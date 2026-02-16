@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon.png">
+
+<title>مسبحة | Masbaha</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #10b981;
+        --primary-glow: rgba(16, 185, 129, 0.4);
+        --bg-dark: #020617;
+        --glass: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+    body {
+        margin: 0;
+        height: 100dvh;
+        overflow: hidden;
+        font-family: 'Tajawal', sans-serif;
+        background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-dark));
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        user-select: none;
+        /* منع تحديث الصفحة عند السحب للأسفل */
+        overscroll-behavior-y: none;
+    }
+
+    /* Main Layout */
+    .app-container {
+        width: 100%;
+        max-width: 480px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
+        position: relative;
+        transition: opacity 0.5s;
+    }
+
+    /* Top Bar */
+    .top-bar {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        z-index: 10;
+        margin-bottom: 20px;
+    }
+
+    .dhikr-select-wrapper {
+        flex: 1;
+        position: relative;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    select {
+        width: 100%;
+        padding: 14px 16px;
+        appearance: none;
+        background: transparent;
+        border: none;
+        color: white;
+        font-family: 'Tajawal';
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .select-arrow {
+        position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+        pointer-events: none; opacity: 0.7;
+    }
+
+    .icon-btn {
+        width: 50px; height: 50px;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
+
+    /* Center Progress Area */
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+    }
+
+    .counter-anchor {
+        position: relative;
+        width: min(80vw, 320px);
+        height: min(80vw, 320px);
+    }
+
+    .progress-wrapper {
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        transition: transform 0.1s;
+        border-radius: 50%;
+        box-shadow: 0 0 60px -20px var(--primary-glow);
+        position: relative;
+        z-index: 1;
+    }
+
+    .progress-wrapper:active { transform: scale(0.97); }
+
+    .mini-reset-btn {
+        position: absolute;
+        bottom: 0px; 
+        left: 0px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: 0.2s;
+    }
+    
+    .mini-reset-btn:active {
+        transform: scale(0.9);
+        background: rgba(239, 68, 68, 0.2);
+    }
+
+    svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    circle { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.3s ease; }
+    .bg-circle { stroke: rgba(255,255,255,0.05); }
+    .fg-circle { stroke: url(#gradient); filter: drop-shadow(0 0 4px var(--primary)); }
+
+    .counter-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .count-label { font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
+    .count-number { 
+        font-size: clamp(60px, 15vw, 90px); 
+        font-weight: 700; 
+        line-height: 1;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .target-pill {
+        margin-top: 10px;
+        font-size: 14px;
+        background: rgba(0,0,0,0.4);
+        padding: 4px 12px;
+        border-radius: 20px;
+        color: var(--text-muted);
+    }
+
+    /* Hadith Card */
+    .hadith-card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 20px;
+        backdrop-filter: blur(12px);
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        margin-top: auto;
+        margin-bottom: 15px;
+    }
+
+    .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
+    .hadith-text { font-family: 'Amiri', serif; font-size: 16px; line-height: 1.8; color: #e2e8f0; }
+
+    /* Modals (Settings & Meanings) */
+    .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
+        display: flex; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    
+    .modal-content {
+        width: 100%; max-width: 480px;
+        background: #1e293b;
+        border-radius: 24px 24px 0 0;
+        padding: 24px;
+        max-height: 85vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        transform: translateY(100%); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border-top: 1px solid var(--glass-border);
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+    .modal-overlay.open .modal-content { transform: translateY(0); }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: 20px; font-weight: bold; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 0 10px;}
+
+    .setting-group { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .group-title { font-size: 14px; color: var(--primary); margin-bottom: 15px; font-weight: bold; display: block; }
+
+    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .setting-label { font-size: 16px; }
+    
+    .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background-color: #334155; border-radius: 34px; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    input[type=number], input[type=text], input[type=time] {
+        background: #334155; border: none; color: white; padding: 10px; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box;
+    }
+    input[type=number] { width: 80px; text-align: center; }
+    
+    .btn-action {
+        background: var(--primary); color: #020617; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; transition: 0.2s;
+    }
+    .btn-action:active { transform: scale(0.98); opacity: 0.9; }
+
+    .reset-btn-full {
+        width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer;
+    }
+
+    .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .stats-table td { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: var(--text-muted); }
+    .stats-table td:first-child { 
+        padding-left: 10px; 
+        white-space: normal; 
+        word-break: break-word; 
+        line-height: 1.5;
+    }
+    .stats-table td:last-child { text-align: left; color: white; font-weight: bold; font-family: sans-serif; white-space: nowrap; }
+    .total-row { display: flex; justify-content: space-between; font-weight: bold; color: var(--primary); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 16px; }
+
+    .about-section { text-align: center; padding: 10px 0; }
+    .app-version { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+    .dev-credit { font-family: sans-serif; font-size: 14px; color: var(--primary); letter-spacing: 1px; font-weight: bold; }
+
+    .meaning-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .meaning-item:last-child { border: none; }
+    .meaning-head { color: var(--primary); font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+    .meaning-desc { font-size: 14px; color: #e2e8f0; line-height: 1.6; }
+    .meaning-sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+
+    #toast {
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+        background: rgba(16, 185, 129, 0.9); color: white; padding: 12px 24px;
+        border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 200; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex; align-items: center; gap: 10px; backdrop-filter: blur(5px);
+        font-weight: bold;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+    #powerModeOverlay {
+        position: fixed; inset: 0; background: #000000; z-index: 999;
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        touch-action: none;
+    }
+    #powerModeOverlay.active { display: flex; }
+    #powerCount { font-size: 150px; color: #333; font-weight: bold; user-select: none; }
+    #powerHint { position: absolute; bottom: 50px; color: #222; font-size: 14px; }
+    
+    #exitCircle {
+        position: absolute; width: 100px; height: 100px; border-radius: 50%;
+        border: 4px solid #475569; /* Slate Grey (Relaxed) */
+        opacity: 0.5; transform: scale(0.5);
+        transition: transform 3s linear, border-color 0.5s;
+        pointer-events: none;
+    }
+    #exitCircle.holding { 
+        opacity: 1; 
+        transform: scale(1.5); 
+        border-color: #ef4444; /* Changes to Red on hold */
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    }
+</style>
+</head>
+
+<body>
+<canvas id="confetti"></canvas>
+<div id="toast"><span>🔔 حان وقت ذكر الله</span></div>
+
+<div id="powerModeOverlay" 
+     onclick="handlePowerTap()" 
+     ontouchstart="handleTouchStart(event)" 
+     ontouchend="handleTouchEnd(event)"
+     onmousedown="handleTouchStart(event)" 
+     onmouseup="handleTouchEnd(event)"
+     onmouseleave="handleTouchEnd(event)">
+    <div id="powerCount">0</div>
+    <div id="exitCircle"></div>
+    <div id="powerHint">اضغط مطولاً للخروج</div>
+</div>
+
+<div class="app-container" id="mainApp">
+    <div class="top-bar">
+        <div class="dhikr-select-wrapper">
+            <select id="dhikrSelect" onchange="changeDhikr()">
+                <option value="subhan">سبحان الله</option>
+                <option value="hamd">الحمد لله</option>
+                <option value="tahleel">لا إله إلا الله</option>
+                <option value="takbeer">الله أكبر</option>
+                <option value="wahdahu">لا إله إلا الله وحده لا شريك له، له الملك وله الحمد يحيي ويميت وهو على كل شيء قدير</option>
+                <option value="hawqala">لا حول ولا قوة الا بالله</option>
+                <option value="istighfar">أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه</option>
+                <option value="subhanwabihamdih">سبحان الله وبحمده</option>
+                <option value="salawat">اللهم صلَّ على سيدنا محمد</option>
+            </select>
+            <span class="select-arrow">▼</span>
+        </div>
+        
+        <div class="icon-btn" onclick="enterPowerMode()">
+            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line><polygon points="11 10 9 14 13 14 11 18" fill="currentColor" stroke="none" style="opacity:0.5"></polygon></svg>
+        </div>
+
+        <div class="icon-btn" onclick="toggleSettings()">
+            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+    </div>
+
+    <div class="main-area">
+        <div class="counter-anchor">
+            <div class="progress-wrapper" onclick="increment()">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#34d399" />
+                            <stop offset="100%" stop-color="#059669" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="bg-circle" cx="100" cy="100" r="90" />
+                    <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="565.48" />
+                </svg>
+                <div class="counter-content">
+                    <span class="count-label">عدد التكرار</span>
+                    <span class="count-number" id="count">0</span>
+                    <div class="target-pill">الهدف: <span id="targetDisplay">33</span></div>
+                </div>
+            </div>
+            <div class="mini-reset-btn" onclick="resetCounter(event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
+                    <path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="hadith-card">
+        <div class="hadith-title">فضل الذكر</div>
+        <div class="hadith-text" id="hintBox">...</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) toggleSettings()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title">الإعدادات</span>
+            <button class="close-btn" onclick="toggleSettings()">✕</button>
+        </div>
+        
+        <div class="setting-group">
+            <span class="group-title">عام</span>
+            <div class="setting-row">
+                <span class="setting-label">الهدف اليومي</span>
+                <input type="number" id="targetInput" min="1" onchange="saveTarget()">
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">الصوت</span>
+                <label class="switch">
+                    <input type="checkbox" id="soundToggle" onchange="saveSettings()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">الاهتزاز</span>
+                <label class="switch">
+                    <input type="checkbox" id="vibrateToggle" onchange="saveSettings()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <span class="group-title">الإحصائيات الكلية (مدى الحياة)</span>
+            <table class="stats-table" id="statsTable"></table>
+            <div class="total-row">
+                <span>المجموع الكلي</span>
+                <span id="grandTotalDisplay">0</span>
+            </div>
+            <button class="btn-action" style="background:#ef4444; margin-top:15px; font-size:12px" onclick="resetStats()">تصفير الإحصائيات بالكامل</button>
+        </div>
+
+        <div class="setting-group">
+            <span class="group-title">معلومات</span>
+            <button class="btn-action" onclick="toggleMeanings()">📖 عرض معاني الأذكار</button>
+        </div>
+
+        <div class="setting-group">
+            <span class="group-title">إضافة ذكر خاص</span>
+            <input type="text" id="customDhikrInput" placeholder="أدخل نص الذكر هنا...">
+            <button class="btn-action" onclick="addCustomDhikr()">إضافة للقائمة</button>
+        </div>
+
+        <div class="setting-group">
+            <span class="group-title">التذكير اليومي</span>
+            <div class="setting-row">
+                <input type="time" id="reminderTime">
+            </div>
+            <button class="btn-action" onclick="setReminder()">حفظ التذكير</button>
+            <div id="reminderStatus" style="font-size: 12px; color: var(--primary); margin-top: 5px; display: none;">تم تفعيل التذكير ✅</div>
+        </div>
+
+        <button class="reset-btn-full" onclick="resetCounter(null)">تصفير العداد الحالي</button>
+        <br><br>
+        <div class="about-section">
+            <div class="app-version">Version 1.5</div>
+            <div class="dev-credit">𝔹 𝕪   /     𝕊 𝕠 𝕝 𝕚 𝕞 𝕒 𝕟    _    𝔸 𝕟 𝕒 𝕤</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="meaningsModal" onclick="if(event.target===this) toggleMeanings()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title">معاني الأذكار</span>
+            <button class="close-btn" onclick="toggleMeanings()">✕</button>
+        </div>
+        
+        <div class="meaning-item">
+            <div class="meaning-head">سبحان الله</div>
+            <div class="meaning-desc">أنزه الله عن كل نقص وعيب، وعن مشابهة المخلوقين، وعن كل ما لا يليق بجلاله وكماله.</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">الحمد لله</div>
+            <div class="meaning-desc">إثبات كل صفات الكمال لله مع المحبة والتعظيم، وشكره على نعمه الظاهرة والباطنة.</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">لا إله إلا الله</div>
+            <div class="meaning-desc">لا معبود بحق في الوجود إلا الله، وهي كلمة التوحيد ومفتاح الجنة.</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">الله أكبر</div>
+            <div class="meaning-desc">الله أعظم من كل شيء؛ أكبر من الدنيا وهمومها ومشاكلها.</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">لا حول ولا قوة إلا بالله</div>
+            <div class="meaning-desc">لا قدرة على التحول من حال إلى حال (كالمعصية للطاعة)، ولا قوة على القيام بأمر إلا بعون الله.</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">سبحان الله وبحمده</div>
+            <div class="meaning-desc">جمع بين التنزيه عن النقص (سبحان الله) والثناء بالكمال (والحمد لله).</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">أستغفر الله العظيم...</div>
+            <div class="meaning-desc">
+                <b>الحي:</b> الذي له الحياة الكاملة التي لم تسبق بعدم ولا يلحقها زوال.<br>
+                <b>القيوم:</b> القائم بنفسه والمقيم لغيره. واسما (الحي القيوم) هما اسم الله الأعظم على قول أكثر أهل العلم.<br>
+                <b>وأتوب إليه:</b> أرجع إليه نادماً عازماً على عدم العودة للذنب.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Data ---
+const defaultTargets = {
+    subhan: 33, hamd: 33, tahleel: 33, takbeer: 33, hawqala: 100,
+    istighfar: 100, wahdahu: 100, subhanwabihamdih: 100, salawat: 100
+};
+
+const hints = {
+    subhan: `قال ﷺ: «أحب الكلام إلى الله أربع: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر»`,
+    hamd: `قال ﷺ: «والحمد لله تملأ الميزان، وسبحان الله والحمد لله تملآن ما بين السماوات والأرض»`,
+    tahleel: `قال ﷺ: «أفضل الذكر لا إله إلا الله، وأفضل الدعاء الحمد لله»`,
+    takbeer: `الباقيات الصالحات: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر`,
+    hawqala: `قال ﷺ: «يا عبد الله بن قيس، ألا أدلك على كنز من كنوز الجنة؟ لا حول ولا قوة إلا بالله»`,
+    istighfar: `قال ﷺ: «منْ لَزِم الاسْتِغْفَار، جَعَلَ اللَّه لَهُ مِنْ كُلِّ ضِيقٍ مخْرجًا، ومنْ كُلِّ هَمٍّ فَرجًا، وَرَزَقَهُ مِنْ حيْثُ لاَ يَحْتَسِبُ»`,
+    wahdahu: `من قالها 100 مرة: كانت له عدل عشر رقاب، وكتبت له مائة حسنة، ومحيت عنه مائة سيئة.`,
+    subhanwabihamdih: `«من قال: سبحان الله وبحمده، في يوم مائة مرة، حُطَّت خطاياه وإن كانت مثل زبد البحر»`,
+    salawat: `«مَن صلَّى عليَّ صلاةً واحدةً صلَّى اللهُ عليه بها عشرًا»`
+};
+
+const customVerse = `«وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُمْ مَغْفِرَةً وَأَجْرًا عَظِيمًا»`;
+
+let currentDhikr = localStorage.getItem("currentDhikr") || "subhan";
+const fullCircle = 565.48;
+
+// --- Sound & Haptic ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSoftClick() {
+    if(!document.getElementById("soundToggle").checked) return;
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+}
+
+function triggerHaptic(type) {
+    const isVibrateOn = document.getElementById("vibrateToggle").checked;
+    if (!isVibrateOn || !navigator.vibrate) return;
+    if (type === 'tap') navigator.vibrate(20);
+    else if (type === 'success') navigator.vibrate([100, 50, 100, 50, 100]);
+}
+
+// --- Init & Load ---
+function init() {
+    loadCustomDhikrs();
+    document.getElementById("dhikrSelect").value = currentDhikr;
+
+    const savedSound = localStorage.getItem("soundPref");
+    const savedVibrate = localStorage.getItem("vibratePref");
+    if (savedSound !== null) document.getElementById("soundToggle").checked = (savedSound === 'true');
+    if (savedVibrate !== null) document.getElementById("vibrateToggle").checked = (savedVibrate === 'true');
+    else document.getElementById("vibrateToggle").checked = true;
+
+    checkReminderPermission();
+    setInterval(checkReminderTime, 60000);
+    loadCounter();
+}
+
+function cKey(){ return "counter_" + currentDhikr }
+function tKey(){ return "target_" + currentDhikr }
+function totalKey(id) { return "total_" + id; }
+
+function loadCounter() {
+    const count = parseInt(localStorage.getItem(cKey()) || 0);
+    let target = localStorage.getItem(tKey());
+    if(!target) {
+        if(currentDhikr.startsWith("custom_")) target = 33; 
+        else target = defaultTargets[currentDhikr] || 33;
+        localStorage.setItem(tKey(), target);
+    }
+    document.getElementById("count").innerText = count;
+    document.getElementById("powerCount").innerText = count; 
+    document.getElementById("targetInput").value = target;
+    document.getElementById("targetDisplay").innerText = target;
+    updateProgress(count, target);
+    showHint();
+}
+
+function updateProgress(count, target) {
+    target = parseInt(target);
+    let displayCount = count % target;
+    if(count > 0 && displayCount === 0) displayCount = target;
+    
+    const percent = target ? Math.min(displayCount / target, 1) : 0;
+    const offset = fullCircle - (fullCircle * percent);
+    document.getElementById("progressCircle").style.strokeDashoffset = offset;
+    
+    if(count > 0 && count % target === 0) {
+        document.getElementById("progressCircle").style.stroke = "#f59e0b"; 
+    } else {
+        document.getElementById("progressCircle").style.stroke = "#10b981"; 
+    }
+}
+
+function increment() {
+    let count = parseInt(localStorage.getItem(cKey()) || 0);
+    let target = parseInt(localStorage.getItem(tKey()));
+    
+    count++;
+    localStorage.setItem(cKey(), count);
+    
+    let total = parseInt(localStorage.getItem(totalKey(currentDhikr)) || 0);
+    localStorage.setItem(totalKey(currentDhikr), total + 1);
+    let grandTotal = parseInt(localStorage.getItem("grand_total") || 0);
+    localStorage.setItem("grand_total", grandTotal + 1);
+
+    document.getElementById("count").innerText = count;
+    document.getElementById("powerCount").innerText = count; 
+
+    playSoftClick();
+    updateProgress(count, target);
+    
+    if(target > 0 && count % target === 0) {
+        triggerHaptic('success');
+        triggerConfetti();
+    } else {
+        triggerHaptic('tap');
+    }
+}
+
+function changeDhikr() {
+    currentDhikr = document.getElementById("dhikrSelect").value;
+    localStorage.setItem("currentDhikr", currentDhikr);
+    loadCounter();
+}
+
+function saveTarget() {
+    const newTarget = document.getElementById("targetInput").value;
+    localStorage.setItem(tKey(), newTarget);
+    document.getElementById("targetDisplay").innerText = newTarget;
+    updateProgress(parseInt(document.getElementById("count").innerText), newTarget);
+}
+
+function saveSettings() {
+    localStorage.setItem("soundPref", document.getElementById("soundToggle").checked);
+    localStorage.setItem("vibratePref", document.getElementById("vibrateToggle").checked);
+}
+
+function resetCounter(e) {
+    if(e) e.stopPropagation();
+    if(confirm("هل أنت متأكد من تصفير العداد الحالي؟")) {
+        localStorage.setItem(cKey(), 0);
+        loadCounter();
+        if(document.getElementById("settingsModal").classList.contains("open")) toggleSettings();
+    }
+}
+
+function showHint() {
+    if(currentDhikr.startsWith("custom_")) document.getElementById("hintBox").innerText = customVerse;
+    else document.getElementById("hintBox").innerText = hints[currentDhikr] || "";
+}
+
+function toggleSettings() {
+    document.getElementById("settingsModal").classList.toggle("open");
+    if(document.getElementById("settingsModal").classList.contains("open")) renderStats();
+}
+
+function toggleMeanings() {
+    document.getElementById("meaningsModal").classList.toggle("open");
+}
+
+// --- Power Saving Mode ---
+let holdTimer;
+let isHolding = false;
+function enterPowerMode() {
+    document.getElementById("powerModeOverlay").classList.add("active");
+    if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(err => console.log(err));
+}
+function handlePowerTap() { if (!isHolding) increment(); }
+function handleTouchStart(e) {
+    isHolding = true;
+    const circle = document.getElementById("exitCircle");
+    circle.classList.remove("holding");
+    void circle.offsetWidth; 
+    circle.classList.add("holding");
+    holdTimer = setTimeout(() => exitPowerMode(), 3000);
+}
+function handleTouchEnd(e) {
+    isHolding = false;
+    clearTimeout(holdTimer);
+    document.getElementById("exitCircle").classList.remove("holding");
+}
+function exitPowerMode() {
+    document.getElementById("powerModeOverlay").classList.remove("active");
+    navigator.vibrate([50,50,50]);
+}
+
+// --- Stats (Updated to remove trimming) ---
+function renderStats() {
+    const table = document.getElementById("statsTable");
+    table.innerHTML = ""; 
+    const select = document.getElementById("dhikrSelect");
+    let grandTotal = 0;
+    for (let i = 0; i < select.options.length; i++) {
+        let key = select.options[i].value;
+        // Removed substring(0,20) to show full name
+        let name = select.options[i].text; 
+        let count = parseInt(localStorage.getItem(totalKey(key)) || 0);
+        let row = table.insertRow();
+        let cellName = row.insertCell(0);
+        let cellCount = row.insertCell(1);
+        cellName.innerText = name;
+        cellCount.innerText = count.toLocaleString('en-US'); 
+        grandTotal += count;
+    }
+    localStorage.setItem("grand_total", grandTotal);
+    document.getElementById("grandTotalDisplay").innerText = grandTotal.toLocaleString('en-US');
+}
+
+function resetStats() {
+    if(confirm("تحذير: سيتم مسح جميع الإحصائيات!")) {
+        const select = document.getElementById("dhikrSelect");
+        for (let i = 0; i < select.options.length; i++) {
+            localStorage.setItem(totalKey(select.options[i].value), 0);
+        }
+        localStorage.setItem("grand_total", 0);
+        renderStats();
+    }
+}
+
+// --- Custom Dhikr ---
+function addCustomDhikr() {
+    const input = document.getElementById("customDhikrInput");
+    const text = input.value.trim();
+    if(!text) return;
+    const id = "custom_" + Date.now();
+    const newDhikr = { id: id, text: text };
+    let customs = JSON.parse(localStorage.getItem("customDhikrs") || "[]");
+    customs.push(newDhikr);
+    localStorage.setItem("customDhikrs", JSON.stringify(customs));
+    appendDhikrOption(newDhikr);
+    input.value = "";
+    document.getElementById("dhikrSelect").value = id;
+    changeDhikr();
+    toggleSettings();
+}
+
+function loadCustomDhikrs() {
+    let customs = JSON.parse(localStorage.getItem("customDhikrs") || "[]");
+    customs.forEach(d => appendDhikrOption(d));
+}
+
+function appendDhikrOption(d) {
+    const select = document.getElementById("dhikrSelect");
+    const option = document.createElement("option");
+    option.value = d.id;
+    option.text = d.text;
+    select.appendChild(option);
+}
+
+// --- Reminder ---
+function setReminder() {
+    const timeVal = document.getElementById("reminderTime").value;
+    if(timeVal) {
+        localStorage.setItem("reminderTime", timeVal);
+        document.getElementById("reminderStatus").style.display = "block";
+        Notification.requestPermission();
+        showToast("تم حفظ وقت التذكير");
+    }
+}
+function checkReminderPermission() {
+    const savedTime = localStorage.getItem("reminderTime");
+    if(savedTime) {
+        document.getElementById("reminderTime").value = savedTime;
+        document.getElementById("reminderStatus").style.display = "block";
+    }
+}
+function checkReminderTime() {
+    const savedTime = localStorage.getItem("reminderTime");
+    if(!savedTime) return;
+    const now = new Date();
+    const [hours, minutes] = savedTime.split(':');
+    if(now.getHours() == hours && now.getMinutes() == minutes) {
+        if(Notification.permission === "granted") {
+            new Notification("تذكير المسبحة", { body: "حان وقت وردك اليومي", icon: "icon.png" });
+        }
+        showToast("🔔 حان وقت ذكر الله");
+    }
+}
+function showToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.querySelector("span").innerText = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 4000);
+}
+
+// --- Confetti ---
+function triggerConfetti() {
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    let particles = [];
+    for(let i=0; i<100; i++) {
+        particles.push({
+            x: canvas.width/2, y: canvas.height/2,
+            vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+            color: `hsl(${Math.random()*360}, 100%, 50%)`,
+            life: 100
+        });
+    }
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if(particles.length === 0) return;
+        particles.forEach((p, index) => {
+            p.x += p.vx; p.y += p.vy; p.life--;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, 5, 5);
+            if(p.life <= 0) particles.splice(index, 1);
+        });
+        if(particles.length > 0) requestAnimationFrame(draw);
+        else ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    draw();
+}
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+init();
+</script>
+</body>
+</html>
