@@ -58,11 +58,11 @@ body{
   padding:20px;
 }
 
-/* Glass Zikr Container - made larger */
+/* Glass Zikr Container */
 .zikr-container{
   width:100%;
   max-width:700px;
-  height:320px;                 /* increased from 260px */
+  height:320px;
   background:var(--glass);
   border:1px solid var(--glass-border);
   backdrop-filter:blur(20px);
@@ -102,64 +102,91 @@ body{
   border-radius:10px;
 }
 
-/* Progress Circle - significantly bigger */
-.progress-wrapper{
-  position:relative;
-  width:280px;                 /* was 200px */
-  height:280px;                /* was 200px */
-  cursor:pointer;
+/* ===== Circle styles (copied from masbaha but smaller) ===== */
+.counter-anchor {
+  position: relative;
+  width: min(65vw, 280px);    /* responsive, max 280px */
+  height: min(65vw, 280px);
+  margin: 0 auto;
 }
 
-.progress-wrapper.glow{
-  animation:glowPulse .6s ease;
+.progress-wrapper {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: transform 0.1s;
+  border-radius: 50%;
+  box-shadow: 0 0 60px -20px var(--primary-glow, rgba(16,185,129,0.4));
+  position: relative;
+  z-index: 1;
 }
 
-@keyframes glowPulse{
-  0%{filter:drop-shadow(0 0 0px #10b981);}
-  50%{filter:drop-shadow(0 0 25px #10b981);}
-  100%{filter:drop-shadow(0 0 0px #10b981);}
+.progress-wrapper:active {
+  transform: scale(0.97);
 }
 
-svg{
-  transform:rotate(-90deg);
-  width:100%;
-  height:100%;
+svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
 }
 
-.bg-circle{
-  fill:none;
-  stroke:rgba(255,255,255,0.1);
-  stroke-width:8;
+circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease;
 }
 
-.fg-circle{
-  fill:none;
-  stroke:url(#gradient);
-  stroke-width:8;
-  stroke-linecap:round;
-  stroke-dasharray:565.48;
-  stroke-dashoffset:565.48;
-  transition:.3s ease;
+.bg-circle {
+  stroke: rgba(255,255,255,0.05);
 }
 
-.counter-content{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
+.fg-circle {
+  stroke: url(#gradient);
+  filter: drop-shadow(0 0 4px var(--primary));
 }
 
-.count-number{
-  font-size:60px;               /* increased to match bigger circle */
-  font-weight:bold;
+.counter-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
+
+.count-label {
+  font-size: 14px;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 5px;
+}
+
+.count-number {
+  font-size: clamp(40px, 12vw, 60px);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+/* Glow animation */
+.progress-wrapper.glow {
+  animation: glowPulse 0.6s ease;
+}
+
+@keyframes glowPulse {
+  0% { filter: drop-shadow(0 0 0px #10b981); }
+  50% { filter: drop-shadow(0 0 25px #10b981); }
+  100% { filter: drop-shadow(0 0 0px #10b981); }
+}
+/* ======================================================== */
 
 /* Buttons */
 .controls{
   display:flex;
   gap:15px;
+  margin-top: 10px;
 }
 
 .btn{
@@ -179,7 +206,7 @@ svg{
   font-weight:bold;
 }
 
-/* Premium Modal */
+/* Modal */
 .modal{
   position:fixed;
   inset:0;
@@ -213,7 +240,6 @@ svg{
   transform:translateY(0);
 }
 
-/* English text inside modal - left aligned */
 #englishText {
   text-align: left;
   direction: ltr;
@@ -229,7 +255,6 @@ svg{
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Settings specific */
 .settings-row {
   margin-bottom: 20px;
 }
@@ -257,26 +282,28 @@ svg{
 
 <div class="page-wrapper">
 
-  <!-- Zikr Text Container (enlarged) -->
+  <!-- Zikr Text Container -->
   <div class="zikr-container fade-in" onclick="increment()">
     <div class="zikr-text" id="arabicText"></div>
   </div>
 
-  <!-- Progress Circle (now larger) -->
-  <div class="progress-wrapper" onclick="increment()">
-    <svg viewBox="0 0 200 200">
-      <defs>
-        <linearGradient id="gradient">
-          <stop offset="0%" stop-color="#34d399"/>
-          <stop offset="100%" stop-color="#059669"/>
-        </linearGradient>
-      </defs>
-      <circle class="bg-circle" cx="100" cy="100" r="90"/>
-      <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
-    </svg>
-    <div class="counter-content">
-      <div>Remaining</div>
-      <div class="count-number" id="counter">0</div>
+  <!-- Progress Circle (now using counter-anchor for size control) -->
+  <div class="counter-anchor">
+    <div class="progress-wrapper" onclick="increment()">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="gradient">
+            <stop offset="0%" stop-color="#34d399"/>
+            <stop offset="100%" stop-color="#059669"/>
+          </linearGradient>
+        </defs>
+        <circle class="bg-circle" cx="100" cy="100" r="90"/>
+        <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
+      </svg>
+      <div class="counter-content">
+        <span class="count-label">Remaining</span>
+        <span class="count-number" id="counter">0</span>
+      </div>
     </div>
   </div>
 
