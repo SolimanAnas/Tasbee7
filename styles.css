@@ -4,10 +4,13 @@
 
 :root {
   --primary: #10b981;
+  --primary-glow: rgba(16, 185, 129, 0.4);
   --bg: #0b132b;
   --card: #111c44;
   --text: #f8fafc;
   --muted: #94a3b8;
+  --gradient-start: #34d399;
+  --gradient-end: #059669;
 }
 
 /* Light Theme */
@@ -147,4 +150,164 @@ body {
   font-size: 20px;
   cursor: pointer;
   margin-bottom: 10px;
+}
+
+/* =====================
+   ADDITIONS: user-select, progress ring, transitions
+===================== */
+
+/* Disable text selection on interactive elements */
+.circle,
+.btn,
+.icon-btn,
+.large-btn,
+.close,
+.close-modal,
+select,
+.switch input,
+.slider,
+.progress-wrapper {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth transitions for theme changes */
+body,
+.modal-content,
+.btn,
+.circle,
+.large-btn,
+.arabic,
+.target-pill,
+.bg-circle,
+.fg-circle {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, stroke 0.3s;
+}
+
+/* Progress Ring (SVG) */
+.progress-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 0 60px -20px var(--primary-glow);
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.progress-ring circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease, stroke 0.3s;
+}
+
+.bg-circle {
+  stroke: rgba(255,255,255,0.05);
+}
+
+.fg-circle {
+  stroke: url(#gradient);
+  filter: drop-shadow(0 0 4px var(--primary));
+}
+
+/* Gradient definition */
+#gradient stop:first-child {
+  stop-color: var(--gradient-start);
+}
+#gradient stop:last-child {
+  stop-color: var(--gradient-end);
+}
+
+/* Counter content inside ring */
+.counter-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.count-label {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.count-number {
+  font-size: clamp(60px, 15vw, 90px);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.target-pill {
+  margin-top: 10px;
+  font-size: 14px;
+  background: rgba(0,0,0,0.4);
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: var(--muted);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Light theme adjustments for progress ring */
+body.light .bg-circle {
+  stroke: rgba(0,0,0,0.05);
+}
+
+body.light .target-pill {
+  background: rgba(0,0,0,0.1);
+  color: var(--text);
+}
+
+/* Additional polish */
+.circle:focus-visible,
+.btn:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Ensure range input styling */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #334155;
+  border-radius: 10px;
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+input[type=range]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* Utility for close button */
+.close-modal {
+  cursor: pointer;
+  font-size: 20px;
+  user-select: none;
 }
