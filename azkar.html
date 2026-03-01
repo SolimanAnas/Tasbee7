@@ -1,242 +1,251 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azkar</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>Azkar</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #22c55e;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-    }
+<style>
+:root{
+  --primary:#10b981;
+  --bg:#0b132b;
+  --card:#111c44;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+}
 
-    * {
-      box-sizing: border-box;
-    }
+*{box-sizing:border-box}
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+body{
+  margin:0;
+  font-family:'Tajawal',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
 
-    header {
-      text-align: center;
-      padding: 15px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      font-size: 14px;
-      color: var(--muted);
-    }
+/* Top Bar */
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
 
-    main {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 800px;
-      margin: auto;
-      width: 100%;
-    }
+.home-btn{
+  font-size:22px;
+  cursor:pointer;
+}
 
-    .arabic {
-      font-size: 24px;
-      line-height: 1.9;
-      text-align: right;
-      direction: rtl;
-      margin-bottom: 20px;
-    }
+/* Title */
+.section-title{
+  text-align:center;
+  font-size:14px;
+  letter-spacing:2px;
+  color:var(--muted);
+  margin-bottom:15px;
+}
 
-    .english {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 40px;
-    }
+/* Arabic */
+.arabic{
+  font-size:22px;
+  line-height:2;
+  text-align:center;
+  margin-bottom:20px;
+}
 
-    .counter-wrapper {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 30px;
-    }
+/* Counter Circle */
+.circle-wrapper{
+  display:flex;
+  justify-content:center;
+  margin:25px 0;
+}
 
-    .circle {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: var(--card);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: bold;
-      border: 4px solid var(--accent);
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.1s ease;
-    }
+.circle{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  border:6px solid var(--primary);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:50px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.2s;
+}
 
-    .circle:active {
-      transform: scale(0.95);
-    }
+.circle:active{
+  transform:scale(.95);
+}
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
+/* Buttons */
+.controls{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:20px;
+}
 
-    .btn {
-      background: var(--card);
-      border: 1px solid #334155;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 12px;
-      cursor: pointer;
-      color: var(--text);
-    }
+.btn{
+  flex:1;
+  padding:16px;
+  border-radius:16px;
+  border:none;
+  font-size:18px;
+  cursor:pointer;
+  background:#1e293b;
+  color:white;
+}
 
-    .btn.active {
-      background: var(--accent);
-      color: black;
-      border: none;
-    }
+.btn.primary{
+  background:var(--primary);
+  color:#001e1b;
+  font-weight:bold;
+}
 
-    .progress {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-    }
-  </style>
+.translate-btn{
+  margin-top:10px;
+  background:#334155;
+}
+
+/* Modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.modal-content{
+  background:#1e293b;
+  padding:25px;
+  border-radius:20px;
+  max-height:80vh;
+  overflow:auto;
+  color:#e2e8f0;
+  line-height:1.7;
+}
+
+.close-modal{
+  text-align:right;
+  font-size:20px;
+  cursor:pointer;
+  margin-bottom:10px;
+}
+</style>
 </head>
 
 <body>
 
-<header id="pageTitle">Loading...</header>
+<div class="top">
+  <div class="home-btn" onclick="goHome()">🏠</div>
+  <div id="modeTitle" class="section-title"></div>
+</div>
 
-<main>
-  <div class="arabic" id="arabicText"></div>
-  <div class="english" id="englishText"></div>
+<div class="arabic" id="arabicText"></div>
 
-  <div class="counter-wrapper">
-    <div class="circle" id="counterCircle">0</div>
+<div class="circle-wrapper">
+  <div class="circle" onclick="increment()" id="counter">0</div>
+</div>
+
+<button class="btn translate-btn" onclick="openTranslation()">View Translation</button>
+
+<div class="controls">
+  <button class="btn" onclick="prev()">Previous</button>
+  <button class="btn primary" onclick="toggleAuto()">Auto</button>
+  <button class="btn" onclick="next()">Next</button>
+</div>
+
+<!-- Translation Modal -->
+<div class="modal" id="translationModal">
+  <div class="modal-content">
+    <div class="close-modal" onclick="closeTranslation()">✕</div>
+    <div id="englishText"></div>
   </div>
-
-  <div class="controls">
-    <button class="btn" id="prevBtn">Previous</button>
-    <button class="btn" id="autoBtn">Auto</button>
-    <button class="btn" id="nextBtn">Next</button>
-  </div>
-
-  <div class="progress" id="progressText"></div>
-</main>
+</div>
 
 <script>
-  const arabicText = document.getElementById('arabicText');
-  const englishText = document.getElementById('englishText');
-  const counterCircle = document.getElementById('counterCircle');
-  const progressText = document.getElementById('progressText');
-  const pageTitle = document.getElementById('pageTitle');
-  const autoBtn = document.getElementById('autoBtn');
+let azkarData;
+let currentIndex = 0;
+let currentCount = 0;
+let autoMode = false;
 
-  let azkarList = [];
-  let currentIndex = 0;
-  let currentCount = 0;
-  let autoMode = false;
+const params = new URLSearchParams(window.location.search);
+const type = params.get("type") || "morning";
 
-  const params = new URLSearchParams(window.location.search);
-  const type = params.get('type') || 'morning';
+fetch("azkar.json")
+.then(res => res.json())
+.then(data => {
+  azkarData = data[type];
+  document.getElementById("modeTitle").innerText = type.toUpperCase();
+  loadZikr();
+});
 
-  pageTitle.textContent = type.toUpperCase();
+function loadZikr(){
+  currentCount = 0;
+  document.getElementById("counter").innerText = 0;
+  document.getElementById("arabicText").innerText = azkarData[currentIndex].arabic;
+  document.getElementById("englishText").innerText = azkarData[currentIndex].english;
+}
 
-  async function init() {
-    const data = await fetch('azkar.json').then(r => r.json());
-    azkarList = data[type] || [];
-    loadProgress();
-    render();
+function increment(){
+  const target = azkarData[currentIndex].count;
+  currentCount++;
+  document.getElementById("counter").innerText = currentCount;
+
+  if(currentCount >= target){
+    setTimeout(()=> next(), 400);
   }
+}
 
-  function render() {
-    const item = azkarList[currentIndex];
-    arabicText.textContent = item.arabic;
-    englishText.textContent = item.english;
-    counterCircle.textContent = currentCount;
-    progressText.textContent =
-      (currentIndex + 1) + " / " + azkarList.length +
-      "  •  " + currentCount + " / " + item.count;
-
-    saveProgress();
-  }
-
-  function next() {
+function next(){
+  if(currentIndex < azkarData.length - 1){
     currentIndex++;
-    if (currentIndex >= azkarList.length) {
-      currentIndex = 0;
-    }
-    currentCount = 0;
-    render();
+    loadZikr();
   }
+}
 
-  function previous() {
+function prev(){
+  if(currentIndex > 0){
     currentIndex--;
-    if (currentIndex < 0) {
-      currentIndex = azkarList.length - 1;
-    }
-    currentCount = 0;
-    render();
+    loadZikr();
   }
+}
 
-  counterCircle.addEventListener('click', () => {
-    const max = azkarList[currentIndex].count;
-    currentCount++;
-
-    if (currentCount >= max) {
-      if (autoMode) {
-        next();
-      } else {
-        currentCount = max;
-      }
-    }
-
-    render();
-  });
-
-  document.getElementById('nextBtn').addEventListener('click', next);
-  document.getElementById('prevBtn').addEventListener('click', previous);
-
-  autoBtn.addEventListener('click', () => {
-    autoMode = !autoMode;
-    autoBtn.classList.toggle('active', autoMode);
-  });
-
-  function saveProgress() {
-    localStorage.setItem(
-      "progress_" + type,
-      JSON.stringify({ index: currentIndex, count: currentCount })
-    );
+function toggleAuto(){
+  autoMode = !autoMode;
+  if(autoMode){
+    autoLoop();
   }
+}
 
-  function loadProgress() {
-    const saved = localStorage.getItem("progress_" + type);
-    if (saved) {
-      const data = JSON.parse(saved);
-      currentIndex = data.index || 0;
-      currentCount = data.count || 0;
-    }
-  }
+function autoLoop(){
+  if(!autoMode) return;
+  increment();
+  setTimeout(autoLoop, 800);
+}
 
-  init();
+/* Translation */
+function openTranslation(){
+  document.getElementById("translationModal").style.display="flex";
+}
+
+function closeTranslation(){
+  document.getElementById("translationModal").style.display="none";
+}
+
+/* Home */
+function goHome(){
+  window.location.href="index.html";
+}
 </script>
 
 </body>
