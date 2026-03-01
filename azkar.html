@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0f172a">
 <title>Azkar</title>
 
-<!-- Replace internal styles with external stylesheet -->
+<!-- External stylesheet with all styles (including progress ring) -->
 <link rel="stylesheet" href="styles.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
 
 <body>
 
-<!-- New top bar with home and settings -->
+<!-- Top bar with home and settings -->
 <div class="top-bar">
   <div class="icon-btn" onclick="goHome()">🏠</div>
   <div class="icon-btn" onclick="openSettings()">⚙️</div>
@@ -26,7 +26,27 @@
 
   <div class="arabic" id="arabicText"></div>
 
-  <div class="circle" onclick="increment()" id="counter">0</div>
+  <!-- SVG Circular Progress Ring -->
+  <div class="progress-wrapper" onclick="increment()">
+    <svg class="progress-ring" viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#34d399" />
+          <stop offset="100%" stop-color="#059669" />
+        </linearGradient>
+      </defs>
+      <!-- Background circle -->
+      <circle class="bg-circle" cx="100" cy="100" r="90" />
+      <!-- Foreground progress circle -->
+      <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"
+              stroke-dasharray="565.48" stroke-dashoffset="565.48" />
+    </svg>
+    <div class="counter-content">
+      <span class="count-label" id="countLabel">Remaining</span>
+      <span class="count-number" id="counter">0</span>
+      <div class="target-pill">Goal: <span id="targetDisplay">0</span></div>
+    </div>
+  </div>
 
   <button class="large-btn" onclick="openTranslation()">
     View Translation
@@ -40,7 +60,7 @@
 
 </div>
 
-<!-- Translation Modal (unchanged, but ensure it's present) -->
+<!-- Translation Modal -->
 <div class="modal" id="translationModal">
   <div class="modal-content">
     <div class="close-modal" onclick="closeTranslation()">✕</div>
@@ -48,7 +68,7 @@
   </div>
 </div>
 
-<!-- New Settings Modal -->
+<!-- Settings Modal -->
 <div class="modal" id="settingsModal">
   <div class="modal-content">
     <div class="close" onclick="closeSettings()">✕</div>
@@ -68,6 +88,7 @@ let azkarData;
 let currentIndex = 0;
 let currentCount = 0;
 let autoMode = false;
+const fullCircle = 565.48; // 2 * π * 90 ≈ 565.48
 
 const params = new URLSearchParams(window.location.search);
 const type = params.get("type") || "morning";
@@ -76,37 +97,58 @@ fetch("azkar.json")
 .then(res => res.json())
 .then(data => {
   azkarData = data[type];
-  // Optionally set a title if you have an element with id "modeTitle"
-  // document.getElementById("modeTitle").innerText = type.toUpperCase();
   loadZikr();
 });
 
 function loadZikr(){
   currentCount = 0;
-  document.getElementById("counter").innerText = 0;
+  const target = azkarData[currentIndex].count;
+  document.getElementById("counter").innerText = currentCount;
+  document.getElementById("targetDisplay").innerText = target;
   document.getElementById("arabicText").innerText = azkarData[currentIndex].arabic;
   document.getElementById("englishText").innerText = azkarData[currentIndex].english;
+  updateProgress();
+}
+
+function updateProgress() {
+  const target = azkarData[currentIndex].count;
+  const remaining = target - currentCount;
+  document.getElementById("counter").innerText = currentCount;
+  // Calculate percent completed (0 to 1)
+  const percent = target ? currentCount / target : 0;
+  const offset = fullCircle - (fullCircle * percent);
+  document.getElementById("progressCircle").style.strokeDashoffset = offset;
+  
+  // Change color when target reached
+  if (currentCount > 0 && currentCount % target === 0) {
+    document.getElementById("progressCircle").style.stroke = "#f59e0b";
+  } else {
+    document.getElementById("progressCircle").style.stroke = "url(#gradient)";
+  }
 }
 
 function increment(){
   const target = azkarData[currentIndex].count;
-  currentCount++;
-  document.getElementById("counter").innerText = currentCount;
+  if (currentCount < target) {
+    currentCount++;
+    updateProgress();
 
-  if(currentCount >= target){
-    setTimeout(()=> next(), 400);
+    // Auto-next on completion
+    if (currentCount >= target) {
+      setTimeout(() => next(), 400);
+    }
   }
 }
 
 function next(){
-  if(currentIndex < azkarData.length - 1){
+  if (currentIndex < azkarData.length - 1) {
     currentIndex++;
     loadZikr();
   }
 }
 
 function prev(){
-  if(currentIndex > 0){
+  if (currentIndex > 0) {
     currentIndex--;
     loadZikr();
   }
@@ -136,16 +178,16 @@ function closeTranslation(){
 
 /* Home */
 function goHome(){
-  window.location.href="index.html";
+  window.location.href = "index.html";
 }
 
-/* --- Settings functions (added) --- */
+/* Settings */
 function openSettings(){
-  document.getElementById("settingsModal").style.display="flex";
+  document.getElementById("settingsModal").style.display = "flex";
 }
 
 function closeSettings(){
-  document.getElementById("settingsModal").style.display="none";
+  document.getElementById("settingsModal").style.display = "none";
 }
 
 function changeFontSize(size){
