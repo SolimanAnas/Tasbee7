@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azkar</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #22c55e;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 800px;
+      margin: auto;
+      width: 100%;
+    }
+
+    .arabic {
+      font-size: 24px;
+      line-height: 1.9;
+      text-align: right;
+      direction: rtl;
+      margin-bottom: 20px;
+    }
+
+    .english {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .counter-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      border: 4px solid var(--accent);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease;
+    }
+
+    .circle:active {
+      transform: scale(0.95);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      background: var(--card);
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .btn.active {
+      background: var(--accent);
+      color: black;
+      border: none;
+    }
+
+    .progress {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+
+<header id="pageTitle">Loading...</header>
+
+<main>
+  <div class="arabic" id="arabicText"></div>
+  <div class="english" id="englishText"></div>
+
+  <div class="counter-wrapper">
+    <div class="circle" id="counterCircle">0</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prevBtn">Previous</button>
+    <button class="btn" id="autoBtn">Auto</button>
+    <button class="btn" id="nextBtn">Next</button>
+  </div>
+
+  <div class="progress" id="progressText"></div>
+</main>
+
+<script>
+  const arabicText = document.getElementById('arabicText');
+  const englishText = document.getElementById('englishText');
+  const counterCircle = document.getElementById('counterCircle');
+  const progressText = document.getElementById('progressText');
+  const pageTitle = document.getElementById('pageTitle');
+  const autoBtn = document.getElementById('autoBtn');
+
+  let azkarList = [];
+  let currentIndex = 0;
+  let currentCount = 0;
+  let autoMode = false;
+
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('type') || 'morning';
+
+  pageTitle.textContent = type.toUpperCase();
+
+  async function init() {
+    const data = await fetch('azkar.json').then(r => r.json());
+    azkarList = data[type] || [];
+    loadProgress();
+    render();
+  }
+
+  function render() {
+    const item = azkarList[currentIndex];
+    arabicText.textContent = item.arabic;
+    englishText.textContent = item.english;
+    counterCircle.textContent = currentCount;
+    progressText.textContent =
+      (currentIndex + 1) + " / " + azkarList.length +
+      "  •  " + currentCount + " / " + item.count;
+
+    saveProgress();
+  }
+
+  function next() {
+    currentIndex++;
+    if (currentIndex >= azkarList.length) {
+      currentIndex = 0;
+    }
+    currentCount = 0;
+    render();
+  }
+
+  function previous() {
+    currentIndex--;
+    if (currentIndex < 0) {
+      currentIndex = azkarList.length - 1;
+    }
+    currentCount = 0;
+    render();
+  }
+
+  counterCircle.addEventListener('click', () => {
+    const max = azkarList[currentIndex].count;
+    currentCount++;
+
+    if (currentCount >= max) {
+      if (autoMode) {
+        next();
+      } else {
+        currentCount = max;
+      }
+    }
+
+    render();
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', next);
+  document.getElementById('prevBtn').addEventListener('click', previous);
+
+  autoBtn.addEventListener('click', () => {
+    autoMode = !autoMode;
+    autoBtn.classList.toggle('active', autoMode);
+  });
+
+  function saveProgress() {
+    localStorage.setItem(
+      "progress_" + type,
+      JSON.stringify({ index: currentIndex, count: currentCount })
+    );
+  }
+
+  function loadProgress() {
+    const saved = localStorage.getItem("progress_" + type);
+    if (saved) {
+      const data = JSON.parse(saved);
+      currentIndex = data.index || 0;
+      currentCount = data.count || 0;
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>
