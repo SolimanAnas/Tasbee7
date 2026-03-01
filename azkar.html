@@ -20,6 +20,8 @@
   --zikr-size:28px;
 }
 
+*{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:'Tajawal',sans-serif;
@@ -44,7 +46,7 @@ body{
   user-select:none;
 }
 
-/* Main centered layout */
+/* Main Layout */
 .page-wrapper{
   flex:1;
   display:flex;
@@ -70,6 +72,17 @@ body{
   text-align:center;
   cursor:pointer;
   user-select:none;
+  transition:.3s ease;
+}
+
+.zikr-container.fade-out{
+  opacity:0;
+  transform:translateY(10px);
+}
+
+.zikr-container.fade-in{
+  opacity:1;
+  transform:translateY(0);
 }
 
 .zikr-text{
@@ -79,7 +92,7 @@ body{
   white-space:pre-line;
 }
 
-/* Scrollbar subtle */
+/* Scrollbar */
 .zikr-container::-webkit-scrollbar{
   width:6px;
 }
@@ -94,6 +107,16 @@ body{
   width:200px;
   height:200px;
   cursor:pointer;
+}
+
+.progress-wrapper.glow{
+  animation:glowPulse .6s ease;
+}
+
+@keyframes glowPulse{
+  0%{filter:drop-shadow(0 0 0px #10b981);}
+  50%{filter:drop-shadow(0 0 25px #10b981);}
+  100%{filter:drop-shadow(0 0 0px #10b981);}
 }
 
 svg{
@@ -125,7 +148,6 @@ svg{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  font-size:18px;
 }
 
 .count-number{
@@ -211,17 +233,15 @@ svg{
 
 <div class="top-bar">
   <div class="icon-btn" onclick="goHome()">🏠</div>
-  <div class="icon-btn" onclick="openSettings()">⚙️</div>
+  <div class="icon-btn" onclick="openTranslation()">🌐</div>
 </div>
 
 <div class="page-wrapper">
 
-  <!-- Glass Zikr -->
-  <div class="zikr-container" onclick="increment()">
+  <div class="zikr-container fade-in" onclick="increment()">
     <div class="zikr-text" id="arabicText"></div>
   </div>
 
-  <!-- Progress -->
   <div class="progress-wrapper" onclick="increment()">
     <svg viewBox="0 0 200 200">
       <defs>
@@ -239,8 +259,6 @@ svg{
     </div>
   </div>
 
-  <button class="large-btn" onclick="openTranslation()">View Translation</button>
-
   <div class="controls">
     <button class="btn" onclick="prev()">Previous</button>
     <button class="btn primary" onclick="toggleAuto()">Auto</button>
@@ -249,7 +267,6 @@ svg{
 
 </div>
 
-<!-- Translation Modal -->
 <div class="modal" id="translationModal">
   <div class="modal-content">
     <div class="close" onclick="closeTranslation()">✕</div>
@@ -259,25 +276,54 @@ svg{
 
 <script>
 let azkarData;
-let currentIndex = 0;
-let currentCount = 0;
-let autoMode = false;
-const fullCircle = 565.48;
+let currentIndex=0;
+let currentCount=0;
+let autoMode=false;
+let touchStartX=0;
+let touchEndX=0;
+const fullCircle=565.48;
 
-const type = new URLSearchParams(window.location.search).get("type") || "morning";
+const type=new URLSearchParams(window.location.search).get("type")||"morning";
 
 fetch("azkar.json")
 .then(res=>res.json())
 .then(data=>{
-  azkarData = data[type];
+  azkarData=data[type];
   loadZikr();
 });
 
+/* Swipe */
+const swipeArea=document.querySelector(".zikr-container");
+swipeArea.addEventListener("touchstart",e=>{
+  touchStartX=e.changedTouches[0].screenX;
+});
+swipeArea.addEventListener("touchend",e=>{
+  touchEndX=e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe(){
+  const diff=touchStartX-touchEndX;
+  if(Math.abs(diff)<50)return;
+  diff>0?next():prev();
+}
+
+/* Load Zikr with fade */
 function loadZikr(){
-  currentCount=0;
-  document.getElementById("arabicText").innerText=azkarData[currentIndex].arabic;
-  document.getElementById("englishText").innerText=azkarData[currentIndex].english;
-  updateProgress();
+  const container=document.querySelector(".zikr-container");
+  container.classList.remove("fade-in");
+  container.classList.add("fade-out");
+
+  setTimeout(()=>{
+    currentCount=0;
+    document.getElementById("arabicText").innerText=
+      azkarData[currentIndex].arabic;
+    document.getElementById("englishText").innerText=
+      azkarData[currentIndex].english;
+    updateProgress();
+    container.classList.remove("fade-out");
+    container.classList.add("fade-in");
+  },200);
 }
 
 function updateProgress(){
@@ -294,10 +340,20 @@ function increment(){
   if(currentCount<target){
     currentCount++;
     updateProgress();
-    if(currentCount>=target){
-      setTimeout(next,400);
+    if(currentCount===target){
+      if(navigator.vibrate){
+        navigator.vibrate([30,40,60]);
+      }
+      triggerGlow();
+      setTimeout(next,600);
     }
   }
+}
+
+function triggerGlow(){
+  const wrapper=document.querySelector(".progress-wrapper");
+  wrapper.classList.add("glow");
+  setTimeout(()=>wrapper.classList.remove("glow"),600);
 }
 
 function next(){
@@ -316,11 +372,11 @@ function prev(){
 
 function toggleAuto(){
   autoMode=!autoMode;
-  if(autoMode) autoLoop();
+  if(autoMode)autoLoop();
 }
 
 function autoLoop(){
-  if(!autoMode) return;
+  if(!autoMode)return;
   increment();
   setTimeout(autoLoop,800);
 }
