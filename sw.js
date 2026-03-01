@@ -1,16 +1,19 @@
-const CACHE_NAME = 'masbaha-v3'; // تغيير الرقم يجبر الهاتف على التحديث
+const CACHE_NAME = 'masbaha-v4'; // change version to force update
+
 const ASSETS = [
   './',
   './index.html',
+  './azkar.html',
+  './azkar.js',
+  './azkar.json',
   './manifest.json',
   './icon.png'
 ];
 
-// 1. Install Event: تحميل الملفات للكاش
+// 1️⃣ Install Event
 self.addEventListener('install', (e) => {
-  // هذا السطر مهم جداً: يجبر المتصفح على تفعيل الخدمة الجديدة فوراً
-  self.skipWaiting(); 
-  
+  self.skipWaiting();
+
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
@@ -18,24 +21,25 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// 2. Activate Event: تنظيف الكاش القديم
+// 2️⃣ Activate Event
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       );
     })
   );
-  // السيطرة على الصفحة فوراً بدون إعادة تحميل
-  return self.clients.claim(); 
+
+  return self.clients.claim();
 });
 
-// 3. Fetch Event: تشغيل التطبيق أوفلاين
+// 3️⃣ Fetch Event (offline-first strategy)
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((response) => {
-      // إذا وجد الملف في الكاش يرجعه، وإلا يطلبه من الإنترنت
       return response || fetch(e.request);
     })
   );
