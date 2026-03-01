@@ -1,4 +1,4 @@
-const CACHE_NAME = 'masbaha-v4'; // change version to force update
+const CACHE_NAME = 'masbaha-v5'; // Updated version
 
 const ASSETS = [
   './',
@@ -6,6 +6,7 @@ const ASSETS = [
   './azkar.html',
   './azkar.js',
   './azkar.json',
+  './styles.css',        // Added stylesheet
   './manifest.json',
   './icon.png'
 ];
