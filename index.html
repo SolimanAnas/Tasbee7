@@ -11,7 +11,7 @@
 
 <style>
 
-/* ================== THEME VARIABLES ================== */
+/* ================== THEME ================== */
 :root {
   --primary: #10b981;
   --bg: #020617;
@@ -19,16 +19,14 @@
   --text: #f8fafc;
   --glass: rgba(255,255,255,0.08);
   --glass-border: rgba(255,255,255,0.1);
-  --text-muted: #94a3b8;
 }
 
 body.light {
   --bg: #f1f5f9;
   --card: #ffffff;
   --text: #0f172a;
-  --glass: rgba(0,0,0,0.03);
-  --glass-border: rgba(0,0,0,0.1);
-  --text-muted: #475569;
+  --glass: rgba(0,0,0,0.04);
+  --glass-border: rgba(0,0,0,0.08);
 }
 
 /* ================== BASE ================== */
@@ -46,7 +44,7 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  transition: background 0.3s ease, color 0.3s ease, opacity 0.25s ease;
+  transition: opacity 0.25s ease, background 0.3s ease;
   opacity: 1;
 }
 
@@ -64,9 +62,7 @@ body.fade-out {
   max-width: 480px;
   display: flex;
   justify-content: flex-end;
-  align-items: center;
   padding: 20px;
-  gap: 12px;
 }
 
 .icon-btn {
@@ -81,15 +77,14 @@ body.fade-out {
   cursor: pointer;
   font-size: 20px;
   transition: 0.25s ease;
-  user-select: none;
-}
-
-.icon-btn:active {
-  transform: scale(0.92);
 }
 
 .icon-btn:hover {
   box-shadow: 0 8px 25px -10px var(--primary);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
 }
 
 /* ================== CONTENT ================== */
@@ -117,18 +112,11 @@ h1 {
 .card {
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
+  border-radius: 22px;
   padding: 28px 10px;
   cursor: pointer;
   backdrop-filter: blur(12px);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  animation: fadeUp 0.4s ease forwards;
-  user-select: none;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .card:hover {
@@ -138,12 +126,6 @@ h1 {
 
 .card:active {
   transform: scale(0.96);
-}
-
-.card.full-width {
-  grid-column: span 2;
-  border: 2px solid var(--primary);
-  background: linear-gradient(145deg, var(--glass), rgba(16,185,129,0.15));
 }
 
 .icon {
@@ -161,14 +143,13 @@ h1 {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: 0.3s ease;
-  z-index: 1000;
 }
 
 .modal.active {
@@ -178,34 +159,19 @@ h1 {
 
 .modal-content {
   width: 90%;
-  max-width: 480px;
+  max-width: 400px;
   background: var(--card);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 25px;
-  border: 1px solid var(--glass-border);
-  transform: translateY(20px);
-  transition: 0.3s ease;
-}
-
-.modal.active .modal-content {
-  transform: translateY(0);
-}
-
-.close {
-  cursor: pointer;
-  margin-bottom: 15px;
-  font-size: 18px;
 }
 
 .btn {
-  padding: 12px 18px;
+  padding: 12px 16px;
   border-radius: 14px;
   border: none;
   cursor: pointer;
   font-size: 14px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  color: var(--text);
+  margin-top: 10px;
 }
 
 .btn.primary {
@@ -253,7 +219,7 @@ h1 {
       <div class="label">الرقية الشرعية</div>
     </div>
 
-    <div class="card full-width" onclick="openHusnPDF()">
+    <div class="card" onclick="go('husn.html')">
       <div class="icon">📘</div>
       <div class="label">حصن المسلم</div>
     </div>
@@ -264,7 +230,6 @@ h1 {
 <!-- SETTINGS -->
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
-    <div class="close" onclick="closeSettings()">✕</div>
     <button class="btn" onclick="setTheme('dark')">Dark</button>
     <button class="btn primary" onclick="setTheme('light')">Light</button>
   </div>
@@ -272,22 +237,24 @@ h1 {
 
 <script>
 
-/* ========== PAGE TRANSITION ========== */
+/* ===== SAFE PAGE NAVIGATION ===== */
 function go(page){
   document.body.classList.add("fade-out");
-  setTimeout(()=>{ window.location.href = page; },200);
+  setTimeout(()=>{ window.location.assign(page); },200);
 }
 
-/* ========== PDF VIEWER ========== */
+/* Fix blank page on Android back */
+window.addEventListener("pageshow", function () {
+  document.body.classList.remove("fade-out");
+});
+
+/* ===== QURAN (Image-based viewer) ===== */
 function goQuran(){
-  go('pdf-viewer/web/viewer.html?file=../../assets/quran.pdf');
+  go("quran.html"); 
+  // you will create quran.html that loads images like 001.webp
 }
 
-function openHusnPDF(){
-  go('pdf-viewer/web/viewer.html?file=../../assets/husn.pdf');
-}
-
-/* ========== SETTINGS ========== */
+/* ===== SETTINGS ===== */
 function openSettings(){
   document.getElementById("settingsModal").classList.add("active");
 }
@@ -310,27 +277,7 @@ window.addEventListener("load",()=>{
   if(saved==="light") document.body.classList.add("light");
 });
 
-/* ========== PWA INSTALL PROMPT ========== */
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt",(e)=>{
-  e.preventDefault();
-  deferredPrompt = e;
-
-  const installBtn = document.createElement("div");
-  installBtn.className="icon-btn";
-  installBtn.innerHTML="⬇️";
-  installBtn.onclick=async()=>{
-    installBtn.remove();
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt=null;
-  };
-
-  document.querySelector(".top-bar").prepend(installBtn);
-});
-
-/* ========== SERVICE WORKER ========== */
+/* ===== SERVICE WORKER ===== */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
