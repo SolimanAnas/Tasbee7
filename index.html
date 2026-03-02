@@ -33,6 +33,7 @@ body.light {
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  user-select: none; /* prevent text selection everywhere */
 }
 
 body {
@@ -44,8 +45,7 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 0;               /* will be handled by containers */
-  user-select: none;        /* prevent text selection everywhere */
+  padding: 0;
   transition: background 0.3s, color 0.3s;
 }
 
@@ -73,8 +73,6 @@ body {
   cursor: pointer;
   transition: 0.2s;
   font-size: 24px;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .icon-btn:active {
@@ -88,7 +86,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   width: 100%;
   max-width: 480px;
   padding: 0 20px 30px;
@@ -113,14 +110,30 @@ h1 {
   padding: 30px 10px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.2s, background 0.3s, border-color 0.3s;
+  transition: transform 0.2s, background 0.3s, border-color 0.3s, box-shadow 0.3s;
   border: 1px solid rgba(255,255,255,0.05);
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  animation: cardFadeIn 0.4s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .card:active {
   transform: scale(0.97);
+}
+
+.card:hover {
+  box-shadow: 0 10px 20px -10px var(--primary);
+}
+
+/* Special full-width card for Hisn al-Muslim */
+.card.full-width {
+  grid-column: span 2;
+  background: linear-gradient(145deg, var(--card), rgba(16,185,129,0.1));
+  border: 2px solid var(--primary);
+  padding: 20px 10px;
 }
 
 .icon {
@@ -133,7 +146,7 @@ h1 {
   font-weight: 600;
 }
 
-/* ===== MODAL (same as azkar) ===== */
+/* ===== MODAL ===== */
 .modal {
   position: fixed;
   inset: 0;
@@ -174,7 +187,6 @@ h1 {
   font-size: 20px;
   margin-bottom: 15px;
   color: var(--text);
-  user-select: none;
 }
 
 .settings-row {
@@ -202,7 +214,6 @@ h1 {
   font-size: 16px;
   flex: 1;
   transition: 0.2s;
-  user-select: none;
 }
 
 .btn:active {
@@ -235,24 +246,46 @@ body.light .btn:not(.primary) {
   <h1>الصفحة الرئيسية</h1>
 
   <div class="grid">
+    <!-- New: القرآن الكريم (Quran) -->
+    <div class="card" onclick="goQuran()">
+      <div class="icon">📖</div>
+      <div class="label">القرآن الكريم</div>
+    </div>
+
+    <!-- Existing: المسبحة -->
     <div class="card" onclick="go('masbaha.html')">
       <div class="icon">📿</div>
       <div class="label">المسبحة</div>
     </div>
 
+    <!-- Existing: أذكار الصباح -->
     <div class="card" onclick="go('azkar.html?type=morning')">
       <div class="icon">🌅</div>
       <div class="label">أذكار الصباح</div>
     </div>
 
+    <!-- Existing: أذكار المساء -->
     <div class="card" onclick="go('azkar.html?type=night')">
       <div class="icon">🌙</div>
       <div class="label">أذكار المساء</div>
     </div>
 
+    <!-- Existing: الرقية الشرعية -->
     <div class="card" onclick="go('azkar.html?type=ruqia')">
       <div class="icon">📖</div>
       <div class="label">الرقية الشرعية</div>
+    </div>
+
+    <!-- New: أذكار الصلاة (Prayer Zikr) -->
+    <div class="card" onclick="go('prayer-zikr.html')">
+      <div class="icon">🕌</div>
+      <div class="label">أذكار الصلاة</div>
+    </div>
+
+    <!-- New: حصن المسلم (PDF) – full width for emphasis -->
+    <div class="card full-width" onclick="openHusnPDF()">
+      <div class="icon">🛡️</div>
+      <div class="label">حصن المسلم</div>
     </div>
   </div>
 </div>
@@ -275,6 +308,18 @@ body.light .btn:not(.primary) {
 <script>
 function go(page) {
   window.location.href = page;
+}
+
+function goQuran() {
+  // For now, just open a placeholder; you can replace with actual Quran page
+  window.location.href = 'quran.html'; // adjust if needed
+}
+
+function openHusnPDF() {
+  // Open the PDF file directly – browser will handle if PDF viewer is available
+  window.location.href = '/assets/husn.pdf';
+  // Alternative if you have a PDF viewer page:
+  // window.location.href = '/pdf-viewer?file=/assets/husn.pdf';
 }
 
 if ('serviceWorker' in navigator) {
