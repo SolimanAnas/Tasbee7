@@ -7,8 +7,11 @@
 <link rel="manifest" href="manifest.json">
 <title>مسبحة</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* ===== THEME VARIABLES ===== */
+
+/* ================== THEME VARIABLES ================== */
 :root {
   --primary: #10b981;
   --bg: #020617;
@@ -19,7 +22,6 @@
   --text-muted: #94a3b8;
 }
 
-/* Light Theme */
 body.light {
   --bg: #f1f5f9;
   --card: #ffffff;
@@ -29,66 +31,74 @@ body.light {
   --text-muted: #475569;
 }
 
-/* ===== NUCLEAR KILL: no highlight, no select ===== */
+/* ================== BASE ================== */
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  user-select: none; /* prevent text selection everywhere */
 }
 
 body {
   margin: 0;
   font-family: 'Tajawal', sans-serif;
-  background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
+  background: var(--bg);
   color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 0;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s ease, color 0.3s ease, opacity 0.25s ease;
+  opacity: 1;
 }
 
-/* ===== TOP BAR ===== */
+body:not(.light) {
+  background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
+}
+
+body.fade-out {
+  opacity: 0;
+}
+
+/* ================== TOP BAR ================== */
 .top-bar {
   width: 100%;
   max-width: 480px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 20px;
-  font-size: 22px;
+  gap: 12px;
 }
 
 .icon-btn {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
-  color: var(--text);
   cursor: pointer;
-  transition: 0.2s;
-  font-size: 24px;
+  font-size: 20px;
+  transition: 0.25s ease;
+  user-select: none;
 }
 
 .icon-btn:active {
   transform: scale(0.92);
-  background: rgba(255,255,255,0.15);
 }
 
-/* ===== MAIN CONTENT ===== */
+.icon-btn:hover {
+  box-shadow: 0 8px 25px -10px var(--primary);
+}
+
+/* ================== CONTENT ================== */
 .content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
   max-width: 480px;
-  padding: 0 20px 30px;
+  padding: 0 20px 40px;
+  text-align: center;
 }
 
 h1 {
@@ -97,56 +107,56 @@ h1 {
   color: var(--primary);
 }
 
+/* ================== GRID ================== */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  width: 100%;
 }
 
 .card {
-  background: var(--card);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
   border-radius: 24px;
-  padding: 30px 10px;
-  text-align: center;
+  padding: 28px 10px;
   cursor: pointer;
-  transition: transform 0.2s, background 0.3s, border-color 0.3s, box-shadow 0.3s;
-  border: 1px solid rgba(255,255,255,0.05);
-  animation: cardFadeIn 0.4s ease-out;
+  backdrop-filter: blur(12px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: fadeUp 0.4s ease forwards;
+  user-select: none;
 }
 
-@keyframes cardFadeIn {
+@keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.card:active {
-  transform: scale(0.97);
-}
-
 .card:hover {
-  box-shadow: 0 10px 20px -10px var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px -10px var(--primary);
 }
 
-/* Special full-width card for Hisn al-Muslim */
+.card:active {
+  transform: scale(0.96);
+}
+
 .card.full-width {
   grid-column: span 2;
-  background: linear-gradient(145deg, var(--card), rgba(16,185,129,0.1));
   border: 2px solid var(--primary);
-  padding: 20px 10px;
+  background: linear-gradient(145deg, var(--glass), rgba(16,185,129,0.15));
 }
 
 .icon {
-  font-size: 40px;
-  margin-bottom: 15px;
+  font-size: 36px;
+  margin-bottom: 14px;
 }
 
 .label {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
-/* ===== MODAL ===== */
+/* ================== MODAL ================== */
 .modal {
   position: fixed;
   inset: 0;
@@ -168,13 +178,13 @@ h1 {
 
 .modal-content {
   width: 90%;
-  max-width: 500px;
+  max-width: 480px;
   background: var(--card);
   border-radius: 24px;
-  padding: 30px;
-  transform: translateY(30px);
-  transition: 0.3s ease;
+  padding: 25px;
   border: 1px solid var(--glass-border);
+  transform: translateY(20px);
+  transition: 0.3s ease;
 }
 
 .modal.active .modal-content {
@@ -182,63 +192,34 @@ h1 {
 }
 
 .close {
-  text-align: left;
   cursor: pointer;
-  font-size: 20px;
   margin-bottom: 15px;
-  color: var(--text);
-}
-
-.settings-row {
-  margin-bottom: 25px;
-}
-
-.settings-row h3 {
-  color: var(--primary);
-  margin: 0 0 15px 0;
   font-size: 18px;
 }
 
-.theme-buttons {
-  display: flex;
-  gap: 15px;
-}
-
 .btn {
-  padding: 14px 22px;
-  border-radius: 16px;
+  padding: 12px 18px;
+  border-radius: 14px;
   border: none;
-  background: #1e293b;
-  color: white;
   cursor: pointer;
-  font-size: 16px;
-  flex: 1;
-  transition: 0.2s;
-}
-
-.btn:active {
-  transform: scale(0.96);
+  font-size: 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
 }
 
 .btn.primary {
   background: var(--primary);
-  color: #001e1b;
+  color: #002e28;
   font-weight: bold;
 }
 
-/* light theme button background adjustments */
-body.light .btn:not(.primary) {
-  background: #e2e8f0;
-  color: #0f172a;
-}
 </style>
 </head>
 
 <body>
 
-<!-- Top Bar with Settings only (Home already here) -->
 <div class="top-bar">
-  <div class="icon-btn" onclick="goHome()">🏠</div>
   <div class="icon-btn" onclick="openSettings()">⚙️</div>
 </div>
 
@@ -246,111 +227,114 @@ body.light .btn:not(.primary) {
   <h1>الصفحة الرئيسية</h1>
 
   <div class="grid">
-    <!-- New: القرآن الكريم (Quran) -->
+
     <div class="card" onclick="goQuran()">
       <div class="icon">📖</div>
       <div class="label">القرآن الكريم</div>
     </div>
 
-    <!-- Existing: المسبحة -->
     <div class="card" onclick="go('masbaha.html')">
       <div class="icon">📿</div>
       <div class="label">المسبحة</div>
     </div>
 
-    <!-- Existing: أذكار الصباح -->
     <div class="card" onclick="go('azkar.html?type=morning')">
       <div class="icon">🌅</div>
       <div class="label">أذكار الصباح</div>
     </div>
 
-    <!-- Existing: أذكار المساء -->
     <div class="card" onclick="go('azkar.html?type=night')">
       <div class="icon">🌙</div>
       <div class="label">أذكار المساء</div>
     </div>
 
-    <!-- Existing: الرقية الشرعية -->
     <div class="card" onclick="go('azkar.html?type=ruqia')">
-      <div class="icon">📖</div>
+      <div class="icon">🛡️</div>
       <div class="label">الرقية الشرعية</div>
     </div>
 
-    <!-- New: أذكار الصلاة (Prayer Zikr) -->
-    <div class="card" onclick="go('prayer-zikr.html')">
-      <div class="icon">🕌</div>
-      <div class="label">أذكار الصلاة</div>
-    </div>
-
-    <!-- New: حصن المسلم (PDF) – full width for emphasis -->
     <div class="card full-width" onclick="openHusnPDF()">
-      <div class="icon">🛡️</div>
+      <div class="icon">📘</div>
       <div class="label">حصن المسلم</div>
     </div>
+
   </div>
 </div>
 
-<!-- Settings Modal -->
+<!-- SETTINGS -->
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
     <div class="close" onclick="closeSettings()">✕</div>
-
-    <div class="settings-row">
-      <h3>Theme</h3>
-      <div class="theme-buttons">
-        <button class="btn" onclick="setTheme('dark')">Dark</button>
-        <button class="btn" onclick="setTheme('light')">Light</button>
-      </div>
-    </div>
+    <button class="btn" onclick="setTheme('dark')">Dark</button>
+    <button class="btn primary" onclick="setTheme('light')">Light</button>
   </div>
 </div>
 
 <script>
-function go(page) {
-  window.location.href = page;
+
+/* ========== PAGE TRANSITION ========== */
+function go(page){
+  document.body.classList.add("fade-out");
+  setTimeout(()=>{ window.location.href = page; },200);
 }
 
-function goQuran() {
-  // For now, just open a placeholder; you can replace with actual Quran page
-  window.location.href = 'quran.html'; // adjust if needed
+/* ========== PDF VIEWER ========== */
+function goQuran(){
+  go('pdf-viewer/web/viewer.html?file=../../assets/quran.pdf');
 }
 
-function openHusnPDF() {
-  // Open the PDF file directly – browser will handle if PDF viewer is available
-  window.location.href = '/assets/husn.pdf';
-  // Alternative if you have a PDF viewer page:
-  // window.location.href = '/pdf-viewer?file=/assets/husn.pdf';
+function openHusnPDF(){
+  go('pdf-viewer/web/viewer.html?file=../../assets/husn.pdf');
 }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+/* ========== SETTINGS ========== */
+function openSettings(){
+  document.getElementById("settingsModal").classList.add("active");
 }
 
-/* ===== Settings & Theme ===== */
-function openSettings() {
-  document.getElementById('settingsModal').classList.add('active');
+function closeSettings(){
+  document.getElementById("settingsModal").classList.remove("active");
 }
 
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('active');
-}
-
-function setTheme(mode) {
-  if (mode === 'light') {
-    document.body.classList.add('light');
+function setTheme(mode){
+  if(mode==="light"){
+    document.body.classList.add("light");
   } else {
-    document.body.classList.remove('light');
+    document.body.classList.remove("light");
   }
-  localStorage.setItem('themeMode', mode);
+  localStorage.setItem("themeMode", mode);
 }
 
-// Load saved theme on startup
-window.addEventListener('load', () => {
-  const savedTheme = localStorage.getItem('themeMode');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light');
-  }
+window.addEventListener("load",()=>{
+  const saved = localStorage.getItem("themeMode");
+  if(saved==="light") document.body.classList.add("light");
 });
+
+/* ========== PWA INSTALL PROMPT ========== */
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const installBtn = document.createElement("div");
+  installBtn.className="icon-btn";
+  installBtn.innerHTML="⬇️";
+  installBtn.onclick=async()=>{
+    installBtn.remove();
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt=null;
+  };
+
+  document.querySelector(".top-bar").prepend(installBtn);
+});
+
+/* ========== SERVICE WORKER ========== */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+
 </script>
 
 </body>
