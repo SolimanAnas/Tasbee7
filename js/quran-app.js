@@ -1,4 +1,6 @@
-/* ================= GLOBAL STATE ================= */
+/* =========================
+   GLOBAL STATE
+========================= */
 
 let currentPage = 1;
 const totalPages = 604;
@@ -8,27 +10,29 @@ const frame = document.getElementById("pageFrame");
 const surahName = document.getElementById("surahName");
 const pageMeta = document.getElementById("pageMeta");
 const selectorPanel = document.getElementById("selectorPanel");
-const tafsirPanel = document.getElementById("tafsirPanel");
-const dimLayer = document.getElementById("dimLayer");
-const bookmarkLabel = document.getElementById("bookmarkLabel");
-const progressBar = document.getElementById("progressBar");
+const settingsPanel = document.getElementById("settingsPanel");
+const swipeArea = document.getElementById("swipeArea");
 
 let touchStartX = 0;
-let zoomMode = false;
+let lastTap = 0;
 
-/* ================= INIT ================= */
+/* =========================
+   INIT
+========================= */
 
 window.onload = function () {
 
-    const savedPage = localStorage.getItem("lastPage");
-    if (savedPage) currentPage = parseInt(savedPage);
+    const saved = localStorage.getItem("lastPage");
+    if (saved) currentPage = parseInt(saved);
 
     renderPage();
     initSwipe();
-    initDoubleTap();
+    initTapHandlers();
 };
 
-/* ================= PAGE RENDER ================= */
+/* =========================
+   RENDER PAGE
+========================= */
 
 function renderPage() {
 
@@ -37,11 +41,11 @@ function renderPage() {
     localStorage.setItem("lastPage", currentPage);
 
     updateSurahAndJuz();
-    updateProgress();
-    updateBookmarkIndicator();
 }
 
-/* ================= SURAH + JUZ ================= */
+/* =========================
+   SURAH & JUZ AUTO UPDATE
+========================= */
 
 function updateSurahAndJuz() {
 
@@ -52,39 +56,41 @@ function updateSurahAndJuz() {
     if (juz) pageMeta.innerText = "الجزء " + juz.number + " | صفحة " + currentPage;
 }
 
-/* ================= CURL ANIMATION ================= */
+/* =========================
+   SIMPLE PERSPECTIVE SWIPE
+========================= */
 
 function nextPage() {
 
     if (currentPage >= totalPages) return;
 
-    frame.classList.add("curl-next");
+    frame.classList.add("swipe-next");
 
     setTimeout(() => {
         currentPage++;
         renderPage();
-        frame.classList.remove("curl-next");
-    }, 250);
+        frame.classList.remove("swipe-next");
+    }, 200);
 }
 
 function prevPage() {
 
     if (currentPage <= 1) return;
 
-    frame.classList.add("curl-prev");
+    frame.classList.add("swipe-prev");
 
     setTimeout(() => {
         currentPage--;
         renderPage();
-        frame.classList.remove("curl-prev");
-    }, 250);
+        frame.classList.remove("swipe-prev");
+    }, 200);
 }
 
-/* ================= SWIPE ================= */
+/* =========================
+   SWIPE GESTURE
+========================= */
 
 function initSwipe() {
-
-    const swipeArea = document.getElementById("swipeArea");
 
     swipeArea.addEventListener("touchstart", e => {
         touchStartX = e.changedTouches[0].screenX;
@@ -97,95 +103,41 @@ function initSwipe() {
         if (Math.abs(diff) < 50) return;
 
         if (diff > 0) {
-            prevPage();   // RTL correct
+            nextPage();   // RTL correct
         } else {
-            nextPage();
+            prevPage();
         }
     });
 }
 
-/* ================= DOUBLE TAP ZOOM ================= */
+/* =========================
+   TAP HANDLERS
+========================= */
 
-function initDoubleTap() {
+function initTapHandlers() {
 
-    let lastTap = 0;
+    swipeArea.addEventListener("touchend", function () {
 
-    document.getElementById("swipeArea").addEventListener("touchend", function (e) {
+        const now = new Date().getTime();
+        const tapLength = now - lastTap;
 
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-
+        // DOUBLE TAP = ZOOM
         if (tapLength < 300 && tapLength > 0) {
-
-            zoomMode = !zoomMode;
-
-            if (zoomMode) {
-                document.body.classList.add("zoomed");
-            } else {
-                document.body.classList.remove("zoomed");
-            }
+            document.body.classList.toggle("zoomed");
         }
 
-        lastTap = currentTime;
+        lastTap = now;
+    });
+
+    // SINGLE TAP = FOCUS MODE
+    swipeArea.addEventListener("click", () => {
+        document.body.classList.toggle("focus-mode");
     });
 }
 
-/* ================= BOOKMARK ================= */
-
-function toggleBookmark() {
-
-    let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-
-    if (bookmarks.includes(currentPage)) {
-        bookmarks = bookmarks.filter(p => p !== currentPage);
-    } else {
-        bookmarks.push(currentPage);
-    }
-
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-
-    updateBookmarkIndicator();
-}
-
-function updateBookmarkIndicator() {
-
-    const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-
-    if (bookmarks.includes(currentPage)) {
-        bookmarkLabel.classList.add("visible");
-    } else {
-        bookmarkLabel.classList.remove("visible");
-    }
-}
-
-/* ================= READING PROGRESS ================= */
-
-function updateProgress() {
-
-    let stats = JSON.parse(localStorage.getItem("readingStats") || "{}");
-
-    stats[currentPage] = true;
-
-    localStorage.setItem("readingStats", JSON.stringify(stats));
-
-    const readCount = Object.keys(stats).length;
-    const percent = Math.floor((readCount / totalPages) * 100);
-
-    progressBar.style.width = percent + "%";
-}
-
-/* ================= DIM MODE ================= */
-
-function toggleDim() {
-
-    if (dimLayer.style.background === "rgba(0,0,0,0.5)") {
-        dimLayer.style.background = "rgba(0,0,0,0)";
-    } else {
-        dimLayer.style.background = "rgba(0,0,0,0.5)";
-    }
-}
-
-/* ================= SELECTORS ================= */
+/* =========================
+   SURAH SELECTOR
+========================= */
 
 function openSurahSelector() {
 
@@ -194,14 +146,12 @@ function openSurahSelector() {
     SURAH_MAP.forEach(s => {
 
         const div = document.createElement("div");
-        div.innerText = s.name;
-        div.style.padding = "10px";
-        div.style.cursor = "pointer";
+        div.innerText = s.number + " - " + s.name;
 
         div.onclick = () => {
             currentPage = s.page;
             renderPage();
-            selectorPanel.classList.remove("open");
+            closePanels();
         };
 
         selectorPanel.appendChild(div);
@@ -209,6 +159,10 @@ function openSurahSelector() {
 
     selectorPanel.classList.add("open");
 }
+
+/* =========================
+   JUZ SELECTOR
+========================= */
 
 function openJuzSelector() {
 
@@ -218,13 +172,11 @@ function openJuzSelector() {
 
         const div = document.createElement("div");
         div.innerText = "الجزء " + j.number;
-        div.style.padding = "10px";
-        div.style.cursor = "pointer";
 
         div.onclick = () => {
             currentPage = j.page;
             renderPage();
-            selectorPanel.classList.remove("open");
+            closePanels();
         };
 
         selectorPanel.appendChild(div);
@@ -233,30 +185,52 @@ function openJuzSelector() {
     selectorPanel.classList.add("open");
 }
 
-/* ================= TAFSIR ================= */
+/* =========================
+   SETTINGS PANEL
+========================= */
 
-function toggleTafsir() {
-
-    if (tafsirPanel.classList.contains("open")) {
-        tafsirPanel.classList.remove("open");
-        return;
-    }
-
-    const surah = SURAH_MAP.slice().reverse().find(s => currentPage >= s.page);
-
-    tafsirPanel.innerHTML = `
-        <h3>${surah.name}</h3>
-        <p>
-        هذا مثال على وضع التفسير.
-        يمكنك لاحقاً تحميل JSON حقيقي للتفسير حسب الصفحة.
-        </p>
-    `;
-
-    tafsirPanel.classList.add("open");
+function openSettings() {
+    settingsPanel.classList.add("open");
 }
 
-/* ================= HOME ================= */
+function closePanels() {
+    selectorPanel.classList.remove("open");
+    settingsPanel.classList.remove("open");
+}
 
-function goHome(){
-    window.location.href = "index.html";
+/* =========================
+   THEME
+========================= */
+
+function toggleTheme() {
+
+    if (document.body.getAttribute("data-theme") === "dark") {
+        document.body.setAttribute("data-theme", "light");
+    } else {
+        document.body.setAttribute("data-theme", "dark");
+    }
+}
+
+/* =========================
+   DOWNLOAD ALL PAGES
+========================= */
+
+function downloadAllPages() {
+
+    alert("جاري تحميل جميع الصفحات...");
+
+    let loaded = 0;
+
+    for (let i = 1; i <= 604; i++) {
+
+        const preload = new Image();
+        preload.src = `mushaf/${i}.png`;
+
+        preload.onload = () => {
+            loaded++;
+            if (loaded === 604) {
+                alert("تم تحميل جميع الصفحات بنجاح");
+            }
+        };
+    }
 }
