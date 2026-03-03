@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حصن المسلم Pro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f4f7f9;
@@ -37,7 +37,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
     body {
-      font-family: 'Amiri', serif;
+      font-family: 'Amiri', serif !important;
       background: var(--bg);
       color: var(--text);
       transition: background 0.3s ease;
@@ -57,7 +57,7 @@
       transition: width 0.1s ease;
     }
 
-    /* --- Optimized Header --- */
+    /* --- Header --- */
     header {
       background: var(--header-bg);
       color: white;
@@ -66,7 +66,6 @@
       top: 0;
       z-index: 1000;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
     }
 
     .toolbar {
@@ -101,12 +100,12 @@
       border-radius: 12px;
       border: none;
       background: rgba(255,255,255,0.95);
-      font-family: 'Amiri', serif; /* Matching Arabic font for search */
+      font-family: 'Amiri', serif !important;
       font-size: 0.95rem;
       outline: none;
     }
 
-    /* --- Floating Navigation (Thumb Zone) --- */
+    /* --- Bottom Nav --- */
     .bottom-nav {
       position: fixed;
       bottom: 20px;
@@ -132,31 +131,32 @@
       padding: 5px;
     }
 
-    /* --- MENU FONT UPDATE --- */
+    /* --- FIXED MENU FONT (AMIRI) --- */
     #section-select {
       background: none;
       border: none;
       color: var(--text);
-      /* Custom Font for the scrollable menu text */
-      font-family: 'Scheherazade New', serif; 
-      font-size: 1.1rem;
-      font-weight: bold;
+      /* Using !important to override system defaults */
+      font-family: 'Amiri', serif !important; 
+      font-size: 1.15rem;
+      font-weight: 700;
       max-width: 160px;
       outline: none;
       cursor: pointer;
-      appearance: none; /* Cleaner look on mobile */
       text-align: center;
+      direction: rtl;
     }
 
-    /* Styles for the options inside the dropdown */
+    /* Targeting the list items inside the scrollable menu */
     #section-select option {
-      font-family: 'Amiri', serif;
+      font-family: 'Amiri', serif !important;
+      font-size: 1.1rem;
       background: var(--card-bg);
       color: var(--text);
-      padding: 10px;
+      direction: rtl;
     }
 
-    /* --- Content Area --- */
+    /* --- Content --- */
     main {
       max-width: 800px;
       margin: 0 auto;
@@ -169,8 +169,9 @@
     }
 
     .section-title {
-      font-family: 'Scheherazade New', serif;
-      font-size: 2rem;
+      font-family: 'Amiri', serif !important;
+      font-size: 2.1rem;
+      font-weight: 700;
       color: var(--accent);
       margin-bottom: 5px;
     }
@@ -187,26 +188,26 @@
       padding: 20px;
       box-shadow: var(--card-shadow);
       border: 1px solid var(--border);
-      transition: transform 0.2s ease;
     }
 
     .card-arabic {
-      font-family: 'Scheherazade New', serif;
-      font-size: 1.7rem;
-      line-height: 1.9;
+      font-family: 'Amiri', serif !important;
+      font-size: 1.75rem;
+      line-height: 1.8;
       margin-bottom: 15px;
       text-align: justify;
       color: var(--text);
     }
 
     .card-ref {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
       border-top: 1px solid var(--border);
       padding-top: 10px;
+      font-family: 'Amiri', serif !important;
     }
 
-    /* --- Theme Toggle --- */
+    /* --- Themes --- */
     .theme-dock {
       display: flex;
       gap: 8px;
@@ -224,9 +225,9 @@
     .highlight { background: #fff9c4 !important; color: #000 !important; }
 
     @media (max-width: 480px) {
-      .card-arabic { font-size: 1.5rem; }
-      .section-title { font-size: 1.6rem; }
-      #section-select { max-width: 130px; }
+      .card-arabic { font-size: 1.55rem; }
+      .section-title { font-size: 1.7rem; }
+      #section-select { max-width: 135px; }
     }
   </style>
 </head>
@@ -253,7 +254,7 @@
       <h1 id="main-title" class="section-title">حصن المسلم</h1>
     </div>
     <div id="content-area">
-      <div style="text-align:center; padding:50px;">جاري تجهيز الأذكار...</div>
+      <div style="text-align:center; padding:50px;">جاري التحميل بجمال الخط العربي...</div>
     </div>
   </main>
 
@@ -360,8 +361,8 @@
       document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
       document.getElementById('content-area').innerHTML = results.map(r => `
         <div class="card" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer; border-right:4px solid var(--accent)">
-          <div style="font-size:0.8rem; color:var(--accent); font-weight:bold; margin-bottom:8px;">${r.title}</div>
-          <div class="card-arabic" style="font-size:1.3rem;">${r.ar}</div>
+          <div style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri',serif;">${r.title}</div>
+          <div class="card-arabic" style="font-size:1.35rem;">${r.ar}</div>
         </div>
       `).join('');
     };
