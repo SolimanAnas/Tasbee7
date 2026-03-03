@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>حصن المسلم</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade', serif;
+      background: #f9f9f9;
+      color: #1e2a3a;
+      line-height: 1.8;
+      padding: 0 0 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 0.8rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .toolbar button, .toolbar select, .toolbar input {
+      padding: 0.5rem 0.8rem;
+      border: none;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      background: white;
+      color: #2c3e50;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .toolbar input {
+      flex: 1 1 200px;
+      background: #ecf0f1;
+    }
+    .toolbar .spacer {
+      flex: 1;
+    }
+    .part-badge {
+      background: #34495e;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+    }
+    .section-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: #34495e;
+      padding: 0.5rem 1rem;
+      border-radius: 3rem;
+      margin-top: 0.5rem;
+    }
+    .section-nav button {
+      background: transparent;
+      color: white;
+      font-size: 1.3rem;
+      padding: 0 0.5rem;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    main {
+      flex: 1;
+      padding: 1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      width: 100%;
+      transition: opacity 0.2s ease;
+    }
+    .cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 2rem;
+      padding: 1.5rem 1.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s;
+      position: relative;
+    }
+    .card:hover {
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .card-label {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-arabic {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 0.8rem;
+      word-break: break-word;
+    }
+    .card-reference {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      border-top: 1px dashed #e0e0e0;
+      padding-top: 0.8rem;
+      direction: ltr;
+      text-align: right;
+    }
+    .favorite-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #f1c40f;
+      transition: transform 0.1s;
+    }
+    .favorite-btn.active {
+      color: #e67e22;
+    }
+    .favorite-btn:hover {
+      transform: scale(1.1);
+    }
+    .search-results {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+    .result-item {
+      padding: 0.8rem;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .result-item:hover {
+      background: #f0f0f0;
+    }
+    .result-title {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .result-snippet {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .result-snippet mark {
+      background: #fcf4a9;
+      padding: 0 2px;
+    }
+    .error-message {
+      color: #c0392b;
+      background: #f9ebea;
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      color: #7f8c8d;
+      font-size: 0.8rem;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .fade-enter {
+      opacity: 0;
+    }
+    .fade-enter-active {
+      opacity: 1;
+      transition: opacity 0.2s;
+    }
+    /* mobile adjustments */
+    @media (max-width: 480px) {
+      .card-arabic {
+        font-size: 1.2rem;
+      }
+      .toolbar {
+        gap: 0.3rem;
+      }
+      .toolbar button, .toolbar select {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="toolbar">
+      <span class="part-badge" id="part-badge">الجزء 1</span>
+      <select id="section-select" aria-label="اختر باباً">
+        <option value="">تحميل...</option>
+      </select>
+      <input type="text" id="search-input" placeholder="بحث في الأدعية والأحاديث...">
+      <button id="favorites-toggle" title="المفضلة">⭐</button>
+      <button id="reset-view" title="العرض العادي">📖</button>
+    </div>
+    <div class="section-nav">
+      <button id="prev-section" title="الباب السابق">‹</button>
+      <span class="section-title" id="current-section-title"></span>
+      <button id="next-section" title="الباب التالي">›</button>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- dynamic content injected here -->
+  </main>
+
+  <div class="footer">
+    <span>حصن المسلم · أدعية وأذكار</span>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- App State ----------
+      const App = {
+        part: 1,
+        data: null,                // array of sections
+        currentSectionIndex: 0,
+        favorites: new Set(),       // set of item ids (e.g. "p1_s2_i3")
+        mode: 'section',            // 'section', 'favorites', 'search'
+        searchQuery: '',
+        searchResults: [],          // array of {sectionIdx, itemIdx, sectionTitle, label, ar, ref}
+        isLoading: false,
+        touchStartX: 0,
+        touchEndX: 0,
+        minSwipeDistance: 50,       // px
+      };
+
+      // ---------- DOM Elements ----------
+      const mainEl = document.getElementById('main-content');
+      const partBadge = document.getElementById('part-badge');
+      const sectionSelect = document.getElementById('section-select');
+      const searchInput = document.getElementById('search-input');
+      const favToggleBtn = document.getElementById('favorites-toggle');
+      const resetViewBtn = document.getElementById('reset-view');
+      const prevSectionBtn = document.getElementById('prev-section');
+      const nextSectionBtn = document.getElementById('next-section');
+      const currentSectionTitle = document.getElementById('current-section-title');
+
+      // ---------- Utilities ----------
+      function getUrlParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      }
+
+      function saveProgress() {
+        localStorage.setItem('hism_lastPart', App.part);
+        localStorage.setItem('hism_lastSection', App.currentSectionIndex);
+      }
+
+      function loadProgress() {
+        const part = localStorage.getItem('hism_lastPart');
+        const section = localStorage.getItem('hism_lastSection');
+        if (part) App.part = parseInt(part, 10);
+        if (section) App.currentSectionIndex = parseInt(section, 10);
+      }
+
+      // Favorites
+      function loadFavorites() {
+        try {
+          const fav = localStorage.getItem('hism_favorites');
+          if (fav) App.favorites = new Set(JSON.parse(fav));
+        } catch (e) { console.warn('Failed to load favorites'); }
+      }
+      function saveFavorites() {
+        localStorage.setItem('hism_favorites', JSON.stringify([...App.favorites]));
+      }
+
+      // Generate a unique item ID (part, section index, item index)
+      function getItemId(sectionIdx, itemIdx) {
+        return `p${App.part}_s${sectionIdx}_i${itemIdx}`;
+      }
+
+      // ---------- Data Loading ----------
+      async function loadPart(partNumber) {
+        App.isLoading = true;
+        mainEl.innerHTML = '<div style="text-align:center; padding:3rem;">جاري التحميل...</div>';
+        try {
+          const response = await fetch(`part${partNumber}.json`);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const json = await response.json();
+          App.data = json;
+          App.part = partNumber;
+          // adjust current section index if out of bounds
+          if (App.currentSectionIndex >= App.data.length) App.currentSectionIndex = 0;
+          updatePartBadge();
+          buildSectionSelect();
+          // restore mode to section
+          App.mode = 'section';
+          App.searchQuery = '';
+          searchInput.value = '';
+          render();
+          saveProgress();
+        } catch (err) {
+          mainEl.innerHTML = `<div class="error-message">تعذر تحميل الجزء ${partNumber}: ${err.message}</div>`;
+        } finally {
+          App.isLoading = false;
+        }
+      }
+
+      function updatePartBadge() {
+        partBadge.textContent = `الجزء ${App.part}`;
+      }
+
+      function buildSectionSelect() {
+        if (!App.data) return;
+        const options = App.data.map((sec, idx) => {
+          return `<option value="${idx}" ${idx === App.currentSectionIndex ? 'selected' : ''}>${sec.title || 'بدون عنوان'}</option>`;
+        }).join('');
+        sectionSelect.innerHTML = `<option value="">اختر باباً</option>` + options;
+      }
+
+      // ---------- Rendering ----------
+      function render() {
+        if (!App.data) return;
+
+        if (App.mode === 'favorites') {
+          renderFavorites();
+        } else if (App.mode === 'search') {
+          renderSearchResults();
+        } else {
+          renderSection();
+        }
+
+        // Update section title and select
+        if (App.mode === 'section' && App.data[App.currentSectionIndex]) {
+          currentSectionTitle.textContent = App.data[App.currentSectionIndex].title || '';
+          sectionSelect.value = App.currentSectionIndex;
+        } else {
+          currentSectionTitle.textContent = '';
+          sectionSelect.value = '';
+        }
+      }
+
+      function renderSection() {
+        const section = App.data[App.currentSectionIndex];
+        if (!section) return;
+
+        const items = section.items || [];
+        const cards = items.map((item, idx) => {
+          const itemId = getItemId(App.currentSectionIndex, idx);
+          const isFav = App.favorites.has(itemId);
+          return `
+            <div class="card" data-section-idx="${App.currentSectionIndex}" data-item-idx="${idx}" data-item-id="${itemId}">
+              <div class="card-label">
+                <span>${item.label || ''}</span>
+                <button class="favorite-btn ${isFav ? 'active' : ''}" data-fav-id="${itemId}" title="المفضلة">${isFav ? '★' : '☆'}</button>
+              </div>
+              <div class="card-arabic">${item.ar || ''}</div>
+              <div class="card-reference">${item.ref || ''}</div>
+            </div>
+          `;
+        }).join('');
+
+        mainEl.innerHTML = `
+          <div class="cards-container fade-enter-active">
+            ${cards}
+          </div>
+        `;
+      }
+
+      function renderFavorites() {
+        if (App.favorites.size === 0) {
+          mainEl.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد أدعية في المفضلة بعد.</div>';
+          return;
+        }
+
+        // collect all favorite items across all sections
+        let favItems = [];
+        App.data.forEach((section, sIdx) => {
+          (section.items || []).forEach((item, iIdx) => {
+            const itemId = getItemId(sIdx, iIdx);
+            if (App.favorites.has(itemId)) {
+              favItems.push({
+                sectionIdx: sIdx,
+                itemIdx: iIdx,
+                itemId,
+                sectionTitle: section.title,
+                label: item.label,
+                ar: item.ar,
+                ref: item.ref
+              });
+            }
+          });
+        });
+
+        const cards = favItems.map(f => {
+          return `
+            <div class="card" data-section-idx="${f.sectionIdx}" data-item-idx="${f.itemIdx}" data-item-id="${f.itemId}">
+              <div class="card-label">
+                <span>${f.sectionTitle} · ${f.label || ''}</span>
+                <button class="favorite-btn active" data-fav-id="${f.itemId}" title="إزالة من المفضلة">★</button>
+              </div>
+              <div class="card-arabic">${f.ar || ''}</div>
+              <div class="card-reference">${f.ref || ''}</div>
+            </div>
+          `;
+        }).join('');
+
+        mainEl.innerHTML = `
+          <h3 style="margin-bottom:1rem;">المفضلة (${favItems.length})</h3>
+          <div class="cards-container">
+            ${cards}
+          </div>
+        `;
+      }
+
+      function renderSearchResults() {
+        if (!App.searchResults.length) {
+          mainEl.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد نتائج.</div>';
+          return;
+        }
+
+        const results = App.searchResults.map(r => {
+          const snippet = (r.ar || '').substring(0, 100) + '…';
+          return `
+            <div class="result-item" data-section-idx="${r.sectionIdx}" data-item-idx="${r.itemIdx}">
+              <div class="result-title">${r.sectionTitle} · ${r.label || ''}</div>
+              <div class="result-snippet">${r.snippet.replace(new RegExp(App.searchQuery, 'gi'), match => `<mark>${match}</mark>`)}</div>
+            </div>
+          `;
+        }).join('');
+
+        mainEl.innerHTML = `
+          <div class="search-results">
+            <h3>نتائج البحث (${App.searchResults.length})</h3>
+            ${results}
+          </div>
+        `;
+      }
+
+      // ---------- Search Index & Query ----------
+      let searchIndex = []; // flat array of {sectionIdx, itemIdx, sectionTitle, label, ar, ref, text}
+
+      function buildSearchIndex() {
+        if (!App.data) return;
+        searchIndex = [];
+        App.data.forEach((section, sIdx) => {
+          (section.items || []).forEach((item, iIdx) => {
+            const text = `${item.ar || ''} ${item.ref || ''} ${section.title || ''} ${item.label || ''}`.toLowerCase();
+            searchIndex.push({
+              sectionIdx: sIdx,
+              itemIdx: iIdx,
+              sectionTitle: section.title,
+              label: item.label,
+              ar: item.ar,
+              ref: item.ref,
+              text
+            });
+          });
+        });
+      }
+
+      function performSearch(query) {
+        if (!query.trim()) {
+          App.mode = 'section';
+          render();
+          return;
+        }
+        const lower = query.toLowerCase();
+        const results = searchIndex.filter(entry => entry.text.includes(lower)).map(entry => ({
+          sectionIdx: entry.sectionIdx,
+          itemIdx: entry.itemIdx,
+          sectionTitle: entry.sectionTitle,
+          label: entry.label,
+          ar: entry.ar,
+          ref: entry.ref,
+          snippet: (entry.ar || '').length > 100 ? (entry.ar || '').substring(0, 100) + '…' : (entry.ar || '')
+        }));
+        App.searchResults = results;
+        App.mode = 'search';
+        render();
+      }
+
+      // ---------- Event Handlers ----------
+      function handleSectionSelect(e) {
+        const idx = parseInt(e.target.value, 10);
+        if (!isNaN(idx) && App.data && idx >= 0 && idx < App.data.length) {
+          App.currentSectionIndex = idx;
+          App.mode = 'section';
+          render();
+          saveProgress();
+        }
+      }
+
+      function handlePrevSection() {
+        if (!App.data) return;
+        if (App.currentSectionIndex > 0) {
+          App.currentSectionIndex--;
+          App.mode = 'section';
+          render();
+          saveProgress();
+        }
+      }
+
+      function handleNextSection() {
+        if (!App.data) return;
+        if (App.currentSectionIndex < App.data.length - 1) {
+          App.currentSectionIndex++;
+          App.mode = 'section';
+          render();
+          saveProgress();
+        }
+      }
+
+      function handleFavoriteClick(e) {
+        const btn = e.target.closest('.favorite-btn');
+        if (!btn) return;
+        e.preventDefault();
+        const itemId = btn.dataset.favId;
+        if (!itemId) return;
+
+        if (App.favorites.has(itemId)) {
+          App.favorites.delete(itemId);
+          btn.classList.remove('active');
+          btn.textContent = '☆';
+          btn.title = 'أضف إلى المفضلة';
+        } else {
+          App.favorites.add(itemId);
+          btn.classList.add('active');
+          btn.textContent = '★';
+          btn.title = 'إزالة من المفضلة';
+        }
+        saveFavorites();
+
+        // If in favorites mode, re-render to reflect removal
+        if (App.mode === 'favorites') renderFavorites();
+      }
+
+      function handleSearchInput(e) {
+        const q = e.target.value;
+        App.searchQuery = q;
+        if (!q) {
+          App.mode = 'section';
+          render();
+        } else {
+          performSearch(q);
+        }
+      }
+
+      function handleFavoritesToggle() {
+        if (App.mode === 'favorites') {
+          App.mode = 'section';
+        } else {
+          App.mode = 'favorites';
+        }
+        render();
+      }
+
+      function handleResetView() {
+        App.mode = 'section';
+        App.searchQuery = '';
+        searchInput.value = '';
+        render();
+      }
+
+      // Jump to section/item from search result click
+      function handleResultClick(e) {
+        const item = e.target.closest('.result-item');
+        if (!item) return;
+        const sIdx = item.dataset.sectionIdx;
+        const iIdx = item.dataset.itemIdx;
+        if (sIdx !== undefined && iIdx !== undefined) {
+          App.currentSectionIndex = parseInt(sIdx, 10);
+          App.mode = 'section';
+          App.searchQuery = '';
+          searchInput.value = '';
+          render();
+          saveProgress();
+          // Scroll to the specific card after a short delay
+          setTimeout(() => {
+            const targetCard = document.querySelector(`.card[data-section-idx="${sIdx}"][data-item-idx="${iIdx}"]`);
+            if (targetCard) {
+              targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              targetCard.style.backgroundColor = '#fcf4a9';
+              setTimeout(() => targetCard.style.backgroundColor = '', 1500);
+            }
+          }, 100);
+        }
+      }
+
+      // Swipe navigation
+      function handleTouchStart(e) {
+        App.touchStartX = e.changedTouches[0].screenX;
+      }
+      function handleTouchEnd(e) {
+        App.touchEndX = e.changedTouches[0].screenX;
+        const diff = App.touchStartX - App.touchEndX;
+        if (Math.abs(diff) < App.minSwipeDistance) return;
+        if (diff > 0) {
+          // swipe left -> next section
+          handleNextSection();
+        } else {
+          // swipe right -> previous section
+          handlePrevSection();
+        }
+      }
+
+      // ---------- Initialization ----------
+      async function init() {
+        loadProgress();
+        loadFavorites();
+
+        const urlPart = getUrlParam('part');
+        if (urlPart) App.part = parseInt(urlPart, 10) || 1;
+
+        await loadPart(App.part);
+
+        // Event listeners
+        sectionSelect.addEventListener('change', handleSectionSelect);
+        prevSectionBtn.addEventListener('click', handlePrevSection);
+        nextSectionBtn.addEventListener('click', handleNextSection);
+        searchInput.addEventListener('input', handleSearchInput);
+        favToggleBtn.addEventListener('click', handleFavoritesToggle);
+        resetViewBtn.addEventListener('click', handleResetView);
+
+        // Delegate favorite clicks and result clicks
+        mainEl.addEventListener('click', (e) => {
+          handleFavoriteClick(e);
+          handleResultClick(e);
+        });
+
+        // Swipe
+        document.addEventListener('touchstart', handleTouchStart, false);
+        document.addEventListener('touchend', handleTouchEnd, false);
+
+        // Rebuild search index after data load
+        window.addEventListener('dataLoaded', () => buildSearchIndex());
+      }
+
+      // Hook to signal data loaded
+      const originalRender = render;
+      render = function() {
+        originalRender();
+        if (App.data && !searchIndex.length) buildSearchIndex();
+      };
+
+      init();
+    })();
+  </script>
+</body>
+</html>
