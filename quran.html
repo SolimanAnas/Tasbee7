@@ -168,33 +168,44 @@
 
     /* ================= ZOOM MODE ================= */
     /*
-     * FIX: expand horizontally, NEVER crop vertically.
-     * Strategy: fix image height to full viewport (no vertical overflow),
-     * let width grow from natural aspect ratio (portrait Mushaf ≈ 0.71 W:H),
-     * so at 100dvh height image is ~71dvh wide — wider than viewport on most phones,
-     * which creates a natural pan-able zoom without any distortion.
+     * ZOOM STRATEGY:
+     * - Image height = 100dvh (locked, never crops vertically)
+     * - Image width grows from natural portrait aspect ratio (~0.71 W:H)
+     *   → on a 390×844 phone: image width ≈ 598px > 390px viewport = scrollable
+     * - Horizontal padding on the frame = 6vw each side gives text room to breathe
+     *   and prevents the calligraphy margins from sitting flush at the scroll edge
+     * - JS centers the scroll position on zoom activation so both edges are
+     *   equidistant and reachable in both scroll directions
      */
     body.zoomed main {
       overflow-x: auto;
-      overflow-y: hidden;     /* vertical: always hidden — no vertical crop risk */
-      align-items: flex-start;
-      padding-top: 0;         /* use full screen in zoom */
+      overflow-y: hidden;
+      align-items: center;
+      padding-top: 0;
+      /* smooth momentum scrolling on iOS */
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: auto; /* instant — JS will center it */
     }
 
     body.zoomed .page-frame {
       flex-shrink: 0;
       width: auto;
-      min-width: 100%;
-      height: 100dvh;         /* frame fills full viewport height */
+      height: 100dvh;
+      display: flex;
       align-items: center;
+      justify-content: center;
+      /* 6vw inset each side = edge text never touches scroll boundary */
+      padding: 0 6vw;
     }
 
     body.zoomed .mushaf-img {
-      height: 100dvh;         /* ALWAYS full viewport height — never crops vertically */
+      height: 100dvh;
       max-height: 100dvh;
       width: auto;
-      max-width: none;        /* allow width to extend beyond viewport for horizontal pan */
-      min-width: 110%;        /* slight extra push to ensure scroll is needed */
+      max-width: none;
+      /* Minimum width ensures the frame is always wider than viewport
+         so scroll is possible even on very tall/narrow phones          */
+      min-width: calc(100vw + 8vw); /* image + padding wider than screen */
     }
 
     /* ================= GLASSMORPHISM MODAL BASE ================= */
@@ -1006,6 +1017,17 @@
             tapTimer    = null;
             lastTapTime = 0;
             document.body.classList.toggle('zoomed');
+
+            // When ENTERING zoom: auto-scroll to horizontal center so both
+            // left and right Mushaf margins are equally reachable
+            if (document.body.classList.contains('zoomed')) {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  const center = (swipeArea.scrollWidth - swipeArea.clientWidth) / 2;
+                  swipeArea.scrollLeft = center;
+                });
+              });
+            }
 
           } else {
             // ← Potential single tap — wait to see if second tap arrives
