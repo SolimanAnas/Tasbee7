@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>حصن المسلم</title>
 
-<!-- Arabic Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
@@ -31,7 +30,6 @@ header{
 
 .toolbar{
   display:flex;
-  flex-wrap:wrap;
   gap:.5rem;
   align-items:center;
   margin-bottom:.7rem;
@@ -90,8 +88,6 @@ main{
   max-width:760px;
   margin:auto;
   width:100%;
-  position:relative;
-  overflow:hidden;
 }
 
 .cards-container{
@@ -145,17 +141,8 @@ main{
 <header>
   <div class="toolbar">
     <button onclick="location.href='index.html'">🏠</button>
-
-    <select id="part-select">
-      <option value="1">الجزء 1</option>
-      <option value="2">الجزء 2</option>
-      <option value="3">الجزء 3</option>
-      <option value="4">الجزء 4</option>
-    </select>
-
     <select id="section-select"></select>
-
-    <input type="text" id="search-input" placeholder="بحث...">
+    <input type="text" id="search-input" placeholder="بحث في حصن المسلم...">
   </div>
 
   <div class="section-nav">
@@ -173,10 +160,8 @@ main{
 
 <script>
 const App={
-  part:1,
-  data:null,
+  data:[],
   current:0,
-  searchIndex:[],
   touchStartX:0,
   touchEndX:0
 };
@@ -184,27 +169,24 @@ const App={
 const content=document.getElementById("content");
 const sectionSelect=document.getElementById("section-select");
 const sectionTitle=document.getElementById("section-title");
-const partSelect=document.getElementById("part-select");
 
-function updateURL(){
-  history.replaceState(null,"",`?part=${App.part}`);
-}
+async function loadAllParts(){
+  const parts=[1,2,3,4,5];
+  let allData=[];
 
-async function loadPart(part){
-  content.innerHTML="جاري التحميل...";
-  try{
-    const res=await fetch(`assets/part${part}.json`);
-    if(!res.ok) throw new Error("404");
-    App.data=await res.json();
-    App.part=part;
-    App.current=0;
-    partSelect.value=part;
-    updateURL();
-    buildSections();
-    renderSection();
-  }catch(e){
-    content.innerHTML="فشل تحميل الجزء";
+  for(let p of parts){
+    try{
+      const res=await fetch(`assets/part${p}.json`);
+      if(res.ok){
+        const json=await res.json();
+        allData=[...allData,...json];
+      }
+    }catch(e){}
   }
+
+  App.data=allData;
+  buildSections();
+  renderSection();
 }
 
 function buildSections(){
@@ -260,25 +242,18 @@ function prevSection(){
   }
 }
 
-/* Arabic swipe direction fixed:
-   Swipe LEFT = previous
-   Swipe RIGHT = next
-*/
+/* RTL swipe fixed */
 document.addEventListener("touchstart",e=>{
   App.touchStartX=e.changedTouches[0].screenX;
 });
-
 document.addEventListener("touchend",e=>{
   App.touchEndX=e.changedTouches[0].screenX;
   const diff=App.touchStartX-App.touchEndX;
   if(Math.abs(diff)<60) return;
-
   if(diff>0){
-    // user swiped LEFT → previous
-    prevSection();
+    prevSection(); // swipe left → previous (RTL)
   }else{
-    // user swiped RIGHT → next
-    nextSection();
+    nextSection(); // swipe right → next
   }
 });
 
@@ -290,31 +265,22 @@ sectionSelect.addEventListener("change",e=>{
   renderSection();
 });
 
-partSelect.addEventListener("change",e=>{
-  loadPart(parseInt(e.target.value));
-});
-
 document.getElementById("search-input").addEventListener("input",e=>{
   const q=e.target.value.toLowerCase();
   if(!q){renderSection();return}
-  const sec=App.data[App.current];
-  const results=sec.items.filter(it=>
-    (it.ar||"").toLowerCase().includes(q)
+  const results=App.data.filter(sec=>
+    sec.title.toLowerCase().includes(q)
   );
-  content.innerHTML=results.map(r=>`
-    <div class="card">
-      <div class="card-arabic">${r.ar}</div>
-      <div class="card-reference">${r.ref||""}</div>
-    </div>
-  `).join("");
+  sectionSelect.innerHTML="";
+  results.forEach((sec,i)=>{
+    const opt=document.createElement("option");
+    opt.value=i;
+    opt.textContent=sec.title;
+    sectionSelect.appendChild(opt);
+  });
 });
 
-(function init(){
-  const params=new URLSearchParams(location.search);
-  const p=parseInt(params.get("part"));
-  if(p) App.part=p;
-  loadPart(App.part);
-})();
+loadAllParts();
 </script>
 
 </body>
