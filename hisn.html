@@ -28,13 +28,66 @@
     header.collapsed {
       padding: 0.3rem 1rem;
     }
+
+    /* ---------- TOOLBAR FIXES ---------- */
     .toolbar {
       display: flex;
       gap: 0.5rem;
       align-items: center;
-      flex-wrap: wrap;
+      flex-wrap: nowrap !important;        /* force single line */
       transition: all 0.2s ease;
     }
+
+    .toolbar select {
+      flex-shrink: 0;
+      min-width: 120px;                    /* readable when visible */
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .toolbar input {
+      flex: 1 1 0;
+      min-width: 0;                         /* allow shrinking */
+      background: #ecf0f1;
+    }
+
+    .toolbar button {
+      flex-shrink: 0;                        /* never shrink buttons */
+      background: white;
+      cursor: pointer;
+    }
+
+    .toolbar button:hover {
+      background: #e0e0e0;
+    }
+
+    .search-clear {
+      background: #b0c4de;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+
+    /* collapsed state: hide select without breaking layout */
+    header.collapsed .toolbar select {
+      position: absolute;
+      right: 0;                               /* RTL: stay at right edge */
+      top: 50%;
+      transform: translateY(-50%);
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      /* keep dimensions to avoid recalc */
+      width: auto;
+      height: auto;
+      margin: 0;
+    }
+
+    /* optional: smaller button padding in collapsed mode */
+    header.collapsed .toolbar button {
+      padding: 0.4rem 0.7rem;
+    }
+    /* --------------------------------- */
+
+    /* base button style (unchanged) */
     .toolbar select,
     .toolbar input,
     .toolbar button {
@@ -45,35 +98,7 @@
       font-size: 0.9rem;
       transition: all 0.2s ease;
     }
-    .toolbar select {
-      flex: 0 1 auto;
-      min-width: 120px;
-    }
-    .toolbar input {
-      flex: 1;
-      min-width: 150px;
-      background: #ecf0f1;
-    }
-    .toolbar button {
-      background: white;
-      cursor: pointer;
-    }
-    .toolbar button:hover {
-      background: #e0e0e0;
-    }
-    .search-clear {
-      background: #b0c4de;
-      color: #2c3e50;
-      font-weight: bold;
-    }
-    /* Hide select when collapsed */
-    header.collapsed .toolbar select {
-      opacity: 0;
-      width: 0;
-      padding: 0;
-      margin: 0;
-      pointer-events: none;
-    }
+
     main {
       padding: 0.6rem 0.8rem;
       max-width: 760px;
@@ -193,14 +218,14 @@
     /* Mobile fine-tuning */
     @media (max-width: 480px) {
       main {
-        padding: 0.6rem 0.8rem; /* keep same horizontal */
+        padding: 0.6rem 0.8rem;
       }
       .card {
-        padding: 0.6rem 0.8rem; /* slightly less vertical, keep horizontal */
+        padding: 0.6rem 0.8rem;
         border-radius: 1rem;
       }
       .card-arabic {
-        font-size: 1.5rem; /* keep size */
+        font-size: 1.5rem;
         line-height: 2.05;
       }
       .toolbar select,
@@ -274,10 +299,8 @@
       function handleScroll() {
         const currentScroll = window.scrollY;
         if (currentScroll > SCROLL_THRESHOLD && currentScroll > lastScrollY) {
-          // Scrolling down past threshold
           header.classList.add('collapsed');
         } else if (currentScroll < lastScrollY || currentScroll <= SCROLL_THRESHOLD) {
-          // Scrolling up or at top
           header.classList.remove('collapsed');
         }
         lastScrollY = currentScroll;
@@ -290,7 +313,6 @@
         if (!localStorage.getItem('swipeHintSeen')) {
           swipeHint.classList.remove('hidden');
           
-          // Auto fade after 5 seconds
           const autoFade = setTimeout(() => {
             swipeHint.classList.add('fade-out');
             setTimeout(() => {
@@ -299,7 +321,6 @@
             }, 800);
           }, 5000);
 
-          // Tap anywhere on hint dismisses it
           swipeHint.addEventListener('click', function dismissHint(e) {
             e.stopPropagation();
             clearTimeout(autoFade);
