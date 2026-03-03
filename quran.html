@@ -1,205 +1,159 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>المصحف الشريف - الطبعة الرقمية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f4ecd8; --text: #5b4636; --header: #eadaaf; --accent: #8d6e63;
-            --card: #fdf6e3; --border: #d3c6aa; --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        [data-theme="dark"] {
-            --bg: #121212; --text: #e0e0e0; --header: #1f1f1f; --accent: #81c784; --card: #1e1e1e; --border: #333333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>المصحف الشريف</title>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121212">
 
-        /* --- STICKY HEADER --- */
-        header {
-            background: var(--header); padding: 10px 15px; border-bottom: 1px solid var(--border);
-            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .surah-info { text-align: center; flex: 1; }
-        .surah-name { font-size: 1.3rem; font-weight: bold; display: block; color: var(--text); }
-        .page-meta { font-size: 0.85rem; opacity: 0.8; font-family: sans-serif; }
+<style>
+:root{
+    --bg:#f4ecd8;
+    --text:#222;
+    --accent:#8d6e63;
+    --dim:rgba(0,0,0,0);
+    --transition:0.5s cubic-bezier(.4,0,.2,1);
+}
 
-        .btn-icon { background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 38px; height: 38px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
+[data-theme="dark"]{
+    --bg:#121212;
+    --text:#e0e0e0;
+    --accent:#81c784;
+}
 
-        /* --- NAVIGATION BAR --- */
-        .nav-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 5px; }
-        .search-input { flex: 1; padding: 10px 18px; border-radius: 25px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: inherit; outline: none; }
-        
-        .index-bar { display: flex; overflow-x: auto; gap: 8px; padding: 10px 0; scrollbar-width: none; border-top: 1px solid var(--border); }
-        .index-bar::-webkit-scrollbar { display: none; }
-        .chip { padding: 6px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; white-space: nowrap; font-size: 0.9rem; cursor: pointer; }
-        .chip.active { background: var(--accent); color: white; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 
-        /* --- MUSHAF VIEWPORT --- */
-        main { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 1500px; padding: 10px; }
-        
-        .page-container {
-            width: 100%; max-width: 550px; height: 100%; position: relative;
-            display: flex; align-items: center; justify-content: center;
-            transition: var(--transition);
-        }
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Amiri',serif;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
 
-        .mushaf-img {
-            max-width: 100%; max-height: 100%; object-fit: contain;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 4px;
-            image-rendering: -webkit-optimize-contrast;
-            transition: opacity 0.3s ease-in-out;
-        }
+/* HEADER */
+header{
+    padding:10px 15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--bg);
+    border-bottom:1px solid #ddd;
+    z-index:10;
+}
 
-        /* FLIP ANIMATION CLASSES */
-        .flip-left { transform: translateX(-100%) rotateY(-20deg); opacity: 0; }
-        .flip-right { transform: translateX(100%) rotateY(20deg); opacity: 0; }
+.header-center{
+    text-align:center;
+}
 
-        /* --- BASMALAH OVERLAY --- */
-        .basmalah-box { position: absolute; top: 10%; width: 60%; max-width: 300px; z-index: 5; pointer-events: none; opacity: 0; transition: 0.5s; }
-        .basmalah-box.visible { opacity: 1; }
+button{
+    background:none;
+    border:none;
+    font-size:20px;
+    cursor:pointer;
+}
 
-        /* --- FLOATING NAV --- */
-        .side-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 100px; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; border-radius: 0 10px 10px 0; }
-        .side-nav.next { left: 0; border-radius: 10px 0 0 10px; }
-        .side-nav.prev { right: 0; }
-    </style>
+/* MAIN */
+main{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    perspective:2000px;
+    position:relative;
+    overflow:hidden;
+}
+
+.page-frame{
+    width:100%;
+    max-width:600px;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:var(--transition);
+}
+
+.mushaf-img{
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:6px;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
+    user-select:none;
+    -webkit-user-drag:none;
+}
+
+/* 3D FLIP */
+.flip-next{
+    transform:rotateY(-25deg) translateX(-50%);
+    opacity:0;
+}
+
+.flip-prev{
+    transform:rotateY(25deg) translateX(50%);
+    opacity:0;
+}
+
+/* DIM OVERLAY */
+.dim-overlay{
+    position:absolute;
+    inset:0;
+    background:var(--dim);
+    pointer-events:none;
+    transition:0.4s;
+}
+
+/* BOOKMARK */
+.bookmark-indicator{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:var(--accent);
+    color:#fff;
+    padding:4px 8px;
+    border-radius:12px;
+    font-size:12px;
+    display:none;
+}
+
+.bookmark-indicator.visible{
+    display:block;
+}
+</style>
 </head>
 <body data-theme="light">
 
-    <header>
-        <div class="top-row">
-            <button class="btn-icon" onclick="toggleTheme()">🌓</button>
-            <div class="surah-info">
-                <span class="surah-name" id="surah-title">سورة الفاتحة</span>
-                <span class="page-meta" id="page-meta">الجزء ١ | صفحة ١</span>
-            </div>
-            <button class="btn-icon" onclick="location.href='index.html'">🏠</button>
-        </div>
+<header>
+<button onclick="goHome()">🏠</button>
+<div class="header-center">
+<div id="surahName">سورة الفاتحة</div>
+<div id="pageMeta">الجزء ١ | صفحة ١</div>
+</div>
+<button onclick="toggleDim()">🌙</button>
+</header>
 
-        <div class="nav-tools">
-            <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن سورة..." oninput="searchSurah()">
-            <button class="btn-icon" onclick="setBookmark()">🔖</button>
-        </div>
+<main id="swipeArea">
+<div class="bookmark-indicator" id="bookmarkLabel">🔖 محفوظة</div>
+<div class="dim-overlay" id="dimLayer"></div>
+<div class="page-frame" id="pageFrame">
+<img id="pageImg" class="mushaf-img" src="mushaf/1.png">
+</div>
+</main>
 
-        <div class="index-bar" id="indexBar"></div>
-    </header>
+<script src="js/surah-map.js"></script>
+<script src="js/juz-map.js"></script>
+<script src="js/quran-app.js"></script>
 
-    <main id="swipe-zone">
-        <div class="side-nav prev" onclick="prevPage()"><span>›</span></div>
-        <div class="side-nav next" onclick="nextPage()"><span>‹</span></div>
+<script>
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js');
+}
+</script>
 
-        <img src="/mushaf/0.png" class="basmalah-box" id="basmalah">
-        
-        <div class="page-container" id="pageFrame">
-            <img src="/mushaf/1.png" class="mushaf-img" id="mushaf-img" onerror="this.src='https://via.placeholder.com/400x600?text=Image+Not+Found'">
-        </div>
-    </main>
-
-    <script>
-        const surahs = [
-            { name: "الفاتحة", page: 1, juz: 1 }, { name: "البقرة", page: 2, juz: 1 },
-            { name: "آل عمران", page: 50, juz: 3 }, { name: "النساء", page: 77, juz: 4 },
-            { name: "المائدة", page: 106, juz: 6 }, { name: "الأنعام", page: 128, juz: 7 },
-            { name: "الأعراف", page: 151, juz: 8 }, { name: "الأنفال", page: 177, juz: 9 },
-            { name: "التوبة", page: 187, juz: 10 }
-        ];
-
-        let currentPage = 1;
-        const totalPages = 604;
-        const imgEl = document.getElementById('mushaf-img');
-        const frame = document.getElementById('pageFrame');
-        const basmalah = document.getElementById('basmalah');
-
-        // --- CORE NAVIGATION ---
-        function updatePage(direction) {
-            if (direction === 'next' && currentPage < totalPages) {
-                frame.classList.add('flip-left');
-                setTimeout(() => {
-                    currentPage++;
-                    renderPage();
-                    frame.classList.remove('flip-left');
-                }, 300);
-            } else if (direction === 'prev' && currentPage > 1) {
-                frame.classList.add('flip-right');
-                setTimeout(() => {
-                    currentPage--;
-                    renderPage();
-                    frame.classList.remove('flip-right');
-                }, 300);
-            }
-        }
-
-        function renderPage() {
-            imgEl.src = `/mushaf/${currentPage}.png`;
-            document.getElementById('page-meta').innerText = `صفحة ${currentPage}`;
-            
-            // Show Basmalah on specific pages if needed
-            basmalah.classList.toggle('visible', currentPage === 1 || currentPage === 2);
-            
-            // Update Surah Title based on page range
-            const currentSurah = surahs.slice().reverse().find(s => currentPage >= s.page);
-            if (currentSurah) {
-                document.getElementById('surah-title').innerText = "سورة " + currentSurah.name;
-            }
-
-            // Sync Index bar
-            document.querySelectorAll('.chip').forEach(chip => {
-                chip.classList.toggle('active', chip.innerText === currentSurah?.name);
-            });
-            
-            localStorage.setItem('lastReadPage', currentPage);
-        }
-
-        // --- INDEX & SEARCH ---
-        function initIndex() {
-            const bar = document.getElementById('indexBar');
-            bar.innerHTML = "";
-            surahs.forEach(s => {
-                const chip = document.createElement('div');
-                chip.className = 'chip';
-                chip.innerText = s.name;
-                chip.onclick = () => { currentPage = s.page; renderPage(); };
-                bar.appendChild(chip);
-            });
-        }
-
-        function searchSurah() {
-            const query = document.getElementById('searchInput').value;
-            const chips = document.querySelectorAll('.chip');
-            chips.forEach(c => c.style.display = c.innerText.includes(query) ? "block" : "none");
-        }
-
-        // --- SWIPE LOGIC ---
-        let touchStartX = 0;
-        document.getElementById('swipe-zone').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-        document.getElementById('swipe-zone').addEventListener('touchend', e => {
-            const diff = touchStartX - e.changedTouches[0].screenX;
-            if (Math.abs(diff) > 50) diff > 0 ? nextPage() : prevPage();
-        });
-
-        function nextPage() { updatePage('next'); }
-        function prevPage() { updatePage('prev'); }
-
-        function toggleTheme() {
-            const theme = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', theme);
-        }
-
-        function setBookmark() {
-            alert("تم حفظ الصفحة " + currentPage + " كعلامة مرجعية");
-        }
-
-        // --- START APP ---
-        window.onload = () => {
-            const saved = localStorage.getItem('lastReadPage');
-            if (saved) currentPage = parseInt(saved);
-            initIndex();
-            renderPage();
-        };
-    </script>
 </body>
 </html>
