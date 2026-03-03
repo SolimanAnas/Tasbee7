@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>حصن المسلم Pro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f4f7f9;
@@ -57,7 +57,7 @@
       transition: width 0.1s ease;
     }
 
-    /* --- Header --- */
+    /* --- Optimized Header --- */
     header {
       background: var(--header-bg);
       color: white;
@@ -66,6 +66,7 @@
       top: 0;
       z-index: 1000;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
     }
 
     .toolbar {
@@ -100,12 +101,12 @@
       border-radius: 12px;
       border: none;
       background: rgba(255,255,255,0.95);
-      font-family: 'Reem Kufi', sans-serif; /* Calligraphy in search */
+      font-family: 'Amiri', serif; /* Matching Arabic font for search */
       font-size: 0.95rem;
       outline: none;
     }
 
-    /* --- Floating Navigation (The Menu) --- */
+    /* --- Floating Navigation (Thumb Zone) --- */
     .bottom-nav {
       position: fixed;
       bottom: 20px;
@@ -113,51 +114,53 @@
       transform: translateX(-50%);
       background: var(--card-bg);
       border: 1px solid var(--border);
-      padding: 10px 20px;
-      border-radius: 30px;
+      padding: 8px 15px;
+      border-radius: 25px;
       display: flex;
       gap: 15px;
       align-items: center;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
       z-index: 999;
-      width: 90%;
-      max-width: 400px;
     }
 
     .nav-btn {
-      background: var(--accent);
+      background: none;
       border: none;
-      color: white;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
+      color: var(--text);
       font-size: 1.2rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 5px;
     }
 
-    /* Calligraphy applied to the Selection Menu */
+    /* --- MENU FONT UPDATE --- */
     #section-select {
       background: none;
       border: none;
       color: var(--text);
-      font-family: 'Reem Kufi', sans-serif; 
+      /* Custom Font for the scrollable menu text */
+      font-family: 'Scheherazade New', serif; 
       font-size: 1.1rem;
       font-weight: bold;
-      flex: 1;
+      max-width: 160px;
       outline: none;
-      text-align: center;
-      appearance: none; /* Removes default arrow for cleaner look */
       cursor: pointer;
+      appearance: none; /* Cleaner look on mobile */
+      text-align: center;
+    }
+
+    /* Styles for the options inside the dropdown */
+    #section-select option {
+      font-family: 'Amiri', serif;
+      background: var(--card-bg);
+      color: var(--text);
+      padding: 10px;
     }
 
     /* --- Content Area --- */
     main {
       max-width: 800px;
       margin: 0 auto;
-      padding: 20px 15px 120px;
+      padding: 20px 15px 100px; 
     }
 
     .section-header {
@@ -166,8 +169,8 @@
     }
 
     .section-title {
-      font-family: 'Reem Kufi', sans-serif; /* Calligraphy Titles */
-      font-size: 1.8rem;
+      font-family: 'Scheherazade New', serif;
+      font-size: 2rem;
       color: var(--accent);
       margin-bottom: 5px;
     }
@@ -184,40 +187,46 @@
       padding: 20px;
       box-shadow: var(--card-shadow);
       border: 1px solid var(--border);
+      transition: transform 0.2s ease;
     }
 
     .card-arabic {
       font-family: 'Scheherazade New', serif;
       font-size: 1.7rem;
-      line-height: 2;
+      line-height: 1.9;
       margin-bottom: 15px;
       text-align: justify;
       color: var(--text);
     }
 
     .card-ref {
-      font-family: 'Amiri', serif;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
       border-top: 1px solid var(--border);
       padding-top: 10px;
     }
 
+    /* --- Theme Toggle --- */
     .theme-dock {
       display: flex;
       gap: 8px;
     }
     .dot {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       border: 2px solid white;
       cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
+    .hidden { display: none !important; }
+    .highlight { background: #fff9c4 !important; color: #000 !important; }
+
     @media (max-width: 480px) {
-      .section-title { font-size: 1.5rem; }
-      #section-select { font-size: 1rem; }
+      .card-arabic { font-size: 1.5rem; }
+      .section-title { font-size: 1.6rem; }
+      #section-select { max-width: 130px; }
     }
   </style>
 </head>
@@ -225,11 +234,11 @@
 
   <div id="scroll-progress"></div>
 
-  <header>
+  <header id="header">
     <div class="toolbar">
       <button class="home-btn" onclick="location.href='index.html'">🏠</button>
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="ابحث في الأبواب والأذكار...">
+        <input type="text" id="search-input" placeholder="ابحث عن دعاء...">
       </div>
       <div class="theme-dock">
         <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
@@ -244,7 +253,7 @@
       <h1 id="main-title" class="section-title">حصن المسلم</h1>
     </div>
     <div id="content-area">
-      <div style="text-align:center; padding:50px; font-family:'Reem Kufi'">جاري تحميل الكتاب...</div>
+      <div style="text-align:center; padding:50px;">جاري تجهيز الأذكار...</div>
     </div>
   </main>
 
@@ -268,7 +277,7 @@
     }
 
     window.onscroll = () => {
-      const winScroll = document.documentElement.scrollTop;
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const scrolled = (winScroll / height) * 100;
       document.getElementById("scroll-progress").style.width = scrolled + "%";
@@ -278,20 +287,14 @@
       const savedTheme = localStorage.getItem('theme') || 'light';
       setTheme(savedTheme);
 
-      // Loading dummy structure - ensure your assets/partX.json files exist
       const parts = [1, 2, 3, 4, 5];
-      try {
-        const results = await Promise.all(parts.map(p => 
-          fetch(`assets/part${p}.json`).then(res => res.ok ? res.json() : [])
-        ));
-        App.data = results.flat();
-        if(App.data.length > 0) {
-          buildUI();
-          render();
-        }
-      } catch (e) {
-        console.error("Data load failed", e);
-      }
+      const results = await Promise.all(parts.map(p => 
+        fetch(`assets/part${p}.json`).then(res => res.ok ? res.json() : []).catch(() => [])
+      ));
+      
+      App.data = results.flat();
+      buildUI();
+      render();
     }
 
     function buildUI() {
@@ -322,6 +325,7 @@
 
     function render() {
       const section = App.data[App.currentIdx];
+      if (!section) return;
       document.getElementById('main-title').textContent = section.title;
       document.getElementById('section-select').value = App.currentIdx;
       
@@ -338,23 +342,26 @@
 
     function nav(dir) {
       if (dir === 'next' && App.currentIdx < App.data.length - 1) App.currentIdx++;
-      else if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
+      if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
       App.isSearchMode = false;
       render();
     }
 
     document.getElementById('search-input').oninput = (e) => {
       const query = e.target.value.trim().replace(/[ًٌٍَُِّْـ]/g, '');
-      if (!query) { render(); return; }
+      if (!query) {
+        if (App.isSearchMode) { App.isSearchMode = false; render(); }
+        return;
+      }
 
       App.isSearchMode = true;
-      const results = App.searchIndex.filter(x => x.norm.includes(query) || x.title.includes(query)).slice(0, 30);
+      const results = App.searchIndex.filter(x => x.norm.includes(query) || x.title.includes(query)).slice(0, 50);
       
-      document.getElementById('main-title').textContent = `نتائج البحث`;
+      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
       document.getElementById('content-area').innerHTML = results.map(r => `
-        <div class="card" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer">
-          <div style="font-family:'Reem Kufi'; color:var(--accent); font-weight:bold; margin-bottom:8px;">${r.title}</div>
-          <div class="card-arabic" style="font-size:1.3rem; line-height:1.5">${r.ar}</div>
+        <div class="card" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer; border-right:4px solid var(--accent)">
+          <div style="font-size:0.8rem; color:var(--accent); font-weight:bold; margin-bottom:8px;">${r.title}</div>
+          <div class="card-arabic" style="font-size:1.3rem;">${r.ar}</div>
         </div>
       `).join('');
     };
@@ -362,12 +369,24 @@
     window.jumpTo = (sIdx, iIdx) => {
       App.currentIdx = sIdx;
       App.isSearchMode = false;
+      document.getElementById('search-input').value = '';
       render();
       setTimeout(() => {
         const el = document.querySelector(`[data-item="${iIdx}"]`);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight');
+          setTimeout(() => el.classList.remove('highlight'), 2000);
+        }
       }, 300);
     };
+
+    let touchX = 0;
+    document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX, {passive: true});
+    document.addEventListener('touchend', e => {
+      const diff = touchX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 80) diff > 0 ? nav('prev') : nav('next');
+    }, {passive: true});
 
     init();
   </script>
