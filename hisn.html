@@ -89,6 +89,7 @@
       max-width: 760px;
       margin: auto;
       width: 100%;
+      position: relative;
     }
     .cards-container {
       display: flex;
@@ -158,9 +159,61 @@
       padding: 1.5rem;
       border-radius: 2rem;
       text-align: center;
+      margin: 1rem 0;
     }
+    /* Swipe hint overlay */
+    .swipe-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(44, 62, 80, 0.95);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 3rem;
+      text-align: center;
+      font-size: 1.1rem;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+      animation: fadeInUp 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+    }
+    .swipe-hint button {
+      background: white;
+      color: #2c3e50;
+      border: none;
+      border-radius: 2rem;
+      padding: 0.3rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .swipe-hint .arrow {
+      font-size: 1.5rem;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Mobile adjustments: reduce card padding */
     @media (max-width: 480px) {
-      .card-arabic { font-size: 1.45rem; }
+      .card {
+        padding: 1.2rem 1rem;  /* reduced padding */
+      }
+      .card-arabic {
+        font-size: 1.45rem;
+        line-height: 1.9;
+      }
+      .toolbar select,
+      .toolbar input,
+      .toolbar button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
@@ -181,6 +234,13 @@
 
   <main>
     <div id="content" class="loading">جاري تحميل الكتاب...</div>
+    <!-- Swipe hint (hidden by default) -->
+    <div id="swipe-hint" class="swipe-hint hidden">
+      <span class="arrow">‹</span>
+      <span>اسحب لليسار واليمين للتنقل بين الأبواب</span>
+      <span class="arrow">›</span>
+      <button id="close-hint">حسناً</button>
+    </div>
   </main>
 
   <div class="footer">حصن المسلم · جميع الأجزاء</div>
@@ -208,6 +268,19 @@
       const clearSearchBtn = document.getElementById('clear-search');
       const prevBtn = document.getElementById('prev-btn');
       const nextBtn = document.getElementById('next-btn');
+      const swipeHint = document.getElementById('swipe-hint');
+      const closeHintBtn = document.getElementById('close-hint');
+
+      // ---------- Swipe Hint (show once) ----------
+      function initSwipeHint() {
+        if (!localStorage.getItem('swipeHintSeen')) {
+          swipeHint.classList.remove('hidden');
+        }
+        closeHintBtn.addEventListener('click', () => {
+          swipeHint.classList.add('hidden');
+          localStorage.setItem('swipeHintSeen', 'true');
+        });
+      }
 
       // ---------- Arabic Normalization (remove diacritics) ----------
       function normalizeArabic(str) {
@@ -221,12 +294,12 @@
         const parts = [1, 2, 3, 4, 5];
         const fetchPromises = parts.map(async (p) => {
           try {
-            const response = await fetch(`assets/part${p}.json`); // <-- from assets folder
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const response = await fetch(`assets/part${p}.json`);
+            if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
             return await response.json();
           } catch (err) {
             console.error(`Failed to load part ${p}:`, err);
-            App.loadErrors.push(`الجزء ${p}`);
+            App.loadErrors.push(`الجزء ${p} (${err.message})`);
             return null;
           }
         });
@@ -242,7 +315,11 @@
         }
 
         if (App.loadErrors.length > 0) {
-          console.warn('الأجزاء التالية لم يتم تحميلها:', App.loadErrors);
+          // Show error summary above content
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'error-message';
+          errorDiv.innerHTML = `لم يتم تحميل: ${App.loadErrors.join('، ')}`;
+          contentEl.prepend(errorDiv);
         }
 
         buildSectionSelect();
@@ -275,7 +352,6 @@
             const ar = item.ar || '';
             const ref = item.ref || '';
             const label = item.label || '';
-            // Store both raw and normalized versions
             searchIndex.push({
               sectionIdx: sIdx,
               itemIdx: iIdx,
@@ -283,7 +359,6 @@
               ar,
               ref,
               label,
-              // normalized fields for matching
               normTitle: normalizeArabic(title),
               normAr: normalizeArabic(ar),
               normRef: normalizeArabic(ref),
@@ -306,7 +381,6 @@
         const results = [];
 
         searchIndex.forEach(item => {
-          // Check all normalized fields
           if (item.normTitle.toLowerCase().includes(normQuery) ||
               item.normAr.toLowerCase().includes(normQuery) ||
               item.normRef.toLowerCase().includes(normQuery) ||
@@ -336,7 +410,6 @@
         }
 
         const query = App.searchQuery;
-        // Build regex for highlighting (escape special chars, but keep Arabic letters)
         const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
 
@@ -383,7 +456,6 @@
         contentEl.innerHTML = '';
         contentEl.appendChild(wrapper);
 
-        // Remove animation class after a tick
         setTimeout(() => {
           wrapper.classList.remove('slide-left', 'slide-right');
         }, 50);
@@ -414,7 +486,6 @@
         searchInput.value = '';
         renderSection();
 
-        // Scroll to the specific card and highlight it
         setTimeout(() => {
           const targetCard = document.querySelector(`.card[data-section-idx="${sectionIdx}"][data-item-idx="${itemIdx}"]`);
           if (targetCard) {
@@ -439,14 +510,12 @@
 
       function handleSectionChange(e) {
         if (App.viewMode !== 'section') {
-          // If in search mode, changing dropdown should switch to section view
           App.viewMode = 'section';
         }
         App.currentSection = parseInt(e.target.value, 10);
         renderSection();
       }
 
-      // Click on search result
       function handleContentClick(e) {
         const card = e.target.closest('.search-result');
         if (card) {
@@ -478,9 +547,9 @@
 
       // ---------- Initialization ----------
       function init() {
+        initSwipeHint();
         loadAllParts();
 
-        // Event listeners
         searchInput.addEventListener('input', handleSearchInput);
         clearSearchBtn.addEventListener('click', handleClearSearch);
         sectionSelect.addEventListener('change', handleSectionChange);
@@ -488,7 +557,6 @@
         nextBtn.addEventListener('click', nextSection);
         contentEl.addEventListener('click', handleContentClick);
 
-        // Touch events for swipe
         document.addEventListener('touchstart', handleTouchStart, { passive: true });
         document.addEventListener('touchend', handleTouchEnd, { passive: true });
       }
