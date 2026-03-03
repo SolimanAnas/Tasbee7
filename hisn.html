@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>حصن المسلم</title>
   <style>
+    /* (same CSS as before) */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -73,6 +74,8 @@
       color: white;
       font-size: 1.3rem;
       padding: 0 0.5rem;
+      border: none;
+      cursor: pointer;
     }
     .section-title {
       font-size: 1.2rem;
@@ -189,7 +192,6 @@
       opacity: 1;
       transition: opacity 0.2s;
     }
-    /* mobile adjustments */
     @media (max-width: 480px) {
       .card-arabic {
         font-size: 1.2rem;
@@ -235,16 +237,16 @@
       // ---------- App State ----------
       const App = {
         part: 1,
-        data: null,                // array of sections
+        data: null,
         currentSectionIndex: 0,
-        favorites: new Set(),       // set of item ids (e.g. "p1_s2_i3")
-        mode: 'section',            // 'section', 'favorites', 'search'
+        favorites: new Set(),
+        mode: 'section',
         searchQuery: '',
-        searchResults: [],          // array of {sectionIdx, itemIdx, sectionTitle, label, ar, ref}
+        searchResults: [],
         isLoading: false,
         touchStartX: 0,
         touchEndX: 0,
-        minSwipeDistance: 50,       // px
+        minSwipeDistance: 50,
       };
 
       // ---------- DOM Elements ----------
@@ -276,7 +278,6 @@
         if (section) App.currentSectionIndex = parseInt(section, 10);
       }
 
-      // Favorites
       function loadFavorites() {
         try {
           const fav = localStorage.getItem('hism_favorites');
@@ -287,26 +288,24 @@
         localStorage.setItem('hism_favorites', JSON.stringify([...App.favorites]));
       }
 
-      // Generate a unique item ID (part, section index, item index)
       function getItemId(sectionIdx, itemIdx) {
         return `p${App.part}_s${sectionIdx}_i${itemIdx}`;
       }
 
-      // ---------- Data Loading ----------
+      // ---------- Data Loading (UPDATED PATH) ----------
       async function loadPart(partNumber) {
         App.isLoading = true;
         mainEl.innerHTML = '<div style="text-align:center; padding:3rem;">جاري التحميل...</div>';
         try {
-          const response = await fetch(`part${partNumber}.json`);
+          // Load from assets folder
+          const response = await fetch(`assets/part${partNumber}.json`);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const json = await response.json();
           App.data = json;
           App.part = partNumber;
-          // adjust current section index if out of bounds
           if (App.currentSectionIndex >= App.data.length) App.currentSectionIndex = 0;
           updatePartBadge();
           buildSectionSelect();
-          // restore mode to section
           App.mode = 'section';
           App.searchQuery = '';
           searchInput.value = '';
@@ -331,7 +330,7 @@
         sectionSelect.innerHTML = `<option value="">اختر باباً</option>` + options;
       }
 
-      // ---------- Rendering ----------
+      // ---------- Rendering (unchanged) ----------
       function render() {
         if (!App.data) return;
 
@@ -343,7 +342,6 @@
           renderSection();
         }
 
-        // Update section title and select
         if (App.mode === 'section' && App.data[App.currentSectionIndex]) {
           currentSectionTitle.textContent = App.data[App.currentSectionIndex].title || '';
           sectionSelect.value = App.currentSectionIndex;
@@ -386,7 +384,6 @@
           return;
         }
 
-        // collect all favorite items across all sections
         let favItems = [];
         App.data.forEach((section, sIdx) => {
           (section.items || []).forEach((item, iIdx) => {
@@ -450,8 +447,8 @@
         `;
       }
 
-      // ---------- Search Index & Query ----------
-      let searchIndex = []; // flat array of {sectionIdx, itemIdx, sectionTitle, label, ar, ref, text}
+      // ---------- Search Index ----------
+      let searchIndex = [];
 
       function buildSearchIndex() {
         if (!App.data) return;
@@ -544,7 +541,6 @@
         }
         saveFavorites();
 
-        // If in favorites mode, re-render to reflect removal
         if (App.mode === 'favorites') renderFavorites();
       }
 
@@ -575,7 +571,6 @@
         render();
       }
 
-      // Jump to section/item from search result click
       function handleResultClick(e) {
         const item = e.target.closest('.result-item');
         if (!item) return;
@@ -588,7 +583,6 @@
           searchInput.value = '';
           render();
           saveProgress();
-          // Scroll to the specific card after a short delay
           setTimeout(() => {
             const targetCard = document.querySelector(`.card[data-section-idx="${sIdx}"][data-item-idx="${iIdx}"]`);
             if (targetCard) {
@@ -600,7 +594,7 @@
         }
       }
 
-      // Swipe navigation
+      // Swipe
       function handleTouchStart(e) {
         App.touchStartX = e.changedTouches[0].screenX;
       }
@@ -609,10 +603,8 @@
         const diff = App.touchStartX - App.touchEndX;
         if (Math.abs(diff) < App.minSwipeDistance) return;
         if (diff > 0) {
-          // swipe left -> next section
           handleNextSection();
         } else {
-          // swipe right -> previous section
           handlePrevSection();
         }
       }
@@ -627,7 +619,6 @@
 
         await loadPart(App.part);
 
-        // Event listeners
         sectionSelect.addEventListener('change', handleSectionSelect);
         prevSectionBtn.addEventListener('click', handlePrevSection);
         nextSectionBtn.addEventListener('click', handleNextSection);
@@ -635,21 +626,17 @@
         favToggleBtn.addEventListener('click', handleFavoritesToggle);
         resetViewBtn.addEventListener('click', handleResetView);
 
-        // Delegate favorite clicks and result clicks
         mainEl.addEventListener('click', (e) => {
           handleFavoriteClick(e);
           handleResultClick(e);
         });
 
-        // Swipe
         document.addEventListener('touchstart', handleTouchStart, false);
         document.addEventListener('touchend', handleTouchEnd, false);
 
-        // Rebuild search index after data load
         window.addEventListener('dataLoaded', () => buildSearchIndex());
       }
 
-      // Hook to signal data loaded
       const originalRender = render;
       render = function() {
         originalRender();
