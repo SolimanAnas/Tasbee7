@@ -209,14 +209,19 @@
       const prevBtn = document.getElementById('prev-btn');
       const nextBtn = document.getElementById('next-btn');
 
-      // ---------- Load All Parts (Fixed) ----------
+      // ---------- Arabic Normalization (remove diacritics) ----------
+      function normalizeArabic(str) {
+        return str.replace(/[ًٌٍَُِّْـ]/g, ''); // removes tashkeel and tatweel
+      }
+
+      // ---------- Load All Parts (files in same directory) ----------
       async function loadAllParts() {
         App.isLoading = true;
         App.loadErrors = [];
         const parts = [1, 2, 3, 4, 5];
         const fetchPromises = parts.map(async (p) => {
           try {
-            const response = await fetch(`assets/part${p}.json`);
+            const response = await fetch(`part${p}.json`); // <-- no "assets/"
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return await response.json();
           } catch (err) {
@@ -231,7 +236,7 @@
         App.data = results.filter(r => r !== null).flat();
 
         if (App.data.length === 0) {
-          contentEl.innerHTML = `<div class="error-message">تعذر تحميل أي جزء. تأكد من وجود ملفات JSON في مجلد assets.</div>`;
+          contentEl.innerHTML = `<div class="error-message">تعذر تحميل أي جزء. تأكد من وجود ملفات part1.json إلى part5.json في نفس مجلد الصفحة.</div>`;
           App.isLoading = false;
           return;
         }
@@ -258,20 +263,19 @@
         sectionSelect.value = App.currentSection;
       }
 
-      // ---------- Search Index ----------
-      let searchIndex = []; // flat array of searchable items
+      // ---------- Search Index (normalized for matching) ----------
+      let searchIndex = [];
 
       function buildSearchIndex() {
         searchIndex = [];
         App.data.forEach((section, sIdx) => {
           const items = section.items || [];
           items.forEach((item, iIdx) => {
-            // Combine all searchable text
             const title = section.title || '';
             const ar = item.ar || '';
             const ref = item.ref || '';
             const label = item.label || '';
-            const combined = `${title} ${ar} ${ref} ${label}`.toLowerCase();
+            // Store both raw and normalized versions
             searchIndex.push({
               sectionIdx: sIdx,
               itemIdx: iIdx,
@@ -279,34 +283,34 @@
               ar,
               ref,
               label,
-              combined
+              // normalized fields for matching
+              normTitle: normalizeArabic(title),
+              normAr: normalizeArabic(ar),
+              normRef: normalizeArabic(ref),
+              normLabel: normalizeArabic(label)
             });
           });
         });
       }
 
-      // ---------- Simple Fuzzy Match (subsequence) ----------
-      function fuzzyMatch(query, text) {
-        const q = query.toLowerCase();
-        const t = text.toLowerCase();
-        let qIdx = 0;
-        for (let i = 0; i < t.length && qIdx < q.length; i++) {
-          if (t[i] === q[qIdx]) qIdx++;
-        }
-        return qIdx === q.length;
-      }
-
-      // ---------- Perform Search ----------
+      // ---------- Perform Search (simple substring after normalization) ----------
       function performSearch(query) {
-        if (!query.trim()) {
+        const trimmed = query.trim();
+        if (!trimmed) {
           App.viewMode = 'section';
           renderSection();
           return;
         }
 
+        const normQuery = normalizeArabic(trimmed).toLowerCase();
         const results = [];
+
         searchIndex.forEach(item => {
-          if (fuzzyMatch(query, item.combined)) {
+          // Check all normalized fields
+          if (item.normTitle.toLowerCase().includes(normQuery) ||
+              item.normAr.toLowerCase().includes(normQuery) ||
+              item.normRef.toLowerCase().includes(normQuery) ||
+              item.normLabel.toLowerCase().includes(normQuery)) {
             results.push({
               sectionIdx: item.sectionIdx,
               itemIdx: item.itemIdx,
@@ -324,22 +328,20 @@
         renderSearchResults();
       }
 
-      // ---------- Render Search Results ----------
+      // ---------- Render Search Results (with highlighting) ----------
       function renderSearchResults() {
         if (App.searchResults.length === 0) {
           contentEl.innerHTML = `<div style="text-align:center; padding:2rem;">لا توجد نتائج لـ "${App.searchQuery}"</div>`;
           return;
         }
 
-        const query = App.searchQuery.toLowerCase();
-        const html = App.searchResults.map(r => {
-          // Highlight matches in Arabic text
-          let highlightedAr = r.ar;
-          if (query) {
-            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            highlightedAr = r.ar.replace(regex, '<mark>$1</mark>');
-          }
+        const query = App.searchQuery;
+        // Build regex for highlighting (escape special chars, but keep Arabic letters)
+        const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
 
+        const html = App.searchResults.map(r => {
+          const highlightedAr = r.ar.replace(regex, '<mark>$1</mark>');
           return `
             <div class="card search-result" data-section-idx="${r.sectionIdx}" data-item-idx="${r.itemIdx}">
               <div class="search-result-meta">${r.sectionTitle} · ${r.label || ''}</div>
