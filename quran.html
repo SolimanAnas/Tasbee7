@@ -1,243 +1,207 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>القرآن الكريم</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
-
-<style>
-:root {
-    --bg-dark: #111;
-    --card-dark: #1c1c1c;
-    --text-dark: #eee;
-    --accent: #2ecc71;
-}
-
-*{box-sizing:border-box;margin:0;padding:0; -webkit-tap-highlight-color: transparent;}
-
-body{
-  font-family: 'Scheherazade New', serif;
-  background: var(--bg-dark);
-  color: var(--text-dark);
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
-  transition: background 0.3s, color 0.3s;
-  overflow: hidden; /* Prevent body scroll, use main scroll */
-}
-
-/* THEMES */
-body.light{ background:#fdfdfd; color:#1a1a1a; --card-dark: #ececec; }
-body.sepia{ background:#f4ecd8; color:#5b4636; --card-dark: #e9dec2; }
-
-/* HEADER */
-header{
-  background: var(--card-dark);
-  padding: 0.8rem 1rem;
-  display: grid;
-  grid-template-columns: 50px 1fr 50px;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  z-index: 100;
-}
-
-header button {
-  background: rgba(255,255,255,0.1);
-  color: inherit;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-body.light header button { background: rgba(0,0,0,0.05); }
-
-/* INFO SECTION */
-.info{
-  text-align:center;
-  line-height: 1.3;
-}
-#surahName { font-weight: bold; font-size: 1.1rem; color: var(--accent); }
-.meta-text { font-size: 0.8rem; opacity: 0.8; }
-
-/* PROGRESS BAR */
-.progress-container { background: rgba(255,255,255,0.1); height: 3px; width: 100%; }
-.progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.4s ease; }
-
-/* MAIN CONTENT */
-main{
-  flex: 1;
-  padding: 1.5rem;
-  max-width: 800px;
-  margin: auto;
-  overflow-y: auto;
-  width: 100%;
-  text-align: center; /* Quran is often centered for beauty */
-}
-
-/* AYAH STYLING - Fixing the "Box" issue */
-.ayah-container {
-    display: inline;
-    line-height: 2.8;
-    word-wrap: break-word;
-}
-
-.ayah {
-  display: inline;
-  font-size: 2.1rem; /* Larger for readability */
-  word-spacing: 4px;
-}
-
-.ayah-number {
-  font-family: 'Amiri', serif;
-  font-size: 1.2rem;
-  color: var(--accent);
-  margin: 0 0.3rem;
-  white-space: nowrap;
-}
-
-/* CONTROLS */
-.controls{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 0.8rem;
-  background: var(--card-dark);
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-
-.controls input {
-  width: 60px;
-  background: rgba(255,255,255,0.05);
-  color: inherit;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  padding: 0.4rem;
-  text-align: center;
-  font-family: inherit;
-}
-
-.nav-btn {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-}
-</style>
-</head>
-
-<body class="dark">
-
-<header>
-  <button onclick="location.href='index.html'">🏠</button>
-  <div class="info">
-    <div id="surahName">تحميل...</div>
-    <div class="meta-text">جزء <span id="juzNumber">-</span> | صفحة <span id="pageNumber">-</span></div>
-  </div>
-  <button onclick="toggleTheme()">🎨</button>
-</header>
-
-<div class="progress-container">
-    <div class="progress-bar" id="progressBar"></div>
-</div>
-
-<main id="content">
-    <div style="margin-top: 40vh">جاري تحميل آيات الذكر الحكيم...</div>
-</main>
-
-<div class="controls">
-  <button class="nav-btn" onclick="nextPage()">السابق</button>
-  <input type="number" id="pageInput" min="1" max="604" value="1">
-  <button class="nav-btn" onclick="prevPage()">التالي</button>
-</div>
-
-<script>
-const TOTAL_PAGES = 604;
-let currentPage = parseInt(localStorage.getItem("quranPage")) || 1;
-
-const content = document.getElementById("content");
-const pageInput = document.getElementById("pageInput");
-const surahNameEl = document.getElementById("surahName");
-const juzNumberEl = document.getElementById("juzNumber");
-const pageNumberEl = document.getElementById("pageNumber");
-const progressBar = document.getElementById("progressBar");
-
-async function loadPage(page) {
-    if(page < 1 || page > TOTAL_PAGES) return;
-    
-    // UI Update
-    currentPage = page;
-    localStorage.setItem("quranPage", page);
-    pageInput.value = page;
-    pageNumberEl.textContent = page;
-    progressBar.style.width = (page / TOTAL_PAGES * 100) + "%";
-    content.scrollTop = 0;
-
-    try {
-        // Using 'quran-simple' to avoid the broken ligatures of 'uthmani' in standard fonts
-        const res = await fetch(`https://api.alquran.cloud/v1/page/${page}/quran-simple`);
-        const data = await res.json();
-        const verses = data.data.ayahs;
-
-        surahNameEl.textContent = "سورة " + verses[0].surah.name;
-        juzNumberEl.textContent = verses[0].juz;
-
-        // Render Ayahs as a continuous block (Mushaf style)
-        let html = '<div class="ayah-container">';
-        verses.forEach(v => {
-            // Remove Bismillah from start of surahs (except Fatiha) as it's usually handled by the app
-            let text = v.text;
-            if (v.numberInSurah === 1 && v.surah.number !== 1 && v.surah.number !== 9) {
-                text = text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "");
-                html += `<div style="color:var(--accent); font-size:1.4rem; margin:1rem 0;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
-            }
-            html += `<span class="ayah">${text}</span><span class="ayah-number">﴿${v.numberInSurah}﴾</span> `;
-        });
-        html += '</div>';
-        
-        content.innerHTML = html;
-
-    } catch (err) {
-        content.innerHTML = `<div style="margin-top:20vh">خطأ في الاتصال. يرجى التأكد من الإنترنت.</div>`;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>القرآن الكريم</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --text-gold: #c5a059;
+      --text-green: #4caf50;
+      --card-bg: #141414;
     }
-}
 
-/* NAVIGATION - Swapped for correct RTL Mushaf feel */
-function nextPage(){ if(currentPage > 1) loadPage(currentPage - 1); }
-function prevPage(){ if(currentPage < 604) loadPage(currentPage + 1); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Amiri', serif;
+      background: var(--bg-dark);
+      color: #ffffff;
+      min-height: 100vh;
+      /* Fixed overflow issue by ensuring body allows scrolling */
+      overflow-y: auto; 
+    }
 
-pageInput.addEventListener('change', () => {
-    let val = parseInt(pageInput.value);
-    if(val >= 1 && val <= 604) loadPage(val);
-});
+    /* --- IMPROVED HEADER --- */
+    header {
+      background: #1a1a1a;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 10px 15px;
+      border-bottom: 1px solid #333;
+      text-align: center;
+    }
 
-/* SWIPE LOGIC (Optimized for Quran Reading) */
-let startX = 0;
-document.addEventListener("touchstart", e => startX = e.changedTouches[0].screenX, {passive:true});
-document.addEventListener("touchend", e => {
-    const diff = startX - e.changedTouches[0].screenX;
-    if(Math.abs(diff) < 60) return;
-    diff > 0 ? prevPage() : nextPage(); 
-}, {passive:true});
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
 
-/* THEME SWITCHER */
-function toggleTheme() {
-    const b = document.body;
-    if(b.classList.contains("dark")) { b.className = "light"; }
-    else if(b.classList.contains("light")) { b.className = "sepia"; }
-    else { b.className = "dark"; }
-}
+    .nav-btn {
+      background: #2a2a2a;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
 
-loadPage(currentPage);
-</script>
+    /* Fixed duplicated word logic in title */
+    .surah-title {
+      color: var(--text-green);
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
 
+    .meta-info {
+      font-size: 0.8rem;
+      color: #bbb;
+    }
+
+    /* --- INDEX / NAVIGATION TABS --- */
+    .index-container {
+      display: flex;
+      overflow-x: auto;
+      background: #111;
+      padding: 8px;
+      gap: 10px;
+      border-bottom: 1px solid #222;
+      scrollbar-width: none; /* Hide scrollbar for clean look */
+    }
+
+    .index-item {
+      padding: 5px 15px;
+      background: #222;
+      border-radius: 15px;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      color: var(--text-gold);
+      border: 1px solid #333;
+    }
+
+    /* --- CONTENT AREA --- */
+    main {
+      padding: 20px 15px;
+      max-width: 800px;
+      margin: auto;
+      line-height: 2.5; /* Proper spacing for Quranic text */
+      text-align: center;
+    }
+
+    .ayah-text {
+      font-family: 'Scheherazade New', serif;
+      font-size: 2rem;
+      display: inline;
+      word-spacing: 4px;
+    }
+
+    .ayah-num {
+      color: var(--text-green);
+      font-family: sans-serif;
+      font-size: 1.2rem;
+      margin: 0 8px;
+      border: 1px solid var(--text-green);
+      border-radius: 50%;
+      padding: 2px 6px;
+      display: inline-block;
+      line-height: 1;
+    }
+
+    /* Swipe hint adjustments */
+    #swipe-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(40, 40, 40, 0.9);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      transition: opacity 1s;
+      z-index: 1000;
+    }
+
+    @media (max-width: 480px) {
+      .ayah-text { font-size: 1.7rem; }
+      header { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <button class="nav-btn">🎨</button>
+      <div id="dynamic-title">
+        <div class="surah-title" id="surah-name">سورة البقرة</div>
+        <div class="meta-info" id="location-meta">جزء 1 | صفحة 8</div>
+      </div>
+      <button class="nav-btn" onclick="location.href='index.html'">🏠</button>
+    </div>
+  </header>
+
+  <div class="index-container">
+    <div class="index-item">السورة: البقرة</div>
+    <div class="index-item">الجزء: ١</div>
+    <div class="index-item">الحزب: ٢</div>
+    <div class="index-item">الصفحة: ٨</div>
+  </div>
+
+  <main id="quran-container">
+    <div class="ayah-text">
+      وَإِذْ نَجَّيْنَاكُمْ مِنْ آلِ فِرْعَوْنَ يَسُومُونَكُمْ سُوءَ الْعَذَابِ يُذَبِّحُونَ أَبْنَاءَكُمْ وَيَسْتَحْيُونَ نِسَاءَكُمْ ۚ وَفِي ذَٰلِكُمْ بَلَاءٌ مِنْ رَبِّكُمْ عَظِيمٌ
+      <span class="ayah-num">49</span>
+      وَإِذْ فَرَقْنَا بِكُمُ الْبَحْرَ فَأَنْجَيْنَاكُمْ وَأَغْرَقْنَا آلَ فِرْعَوْنَ وَأَنْتُمْ تَنْظُرُونَ
+      <span class="ayah-num">50</span>
+      <br><br>
+      وَإِذْ وَاعَدْنَا مُوسَىٰ أَرْبَعِينَ لَيْلَةً ثُمَّ اتَّخَذْتُمُ الْعِجْلَ مِنْ بَعْدِهِ وَأَنْتُمْ ظَالِمُونَ
+      <span class="ayah-num">51</span>
+    </div>
+  </main>
+
+  <div id="swipe-hint">اسحب لليمين أو اليسار للتنقل</div>
+
+  <script>
+    (function() {
+      // Fix for duplicated "Surah" word logic
+      function updateTitle(name, part, page) {
+        const nameEl = document.getElementById('surah-name');
+        // Ensure we don't add "Surah" if the data already includes it
+        const cleanName = name.startsWith("سورة") ? name : "سورة " + name;
+        nameEl.textContent = cleanName;
+        
+        document.getElementById('location-meta').textContent = `جزء ${part} | صفحة ${page}`;
+      }
+
+      // Scrolling Fix: Ensure container height doesn't block body scroll
+      const container = document.getElementById('quran-container');
+      container.style.minHeight = "120vh"; // Push height to ensure scrollability
+
+      // Auto-hide hint
+      setTimeout(() => {
+        const hint = document.getElementById('swipe-hint');
+        if(hint) {
+          hint.style.opacity = '0';
+          setTimeout(() => hint.remove(), 1000);
+        }
+      }, 4000);
+
+      // Simple click to dismiss hint
+      document.getElementById('swipe-hint').onclick = function() { this.remove(); };
+      
+    })();
+  </script>
 </body>
 </html>
