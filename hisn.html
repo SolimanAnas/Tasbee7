@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Amiri', serif;
       background: #f4f6f8;
@@ -15,232 +16,172 @@
       display: flex;
       flex-direction: column;
     }
+
+    /* ================= HEADER ================= */
+
     header {
       background: linear-gradient(135deg, #2c3e50, #34495e);
       color: white;
-      padding: 0.8rem 1rem;
+      padding: 0.6rem 0.8rem;
       position: sticky;
       top: 0;
       z-index: 10;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       transition: padding 0.2s ease;
     }
+
     header.collapsed {
-      padding: 0.3rem 1rem;
+      padding: 0.35rem 0.8rem;
     }
 
-    /* ---------- TOOLBAR FIXES ---------- */
     .toolbar {
       display: flex;
-      gap: 0.5rem;
       align-items: center;
-      flex-wrap: nowrap !important;        /* force single line */
-      transition: all 0.2s ease;
+      gap: 0.5rem;
+      flex-wrap: nowrap;              /* prevent wrapping */
+      width: 100%;
     }
 
-    .toolbar select {
-      flex-shrink: 0;
-      min-width: 120px;                    /* readable when visible */
-      transition: opacity 0.2s ease, visibility 0.2s ease;
+    .toolbar > * {
+      min-width: 0;                   /* allow proper shrinking */
     }
 
+    /* HOME BUTTON */
+    .toolbar button:first-child {
+      flex: 0 0 auto;
+    }
+
+    /* SEARCH INPUT */
     .toolbar input {
-      flex: 1 1 0;
-      min-width: 0;                         /* allow shrinking */
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0.45rem 0.7rem;
+      border: none;
+      border-radius: 2rem;
       background: #ecf0f1;
+      font-family: inherit;
+      font-size: 0.9rem;
     }
 
-    .toolbar button {
-      flex-shrink: 0;                        /* never shrink buttons */
-      background: white;
+    /* CLEAR BUTTON */
+    .toolbar .search-clear {
+      flex: 0 0 auto;
+      padding: 0.45rem 0.7rem;
+      border-radius: 2rem;
+      border: none;
+      background: #b0c4de;
+      font-weight: bold;
       cursor: pointer;
     }
 
-    .toolbar button:hover {
-      background: #e0e0e0;
-    }
-
-    .search-clear {
-      background: #b0c4de;
-      color: #2c3e50;
-      font-weight: bold;
-    }
-
-    /* collapsed state: hide select without breaking layout */
-    header.collapsed .toolbar select {
-      position: absolute;
-      right: 0;                               /* RTL: stay at right edge */
-      top: 50%;
-      transform: translateY(-50%);
-      visibility: hidden;
-      opacity: 0;
-      pointer-events: none;
-      /* keep dimensions to avoid recalc */
-      width: auto;
-      height: auto;
-      margin: 0;
-    }
-
-    /* optional: smaller button padding in collapsed mode */
-    header.collapsed .toolbar button {
-      padding: 0.4rem 0.7rem;
-    }
-    /* --------------------------------- */
-
-    /* base button style (unchanged) */
-    .toolbar select,
-    .toolbar input,
-    .toolbar button {
-      padding: 0.5rem 0.9rem;
-      border: none;
+    /* SELECT */
+    .toolbar select {
+      flex: 0 0 auto;
+      min-width: 110px;
+      padding: 0.45rem 0.7rem;
       border-radius: 2rem;
+      border: none;
       font-family: inherit;
       font-size: 0.9rem;
-      transition: all 0.2s ease;
     }
 
+    /* When collapsed → hide select safely */
+    header.collapsed .toolbar select {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+    }
+
+    /* ================= MAIN ================= */
+
     main {
-      padding: 0.6rem 0.8rem;
-      max-width: 760px;
-      margin: auto;
+      padding: 0.4rem 0.6rem;      /* reduced horizontal padding */
       width: 100%;
+      max-width: 680px;            /* slightly tighter */
+      margin: 0 auto;
       position: relative;
     }
+
+    /* ================= SECTION TITLE ================= */
+
     .section-title {
       font-family: 'Scheherazade New', serif;
       font-size: 1.5rem;
       font-weight: 700;
-      margin: 0.5rem 0 1rem;
-      padding: 0 0.25rem;
+      margin: 0.4rem 0 0.6rem;
+      padding: 0;
       color: #2c3e50;
     }
+
+    /* ================= CARDS ================= */
+
     .cards-container {
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 0.7rem;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
-    .slide-left { transform: translateX(-30px); opacity: 0; }
-    .slide-right { transform: translateX(30px); opacity: 0; }
+
     .card {
       background: white;
-      border-radius: 1rem;
-      padding: 0.7rem 0.8rem;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+      border-radius: 0.9rem;
+      padding: 0.5rem 0.6rem;      /* tighter card padding */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       transition: background 0.3s;
     }
+
     .card.highlight {
       background: #fff9c4;
     }
+
     .card-arabic {
       font-family: 'Scheherazade New', 'Amiri', serif;
       font-size: 1.5rem;
-      line-height: 2.05;
-      margin-bottom: 0.5rem;
+      line-height: 1.95;           /* slightly reduced */
+      margin-bottom: 0.4rem;
       word-break: break-word;
     }
+
     .card-reference {
       font-size: 0.75rem;
       color: #777;
       border-top: 1px dashed #ddd;
-      padding-top: 0.4rem;
+      padding-top: 0.35rem;
       direction: ltr;
       text-align: right;
     }
-    .search-result-meta {
-      font-size: 0.85rem;
-      color: #3b4d61;
-      margin-bottom: 0.4rem;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 0.2rem;
-    }
-    .result-count {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #2c3e50;
-    }
-    mark {
-      background: #fdd835;
-      padding: 0 2px;
-      border-radius: 3px;
-    }
-    .footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.8rem;
-      color: #888;
-    }
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: #3b4d61;
-    }
-    .error-message {
-      background: #ffebee;
-      color: #c62828;
-      padding: 0.8rem;
-      border-radius: 2rem;
-      text-align: center;
-      margin: 0.8rem 0;
-    }
-    /* Swipe hint */
-    .swipe-hint {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      right: 20px;
-      background: rgba(44, 62, 80, 0.95);
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 3rem;
-      text-align: center;
-      font-size: 1.1rem;
-      z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.8rem;
-      transition: opacity 0.8s ease;
-      cursor: pointer;
-    }
-    .swipe-hint.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .swipe-hint .arrow {
-      font-size: 1.5rem;
-    }
-    .hidden {
-      display: none !important;
-    }
-    /* Mobile fine-tuning */
+
+    /* ================= MOBILE ================= */
+
     @media (max-width: 480px) {
+
       main {
-        padding: 0.6rem 0.8rem;
+        padding: 0.35rem 0.5rem;
+        max-width: 100%;
       }
+
       .card {
-        padding: 0.6rem 0.8rem;
-        border-radius: 1rem;
+        padding: 0.45rem 0.5rem;
       }
+
       .card-arabic {
         font-size: 1.5rem;
-        line-height: 2.05;
+        line-height: 1.9;
       }
+
+      .toolbar input {
+        padding: 0.4rem 0.6rem;
+      }
+
       .toolbar select,
-      .toolbar input,
       .toolbar button {
         padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
       }
+
       .section-title {
-        font-size: 1.3rem;
-        margin: 0.3rem 0 0.6rem;
-      }
-      .swipe-hint {
-        font-size: 1rem;
-        padding: 0.8rem 1rem;
+        font-size: 1.35rem;
       }
     }
   </style>
