@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>القرآن الكريم</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:#111;
+  color:white;
+  font-family:Arial, sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* Header */
+header{
+  background:#1e1e1e;
+  padding:.6rem 1rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:20;
+}
+
+header button{
+  background:#2c3e50;
+  color:white;
+  border:none;
+  padding:.4rem .8rem;
+  border-radius:2rem;
+  cursor:pointer;
+}
+
+.page-info{
+  font-size:.9rem;
+}
+
+/* Main Image */
+main{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+}
+
+.quran-img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  transition:opacity .3s ease;
+}
+
+.fade{
+  opacity:0;
+}
+
+/* Bottom Controls */
+.controls{
+  background:#1e1e1e;
+  padding:.6rem;
+  display:flex;
+  justify-content:center;
+  gap:.5rem;
+}
+
+.controls input{
+  width:70px;
+  text-align:center;
+  border-radius:1rem;
+  border:none;
+  padding:.3rem;
+}
+
+.controls button{
+  border:none;
+  background:#34495e;
+  color:white;
+  padding:.3rem .8rem;
+  border-radius:1rem;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button onclick="location.href='index.html'">🏠 الرئيسية</button>
+  <div class="page-info">
+    صفحة <span id="pageNumber">1</span> / 604
+  </div>
+</header>
+
+<main>
+  <img id="quranImage" class="quran-img" src="" alt="Quran Page">
+</main>
+
+<div class="controls">
+  <button onclick="prevPage()">‹ السابق</button>
+  <input type="number" id="pageInput" min="1" max="604" value="1">
+  <button onclick="goToPage()">اذهب</button>
+  <button onclick="nextPage()">التالي ›</button>
+</div>
+
+<script>
+const TOTAL_PAGES = 604;
+let currentPage = parseInt(localStorage.getItem("quranPage")) || 1;
+
+const img = document.getElementById("quranImage");
+const pageNumberEl = document.getElementById("pageNumber");
+const pageInput = document.getElementById("pageInput");
+
+/* Format page number */
+function pad(num){
+  return num.toString().padStart(3,"0");
+}
+
+/* Load page */
+function loadPage(page){
+  if(page < 1 || page > TOTAL_PAGES) return;
+
+  img.classList.add("fade");
+
+  setTimeout(()=>{
+    img.src = `https://cdn.quran.com/images/pages/page_${pad(page)}.png`;
+    currentPage = page;
+    pageNumberEl.textContent = page;
+    pageInput.value = page;
+    localStorage.setItem("quranPage", page);
+    preloadNext(page);
+    img.classList.remove("fade");
+  },200);
+}
+
+/* Preload next page */
+function preloadNext(page){
+  if(page < TOTAL_PAGES){
+    const preload = new Image();
+    preload.src = `https://cdn.quran.com/images/pages/page_${pad(page+1)}.png`;
+  }
+}
+
+/* Navigation */
+function nextPage(){
+  if(currentPage < TOTAL_PAGES){
+    loadPage(currentPage + 1);
+  }
+}
+
+function prevPage(){
+  if(currentPage > 1){
+    loadPage(currentPage - 1);
+  }
+}
+
+function goToPage(){
+  const page = parseInt(pageInput.value);
+  if(page >= 1 && page <= TOTAL_PAGES){
+    loadPage(page);
+  }
+}
+
+/* Swipe Support */
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener("touchstart", e=>{
+  touchStartX = e.changedTouches[0].screenX;
+},{passive:true});
+
+document.addEventListener("touchend", e=>{
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+
+  if(Math.abs(diff) < 50) return;
+
+  if(diff > 0){
+    nextPage();   // Swipe left → next page
+  } else {
+    prevPage();   // Swipe right → previous page
+  }
+},{passive:true});
+
+/* Initial load */
+loadPage(currentPage);
+</script>
+
+</body>
+</html>
