@@ -18,7 +18,7 @@
     header {
       background: linear-gradient(135deg, #2c3e50, #34495e);
       color: white;
-      padding: 1rem;
+      padding: 0.8rem 1rem;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -28,7 +28,6 @@
       display: flex;
       gap: 0.5rem;
       align-items: center;
-      margin-bottom: 0.7rem;
       flex-wrap: wrap;
     }
     .toolbar select,
@@ -58,51 +57,34 @@
       color: #2c3e50;
       font-weight: bold;
     }
-    .section-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #3b4d61;
-      padding: 0.7rem 1rem;
-      border-radius: 3rem;
-    }
-    .section-title {
-      font-family: 'Scheherazade New', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.4;
-      flex: 1;
-      padding: 0 0.5rem;
-    }
-    .section-nav button {
-      background: transparent;
-      color: white;
-      border: none;
-      font-size: 1.4rem;
-      cursor: pointer;
-      padding: 0 0.5rem;
-    }
     main {
       flex: 1;
-      padding: 1.2rem;
+      padding: 1rem 1rem 2rem;
       max-width: 760px;
       margin: auto;
       width: 100%;
       position: relative;
     }
+    .section-title {
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0 1rem;
+      padding: 0 0.5rem;
+      color: #2c3e50;
+    }
     .cards-container {
       display: flex;
       flex-direction: column;
-      gap: 1.4rem;
+      gap: 1rem;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .slide-left { transform: translateX(-30px); opacity: 0; }
     .slide-right { transform: translateX(30px); opacity: 0; }
     .card {
       background: white;
-      border-radius: 2rem;
-      padding: 1.7rem 1.4rem;
+      border-radius: 1.5rem;
+      padding: 1.5rem 1.2rem;
       box-shadow: 0 5px 15px rgba(0,0,0,0.06);
       transition: background 0.3s;
     }
@@ -114,14 +96,14 @@
       font-family: 'Scheherazade New', 'Amiri', serif;
       font-size: 1.7rem;
       line-height: 2.2;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
       word-break: break-word;
     }
     .card-reference {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #777;
       border-top: 1px dashed #ddd;
-      padding-top: 0.7rem;
+      padding-top: 0.6rem;
       direction: ltr;
       text-align: right;
     }
@@ -156,12 +138,12 @@
     .error-message {
       background: #ffebee;
       color: #c62828;
-      padding: 1.5rem;
+      padding: 1rem;
       border-radius: 2rem;
       text-align: center;
       margin: 1rem 0;
     }
-    /* Swipe hint overlay */
+    /* Swipe hint */
     .swipe-hint {
       position: fixed;
       bottom: 20px;
@@ -176,11 +158,15 @@
       z-index: 100;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       backdrop-filter: blur(4px);
-      animation: fadeInUp 0.5s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.8rem;
+      transition: opacity 0.8s ease;
+    }
+    .swipe-hint.fade-out {
+      opacity: 0;
+      pointer-events: none;
     }
     .swipe-hint button {
       background: white;
@@ -195,17 +181,20 @@
     .swipe-hint .arrow {
       font-size: 1.5rem;
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .hidden {
+      display: none !important;
     }
-    /* Mobile adjustments: reduce card padding */
+    /* Mobile adjustments: even smaller padding */
     @media (max-width: 480px) {
+      main {
+        padding: 0.8rem;
+      }
       .card {
-        padding: 1.2rem 1rem;  /* reduced padding */
+        padding: 1rem 0.8rem;   /* reduced padding */
+        border-radius: 1.2rem;
       }
       .card-arabic {
-        font-size: 1.45rem;
+        font-size: 1.4rem;
         line-height: 1.9;
       }
       .toolbar select,
@@ -213,6 +202,10 @@
       .toolbar button {
         padding: 0.4rem 0.7rem;
         font-size: 0.8rem;
+      }
+      .section-title {
+        font-size: 1.3rem;
+        margin: 0.3rem 0 0.8rem;
       }
     }
   </style>
@@ -225,14 +218,11 @@
       <input type="text" id="search-input" placeholder="بحث في الأدعية والأحاديث...">
       <button id="clear-search" class="search-clear" title="مسح البحث">✕</button>
     </div>
-    <div class="section-nav">
-      <button id="prev-btn" title="السابق">›</button>
-      <div class="section-title" id="section-title"></div>
-      <button id="next-btn" title="التالي">‹</button>
-    </div>
+    <!-- section-nav removed – title now in main content -->
   </header>
 
   <main>
+    <div id="section-title" class="section-title"></div>
     <div id="content" class="loading">جاري تحميل الكتاب...</div>
     <!-- Swipe hint (hidden by default) -->
     <div id="swipe-hint" class="swipe-hint hidden">
@@ -266,25 +256,44 @@
       const sectionTitleEl = document.getElementById('section-title');
       const searchInput = document.getElementById('search-input');
       const clearSearchBtn = document.getElementById('clear-search');
-      const prevBtn = document.getElementById('prev-btn');
-      const nextBtn = document.getElementById('next-btn');
+      const prevBtn = document.getElementById('prev-btn');    // removed from UI, but keep for potential use? We'll keep them null.
+      const nextBtn = document.getElementById('next-btn');    // removed
       const swipeHint = document.getElementById('swipe-hint');
       const closeHintBtn = document.getElementById('close-hint');
 
-      // ---------- Swipe Hint (show once) ----------
+      // prev/next buttons no longer exist – remove event listeners later.
+
+      // ---------- Swipe Hint (show once, auto fade after 5s) ----------
       function initSwipeHint() {
         if (!localStorage.getItem('swipeHintSeen')) {
           swipeHint.classList.remove('hidden');
+          // Auto fade after 5 seconds
+          const autoFade = setTimeout(() => {
+            swipeHint.classList.add('fade-out');
+            setTimeout(() => {
+              swipeHint.classList.add('hidden');
+              swipeHint.classList.remove('fade-out');
+            }, 800); // match transition
+          }, 5000);
+
+          // Tap anywhere on hint (except button) also fades? We'll just use button.
+          closeHintBtn.addEventListener('click', () => {
+            clearTimeout(autoFade);
+            swipeHint.classList.add('fade-out');
+            setTimeout(() => {
+              swipeHint.classList.add('hidden');
+              swipeHint.classList.remove('fade-out');
+            }, 800);
+            localStorage.setItem('swipeHintSeen', 'true');
+          });
+
+          // Also allow tapping on the hint itself to dismiss? We'll keep button only for clarity.
         }
-        closeHintBtn.addEventListener('click', () => {
-          swipeHint.classList.add('hidden');
-          localStorage.setItem('swipeHintSeen', 'true');
-        });
       }
 
       // ---------- Arabic Normalization (remove diacritics) ----------
       function normalizeArabic(str) {
-        return str.replace(/[ًٌٍَُِّْـ]/g, ''); // removes tashkeel and tatweel
+        return str.replace(/[ًٌٍَُِّْـ]/g, '');
       }
 
       // ---------- Load All Parts (from assets folder) ----------
@@ -305,7 +314,6 @@
         });
 
         const results = await Promise.all(fetchPromises);
-        // Merge all successfully loaded parts
         App.data = results.filter(r => r !== null).flat();
 
         if (App.data.length === 0) {
@@ -315,7 +323,6 @@
         }
 
         if (App.loadErrors.length > 0) {
-          // Show error summary above content
           const errorDiv = document.createElement('div');
           errorDiv.className = 'error-message';
           errorDiv.innerHTML = `لم يتم تحميل: ${App.loadErrors.join('، ')}`;
@@ -340,7 +347,7 @@
         sectionSelect.value = App.currentSection;
       }
 
-      // ---------- Search Index (normalized for matching) ----------
+      // ---------- Search Index ----------
       let searchIndex = [];
 
       function buildSearchIndex() {
@@ -368,7 +375,7 @@
         });
       }
 
-      // ---------- Perform Search (simple substring after normalization) ----------
+      // ---------- Perform Search ----------
       function performSearch(query) {
         const trimmed = query.trim();
         if (!trimmed) {
@@ -402,7 +409,7 @@
         renderSearchResults();
       }
 
-      // ---------- Render Search Results (with highlighting) ----------
+      // ---------- Render Search Results ----------
       function renderSearchResults() {
         if (App.searchResults.length === 0) {
           contentEl.innerHTML = `<div style="text-align:center; padding:2rem;">لا توجد نتائج لـ "${App.searchQuery}"</div>`;
@@ -428,6 +435,8 @@
           <div class="result-count">${App.searchResults.length} نتيجة</div>
           <div class="cards-container">${html}</div>
         `;
+        // Hide section title when showing search results
+        sectionTitleEl.style.display = 'none';
       }
 
       // ---------- Render Current Section ----------
@@ -436,6 +445,7 @@
         const section = App.data[App.currentSection];
         if (!section) return;
 
+        sectionTitleEl.style.display = 'block';
         sectionTitleEl.textContent = section.title || '';
         sectionSelect.value = App.currentSection;
 
@@ -537,11 +547,9 @@
         const diff = App.touchStartX - App.touchEndX;
         if (Math.abs(diff) < 50) return;
         if (diff > 0) {
-          // swipe left → previous (RTL)
-          prevSection();
+          prevSection(); // swipe left → previous (RTL)
         } else {
-          // swipe right → next
-          nextSection();
+          nextSection(); // swipe right → next
         }
       }
 
@@ -553,8 +561,6 @@
         searchInput.addEventListener('input', handleSearchInput);
         clearSearchBtn.addEventListener('click', handleClearSearch);
         sectionSelect.addEventListener('change', handleSectionChange);
-        prevBtn.addEventListener('click', prevSection);
-        nextBtn.addEventListener('click', nextSection);
         contentEl.addEventListener('click', handleContentClick);
 
         document.addEventListener('touchstart', handleTouchStart, { passive: true });
