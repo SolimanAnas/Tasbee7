@@ -6,212 +6,261 @@
   <title>حصن المسلم</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary-color: #2c3e50;
+      --bg-color: #f4f6f8;
+      --card-bg: #ffffff;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
       font-family: 'Amiri', serif;
-      background: #f4f6f8;
+      background: var(--bg-color);
       color: #1e2a3a;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* ================= HEADER ================= */
-
+    /* --- Header UI --- */
     header {
       background: linear-gradient(135deg, #2c3e50, #34495e);
       color: white;
-      padding: 0.6rem 0.8rem;
+      padding: 8px 12px;
       position: sticky;
       top: 0;
-      z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: padding 0.2s ease;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      transition: all 0.3s ease-in-out;
     }
 
-    header.collapsed {
-      padding: 0.35rem 0.8rem;
+    /* Collapse effect for scrolling */
+    header.scrolled {
+      padding: 5px 12px;
     }
 
     .toolbar {
       display: flex;
+      gap: 8px;
       align-items: center;
-      gap: 0.5rem;
-      flex-wrap: nowrap;              /* prevent wrapping */
-      width: 100%;
-    }
-
-    .toolbar > * {
-      min-width: 0;                   /* allow proper shrinking */
-    }
-
-    /* HOME BUTTON */
-    .toolbar button:first-child {
-      flex: 0 0 auto;
-    }
-
-    /* SEARCH INPUT */
-    .toolbar input {
-      flex: 1 1 auto;
-      min-width: 0;
-      padding: 0.45rem 0.7rem;
-      border: none;
-      border-radius: 2rem;
-      background: #ecf0f1;
-      font-family: inherit;
-      font-size: 0.9rem;
-    }
-
-    /* CLEAR BUTTON */
-    .toolbar .search-clear {
-      flex: 0 0 auto;
-      padding: 0.45rem 0.7rem;
-      border-radius: 2rem;
-      border: none;
-      background: #b0c4de;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* SELECT */
-    .toolbar select {
-      flex: 0 0 auto;
-      min-width: 110px;
-      padding: 0.45rem 0.7rem;
-      border-radius: 2rem;
-      border: none;
-      font-family: inherit;
-      font-size: 0.9rem;
-    }
-
-    /* When collapsed → hide select safely */
-    header.collapsed .toolbar select {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(0.95);
-    }
-
-    /* ================= MAIN ================= */
-
-    main {
-      padding: 0.4rem 0.6rem;      /* reduced horizontal padding */
-      width: 100%;
-      max-width: 680px;            /* slightly tighter */
+      max-width: 900px;
       margin: 0 auto;
-      position: relative;
+      width: 100%;
     }
 
-    /* ================= SECTION TITLE ================= */
+    .home-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .search-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .toolbar input {
+      width: 100%;
+      padding: 10px 15px;
+      padding-left: 35px; /* space for clear btn */
+      border: none;
+      border-radius: 25px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: #ecf0f1;
+      outline: none;
+    }
+
+    .clear-search {
+      position: absolute;
+      left: 10px;
+      background: #bdc3c7;
+      color: white;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+    }
+
+    /* Hide section select when scrolled to save space */
+    #section-select {
+      max-width: 120px;
+      padding: 8px;
+      border-radius: 20px;
+      border: none;
+      background: rgba(255,255,255,0.9);
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: opacity 0.3s;
+    }
+    
+    header.scrolled #section-select {
+      display: none;
+    }
+
+    /* --- Main Content --- */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 100%;
+      padding: 0; /* Remove side padding for full width feel on mobile */
+      margin: 0 auto;
+    }
+
+    .content-wrapper {
+      padding: 10px 12px 30px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
     .section-title {
       font-family: 'Scheherazade New', serif;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       font-weight: 700;
-      margin: 0.4rem 0 0.6rem;
-      padding: 0;
-      color: #2c3e50;
+      margin: 15px 5px 20px;
+      color: var(--primary-color);
+      text-align: center;
+      line-height: 1.2;
     }
-
-    /* ================= CARDS ================= */
 
     .cards-container {
       display: flex;
       flex-direction: column;
-      gap: 0.7rem;
+      gap: 12px;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
     .card {
-      background: white;
-      border-radius: 0.9rem;
-      padding: 0.5rem 0.6rem;      /* tighter card padding */
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      transition: background 0.3s;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 18px 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid #edf0f2;
     }
 
     .card.highlight {
       background: #fff9c4;
+      border-color: #fdd835;
     }
 
     .card-arabic {
-      font-family: 'Scheherazade New', 'Amiri', serif;
-      font-size: 1.5rem;
-      line-height: 1.95;           /* slightly reduced */
-      margin-bottom: 0.4rem;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.6rem;
+      line-height: 1.8;
+      margin-bottom: 12px;
       word-break: break-word;
+      text-align: justify;
+      color: #000;
     }
 
     .card-reference {
-      font-size: 0.75rem;
-      color: #777;
-      border-top: 1px dashed #ddd;
-      padding-top: 0.35rem;
-      direction: ltr;
-      text-align: right;
+      font-size: 0.85rem;
+      color: #666;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 8px;
+      line-height: 1.4;
     }
 
-    /* ================= MOBILE ================= */
+    /* --- Animations --- */
+    .slide-left { transform: translateX(-20px); opacity: 0; }
+    .slide-right { transform: translateX(20px); opacity: 0; }
 
+    /* --- Swipe Hint --- */
+    .swipe-hint {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(44, 62, 80, 0.9);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      text-align: center;
+      font-size: 1rem;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      transition: opacity 1.5s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .swipe-hint.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .hidden { display: none !important; }
+
+    /* --- Footer --- */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: #999;
+    }
+
+    /* Mobile Responsive Tweaks */
     @media (max-width: 480px) {
-
-      main {
-        padding: 0.35rem 0.5rem;
-        max-width: 100%;
-      }
-
-      .card {
-        padding: 0.45rem 0.5rem;
-      }
-
-      .card-arabic {
-        font-size: 1.5rem;
-        line-height: 1.9;
-      }
-
-      .toolbar input {
-        padding: 0.4rem 0.6rem;
-      }
-
-      .toolbar select,
-      .toolbar button {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.85rem;
-      }
-
-      .section-title {
-        font-size: 1.35rem;
-      }
+      .card-arabic { font-size: 1.45rem; }
+      .section-title { font-size: 1.5rem; }
+      .home-btn { width: 36px; height: 36px; }
     }
   </style>
 </head>
 <body>
+
   <header id="main-header">
     <div class="toolbar">
-      <button onclick="location.href='index.html'" title="الرئيسية">🏠</button>
+      <button class="home-btn" onclick="location.href='index.html'" title="الرئيسية">🏠</button>
+      
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="بحث في الأذكار...">
+        <button id="clear-search" class="clear-search">✕</button>
+      </div>
+
       <select id="section-select" aria-label="اختر باباً"></select>
-      <input type="text" id="search-input" placeholder="بحث في حصن المسلم...">
-      <button id="clear-search" class="search-clear" title="مسح البحث">✕</button>
     </div>
   </header>
 
   <main>
-    <div id="section-title" class="section-title"></div>
-    <div id="content" class="loading">جاري تحميل الكتاب...</div>
-    <!-- Swipe hint -->
-    <div id="swipe-hint" class="swipe-hint hidden">
-      <span class="arrow">‹</span>
-      <span>اسحب لليسار واليمين للتنقل بين الأبواب</span>
-      <span class="arrow">›</span>
+    <div class="content-wrapper">
+      <div id="section-title" class="section-title"></div>
+      <div id="content">
+        <div style="text-align:center; padding:50px;">جاري تحميل حصن المسلم...</div>
+      </div>
     </div>
   </main>
+
+  <div id="swipe-hint" class="swipe-hint hidden">
+    <span>‹</span>
+    <span>اسحب لليمين أو اليسار للتنقل</span>
+    <span>›</span>
+  </div>
 
   <div class="footer">حصن المسلم · جميع الأجزاء</div>
 
   <script>
     (function() {
-      // ---------- App State ----------
       const App = {
         data: [],
         currentSection: 0,
@@ -220,104 +269,76 @@
         searchResults: [],
         touchStartX: 0,
         touchEndX: 0,
-        isLoading: true,
-        loadErrors: []
+        isLoading: true
       };
 
-      // ---------- DOM Elements ----------
-      const header = document.getElementById('main-header');
       const contentEl = document.getElementById('content');
       const sectionSelect = document.getElementById('section-select');
       const sectionTitleEl = document.getElementById('section-title');
       const searchInput = document.getElementById('search-input');
       const clearSearchBtn = document.getElementById('clear-search');
+      const header = document.getElementById('main-header');
       const swipeHint = document.getElementById('swipe-hint');
 
-      // ---------- Collapsible Header on Scroll ----------
-      let lastScrollY = window.scrollY;
-      const SCROLL_THRESHOLD = 20;
-
-      function handleScroll() {
-        const currentScroll = window.scrollY;
-        if (currentScroll > SCROLL_THRESHOLD && currentScroll > lastScrollY) {
-          header.classList.add('collapsed');
-        } else if (currentScroll < lastScrollY || currentScroll <= SCROLL_THRESHOLD) {
-          header.classList.remove('collapsed');
+      // --- Header Collapse Logic ---
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
         }
-        lastScrollY = currentScroll;
-      }
+      });
 
-      window.addEventListener('scroll', handleScroll, { passive: true });
-
-      // ---------- Swipe Hint (auto-fade + tap to dismiss) ----------
+      // --- Swipe Hint Logic ---
       function initSwipeHint() {
         if (!localStorage.getItem('swipeHintSeen')) {
           swipeHint.classList.remove('hidden');
           
-          const autoFade = setTimeout(() => {
+          const fadeOut = () => {
             swipeHint.classList.add('fade-out');
             setTimeout(() => {
               swipeHint.classList.add('hidden');
-              swipeHint.classList.remove('fade-out');
-            }, 800);
-          }, 5000);
+              localStorage.setItem('swipeHintSeen', 'true');
+            }, 1500);
+          };
 
-          swipeHint.addEventListener('click', function dismissHint(e) {
-            e.stopPropagation();
-            clearTimeout(autoFade);
-            swipeHint.classList.add('fade-out');
-            setTimeout(() => {
-              swipeHint.classList.add('hidden');
-              swipeHint.classList.remove('fade-out');
-            }, 800);
-            localStorage.setItem('swipeHintSeen', 'true');
-            swipeHint.removeEventListener('click', dismissHint);
-          }, { once: true });
+          // Auto fade after 5 seconds
+          const timer = setTimeout(fadeOut, 5000);
+
+          // Dismiss on touch
+          swipeHint.addEventListener('click', () => {
+            clearTimeout(timer);
+            fadeOut();
+          });
         }
       }
 
-      // ---------- Arabic Normalization ----------
       function normalizeArabic(str) {
         return str.replace(/[ًٌٍَُِّْـ]/g, '');
       }
 
-      // ---------- Load All Parts (from assets folder) ----------
       async function loadAllParts() {
-        App.isLoading = true;
-        App.loadErrors = [];
         const parts = [1, 2, 3, 4, 5];
         const fetchPromises = parts.map(async (p) => {
           try {
-            const response = await fetch(`assets/part${p}.json`);
-            if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-            return await response.json();
-          } catch (err) {
-            console.error(`Failed to load part ${p}:`, err);
-            App.loadErrors.push(`الجزء ${p} (${err.message})`);
-            return null;
-          }
+            const res = await fetch(`assets/part${p}.json`);
+            return res.ok ? await res.json() : null;
+          } catch { return null; }
         });
 
         const results = await Promise.all(fetchPromises);
         App.data = results.filter(r => r !== null).flat();
 
         if (App.data.length === 0) {
-          contentEl.innerHTML = `<div class="error-message">تعذر تحميل أي جزء. تأكد من وجود ملفات assets/part1.json إلى assets/part5.json.</div>`;
-          App.isLoading = false;
+          contentEl.innerHTML = '<div style="color:red; text-align:center;">خطأ في تحميل البيانات</div>';
           return;
-        }
-
-        if (App.loadErrors.length > 0) {
-          const errorDiv = document.createElement('div');
-          errorDiv.className = 'error-message';
-          errorDiv.innerHTML = `لم يتم تحميل: ${App.loadErrors.join('، ')}`;
-          contentEl.prepend(errorDiv);
         }
 
         buildSectionSelect();
         buildSearchIndex();
         App.isLoading = false;
         renderSection();
+        initSwipeHint();
       }
 
       function buildSectionSelect() {
@@ -325,114 +346,36 @@
         App.data.forEach((sec, idx) => {
           const opt = document.createElement('option');
           opt.value = idx;
-          opt.textContent = sec.title || 'بدون عنوان';
+          opt.textContent = sec.title;
           sectionSelect.appendChild(opt);
         });
-        sectionSelect.value = App.currentSection;
       }
 
-      // ---------- Search Index ----------
       let searchIndex = [];
-
       function buildSearchIndex() {
-        searchIndex = [];
         App.data.forEach((section, sIdx) => {
-          const items = section.items || [];
-          items.forEach((item, iIdx) => {
-            const title = section.title || '';
-            const ar = item.ar || '';
-            const ref = item.ref || '';
-            const label = item.label || '';
+          section.items.forEach((item, iIdx) => {
             searchIndex.push({
               sectionIdx: sIdx,
               itemIdx: iIdx,
-              sectionTitle: title,
-              ar,
-              ref,
-              label,
-              normTitle: normalizeArabic(title),
-              normAr: normalizeArabic(ar),
-              normRef: normalizeArabic(ref),
-              normLabel: normalizeArabic(label)
+              sectionTitle: section.title,
+              ar: item.ar,
+              ref: item.ref,
+              normAr: normalizeArabic(item.ar),
+              normTitle: normalizeArabic(section.title)
             });
           });
         });
       }
 
-      function performSearch(query) {
-        const trimmed = query.trim();
-        if (!trimmed) {
-          App.viewMode = 'section';
-          renderSection();
-          return;
-        }
-
-        const normQuery = normalizeArabic(trimmed).toLowerCase();
-        const results = [];
-
-        searchIndex.forEach(item => {
-          if (item.normTitle.toLowerCase().includes(normQuery) ||
-              item.normAr.toLowerCase().includes(normQuery) ||
-              item.normRef.toLowerCase().includes(normQuery) ||
-              item.normLabel.toLowerCase().includes(normQuery)) {
-            results.push({
-              sectionIdx: item.sectionIdx,
-              itemIdx: item.itemIdx,
-              sectionTitle: item.sectionTitle,
-              ar: item.ar,
-              ref: item.ref,
-              label: item.label
-            });
-          }
-        });
-
-        App.searchQuery = query;
-        App.searchResults = results;
-        App.viewMode = 'search';
-        renderSearchResults();
-      }
-
-      function renderSearchResults() {
-        if (App.searchResults.length === 0) {
-          contentEl.innerHTML = `<div style="text-align:center; padding:2rem;">لا توجد نتائج لـ "${App.searchQuery}"</div>`;
-          return;
-        }
-
-        const query = App.searchQuery;
-        const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-
-        const html = App.searchResults.map(r => {
-          const highlightedAr = r.ar.replace(regex, '<mark>$1</mark>');
-          return `
-            <div class="card search-result" data-section-idx="${r.sectionIdx}" data-item-idx="${r.itemIdx}">
-              <div class="search-result-meta">${r.sectionTitle} · ${r.label || ''}</div>
-              <div class="card-arabic">${highlightedAr}</div>
-              <div class="card-reference">${r.ref || ''}</div>
-            </div>
-          `;
-        }).join('');
-
-        contentEl.innerHTML = `
-          <div class="result-count">${App.searchResults.length} نتيجة</div>
-          <div class="cards-container">${html}</div>
-        `;
-        sectionTitleEl.style.display = 'none';
-      }
-
       function renderSection(direction = null) {
-        if (App.isLoading) return;
         const section = App.data[App.currentSection];
-        if (!section) return;
-
-        sectionTitleEl.style.display = 'block';
-        sectionTitleEl.textContent = section.title || '';
+        sectionTitleEl.textContent = section.title;
         sectionSelect.value = App.currentSection;
-
-        const items = section.items || [];
-        const cardsHtml = items.map((item, idx) => `
-          <div class="card" data-section-idx="${App.currentSection}" data-item-idx="${idx}">
-            <div class="card-arabic">${item.ar || ''}</div>
+        
+        const cardsHtml = section.items.map((item, idx) => `
+          <div class="card" data-idx="${idx}">
+            <div class="card-arabic">${item.ar}</div>
             <div class="card-reference">${item.ref || ''}</div>
           </div>
         `).join('');
@@ -446,106 +389,81 @@
         contentEl.innerHTML = '';
         contentEl.appendChild(wrapper);
 
-        setTimeout(() => {
-          wrapper.classList.remove('slide-left', 'slide-right');
-        }, 50);
+        window.scrollTo(0, 0);
+        setTimeout(() => wrapper.classList.remove('slide-left', 'slide-right'), 50);
       }
 
-      // Navigation
-      function nextSection() {
+      function performSearch(query) {
+        if (!query.trim()) {
+          App.viewMode = 'section';
+          clearSearchBtn.style.display = 'none';
+          renderSection();
+          return;
+        }
+        clearSearchBtn.style.display = 'block';
+        const normQuery = normalizeArabic(query).toLowerCase();
+        const results = searchIndex.filter(item => 
+          item.normAr.includes(normQuery) || item.normTitle.includes(normQuery)
+        );
+
+        App.viewMode = 'search';
+        sectionTitleEl.textContent = `نتائج البحث: ${results.length}`;
+        
+        contentEl.innerHTML = results.map(r => `
+          <div class="card" onclick="jumpTo('${r.sectionIdx}', '${r.itemIdx}')" style="cursor:pointer">
+            <div style="font-size:0.8rem; color:#2c3e50; margin-bottom:5px; font-weight:bold;">${r.sectionTitle}</div>
+            <div class="card-arabic" style="font-size:1.2rem; line-height:1.5">${r.ar}</div>
+          </div>
+        `).join('');
+      }
+
+      window.jumpTo = (sIdx, iIdx) => {
+        App.currentSection = parseInt(sIdx);
+        App.viewMode = 'section';
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        renderSection();
+        setTimeout(() => {
+          const el = document.querySelector(`[data-idx="${iIdx}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('highlight');
+          }
+        }, 300);
+      };
+
+      // --- Navigation ---
+      function nav(dir) {
         if (App.viewMode !== 'section') return;
-        if (App.currentSection < App.data.length - 1) {
+        if (dir === 'next' && App.currentSection < App.data.length - 1) {
           App.currentSection++;
           renderSection('next');
-        }
-      }
-
-      function prevSection() {
-        if (App.viewMode !== 'section') return;
-        if (App.currentSection > 0) {
+        } else if (dir === 'prev' && App.currentSection > 0) {
           App.currentSection--;
           renderSection('prev');
         }
       }
 
-      function jumpToItem(sectionIdx, itemIdx) {
-        App.currentSection = sectionIdx;
-        App.viewMode = 'section';
-        App.searchQuery = '';
+      // --- Event Listeners ---
+      searchInput.addEventListener('input', (e) => performSearch(e.target.value));
+      clearSearchBtn.addEventListener('click', () => {
         searchInput.value = '';
-        renderSection();
-
-        setTimeout(() => {
-          const targetCard = document.querySelector(`.card[data-section-idx="${sectionIdx}"][data-item-idx="${itemIdx}"]`);
-          if (targetCard) {
-            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            targetCard.classList.add('highlight');
-            setTimeout(() => targetCard.classList.remove('highlight'), 1500);
-          }
-        }, 100);
-      }
-
-      // ---------- Event Handlers ----------
-      function handleSearchInput(e) {
-        performSearch(e.target.value);
-      }
-
-      function handleClearSearch() {
-        searchInput.value = '';
+        performSearch('');
+      });
+      sectionSelect.addEventListener('change', (e) => {
+        App.currentSection = parseInt(e.target.value);
         App.viewMode = 'section';
         renderSection();
-      }
+      });
 
-      function handleSectionChange(e) {
-        if (App.viewMode !== 'section') {
-          App.viewMode = 'section';
-        }
-        App.currentSection = parseInt(e.target.value, 10);
-        renderSection();
-      }
-
-      function handleContentClick(e) {
-        const card = e.target.closest('.search-result');
-        if (card) {
-          const sectionIdx = card.dataset.sectionIdx;
-          const itemIdx = card.dataset.itemIdx;
-          if (sectionIdx !== undefined && itemIdx !== undefined) {
-            jumpToItem(parseInt(sectionIdx), parseInt(itemIdx));
-          }
-        }
-      }
-
-      // Swipe navigation (RTL)
-      function handleTouchStart(e) {
-        App.touchStartX = e.changedTouches[0].screenX;
-      }
-      function handleTouchEnd(e) {
-        if (App.viewMode !== 'section') return;
+      document.addEventListener('touchstart', e => App.touchStartX = e.changedTouches[0].screenX, {passive: true});
+      document.addEventListener('touchend', e => {
         App.touchEndX = e.changedTouches[0].screenX;
         const diff = App.touchStartX - App.touchEndX;
-        if (Math.abs(diff) < 50) return;
-        if (diff > 0) {
-          prevSection(); // left swipe → previous
-        } else {
-          nextSection(); // right swipe → next
-        }
-      }
+        if (Math.abs(diff) > 70) diff > 0 ? nav('prev') : nav('next');
+      }, {passive: true});
 
-      // ---------- Initialization ----------
-      function init() {
-        initSwipeHint();
-        loadAllParts();
-
-        searchInput.addEventListener('input', handleSearchInput);
-        clearSearchBtn.addEventListener('click', handleClearSearch);
-        sectionSelect.addEventListener('change', handleSectionChange);
-        contentEl.addEventListener('click', handleContentClick);
-
-        document.addEventListener('touchstart', handleTouchStart, { passive: true });
-        document.addEventListener('touchend', handleTouchEnd, { passive: true });
-      }
-
-      init();
+      loadAllParts();
     })();
   </script>
 </body>
