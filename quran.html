@@ -168,34 +168,43 @@
 
     /* ================= ZOOM MODE ================= */
     /*
-     * ZOOM STRATEGY:
-     * - Image height = 100dvh (locked, never crops vertically)
-     * - Image width grows from natural portrait aspect ratio (~0.71 W:H)
-     *   → on a 390×844 phone: image width ≈ 598px > 390px viewport = scrollable
-     * - Horizontal padding on the frame = 6vw each side gives text room to breathe
-     *   and prevents the calligraphy margins from sitting flush at the scroll edge
-     * - JS centers the scroll position on zoom activation so both edges are
-     *   equidistant and reachable in both scroll directions
+     * KEY FIXES:
+     *
+     * 1. RTL scrollLeft is inverted in Safari/Chrome: scrollLeft=0 = RIGHT edge.
+     *    Fix: force direction:ltr on scroll container only.
+     *    scrollLeft = (scrollWidth - clientWidth) / 2 now reliably = center.
+     *    Inner frame restores direction:rtl for Arabic text.
+     *
+     * 2. padding:0 6vw added dead space that pushed the image off-center,
+     *    creating the big blank area seen on the left in screenshots.
+     *    Fix: remove all padding. Natural portrait overflow is already symmetric.
+     *
+     * 3. min-width:calc(100vw + 8vw) on the image forced unexpected sizing.
+     *    Fix: removed. Portrait Mushaf at height:100dvh is always wider than
+     *    mobile viewport naturally (aspect ~0.71 → ~597px on a 390px-wide phone).
+     *
+     * 4. Page changes while zoomed didn't recenter.
+     *    Fix: centerZoomScroll() called at end of every navigateTo() transition.
      */
     body.zoomed main {
       overflow-x: auto;
       overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
       align-items: center;
       padding-top: 0;
-      /* smooth momentum scrolling on iOS */
-      -webkit-overflow-scrolling: touch;
-      scroll-behavior: auto; /* instant — JS will center it */
+      /* Normalize scrollLeft to always be 0=left-edge in all browsers,
+         even when the document root is dir=rtl                           */
+      direction: ltr;
     }
 
     body.zoomed .page-frame {
+      direction: rtl;   /* restore RTL for Arabic Mushaf content */
       flex-shrink: 0;
       width: auto;
       height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
-      /* 6vw inset each side = edge text never touches scroll boundary */
-      padding: 0 6vw;
     }
 
     body.zoomed .mushaf-img {
@@ -203,9 +212,6 @@
       max-height: 100dvh;
       width: auto;
       max-width: none;
-      /* Minimum width ensures the frame is always wider than viewport
-         so scroll is possible even on very tall/narrow phones          */
-      min-width: calc(100vw + 8vw); /* image + padding wider than screen */
     }
 
     /* ================= GLASSMORPHISM MODAL BASE ================= */
@@ -902,6 +908,8 @@
               frame.style.cssText  = '';
               isTransitioning = false;
               preloadAdjacentPages();
+              // Re-center scroll if we're in zoom mode (new page, same zoom level)
+              centerZoomScroll();
             }, 300);
           });
         });
@@ -921,6 +929,24 @@
     function preloadAdjacentPages() {
       if (currentPage > 1)          new Image().src = `mushaf/${currentPage - 1}.png`;
       if (currentPage < totalPages) new Image().src = `mushaf/${currentPage + 1}.png`;
+    }
+
+    // Center the horizontal scroll when in zoom mode.
+    // Uses double-rAF to ensure the new image/layout has fully painted
+    // before reading scrollWidth (which changes with each page's image size).
+    // direction:ltr is forced on main in CSS, so scrollLeft=0 is always
+    // the left edge in all browsers — the center calculation is reliable.
+    function centerZoomScroll() {
+      if (!document.body.classList.contains('zoomed')) return;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const el       = swipeArea;
+          const overflow = el.scrollWidth - el.clientWidth;
+          if (overflow > 0) {
+            el.scrollLeft = overflow / 2;
+          }
+        });
+      });
     }
 
     // ============================================================
@@ -1018,16 +1044,9 @@
             lastTapTime = 0;
             document.body.classList.toggle('zoomed');
 
-            // When ENTERING zoom: auto-scroll to horizontal center so both
-            // left and right Mushaf margins are equally reachable
-            if (document.body.classList.contains('zoomed')) {
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  const center = (swipeArea.scrollWidth - swipeArea.clientWidth) / 2;
-                  swipeArea.scrollLeft = center;
-                });
-              });
-            }
+            // centerZoomScroll() handles both cases:
+            // entering zoom → snaps to center | exiting → no-op (class already removed)
+            centerZoomScroll();
 
           } else {
             // ← Potential single tap — wait to see if second tap arrives
