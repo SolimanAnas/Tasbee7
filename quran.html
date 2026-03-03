@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>المصحف الرقمي</title>
+    <title>المصحف الرقمي - Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -42,9 +42,10 @@
             color: var(--text-color);
             line-height: 1.6;
             overflow-x: hidden;
+            overflow-y: auto;
         }
 
-        /* --- STICKY HEADER --- */
+        /* --- HEADER --- */
         header {
             background-color: var(--header-bg);
             position: sticky;
@@ -55,13 +56,13 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         
         .theme-swatches { display: flex; gap: 8px; }
         .swatch { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
         .header-info { text-align: center; flex: 1; }
-        .surah-name { font-size: 1.3rem; font-weight: bold; display: block; }
+        .surah-name { font-size: 1.2rem; font-weight: bold; display: block; color: var(--text-color); }
         .meta-data { font-size: 0.8rem; opacity: 0.8; }
 
         /* --- NAVIGATION & SEARCH --- */
@@ -71,17 +72,18 @@
             background: var(--card-bg); color: var(--text-color); font-family: inherit; outline: none;
         }
 
-        .font-btn { 
+        .nav-btn { 
             background: var(--card-bg); border: 1px solid var(--border-color); 
-            padding: 5px 12px; border-radius: 8px; cursor: pointer; color: var(--text-color); font-weight: bold;
+            padding: 8px 12px; border-radius: 50%; cursor: pointer; color: var(--text-color);
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- THE WORKING INDEX --- */
+        /* --- INDEX --- */
         .index-container {
             display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px;
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
         }
-        .index-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .index-container::-webkit-scrollbar { display: none; }
 
         .index-item {
             padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border-color);
@@ -89,8 +91,8 @@
         }
         .index-item.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
 
-        /* --- QURAN TEXT & BRACKET FIX --- */
-        main { padding: 30px 20px; max-width: 800px; margin: auto; text-align: center; }
+        /* --- QURAN CONTENT --- */
+        main { padding: 30px 15px; max-width: 900px; margin: auto; text-align: center; }
         
         .quran-container {
             font-family: 'Scheherazade New', serif;
@@ -98,21 +100,23 @@
             line-height: 2.8;
             text-align: justify;
             text-align-last: center;
+            direction: rtl;
         }
 
-        /* The Bracket Fix: Using unicode-bidi to prevent inversion */
+        /* FIXED BRACKETS ﴿ ﴾ */
         .ayah-num {
             display: inline-block;
             color: var(--accent-color);
             font-family: 'Amiri', serif;
-            font-size: 1.2rem;
-            margin: 0 8px;
+            font-size: 1.3rem;
+            margin: 0 5px;
             direction: ltr; 
             unicode-bidi: bidi-override;
+            white-space: nowrap;
         }
 
-        @media (max-width: 600px) {
-            :root { --font-size: 1.5rem; }
+        @media (max-width: 480px) {
+            :root { --font-size: 1.6rem; }
             .surah-name { font-size: 1.1rem; }
         }
     </style>
@@ -121,10 +125,10 @@
 
     <header>
         <div class="top-row">
-            <button class="font-btn" onclick="location.href='index.html'">🏠</button>
+            <button class="nav-btn" onclick="location.href='index.html'">🏠</button>
             <div class="header-info">
-                <span class="surah-name" id="current-surah">سورة الفاتحة</span>
-                <span class="meta-data" id="current-meta">جزء ١ | صفحة ١</span>
+                <span class="surah-name" id="display-surah">سورة الفاتحة</span>
+                <span class="meta-data" id="display-meta">جزء ١ | صفحة ١</span>
             </div>
             <div class="theme-swatches">
                 <div class="swatch" style="background: #ffffff;" onclick="setTheme('light')"></div>
@@ -134,45 +138,31 @@
         </div>
 
         <div class="controls">
-            <button class="font-btn" onclick="changeFontSize(0.1)">A+</button>
-            <button class="font-btn" onclick="changeFontSize(-0.1)">A-</button>
+            <button class="nav-btn" onclick="changeFontSize(0.1)">+</button>
+            <button class="nav-btn" onclick="changeFontSize(-0.1)">-</button>
             <input type="text" class="search-bar" id="surahSearch" placeholder="بحث عن سورة..." oninput="filterIndex()">
         </div>
 
-        <div class="index-container" id="surahIndex">
-            </div>
+        <div class="index-container" id="surahIndex"></div>
     </header>
 
     <main>
-        <div class="quran-container" id="quran-text">
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ <span class="ayah-num">﴿١﴾</span>
-            الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ <span class="ayah-num">﴿٢﴾</span>
-            الرَّحْمَٰنِ الرَّحِيمِ <span class="ayah-num">﴿٣﴾</span>
-            مَالِكِ يَوْمِ الدِّينِ <span class="ayah-num">﴿٤﴾</span>
-            إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ <span class="ayah-num">﴿٥﴾</span>
-            اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ <span class="ayah-num">﴿٦﴾</span>
-            صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ <span class="ayah-num">﴿٧﴾</span>
-        </div>
+        <div class="quran-container" id="quran-content">
+            </div>
     </main>
 
     <script>
-        // Data structure for the index
+        // Data Source
         const surahs = [
-            { id: 1, name: "الفاتحة", page: 1, juz: 1 },
-            { id: 2, name: "البقرة", page: 2, juz: 1 },
-            { id: 3, name: "آل عمران", page: 50, juz: 3 },
-            { id: 4, name: "النساء", page: 77, juz: 4 },
-            { id: 5, name: "المائدة", page: 106, juz: 6 }
+            { id: 1, name: "الفاتحة", page: 1, juz: 1, text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ <span class='ayah-num'>﴿١﴾</span> الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ <span class='ayah-num'>﴿٢﴾</span> الرَّحْمَٰنِ الرَّحِيمِ <span class='ayah-num'>﴿٣﴾</span> مَالِكِ يَوْمِ الدِّينِ <span class='ayah-num'>﴿٤﴾</span> إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ <span class='ayah-num'>﴿٥﴾</span> اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ <span class='ayah-num'>﴿٦﴾</span> صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ <span class='ayah-num'>﴿٧﴾</span>" },
+            { id: 2, name: "البقرة", page: 2, juz: 1, text: "الم <span class='ayah-num'>﴿١﴾</span> ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ <span class='ayah-num'>﴿٢﴾</span> الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ <span class='ayah-num'>﴿٣﴾</span> وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنْزِلَ إِلَيْكَ وَمَا أُنْزِلَ مِنْ قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ <span class='ayah-num'>﴿٤﴾</span> أُولَٰئِكَ عَلَىٰ هُدًى مِنْ رَبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ <span class='ayah-num'>﴿٥﴾</span>" },
+            { id: 3, name: "آل عمران", page: 50, juz: 3, text: "الم <span class='ayah-num'>﴿١﴾</span> اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ <span class='ayah-num'>﴿٢﴾</span> نَزَّلَ عَلَيْكَ الْكِتَابَ بِالْحَقِّ مُصَدِّقًا لِمَا بَيْنَ يَدَيْهِ وَأَنْزَلَ التَّوْرَاةَ وَالْإِنْجِيلَ <span class='ayah-num'>﴿٣﴾</span>" }
         ];
 
-        // 1. Fix Brackets Logic: Already handled in CSS using bidi-override
-        
-        // 2. Initialize and Filter Index
-        function renderIndex(filter = "") {
+        function renderIndex(query = "") {
             const container = document.getElementById('surahIndex');
             container.innerHTML = "";
-            
-            surahs.filter(s => s.name.includes(filter)).forEach(s => {
+            surahs.filter(s => s.name.includes(query)).forEach(s => {
                 const item = document.createElement('div');
                 item.className = "index-item";
                 item.innerText = s.name;
@@ -181,36 +171,34 @@
             });
         }
 
+        function loadSurah(s) {
+            document.getElementById('display-surah').innerText = "سورة " + s.name;
+            document.getElementById('display-meta').innerText = `جزء ${s.juz} | صفحة ${s.page}`;
+            document.getElementById('quran-content').innerHTML = s.text;
+            
+            // Highlight active index item
+            document.querySelectorAll('.index-item').forEach(el => {
+                el.classList.toggle('active', el.innerText === s.name);
+            });
+            window.scrollTo(0, 0);
+        }
+
         function filterIndex() {
             const val = document.getElementById('surahSearch').value;
             renderIndex(val);
         }
 
-        // 3. Navigation Logic
-        function loadSurah(surah) {
-            document.getElementById('current-surah').innerText = "سورة " + surah.name;
-            document.getElementById('current-meta').innerText = `جزء ${surah.juz} | صفحة ${surah.page}`;
-            
-            // In a real app, you'd fetch the text here. 
-            // For this demo, we'll just update the UI state.
-            const items = document.querySelectorAll('.index-item');
-            items.forEach(i => i.classList.remove('active'));
-            event.target.classList.add('active');
+        function setTheme(t) { document.body.setAttribute('data-theme', t); }
+
+        let scale = 1.8;
+        function changeFontSize(d) {
+            scale += d;
+            document.documentElement.style.setProperty('--font-size', scale + 'rem');
         }
 
-        // 4. UX Controls
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-        }
-
-        let currentScale = 1.8;
-        function changeFontSize(delta) {
-            currentScale += delta;
-            document.documentElement.style.setProperty('--font-size', currentScale + 'rem');
-        }
-
-        // Start
+        // Init
         renderIndex();
+        loadSurah(surahs[0]);
     </script>
 </body>
 </html>
