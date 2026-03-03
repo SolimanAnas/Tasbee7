@@ -214,14 +214,14 @@
         return str.replace(/[ًٌٍَُِّْـ]/g, ''); // removes tashkeel and tatweel
       }
 
-      // ---------- Load All Parts (files in same directory) ----------
+      // ---------- Load All Parts (from assets folder) ----------
       async function loadAllParts() {
         App.isLoading = true;
         App.loadErrors = [];
         const parts = [1, 2, 3, 4, 5];
         const fetchPromises = parts.map(async (p) => {
           try {
-            const response = await fetch(`part${p}.json`); // <-- no "assets/"
+            const response = await fetch(`assets/part${p}.json`); // <-- from assets folder
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return await response.json();
           } catch (err) {
@@ -236,7 +236,7 @@
         App.data = results.filter(r => r !== null).flat();
 
         if (App.data.length === 0) {
-          contentEl.innerHTML = `<div class="error-message">تعذر تحميل أي جزء. تأكد من وجود ملفات part1.json إلى part5.json في نفس مجلد الصفحة.</div>`;
+          contentEl.innerHTML = `<div class="error-message">تعذر تحميل أي جزء. تأكد من وجود ملفات assets/part1.json إلى assets/part5.json.</div>`;
           App.isLoading = false;
           return;
         }
