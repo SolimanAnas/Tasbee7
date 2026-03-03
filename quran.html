@@ -6,7 +6,7 @@
 <title>المصحف الشريف</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#121212">
+<meta name="theme-color" content="#000000">
 
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 
@@ -14,22 +14,15 @@
 
 /* ================= ROOT ================= */
 :root{
-    --bg:#f4ecd8;
-    --text:#222;
+    --bg:#000;
+    --text:#fff;
     --accent:#10b981;
-    --dim:rgba(0,0,0,0);
-    --transition:0.35s cubic-bezier(.4,0,.2,1);
-}
-
-[data-theme="dark"]{
-    --bg:#121212;
-    --text:#f5f5f5;
 }
 
 *{
-    box-sizing:border-box;
     margin:0;
     padding:0;
+    box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
 }
 
@@ -44,14 +37,24 @@ body{
 }
 
 /* ================= HEADER ================= */
+
 header{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
     padding:12px 16px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    border-bottom:1px solid rgba(0,0,0,0.08);
-    background:var(--bg);
+    background:rgba(0,0,0,0.7);
+    backdrop-filter:blur(8px);
     z-index:10;
+    transition:0.3s;
+}
+
+body.focus-mode header{
+    transform:translateY(-100%);
 }
 
 .header-center{
@@ -60,118 +63,78 @@ header{
 }
 
 #surahName{
-    font-size:18px;
+    font-size:16px;
     font-weight:bold;
     cursor:pointer;
 }
 
 #pageMeta{
-    font-size:14px;
+    font-size:13px;
     opacity:.8;
     cursor:pointer;
-}
-
-#progressBar{
-    height:4px;
-    width:0%;
-    background:var(--accent);
-    transition:0.3s;
 }
 
 button{
     background:none;
     border:none;
-    font-size:20px;
+    color:#fff;
+    font-size:18px;
     cursor:pointer;
 }
 
 /* ================= MAIN ================= */
+
 main{
     flex:1;
-    position:relative;
     display:flex;
     align-items:center;
     justify-content:center;
-    perspective:2000px;
+    perspective:1200px;
     overflow:hidden;
 }
 
+/* ================= PAGE FRAME ================= */
+
 .page-frame{
     width:100%;
-    max-width:600px;
     height:100%;
     display:flex;
     align-items:center;
     justify-content:center;
-    position:relative;
-    transform-style:preserve-3d;
-    transition:var(--transition);
+    transition:transform 0.25s ease, opacity 0.25s ease;
 }
 
 .mushaf-img{
-    max-width:100%;
-    max-height:100%;
+    height:100%;
+    max-height:100vh;
+    width:auto;
     object-fit:contain;
-    border-radius:6px;
-    box-shadow:0 15px 40px rgba(0,0,0,.25);
     user-select:none;
     -webkit-user-drag:none;
 }
 
-/* ================= CURL ANIMATION ================= */
-.page-frame::after{
-    content:"";
-    position:absolute;
-    right:0;
-    top:0;
-    width:50px;
-    height:100%;
-    background:linear-gradient(to left, rgba(0,0,0,.25), transparent);
-    transform-origin:right center;
-    transition:0.3s;
+/* ================= SIMPLE PERSPECTIVE SWIPE ================= */
+
+.swipe-next{
+    transform:translateX(-30%) rotateY(-10deg);
+    opacity:0;
 }
 
-.curl-next{
-    transform:rotateY(-15deg);
-}
-.curl-next::after{
-    transform:rotateY(-35deg);
+.swipe-prev{
+    transform:translateX(30%) rotateY(10deg);
+    opacity:0;
 }
 
-.curl-prev{
-    transform:rotateY(15deg);
-}
-.curl-prev::after{
-    transform:rotateY(35deg);
+/* ================= ZOOM MODE ================= */
+
+.zoomed .mushaf-img{
+    height:115%;
+    transform:translateY(-5%);
 }
 
-/* ================= DIM OVERLAY ================= */
-.dim-layer{
-    position:absolute;
-    inset:0;
-    background:var(--dim);
-    pointer-events:none;
-    transition:.4s;
-}
+/* ================= PANELS ================= */
 
-/* ================= BOOKMARK ================= */
-.bookmark-indicator{
-    position:absolute;
-    top:10px;
-    left:10px;
-    background:var(--accent);
-    color:#fff;
-    padding:4px 10px;
-    border-radius:12px;
-    font-size:12px;
-    display:none;
-}
-.bookmark-indicator.visible{
-    display:block;
-}
-
-/* ================= SELECTOR PANEL ================= */
-.selector-panel{
+.panel{
     position:fixed;
     bottom:-100%;
     left:0;
@@ -179,77 +142,68 @@ main{
     height:60%;
     background:#111;
     color:#fff;
-    overflow:auto;
     padding:20px;
-    transition:.4s;
-    z-index:999;
-    border-top-left-radius:20px;
-    border-top-right-radius:20px;
+    overflow:auto;
+    transition:0.4s;
+    z-index:20;
 }
 
-.selector-panel.open{
+.panel.open{
     bottom:0;
 }
 
-.selector-panel h3{
+.panel h3{
     margin-bottom:15px;
 }
 
-/* ================= TAFSIR PANEL ================= */
-.tafsir-panel{
-    position:fixed;
-    bottom:-100%;
-    left:0;
-    right:0;
-    height:60%;
-    background:#1a1a1a;
+.panel div{
+    padding:8px 0;
+    border-bottom:1px solid #333;
+    cursor:pointer;
+}
+
+/* ================= SETTINGS PANEL ================= */
+
+#settingsPanel button{
+    display:block;
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:#222;
     color:#fff;
-    padding:20px;
-    overflow:auto;
-    transition:.4s;
-    z-index:999;
-    border-top-left-radius:20px;
-    border-top-right-radius:20px;
-}
-
-.tafsir-panel.open{
-    bottom:0;
-}
-
-/* ================= ZOOM MODE ================= */
-.zoomed .page-frame{
-    max-width:95% !important;
+    border-radius:8px;
 }
 
 </style>
 </head>
 
-<body data-theme="light">
+<body>
 
 <header>
-<button onclick="goHome()">🏠</button>
+<button onclick="prevPage()">⟨</button>
 
 <div class="header-center">
 <div id="surahName" onclick="openSurahSelector()">سورة الفاتحة</div>
 <div id="pageMeta" onclick="openJuzSelector()">الجزء ١ | صفحة ١</div>
-<div id="progressBar"></div>
 </div>
 
-<button onclick="toggleDim()">🌙</button>
-<button onclick="toggleBookmark()">🔖</button>
-<button onclick="toggleTafsir()">📘</button>
+<button onclick="nextPage()">⟩</button>
+<button onclick="openSettings()">⚙️</button>
 </header>
 
 <main id="swipeArea">
-<div class="bookmark-indicator" id="bookmarkLabel">🔖 محفوظة</div>
-<div class="dim-layer" id="dimLayer"></div>
 <div class="page-frame" id="pageFrame">
 <img id="pageImg" class="mushaf-img" src="mushaf/1.png">
 </div>
 </main>
 
-<div class="selector-panel" id="selectorPanel"></div>
-<div class="tafsir-panel" id="tafsirPanel"></div>
+<div class="panel" id="selectorPanel"></div>
+
+<div class="panel" id="settingsPanel">
+<h3>الإعدادات</h3>
+<button onclick="toggleTheme()">تبديل الوضع الليلي</button>
+<button onclick="downloadAllPages()">تحميل جميع الصفحات</button>
+</div>
 
 <script src="js/surah-map.js"></script>
 <script src="js/juz-map.js"></script>
