@@ -2,469 +2,385 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>حصن المسلم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>حصن المسلم Pro</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #2c3e50;
-      --bg-color: #f4f6f8;
+      --bg: #f4f7f9;
+      --header-bg: linear-gradient(135deg, #2c3e50, #34495e);
       --card-bg: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --accent: #3498db;
+      --border: #e1e8ed;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [data-theme="sepia"] {
+      --bg: #f4ecd8;
+      --card-bg: #fdf6e3;
+      --text: #5b4636;
+      --text-muted: #8c7769;
+      --border: #e6dfcc;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #b0b0b0;
+      --border: #333;
+      --header-bg: #1a1a1a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
     body {
       font-family: 'Amiri', serif;
-      background: var(--bg-color);
-      color: #1e2a3a;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s ease;
+      line-height: 1.6;
       overflow-x: hidden;
     }
 
-    /* --- Header UI --- */
-    header {
-      background: linear-gradient(135deg, #2c3e50, #34495e);
-      color: white;
-      padding: 8px 12px;
-      position: sticky;
+    /* --- Progress Bar --- */
+    #scroll-progress {
+      position: fixed;
       top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-      transition: all 0.3s ease-in-out;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      width: 0%;
+      z-index: 1001;
+      transition: width 0.1s ease;
     }
 
-    /* Collapse effect for scrolling */
-    header.scrolled {
-      padding: 5px 12px;
+    /* --- Optimized Header --- */
+    header {
+      background: var(--header-bg);
+      color: white;
+      padding: 10px 15px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
     }
 
     .toolbar {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
-      max-width: 900px;
+      max-width: 800px;
       margin: 0 auto;
-      width: 100%;
     }
 
     .home-btn {
       background: rgba(255,255,255,0.15);
       border: none;
-      border-radius: 50%;
+      border-radius: 12px;
       width: 40px;
       height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: white;
       font-size: 1.2rem;
-      flex-shrink: 0;
     }
 
-    .search-container {
-      position: relative;
+    .search-box {
       flex: 1;
-      display: flex;
-      align-items: center;
+      position: relative;
     }
 
-    .toolbar input {
+    .search-box input {
       width: 100%;
       padding: 10px 15px;
-      padding-left: 35px; /* space for clear btn */
+      border-radius: 12px;
       border: none;
-      border-radius: 25px;
+      background: rgba(255,255,255,0.95);
       font-family: inherit;
       font-size: 0.95rem;
-      background: #ecf0f1;
       outline: none;
     }
 
-    .clear-search {
-      position: absolute;
-      left: 10px;
-      background: #bdc3c7;
-      color: white;
+    /* --- Floating Navigation (Thumb Zone) --- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 8px 15px;
+      border-radius: 25px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      z-index: 999;
+    }
+
+    .nav-btn {
+      background: none;
       border: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      font-size: 10px;
+      color: var(--text);
+      font-size: 1.2rem;
       cursor: pointer;
-      display: none;
+      padding: 5px;
     }
 
-    /* Hide section select when scrolled to save space */
     #section-select {
-      max-width: 120px;
-      padding: 8px;
-      border-radius: 20px;
+      background: none;
       border: none;
-      background: rgba(255,255,255,0.9);
+      color: var(--text);
       font-family: inherit;
-      font-size: 0.85rem;
-      transition: opacity 0.3s;
-    }
-    
-    header.scrolled #section-select {
-      display: none;
+      font-weight: bold;
+      max-width: 120px;
+      outline: none;
     }
 
-    /* --- Main Content --- */
+    /* --- Content Area --- */
     main {
-      flex: 1;
-      width: 100%;
-      max-width: 100%;
-      padding: 0; /* Remove side padding for full width feel on mobile */
-      margin: 0 auto;
-    }
-
-    .content-wrapper {
-      padding: 10px 12px 30px;
       max-width: 800px;
       margin: 0 auto;
+      padding: 20px 15px 100px; /* Space for bottom nav */
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 25px;
     }
 
     .section-title {
       font-family: 'Scheherazade New', serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin: 15px 5px 20px;
-      color: var(--primary-color);
-      text-align: center;
-      line-height: 1.2;
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 5px;
     }
 
     .cards-container {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      gap: 15px;
     }
 
     .card {
       background: var(--card-bg);
-      border-radius: 12px;
-      padding: 18px 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border: 1px solid #edf0f2;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease;
     }
 
-    .card.highlight {
-      background: #fff9c4;
-      border-color: #fdd835;
-    }
+    .card:active { transform: scale(0.98); }
 
     .card-arabic {
       font-family: 'Scheherazade New', serif;
-      font-size: 1.6rem;
-      line-height: 1.8;
-      margin-bottom: 12px;
-      word-break: break-word;
+      font-size: 1.7rem;
+      line-height: 1.9;
+      margin-bottom: 15px;
       text-align: justify;
-      color: #000;
+      color: var(--text);
     }
 
-    .card-reference {
+    .card-ref {
       font-size: 0.85rem;
-      color: #666;
-      border-top: 1px solid #f0f0f0;
-      padding-top: 8px;
-      line-height: 1.4;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      font-style: italic;
     }
 
-    /* --- Animations --- */
-    .slide-left { transform: translateX(-20px); opacity: 0; }
-    .slide-right { transform: translateX(20px); opacity: 0; }
-
-    /* --- Swipe Hint --- */
-    .swipe-hint {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(44, 62, 80, 0.9);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 50px;
-      text-align: center;
-      font-size: 1rem;
-      z-index: 1000;
-      backdrop-filter: blur(5px);
+    /* --- Theme Toggle --- */
+    .theme-dock {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      white-space: nowrap;
-      transition: opacity 1.5s ease;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      gap: 8px;
+    }
+    .dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid white;
       cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .swipe-hint.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-
+    /* --- Utilities --- */
     .hidden { display: none !important; }
+    .highlight { background: #fff9c4 !important; color: #000 !important; }
 
-    /* --- Footer --- */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 0.8rem;
-      color: #999;
-    }
-
-    /* Mobile Responsive Tweaks */
     @media (max-width: 480px) {
-      .card-arabic { font-size: 1.45rem; }
-      .section-title { font-size: 1.5rem; }
-      .home-btn { width: 36px; height: 36px; }
+      .card-arabic { font-size: 1.5rem; }
+      .section-title { font-size: 1.6rem; }
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
 
-  <header id="main-header">
+  <div id="scroll-progress"></div>
+
+  <header id="header">
     <div class="toolbar">
-      <button class="home-btn" onclick="location.href='index.html'" title="الرئيسية">🏠</button>
-      
-      <div class="search-container">
-        <input type="text" id="search-input" placeholder="بحث في الأذكار...">
-        <button id="clear-search" class="clear-search">✕</button>
+      <button class="home-btn" onclick="location.href='index.html'">🏠</button>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="ابحث عن دعاء...">
       </div>
-
-      <select id="section-select" aria-label="اختر باباً"></select>
+      <div class="theme-dock">
+        <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
+        <div class="dot" style="background:#f4ecd8;" onclick="setTheme('sepia')"></div>
+        <div class="dot" style="background:#333;" onclick="setTheme('dark')"></div>
+      </div>
     </div>
   </header>
 
   <main>
-    <div class="content-wrapper">
-      <div id="section-title" class="section-title"></div>
-      <div id="content">
-        <div style="text-align:center; padding:50px;">جاري تحميل حصن المسلم...</div>
-      </div>
+    <div class="section-header">
+      <h1 id="main-title" class="section-title">حصن المسلم</h1>
+    </div>
+    <div id="content-area">
+      <div style="text-align:center; padding:50px;">جاري تجهيز الأذكار...</div>
     </div>
   </main>
 
-  <div id="swipe-hint" class="swipe-hint hidden">
-    <span>‹</span>
-    <span>اسحب لليمين أو اليسار للتنقل</span>
-    <span>›</span>
-  </div>
-
-  <div class="footer">حصن المسلم · جميع الأجزاء</div>
+  <nav class="bottom-nav">
+    <button class="nav-btn" onclick="nav('next')">›</button>
+    <select id="section-select"></select>
+    <button class="nav-btn" onclick="nav('prev')">‹</button>
+  </nav>
 
   <script>
-    (function() {
-      const App = {
-        data: [],
-        currentSection: 0,
-        viewMode: 'section',
-        searchQuery: '',
-        searchResults: [],
-        touchStartX: 0,
-        touchEndX: 0,
-        isLoading: true
-      };
+    const App = {
+      data: [],
+      currentIdx: 0,
+      searchIndex: [],
+      isSearchMode: false
+    };
 
-      const contentEl = document.getElementById('content');
-      const sectionSelect = document.getElementById('section-select');
-      const sectionTitleEl = document.getElementById('section-title');
-      const searchInput = document.getElementById('search-input');
-      const clearSearchBtn = document.getElementById('clear-search');
-      const header = document.getElementById('main-header');
-      const swipeHint = document.getElementById('swipe-hint');
+    // --- UX: Theme & Progress ---
+    function setTheme(t) {
+      document.body.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+    }
 
-      // --- Header Collapse Logic ---
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 20) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
-        }
-      });
+    window.onscroll = () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById("scroll-progress").style.width = scrolled + "%";
+    };
 
-      // --- Swipe Hint Logic ---
-      function initSwipeHint() {
-        if (!localStorage.getItem('swipeHintSeen')) {
-          swipeHint.classList.remove('hidden');
-          
-          const fadeOut = () => {
-            swipeHint.classList.add('fade-out');
-            setTimeout(() => {
-              swipeHint.classList.add('hidden');
-              localStorage.setItem('swipeHintSeen', 'true');
-            }, 1500);
-          };
+    // --- Core Logic ---
+    async function init() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
 
-          // Auto fade after 5 seconds
-          const timer = setTimeout(fadeOut, 5000);
+      const parts = [1, 2, 3, 4, 5];
+      const results = await Promise.all(parts.map(p => 
+        fetch(`assets/part${p}.json`).then(res => res.ok ? res.json() : []).catch(() => [])
+      ));
+      
+      App.data = results.flat();
+      buildUI();
+      render();
+    }
 
-          // Dismiss on touch
-          swipeHint.addEventListener('click', () => {
-            clearTimeout(timer);
-            fadeOut();
-          });
-        }
-      }
+    function buildUI() {
+      const select = document.getElementById('section-select');
+      App.data.forEach((sec, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = sec.title;
+        select.appendChild(opt);
 
-      function normalizeArabic(str) {
-        return str.replace(/[ًٌٍَُِّْـ]/g, '');
-      }
-
-      async function loadAllParts() {
-        const parts = [1, 2, 3, 4, 5];
-        const fetchPromises = parts.map(async (p) => {
-          try {
-            const res = await fetch(`assets/part${p}.json`);
-            return res.ok ? await res.json() : null;
-          } catch { return null; }
-        });
-
-        const results = await Promise.all(fetchPromises);
-        App.data = results.filter(r => r !== null).flat();
-
-        if (App.data.length === 0) {
-          contentEl.innerHTML = '<div style="color:red; text-align:center;">خطأ في تحميل البيانات</div>';
-          return;
-        }
-
-        buildSectionSelect();
-        buildSearchIndex();
-        App.isLoading = false;
-        renderSection();
-        initSwipeHint();
-      }
-
-      function buildSectionSelect() {
-        sectionSelect.innerHTML = '';
-        App.data.forEach((sec, idx) => {
-          const opt = document.createElement('option');
-          opt.value = idx;
-          opt.textContent = sec.title;
-          sectionSelect.appendChild(opt);
-        });
-      }
-
-      let searchIndex = [];
-      function buildSearchIndex() {
-        App.data.forEach((section, sIdx) => {
-          section.items.forEach((item, iIdx) => {
-            searchIndex.push({
-              sectionIdx: sIdx,
-              itemIdx: iIdx,
-              sectionTitle: section.title,
-              ar: item.ar,
-              ref: item.ref,
-              normAr: normalizeArabic(item.ar),
-              normTitle: normalizeArabic(section.title)
-            });
+        sec.items.forEach((item, itemIdx) => {
+          App.searchIndex.push({
+            sIdx: i,
+            iIdx: itemIdx,
+            title: sec.title,
+            ar: item.ar,
+            norm: item.ar.replace(/[ًٌٍَُِّْـ]/g, '')
           });
         });
-      }
+      });
 
-      function renderSection(direction = null) {
-        const section = App.data[App.currentSection];
-        sectionTitleEl.textContent = section.title;
-        sectionSelect.value = App.currentSection;
-        
-        const cardsHtml = section.items.map((item, idx) => `
-          <div class="card" data-idx="${idx}">
-            <div class="card-arabic">${item.ar}</div>
-            <div class="card-reference">${item.ref || ''}</div>
-          </div>
-        `).join('');
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'cards-container';
-        if (direction === 'next') wrapper.classList.add('slide-left');
-        if (direction === 'prev') wrapper.classList.add('slide-right');
-        wrapper.innerHTML = cardsHtml;
-
-        contentEl.innerHTML = '';
-        contentEl.appendChild(wrapper);
-
-        window.scrollTo(0, 0);
-        setTimeout(() => wrapper.classList.remove('slide-left', 'slide-right'), 50);
-      }
-
-      function performSearch(query) {
-        if (!query.trim()) {
-          App.viewMode = 'section';
-          clearSearchBtn.style.display = 'none';
-          renderSection();
-          return;
-        }
-        clearSearchBtn.style.display = 'block';
-        const normQuery = normalizeArabic(query).toLowerCase();
-        const results = searchIndex.filter(item => 
-          item.normAr.includes(normQuery) || item.normTitle.includes(normQuery)
-        );
-
-        App.viewMode = 'search';
-        sectionTitleEl.textContent = `نتائج البحث: ${results.length}`;
-        
-        contentEl.innerHTML = results.map(r => `
-          <div class="card" onclick="jumpTo('${r.sectionIdx}', '${r.itemIdx}')" style="cursor:pointer">
-            <div style="font-size:0.8rem; color:#2c3e50; margin-bottom:5px; font-weight:bold;">${r.sectionTitle}</div>
-            <div class="card-arabic" style="font-size:1.2rem; line-height:1.5">${r.ar}</div>
-          </div>
-        `).join('');
-      }
-
-      window.jumpTo = (sIdx, iIdx) => {
-        App.currentSection = parseInt(sIdx);
-        App.viewMode = 'section';
-        searchInput.value = '';
-        clearSearchBtn.style.display = 'none';
-        renderSection();
-        setTimeout(() => {
-          const el = document.querySelector(`[data-idx="${iIdx}"]`);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add('highlight');
-          }
-        }, 300);
+      select.onchange = (e) => {
+        App.currentIdx = parseInt(e.target.value);
+        App.isSearchMode = false;
+        render();
       };
+    }
 
-      // --- Navigation ---
-      function nav(dir) {
-        if (App.viewMode !== 'section') return;
-        if (dir === 'next' && App.currentSection < App.data.length - 1) {
-          App.currentSection++;
-          renderSection('next');
-        } else if (dir === 'prev' && App.currentSection > 0) {
-          App.currentSection--;
-          renderSection('prev');
-        }
+    function render() {
+      const section = App.data[App.currentIdx];
+      document.getElementById('main-title').textContent = section.title;
+      document.getElementById('section-select').value = App.currentIdx;
+      
+      const html = section.items.map((item, i) => `
+        <div class="card" data-item="${i}">
+          <div class="card-arabic">${item.ar}</div>
+          <div class="card-ref">${item.ref || ''}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+      window.scrollTo(0, 0);
+    }
+
+    function nav(dir) {
+      if (dir === 'next' && App.currentIdx < App.data.length - 1) App.currentIdx++;
+      if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
+      App.isSearchMode = false;
+      render();
+    }
+
+    // --- Advanced Search ---
+    document.getElementById('search-input').oninput = (e) => {
+      const query = e.target.value.trim().replace(/[ًٌٍَُِّْـ]/g, '');
+      if (!query) {
+        if (App.isSearchMode) { App.isSearchMode = false; render(); }
+        return;
       }
 
-      // --- Event Listeners ---
-      searchInput.addEventListener('input', (e) => performSearch(e.target.value));
-      clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        performSearch('');
-      });
-      sectionSelect.addEventListener('change', (e) => {
-        App.currentSection = parseInt(e.target.value);
-        App.viewMode = 'section';
-        renderSection();
-      });
+      App.isSearchMode = true;
+      const results = App.searchIndex.filter(x => x.norm.includes(query) || x.title.includes(query)).slice(0, 50);
+      
+      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
+      document.getElementById('content-area').innerHTML = results.map(r => `
+        <div class="card" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer; border-right:4px solid var(--accent)">
+          <div style="font-size:0.8rem; color:var(--accent); font-weight:bold; margin-bottom:8px;">${r.title}</div>
+          <div class="card-arabic" style="font-size:1.3rem;">${r.ar}</div>
+        </div>
+      `).join('');
+    };
 
-      document.addEventListener('touchstart', e => App.touchStartX = e.changedTouches[0].screenX, {passive: true});
-      document.addEventListener('touchend', e => {
-        App.touchEndX = e.changedTouches[0].screenX;
-        const diff = App.touchStartX - App.touchEndX;
-        if (Math.abs(diff) > 70) diff > 0 ? nav('prev') : nav('next');
-      }, {passive: true});
+    window.jumpTo = (sIdx, iIdx) => {
+      App.currentIdx = sIdx;
+      App.isSearchMode = false;
+      document.getElementById('search-input').value = '';
+      render();
+      setTimeout(() => {
+        const el = document.querySelector(`[data-item="${iIdx}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight');
+          setTimeout(() => el.classList.remove('highlight'), 2000);
+        }
+      }, 300);
+    };
 
-      loadAllParts();
-    })();
+    // --- Gestures ---
+    let touchX = 0;
+    document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX, {passive: true});
+    document.addEventListener('touchend', e => {
+      const diff = touchX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 80) diff > 0 ? nav('prev') : nav('next');
+    }, {passive: true});
+
+    init();
   </script>
 </body>
 </html>
