@@ -1,150 +1,144 @@
-// ====== QURAN APP ENGINE ======
+/* ================= GLOBAL STATE ================= */
 
 let currentPage = 1;
 const totalPages = 604;
 
 const img = document.getElementById("pageImg");
 const frame = document.getElementById("pageFrame");
-const surahTitle = document.getElementById("surahName");
+const surahName = document.getElementById("surahName");
 const pageMeta = document.getElementById("pageMeta");
+const selectorPanel = document.getElementById("selectorPanel");
+const tafsirPanel = document.getElementById("tafsirPanel");
 const dimLayer = document.getElementById("dimLayer");
 const bookmarkLabel = document.getElementById("bookmarkLabel");
+const progressBar = document.getElementById("progressBar");
 
+let touchStartX = 0;
+let zoomMode = false;
 
-// ===== INIT =====
-window.addEventListener("load", () => {
+/* ================= INIT ================= */
 
-    const saved = localStorage.getItem("lastPage");
-    if (saved) currentPage = parseInt(saved);
+window.onload = function () {
+
+    const savedPage = localStorage.getItem("lastPage");
+    if (savedPage) currentPage = parseInt(savedPage);
 
     renderPage();
     initSwipe();
-    updateBookmarkIndicator();
-});
+    initDoubleTap();
+};
 
+/* ================= PAGE RENDER ================= */
 
-// ===== PAGE RENDER =====
 function renderPage() {
 
     img.src = `mushaf/${currentPage}.png`;
 
-    const surah = getCurrentSurah();
-    const juz = getCurrentJuz();
-
-    surahTitle.innerText = "سورة " + surah.name;
-    pageMeta.innerText = `الجزء ${juz.juz} | صفحة ${currentPage}`;
-
-    preloadNext();
-    preloadPrev();
-
     localStorage.setItem("lastPage", currentPage);
+
+    updateSurahAndJuz();
+    updateProgress();
+    updateBookmarkIndicator();
 }
 
+/* ================= SURAH + JUZ ================= */
 
-// ===== PRELOAD FOR SMOOTHNESS =====
-function preloadNext(){
-    if(currentPage < totalPages){
-        const preload = new Image();
-        preload.src = `mushaf/${currentPage+1}.png`;
-    }
+function updateSurahAndJuz() {
+
+    const surah = SURAH_MAP.slice().reverse().find(s => currentPage >= s.page);
+    const juz = JUZ_MAP.slice().reverse().find(j => currentPage >= j.page);
+
+    if (surah) surahName.innerText = "سورة " + surah.name;
+    if (juz) pageMeta.innerText = "الجزء " + juz.number + " | صفحة " + currentPage;
 }
 
-function preloadPrev(){
-    if(currentPage > 1){
-        const preload = new Image();
-        preload.src = `mushaf/${currentPage-1}.png`;
-    }
-}
+/* ================= CURL ANIMATION ================= */
 
+function nextPage() {
 
-// ===== PAGE FLIP 3D =====
-function nextPage(){
-    if(currentPage >= totalPages) return;
+    if (currentPage >= totalPages) return;
 
-    frame.classList.add("flip-next");
+    frame.classList.add("curl-next");
 
-    setTimeout(()=>{
+    setTimeout(() => {
         currentPage++;
         renderPage();
-        frame.classList.remove("flip-next");
-    }, 400);
+        frame.classList.remove("curl-next");
+    }, 250);
 }
 
-function prevPage(){
-    if(currentPage <= 1) return;
+function prevPage() {
 
-    frame.classList.add("flip-prev");
+    if (currentPage <= 1) return;
 
-    setTimeout(()=>{
+    frame.classList.add("curl-prev");
+
+    setTimeout(() => {
         currentPage--;
         renderPage();
-        frame.classList.remove("flip-prev");
-    }, 400);
+        frame.classList.remove("curl-prev");
+    }, 250);
 }
 
+/* ================= SWIPE ================= */
 
-// ===== RTL SWIPE =====
-function initSwipe(){
-    let startX = 0;
+function initSwipe() {
 
-    document.getElementById("swipeArea")
-    .addEventListener("touchstart", e=>{
-        startX = e.changedTouches[0].screenX;
+    const swipeArea = document.getElementById("swipeArea");
+
+    swipeArea.addEventListener("touchstart", e => {
+        touchStartX = e.changedTouches[0].screenX;
     });
 
-    document.getElementById("swipeArea")
-    .addEventListener("touchend", e=>{
-        let diff = startX - e.changedTouches[0].screenX;
+    swipeArea.addEventListener("touchend", e => {
 
-        if(Math.abs(diff) > 50){
-            if(diff > 0){
-                // swipe left → previous (RTL)
-                prevPage();
-            }else{
-                // swipe right → next
-                nextPage();
+        const diff = touchStartX - e.changedTouches[0].screenX;
+
+        if (Math.abs(diff) < 50) return;
+
+        if (diff > 0) {
+            prevPage();   // RTL correct
+        } else {
+            nextPage();
+        }
+    });
+}
+
+/* ================= DOUBLE TAP ZOOM ================= */
+
+function initDoubleTap() {
+
+    let lastTap = 0;
+
+    document.getElementById("swipeArea").addEventListener("touchend", function (e) {
+
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+
+        if (tapLength < 300 && tapLength > 0) {
+
+            zoomMode = !zoomMode;
+
+            if (zoomMode) {
+                document.body.classList.add("zoomed");
+            } else {
+                document.body.classList.remove("zoomed");
             }
         }
+
+        lastTap = currentTime;
     });
 }
 
+/* ================= BOOKMARK ================= */
 
-// ===== SURAH AUTO DETECT =====
-function getCurrentSurah(){
-    let surah = SURAH_MAP[0];
-
-    for(let i=0; i<SURAH_MAP.length; i++){
-        if(currentPage >= SURAH_MAP[i].page){
-            surah = SURAH_MAP[i];
-        }
-    }
-
-    return surah;
-}
-
-
-// ===== JUZ AUTO DETECT =====
-function getCurrentJuz(){
-    let juz = JUZ_MAP[0];
-
-    for(let i=0; i<JUZ_MAP.length; i++){
-        if(currentPage >= JUZ_MAP[i].page){
-            juz = JUZ_MAP[i];
-        }
-    }
-
-    return juz;
-}
-
-
-// ===== BOOKMARK SYSTEM =====
-function toggleBookmark(){
+function toggleBookmark() {
 
     let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
 
-    if(bookmarks.includes(currentPage)){
+    if (bookmarks.includes(currentPage)) {
         bookmarks = bookmarks.filter(p => p !== currentPage);
-    }else{
+    } else {
         bookmarks.push(currentPage);
     }
 
@@ -153,41 +147,116 @@ function toggleBookmark(){
     updateBookmarkIndicator();
 }
 
-function updateBookmarkIndicator(){
-    let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+function updateBookmarkIndicator() {
 
-    if(bookmarks.includes(currentPage)){
+    const bookmarks = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+
+    if (bookmarks.includes(currentPage)) {
         bookmarkLabel.classList.add("visible");
-    }else{
+    } else {
         bookmarkLabel.classList.remove("visible");
     }
 }
 
+/* ================= READING PROGRESS ================= */
 
-// ===== DIM NIGHT MODE =====
-function toggleDim(){
-    const current = dimLayer.style.background;
+function updateProgress() {
 
-    if(current && current !== "rgba(0, 0, 0, 0)"){
+    let stats = JSON.parse(localStorage.getItem("readingStats") || "{}");
+
+    stats[currentPage] = true;
+
+    localStorage.setItem("readingStats", JSON.stringify(stats));
+
+    const readCount = Object.keys(stats).length;
+    const percent = Math.floor((readCount / totalPages) * 100);
+
+    progressBar.style.width = percent + "%";
+}
+
+/* ================= DIM MODE ================= */
+
+function toggleDim() {
+
+    if (dimLayer.style.background === "rgba(0,0,0,0.5)") {
         dimLayer.style.background = "rgba(0,0,0,0)";
-    }else{
-        dimLayer.style.background = "rgba(0,0,0,0.55)";
+    } else {
+        dimLayer.style.background = "rgba(0,0,0,0.5)";
     }
 }
 
+/* ================= SELECTORS ================= */
 
-// ===== HOME =====
+function openSurahSelector() {
+
+    selectorPanel.innerHTML = "<h3>اختر سورة</h3>";
+
+    SURAH_MAP.forEach(s => {
+
+        const div = document.createElement("div");
+        div.innerText = s.name;
+        div.style.padding = "10px";
+        div.style.cursor = "pointer";
+
+        div.onclick = () => {
+            currentPage = s.page;
+            renderPage();
+            selectorPanel.classList.remove("open");
+        };
+
+        selectorPanel.appendChild(div);
+    });
+
+    selectorPanel.classList.add("open");
+}
+
+function openJuzSelector() {
+
+    selectorPanel.innerHTML = "<h3>اختر جزء</h3>";
+
+    JUZ_MAP.forEach(j => {
+
+        const div = document.createElement("div");
+        div.innerText = "الجزء " + j.number;
+        div.style.padding = "10px";
+        div.style.cursor = "pointer";
+
+        div.onclick = () => {
+            currentPage = j.page;
+            renderPage();
+            selectorPanel.classList.remove("open");
+        };
+
+        selectorPanel.appendChild(div);
+    });
+
+    selectorPanel.classList.add("open");
+}
+
+/* ================= TAFSIR ================= */
+
+function toggleTafsir() {
+
+    if (tafsirPanel.classList.contains("open")) {
+        tafsirPanel.classList.remove("open");
+        return;
+    }
+
+    const surah = SURAH_MAP.slice().reverse().find(s => currentPage >= s.page);
+
+    tafsirPanel.innerHTML = `
+        <h3>${surah.name}</h3>
+        <p>
+        هذا مثال على وضع التفسير.
+        يمكنك لاحقاً تحميل JSON حقيقي للتفسير حسب الصفحة.
+        </p>
+    `;
+
+    tafsirPanel.classList.add("open");
+}
+
+/* ================= HOME ================= */
+
 function goHome(){
     window.location.href = "index.html";
 }
-
-
-// ===== KEYBOARD NAV (Desktop) =====
-document.addEventListener("keydown", e=>{
-    if(e.key === "ArrowLeft"){
-        prevPage();
-    }
-    if(e.key === "ArrowRight"){
-        nextPage();
-    }
-});
