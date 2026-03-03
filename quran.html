@@ -3,202 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>المصحف الرقمي - Pro</title>
+    <title>المصحف الشريف - الطبعة الرقمية</title>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f4ecd8;
-            --text-color: #5b4636;
-            --header-bg: #eadaaf;
-            --accent-color: #8d6e63;
-            --card-bg: #fdf6e3;
-            --border-color: #d3c6aa;
-            --font-size: 1.8rem;
+            --bg: #f4ecd8; --text: #5b4636; --header: #eadaaf; --accent: #8d6e63;
+            --card: #fdf6e3; --border: #d3c6aa; --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --header-bg: #1f1f1f;
-            --accent-color: #81c784;
-            --card-bg: #1e1e1e;
-            --border-color: #333333;
+            --bg: #121212; --text: #e0e0e0; --header: #1f1f1f; --accent: #81c784; --card: #1e1e1e; --border: #333333;
         }
 
-        [data-theme="light"] {
-            --bg-color: #ffffff;
-            --text-color: #1a1a1a;
-            --header-bg: #f8f9fa;
-            --accent-color: #2e7d32;
-            --card-bg: #ffffff;
-            --border-color: #eeeeee;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s ease; }
-
-        body {
-            font-family: 'Amiri', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
-
-        /* --- HEADER --- */
+        /* --- STICKY HEADER --- */
         header {
-            background-color: var(--header-bg);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--header); padding: 10px 15px; border-bottom: 1px solid var(--border);
+            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .surah-info { text-align: center; flex: 1; }
+        .surah-name { font-size: 1.3rem; font-weight: bold; display: block; color: var(--text); }
+        .page-meta { font-size: 0.85rem; opacity: 0.8; font-family: sans-serif; }
 
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .btn-icon { background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 38px; height: 38px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; }
+
+        /* --- NAVIGATION BAR --- */
+        .nav-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 5px; }
+        .search-input { flex: 1; padding: 10px 18px; border-radius: 25px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: inherit; outline: none; }
         
-        .theme-swatches { display: flex; gap: 8px; }
-        .swatch { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .index-bar { display: flex; overflow-x: auto; gap: 8px; padding: 10px 0; scrollbar-width: none; border-top: 1px solid var(--border); }
+        .index-bar::-webkit-scrollbar { display: none; }
+        .chip { padding: 6px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; white-space: nowrap; font-size: 0.9rem; cursor: pointer; }
+        .chip.active { background: var(--accent); color: white; }
 
-        .header-info { text-align: center; flex: 1; }
-        .surah-name { font-size: 1.2rem; font-weight: bold; display: block; color: var(--text-color); }
-        .meta-data { font-size: 0.8rem; opacity: 0.8; }
-
-        /* --- NAVIGATION & SEARCH --- */
-        .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-        .search-bar { 
-            flex: 1; padding: 10px 20px; border-radius: 25px; border: 1px solid var(--border-color);
-            background: var(--card-bg); color: var(--text-color); font-family: inherit; outline: none;
-        }
-
-        .nav-btn { 
-            background: var(--card-bg); border: 1px solid var(--border-color); 
-            padding: 8px 12px; border-radius: 50%; cursor: pointer; color: var(--text-color);
+        /* --- MUSHAF VIEWPORT --- */
+        main { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 1500px; padding: 10px; }
+        
+        .page-container {
+            width: 100%; max-width: 550px; height: 100%; position: relative;
             display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
         }
 
-        /* --- INDEX --- */
-        .index-container {
-            display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px;
-            scrollbar-width: none;
-        }
-        .index-container::-webkit-scrollbar { display: none; }
-
-        .index-item {
-            padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 20px; white-space: nowrap; font-size: 0.9rem; cursor: pointer;
-        }
-        .index-item.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
-
-        /* --- QURAN CONTENT --- */
-        main { padding: 30px 15px; max-width: 900px; margin: auto; text-align: center; }
-        
-        .quran-container {
-            font-family: 'Scheherazade New', serif;
-            font-size: var(--font-size);
-            line-height: 2.8;
-            text-align: justify;
-            text-align-last: center;
-            direction: rtl;
+        .mushaf-img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-radius: 4px;
+            image-rendering: -webkit-optimize-contrast;
+            transition: opacity 0.3s ease-in-out;
         }
 
-        /* FIXED BRACKETS ﴿ ﴾ */
-        .ayah-num {
-            display: inline-block;
-            color: var(--accent-color);
-            font-family: 'Amiri', serif;
-            font-size: 1.3rem;
-            margin: 0 5px;
-            direction: ltr; 
-            unicode-bidi: bidi-override;
-            white-space: nowrap;
-        }
+        /* FLIP ANIMATION CLASSES */
+        .flip-left { transform: translateX(-100%) rotateY(-20deg); opacity: 0; }
+        .flip-right { transform: translateX(100%) rotateY(20deg); opacity: 0; }
 
-        @media (max-width: 480px) {
-            :root { --font-size: 1.6rem; }
-            .surah-name { font-size: 1.1rem; }
-        }
+        /* --- BASMALAH OVERLAY --- */
+        .basmalah-box { position: absolute; top: 10%; width: 60%; max-width: 300px; z-index: 5; pointer-events: none; opacity: 0; transition: 0.5s; }
+        .basmalah-box.visible { opacity: 1; }
+
+        /* --- FLOATING NAV --- */
+        .side-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 100px; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; border-radius: 0 10px 10px 0; }
+        .side-nav.next { left: 0; border-radius: 10px 0 0 10px; }
+        .side-nav.prev { right: 0; }
     </style>
 </head>
-<body data-theme="sepia">
+<body data-theme="light">
 
     <header>
         <div class="top-row">
-            <button class="nav-btn" onclick="location.href='index.html'">🏠</button>
-            <div class="header-info">
-                <span class="surah-name" id="display-surah">سورة الفاتحة</span>
-                <span class="meta-data" id="display-meta">جزء ١ | صفحة ١</span>
+            <button class="btn-icon" onclick="toggleTheme()">🌓</button>
+            <div class="surah-info">
+                <span class="surah-name" id="surah-title">سورة الفاتحة</span>
+                <span class="page-meta" id="page-meta">الجزء ١ | صفحة ١</span>
             </div>
-            <div class="theme-swatches">
-                <div class="swatch" style="background: #ffffff;" onclick="setTheme('light')"></div>
-                <div class="swatch" style="background: #121212;" onclick="setTheme('dark')"></div>
-                <div class="swatch" style="background: #f4ecd8;" onclick="setTheme('sepia')"></div>
-            </div>
+            <button class="btn-icon" onclick="location.href='index.html'">🏠</button>
         </div>
 
-        <div class="controls">
-            <button class="nav-btn" onclick="changeFontSize(0.1)">+</button>
-            <button class="nav-btn" onclick="changeFontSize(-0.1)">-</button>
-            <input type="text" class="search-bar" id="surahSearch" placeholder="بحث عن سورة..." oninput="filterIndex()">
+        <div class="nav-tools">
+            <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن سورة..." oninput="searchSurah()">
+            <button class="btn-icon" onclick="setBookmark()">🔖</button>
         </div>
 
-        <div class="index-container" id="surahIndex"></div>
+        <div class="index-bar" id="indexBar"></div>
     </header>
 
-    <main>
-        <div class="quran-container" id="quran-content">
-            </div>
+    <main id="swipe-zone">
+        <div class="side-nav prev" onclick="prevPage()"><span>›</span></div>
+        <div class="side-nav next" onclick="nextPage()"><span>‹</span></div>
+
+        <img src="/mushaf/0.png" class="basmalah-box" id="basmalah">
+        
+        <div class="page-container" id="pageFrame">
+            <img src="/mushaf/1.png" class="mushaf-img" id="mushaf-img" onerror="this.src='https://via.placeholder.com/400x600?text=Image+Not+Found'">
+        </div>
     </main>
 
     <script>
-        // Data Source
         const surahs = [
-            { id: 1, name: "الفاتحة", page: 1, juz: 1, text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ <span class='ayah-num'>﴿١﴾</span> الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ <span class='ayah-num'>﴿٢﴾</span> الرَّحْمَٰنِ الرَّحِيمِ <span class='ayah-num'>﴿٣﴾</span> مَالِكِ يَوْمِ الدِّينِ <span class='ayah-num'>﴿٤﴾</span> إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ <span class='ayah-num'>﴿٥﴾</span> اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ <span class='ayah-num'>﴿٦﴾</span> صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ <span class='ayah-num'>﴿٧﴾</span>" },
-            { id: 2, name: "البقرة", page: 2, juz: 1, text: "الم <span class='ayah-num'>﴿١﴾</span> ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ <span class='ayah-num'>﴿٢﴾</span> الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ <span class='ayah-num'>﴿٣﴾</span> وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنْزِلَ إِلَيْكَ وَمَا أُنْزِلَ مِنْ قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ <span class='ayah-num'>﴿٤﴾</span> أُولَٰئِكَ عَلَىٰ هُدًى مِنْ رَبِّهِمْ ۖ وَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ <span class='ayah-num'>﴿٥﴾</span>" },
-            { id: 3, name: "آل عمران", page: 50, juz: 3, text: "الم <span class='ayah-num'>﴿١﴾</span> اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ <span class='ayah-num'>﴿٢﴾</span> نَزَّلَ عَلَيْكَ الْكِتَابَ بِالْحَقِّ مُصَدِّقًا لِمَا بَيْنَ يَدَيْهِ وَأَنْزَلَ التَّوْرَاةَ وَالْإِنْجِيلَ <span class='ayah-num'>﴿٣﴾</span>" }
+            { name: "الفاتحة", page: 1, juz: 1 }, { name: "البقرة", page: 2, juz: 1 },
+            { name: "آل عمران", page: 50, juz: 3 }, { name: "النساء", page: 77, juz: 4 },
+            { name: "المائدة", page: 106, juz: 6 }, { name: "الأنعام", page: 128, juz: 7 },
+            { name: "الأعراف", page: 151, juz: 8 }, { name: "الأنفال", page: 177, juz: 9 },
+            { name: "التوبة", page: 187, juz: 10 }
         ];
 
-        function renderIndex(query = "") {
-            const container = document.getElementById('surahIndex');
-            container.innerHTML = "";
-            surahs.filter(s => s.name.includes(query)).forEach(s => {
-                const item = document.createElement('div');
-                item.className = "index-item";
-                item.innerText = s.name;
-                item.onclick = () => loadSurah(s);
-                container.appendChild(item);
-            });
+        let currentPage = 1;
+        const totalPages = 604;
+        const imgEl = document.getElementById('mushaf-img');
+        const frame = document.getElementById('pageFrame');
+        const basmalah = document.getElementById('basmalah');
+
+        // --- CORE NAVIGATION ---
+        function updatePage(direction) {
+            if (direction === 'next' && currentPage < totalPages) {
+                frame.classList.add('flip-left');
+                setTimeout(() => {
+                    currentPage++;
+                    renderPage();
+                    frame.classList.remove('flip-left');
+                }, 300);
+            } else if (direction === 'prev' && currentPage > 1) {
+                frame.classList.add('flip-right');
+                setTimeout(() => {
+                    currentPage--;
+                    renderPage();
+                    frame.classList.remove('flip-right');
+                }, 300);
+            }
         }
 
-        function loadSurah(s) {
-            document.getElementById('display-surah').innerText = "سورة " + s.name;
-            document.getElementById('display-meta').innerText = `جزء ${s.juz} | صفحة ${s.page}`;
-            document.getElementById('quran-content').innerHTML = s.text;
+        function renderPage() {
+            imgEl.src = `/mushaf/${currentPage}.png`;
+            document.getElementById('page-meta').innerText = `صفحة ${currentPage}`;
             
-            // Highlight active index item
-            document.querySelectorAll('.index-item').forEach(el => {
-                el.classList.toggle('active', el.innerText === s.name);
+            // Show Basmalah on specific pages if needed
+            basmalah.classList.toggle('visible', currentPage === 1 || currentPage === 2);
+            
+            // Update Surah Title based on page range
+            const currentSurah = surahs.slice().reverse().find(s => currentPage >= s.page);
+            if (currentSurah) {
+                document.getElementById('surah-title').innerText = "سورة " + currentSurah.name;
+            }
+
+            // Sync Index bar
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.classList.toggle('active', chip.innerText === currentSurah?.name);
             });
-            window.scrollTo(0, 0);
+            
+            localStorage.setItem('lastReadPage', currentPage);
         }
 
-        function filterIndex() {
-            const val = document.getElementById('surahSearch').value;
-            renderIndex(val);
+        // --- INDEX & SEARCH ---
+        function initIndex() {
+            const bar = document.getElementById('indexBar');
+            bar.innerHTML = "";
+            surahs.forEach(s => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerText = s.name;
+                chip.onclick = () => { currentPage = s.page; renderPage(); };
+                bar.appendChild(chip);
+            });
         }
 
-        function setTheme(t) { document.body.setAttribute('data-theme', t); }
-
-        let scale = 1.8;
-        function changeFontSize(d) {
-            scale += d;
-            document.documentElement.style.setProperty('--font-size', scale + 'rem');
+        function searchSurah() {
+            const query = document.getElementById('searchInput').value;
+            const chips = document.querySelectorAll('.chip');
+            chips.forEach(c => c.style.display = c.innerText.includes(query) ? "block" : "none");
         }
 
-        // Init
-        renderIndex();
-        loadSurah(surahs[0]);
+        // --- SWIPE LOGIC ---
+        let touchStartX = 0;
+        document.getElementById('swipe-zone').addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+        document.getElementById('swipe-zone').addEventListener('touchend', e => {
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) diff > 0 ? nextPage() : prevPage();
+        });
+
+        function nextPage() { updatePage('next'); }
+        function prevPage() { updatePage('prev'); }
+
+        function toggleTheme() {
+            const theme = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', theme);
+        }
+
+        function setBookmark() {
+            alert("تم حفظ الصفحة " + currentPage + " كعلامة مرجعية");
+        }
+
+        // --- START APP ---
+        window.onload = () => {
+            const saved = localStorage.getItem('lastReadPage');
+            if (saved) currentPage = parseInt(saved);
+            initIndex();
+            renderPage();
+        };
     </script>
 </body>
 </html>
