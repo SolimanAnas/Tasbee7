@@ -1,47 +1,55 @@
-const CACHE_NAME = 'masbaha-v5'; // Updated version
+const CACHE_NAME = "quran-mushaf-v1";
 
-const ASSETS = [
-  './',
-  './index.html',
-  './azkar.html',
-  './azkar.js',
-  './azkar.json',
-  './styles.css',        // Added stylesheet
-  './manifest.json',
-  './icon.png'
+const CORE_ASSETS = [
+  "quran.html",
+  "manifest.json",
+  "js/surah-map.js",
+  "js/juz-map.js",
+  "js/quran-app.js"
 ];
 
-// 1️⃣ Install Event
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+// Install
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(CORE_ASSETS);
     })
   );
+  self.skipWaiting();
 });
 
-// 2️⃣ Activate Event
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
+// Activate
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
       return Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       );
     })
   );
-
-  return self.clients.claim();
+  self.clients.claim();
 });
 
-// 3️⃣ Fetch Event (offline-first strategy)
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
+// Fetch
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request).then(networkResponse => {
+
+        // Cache mushaf images dynamically
+        if (event.request.url.includes("/mushaf/")) {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        }
+
+        return networkResponse;
+      });
     })
   );
 });
