@@ -1,1 +1,227 @@
-quran.html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>القرآن الكريم</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Scheherazade New',serif;
+  background:#111;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  transition:.3s;
+}
+
+/* THEMES */
+body.light{background:#f5f5f5;color:#000}
+body.sepia{background:#f1e7d0;color:#5b4636}
+
+/* HEADER */
+header{
+  background:#1c1c1c;
+  padding:.7rem 1rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+body.light header{background:#ddd}
+body.sepia header{background:#e4d7b7}
+
+header button{
+  border:none;
+  padding:.3rem .8rem;
+  border-radius:2rem;
+  cursor:pointer;
+}
+
+.info{
+  text-align:center;
+  font-size:.85rem;
+}
+
+/* PROGRESS */
+.progress{
+  height:4px;
+  background:#2ecc71;
+  width:0%;
+  transition:.3s;
+}
+
+/* MAIN */
+main{
+  flex:1;
+  padding:1rem;
+  max-width:900px;
+  margin:auto;
+  overflow-y:auto;
+}
+
+.ayah{
+  font-size:1.6rem;
+  line-height:2.3;
+  padding:.5rem;
+  border-radius:.6rem;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.ayah:hover{
+  background:rgba(255,255,255,.1);
+}
+
+body.light .ayah:hover{background:rgba(0,0,0,.05)}
+body.sepia .ayah:hover{background:rgba(0,0,0,.07)}
+
+.ayah-number{
+  font-size:.9rem;
+  opacity:.7;
+  margin-right:.3rem;
+}
+
+/* CONTROLS */
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:.5rem;
+  padding:.5rem;
+  background:#1c1c1c;
+}
+
+.controls input{
+  width:70px;
+  text-align:center;
+  border:none;
+  border-radius:1rem;
+  padding:.3rem;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button onclick="location.href='index.html'">🏠</button>
+  <div class="info">
+    <div id="surahName">...</div>
+    <div>جزء <span id="juzNumber">...</span></div>
+    <div>صفحة <span id="pageNumber">1</span> / 604</div>
+  </div>
+  <button onclick="toggleTheme()">🎨</button>
+</header>
+
+<div class="progress" id="progressBar"></div>
+
+<main id="content">
+جاري تحميل الصفحة...
+</main>
+
+<div class="controls">
+  <button onclick="prevPage()">‹</button>
+  <input type="number" id="pageInput" min="1" max="604">
+  <button onclick="goToPage()">اذهب</button>
+  <button onclick="nextPage()">›</button>
+</div>
+
+<script>
+const TOTAL_PAGES=604;
+let currentPage=parseInt(localStorage.getItem("quranPage"))||1;
+
+const content=document.getElementById("content");
+const pageInput=document.getElementById("pageInput");
+const pageNumberEl=document.getElementById("pageNumber");
+const surahNameEl=document.getElementById("surahName");
+const juzNumberEl=document.getElementById("juzNumber");
+const progressBar=document.getElementById("progressBar");
+
+async function loadPage(page){
+  if(page<1||page>TOTAL_PAGES)return;
+
+  content.innerHTML="جاري التحميل...";
+  try{
+    const res=await fetch(`https://api.quran.com/api/v4/verses/by_page/${page}?words=false`);
+    const data=await res.json();
+    const verses=data.verses;
+
+    if(!verses||verses.length===0){
+      content.innerHTML="تعذر تحميل الصفحة";
+      return;
+    }
+
+    currentPage=page;
+    localStorage.setItem("quranPage",page);
+
+    pageNumberEl.textContent=page;
+    pageInput.value=page;
+    progressBar.style.width=(page/TOTAL_PAGES*100)+"%";
+
+    surahNameEl.textContent="سورة "+verses[0].surah.name_arabic;
+    juzNumberEl.textContent=verses[0].juz_number;
+
+    content.innerHTML=verses.map(v=>`
+      <div class="ayah" data-id="${v.id}">
+        ${v.text_uthmani}
+        <span class="ayah-number">﴿${v.verse_number}﴾</span>
+      </div>
+    `).join("");
+
+  }catch(err){
+    content.innerHTML="حدث خطأ في الاتصال بالإنترنت";
+  }
+}
+
+function nextPage(){ loadPage(currentPage+1); }
+function prevPage(){ loadPage(currentPage-1); }
+
+function goToPage(){
+  const p=parseInt(pageInput.value);
+  if(p>=1&&p<=TOTAL_PAGES) loadPage(p);
+}
+
+/* Swipe RTL */
+let startX=0;
+document.addEventListener("touchstart",e=>{
+  startX=e.changedTouches[0].screenX;
+},{passive:true});
+
+document.addEventListener("touchend",e=>{
+  const diff=startX-e.changedTouches[0].screenX;
+  if(Math.abs(diff)<50)return;
+  if(diff>0) nextPage();
+  else prevPage();
+},{passive:true});
+
+/* Theme */
+function toggleTheme(){
+  if(document.body.classList.contains("light")){
+    document.body.classList.remove("light");
+    document.body.classList.add("sepia");
+  }else if(document.body.classList.contains("sepia")){
+    document.body.classList.remove("sepia");
+  }else{
+    document.body.classList.add("light");
+  }
+}
+
+/* Zoom */
+let zoomed=false;
+content.addEventListener("dblclick",()=>{
+  zoomed=!zoomed;
+  content.style.transform=zoomed?"scale(1.4)":"scale(1)";
+});
+
+/* Init */
+loadPage(currentPage);
+</script>
+
+</body>
+</html> 
