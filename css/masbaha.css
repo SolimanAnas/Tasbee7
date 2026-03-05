@@ -8,7 +8,11 @@
     --text-muted: #94a3b8;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
 
 body {
     margin: 0;
@@ -23,7 +27,8 @@ body {
     overscroll-behavior-y: none;
 }
 
-/* Main Layout */
+/* App Container */
+
 .app-container {
     width: 100%;
     max-width: 480px;
@@ -31,11 +36,10 @@ body {
     display: flex;
     flex-direction: column;
     padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
-    position: relative;
-    transition: opacity 0.5s;
 }
 
 /* Top Bar */
+
 .top-bar {
     display: flex;
     gap: 12px;
@@ -61,7 +65,6 @@ select {
     color: white;
     font-family: 'Tajawal';
     font-size: 16px;
-    cursor: pointer;
 }
 
 .select-arrow {
@@ -90,35 +93,45 @@ select {
 
 .icon-btn:active {
     transform: scale(0.92);
-    background: rgba(255,255,255,0.15);
 }
 
-/* MAIN AREA */
+/* MAIN GRID LAYOUT */
+
 .main-area {
-    position: relative;
-    height: 100%;
-    width: 100%;
+    flex: 1;
+
+    display: grid;
+
+    grid-template-rows:
+        1fr
+        auto
+        1fr
+        1fr
+        auto;
+
+    align-items: center;
 }
 
-/* Circle perfectly centered */
+/* Circle */
+
 .counter-anchor {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    grid-row: 2;
+
+    justify-self: center;
+
     width: min(80vw, 320px);
     height: min(80vw, 320px);
+
+    position: relative;
 }
 
 .progress-wrapper {
     width: 100%;
     height: 100%;
     cursor: pointer;
-    transition: transform 0.1s;
     border-radius: 50%;
     box-shadow: 0 0 60px -20px var(--primary-glow);
     position: relative;
-    z-index: 1;
 }
 
 .progress-wrapper:active {
@@ -127,28 +140,29 @@ select {
 
 .mini-reset-btn {
     position: absolute;
-    bottom: 0px;
-    left: 0px;
+    bottom: 0;
+    left: 0;
+
     width: 44px;
     height: 44px;
+
     border-radius: 50%;
+
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(239, 68, 68, 0.4);
+
     color: #f87171;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     cursor: pointer;
-    z-index: 20;
+
     backdrop-filter: blur(4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: 0.2s;
 }
 
-.mini-reset-btn:active {
-    transform: scale(0.9);
-    background: rgba(239, 68, 68, 0.2);
-}
+/* SVG Circle */
 
 svg {
     transform: rotate(-90deg);
@@ -160,37 +174,37 @@ circle {
     fill: none;
     stroke-width: 8;
     stroke-linecap: round;
-    transition: stroke-dashoffset 0.3s ease;
 }
 
-.bg-circle { stroke: rgba(255,255,255,0.05); }
+.bg-circle {
+    stroke: rgba(255,255,255,0.05);
+}
 
 .fg-circle {
     stroke: url(#gradient);
     filter: drop-shadow(0 0 4px var(--primary));
 }
 
+/* Counter Text */
+
 .counter-content {
     position: absolute;
     inset: 0;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
 }
 
 .count-label {
     font-size: 14px;
     color: var(--text-muted);
-    margin-bottom: 5px;
 }
 
 .count-number {
     font-size: clamp(60px, 15vw, 90px);
     font-weight: 700;
-    line-height: 1;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 .target-pill {
@@ -202,22 +216,12 @@ circle {
     color: var(--text-muted);
 }
 
-/* Hadith Card positioned at lower 1/3 of remaining space */
+/* Hadith Card */
+
 .hadith-card {
-    position: absolute;
-    left: 0;
-    right: 0;
 
-    top: calc(
-        50% +
-        min(40vw,160px) +
-        (
-            (100vh - (50% + min(40vw,160px)))
-            / 3
-        )
-    );
+    grid-row: 5;
 
-    width: 100%;
     background: linear-gradient(
         180deg,
         rgba(255,255,255,0.08),
@@ -226,16 +230,17 @@ circle {
 
     border: 1px solid var(--glass-border);
     border-radius: 20px;
+
     padding: 20px;
+
     backdrop-filter: blur(12px);
 
     min-height: 120px;
-    max-height: 30vh;
-    overflow-y: auto;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
+
     text-align: center;
 }
 
@@ -252,35 +257,4 @@ circle {
     font-size: 16px;
     line-height: 1.8;
     color: #e2e8f0;
-}
-
-/* Toast */
-#toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: rgba(16, 185, 129, 0.9);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 50px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 200;
-    transition: 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    backdrop-filter: blur(5px);
-    font-weight: bold;
-}
-
-#toast.show {
-    transform: translateX(-50%) translateY(0);
-}
-
-#confetti {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 50;
 }
