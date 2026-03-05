@@ -42,26 +42,25 @@
         overscroll-behavior-y: none;
     }
 
-    /* Main Layout - Modified for optimal padding */
+    /* Main Layout */
     .app-container {
         width: 100%;
         max-width: 480px;
-        height: 100dvh;
+        height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start; /* Changed to start to pull content up */
-        padding: max(10px, env(safe-area-inset-top)) 20px max(15px, env(safe-area-inset-bottom));
+        padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
         position: relative;
         transition: opacity 0.5s;
     }
 
-    /* Top Bar - Tightened margin */
+    /* Top Bar */
     .top-bar {
         display: flex;
         gap: 12px;
         align-items: center;
         z-index: 10;
-        margin-bottom: 10px; 
+        margin-bottom: 20px;
     }
 
     .dhikr-select-wrapper {
@@ -103,22 +102,20 @@
     }
     .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
-    /* Center Progress Area */
+    /* Center Progress Area - using grid for perfect centering of card below circle */
     .main-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: relative;
+        display: grid;
+        grid-template-rows: auto 1fr;   /* counter auto, rest for card */
+        align-items: start;              /* counter stays at top of its row */
+        height: 100%;
         width: 100%;
     }
 
     .counter-anchor {
+        justify-self: center;            /* center counter horizontally */
         position: relative;
-        /* Optimized size to fit smaller screens */
-        width: min(72vw, 290px);
-        height: min(72vw, 290px);
+        width: min(80vw, 320px);
+        height: min(80vw, 320px);
     }
 
     .progress-wrapper {
@@ -190,27 +187,28 @@
         color: var(--text-muted);
     }
 
-    /* Hadith Card - Tightened spacing */
+    /* Hadith Card – centered vertically in the remaining space */
     .hadith-card {
+        align-self: center;               /* center card vertically in its row */
+        width: 100%;
         background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         border: 1px solid var(--glass-border);
         border-radius: 20px;
-        padding: 15px; 
+        padding: 20px;
         backdrop-filter: blur(12px);
-        min-height: 100px;
+        min-height: 120px;
+        max-height: 30vh;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        margin-top: 10px;
-        margin-bottom: 5px;
-        flex-shrink: 0;
     }
 
     .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
     .hadith-text { font-family: 'Amiri', serif; font-size: 16px; line-height: 1.8; color: #e2e8f0; }
 
-    /* Modals */
+    /* Modals (Settings & Meanings) */
     .modal-overlay {
         position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
         z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
@@ -282,6 +280,7 @@
     .meaning-item:last-child { border: none; }
     .meaning-head { color: var(--primary); font-weight: bold; font-size: 16px; margin-bottom: 5px; }
     .meaning-desc { font-size: 14px; color: #e2e8f0; line-height: 1.6; }
+    .meaning-sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
 
     #toast {
         position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
@@ -390,6 +389,7 @@
             </div>
         </div>
 
+        <!-- hadith card centered in remaining space -->
         <div class="hadith-card">
             <div class="hadith-title">فضل الذكر</div>
             <div class="hadith-text" id="hintBox">...</div>
@@ -508,6 +508,7 @@
 </div>
 
 <script>
+// --- Data ---
 const defaultTargets = {
     subhan: 33, hamd: 33, tahleel: 33, takbeer: 33, hawqala: 100,
     istighfar: 100, wahdahu: 100, subhanwabihamdih: 100, salawat: 100
@@ -530,6 +531,7 @@ const customVerse = `«وَالذَّاكِرِينَ اللَّهَ كَثِي�
 let currentDhikr = localStorage.getItem("currentDhikr") || "subhan";
 const fullCircle = 565.48;
 
+// --- Sound & Haptic ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSoftClick() {
     if(!document.getElementById("soundToggle").checked) return;
@@ -554,6 +556,7 @@ function triggerHaptic(type) {
     else if (type === 'success') navigator.vibrate([100, 50, 100, 50, 100]);
 }
 
+// --- Init & Load ---
 function init() {
     loadCustomDhikrs();
     document.getElementById("dhikrSelect").value = currentDhikr;
@@ -672,6 +675,7 @@ function toggleMeanings() {
     document.getElementById("meaningsModal").classList.toggle("open");
 }
 
+// --- Power Saving Mode ---
 let holdTimer;
 let isHolding = false;
 function enterPowerMode() {
@@ -697,6 +701,7 @@ function exitPowerMode() {
     navigator.vibrate([50,50,50]);
 }
 
+// --- Stats (full names, no trim) ---
 function renderStats() {
     const table = document.getElementById("statsTable");
     table.innerHTML = ""; 
@@ -728,6 +733,7 @@ function resetStats() {
     }
 }
 
+// --- Custom Dhikr ---
 function addCustomDhikr() {
     const input = document.getElementById("customDhikrInput");
     const text = input.value.trim();
@@ -757,6 +763,7 @@ function appendDhikrOption(d) {
     select.appendChild(option);
 }
 
+// --- Reminder ---
 function setReminder() {
     const timeVal = document.getElementById("reminderTime").value;
     if(timeVal) {
@@ -792,10 +799,12 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove("show"), 4000);
 }
 
+// --- Home function ---
 function goHome() {
     window.location.href = "index.html";
 }
 
+// --- Confetti ---
 function triggerConfetti() {
     const canvas = document.getElementById("confetti");
     const ctx = canvas.getContext("2d");
