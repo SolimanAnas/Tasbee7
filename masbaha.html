@@ -39,7 +39,6 @@
         display: flex;
         justify-content: center;
         user-select: none;
-        /* منع تحديث الصفحة عند السحب للأسفل */
         overscroll-behavior-y: none;
     }
 
@@ -50,7 +49,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        padding: max(10px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
+        padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
         position: relative;
         transition: opacity 0.5s;
     }
@@ -99,7 +98,7 @@
         color: white;
         cursor: pointer;
         transition: 0.2s;
-        font-size: 24px; /* for emoji */
+        font-size: 24px;
     }
     .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
@@ -109,7 +108,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;   /* changed from center to move content upward */
+        justify-content: center;    /* group (counter + card) will be centered vertically */
         position: relative;
         width: 100%;
     }
@@ -118,7 +117,7 @@
         position: relative;
         width: min(80vw, 320px);
         height: min(80vw, 320px);
-        margin-top: 20px;               /* add small top margin for breathing room */
+        /* no extra top margin – group centering handles it */
     }
 
     .progress-wrapper {
@@ -190,7 +189,7 @@
         color: var(--text-muted);
     }
 
-    /* Hadith Card - moved up, full width, scrollable if needed */
+    /* Hadith Card – placed below counter with 15px gap */
     .hadith-card {
         background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         border: 1px solid var(--glass-border);
@@ -198,14 +197,14 @@
         padding: 20px;
         backdrop-filter: blur(12px);
         min-height: 120px;
-        max-height: 30vh;                 /* prevent cropping on very long texts */
+        max-height: 30vh;                 /* prevent excessive height */
         overflow-y: auto;                  /* allow scrolling if text overflows */
         display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        margin-bottom: 15px;
         width: 100%;
+        margin-top: 15px;                  /* 15px gap below counter */
     }
 
     .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
@@ -308,7 +307,7 @@
     
     #exitCircle {
         position: absolute; width: 100px; height: 100px; border-radius: 50%;
-        border: 4px solid #475569; /* Slate Grey (Relaxed) */
+        border: 4px solid #475569;
         opacity: 0.5; transform: scale(0.5);
         transition: transform 3s linear, border-color 0.5s;
         pointer-events: none;
@@ -316,7 +315,7 @@
     #exitCircle.holding { 
         opacity: 1; 
         transform: scale(1.5); 
-        border-color: #ef4444; /* Changes to Red on hold */
+        border-color: #ef4444;
         box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
     }
 </style>
@@ -359,7 +358,6 @@
             <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line><polygon points="11 10 9 14 13 14 11 18" fill="currentColor" stroke="none" style="opacity:0.5"></polygon></svg>
         </div>
 
-        <!-- Home Button -->
         <div class="icon-btn" onclick="goHome()">🏠</div>
 
         <div class="icon-btn" onclick="toggleSettings()">
@@ -393,7 +391,7 @@
             </div>
         </div>
 
-        <!-- hadith card now directly below counter, no extra auto margin -->
+        <!-- hadith card with 15px gap below counter -->
         <div class="hadith-card">
             <div class="hadith-title">فضل الذكر</div>
             <div class="hadith-text" id="hintBox">...</div>
