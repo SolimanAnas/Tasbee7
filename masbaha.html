@@ -102,22 +102,20 @@
     }
     .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
-    /* Center Progress Area */
+    /* Center Progress Area - using grid for perfect centering of card below circle */
     .main-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;    /* group (counter + card) will be centered vertically */
-        position: relative;
+        display: grid;
+        grid-template-rows: auto 1fr;   /* counter auto, rest for card */
+        align-items: start;              /* counter stays at top of its row */
+        height: 100%;
         width: 100%;
     }
 
     .counter-anchor {
+        justify-self: center;            /* center counter horizontally */
         position: relative;
         width: min(80vw, 320px);
         height: min(80vw, 320px);
-        /* no extra top margin – group centering handles it */
     }
 
     .progress-wrapper {
@@ -189,22 +187,22 @@
         color: var(--text-muted);
     }
 
-    /* Hadith Card – placed below counter with 15px gap */
+    /* Hadith Card – centered vertically in the remaining space */
     .hadith-card {
+        align-self: center;               /* center card vertically in its row */
+        width: 100%;
         background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         border: 1px solid var(--glass-border);
         border-radius: 20px;
         padding: 20px;
         backdrop-filter: blur(12px);
         min-height: 120px;
-        max-height: 30vh;                 /* prevent excessive height */
-        overflow-y: auto;                  /* allow scrolling if text overflows */
+        max-height: 30vh;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        width: 100%;
-        margin-top: 15px;                  /* 15px gap below counter */
     }
 
     .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
@@ -391,7 +389,7 @@
             </div>
         </div>
 
-        <!-- hadith card with 15px gap below counter -->
+        <!-- hadith card centered in remaining space -->
         <div class="hadith-card">
             <div class="hadith-title">فضل الذكر</div>
             <div class="hadith-text" id="hintBox">...</div>
