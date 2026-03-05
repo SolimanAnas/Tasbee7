@@ -40,7 +40,7 @@
 
     body {
       font-family: 'Amiri', serif;
-      height: 100vh;                     /* stable viewport height */
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -52,9 +52,9 @@
     body[data-theme="light"] { background: var(--bg-light); color: var(--text-light); }
     body[data-theme="dark"]  { background: var(--bg-dark);  color: var(--text-dark);  }
 
-    /* ================= HEADER (fixed) ================= */
+    /* ================= HEADER ================= */
     header {
-      position: fixed;
+      position: absolute;
       top: 0; left: 0; right: 0;
       padding: 10px 14px;
       display: flex;
@@ -124,14 +124,16 @@
     /* Bookmark active state */
     #bookmarkBtn.active { color: #f5b342; text-shadow: 0 0 10px rgba(245,179,66,0.6); }
 
-    /* ================= MAIN / READER (full-screen) ================= */
+    /* ================= MAIN / READER ================= */
     main {
-      position: fixed;
-      inset: 0;
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative;
+      /* padding-top for header height */
+      padding-top: 56px;
     }
 
     /* Page frame: the animatable container */
@@ -173,13 +175,23 @@
      *    scrollLeft = (scrollWidth - clientWidth) / 2 now reliably = center.
      *    Inner frame restores direction:rtl for Arabic text.
      *
-     * 2. No extra padding, no dvh – pure 100vh for stable zoom.
+     * 2. padding:0 6vw added dead space that pushed the image off-center,
+     *    creating the big blank area seen on the left in screenshots.
+     *    Fix: remove all padding. Natural portrait overflow is already symmetric.
+     *
+     * 3. min-width:calc(100vw + 8vw) on the image forced unexpected sizing.
+     *    Fix: removed. Portrait Mushaf at height:100dvh is always wider than
+     *    mobile viewport naturally (aspect ~0.71 → ~597px on a 390px-wide phone).
+     *
+     * 4. Page changes while zoomed didn't recenter.
+     *    Fix: centerZoomScroll() called at end of every navigateTo() transition.
      */
     body.zoomed main {
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       align-items: center;
+      padding-top: 0;
       /* Normalize scrollLeft to always be 0=left-edge in all browsers,
          even when the document root is dir=rtl                           */
       direction: ltr;
@@ -189,15 +201,15 @@
       direction: rtl;   /* restore RTL for Arabic Mushaf content */
       flex-shrink: 0;
       width: auto;
-      height: 100vh;
+      height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     body.zoomed .mushaf-img {
-      height: 100vh;
-      max-height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       width: auto;
       max-width: none;
     }
@@ -233,7 +245,7 @@
       border-radius: var(--radius-modal);
       padding: 22px 20px;
       width: min(360px, 94vw);
-      max-height: 80vh;
+      max-height: 80dvh;
       overflow-y: auto;
       overflow-x: hidden;
       box-shadow: var(--shadow);
@@ -356,7 +368,7 @@
     .search-input:focus { border-color: var(--accent); }
 
     .selector-scroll {
-      max-height: 55vh;
+      max-height: 55dvh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -1033,7 +1045,7 @@
             document.body.classList.toggle('zoomed');
 
             // centerZoomScroll() handles both cases:
-            // entering zoom → snaps to center | exiting → class removed, no need to center
+            // entering zoom → snaps to center | exiting → no-op (class already removed)
             centerZoomScroll();
 
           } else {
