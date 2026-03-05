@@ -146,19 +146,31 @@
       will-change: transform, opacity;
     }
 
-    /* Mushaf image: normal mode */
+    /* Mushaf image */
     .mushaf-img {
-      /* Fit within available space */
       max-height: 100%;
       max-width: 100%;
       width: auto;
       height: auto;
       object-fit: contain;
       display: block;
-      /* Prevent browser image context menu / drag */
       -webkit-user-drag: none;
       pointer-events: none;
-      transition: filter 0.35s ease;
+      /*
+       * DEFAULT = cropped view (hides decorative border).
+       * scale(1.19) crops about 8% from each side (1 - 1/1.19 ≈ 0.16/2 = 8%).
+       * transform-origin:center ensures the crop is symmetric on all sides.
+       * transition enables a smooth animated toggle when double-tapping.
+       */
+      transform: scale(1.19);
+      transform-origin: center center;
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                  filter 0.35s ease;
+    }
+
+    /* FULL VIEW — double tap to reveal complete page with decorative border */
+    body.full-view .mushaf-img {
+      transform: scale(1);
     }
 
     /* Dark sepia filter — reduces white PNG halo while preserving clarity */
@@ -166,53 +178,7 @@
       filter: brightness(0.87) contrast(1.1) sepia(0.22) saturate(0.9);
     }
 
-    /* ================= ZOOM MODE ================= */
-    /*
-     * KEY FIXES:
-     *
-     * 1. RTL scrollLeft is inverted in Safari/Chrome: scrollLeft=0 = RIGHT edge.
-     *    Fix: force direction:ltr on scroll container only.
-     *    scrollLeft = (scrollWidth - clientWidth) / 2 now reliably = center.
-     *    Inner frame restores direction:rtl for Arabic text.
-     *
-     * 2. padding:0 6vw added dead space that pushed the image off-center,
-     *    creating the big blank area seen on the left in screenshots.
-     *    Fix: remove all padding. Natural portrait overflow is already symmetric.
-     *
-     * 3. min-width:calc(100vw + 8vw) on the image forced unexpected sizing.
-     *    Fix: removed. Portrait Mushaf at height:100dvh is always wider than
-     *    mobile viewport naturally (aspect ~0.71 → ~597px on a 390px-wide phone).
-     *
-     * 4. Page changes while zoomed didn't recenter.
-     *    Fix: centerZoomScroll() called at end of every navigateTo() transition.
-     */
-    body.zoomed main {
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      align-items: center;
-      padding-top: 0;
-      /* Normalize scrollLeft to always be 0=left-edge in all browsers,
-         even when the document root is dir=rtl                           */
-      direction: ltr;
-    }
 
-    body.zoomed .page-frame {
-      direction: rtl;   /* restore RTL for Arabic Mushaf content */
-      flex-shrink: 0;
-      width: auto;
-      height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    body.zoomed .mushaf-img {
-      height: 100dvh;
-      max-height: 100dvh;
-      width: auto;
-      max-width: none;
-    }
 
     /* ================= GLASSMORPHISM MODAL BASE ================= */
     .modal-overlay {
@@ -796,6 +762,9 @@
     const totalPages     = 604;
     let bookmarks        = new Set();
     let isTransitioning  = false;
+    // fullView = true  → full page shown (decorative border visible)
+    // fullView = false → cropped view (border hidden, default)
+    let fullView         = false;
 
     // Cached DOM refs
     const img         = document.getElementById('pageImg');
@@ -825,6 +794,10 @@
 
       // Load bookmarks
       loadBookmarks();
+
+      // Restore view mode (cropped = default, full = user toggled)
+      fullView = localStorage.getItem('quranFullView') === 'true';
+      if (fullView) document.body.classList.add('full-view');
 
       // Render and setup
       renderPageContent();
@@ -908,8 +881,6 @@
               frame.style.cssText  = '';
               isTransitioning = false;
               preloadAdjacentPages();
-              // Re-center scroll if we're in zoom mode (new page, same zoom level)
-              centerZoomScroll();
             }, 300);
           });
         });
@@ -931,23 +902,7 @@
       if (currentPage < totalPages) new Image().src = `mushaf/${currentPage + 1}.png`;
     }
 
-    // Center the horizontal scroll when in zoom mode.
-    // Uses double-rAF to ensure the new image/layout has fully painted
-    // before reading scrollWidth (which changes with each page's image size).
-    // direction:ltr is forced on main in CSS, so scrollLeft=0 is always
-    // the left edge in all browsers — the center calculation is reliable.
-    function centerZoomScroll() {
-      if (!document.body.classList.contains('zoomed')) return;
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const el       = swipeArea;
-          const overflow = el.scrollWidth - el.clientWidth;
-          if (overflow > 0) {
-            el.scrollLeft = overflow / 2;
-          }
-        });
-      });
-    }
+
 
     // ============================================================
     //  UNIFIED GESTURE HANDLER
@@ -1038,15 +993,14 @@
           const sinceLastTap  = now - lastTapTime;
 
           if (sinceLastTap < DOUBLE_TAP_MS && tapTimer !== null) {
-            // ← DOUBLE TAP: toggle zoom
+            // ← DOUBLE TAP: toggle between cropped (default) ↔ full view
             clearTimeout(tapTimer);
             tapTimer    = null;
             lastTapTime = 0;
-            document.body.classList.toggle('zoomed');
 
-            // centerZoomScroll() handles both cases:
-            // entering zoom → snaps to center | exiting → no-op (class already removed)
-            centerZoomScroll();
+            fullView = !fullView;
+            document.body.classList.toggle('full-view', fullView);
+            localStorage.setItem('quranFullView', fullView);
 
           } else {
             // ← Potential single tap — wait to see if second tap arrives
