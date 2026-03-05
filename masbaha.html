@@ -50,7 +50,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
+        padding: max(10px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
         position: relative;
         transition: opacity 0.5s;
     }
@@ -109,7 +109,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;   /* changed from center to move content upward */
         position: relative;
         width: 100%;
     }
@@ -118,6 +118,7 @@
         position: relative;
         width: min(80vw, 320px);
         height: min(80vw, 320px);
+        margin-top: 20px;               /* add small top margin for breathing room */
     }
 
     .progress-wrapper {
@@ -189,7 +190,7 @@
         color: var(--text-muted);
     }
 
-    /* Hadith Card */
+    /* Hadith Card - moved up, full width, scrollable if needed */
     .hadith-card {
         background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         border: 1px solid var(--glass-border);
@@ -197,12 +198,14 @@
         padding: 20px;
         backdrop-filter: blur(12px);
         min-height: 120px;
+        max-height: 30vh;                 /* prevent cropping on very long texts */
+        overflow-y: auto;                  /* allow scrolling if text overflows */
         display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        margin-top: auto;
         margin-bottom: 15px;
+        width: 100%;
     }
 
     .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
@@ -389,11 +392,12 @@
                 </svg>
             </div>
         </div>
-    </div>
 
-    <div class="hadith-card">
-        <div class="hadith-title">فضل الذكر</div>
-        <div class="hadith-text" id="hintBox">...</div>
+        <!-- hadith card now directly below counter, no extra auto margin -->
+        <div class="hadith-card">
+            <div class="hadith-title">فضل الذكر</div>
+            <div class="hadith-text" id="hintBox">...</div>
+        </div>
     </div>
 </div>
 
@@ -701,7 +705,7 @@ function exitPowerMode() {
     navigator.vibrate([50,50,50]);
 }
 
-// --- Stats (Updated to remove trimming) ---
+// --- Stats (full names, no trim) ---
 function renderStats() {
     const table = document.getElementById("statsTable");
     table.innerHTML = ""; 
@@ -709,7 +713,6 @@ function renderStats() {
     let grandTotal = 0;
     for (let i = 0; i < select.options.length; i++) {
         let key = select.options[i].value;
-        // Removed substring(0,20) to show full name
         let name = select.options[i].text; 
         let count = parseInt(localStorage.getItem(totalKey(key)) || 0);
         let row = table.insertRow();
