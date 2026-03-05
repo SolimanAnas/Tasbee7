@@ -83,18 +83,19 @@ select {
 }
 .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
-/* Center Progress Area - using grid for perfect centering of card below circle */
+/* ===== MAIN AREA – absolute positioning for exact centering ===== */
 .main-area {
-    display: grid;
-    grid-template-rows: auto 1fr;   /* counter auto, rest for card */
-    align-items: start;              /* counter stays at top of its row */
+    position: relative;
     height: 100%;
     width: 100%;
 }
 
+/* Circle – exactly in the middle */
 .counter-anchor {
-    justify-self: center;            /* center counter horizontally */
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: min(80vw, 320px);
     height: min(80vw, 320px);
 }
@@ -168,10 +169,13 @@ circle { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-
     color: var(--text-muted);
 }
 
-/* Hadith Card – aligned to bottom with 30px margin from bottom */
+/* Hadith Card – positioned 100px below the circle */
 .hadith-card {
-    align-self: end;                  /* align to bottom of its row */
-    margin-bottom: 30px;               /* 30px gap from bottom */
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* top = 50% + (half circle height) + 100px */
+    top: calc(50% + min(40vw, 160px) + 100px);
     width: 100%;
     background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
     border: 1px solid var(--glass-border);
