@@ -65,6 +65,7 @@ select {
     color: white;
     font-family: 'Tajawal';
     font-size: 16px;
+    cursor: pointer;
 }
 
 .select-arrow {
@@ -93,6 +94,7 @@ select {
 
 .icon-btn:active {
     transform: scale(0.92);
+    background: rgba(255,255,255,0.15);
 }
 
 /* MAIN GRID LAYOUT */
@@ -112,15 +114,17 @@ select {
     align-items: center;
 }
 
-/* Circle */
+/* Counter Circle */
 
 .counter-anchor {
+
     grid-row: 2;
 
     justify-self: center;
 
-    width: min(80vw, 320px);
-    height: min(80vw, 320px);
+    width: clamp(220px, 65vmin, 340px);
+
+    aspect-ratio: 1 / 1;
 
     position: relative;
 }
@@ -129,9 +133,11 @@ select {
     width: 100%;
     height: 100%;
     cursor: pointer;
+    transition: transform 0.1s;
     border-radius: 50%;
-    box-shadow: 0 0 60px -20px var(--primary-glow);
+    box-shadow: 0 0 clamp(40px, 8vmin, 70px) -20px var(--primary-glow);
     position: relative;
+    z-index: 1;
 }
 
 .progress-wrapper:active {
@@ -159,7 +165,18 @@ select {
 
     cursor: pointer;
 
+    z-index: 20;
+
     backdrop-filter: blur(4px);
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+    transition: 0.2s;
+}
+
+.mini-reset-btn:active {
+    transform: scale(0.9);
+    background: rgba(239, 68, 68, 0.2);
 }
 
 /* SVG Circle */
@@ -174,6 +191,7 @@ circle {
     fill: none;
     stroke-width: 8;
     stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease;
 }
 
 .bg-circle {
@@ -195,16 +213,21 @@ circle {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    pointer-events: none;
 }
 
 .count-label {
     font-size: 14px;
     color: var(--text-muted);
+    margin-bottom: 5px;
 }
 
 .count-number {
     font-size: clamp(60px, 15vw, 90px);
     font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 .target-pill {
@@ -222,6 +245,8 @@ circle {
 
     grid-row: 5;
 
+    width: 100%;
+
     background: linear-gradient(
         180deg,
         rgba(255,255,255,0.08),
@@ -229,6 +254,7 @@ circle {
     );
 
     border: 1px solid var(--glass-border);
+
     border-radius: 20px;
 
     padding: 20px;
@@ -236,6 +262,10 @@ circle {
     backdrop-filter: blur(12px);
 
     min-height: 120px;
+
+    max-height: 30vh;
+
+    overflow-y: auto;
 
     display: flex;
     flex-direction: column;
@@ -257,4 +287,48 @@ circle {
     font-size: 16px;
     line-height: 1.8;
     color: #e2e8f0;
+}
+
+/* Toast */
+
+#toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+
+    background: rgba(16, 185, 129, 0.9);
+
+    color: white;
+
+    padding: 12px 24px;
+
+    border-radius: 50px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+    z-index: 200;
+
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    backdrop-filter: blur(5px);
+
+    font-weight: bold;
+}
+
+#toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Confetti Layer */
+
+#confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
 }
