@@ -28,7 +28,6 @@ body {
 }
 
 /* App Container */
-
 .app-container {
     width: 100%;
     max-width: 480px;
@@ -39,7 +38,6 @@ body {
 }
 
 /* Top Bar */
-
 .top-bar {
     display: flex;
     gap: 12px;
@@ -97,36 +95,21 @@ select {
     background: rgba(255,255,255,0.15);
 }
 
-/* MAIN GRID LAYOUT */
-
+/* ===== MAIN AREA – ABSOLUTE POSITIONING FOR PERFECT CENTERING ===== */
 .main-area {
+    position: relative;
     flex: 1;
-
-    display: grid;
-
-    grid-template-rows:
-        1fr
-        auto
-        1fr
-        1fr
-        auto;
-
-    align-items: center;
+    width: 100%;
 }
 
-/* Counter Circle */
-
+/* Counter – exactly centered */
 .counter-anchor {
-
-    grid-row: 2;
-
-    justify-self: center;
-
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: clamp(220px, 65vmin, 340px);
-
     aspect-ratio: 1 / 1;
-
-    position: relative;
 }
 
 .progress-wrapper {
@@ -148,29 +131,19 @@ select {
     position: absolute;
     bottom: 0;
     left: 0;
-
     width: 44px;
     height: 44px;
-
     border-radius: 50%;
-
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(239, 68, 68, 0.4);
-
     color: #f87171;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     cursor: pointer;
-
     z-index: 20;
-
     backdrop-filter: blur(4px);
-
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-
     transition: 0.2s;
 }
 
@@ -180,7 +153,6 @@ select {
 }
 
 /* SVG Circle */
-
 svg {
     transform: rotate(-90deg);
     width: 100%;
@@ -204,16 +176,13 @@ circle {
 }
 
 /* Counter Text */
-
 .counter-content {
     position: absolute;
     inset: 0;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     pointer-events: none;
 }
 
@@ -239,39 +208,32 @@ circle {
     color: var(--text-muted);
 }
 
-/* Hadith Card */
-
+/* Hadith Card – placed 100px below the circle */
 .hadith-card {
-
-    grid-row: 5;
-
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* top = 50% (center of screen) + half circle height + 100px */
+    top: calc(50% + clamp(110px, 32.5vmin, 170px) + 100px);
     width: 100%;
-
     background: linear-gradient(
         180deg,
         rgba(255,255,255,0.08),
         rgba(255,255,255,0.02)
     );
-
     border: 1px solid var(--glass-border);
-
     border-radius: 20px;
-
     padding: 20px;
-
     backdrop-filter: blur(12px);
-
     min-height: 120px;
-
     max-height: 30vh;
-
     overflow-y: auto;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
-
     text-align: center;
+    /* Ensure it doesn't go below safe area */
+    max-height: calc(50vh - 50px);
 }
 
 .hadith-title {
@@ -290,33 +252,22 @@ circle {
 }
 
 /* Toast */
-
 #toast {
     position: fixed;
     top: 20px;
     left: 50%;
     transform: translateX(-50%) translateY(-100px);
-
     background: rgba(16, 185, 129, 0.9);
-
     color: white;
-
     padding: 12px 24px;
-
     border-radius: 50px;
-
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-
     z-index: 200;
-
     transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
     display: flex;
     align-items: center;
     gap: 10px;
-
     backdrop-filter: blur(5px);
-
     font-weight: bold;
 }
 
@@ -325,7 +276,6 @@ circle {
 }
 
 /* Confetti Layer */
-
 #confetti {
     position: fixed;
     inset: 0;
