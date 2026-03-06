@@ -2,7 +2,9 @@
 <html lang="ar" dir="rtl">
 
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>الاستماع للقرآن</title>
@@ -25,8 +27,6 @@
 
 }
 
-/* LIGHT THEME */
-
 body.light{
 
 --bg:#f1f5f9;
@@ -36,8 +36,6 @@ body.light{
 --border:rgba(0,0,0,0.08);
 
 }
-
-/* SEPIA */
 
 body.sepia{
 
@@ -58,10 +56,13 @@ body{
 
 margin:0;
 font-family:'Tajawal',sans-serif;
+
 background:radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
+
 color:var(--text);
 
 display:flex;
+
 justify-content:center;
 
 padding:20px 20px 100px;
@@ -74,6 +75,7 @@ min-height:100dvh;
 
 width:100%;
 max-width:480px;
+
 display:flex;
 flex-direction:column;
 gap:16px;
@@ -107,13 +109,10 @@ font-size:18px;
 
 background:none;
 border:none;
+
 color:white;
 
 cursor:pointer;
-
-display:flex;
-align-items:center;
-justify-content:center;
 
 }
 
@@ -130,7 +129,9 @@ border-radius:20px;
 padding:20px;
 
 display:flex;
+
 flex-direction:column;
+
 gap:12px;
 
 }
@@ -138,6 +139,7 @@ gap:12px;
 label{
 
 font-size:14px;
+
 color:var(--primary);
 
 }
@@ -159,6 +161,7 @@ border:none;
 .now{
 
 text-align:center;
+
 padding:30px 20px;
 
 }
@@ -166,6 +169,7 @@ padding:30px 20px;
 .nowSurah{
 
 font-family:'Amiri',serif;
+
 font-size:26px;
 
 }
@@ -173,6 +177,7 @@ font-size:26px;
 .nowReciter{
 
 font-size:15px;
+
 color:var(--muted);
 
 }
@@ -180,7 +185,9 @@ color:var(--muted);
 .controls{
 
 display:flex;
+
 justify-content:center;
+
 align-items:center;
 
 gap:12px;
@@ -192,6 +199,7 @@ margin-top:10px;
 .play-pause-btn{
 
 width:60px;
+
 height:60px;
 
 border-radius:50%;
@@ -201,7 +209,9 @@ background:var(--primary);
 border:none;
 
 display:flex;
+
 align-items:center;
+
 justify-content:center;
 
 cursor:pointer;
@@ -293,6 +303,7 @@ transform:translate(-50%,0);
 }
 
 </style>
+
 </head>
 
 <body>
@@ -375,19 +386,29 @@ transform:translate(-50%,0);
 
 <script>
 
-/* GLOBAL THEME */
+/* THEME */
 
-const savedTheme = localStorage.getItem("themeMode");
+const savedTheme=localStorage.getItem("themeMode");
 
-if(savedTheme==="light") document.body.classList.add("light");
+if(savedTheme==="light")document.body.classList.add("light");
 
-if(savedTheme==="sepia") document.body.classList.add("sepia");
+if(savedTheme==="sepia")document.body.classList.add("sepia");
+
+/* AUDIO FIX */
+
+const audioElement=document.getElementById("audio");
+
+if(!window.globalAudio){
+
+window.globalAudio=audioElement;
+
+}
+
+const audio=window.globalAudio;
 
 /* VARIABLES */
 
 let data;
-
-const audio=document.getElementById("audio");
 
 const reciterSelect=document.getElementById("reciterSelect");
 
@@ -433,13 +454,15 @@ loadTracks();
 
 }
 
+/* LOAD TRACKS */
+
 function loadTracks(){
 
 juzSelect.innerHTML="";
 
 let reciter=data.reciters[reciterSelect.value];
 
-reciter.juz.forEach(j=>{
+reciter.items.forEach(j=>{
 
 let opt=document.createElement("option");
 
@@ -477,8 +500,6 @@ miniSurah.innerText=name;
 
 miniReciter.innerText=reciter;
 
-/* SAVE LAST */
-
 localStorage.setItem("lastTrack",url);
 
 localStorage.setItem("lastSurah",name);
@@ -503,34 +524,21 @@ audio.pause();
 
 }
 
-/* UI */
-
-audio.addEventListener("play",()=>{
-
-playIcon.style.display="none";
-
-pauseIcon.style.display="block";
-
-mini.classList.add("show");
-
 /* MEDIA SESSION */
 
-if("mediaSession" in navigator){
+function updateMediaSession(title,reciter){
+
+if(!("mediaSession"in navigator))return;
 
 navigator.mediaSession.metadata=new MediaMetadata({
 
-title:nowSurah.innerText,
-
-artist:nowReciter.innerText,
-
+title:title,
+artist:reciter,
 album:"Zad Al-Muslim",
 
 artwork:[
-
 {src:"icon/icon-192.png",sizes:"192x192",type:"image/png"},
-
 {src:"icon/icon-512.png",sizes:"512x512",type:"image/png"}
-
 ]
 
 });
@@ -540,6 +548,18 @@ navigator.mediaSession.setActionHandler("play",()=>audio.play());
 navigator.mediaSession.setActionHandler("pause",()=>audio.pause());
 
 }
+
+/* AUDIO EVENTS */
+
+audio.addEventListener("play",()=>{
+
+playIcon.style.display="none";
+
+pauseIcon.style.display="block";
+
+mini.classList.add("show");
+
+updateMediaSession(nowSurah.innerText,nowReciter.innerText);
 
 });
 
@@ -551,17 +571,15 @@ pauseIcon.style.display="none";
 
 });
 
-/* AUTO RECONNECT */
-
 audio.addEventListener("error",()=>{
 
-showToast("إعادة الاتصال...");
+nowSurah.innerText="إعادة الاتصال...";
 
 setTimeout(()=>{
 
 audio.src=currentTrackUrl;
 
-audio.play();
+audio.play().catch(()=>{});
 
 },3000);
 
@@ -571,15 +589,17 @@ audio.play();
 
 window.addEventListener("load",()=>{
 
-let last=localStorage.getItem("lastTrack");
+const lastTrack=localStorage.getItem("lastTrack");
 
-if(last){
+if(lastTrack){
 
-audio.src=last;
+audio.src=lastTrack;
 
-nowSurah.innerText=localStorage.getItem("lastSurah");
+currentTrackUrl=lastTrack;
 
-nowReciter.innerText=localStorage.getItem("lastReciter");
+nowSurah.innerText=localStorage.getItem("lastSurah")||"آخر تشغيل";
+
+nowReciter.innerText=localStorage.getItem("lastReciter")||"";
 
 miniSurah.innerText=nowSurah.innerText;
 
@@ -588,6 +608,8 @@ miniReciter.innerText=nowReciter.innerText;
 }
 
 });
+
+/* EVENTS */
 
 reciterSelect.onchange=loadTracks;
 
