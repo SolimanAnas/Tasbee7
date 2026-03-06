@@ -12,8 +12,11 @@
     :root {
       --bg-light:          #f5f0e6;
       --text-light:        #1e2a3a;
-      --bg-dark:           #1c1b16;
-      --text-dark:         #d9cdb3;
+      
+      /* وضع القراءة المريح (Parchment/Sepia) */
+      --bg-dark:           #e5d5b5; 
+      --text-dark:         #2a1f14; 
+      
       --accent:            #b38b5d;
       --radius-modal:      20px;
       --shadow:            0 12px 48px rgba(0, 0, 0, 0.28);
@@ -21,14 +24,13 @@
       --transition-speed:  0.28s;
     }
 
-    /* Theme-aware glass – different look in light vs dark */
     body[data-theme="light"] {
       --glass-bg:     rgba(248, 243, 232, 0.82);
       --glass-border: rgba(179, 139, 93, 0.22);
     }
     body[data-theme="dark"] {
-      --glass-bg:     rgba(22, 21, 16, 0.85);
-      --glass-border: rgba(217, 205, 179, 0.14);
+      --glass-bg:     rgba(229, 213, 181, 0.85);
+      --glass-border: rgba(179, 139, 93, 0.25);
     }
 
     /* ================= RESET ================= */
@@ -52,7 +54,7 @@
     body[data-theme="light"] { background: var(--bg-light); color: var(--text-light); }
     body[data-theme="dark"]  { background: var(--bg-dark);  color: var(--text-dark);  }
 
-    /* ================= HEADER ================= */
+    /* ================= HEADER & NAVIGATORS ================= */
     header {
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -69,7 +71,6 @@
                   opacity var(--transition-speed) var(--cb);
     }
 
-    /* Focus mode: header slides out smoothly */
     body.focus-mode header {
       transform: translateY(-100%);
       opacity: 0;
@@ -80,48 +81,61 @@
       text-align: center;
       flex: 1;
       padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .nav-item {
+      cursor: pointer;
+      transition: opacity 0.2s, background 0.2s;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .nav-item:active {
+      background: rgba(128,128,128,0.15);
     }
 
     #surahName {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
-      cursor: pointer;
-      opacity: 0.92;
-      letter-spacing: 0.3px;
-      transition: opacity 0.2s;
+      color: var(--accent);
+      margin-bottom: 2px;
     }
 
-    #pageMeta {
+    .meta-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .divider {
+      opacity: 0.4;
       font-size: 12px;
-      opacity: 0.65;
-      cursor: pointer;
-      margin-top: 1px;
-      transition: opacity 0.2s;
+      pointer-events: none;
     }
 
-    #surahName:active, #pageMeta:active { opacity: 1; }
-
-    /* Icon buttons */
     .icon-btn {
       background: none;
       border: none;
       color: inherit;
-      font-size: 19px;
       cursor: pointer;
-      padding: 7px;
+      padding: 8px;
       border-radius: 50%;
-      line-height: 1;
       transition: background 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 36px;
-      min-height: 36px;
+      min-width: 38px;
+      min-height: 38px;
     }
 
     .icon-btn:active { background: rgba(128,128,128,0.15); }
 
-    /* Bookmark active state */
     #bookmarkBtn.active { color: #f5b342; text-shadow: 0 0 10px rgba(245,179,66,0.6); }
 
     /* ================= MAIN / READER ================= */
@@ -132,23 +146,21 @@
       justify-content: center;
       overflow: hidden;
       position: relative;
-      /* padding-top for header height */
       padding-top: 56px;
     }
 
-    /* Page frame: the animatable container */
     .page-frame {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding-bottom: 25px; 
       will-change: transform, opacity;
     }
 
-    /* Mushaf image */
     .mushaf-img {
-      max-height: 100%;
+      max-height: 96%; 
       max-width: 100%;
       width: auto;
       height: auto;
@@ -156,29 +168,20 @@
       display: block;
       -webkit-user-drag: none;
       pointer-events: none;
-      /*
-       * DEFAULT = cropped view (hides decorative border).
-       * scale(1.19) crops about 8% from each side (1 - 1/1.19 ≈ 0.16/2 = 8%).
-       * transform-origin:center ensures the crop is symmetric on all sides.
-       * transition enables a smooth animated toggle when double-tapping.
-       */
-      transform: scale(1.19);
+      transform: scale(1.16) translateY(-2%);
       transform-origin: center center;
       transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
                   filter 0.35s ease;
     }
 
-    /* FULL VIEW — double tap to reveal complete page with decorative border */
     body.full-view .mushaf-img {
-      transform: scale(1);
+      transform: scale(1) translateY(0); 
     }
 
-    /* Dark sepia filter — reduces white PNG halo while preserving clarity */
     body[data-theme="dark"] .mushaf-img {
-      filter: brightness(0.87) contrast(1.1) sepia(0.22) saturate(0.9);
+      mix-blend-mode: multiply;
+      filter: brightness(0.95) sepia(0.3) contrast(1.05);
     }
-
-
 
     /* ================= GLASSMORPHISM MODAL BASE ================= */
     .modal-overlay {
@@ -192,7 +195,6 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      /* Fade in/out */
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.22s ease, visibility 0.22s;
@@ -211,12 +213,11 @@
       border-radius: var(--radius-modal);
       padding: 22px 20px;
       width: min(360px, 94vw);
-      max-height: 80dvh;
+      max-height: 85dvh;
       overflow-y: auto;
       overflow-x: hidden;
       box-shadow: var(--shadow);
       color: inherit;
-      /* Scale in animation */
       transform: scale(0.93) translateY(8px);
       transition: transform 0.22s var(--cb);
     }
@@ -262,59 +263,91 @@
     .modal-item:last-child { border-bottom: none; }
     .modal-item:active     { background: rgba(128,128,128,0.1); }
 
-    /* ================= PAGE SELECTOR ================= */
-    .page-selector {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    /* ================= ROLLER PAGE SELECTOR ================= */
+    .picker-container {
+      position: relative;
+      height: 150px;
+      margin: 10px 0 20px;
+      mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
     }
 
-    .current-info {
+    .picker-scroll {
+      height: 100%;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      overscroll-behavior: contain;
+    }
+    .picker-scroll::-webkit-scrollbar { display: none; }
+
+    .picker-item {
+      height: 50px;
+      line-height: 50px;
       text-align: center;
-      font-size: 0.9rem;
-      opacity: 0.75;
-      background: rgba(128,128,128,0.08);
-      border-radius: 10px;
-      padding: 10px;
-      line-height: 1.5;
+      scroll-snap-align: center;
+      font-size: 1.4rem;
+      opacity: 0.3;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      cursor: pointer;
     }
 
-    .page-input-group {
+    .picker-item.active {
+      opacity: 1;
+      font-size: 1.9rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .picker-highlight {
+      position: absolute;
+      top: 50px; 
+      left: 10%; right: 10%;
+      height: 50px;
+      border-top: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-border);
+      pointer-events: none;
+      background: rgba(128,128,128,0.06);
+      border-radius: 10px;
+    }
+
+    .manual-input-group {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
     }
 
-    .page-input-group input {
+    .manual-input-group input {
       flex: 1;
-      padding: 11px 14px;
-      border-radius: 40px;
+      min-width: 0; 
+      padding: 12px 14px;
+      border-radius: 12px;
       border: 1px solid var(--glass-border);
       background: rgba(128,128,128,0.08);
       color: inherit;
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-family: inherit;
       text-align: center;
       outline: none;
       transition: border-color 0.2s;
     }
 
-    .page-input-group input:focus { border-color: var(--accent); }
+    .manual-input-group input:focus { border-color: var(--accent); }
 
-    .page-input-group button {
-      padding: 11px 20px;
-      border-radius: 40px;
+    .btn-go {
+      padding: 12px 26px;
+      border-radius: 12px;
       background: var(--accent);
       color: #fff;
       border: none;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-family: inherit;
+      font-weight: bold;
       cursor: pointer;
       transition: opacity 0.2s;
-      white-space: nowrap;
     }
-
-    .page-input-group button:active { opacity: 0.8; }
+    .btn-go:active { opacity: 0.8; }
 
     /* ================= SELECTOR LIST (Surah & Juz) ================= */
     .search-input {
@@ -400,7 +433,7 @@
     .bookmark-item .bm-page    { font-weight: 700; font-size: 0.95rem; }
     .bookmark-item .bm-surah   { font-size: 0.82rem; opacity: 0.65; margin-top: 2px; }
 
-    /* ================= CONTEXT MENU (long press — bottom sheet) ================= */
+    /* ================= CONTEXT MENU ================= */
     .context-menu {
       position: fixed;
       bottom: 0;
@@ -420,7 +453,6 @@
 
     .context-menu.active { transform: translateY(0); }
 
-    /* Drag handle pill */
     .context-handle {
       width: 40px;
       height: 4px;
@@ -462,44 +494,12 @@
 
     .context-btn:active { background: rgba(128,128,128,0.2); }
 
-    .context-btn.danger {
-      color: #e57373;
-      border-color: rgba(229,115,115,0.2);
-    }
+    .context-btn.danger { color: #e57373; border-color: rgba(229,115,115,0.2); }
+    .context-btn.primary { background: rgba(179,139,93,0.15); border-color: rgba(179,139,93,0.3); color: var(--accent); }
 
-    .context-btn.primary {
-      background: rgba(179,139,93,0.15);
-      border-color: rgba(179,139,93,0.3);
-      color: var(--accent);
-    }
-
-    /* ================= SCROLLBAR STYLING ================= */
-    .selector-scroll::-webkit-scrollbar,
-    .modal-content::-webkit-scrollbar { width: 4px; }
-
-    .selector-scroll::-webkit-scrollbar-track,
-    .modal-content::-webkit-scrollbar-track { background: transparent; }
-
-    .selector-scroll::-webkit-scrollbar-thumb { background: rgba(179,139,93,0.3); border-radius: 2px; }
-    .modal-content::-webkit-scrollbar-thumb   { background: rgba(128,128,128,0.2); border-radius: 2px; }
-
-    /* ================= RESPONSIVE ================= */
     @media (max-width: 380px) {
       .context-buttons { grid-template-columns: 1fr; }
       .modal-content   { padding: 16px 14px; }
-    }
-
-    /* رفع الصفحة للأعلى قليلاً في الشاشات الكبيرة لمنع قص النص السفلي */
-    @media (min-width: 768px), (min-height: 800px) {
-      .mushaf-img {
-        /* دمج التكبير 1.19 مع رفع الصورة للأعلى بنسبة 3% */
-        transform: scale(1.19) translateY(-3%);
-      }
-      
-      /* إعادتها لوضعها الطبيعي عند تفعيل وضع الرؤية الكاملة (النقر المزدوج) */
-      body.full-view .mushaf-img {
-        transform: scale(1) translateY(0);
-      }
     }
   </style>
 </head>
@@ -507,14 +507,27 @@
 <body data-theme="light">
 
   <header id="appHeader">
-    <button class="icon-btn" onclick="prevPage()" title="الصفحة السابقة">⟨</button>
+    <button class="icon-btn" onclick="goHome()" title="الرئيسية">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </button>
 
     <div class="header-center">
-      <div id="surahName" onclick="openSurahSelector()">سورة الفاتحة</div>
-      <div id="pageMeta"  onclick="openPageSelector()">الجزء ١ | صفحة ١</div>
+      <div id="surahName" class="nav-item surah-nav" onclick="openSurahSelector()">سورة الفاتحة</div>
+      <div class="meta-row">
+        <span id="juzName" class="nav-item juz-nav" onclick="openJuzSelector()">الجزء ١</span>
+        <span class="divider">|</span>
+        <span id="pageName" class="nav-item page-nav" onclick="openPageSelector()">صفحة ١</span>
+      </div>
     </div>
 
-    <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">☆</button>
+    <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+    </button>
   </header>
 
   <main id="swipeArea">
@@ -536,7 +549,7 @@
         <span>الإعدادات</span>
         <button class="close-btn" onclick="closeModal('settingsModal')">✕</button>
       </div>
-      <div class="modal-item" onclick="toggleTheme()">🌙 تبديل الوضع الليلي</div>
+      <div class="modal-item" onclick="toggleTheme()">👓 وضع القراءة المريح</div>
       <div class="modal-item" onclick="openBookmarksModal()">🔖 المفضلة</div>
       <div class="modal-item" onclick="cacheAllPages()">⬇ تحميل جميع الصفحات</div>
     </div>
@@ -548,19 +561,25 @@
         <span>الذهاب إلى صفحة</span>
         <button class="close-btn" onclick="closeModal('pageSelectorModal')">✕</button>
       </div>
-      <div class="page-selector">
-        <div class="current-info" id="currentPageInfo"></div>
-        <div class="page-input-group">
-          <input
-            type="number"
-            id="gotoPageInput"
-            min="1" max="604"
-            placeholder="رقم الصفحة"
-            onkeydown="if(event.key==='Enter') goToPageInput()"
-          >
-          <button onclick="goToPageInput()">انتقال</button>
-        </div>
+      
+      <div class="picker-container">
+        <div class="picker-highlight"></div>
+        <div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()">
+          </div>
       </div>
+
+      <div class="manual-input-group">
+        <input
+          type="number"
+          id="gotoPageInput"
+          min="1" max="604"
+          placeholder="رقم الصفحة"
+          oninput="syncPickerWithInput()"
+          onkeydown="if(event.key==='Enter') confirmPageSelection()"
+        >
+        <button class="btn-go" onclick="confirmPageSelection()">انتقال</button>
+      </div>
+
     </div>
   </div>
 
@@ -766,8 +785,6 @@
     const totalPages     = 604;
     let bookmarks        = new Set();
     let isTransitioning  = false;
-    // fullView = true  → full page shown (decorative border visible)
-    // fullView = false → cropped view (border hidden, default)
     let fullView         = false;
 
     // Cached DOM refs
@@ -775,10 +792,10 @@
     const frame       = document.getElementById('pageFrame');
     const swipeArea   = document.getElementById('swipeArea');
     const surahName   = document.getElementById('surahName');
-    const pageMeta    = document.getElementById('pageMeta');
+    const juzName     = document.getElementById('juzName');
+    const pageName    = document.getElementById('pageName');
     const bookmarkBtn = document.getElementById('bookmarkBtn');
 
-    // Helpers to look up current surah/juz
     const getCurrentSurah = () => [...SURAH_MAP].reverse().find(s => currentPage >= s.page);
     const getCurrentJuz   = () => [...JUZ_MAP].reverse().find(j => currentPage >= j.page);
 
@@ -786,32 +803,33 @@
     //  INIT
     // ============================================================
     window.onload = function () {
-      // Restore theme (default = light)
       const savedTheme = localStorage.getItem('quranTheme') || 'light';
       document.body.setAttribute('data-theme', savedTheme);
 
-      // Restore last page
       const savedPage = parseInt(localStorage.getItem('lastPage'));
       if (savedPage && savedPage >= 1 && savedPage <= totalPages) {
         currentPage = savedPage;
       }
 
-      // Load bookmarks
       loadBookmarks();
+      initPageRoller();
 
-      // Restore view mode (cropped = default, full = user toggled)
       fullView = localStorage.getItem('quranFullView') === 'true';
       if (fullView) document.body.classList.add('full-view');
 
-      // Render and setup
       renderPageContent();
       initGestures();
       disableNativeLongPress();
       preloadAdjacentPages();
     };
 
+    function goHome() {
+      // توجيه لصفحة الاندكس الخاصة بتطبيقاتك
+      window.location.href = 'index.html';
+    }
+
     // ============================================================
-    //  RENDER PAGE CONTENT (does NOT animate — only updates DOM)
+    //  RENDER PAGE CONTENT
     // ============================================================
     function renderPageContent() {
       img.src = `mushaf/${currentPage}.png`;
@@ -824,23 +842,12 @@
       const surah = getCurrentSurah();
       const juz   = getCurrentJuz();
       surahName.textContent = surah ? 'سورة ' + surah.name : '';
-      pageMeta.textContent  = juz
-        ? `الجزء ${juz.number} | صفحة ${currentPage}`
-        : `صفحة ${currentPage}`;
+      juzName.textContent   = juz ? `الجزء ${juz.number}` : '';
+      pageName.textContent  = `صفحة ${currentPage}`;
     }
 
     // ============================================================
-    //  PAGE TRANSITION  (3-phase: exit → swap → enter)
-    //
-    //  WHY 3 PHASES:
-    //  The old code removed the CSS class and changed the image
-    //  in the same setTimeout callback. When the class is removed
-    //  the element snaps back to position 0 *before* the new image
-    //  paints, causing a visible white flash.
-    //
-    //  Fix: Phase 2 uses inline styles to hold the "enter position"
-    //  without any transition, then double-rAF forces a repaint
-    //  before Phase 3 re-enables transition for the entry glide.
+    //  PAGE TRANSITION
     // ============================================================
     function navigateTo(newPage, direction) {
       if (isTransitioning) return;
@@ -853,19 +860,14 @@
       const DUR  = '0.28s';
       const TRANS = `transform ${DUR} ${CB}, opacity ${DUR} ${CB}`;
 
-      // RTL: swipe left (dx<0) = prevPage, swipe right (dx>0) = nextPage
-      // • nextPage: current exits right (+30%), new enters from left (-30%)
-      // • prevPage: current exits left (-30%), new enters from right (+30%)
       const exitX  = direction === 'next' ? '30%'  : '-30%';
       const enterX = direction === 'next' ? '-30%' : '30%';
 
-      // ── PHASE 1: exit current page ─────────────────────────────
       frame.style.transition = TRANS;
       frame.style.transform  = `translateX(${exitX})`;
       frame.style.opacity    = '0';
 
       setTimeout(() => {
-        // ── PHASE 2: swap content + snap to enter side (no transition) ─
         currentPage = newPage;
         renderPageContent();
 
@@ -873,7 +875,6 @@
         frame.style.transform  = `translateX(${enterX})`;
         frame.style.opacity    = '0';
 
-        // ── PHASE 3: enter animation (double rAF = force repaint first) ─
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             frame.style.transition = TRANS;
@@ -881,7 +882,6 @@
             frame.style.opacity    = '1';
 
             setTimeout(() => {
-              // Clean up all inline styles so CSS classes can take over
               frame.style.cssText  = '';
               isTransitioning = false;
               preloadAdjacentPages();
@@ -900,36 +900,19 @@
       navigateTo(pageNum, dir);
     }
 
-    // Preload adjacent pages for smooth swiping
     function preloadAdjacentPages() {
       if (currentPage > 1)          new Image().src = `mushaf/${currentPage - 1}.png`;
       if (currentPage < totalPages) new Image().src = `mushaf/${currentPage + 1}.png`;
     }
 
-
-
     // ============================================================
     //  UNIFIED GESTURE HANDLER
-    //
-    //  WHY UNIFIED:
-    //  Three separate touchend listeners on the same element caused
-    //  race conditions. Each listener ran independently — a swipe
-    //  could simultaneously trigger tap logic, and long press could
-    //  start while a swipe was in progress.
-    //
-    //  Fix: ONE touchstart, ONE touchmove, ONE touchend listener.
-    //  Gesture type is determined by a single state machine:
-    //    idle → (movement?) swipe
-    //         → (600ms held still?) longpress
-    //         → (quick release, no move?) tap / doubletap
-    //  Mutual exclusion is enforced: once a gesture type is decided,
-    //  all others are cancelled.
     // ============================================================
     function initGestures() {
       const LONG_PRESS_MS      = 600;
-      const SWIPE_THRESHOLD    = 48;   // px minimum horizontal swipe
-      const MOVE_CANCEL_THRES  = 10;   // px movement before long-press cancels
-      const DOUBLE_TAP_MS      = 280;  // ms window for double-tap
+      const SWIPE_THRESHOLD    = 48;   
+      const MOVE_CANCEL_THRES  = 10;   
+      const DOUBLE_TAP_MS      = 280;  
 
       let startX       = 0, startY = 0;
       let didMove      = false;
@@ -938,7 +921,6 @@
       let tapTimer     = null;
       let lpTimer      = null;
 
-      // ── touchstart: record position, start long-press countdown ──
       swipeArea.addEventListener('touchstart', e => {
         const t = e.changedTouches[0];
         startX   = t.clientX;
@@ -955,7 +937,6 @@
         }, LONG_PRESS_MS);
       }, { passive: true });
 
-      // ── touchmove: cancel long-press if finger moved ──────────
       swipeArea.addEventListener('touchmove', e => {
         if (didMove) return;
         const t  = e.changedTouches[0];
@@ -967,11 +948,9 @@
         }
       }, { passive: true });
 
-      // ── touchend: determine gesture and act ───────────────────
       swipeArea.addEventListener('touchend', e => {
         clearTimeout(lpTimer);
 
-        // Long press already handled above — do nothing
         if (lpFired) return;
 
         const t    = e.changedTouches[0];
@@ -979,25 +958,20 @@
         const dy   = Math.abs(t.clientY - startY);
         const absDx = Math.abs(dx);
 
-        // ── SWIPE: horizontal movement dominant & over threshold ──
         if (didMove && absDx > SWIPE_THRESHOLD && absDx > dy) {
-          // Cancel any pending tap/double-tap
           if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
           lastTapTime = 0;
 
-          // RTL: dx < 0 (swipe left) → prevPage | dx > 0 (swipe right) → nextPage
           if (dx < 0) prevPage();
           else        nextPage();
           return;
         }
 
-        // ── TAP / DOUBLE-TAP: minimal movement ────────────────────
         if (!didMove) {
           const now           = Date.now();
           const sinceLastTap  = now - lastTapTime;
 
           if (sinceLastTap < DOUBLE_TAP_MS && tapTimer !== null) {
-            // ← DOUBLE TAP: toggle between cropped (default) ↔ full view
             clearTimeout(tapTimer);
             tapTimer    = null;
             lastTapTime = 0;
@@ -1007,19 +981,16 @@
             localStorage.setItem('quranFullView', fullView);
 
           } else {
-            // ← Potential single tap — wait to see if second tap arrives
             lastTapTime = now;
             if (tapTimer) clearTimeout(tapTimer);
             tapTimer = setTimeout(() => {
               tapTimer = null;
-              // Single tap confirmed — toggle focus mode
               document.body.classList.toggle('focus-mode');
             }, DOUBLE_TAP_MS);
           }
         }
       });
 
-      // ── touchcancel: clean up all timers ─────────────────────
       swipeArea.addEventListener('touchcancel', () => {
         clearTimeout(lpTimer);
         clearTimeout(tapTimer);
@@ -1028,14 +999,9 @@
       });
     }
 
-    // ============================================================
-    //  DISABLE NATIVE LONG-PRESS IMAGE MENU
-    // ============================================================
     function disableNativeLongPress() {
-      // Prevent browser's native image context menu on long press
       img.addEventListener('contextmenu',  e => e.preventDefault());
       swipeArea.addEventListener('contextmenu', e => e.preventDefault());
-      // Prevent callout on iOS
       img.style.webkitTouchCallout = 'none';
     }
 
@@ -1093,7 +1059,6 @@
 
     function updateBookmarkStar() {
       const isBookmarked = bookmarks.has(currentPage);
-      bookmarkBtn.textContent = isBookmarked ? '★' : '☆';
       bookmarkBtn.classList.toggle('active', isBookmarked);
     }
 
@@ -1129,16 +1094,14 @@
     }
 
     // ============================================================
-    //  SURAH SELECTOR — fully implemented with search
+    //  SURAH SELECTOR
     // ============================================================
     function openSurahSelector() {
       closeContextMenu();
-      // Reset search
       const searchEl = document.getElementById('surahSearch');
       if (searchEl) searchEl.value = '';
       buildSurahList(SURAH_MAP);
       openModal('surahSelectorModal');
-      // Auto-focus search after transition
       setTimeout(() => { if (searchEl) searchEl.focus(); }, 200);
     }
 
@@ -1180,7 +1143,7 @@
     }
 
     // ============================================================
-    //  JUZ SELECTOR — fully implemented
+    //  JUZ SELECTOR
     // ============================================================
     function openJuzSelector() {
       closeContextMenu();
@@ -1189,7 +1152,6 @@
 
       const fragment = document.createDocumentFragment();
       JUZ_MAP.forEach(j => {
-        // Find which surah starts this juz
         const surah = [...SURAH_MAP].reverse().find(s => j.page >= s.page);
 
         const div = document.createElement('div');
@@ -1210,33 +1172,81 @@
     }
 
     // ============================================================
-    //  PAGE SELECTOR MODAL
+    //  PAGE SELECTOR MODAL (WHEEL PICKER)
     // ============================================================
-    function openPageSelector() {
-      closeContextMenu();
-      const surah = getCurrentSurah();
-      const juz   = getCurrentJuz();
+    let lastActivePickerIndex = -1;
 
-      document.getElementById('currentPageInfo').innerHTML =
-        `الصفحة الحالية: <strong>${currentPage}</strong><br>` +
-        (surah ? `سورة ${surah.name}` : '') +
-        (juz   ? ` | الجزء ${juz.number}` : '');
+    function initPageRoller() {
+      const scroll = document.getElementById('pagePickerScroll');
+      scroll.innerHTML = '';
+      
+      const topSpacer = document.createElement('div');
+      topSpacer.style.height = '50px';
+      scroll.appendChild(topSpacer);
 
-      const input = document.getElementById('gotoPageInput');
-      input.value = '';
-      openModal('pageSelectorModal');
-      setTimeout(() => input.focus(), 200);
+      for(let i = 1; i <= totalPages; i++) {
+        const div = document.createElement('div');
+        div.className = 'picker-item';
+        div.id = 'picker-item-' + i;
+        div.textContent = i;
+        // النقر على الرقم يضعه في المنتصف فوراً
+        div.onclick = () => { scroll.scrollTop = (i - 1) * 50; };
+        scroll.appendChild(div);
+      }
+
+      const botSpacer = document.createElement('div');
+      botSpacer.style.height = '50px';
+      scroll.appendChild(botSpacer);
     }
 
-    function goToPageInput() {
-      const input = document.getElementById('gotoPageInput');
-      const page  = parseInt(input.value);
+    function openPageSelector() {
+      closeContextMenu();
+      openModal('pageSelectorModal');
+      
+      // التمرير التلقائي ليكون العرض على الصفحة الحالية عند فتح النافذة
+      setTimeout(() => {
+        const scroll = document.getElementById('pagePickerScroll');
+        scroll.scrollTop = (currentPage - 1) * 50;
+        updatePickerInput();
+      }, 10);
+    }
+
+    function updatePickerInput() {
+      const scroll = document.getElementById('pagePickerScroll');
+      let index = Math.round(scroll.scrollTop / 50) + 1;
+      
+      if (index < 1) index = 1;
+      if (index > totalPages) index = totalPages;
+
+      document.getElementById('gotoPageInput').value = index;
+
+      // تحديث مظهر العنصر النشط (تكبيره وتلوينه) بشكل سلس دون التأثير على الأداء
+      if (index !== lastActivePickerIndex) {
+        if (lastActivePickerIndex !== -1) {
+          const oldItem = document.getElementById('picker-item-' + lastActivePickerIndex);
+          if (oldItem) oldItem.classList.remove('active');
+        }
+        const newItem = document.getElementById('picker-item-' + index);
+        if (newItem) newItem.classList.add('active');
+        
+        lastActivePickerIndex = index;
+      }
+    }
+
+    // يتزامن السحب (الرولر) عند كتابة الرقم يدوياً في المربع
+    function syncPickerWithInput() {
+      let val = parseInt(document.getElementById('gotoPageInput').value);
+      if (val >= 1 && val <= totalPages) {
+        const scroll = document.getElementById('pagePickerScroll');
+        scroll.scrollTop = (val - 1) * 50;
+      }
+    }
+
+    function confirmPageSelection() {
+      const page = parseInt(document.getElementById('gotoPageInput').value);
       if (page >= 1 && page <= totalPages) {
         goToPage(page);
         closeModal('pageSelectorModal');
-      } else {
-        input.style.borderColor = '#e57373';
-        setTimeout(() => input.style.borderColor = '', 1200);
       }
     }
 
@@ -1251,7 +1261,6 @@
       document.getElementById(id).classList.remove('active');
     }
 
-    // Close modal when clicking the overlay (outside modal-content)
     function handleOverlayClick(event, modalId) {
       if (event.target === document.getElementById(modalId)) {
         closeModal(modalId);
@@ -1297,7 +1306,6 @@
   </script>
 
   <script>
-    // Service Worker registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(console.warn);
     }
