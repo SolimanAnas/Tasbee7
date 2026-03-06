@@ -1,284 +1,148 @@
-:root {
-    --primary: #10b981;
-    --primary-glow: rgba(16, 185, 129, 0.4);
-    --bg-dark: #020617;
-    --glass: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-}
-
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-}
-
-body {
-    margin: 0;
-    height: 100dvh;
-    overflow: hidden;
-    font-family: 'Tajawal', sans-serif;
-    background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-dark));
-    color: var(--text-main);
-    display: flex;
-    justify-content: center;
-    user-select: none;
-    overscroll-behavior-y: none;
-}
-
-/* App Container */
-.app-container {
-    width: 100%;
-    max-width: 480px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
-}
-
-/* Top Bar */
-.top-bar {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    z-index: 10;
-}
-
-.dhikr-select-wrapper {
-    flex: 1;
-    position: relative;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-}
-
-select {
-    width: 100%;
-    padding: 14px 16px;
-    appearance: none;
-    background: transparent;
-    border: none;
-    color: white;
-    font-family: 'Tajawal';
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.select-arrow {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    opacity: 0.7;
-}
-
-.icon-btn {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    color: white;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 24px;
-}
-
-.icon-btn:active {
-    transform: scale(0.92);
-    background: rgba(255,255,255,0.15);
-}
-
-/* ===== MAIN AREA – ABSOLUTE POSITIONING FOR PERFECT CENTERING ===== */
-.main-area {
-    position: relative;
-    flex: 1;
-    width: 100%;
-}
-
-/* Counter – exactly centered */
-.counter-anchor {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: clamp(220px, 65vmin, 340px);
-    aspect-ratio: 1 / 1;
-}
-
-.progress-wrapper {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    transition: transform 0.1s;
-    border-radius: 50%;
-    box-shadow: 0 0 clamp(40px, 8vmin, 70px) -20px var(--primary-glow);
-    position: relative;
-    z-index: 1;
-}
-
-.progress-wrapper:active {
-    transform: scale(0.97);
-}
-
-.mini-reset-btn {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    color: #f87171;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 20;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: 0.2s;
-}
-
-.mini-reset-btn:active {
-    transform: scale(0.9);
-    background: rgba(239, 68, 68, 0.2);
-}
-
-/* SVG Circle */
-svg {
-    transform: rotate(-90deg);
-    width: 100%;
-    height: 100%;
-}
-
-circle {
-    fill: none;
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.3s ease;
-}
-
-.bg-circle {
-    stroke: rgba(255,255,255,0.05);
-}
-
-.fg-circle {
-    stroke: url(#gradient);
-    filter: drop-shadow(0 0 4px var(--primary));
-}
-
-/* Counter Text */
-.counter-content {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
-
-.count-label {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 5px;
-}
-
-.count-number {
-    font-size: clamp(60px, 15vw, 90px);
-    font-weight: 700;
-    line-height: 1;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-
-.target-pill {
-    margin-top: 10px;
-    font-size: 14px;
-    background: rgba(0,0,0,0.4);
-    padding: 4px 12px;
-    border-radius: 20px;
-    color: var(--text-muted);
-}
-
-/* Hadith Card – placed 100px below the circle */
-.hadith-card {
-    position: absolute;
-    left: 0;
-    right: 0;
-    /* top = 50% (center of screen) + half circle height + 100px */
-    top: calc(50% + clamp(110px, 32.5vmin, 170px) + 100px);
-    width: 100%;
-    background: linear-gradient(
-        180deg,
-        rgba(255,255,255,0.08),
-        rgba(255,255,255,0.02)
-    );
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 20px;
-    backdrop-filter: blur(12px);
-    min-height: 120px;
-    max-height: 30vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    /* Ensure it doesn't go below safe area */
-    max-height: calc(50vh - 50px);
-}
-
-.hadith-title {
-    font-size: 12px;
-    color: var(--primary);
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-.hadith-text {
-    font-family: 'Amiri', serif;
-    font-size: 16px;
-    line-height: 1.8;
-    color: #e2e8f0;
-}
-
-/* Toast */
-#toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: rgba(16, 185, 129, 0.9);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 50px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 200;
-    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    backdrop-filter: blur(5px);
-    font-weight: bold;
-}
-
-#toast.show {
-    transform: translateX(-50%) translateY(0);
-}
-
-/* Confetti Layer */
-#confetti {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 50;
-}
+[
+  {
+    "id": "intro",
+    "title": "المقدمة",
+    "subtitle": "فضل الذكر",
+    "icon": "✦",
+    "content": [
+      {
+        "type": "text",
+        "ar": "إِنَّ الحَمْدَ للَّهِ، نَحْمَدُهُ، وَنَسْتَعِينُهُ، وَنَسْتَغْفِرُهُ، وَنَعُوذُ بِاللَّهِ مِنْ شُرُورِ أَنْفُسِنَا، وَسَيِّئَاتِ أَعْمَالِنَا، مَنْ يَهْدِهِ اللَّهُ فَلاَ مُضِلَّ لَهُ، وَمَنْ يُضْلِلْ فَلاَ هَادِيَ لَهُ، وَأَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّداً عَبْدُهُ وَرَسُولُهُ."
+      },
+      {
+        "type": "quran",
+        "ar": "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُواْ لِي وَلاَ تَكْفُرُونِ",
+        "ref": "البقرة: ١٥٢"
+      },
+      {
+        "type": "quran",
+        "ar": "يَا أَيُّهَا الَّذِينَ آمَنُوا اذْكُرُوا اللَّهَ ذِكْراً كَثِيراً",
+        "ref": "الأحزاب: ٤١"
+      },
+      {
+        "type": "hadith",
+        "ar": "مَثَلُ الَّذِي يَذْكُرُ رَبَّهُ، وَالَّذِي لاَ يَذْكُرُ رَبَّهُ، مَثَلُ الْحَيِّ وَالْمَيِّتِ",
+        "ref": "رواه البخاري"
+      },
+      {
+        "type": "hadith",
+        "ar": "أَلاَ أُنبِّئُكُم بِخَيْرِ أَعْمَالِكُمْ، وَأَزْكَاهَا عِنْدَ مَلِيكِكُمْ، وَأَرْفَعِهَا فِي دَرَجَاتِكُمْ، وَخَيْرٍ لَكُمْ مِنْ إِنْفَاقِ الذَّهَبِ وَالوَرِقِ؟ ذِكْرُ اللَّهِ تَعَالَى",
+        "ref": "رواه الترمذي"
+      }
+    ]
+  },
+  {
+    "id": "waking",
+    "title": "١ - أذكار الاستيقاظ من النوم",
+    "subtitle": "عند الصحيان",
+    "icon": "🌅",
+    "content": [
+      {
+        "type": "dhikr",
+        "num": "١",
+        "ar": "الْحَمْدُ للَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا، وَإِلَيْهِ النُّشُورُ",
+        "ref": "رواه البخاري"
+      },
+      {
+        "type": "dhikr",
+        "num": "٢",
+        "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَريكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، سُبْحَانَ اللَّهِ، وَالْحَمْدُ للَّهِ، وَلاَ إِلَهَ إِلاَّ اللَّهُ، وَاللَّهُ أَكبَرُ، وَلاَ حَوْلَ وَلاَ قُوَّةَ إِلاَّ بِاللَّهِ الْعَلِيِّ الْعَظِيمِ، رَبِّ اغْفِرْ لِي",
+        "ref": "رواه البخاري"
+      },
+      {
+        "type": "dhikr",
+        "num": "٣",
+        "ar": "الْحَمْدُ لِلَّهِ الَّذِي عَافَانِي فِي جَسَدِي، وَرَدَّ عَلَيَّ رُوحِي، وَأَذِنَ لِي بِذِكْرِهِ",
+        "ref": "رواه الترمذي"
+      }
+    ]
+  },
+  {
+    "id": "clothing",
+    "title": "٢ - دعاء لبس الثوب",
+    "subtitle": "عند ارتداء الملابس",
+    "icon": "👘",
+    "content": [
+      {
+        "type": "dhikr",
+        "num": "١",
+        "ar": "الْحَمْدُ للَّهِ الَّذِي كَسَانِي هَذَا (الثَّوْبَ) وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلاَ قُوَّةٍ",
+        "ref": "رواه أبو داود والترمذي"
+      }
+    ]
+  },
+  {
+    "id": "new-clothing",
+    "title": "٣ - دعاء لبس الثوب الجديد",
+    "subtitle": "عند ارتداء ثوب جديد",
+    "icon": "✨",
+    "content": [
+      {
+        "type": "dhikr",
+        "num": "١",
+        "ar": "اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ كَسَوْتَنِيهِ، أَسْأَلُكَ مِنْ خَيْرِهِ وَخَيْرِ مَا صُنِعَ لَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّهِ وَشَرِّ مَا صُنِعَ لَهُ",
+        "ref": "رواه أبو داود والترمذي"
+      }
+    ]
+  },
+  {
+    "id": "bathroom",
+    "title": "٦ - دعاء دخول الخلاء",
+    "subtitle": "عند الدخول إلى الحمام",
+    "icon": "🚪",
+    "content": [
+      {
+        "type": "dhikr",
+        "num": "١",
+        "ar": "بِسْمِ اللَّهِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبْثِ وَالْخَبَائِثِ",
+        "ref": "رواه البخاري ومسلم"
+      }
+    ]
+  },
+  {
+    "id": "wudu",
+    "title": "٩ - الذكر بعد الفراغ من الوضوء",
+    "subtitle": "بعد الانتهاء من الوضوء",
+    "icon": "💧",
+    "content": [
+      {
+        "type": "dhikr",
+        "num": "١",
+        "ar": "أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّداً عَبْدُهُ وَرَسُولُهُ",
+        "ref": "رواه مسلم"
+      },
+      {
+        "type": "dhikr",
+        "num": "٢",
+        "ar": "اللَّهُمَّ اجْعَلْنِي مِنَ التَّوَّابِينَ وَاجْعَلْنِي مِنَ الْمُتَطَهِّرِينَ",
+        "ref": "رواه الترمذي"
+      },
+      {
+        "type": "dhikr",
+        "num": "٣",
+        "ar": "سُبْحانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ أَنْتَ، أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ",
+        "ref": "رواه النسائي"
+      }
+    ]
+  },
+  {
+    "id": "leaving-home",
+    "title": "١٠ - الذكر عند الخروج من المنزل",
+    "subtitle": "عند مغادرة البيت",
+    "icon": "🏠",
+    "content": [
+      {
+        "type": "dhikr",
+        "num": "١",
+        "ar": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلاَ حَوْلَ وَلاَ قُوَّةَ إِلاَّ بِاللَّهِ",
+        "ref": "رواه أبو داود والترمذي"
+      },
+      {
+        "type": "dhikr",
+        "num": "٢",
+        "ar": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أَضِلَّ، أَوْ أُضَلَّ، أَوْ أَزِلَّ، أَوْ أُزَلَّ، أَوْ أَظْلِمَ، أَوْ أُظْلَمَ، أَوْ أَجْهَلَ، أَوْ يُجْهَلَ عَلَيَّ",
+        "ref": "رواه أبو داود والترمذي"
+      }
+    ]
+  }
+]
