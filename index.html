@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Zad Al-Muslim</title>
@@ -14,191 +13,214 @@
 <link rel="manifest" href="manifest.json">
 
 <link rel="icon" href="icon/icon-192.png">
-
 <link rel="apple-touch-icon" href="icon/icon-512.png">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
-
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <meta name="apple-mobile-web-app-title" content="Zad Al-Muslim">
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-/* ================== THEME ================== */
-:root {
-  --primary: #10b981;
-  --bg: #020617;
-  --card: #0f172a;
-  --text: #f8fafc;
-  --glass: rgba(255,255,255,0.08);
-  --glass-border: rgba(255,255,255,0.1);
+/* ================= THEME VARIABLES ================= */
+
+:root{
+
+--primary:#10b981;
+
+--bg:#020617;
+--card:#0f172a;
+--text:#f8fafc;
+
+--glass:rgba(255,255,255,0.08);
+--glass-border:rgba(255,255,255,0.1);
+
 }
 
-body.light {
-  --bg: #f1f5f9;
-  --card: #ffffff;
-  --text: #0f172a;
-  --glass: rgba(0,0,0,0.04);
-  --glass-border: rgba(0,0,0,0.08);
+/* LIGHT THEME */
+
+body.light{
+
+--bg:#f1f5f9;
+--card:#ffffff;
+--text:#0f172a;
+
+--glass:rgba(0,0,0,0.04);
+--glass-border:rgba(0,0,0,0.08);
+
 }
 
-/* ================== BASE ================== */
+/* SEPIA THEME */
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+body.sepia{
+
+--bg:#f4ecd8;
+--card:#fffaf0;
+--text:#3b2f1e;
+
+--glass:rgba(0,0,0,0.05);
+--glass-border:rgba(0,0,0,0.08);
+
 }
 
-body {
-  margin: 0;
-  font-family: 'Tajawal', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  transition: opacity 0.25s ease, background 0.3s ease;
-  opacity: 1;
+/* ================= BASE ================= */
+
+*{
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
 
-body:not(.light) {
-  background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
+body{
+
+margin:0;
+font-family:'Tajawal',sans-serif;
+
+background:var(--bg);
+color:var(--text);
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+min-height:100vh;
+
+transition:background 0.3s ease;
+
 }
 
-body.fade-out {
-  opacity: 0;
+/* DARK GRADIENT */
+
+body:not(.light):not(.sepia){
+background:radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
 }
 
-/* ================== TOP BAR ================== */
+/* ================= TOP BAR ================= */
 
-.top-bar {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  justify-content: flex-end;
-  padding: 20px;
+.top-bar{
+
+width:100%;
+max-width:480px;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:16px 20px;
+
 }
 
-.icon-btn {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  cursor: pointer;
-  font-size: 20px;
-  transition: 0.25s ease;
+.title{
+
+font-size:18px;
+font-weight:700;
+color:var(--primary);
+
 }
 
-.icon-btn:hover {
-  box-shadow: 0 8px 25px -10px var(--primary);
+/* ================= THEME SWITCH ================= */
+
+.theme-switch{
+
+display:flex;
+gap:10px;
+
 }
 
-.icon-btn:active {
-  transform: scale(0.92);
+.theme-dot{
+
+width:34px;
+height:34px;
+
+border-radius:50%;
+
+border:3px solid rgba(255,255,255,0.6);
+
+cursor:pointer;
+
+transition:0.2s;
+
 }
 
-/* ================== CONTENT ================== */
-
-.content {
-  flex: 1;
-  width: 100%;
-  max-width: 480px;
-  padding: 0 20px 40px;
-  text-align: center;
+.theme-dot:hover{
+transform:scale(1.1);
 }
 
-h1 {
-  font-size: 20px;
-  margin-bottom: 30px;
-  color: var(--primary);
+.theme-dark{ background:#1f2937; }
+
+.theme-sepia{ background:#e7dec5; }
+
+.theme-light{ background:#ffffff; }
+
+/* ================= CONTENT ================= */
+
+.content{
+
+flex:1;
+
+width:100%;
+max-width:480px;
+
+padding:0 20px 30px;
+
 }
 
-/* ================== GRID ================== */
+/* ================= GRID ================= */
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+.grid{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:18px;
+
 }
 
-.card {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 22px;
-  padding: 28px 10px;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+.card{
+
+background:var(--glass);
+
+border:1px solid var(--glass-border);
+
+border-radius:22px;
+
+padding:26px 12px;
+
+cursor:pointer;
+
+text-align:center;
+
+backdrop-filter:blur(10px);
+
+transition:0.25s;
+
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 35px -10px var(--primary);
+.card:hover{
+transform:translateY(-4px);
+box-shadow:0 10px 30px -10px var(--primary);
 }
 
-.card:active {
-  transform: scale(0.96);
+.card:active{
+transform:scale(0.96);
 }
 
-.icon {
-  font-size: 36px;
-  margin-bottom: 14px;
+.icon{
+font-size:34px;
+margin-bottom:10px;
 }
 
-.label {
-  font-size: 15px;
-  font-weight: 600;
+.label{
+font-size:15px;
+font-weight:600;
 }
 
-/* ================== MODAL ================== */
+/* ================= SAFE NAVIGATION ================= */
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: 0.3s ease;
-}
-
-.modal.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.modal-content {
-  width: 90%;
-  max-width: 400px;
-  background: var(--card);
-  border-radius: 20px;
-  padding: 25px;
-}
-
-.btn {
-  padding: 12px 16px;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-.btn.primary {
-  background: var(--primary);
-  color: #002e28;
-  font-weight: bold;
+body.fade-out{
+opacity:0;
+transition:opacity 0.25s;
 }
 
 </style>
@@ -207,125 +229,126 @@ h1 {
 
 <body>
 
+<!-- TOP BAR -->
+
 <div class="top-bar">
-  <div class="icon-btn" onclick="openSettings()">⚙️</div>
+
+<div class="title">الصفحة الرئيسية</div>
+
+<div class="theme-switch">
+
+<div class="theme-dot theme-dark" onclick="setTheme('dark')"></div>
+
+<div class="theme-dot theme-sepia" onclick="setTheme('sepia')"></div>
+
+<div class="theme-dot theme-light" onclick="setTheme('light')"></div>
+
 </div>
+
+</div>
+
+<!-- CONTENT -->
 
 <div class="content">
 
-  <h1>Zad Al-Muslim</h1>
+<div class="grid">
 
-  <div class="grid">
+<div class="card" onclick="go('audio.html')">
+<div class="icon">🎧</div>
+<div class="label">الاستماع للقرآن الكريم</div>
+</div>
 
-    <div class="card" onclick="goQuran()">
-      <div class="icon">📖</div>
-      <div class="label">القرآن الكريم</div>
-    </div>
+<div class="card" onclick="go('quran.html')">
+<div class="icon">📖</div>
+<div class="label">القرآن الكريم</div>
+</div>
 
-    <div class="card" onclick="go('audio.html')">
-      <div class="icon">🎧</div>
-      <div class="label">الاستماع للقرآن الكريم</div>
-    </div>
+<div class="card" onclick="go('masbaha.html')">
+<div class="icon">📿</div>
+<div class="label">المسبحة</div>
+</div>
 
-    <div class="card" onclick="go('radio.html')">
-      <div class="icon">📻</div>
-      <div class="label">إذاعة القرآن الكريم</div>
-    </div>
+<div class="card" onclick="go('radio.html')">
+<div class="icon">📻</div>
+<div class="label">إذاعة القرآن الكريم</div>
+</div>
 
-    <div class="card" onclick="go('masbaha.html')">
-      <div class="icon">📿</div>
-      <div class="label">المسبحة</div>
-    </div>
+<div class="card" onclick="go('azkar.html?type=night')">
+<div class="icon">🌙</div>
+<div class="label">أذكار المساء</div>
+</div>
 
-    <div class="card" onclick="go('azkar.html?type=morning')">
-      <div class="icon">🌅</div>
-      <div class="label">أذكار الصباح</div>
-    </div>
+<div class="card" onclick="go('azkar.html?type=morning')">
+<div class="icon">🌅</div>
+<div class="label">أذكار الصباح</div>
+</div>
 
-    <div class="card" onclick="go('azkar.html?type=night')">
-      <div class="icon">🌙</div>
-      <div class="label">أذكار المساء</div>
-    </div>
+<div class="card" onclick="go('hisn.html')">
+<div class="icon">📘</div>
+<div class="label">حصن المسلم</div>
+</div>
 
-    <div class="card" onclick="go('azkar.html?type=ruqia')">
-      <div class="icon">🛡️</div>
-      <div class="label">الرقية الشرعية</div>
-    </div>
-
-    <div class="card" onclick="go('hisn.html')">
-      <div class="icon">📘</div>
-      <div class="label">حصن المسلم</div>
-    </div>
-
-  </div>
+<div class="card" onclick="go('azkar.html?type=ruqia')">
+<div class="icon">🛡️</div>
+<div class="label">الرقية الشرعية</div>
+</div>
 
 </div>
 
-<!-- SETTINGS -->
-
-<div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
-  <div class="modal-content">
-
-    <button class="btn" onclick="setTheme('dark')">Dark</button>
-
-    <button class="btn primary" onclick="setTheme('light')">Light</button>
-
-  </div>
 </div>
 
 <script>
 
-/* ===== SAFE PAGE NAVIGATION ===== */
+/* ===== PAGE NAVIGATION ===== */
 
 function go(page){
-  document.body.classList.add("fade-out");
-  setTimeout(()=>{ window.location.assign(page); },200);
+
+document.body.classList.add("fade-out");
+
+setTimeout(()=>{
+window.location.assign(page);
+},200);
+
 }
 
-window.addEventListener("pageshow", function () {
-  document.body.classList.remove("fade-out");
+window.addEventListener("pageshow",()=>{
+document.body.classList.remove("fade-out");
 });
 
-/* ===== QURAN VIEWER ===== */
-
-function goQuran(){
-  go("quran.html");
-}
-
-/* ===== SETTINGS ===== */
-
-function openSettings(){
-  document.getElementById("settingsModal").classList.add("active");
-}
-
-function closeSettings(){
-  document.getElementById("settingsModal").classList.remove("active");
-}
+/* ===== THEME SYSTEM ===== */
 
 function setTheme(mode){
 
-  if(mode==="light"){
-    document.body.classList.add("light");
-  }else{
-    document.body.classList.remove("light");
-  }
+document.body.classList.remove("light","sepia");
 
-  localStorage.setItem("themeMode", mode);
+if(mode==="light"){
+document.body.classList.add("light");
+}
+
+if(mode==="sepia"){
+document.body.classList.add("sepia");
+}
+
+localStorage.setItem("themeMode",mode);
 
 }
 
+/* LOAD SAVED THEME */
+
 window.addEventListener("load",()=>{
 
-  const saved = localStorage.getItem("themeMode");
+const saved=localStorage.getItem("themeMode");
 
-  if(saved==="light") document.body.classList.add("light");
+if(saved==="light") document.body.classList.add("light");
+
+if(saved==="sepia") document.body.classList.add("sepia");
 
 });
 
 /* ===== SERVICE WORKER ===== */
 
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+navigator.serviceWorker.register("sw.js");
 }
 
 </script>
