@@ -64,7 +64,7 @@
         font-size: 16px;
         cursor: pointer;
     }
-    
+
     .select-arrow {
         position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
         pointer-events: none; opacity: 0.7;
@@ -79,16 +79,18 @@
         color: white;
         cursor: pointer;
         transition: 0.2s;
+        font-size: 24px;
     }
     .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
 
-    /* Center Progress Area */
+    /* ===== MAIN AREA ===== */
     .main-area {
         flex: 1;
         position: relative;
         width: 100%;
     }
 
+    /* Circle – exactly in the middle */
     .counter-anchor {
         position: absolute;
         top: 50%;
@@ -96,7 +98,7 @@
         transform: translate(-50%, -50%);
         width: min(80vw, 320px);
         height: min(80vw, 320px);
-        z-index: 10; /* لإبقاء الدائرة فوق البطاقة عند التداخل */
+        z-index: 10; /* لإبقاء الدائرة في المقدمة */
     }
 
     .progress-wrapper {
@@ -131,7 +133,7 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         transition: 0.2s;
     }
-    
+
     .mini-reset-btn:active {
         transform: scale(0.9);
         background: rgba(239, 68, 68, 0.2);
@@ -168,25 +170,28 @@
         color: var(--text-muted);
     }
 
-    /* Hadith Card */
+    /* Hadith Card – Positioned exactly 20px below the circle */
     .hadith-card {
         position: absolute;
-        bottom: 50px;
+        /* المعادلة: المنتصف (50%) + نصف مساحة الدائرة + 20 بكسل */
+        top: calc(50% + min(40vw, 160px) + 20px);
         left: 20px;
         right: 20px;
+        
+        /* يمنع البطاقة من تجاوز أسفل الشاشة في الهواتف الصغيرة */
+        max-height: calc(50dvh - min(40vw, 160px) - 40px);
+        overflow-y: auto;
+        
         background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         border: 1px solid var(--glass-border);
         border-radius: 20px;
-        padding: 20px;
+        padding: 15px 20px;
         backdrop-filter: blur(12px);
-        min-height: 120px;
-        max-height: 25vh;
-        overflow-y: auto;
         display: flex;
         flex-direction: column;
         justify-content: center;
         text-align: center;
-        z-index: 5; /* لجعل البطاقة خلف الدائرة */
+        z-index: 5;
     }
 
     .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
@@ -199,7 +204,7 @@
         display: flex; align-items: flex-end; justify-content: center;
     }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
-    
+
     .modal-content {
         width: 100%; max-width: 480px;
         background: #1e293b;
@@ -223,7 +228,7 @@
 
     .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .setting-label { font-size: 16px; }
-    
+
     .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; inset: 0; background-color: #334155; border-radius: 34px; transition: .4s; }
@@ -235,7 +240,7 @@
         background: #334155; border: none; color: white; padding: 10px; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box;
     }
     input[type=number] { width: 80px; text-align: center; }
-    
+
     .btn-action {
         background: var(--primary); color: #020617; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; transition: 0.2s;
     }
@@ -260,7 +265,6 @@
     .app-version { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
     .dev-credit { font-family: sans-serif; font-size: 14px; color: var(--primary); letter-spacing: 1px; font-weight: bold; }
 
-    /* Meanings Styles */
     .meaning-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
     .meaning-item:last-child { border: none; }
     .meaning-head { color: var(--primary); font-weight: bold; font-size: 16px; margin-bottom: 5px; }
@@ -279,7 +283,6 @@
 
     #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 
-    /* Power Saving Mode Styles */
     #powerModeOverlay {
         position: fixed; inset: 0; background: #000000; z-index: 999;
         display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -288,18 +291,17 @@
     #powerModeOverlay.active { display: flex; }
     #powerCount { font-size: 150px; color: #333; font-weight: bold; user-select: none; }
     #powerHint { position: absolute; bottom: 50px; color: #222; font-size: 14px; }
-    
+
     #exitCircle {
         position: absolute; width: 100px; height: 100px; border-radius: 50%;
-        border: 4px solid #475569; 
+        border: 4px solid #475569;
         opacity: 0.5; transform: scale(0.5);
-        transition: transform 3s linear, border-color 0.5s; 
+        transition: transform 3s linear, border-color 0.5s;
         pointer-events: none;
     }
-    
     #exitCircle.holding { 
         opacity: 1; 
         transform: scale(1.5); 
-        border-color: #ef4444; 
+        border-color: #ef4444;
         box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
     }
