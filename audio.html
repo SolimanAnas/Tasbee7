@@ -163,7 +163,7 @@ input[type=range]::-webkit-slider-thumb {
 .miniInfo{ display:flex; flex-direction:column; }
 .miniSurah{ font-weight:bold; font-size:15px; margin-bottom:2px;}
 .miniReciter{ font-size:12px; color:var(--muted); }
-.mini-play-btn{ background:var(--primary); color:var(--play-text); border:none; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.mini-play-btn{ background:var(--primary); color:var(--play-text); border:none; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
 .mini-play-btn svg{ width:20px; height:20px; fill:currentColor; }
 
 .toast{
@@ -226,7 +226,7 @@ input[type=range]::-webkit-slider-thumb {
   </div>
 
   <div class="card now">
-    <div class="nowSurah" id="nowSurah">اختر تلاوة للبدء</div>
+    <div class="nowSurah" id="nowSurah">جاري التحميل...</div>
     <div class="nowReciter" id="nowReciter">—</div>
 
     <div class="progress-container">
@@ -310,6 +310,7 @@ const savedTheme = localStorage.getItem('themeMode') || 'dark';
 setTheme(savedTheme);
 
 /* ================= VARIABLES ================= */
+let data;
 const audio = document.getElementById("audio");
 const reciterSelect = document.getElementById("reciterSelect");
 const juzSelect = document.getElementById("juzSelect");
@@ -337,57 +338,7 @@ let currentTrackUrl = "";
 let isShuffle = false;
 let isRepeat = false;
 
-/* ================= HARDCODED JSON DATA ================= 
-   تم دمج البيانات لمنع أخطاء (تعذر التحميل) التي ظهرت لديك */
-const appData = {
-  "reciters": [
-    {
-      "id": "mishary_alafasy",
-      "name": "مشاري العفاسي (أجزاء)",
-      "type": "juz",
-      "items": [
-        { "id": 1, "name": "الجزء 1", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/01.mp3" },
-        { "id": 2, "name": "الجزء 2", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/02.mp3" },
-        { "id": 3, "name": "الجزء 3", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/03.mp3" },
-        { "id": 4, "name": "الجزء 4", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/04.mp3" },
-        { "id": 5, "name": "الجزء 5", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/05.mp3" },
-        { "id": 6, "name": "الجزء 6", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/06.mp3" },
-        { "id": 7, "name": "الجزء 7", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/07.mp3" },
-        { "id": 8, "name": "الجزء 8", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/08.mp3" },
-        { "id": 9, "name": "الجزء 9", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/09.mp3" },
-        { "id": 10, "name": "الجزء 10", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/10.mp3" },
-        { "id": 11, "name": "الجزء 11", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/11.mp3" },
-        { "id": 12, "name": "الجزء 12", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/12.mp3" },
-        { "id": 13, "name": "الجزء 13", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/13.mp3" },
-        { "id": 14, "name": "الجزء 14", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/14.mp3" },
-        { "id": 15, "name": "الجزء 15", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/15.mp3" },
-        { "id": 16, "name": "الجزء 16", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/16.mp3" },
-        { "id": 17, "name": "الجزء 17", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/17.mp3" },
-        { "id": 18, "name": "الجزء 18", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/18.mp3" },
-        { "id": 19, "name": "الجزء 19", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/19.mp3" },
-        { "id": 20, "name": "الجزء 20", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/20.mp3" },
-        { "id": 21, "name": "الجزء 21", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/21.mp3" },
-        { "id": 22, "name": "الجزء 22", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/22.mp3" },
-        { "id": 23, "name": "الجزء 23", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/23.mp3" },
-        { "id": 24, "name": "الجزء 24", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/24.mp3" },
-        { "id": 25, "name": "الجزء 25", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/25.mp3" },
-        { "id": 26, "name": "الجزء 26", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/26.mp3" },
-        { "id": 27, "name": "الجزء 27", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/27.mp3" },
-        { "id": 28, "name": "الجزء 28", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/28.mp3" },
-        { "id": 29, "name": "الجزء 29", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/29.mp3" },
-        { "id": 30, "name": "الجزء 30", "url": "https://archive.org/download/MisharyRasyidPerJuz/Mishary/30.mp3" }
-      ]
-    },
-    { "id": "sudais", "name": "عبدالرحمن السديس", "type": "surah", "baseUrl": "https://server11.mp3quran.net/sds/" },
-    { "id": "shuraim", "name": "سعود الشريم", "type": "surah", "baseUrl": "https://server7.mp3quran.net/shur/" },
-    { "id": "muaiqly", "name": "ماهر المعيقلي", "type": "surah", "baseUrl": "https://server12.mp3quran.net/maher/" },
-    { "id": "dosari", "name": "ياسر الدوسري", "type": "surah", "baseUrl": "https://server11.mp3quran.net/yasser/" },
-    { "id": "basit", "name": "عبدالباسط عبدالصمد", "type": "surah", "baseUrl": "https://server7.mp3quran.net/basit/" },
-    { "id": "husary", "name": "محمود خليل الحصري", "type": "surah", "baseUrl": "https://server13.mp3quran.net/husr/" },
-    { "id": "ghamdi", "name": "سعد الغامدي", "type": "surah", "baseUrl": "https://server7.mp3quran.net/s_gmd/" }
-  ]
-};
-
+/* السور كاملة */
 const surahNames = [
   "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال",
   "التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف",
@@ -404,33 +355,45 @@ const surahNames = [
   "الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"
 ];
 
-/* ================= INIT DATA ================= */
-function initData() {
-  reciterSelect.innerHTML = "";
-  appData.reciters.forEach((r, i) => {
-    let opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = r.name;
-    reciterSelect.appendChild(opt);
-  });
-  loadTracks(false);
+/* ================= LOAD DATA ================= */
+async function loadJSON(){
+  try {
+    let res = await fetch("assets/audio.json?v=" + new Date().getTime());
+    data = await res.json();
+    reciterSelect.innerHTML = "";
+    data.reciters.forEach((r, i) => {
+      let opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = r.name;
+      reciterSelect.appendChild(opt);
+    });
+    loadTracks(); // call after populating reciters
+  } catch (error) {
+    nowSurah.innerText = "تعذر تحميل البيانات";
+  }
 }
 
-function loadTracks(isUserClick = true) {
+// الدالة المصححة: تتعامل مع كلا النوعين (surah و juz) بشكل صحيح
+function loadTracks() {
   juzSelect.innerHTML = "";
-  let reciter = appData.reciters[reciterSelect.value];
-  let arrayData = reciter.items;
+  if(!data || !data.reciters[reciterSelect.value]) return;
   
-  if (reciter.type === "juz" && arrayData) {
-    arrayData.forEach(j => {
+  let reciter = data.reciters[reciterSelect.value];
+  
+  if (reciter.type === "juz") {
+    // نوع الأجزاء: نعرض كل جزء مع عنوانه ورابطه المباشر
+    reciter.items.forEach(item => {
       let opt = document.createElement("option");
-      opt.value = j.url;
-      opt.textContent = j.name;
+      opt.value = item.url;
+      opt.textContent = item.name;
       juzSelect.appendChild(opt);
     });
-  } else if (reciter.type === "surah") {
+  } else {
+    // نوع السور الكاملة: نبني الروابط باستخدام baseUrl
+    reciter.baseUrl = reciter.baseUrl || "";
     surahNames.forEach((name, index) => {
       let num = index + 1;
+      // تنسيق رقم السورة بثلاثة أرقام (مثال: 001)
       let surahNumber = num < 10 ? '00' + num : num < 100 ? '0' + num : num; 
       let opt = document.createElement("option");
       opt.value = reciter.baseUrl + surahNumber + ".mp3";
@@ -439,17 +402,14 @@ function loadTracks(isUserClick = true) {
     });
   }
   
-  // لا تستبدل المقطع الأخير إذا كان التطبيق قيد التحميل المبدئي
-  if (isUserClick) {
-    prepareTrack();
-  }
+  prepareTrack();
 }
 
 function prepareTrack() {
   if(juzSelect.options.length === 0) return; 
 
   let url = juzSelect.value;
-  let reciterName = appData.reciters[reciterSelect.value].name;
+  let reciterName = data.reciters[reciterSelect.value].name;
   let juzName = juzSelect.options[juzSelect.selectedIndex].text;
 
   if(currentTrackUrl !== url) {
@@ -473,10 +433,10 @@ function prepareTrack() {
   miniReciter.innerText = reciterName;
 }
 
-reciterSelect.addEventListener('change', () => loadTracks(true));
+reciterSelect.addEventListener('change', loadTracks);
 juzSelect.addEventListener('change', () => {
     prepareTrack();
-    audio.play().catch(()=>{});
+    audio.play();
 });
 
 /* ================= PLAYER LOGIC ================= */
@@ -489,7 +449,7 @@ function formatTime(seconds) {
 
 function togglePlay() {
   if(!currentTrackUrl) return showToast("اختر سورة أولاً");
-  if (audio.paused) audio.play().catch(e => console.log(e));
+  if (audio.paused) audio.play();
   else audio.pause();
 }
 
@@ -560,7 +520,8 @@ audio.addEventListener('pause', () => { updatePlayPauseUI(false); });
 
 audio.addEventListener('error', () => {
   if(currentTrackUrl) {
-    nowSurah.innerText = "تعذر تشغيل المقطع";
+    showToast("تعذر تحميل المقطع، سيتم إعادة المحاولة...");
+    setTimeout(() => { audio.src = currentTrackUrl; audio.play().catch(()=>{}); }, 3000);
   }
 });
 
@@ -669,8 +630,7 @@ function playFromFav(url, surah, reciter) {
         }
     }
   }
-  audio.play().catch(()=>{}); 
-  closeFavModal();
+  audio.play(); closeFavModal();
 }
 
 function removeFav(index, event) {
@@ -683,8 +643,6 @@ function removeFav(index, event) {
 
 /* ================= INIT ================= */
 window.addEventListener("load", () => {
-  initData();
-  
   let last = localStorage.getItem("lastTrack");
   if(last){
     currentTrackUrl = last; audio.src = last;
@@ -693,10 +651,8 @@ window.addEventListener("load", () => {
     miniSurah.innerText = nowSurah.innerText;
     miniReciter.innerText = nowReciter.innerText;
     checkFavStatus();
-  } else {
-    // تجهيز أول مقطع تلقائياً
-    prepareTrack();
   }
+  loadJSON();
 });
 
 </script>
