@@ -392,12 +392,12 @@ const savedTheme = localStorage.getItem('radio_theme') || 'dark';
 setTheme(savedTheme);
 
 
-// ================= قائمة الإذاعات المحدثة ================= //
+// ================= القائمة المطلوبة (بالروابط الأصلية تماماً) ================= //
 const radioStations = [
-  {"name":"إذاعة القرآن الكريم - القاهرة","url":"https://n0b.radiojar.com/8s5u5tpdtwzuv"},
+  {"name":"إذاعة القرآن الكريم - القاهرة","url":"http://n0b.radiojar.com/8s5u5tpdtwzuv"},
   {"name":"إذاعة القرآن الكريم - مكة","url":"https://stream.radiojar.com/0tpy1h0kxtzuv"},
   {"name":"إذاعة القرآن الكريم - الشارقة","url":"https://svs.itworkscdn.net/smcquranlive/quranradiolive/playlist.m3u8"},
-  {"name":"إذاعة القرآن الكريم - الكويت","url":"https://qurankw.itworkscdn.net/quranlive/quranradiolive/playlist.m3u8"},
+  {"name":"إذاعة القرآن الكريم - الكويت","url":"http://qurankw.itworkscdn.net/quranlive/quranradiolive/playlist.m3u8"},
   {"name":"إذاعة القرآن الكريم - قطر","url":"https://qatarradio-live.hls.adaptive.level3.net/qatarradio/quran/playlist.m3u8"},
   {"name":"إذاعة القرآن الكريم - البحرين","url":"https://5c7b683162943.streamlock.net/live/ngrp:quran_all/playlist.m3u8"},
   {"name":"إذاعة القرآن الكريم - الأردن","url":"https://jrtv-live.ercdn.net/jrtv/quran.m3u8"},
@@ -427,9 +427,8 @@ const liveIndicator = document.getElementById("liveIndicator");
 const liveText = document.getElementById("liveText");
 
 let currentTrackUrl = "";
-let hls = null; // متغير لحفظ جلسة HLS.js
+let hls = null; 
 
-// تهيئة القائمة
 function initRadios() {
   radioStations.forEach((station, index) => {
     let opt = document.createElement("option");
@@ -440,24 +439,36 @@ function initRadios() {
   prepareStation();
 }
 
-// مشغل الروابط الذكي (يدعم mp3 و m3u8)
+// دالة التشغيل الذكية والمحدثة لتتجاوز قيود الـ CORS في الهواتف
 function loadStream(url) {
+  // تنظيف أي جلسة سابقة
+  if (hls) {
+    hls.destroy();
+    hls = null;
+  }
+  
   if (url.includes('.m3u8')) {
-    if (Hls.isSupported()) {
-      if (hls) hls.destroy(); // تدمير الجلسة السابقة إن وجدت
-      hls = new Hls();
+    // المحاولة الأولى: التشغيل المباشر (Native)
+    // الهواتف الذكية (آيفون وأغلب الأندرويد) تشغل m3u8 مباشرة من المتصفح بدون الحاجة لمكتبة خارجية مما يمنع مشكلة الـ CORS
+    if (/iPad|iPhone|iPod|Android/i.test(navigator.userAgent) || audio.canPlayType('application/vnd.apple.mpegurl')) {
+      audio.src = url;
+    } 
+    // المحاولة الثانية: للكمبيوتر والمتصفحات الأخرى
+    else if (Hls.isSupported()) {
+      hls = new Hls({ debug: false });
       hls.loadSource(url);
       hls.attachMedia(audio);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        // تم التحميل بنجاح
+      
+      // إذا فشلت مكتبة HLS بسبب CORS، حاول إجبار الرابط المباشر
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        if (data.fatal) {
+          hls.destroy();
+          audio.src = url;
+        }
       });
-    } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-      // دعم أصلي (مثل أجهزة الآيفون)
-      audio.src = url;
     }
   } else {
-    // روابط mp3 أو aac عادية
-    if (hls) hls.destroy();
+    // ملفات mp3 عادية
     audio.src = url;
   }
 }
@@ -481,7 +492,7 @@ function prepareStation() {
 
 radioSelect.addEventListener('change', () => {
   prepareStation();
-  audio.play(); 
+  audio.play().catch(e => console.log('Waiting for user interaction')); 
 });
 
 function togglePlay() {
@@ -516,8 +527,7 @@ audio.addEventListener('pause', () => {
 audio.addEventListener('error', () => {
   mainPlayBtn.classList.remove('loading');
   updatePlayPauseUI(false);
-  nowStation.innerText = "⚠️ البث متوقف مؤقتاً";
-  showToast("تعذر الاتصال بالخادم، جرب محطة أخرى");
+  nowStation.innerText = "⚠️ البث غير متاح حالياً";
 });
 
 function updatePlayPauseUI(isPlaying) {
@@ -635,7 +645,6 @@ function removeFav(index, event) {
   showToast("تم الحذف بنجاح");
 }
 
-// بدء التشغيل
 initRadios();
 
 </script>
