@@ -28,24 +28,7 @@
   --live-color: #ef4444; 
 }
 
-body.light {
-  --primary: #10b981;
-  --bg: #f1f5f9;
-  --bg-top: #ffffff;
-  --glass: rgba(255, 255, 255, 0.7);
-  --border: rgba(0, 0, 0, 0.08);
-  --text: #0f172a;
-  --muted: #64748b;
-  --card-bg: rgba(255, 255, 255, 0.8);
-  --input-bg: rgba(0, 0, 0, 0.04);
-  --action-bg: rgba(0, 0, 0, 0.05);
-  --action-hover: rgba(0, 0, 0, 0.1);
-  --mini-bg: rgba(255, 255, 255, 0.95);
-  --play-text: #ffffff;
-  --live-color: #ef4444;
-}
-
-body.sepia {
+body[data-theme="sepia"] {
   --primary: #059669; 
   --bg: #e5d5b5;
   --bg-top: #f4eadd;
@@ -62,42 +45,40 @@ body.sepia {
   --live-color: #dc2626;
 }
 
-/* ================= RESET ================= */
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+body[data-theme="light"] {
+  --primary: #10b981;
+  --bg: #f1f5f9;
+  --bg-top: #ffffff;
+  --glass: rgba(255, 255, 255, 0.7);
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #0f172a;
+  --muted: #64748b;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --input-bg: rgba(0, 0, 0, 0.04);
+  --action-bg: rgba(0, 0, 0, 0.05);
+  --action-hover: rgba(0, 0, 0, 0.1);
+  --mini-bg: rgba(255, 255, 255, 0.95);
+  --play-text: #ffffff;
+  --live-color: #ef4444;
 }
 
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
 body {
-  margin: 0;
-  font-family: 'Tajawal', sans-serif;
+  margin: 0; font-family: 'Tajawal', sans-serif;
   background: radial-gradient(circle at 50% 0%, var(--bg-top), var(--bg));
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  padding: 20px 20px 100px; 
-  min-height: 100dvh;
+  color: var(--text); display: flex; justify-content: center;
+  padding: 20px 20px 100px; min-height: 100dvh;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
-.app {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+.app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; }
 
-/* ================= HEADER ================= */
+/* ================= HEADER & THEMES ================= */
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--glass);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--glass); border: 1px solid var(--border);
+  backdrop-filter: blur(12px); border-radius: 16px; padding: 14px 16px;
   transition: 0.4s ease;
 }
 
@@ -110,76 +91,59 @@ body {
 }
 .icon-btn:active { opacity: 0.7; transform: scale(0.9); }
 
+.theme-toggles { display: flex; justify-content: center; gap: 15px; margin: -4px 0 4px 0; }
+
+.theme-btn {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.theme-btn.dark { background: #1e293b; }
+.theme-btn.sepia { background: #e5d5b5; }
+.theme-btn.light { background: #f8fafc; }
+.theme-btn.active { 
+  border-color: var(--primary); transform: scale(1.2); 
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
 /* ================= CARDS ================= */
 .card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: 0.4s ease;
+  background: var(--card-bg); border: 1px solid var(--border);
+  backdrop-filter: blur(12px); border-radius: 20px;
+  padding: 20px; display: flex; flex-direction: column;
+  gap: 12px; transition: 0.4s ease;
 }
 
-label {
-  font-size: 14px;
-  color: var(--primary);
-  font-weight: 500;
-}
+label { font-size: 14px; color: var(--primary); font-weight: 500; }
 
 select {
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--input-bg);
-  color: var(--text);
-  font-size: 15px;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  transition: 0.4s ease;
+  padding: 14px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--input-bg); color: var(--text); font-size: 15px;
+  font-family: inherit; outline: none; cursor: pointer;
+  appearance: none; transition: 0.4s ease;
 }
 select:focus { border-color: var(--primary); }
+select option { background: var(--bg-top); color: var(--text); }
 
 /* ================= PLAYER AREA ================= */
 .now {
-  text-align: center;
-  padding: 40px 20px;
+  text-align: center; padding: 40px 20px;
   background: linear-gradient(145deg, var(--card-bg), var(--action-bg));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 
 .nowStation { font-family: 'Amiri', serif; font-size: 24px; margin-bottom: 12px; line-height: 1.4; }
 
 /* Live Indicator */
 .live-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 25px;
-  transition: color 0.3s;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--muted); font-weight: bold; font-size: 14px;
+  margin-bottom: 25px; transition: color 0.3s;
 }
 .live-indicator.playing { color: var(--live-color); }
 
-.pulse-dot {
-  width: 10px; height: 10px;
-  background: var(--muted);
-  border-radius: 50%;
-  transition: background 0.3s;
-}
-.live-indicator.playing .pulse-dot {
-  background: var(--live-color);
-  animation: pulse 1.5s infinite;
-}
+.pulse-dot { width: 10px; height: 10px; background: var(--muted); border-radius: 50%; transition: background 0.3s; }
+.live-indicator.playing .pulse-dot { background: var(--live-color); animation: pulse 1.5s infinite; }
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
@@ -188,15 +152,12 @@ select:focus { border-color: var(--primary); }
 }
 
 /* Controls */
-.controls {
-  display: flex; justify-content: center; align-items: center;
-  gap: 20px; margin-top: 10px;
-}
+.controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; }
 
 .play-pause-btn {
   width: 70px; height: 70px; border-radius: 50%;
-  background: var(--primary); color: var(--play-text);
-  border: none; display: flex; align-items: center; justify-content: center;
+  background: var(--primary); color: var(--play-text); border: none; 
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
   transition: transform 0.2s, background 0.4s, color 0.4s; flex-shrink: 0;
 }
@@ -253,27 +214,19 @@ select:focus { border-color: var(--primary); }
 
 .fav-item {
   display: flex; justify-content: space-between; align-items: center;
-  background: var(--action-bg); padding: 12px 15px;
-  border-radius: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+  background: var(--action-bg); padding: 12px 15px; border-radius: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent;
 }
 .fav-item:active { transform: scale(0.98); }
 .fav-item:hover { background: var(--action-hover); border-color: rgba(16, 185, 129, 0.3); }
 .fav-item-info { display: flex; flex-direction: column; gap: 4px; }
 .fav-item-surah { font-weight: bold; color: var(--primary); font-size: 1.05rem; }
-.delete-fav-btn {
-  background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none;
-  padding: 8px; border-radius: 8px; cursor: pointer;
-}
+.delete-fav-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 8px; border-radius: 8px; cursor: pointer; }
 
 /* Spinner Loader */
 .loader {
-  display: none;
-  width: 24px;
-  height: 24px;
-  border: 3px solid rgba(255,255,255,0.3);
-  border-radius: 50%;
-  border-top-color: var(--text);
-  animation: spin 1s ease-in-out infinite;
+  display: none; width: 24px; height: 24px;
+  border: 3px solid rgba(255,255,255,0.3); border-radius: 50%;
+  border-top-color: var(--text); animation: spin 1s ease-in-out infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading .play-icon { display: none !important; }
@@ -290,16 +243,19 @@ select:focus { border-color: var(--primary); }
   <div class="header">
     <button class="icon-btn" onclick="window.location.href='index.html'" title="الرئيسية">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>
       </svg>
     </button>
-    
     <div class="header-title">إذاعة القرآن الكريم</div>
-    
     <button class="icon-btn" onclick="openFavModal()" title="قائمة الإذاعات المفضلة">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
     </button>
+  </div>
+
+  <div class="theme-toggles">
+    <div class="theme-btn dark" onclick="setTheme('dark')" title="داكن"></div>
+    <div class="theme-btn sepia" onclick="setTheme('sepia')" title="مريح للعين"></div>
+    <div class="theme-btn light" onclick="setTheme('light')" title="فاتح"></div>
   </div>
 
   <div class="card">
@@ -316,7 +272,6 @@ select:focus { border-color: var(--primary); }
     </div>
 
     <div class="controls">
-      
       <button class="action-btn fill-icon" id="favBtn" title="إضافة للمفضلة">
         <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -328,7 +283,6 @@ select:focus { border-color: var(--primary); }
         <svg id="playIcon" class="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         <svg id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
       </button>
-
     </div>
   </div>
 
@@ -347,15 +301,24 @@ select:focus { border-color: var(--primary); }
 </div>
 
 <script>
-/* GLOBAL THEME */
-const savedTheme = localStorage.getItem("themeMode");
-if(savedTheme==="light") document.body.classList.add("light");
-if(savedTheme==="sepia") document.body.classList.add("sepia");
+// ================= نظام الثيمات ================= //
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('radio_theme', theme);
+  
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.classList.contains(theme)) btn.classList.add('active');
+  });
+}
+const savedTheme = localStorage.getItem('radio_theme') || 'dark';
+setTheme(savedTheme);
 
-/* ================= قائمة الإذاعات (بدون الإذاعات المطلوبة) ================= */
+
+// ================= القائمة الرسمية للإذاعات ================= //
 const radioStations = [
   {"name":"إذاعة القرآن الكريم - مكة","url":"https://stream.radiojar.com/0tpy1h0kxtzuv"},
-  {"name":"إذاعة القرآن الكريم - القاهرة","url":"https://n0b.radiojar.com/8s5u5tpdtwzuv"}, /* تم تحويله لـ https ليعمل */
+  {"name":"إذاعة القرآن الكريم - القاهرة","url":"https://n0b.radiojar.com/8s5u5tpdtwzuv"},
   {"name":"إذاعة القرآن الكريم - الشارقة","url":"https://svs.itworkscdn.net/smcquranlive/quranradiolive/playlist.m3u8"},
   { "name": "إذاعة عبدالباسط عبدالصمد", "url": "https://qurango.net/radio/abdulbasit_abdulsamad" },
   { "name": "إذاعة محمود خليل الحصري", "url": "https://qurango.net/radio/mahmoud_khalil_alhussary" },
@@ -363,15 +326,12 @@ const radioStations = [
   { "name": "إذاعة ياسر الدوسري", "url": "https://qurango.net/radio/yasser_aldosari" },
   { "name": "إذاعة ماهر المعيقلي", "url": "https://qurango.net/radio/maher_almuaiqly" },
   { "name": "إذاعة سعد الغامدي", "url": "https://qurango.net/radio/saad_alghamdi" },
-  { "name": "إذاعة سعود الشريم", "url": "https://qurango.net/radio/saud_alshuraim" },
   { "name": "إذاعة الرقية الشرعية", "url": "https://qurango.net/radio/roqiah" },
   { "name": "إذاعة أذكار الصباح والمساء", "url": "https://qurango.net/radio/athkar_sabah" },
   { "name": "إذاعة الفتاوى", "url": "https://qurango.net/radio/fatwa" }
 ];
 
-const audio = window.globalAudio || document.getElementById("audio");
-window.globalAudio = audio;
-
+const audio = document.getElementById("audio");
 const radioSelect = document.getElementById("radioSelect");
 const mainPlayBtn = document.getElementById("mainPlayBtn");
 const playIcon = document.getElementById("playIcon");
@@ -384,7 +344,6 @@ const liveText = document.getElementById("liveText");
 let currentTrackUrl = "";
 let hls = null; 
 
-// تهيئة القائمة
 function initRadios() {
   radioStations.forEach((station, index) => {
     let opt = document.createElement("option");
@@ -393,7 +352,6 @@ function initRadios() {
     radioSelect.appendChild(opt);
   });
   
-  // استعادة آخر إذاعة تم تشغيلها إن وجدت
   const lastUrl = localStorage.getItem("lastRadioUrl");
   if(lastUrl) {
     for(let i=0; i<radioSelect.options.length; i++) {
@@ -407,30 +365,20 @@ function initRadios() {
   prepareStation();
 }
 
-// مشغل الروابط الذكي (يدعم mp3 و m3u8)
 function loadStream(url) {
+  if (hls) { hls.destroy(); hls = null; }
+
   if (url.includes('.m3u8')) {
     if (Hls.isSupported()) {
-      if (hls) hls.destroy(); 
-      hls = new Hls({
-          debug: false,
-          enableWorker: true,
-          lowLatencyMode: true
-      });
+      hls = new Hls({ debug: false, enableWorker: true, lowLatencyMode: true });
       hls.loadSource(url);
       hls.attachMedia(audio);
       hls.on(Hls.Events.ERROR, function (event, data) {
         if (data.fatal) {
           switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError();
-              break;
-            default:
-              hls.destroy();
-              break;
+            case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+            case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+            default: hls.destroy(); break;
           }
         }
       });
@@ -438,7 +386,6 @@ function loadStream(url) {
       audio.src = url;
     }
   } else {
-    if (hls) { hls.destroy(); hls = null; }
     audio.src = url;
   }
 }
@@ -478,51 +425,17 @@ function togglePlay() {
 
 mainPlayBtn.onclick = togglePlay;
 
-/* MEDIA SESSION */
-function updateMediaSession(title){
-  if(!("mediaSession" in navigator)) return;
-  navigator.mediaSession.metadata=new MediaMetadata({
-    title:title,
-    artist:"Zad Al-Muslim",
-    album:"إذاعة القرآن الكريم",
-    artwork:[
-      {src:"icon/icon-192.png",sizes:"192x192",type:"image/png"},
-      {src:"icon/icon-512.png",sizes:"512x512",type:"image/png"}
-    ]
-  });
-  navigator.mediaSession.setActionHandler("play",()=>audio.play());
-  navigator.mediaSession.setActionHandler("pause",()=>audio.pause());
-}
-
-
 // Audio Events
-audio.addEventListener('play', () => {
-  mainPlayBtn.classList.add('loading'); 
-});
-
-audio.addEventListener('playing', () => {
-  mainPlayBtn.classList.remove('loading');
-  updatePlayPauseUI(true);
-  updateMediaSession(nowStation.innerText);
-});
-
-audio.addEventListener('waiting', () => {
-  mainPlayBtn.classList.add('loading');
-});
-
-audio.addEventListener('pause', () => {
-  mainPlayBtn.classList.remove('loading');
-  updatePlayPauseUI(false);
-});
+audio.addEventListener('play', () => { mainPlayBtn.classList.add('loading'); });
+audio.addEventListener('playing', () => { mainPlayBtn.classList.remove('loading'); updatePlayPauseUI(true); });
+audio.addEventListener('waiting', () => { mainPlayBtn.classList.add('loading'); });
+audio.addEventListener('pause', () => { mainPlayBtn.classList.remove('loading'); updatePlayPauseUI(false); });
 
 audio.addEventListener('error', () => {
   mainPlayBtn.classList.remove('loading');
   updatePlayPauseUI(false);
-  nowStation.innerText = "إعادة الاتصال بالبث...";
-  setTimeout(()=>{
-    loadStream(currentTrackUrl);
-    audio.play().catch(()=>{});
-  },3000);
+  nowStation.innerText = "⚠️ البث متوقف مؤقتاً";
+  showToast("تعذر الاتصال بالخادم، جرب محطة أخرى");
 });
 
 function updatePlayPauseUI(isPlaying) {
@@ -623,11 +536,7 @@ function playFromFav(url, name) {
             break;
         }
     }
-    
     checkFavStatus();
-    
-    localStorage.setItem("lastRadioUrl",url);
-    localStorage.setItem("lastRadioName",name);
   }
   audio.play();
   closeFavModal();
@@ -643,8 +552,9 @@ function removeFav(index, event) {
   showToast("تم الحذف بنجاح");
 }
 
-// بدء التشغيل
-initRadios();
+window.addEventListener("load",()=>{
+  initRadios();
+});
 
 </script>
 </body>
