@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
 <title>Azkar</title>
 
@@ -27,10 +27,11 @@ body{
   font-family:'Tajawal',sans-serif;
   background:radial-gradient(circle at 50% 0%, #1e293b, var(--bg));
   color:var(--text);
-  height:100vh;
+  height:100dvh; /* تم التعديل لدعم دقيق لشاشات الهواتف */
   display:flex;
   flex-direction:column;
   overflow:hidden;
+  position: relative; /* لتثبيت الأزرار بالنسبة للشاشة */
 }
 
 /* Top Bar */
@@ -48,23 +49,23 @@ body{
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Main Layout – now items start from top */
+/* Main Layout */
 .page-wrapper{
   flex:1;
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:flex-start;  /* was center, now top-aligned */
-  gap:12px;                    /* reduced gap */
-  padding:5px 20px 20px;       /* small top padding, more at bottom */
-  overflow-y:auto;              /* allow scrolling if content overflows */
+  justify-content:flex-start;  
+  gap:12px;                    
+  padding:5px 20px 120px; /* تمت إضافة مساحة سفلية لكي لا يختفي المحتوى خلف الأزرار */
+  overflow-y:auto;              
 }
 
-/* Glass Zikr Container – slightly smaller height to fit buttons */
+/* Glass Zikr Container */
 .zikr-container{
   width:100%;
   max-width:700px;
-  height:280px;                 /* reduced from 320px */
+  height:280px;                 
   background:var(--glass);
   border:1px solid var(--glass-border);
   backdrop-filter:blur(20px);
@@ -76,7 +77,7 @@ body{
   cursor:pointer;
   user-select:none;
   transition:.3s ease;
-  margin-top:0;                 /* sits right below top bar */
+  margin-top:0;                 
 }
 
 .zikr-container.fade-out{
@@ -105,10 +106,10 @@ body{
   border-radius:10px;
 }
 
-/* ===== Circle styles (from masbaha, slightly smaller) ===== */
+/* ===== Circle styles ===== */
 .counter-anchor {
   position: relative;
-  width: min(60vw, 260px);     /* a bit smaller */
+  width: min(60vw, 260px);     
   height: min(60vw, 260px);
   margin: 0 auto;
 }
@@ -183,16 +184,19 @@ circle {
   50% { filter: drop-shadow(0 0 25px #10b981); }
   100% { filter: drop-shadow(0 0 0px #10b981); }
 }
-/* ======================================================== */
 
-/* Buttons – now always visible */
+/* Buttons – Fixed exacty 50px from bottom */
 .controls{
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  right: 0;
   display:flex;
   gap:12px;
-  margin-top:5px;
   width:100%;
   justify-content:center;
-  flex-wrap:wrap;               /* in case of very narrow screen */
+  flex-wrap:wrap;               
+  z-index: 50; /* لإبقائها فوق المحتوى */
 }
 
 .btn{
@@ -205,6 +209,7 @@ circle {
   font-size:16px;
   -webkit-tap-highlight-color: transparent;
   flex:0 1 auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* إضافة ظل بسيط للأزرار لتبرز فوق الخلفية */
 }
 
 .btn.primary{
@@ -278,7 +283,6 @@ circle {
 
 <body>
 
-<!-- Top Bar with Home, Translation, and Settings -->
 <div class="top-bar">
   <div class="icon-btn" onclick="goHome()">🏠</div>
   <div style="display: flex; gap: 15px;">
@@ -289,12 +293,10 @@ circle {
 
 <div class="page-wrapper">
 
-  <!-- Zikr Text Container (now closer to top) -->
   <div class="zikr-container fade-in" onclick="increment()">
     <div class="zikr-text" id="arabicText"></div>
   </div>
 
-  <!-- Progress Circle (slightly smaller) -->
   <div class="counter-anchor">
     <div class="progress-wrapper" onclick="increment()">
       <svg viewBox="0 0 200 200">
@@ -314,16 +316,14 @@ circle {
     </div>
   </div>
 
-  <!-- Control Buttons (now guaranteed visible) -->
-  <div class="controls">
-    <button class="btn" onclick="prev()">Previous</button>
-    <button class="btn primary" onclick="toggleAuto()">Auto</button>
-    <button class="btn" onclick="next()">Next</button>
-  </div>
-
 </div>
 
-<!-- Translation Modal -->
+<div class="controls">
+  <button class="btn" onclick="prev()">Previous</button>
+  <button class="btn" id="autoBtn" onclick="toggleAuto()">Auto</button>
+  <button class="btn" onclick="next()">Next</button>
+</div>
+
 <div class="modal" id="translationModal" onclick="if(event.target===this) closeTranslation()">
   <div class="modal-content">
     <div class="close" onclick="closeTranslation()">✕</div>
@@ -331,7 +331,6 @@ circle {
   </div>
 </div>
 
-<!-- Settings Modal -->
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
     <div class="close" onclick="closeSettings()">✕</div>
@@ -448,13 +447,20 @@ function prev() {
 
 function toggleAuto() {
   autoMode = !autoMode;
-  if (autoMode) autoLoop();
+  const autoBtn = document.getElementById("autoBtn");
+  
+  if (autoMode) {
+    autoBtn.classList.add("primary");
+    autoLoop();
+  } else {
+    autoBtn.classList.remove("primary");
+  }
 }
 
 function autoLoop() {
   if (!autoMode) return;
   increment();
-  setTimeout(autoLoop, 800);
+  setTimeout(autoLoop, 2000);
 }
 
 /* Translation Modal */
