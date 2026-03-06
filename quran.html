@@ -488,12 +488,24 @@
       .context-buttons { grid-template-columns: 1fr; }
       .modal-content   { padding: 16px 14px; }
     }
+
+    /* رفع الصفحة للأعلى قليلاً في الشاشات الكبيرة لمنع قص النص السفلي */
+    @media (min-width: 768px), (min-height: 800px) {
+      .mushaf-img {
+        /* دمج التكبير 1.19 مع رفع الصورة للأعلى بنسبة 3% */
+        transform: scale(1.19) translateY(-3%);
+      }
+      
+      /* إعادتها لوضعها الطبيعي عند تفعيل وضع الرؤية الكاملة (النقر المزدوج) */
+      body.full-view .mushaf-img {
+        transform: scale(1) translateY(0);
+      }
+    }
   </style>
 </head>
 
 <body data-theme="light">
 
-  <!-- ===== HEADER ===== -->
   <header id="appHeader">
     <button class="icon-btn" onclick="prevPage()" title="الصفحة السابقة">⟨</button>
 
@@ -505,7 +517,6 @@
     <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">☆</button>
   </header>
 
-  <!-- ===== READER ===== -->
   <main id="swipeArea">
     <div class="page-frame" id="pageFrame">
       <img
@@ -519,7 +530,6 @@
     </div>
   </main>
 
-  <!-- ===== SETTINGS MODAL ===== -->
   <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
     <div class="modal-content">
       <div class="modal-header">
@@ -532,7 +542,6 @@
     </div>
   </div>
 
-  <!-- ===== PAGE SELECTOR MODAL ===== -->
   <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')">
     <div class="modal-content">
       <div class="modal-header">
@@ -555,7 +564,6 @@
     </div>
   </div>
 
-  <!-- ===== BOOKMARKS MODAL ===== -->
   <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')">
     <div class="modal-content">
       <div class="modal-header">
@@ -566,7 +574,6 @@
     </div>
   </div>
 
-  <!-- ===== SURAH SELECTOR MODAL (NEW — fully implemented) ===== -->
   <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')">
     <div class="modal-content">
       <div class="modal-header">
@@ -585,7 +592,6 @@
     </div>
   </div>
 
-  <!-- ===== JUZ SELECTOR MODAL (NEW — fully implemented) ===== -->
   <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')">
     <div class="modal-content">
       <div class="modal-header">
@@ -596,7 +602,6 @@
     </div>
   </div>
 
-  <!-- ===== CONTEXT MENU — long-press bottom sheet ===== -->
   <div class="context-menu" id="contextMenu">
     <div class="context-handle"></div>
     <div class="context-info" id="contextInfo"></div>
@@ -610,7 +615,6 @@
     </div>
   </div>
 
-  <!-- ===== OVERLAY for context menu dismiss ===== -->
   <div id="contextOverlay"
     style="display:none;position:fixed;inset:0;z-index:199;"
     onclick="closeContextMenu()"
