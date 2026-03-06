@@ -1,11 +1,27 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f172a">
+
+<title>Zad Al-Muslim</title>
+
+<meta name="theme-color" content="#10b981">
+
 <link rel="manifest" href="manifest.json">
-<title>مسبحة</title>
+
+<link rel="icon" href="icon/icon-192.png">
+
+<link rel="apple-touch-icon" href="icon/icon-512.png">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<meta name="apple-mobile-web-app-title" content="Zad Al-Muslim">
 
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -30,6 +46,7 @@ body.light {
 }
 
 /* ================== BASE ================== */
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -57,6 +74,7 @@ body.fade-out {
 }
 
 /* ================== TOP BAR ================== */
+
 .top-bar {
   width: 100%;
   max-width: 480px;
@@ -88,6 +106,7 @@ body.fade-out {
 }
 
 /* ================== CONTENT ================== */
+
 .content {
   flex: 1;
   width: 100%;
@@ -103,6 +122,7 @@ h1 {
 }
 
 /* ================== GRID ================== */
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -139,6 +159,7 @@ h1 {
 }
 
 /* ================== MODAL ================== */
+
 .modal {
   position: fixed;
   inset: 0;
@@ -181,6 +202,7 @@ h1 {
 }
 
 </style>
+
 </head>
 
 <body>
@@ -190,7 +212,8 @@ h1 {
 </div>
 
 <div class="content">
-  <h1>الصفحة الرئيسية</h1>
+
+  <h1>Zad Al-Muslim</h1>
 
   <div class="grid">
 
@@ -235,19 +258,25 @@ h1 {
     </div>
 
   </div>
+
 </div>
 
 <!-- SETTINGS -->
+
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
+
     <button class="btn" onclick="setTheme('dark')">Dark</button>
+
     <button class="btn primary" onclick="setTheme('light')">Light</button>
+
   </div>
 </div>
 
 <script>
 
 /* ===== SAFE PAGE NAVIGATION ===== */
+
 function go(page){
   document.body.classList.add("fade-out");
   setTimeout(()=>{ window.location.assign(page); },200);
@@ -258,11 +287,13 @@ window.addEventListener("pageshow", function () {
 });
 
 /* ===== QURAN VIEWER ===== */
+
 function goQuran(){
   go("quran.html");
 }
 
 /* ===== SETTINGS ===== */
+
 function openSettings(){
   document.getElementById("settingsModal").classList.add("active");
 }
@@ -272,20 +303,27 @@ function closeSettings(){
 }
 
 function setTheme(mode){
+
   if(mode==="light"){
     document.body.classList.add("light");
-  } else {
+  }else{
     document.body.classList.remove("light");
   }
+
   localStorage.setItem("themeMode", mode);
+
 }
 
 window.addEventListener("load",()=>{
+
   const saved = localStorage.getItem("themeMode");
+
   if(saved==="light") document.body.classList.add("light");
+
 });
 
 /* ===== SERVICE WORKER ===== */
+
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
