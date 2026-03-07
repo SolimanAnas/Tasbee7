@@ -11,31 +11,29 @@
 <style>
 /* --- 2-THEME GLASSMORPHISM SYSTEM --- */
 :root {
-  /* Dark Glass Theme (Default) */
   --bg-image: url('images/Background-dark.png');
-  --bg-surface: rgba(15, 23, 42, 0.5); /* Deep transparent blue for dropdowns/inputs */
+  --bg-surface: rgba(15, 23, 42, 0.5);
   --text-primary: #F8FAFC; 
   --text-secondary: #CBD5E1;
-  --accent-main: #34D399; /* Mint green */
+  --accent-main: #34D399; 
   --accent-muted: rgba(255, 255, 255, 0.15);
-  --glass: rgba(15, 23, 42, 0.4); /* Dark frosty glass */
+  --glass: rgba(15, 23, 42, 0.4); 
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  --overlay: rgba(15, 23, 42, 0.2); /* Slight dim over the background image */
+  --overlay: rgba(15, 23, 42, 0.2); 
 }
 
 [data-theme="light"] {
-  /* Light Glass Theme - Softened the brightness! */
   --bg-image: url('images/Background-light.png');
-  --bg-surface: rgba(255, 255, 255, 0.35); /* Lowered transparency to let background peek through */
+  --bg-surface: rgba(255, 255, 255, 0.35); 
   --text-primary: #0F172A; 
   --text-secondary: #475569;
   --accent-main: #059669; 
   --accent-muted: rgba(0, 0, 0, 0.05);
-  --glass: rgba(255, 255, 255, 0.2); /* Lowered to make it look like real glass, not solid white */
-  --glass-border: rgba(255, 255, 255, 0.4); /* Softened border glare */
+  --glass: rgba(255, 255, 255, 0.2); 
+  --glass-border: rgba(255, 255, 255, 0.4); 
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-  --overlay: rgba(255, 255, 255, 0.1); /* Dropped to keep the background image richer */
+  --overlay: rgba(255, 255, 255, 0.1); 
 }
 
 * {
@@ -50,7 +48,7 @@ body {
   background-image: var(--bg-image);
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Keeps background still during scroll */
+  background-attachment: fixed;
   background-repeat: no-repeat;
   color: var(--text-primary);
   display: flex;
@@ -60,7 +58,6 @@ body {
   transition: color 0.3s ease, background-image 0.3s ease;
 }
 
-/* Subtle overlay to ensure text/glass always pops against the image */
 body::before {
   content: '';
   position: fixed;
@@ -115,21 +112,23 @@ label {
   font-weight: bold;
 }
 
-select {
-  padding: 14px;
+/* Custom Dropdown Buttons */
+.custom-select-btn {
+  padding: 16px;
   border-radius: 12px;
   border: 1px solid var(--glass-border);
   background: var(--bg-surface);
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
-  outline: none;
   cursor: pointer;
-  appearance: none;
-  transition: border-color 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: border-color 0.3s, background 0.3s;
 }
-select:focus { border-color: var(--accent-main); }
-select option { background: var(--bg-surface); color: var(--text-primary); }
+.custom-select-btn:active { background: var(--accent-muted); }
+.custom-select-btn:after { content: '▼'; font-size: 12px; opacity: 0.6; }
 
 /* Main Player Area */
 .now {
@@ -138,245 +137,111 @@ select option { background: var(--bg-surface); color: var(--text-primary); }
   background: linear-gradient(145deg, var(--glass), var(--accent-muted));
 }
 
-.nowSurah {
-  font-family: 'Amiri', serif;
-  font-size: 26px;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-}
-
-.nowReciter {
-  font-size: 15px;
-  color: var(--text-secondary);
-}
+.nowSurah { font-family: 'Amiri', serif; font-size: 26px; margin-bottom: 8px; color: var(--text-primary); }
+.nowReciter { font-size: 15px; color: var(--text-secondary); }
 
 /* Custom Progress Bar */
-.progress-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
+.progress-container { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 20px; }
 .time { font-size: 12px; color: var(--text-secondary); width: 40px; text-align: center; }
 
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  background: transparent;
-}
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
 input[type=range]:focus { outline: none; }
 input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 6px;
-  cursor: pointer;
-  background: var(--accent-muted);
-  border-radius: 4px;
+  width: 100%; height: 6px; cursor: pointer; background: var(--accent-muted); border-radius: 4px;
 }
 input[type=range]::-webkit-slider-thumb {
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background: var(--accent-main);
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -5px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  height: 16px; width: 16px; border-radius: 50%; background: var(--accent-main);
+  cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
 /* Controls */
-.controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px; 
-  margin-top: 10px;
-}
+.controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; }
 
 .play-pause-btn {
-  width: 60px; 
-  height: 60px;
-  border-radius: 50%;
-  background: var(--accent-main);
-  color: #FFFFFF; /* Play icon is always white/light for contrast */
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  transition: transform 0.2s;
-  flex-shrink: 0;
+  width: 60px; height: 60px; border-radius: 50%; background: var(--accent-main); color: #FFFFFF; border: none;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s; flex-shrink: 0;
 }
 .play-pause-btn:active { transform: scale(0.92); }
 .play-pause-btn svg { width: 26px; height: 26px; fill: currentColor; }
 
 .action-btn {
-  background: var(--accent-muted);
-  border: 1px solid var(--glass-border);
-  width: 44px; 
-  height: 44px;
-  border-radius: 50%;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.2s;
-  flex-shrink: 0;
+  background: var(--accent-muted); border: 1px solid var(--glass-border); width: 44px; height: 44px; border-radius: 50%; color: var(--text-primary);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;
 }
 .action-btn:active { transform: scale(0.9); }
 .action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
-
-.action-btn.active { 
-  background: var(--bg-surface); 
-  border-color: var(--accent-main); 
-  color: var(--accent-main); 
-}
+.action-btn.active { background: var(--bg-surface); border-color: var(--accent-main); color: var(--accent-main); }
 .action-btn.active svg { stroke: var(--accent-main); }
 .action-btn.active.fill-icon svg { fill: var(--accent-main); }
 
 /* Mini Player */
 .mini {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--glass-border);
-  box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 50;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--glass-border); box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+  padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 50; padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
-
 .mini.show { transform: translateY(0); }
-
 .miniInfo { display: flex; flex-direction: column; }
 .miniSurah { font-weight: bold; font-size: 15px; margin-bottom: 2px; color: var(--text-primary);}
 .miniReciter { font-size: 12px; color: var(--text-secondary); }
-
-.mini-play-btn {
-  background: var(--accent-main);
-  color: #FFFFFF;
-  border: none;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-}
+.mini-play-btn { background: var(--accent-main); color: #FFFFFF; border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;}
 .mini-play-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
 /* Toast Notification */
 .toast {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translate(-50%, -100px);
-  background: var(--accent-main);
-  color: #FFFFFF;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 14px;
-  font-weight: bold;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 1000;
+  position: fixed; top: 20px; left: 50%; transform: translate(-50%, -100px);
+  background: var(--accent-main); color: #FFFFFF; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold;
+  backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 1000;
 }
 .toast.show { transform: translate(-50%, 0); }
 
-/* ================= MODAL STYLES ================= */
+/* ================= FULL SCREEN GLASS MODAL (The Roller) ================= */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  opacity: 0;
-  visibility: hidden;
-  transition: 0.3s ease;
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+  z-index: 9999; display: flex; flex-direction: column;
+  opacity: 0; visibility: hidden; transition: 0.3s ease;
 }
 .modal-overlay.active { opacity: 1; visibility: visible; }
-
 .modal-content {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--glass-shadow);
-  border-radius: 20px;
-  padding: 20px;
-  width: 100%;
-  max-width: 440px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(20px);
-  transition: 0.3s ease;
+  display: flex; flex-direction: column; height: 100%; padding: 20px;
+  padding-top: max(20px, env(safe-area-inset-top)); padding-bottom: max(20px, env(safe-area-inset-bottom));
 }
-.modal-overlay.active .modal-content { transform: translateY(0); }
-
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--glass-border);
-  color: var(--text-primary);
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: bold; font-size: 1.3rem; margin-bottom: 20px;
+  padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); color: var(--text-primary);
 }
-.close-btn {
-  background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; opacity: 0.7;
-}
+.close-btn { background: none; border: none; color: inherit; font-size: 1.5rem; cursor: pointer; padding: 5px; opacity: 0.8; }
 
-.fav-list {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.fav-list::-webkit-scrollbar { width: 4px; }
-.fav-list::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 10px; }
+/* Scrollable List */
+.selection-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 5px; }
+.selection-list::-webkit-scrollbar { width: 6px; }
+.selection-list::-webkit-scrollbar-track { background: var(--accent-muted); border-radius: 10px; }
+.selection-list::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 10px; }
 
-.fav-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--accent-muted);
-  padding: 12px 15px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: 0.2s;
-  border: 1px solid transparent;
+/* Roller Items */
+.selection-item {
+  padding: 20px 15px; border-radius: 16px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  color: var(--text-primary); font-size: 18px; font-weight: bold;
+  text-align: center; transition: 0.2s; cursor: pointer;
 }
-.fav-item:active { transform: scale(0.98); }
-.fav-item:hover { border-color: var(--accent-main); }
+.selection-item:active { transform: scale(0.98); }
+.selection-item.active { background: var(--accent-main); color: #fff; border-color: var(--accent-main); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-.fav-item-info { display: flex; flex-direction: column; gap: 4px; }
-.fav-item-surah { font-weight: bold; color: var(--accent-main); }
-.fav-item-reciter { font-size: 0.85rem; color: var(--text-secondary); }
-.delete-fav-btn {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: none;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
+/* Favorites specific styling */
+.fav-item-container {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--glass); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border);
 }
+.fav-info { display: flex; flex-direction: column; gap: 6px; cursor: pointer; width: 85%; }
+.fav-surah { font-weight: bold; color: var(--accent-main); font-size: 18px;}
+.fav-reciter { font-size: 14px; color: var(--text-secondary); }
+.delete-fav-btn { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: none; padding: 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
 
@@ -398,14 +263,10 @@ input[type=range]::-webkit-slider-thumb {
       <button class="icon-btn" onclick="toggleTheme()" title="تبديل المظهر">
         <svg id="sunIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
         </svg>
         <svg id="moonIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -422,40 +283,31 @@ input[type=range]::-webkit-slider-thumb {
 
   <div class="card">
     <label>اختر القارئ</label>
-    <select id="reciterSelect"></select>
+    <div class="custom-select-btn" id="reciterSelectBtn" onclick="openReciterModal()">جاري التحميل...</div>
   </div>
 
   <div class="card">
     <label>اختر السورة / الجزء</label>
-    <select id="juzSelect"></select>
+    <div class="custom-select-btn" id="juzSelectBtn" onclick="openJuzModal()">جاري التحميل...</div>
   </div>
 
   <div class="card now">
-    <div class="nowSurah" id="nowSurah">جاري التحميل...</div>
+    <div class="nowSurah" id="nowSurah">اختر تلاوة للبدء</div>
     <div class="nowReciter" id="nowReciter">—</div>
 
-    <div class="progress-container" style="margin-top: 20px;">
+    <div class="progress-container">
       <span class="time" id="currentTime">00:00</span>
       <input type="range" id="progress" value="0" min="0" max="100" step="0.1">
       <span class="time" id="durationTime">00:00</span>
     </div>
 
     <div class="controls">
-      
       <button class="action-btn" id="shuffleBtn" title="تشغيل عشوائي">
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 3 21 3 21 8"></polyline>
-          <line x1="4" y1="20" x2="21" y2="3"></line>
-          <polyline points="21 16 21 21 16 21"></polyline>
-          <line x1="15" y1="15" x2="21" y2="21"></line>
-          <line x1="4" y1="4" x2="9" y2="9"></line>
-        </svg>
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
       </button>
 
       <button class="action-btn fill-icon" id="favBtn" title="إضافة للمفضلة">
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
       </button>
 
       <button class="play-pause-btn" id="mainPlayBtn">
@@ -464,20 +316,12 @@ input[type=range]::-webkit-slider-thumb {
       </button>
 
       <button class="action-btn" id="downloadBtn" title="تحميل">
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       </button>
 
       <button class="action-btn" id="repeatBtn" title="تكرار المقطع الحالي">
-        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="17 1 21 5 17 9"></polyline>
-          <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-          <polyline points="7 23 3 19 7 15"></polyline>
-          <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
       </button>
-
     </div>
   </div>
 
@@ -485,13 +329,13 @@ input[type=range]::-webkit-slider-thumb {
 
 </div>
 
-<div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
+<div class="modal-overlay" id="selectionModal" onclick="if(event.target === this) closeSelectionModal()">
   <div class="modal-content">
     <div class="modal-header">
-      <span>مقاطعي المفضلة</span>
-      <button class="close-btn" onclick="closeFavModal()">✕</button>
+      <span id="selectionModalTitle">العنوان</span>
+      <button class="close-btn" onclick="closeSelectionModal()">✕</button>
     </div>
-    <div class="fav-list" id="favList"></div>
+    <div class="selection-list" id="selectionList"></div>
   </div>
 </div>
 
@@ -511,13 +355,10 @@ input[type=range]::-webkit-slider-thumb {
 function updateThemeIcon(theme) {
   const sunIcon = document.getElementById('sunIcon');
   const moonIcon = document.getElementById('moonIcon');
-  
   if(theme === 'light') {
-    sunIcon.style.display = 'none';
-    moonIcon.style.display = 'block';
+    sunIcon.style.display = 'none'; moonIcon.style.display = 'block';
   } else {
-    sunIcon.style.display = 'block';
-    moonIcon.style.display = 'none';
+    sunIcon.style.display = 'block'; moonIcon.style.display = 'none';
   }
 }
 
@@ -525,149 +366,179 @@ function toggleTheme() {
   const html = document.documentElement;
   const isLight = html.getAttribute('data-theme') === 'light';
   const newTheme = isLight ? 'dark' : 'light';
-  
   html.setAttribute('data-theme', newTheme);
   localStorage.setItem("themeMode", newTheme);
   updateThemeIcon(newTheme);
 }
 
-window.addEventListener("load", () => {
-  // Check storage, default to dark if not set
-  let savedTheme = localStorage.getItem("themeMode");
-  if(savedTheme !== 'light' && savedTheme !== 'dark') {
-    savedTheme = 'dark';
-  }
-  
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  updateThemeIcon(savedTheme);
-});
-
-// --- Audio Player Logic ---
-let data;
-const audio = document.getElementById("audio");
-
-const reciterSelect = document.getElementById("reciterSelect");
-const juzSelect = document.getElementById("juzSelect");
-
-const mainPlayBtn = document.getElementById("mainPlayBtn");
-const playIcon = document.getElementById("playIcon");
-const pauseIcon = document.getElementById("pauseIcon");
-
-const miniPlayBtn = document.getElementById("miniPlayBtn");
-const miniPlayIcon = document.getElementById("miniPlayIcon");
-const miniPauseIcon = document.getElementById("miniPauseIcon");
-
-const progress = document.getElementById("progress");
-const currentTimeEl = document.getElementById("currentTime");
-const durationTimeEl = document.getElementById("durationTime");
-
-const nowSurah = document.getElementById("nowSurah");
-const nowReciter = document.getElementById("nowReciter");
-const miniSurah = document.getElementById("miniSurah");
-const miniReciter = document.getElementById("miniReciter");
-const mini = document.getElementById("miniPlayer");
-
-const favBtn = document.getElementById("favBtn");
-const shuffleBtn = document.getElementById("shuffleBtn");
-const repeatBtn = document.getElementById("repeatBtn");
+// --- Data Logic (Fetching JSON from Assets) ---
+let appData = null;
+let selectedReciterIndex = 0;
+let currentJuzData = [];
+let selectedJuzIndex = 0;
 
 let currentTrackUrl = "";
 let isShuffle = false;
 let isRepeat = false;
 
+const audio = document.getElementById("audio");
+const reciterSelectBtn = document.getElementById("reciterSelectBtn");
+const juzSelectBtn = document.getElementById("juzSelectBtn");
+
 const surahNames = [
-  "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال",
-  "التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف",
-  "مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل",
-  "القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات",
-  "ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد",
-  "الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة",
-  "الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن",
-  "الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل",
-  "المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير",
-  "الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر",
-  "البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة",
-  "الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش",
-  "الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"
+  "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"
 ];
 
-async function loadJSON(){
+async function loadJSON() {
   try {
     let res = await fetch("assets/audio.json?v=" + new Date().getTime());
-    data = await res.json();
-    loadReciters();
+    appData = await res.json();
+    initData();
   } catch (error) {
     console.error("Error loading JSON:", error);
-    nowSurah.innerText = "تعذر تحميل البيانات";
+    reciterSelectBtn.innerText = "تعذر تحميل البيانات";
+    juzSelectBtn.innerText = "تعذر تحميل البيانات";
   }
 }
 
-function loadReciters(){
-  reciterSelect.innerHTML = "";
-  data.reciters.forEach((r, i) => {
-    let opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = r.name;
-    reciterSelect.appendChild(opt);
-  });
-  loadJuz();
+function initData() {
+  if (!appData) return;
+  
+  reciterSelectBtn.innerText = appData.reciters[selectedReciterIndex].name;
+  buildJuzData();
+
+  // Auto Resume state checking
+  let lastTrack = localStorage.getItem("lastTrack");
+  if (lastTrack) {
+    currentTrackUrl = lastTrack; 
+    audio.src = lastTrack;
+    
+    document.getElementById("nowSurah").innerText = localStorage.getItem("lastSurah") || "";
+    document.getElementById("nowReciter").innerText = localStorage.getItem("lastReciter") || "";
+    document.getElementById("miniSurah").innerText = localStorage.getItem("lastSurah") || "";
+    document.getElementById("miniReciter").innerText = localStorage.getItem("lastReciter") || "";
+    
+    checkFavStatus();
+    updateMediaSession(localStorage.getItem("lastSurah"), localStorage.getItem("lastReciter"));
+  } else {
+    prepareTrack();
+  }
 }
 
-function loadJuz() {
-  juzSelect.innerHTML = "";
-  let reciter = data.reciters[reciterSelect.value];
-  
+function buildJuzData() {
+  currentJuzData = [];
+  let reciter = appData.reciters[selectedReciterIndex];
   let arrayData = reciter.items || reciter.juz;
   
-  if (reciter.type === "juz" && arrayData) {
-    arrayData.forEach(j => {
-      let opt = document.createElement("option");
-      opt.value = j.url;
-      opt.textContent = j.name;
-      juzSelect.appendChild(opt);
-    });
+  if ((reciter.type === "juz" || !reciter.type) && arrayData) {
+    currentJuzData = arrayData;
   } else if (reciter.type === "surah") {
     surahNames.forEach((name, index) => {
       let num = index + 1;
       let surahNumber = num < 10 ? '00' + num : num < 100 ? '0' + num : num; 
-      let opt = document.createElement("option");
-      opt.value = reciter.baseUrl + surahNumber + ".mp3";
-      opt.textContent = "سورة " + name;
-      juzSelect.appendChild(opt);
+      currentJuzData.push({
+        name: "سورة " + name,
+        url: reciter.baseUrl + surahNumber + ".mp3"
+      });
     });
   }
+  selectedJuzIndex = 0;
+  juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+}
+
+// --- Custom Full Screen Modals (Roller Design) ---
+function closeSelectionModal() {
+  document.getElementById('selectionModal').classList.remove('active');
+}
+
+function openReciterModal() {
+  if (!appData) return;
+  document.getElementById('selectionModalTitle').innerText = "اختر القارئ";
+  const list = document.getElementById('selectionList');
+  list.innerHTML = '';
   
-  prepareTrack();
+  appData.reciters.forEach((r, i) => {
+    let div = document.createElement('div');
+    div.className = 'selection-item' + (i === selectedReciterIndex ? ' active' : '');
+    div.innerText = r.name;
+    div.onclick = () => {
+      selectedReciterIndex = i;
+      reciterSelectBtn.innerText = r.name;
+      buildJuzData();
+      prepareTrack();
+      closeSelectionModal();
+    };
+    list.appendChild(div);
+  });
+  
+  document.getElementById('selectionModal').classList.add('active');
+  scrollToActive(list);
+}
+
+function openJuzModal() {
+  if (!appData) return;
+  document.getElementById('selectionModalTitle').innerText = "اختر السورة / الجزء";
+  const list = document.getElementById('selectionList');
+  list.innerHTML = '';
+  
+  currentJuzData.forEach((j, i) => {
+    let div = document.createElement('div');
+    div.className = 'selection-item' + (i === selectedJuzIndex ? ' active' : '');
+    div.innerText = j.name;
+    div.onclick = () => {
+      selectedJuzIndex = i;
+      juzSelectBtn.innerText = j.name;
+      closeSelectionModal();
+      prepareTrack();
+      audio.play().catch(()=>{});
+    };
+    list.appendChild(div);
+  });
+  
+  document.getElementById('selectionModal').classList.add('active');
+  scrollToActive(list);
+}
+
+function scrollToActive(container) {
+  setTimeout(() => {
+    const activeItem = container.querySelector('.active');
+    if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 50);
 }
 
 function prepareTrack() {
-  if(juzSelect.options.length === 0) return; 
+  if(currentJuzData.length === 0) return; 
 
-  let url = juzSelect.value;
-  let reciterName = data.reciters[reciterSelect.value].name;
-  let juzName = juzSelect.options[juzSelect.selectedIndex].text;
+  let url = currentJuzData[selectedJuzIndex].url;
+  let reciterName = appData.reciters[selectedReciterIndex].name;
+  let juzName = currentJuzData[selectedJuzIndex].name;
 
   if(currentTrackUrl !== url) {
     audio.src = url;
     currentTrackUrl = url;
     
-    nowSurah.innerText = juzName;
-    nowReciter.innerText = reciterName;
-    miniSurah.innerText = juzName;
-    miniReciter.innerText = reciterName;
+    document.getElementById("nowSurah").innerText = juzName;
+    document.getElementById("nowReciter").innerText = reciterName;
+    document.getElementById("miniSurah").innerText = juzName;
+    document.getElementById("miniReciter").innerText = reciterName;
     
-    progress.value = 0;
+    document.getElementById("progress").value = 0;
     updateProgressFill();
-    currentTimeEl.innerText = "00:00";
-    durationTimeEl.innerText = "00:00";
+    document.getElementById("currentTime").innerText = "00:00";
+    document.getElementById("durationTime").innerText = "00:00";
+    
     updatePlayPauseUI(false);
     checkFavStatus();
+
+    localStorage.setItem("lastTrack", url);
+    localStorage.setItem("lastSurah", juzName);
+    localStorage.setItem("lastReciter", reciterName);
+    
+    updateMediaSession(juzName, reciterName);
   }
 }
 
-reciterSelect.addEventListener('change', loadJuz);
-juzSelect.addEventListener('change', prepareTrack);
-
+// --- Player Logic ---
 function formatTime(seconds) {
   if (isNaN(seconds)) return "00:00";
   const m = Math.floor(seconds / 60);
@@ -676,118 +547,140 @@ function formatTime(seconds) {
 }
 
 function togglePlay() {
-  if (audio.paused) {
-    audio.play();
-  } else {
-    audio.pause();
-  }
+  if(!currentTrackUrl) return showToast("اختر سورة أولاً");
+  if (audio.paused) audio.play().catch(e => console.log(e));
+  else audio.pause();
 }
 
-mainPlayBtn.onclick = togglePlay;
-miniPlayBtn.onclick = togglePlay;
+document.getElementById("mainPlayBtn").onclick = togglePlay;
+document.getElementById("miniPlayBtn").onclick = togglePlay;
 
-// ================= Auto Continue, Shuffle & Loop ================= //
-
-shuffleBtn.onclick = () => {
+document.getElementById("shuffleBtn").onclick = () => {
   isShuffle = !isShuffle;
-  shuffleBtn.classList.toggle("active", isShuffle);
+  document.getElementById("shuffleBtn").classList.toggle("active", isShuffle);
   showToast(isShuffle ? "تم تفعيل التشغيل العشوائي" : "تم إيقاف التشغيل العشوائي");
 };
 
-repeatBtn.onclick = () => {
+document.getElementById("repeatBtn").onclick = () => {
   isRepeat = !isRepeat;
-  repeatBtn.classList.toggle("active", isRepeat);
-  showToast(isRepeat ? "تكرار المقطع الحالي قيد التفعيل" : "تم إيقاف التكرار");
+  document.getElementById("repeatBtn").classList.toggle("active", isRepeat);
+  showToast(isRepeat ? "تكرار السورة مفعل" : "تم إيقاف التكرار");
 };
+
+document.getElementById("downloadBtn").onclick = () => {
+  if(!currentTrackUrl) return showToast("لا يوجد مقطع للتحميل");
+  let a = document.createElement("a");
+  a.href = currentTrackUrl;
+  a.download = "quran.mp3"; 
+  a.target = "_blank";
+  a.click();
+};
+
+function playNextTrack() {
+  let nextIndex = selectedJuzIndex + 1;
+  if (isShuffle) {
+    let newIndex = selectedJuzIndex;
+    if (currentJuzData.length > 1) {
+      while (newIndex === selectedJuzIndex) { newIndex = Math.floor(Math.random() * currentJuzData.length); }
+    }
+    nextIndex = newIndex;
+  } else if (nextIndex >= currentJuzData.length) {
+    nextIndex = 0; 
+  }
+  
+  selectedJuzIndex = nextIndex;
+  juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+  prepareTrack();
+  audio.play().catch(()=>{});
+}
+
+function playPrevTrack() {
+  let prevIndex = selectedJuzIndex - 1;
+  if (prevIndex < 0) prevIndex = currentJuzData.length - 1;
+  selectedJuzIndex = prevIndex;
+  juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+  prepareTrack();
+  audio.play().catch(()=>{});
+}
 
 audio.addEventListener('ended', () => {
   if (isRepeat) {
-    audio.currentTime = 0;
-    audio.play();
-    return;
+    audio.currentTime = 0; audio.play(); return;
   }
+  playNextTrack();
+});
 
-  let nextIndex = juzSelect.selectedIndex + 1;
+// ================= MEDIA SESSION (شاشة القفل الاحترافية) =================
+function updateMediaSession(title, artist) {
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title || "الاستماع للقرآن",
+      artist: artist || "زاد المسلم برو",
+      album: "Zad Al-Muslim Pro",
+      artwork: [
+        // لكي تظهر الصورة في شاشة القفل يجب أن تضع صورة بهذا الاسم والمسار في استضافتك
+        { src: "icon/icon-192.png", sizes: "192x192", type: "image/png" },
+        { src: "icon/icon-512.png", sizes: "512x512", type: "image/png" }
+      ]
+    });
 
-  if (isShuffle) {
-    let newIndex = juzSelect.selectedIndex;
-    if (juzSelect.options.length > 1) {
-      while (newIndex === juzSelect.selectedIndex) {
-        newIndex = Math.floor(Math.random() * juzSelect.options.length);
+    navigator.mediaSession.setActionHandler("play", () => audio.play());
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+    navigator.mediaSession.setActionHandler("previoustrack", () => playPrevTrack());
+    navigator.mediaSession.setActionHandler("nexttrack", () => playNextTrack());
+    navigator.mediaSession.setActionHandler("seekto", (details) => {
+      if (details.fastSeek && ('fastSeek' in audio)) {
+        audio.fastSeek(details.seekTime);
+      } else {
+        audio.currentTime = details.seekTime;
       }
-    }
-    nextIndex = newIndex;
-  } 
-  else if (nextIndex >= juzSelect.options.length) {
-    nextIndex = 0; 
-  }
-
-  juzSelect.selectedIndex = nextIndex;
-  prepareTrack();
-  audio.play();
-});
-
-// ================= Audio Events ================= //
-
-audio.addEventListener('play', () => {
-  updatePlayPauseUI(true);
-  mini.classList.add("show");
-});
-
-audio.addEventListener('pause', () => {
-  updatePlayPauseUI(false);
-});
-
-audio.addEventListener('error', () => {
-  nowSurah.innerText = "⚠️ الرابط معطل حالياً";
-  updatePlayPauseUI(false);
-});
-
-audio.addEventListener('loadedmetadata', () => {
-  durationTimeEl.innerText = formatTime(audio.duration);
-});
-
-audio.addEventListener('timeupdate', () => {
-  if (!audio.duration) return;
-  const percent = (audio.currentTime / audio.duration) * 100;
-  progress.value = percent;
-  updateProgressFill();
-  currentTimeEl.innerText = formatTime(audio.currentTime);
-});
-
-function updatePlayPauseUI(isPlaying) {
-  if (isPlaying) {
-    playIcon.style.display = "none";
-    pauseIcon.style.display = "block";
-    miniPlayIcon.style.display = "none";
-    miniPauseIcon.style.display = "block";
-  } else {
-    playIcon.style.display = "block";
-    pauseIcon.style.display = "none";
-    miniPlayIcon.style.display = "block";
-    miniPauseIcon.style.display = "none";
+    });
   }
 }
 
-progress.addEventListener('input', () => {
-  const seekTime = (progress.value / 100) * audio.duration;
+audio.addEventListener('play', () => {
+  updatePlayPauseUI(true);
+  document.getElementById("miniPlayer").classList.add("show");
+  updateMediaSession(document.getElementById("nowSurah").innerText, document.getElementById("nowReciter").innerText);
+});
+
+audio.addEventListener('pause', () => updatePlayPauseUI(false));
+audio.addEventListener('error', () => { if(currentTrackUrl) document.getElementById("nowSurah").innerText = "تعذر تشغيل المقطع"; });
+audio.addEventListener('loadedmetadata', () => { document.getElementById("durationTime").innerText = formatTime(audio.duration); });
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const percent = (audio.currentTime / audio.duration) * 100;
+  const progress = document.getElementById("progress");
+  progress.value = percent;
+  updateProgressFill();
+  document.getElementById("currentTime").innerText = formatTime(audio.currentTime);
+});
+
+function updatePlayPauseUI(isPlaying) {
+  const playIcon = document.getElementById("playIcon");
+  const pauseIcon = document.getElementById("pauseIcon");
+  const miniPlayIcon = document.getElementById("miniPlayIcon");
+  const miniPauseIcon = document.getElementById("miniPauseIcon");
+  
+  if (isPlaying) {
+    playIcon.style.display = "none"; pauseIcon.style.display = "block";
+    miniPlayIcon.style.display = "none"; miniPauseIcon.style.display = "block";
+  } else {
+    playIcon.style.display = "block"; pauseIcon.style.display = "none";
+    miniPlayIcon.style.display = "block"; miniPauseIcon.style.display = "none";
+  }
+}
+
+document.getElementById("progress").addEventListener('input', (e) => {
+  const seekTime = (e.target.value / 100) * audio.duration;
   audio.currentTime = seekTime;
   updateProgressFill();
 });
 
-// Dynamic gradient fill for the range slider
 function updateProgressFill() {
+  const progress = document.getElementById("progress");
   const val = progress.value;
   progress.style.background = `linear-gradient(to left, var(--accent-main) ${val}%, var(--accent-muted) ${val}%)`;
-}
-
-document.getElementById("downloadBtn").onclick = () => {
-  let url = currentTrackUrl || juzSelect.value;
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "quran.mp3"; 
-  a.target = "_blank";
-  a.click();
 }
 
 function showToast(msg) {
@@ -797,91 +690,75 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove("show"), 2500);
 }
 
-// ================= Favorites System ================= //
-
-favBtn.onclick = () => {
+// --- Favorites Modal ---
+document.getElementById("favBtn").onclick = () => {
+  if(!currentTrackUrl) return showToast("اختر سورة أولاً");
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  let reciterName = nowReciter.innerText;
-  let juzName = nowSurah.innerText;
-  let url = currentTrackUrl;
-
-  let existsIndex = favs.findIndex(f => f.url === url);
+  let existsIndex = favs.findIndex(f => f.url === currentTrackUrl);
   if(existsIndex === -1) {
-    favs.push({ reciter: reciterName, surah: juzName, url: url });
+    favs.push({ reciter: document.getElementById("nowReciter").innerText, surah: document.getElementById("nowSurah").innerText, url: currentTrackUrl });
     localStorage.setItem("favorites", JSON.stringify(favs));
     showToast("تمت الإضافة للمفضلة بنجاح");
-    favBtn.classList.add("active");
   } else {
     favs.splice(existsIndex, 1);
     localStorage.setItem("favorites", JSON.stringify(favs));
     showToast("تمت الإزالة من المفضلة");
-    favBtn.classList.remove("active");
   }
-  renderFavList();
+  checkFavStatus();
+  if(document.getElementById('selectionModal').classList.contains('active')) openFavModal();
 }
 
 function checkFavStatus() {
    let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
    let exists = favs.find(f => f.url === currentTrackUrl);
+   const favBtn = document.getElementById("favBtn");
    if(exists) favBtn.classList.add("active");
    else favBtn.classList.remove("active");
 }
 
 function openFavModal() {
-  document.getElementById('favModal').classList.add('active');
-  renderFavList();
-}
-
-function closeFavModal() {
-  document.getElementById('favModal').classList.remove('active');
-}
-
-function renderFavList() {
-  const list = document.getElementById('favList');
+  document.getElementById('selectionModalTitle').innerText = "مقاطعي المفضلة";
+  const list = document.getElementById('selectionList');
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
   list.innerHTML = '';
   
   if (favs.length === 0) {
     list.innerHTML = '<div style="text-align:center; padding:30px; opacity:0.5; color: var(--text-primary);">لا توجد مقاطع في المفضلة بعد</div>';
-    return;
+  } else {
+    favs.forEach((fav, index) => {
+      let div = document.createElement('div');
+      div.className = 'fav-item-container';
+      div.innerHTML = `
+        <div class="fav-info" onclick="playFromFav('${fav.url}', '${fav.surah}', '${fav.reciter}')">
+          <div class="fav-surah">${fav.surah}</div>
+          <div class="fav-reciter">${fav.reciter}</div>
+        </div>
+        <button class="delete-fav-btn" onclick="removeFav(${index}, event)" title="حذف">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </button>
+      `;
+      list.appendChild(div);
+    });
   }
-  
-  favs.forEach((fav, index) => {
-    let div = document.createElement('div');
-    div.className = 'fav-item';
-    
-    div.innerHTML = `
-      <div class="fav-item-info" onclick="playFromFav('${fav.url}', '${fav.surah}', '${fav.reciter}')">
-        <div class="fav-item-surah">${fav.surah}</div>
-        <div class="fav-item-reciter">${fav.reciter}</div>
-      </div>
-      <button class="delete-fav-btn" onclick="removeFav(${index}, event)" title="حذف">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-      </button>
-    `;
-    list.appendChild(div);
-  });
+  document.getElementById('selectionModal').classList.add('active');
 }
 
 function playFromFav(url, surah, reciter) {
   if(currentTrackUrl !== url) {
-    audio.src = url;
-    currentTrackUrl = url;
+    audio.src = url; currentTrackUrl = url;
+    document.getElementById("nowSurah").innerText = surah; 
+    document.getElementById("nowReciter").innerText = reciter;
+    document.getElementById("miniSurah").innerText = surah; 
+    document.getElementById("miniReciter").innerText = reciter;
     
-    nowSurah.innerText = surah;
-    nowReciter.innerText = reciter;
-    miniSurah.innerText = surah;
-    miniReciter.innerText = reciter;
-    
-    progress.value = 0;
-    updateProgressFill();
-    currentTimeEl.innerText = "00:00";
-    durationTimeEl.innerText = "00:00";
+    document.getElementById("progress").value = 0; updateProgressFill();
+    document.getElementById("currentTime").innerText = "00:00"; 
+    document.getElementById("durationTime").innerText = "00:00";
     checkFavStatus();
+    updateMediaSession(surah, reciter);
   }
-  
-  audio.play();
-  closeFavModal();
+  audio.play().catch(()=>{}); 
+  closeSelectionModal();
 }
 
 function removeFav(index, event) {
@@ -889,13 +766,21 @@ function removeFav(index, event) {
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
   favs.splice(index, 1);
   localStorage.setItem("favorites", JSON.stringify(favs));
-  renderFavList();
+  openFavModal(); 
   checkFavStatus();
   showToast("تم الحذف بنجاح");
 }
 
-loadJSON();
+// --- App Launch ---
+window.addEventListener("load", () => {
+  let savedTheme = localStorage.getItem("themeMode");
+  if(savedTheme !== 'light' && savedTheme !== 'dark') savedTheme = 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
 
+  // Load external JSON
+  loadJSON();
+});
 </script>
 </body>
 </html>
