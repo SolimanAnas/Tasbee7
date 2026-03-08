@@ -464,7 +464,10 @@ swipeArea.addEventListener("touchend", e => {
 function handleSwipe() {
   const diff = touchStartX - touchEndX;
   if (Math.abs(diff) < 50) return;
-  diff > 0 ? next() : prev();
+  // تم عكس المنطق هنا ليتناسب مع السحب باللغة العربية (RTL)
+  // تمرير لليمين (diff < 0) يذهب للتالي
+  // تمرير لليسار (diff > 0) يعود للسابق
+  diff > 0 ? prev() : next();
 }
 
 /* Load Zikr with fade */
