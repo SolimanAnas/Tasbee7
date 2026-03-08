@@ -151,7 +151,9 @@
     }
     .mini-reset-btn:active { transform: scale(0.9); background: rgba(239, 68, 68, 0.2); }
 
-    svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
+    /* تم التعديل هنا: الدوران يطبق على الدائرة فقط وليس جميع الأيقونات */
+    .progress-wrapper svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
+    
     circle { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.1s linear; }
     .bg-circle { stroke: rgba(255,255,255,0.05); }
     .fg-circle { stroke: url(#gradient); filter: drop-shadow(0 0 4px var(--primary)); }
@@ -179,7 +181,6 @@
         text-align: center;
         flex-shrink: 0;
         margin-top: 25px; 
-        /* تم إضافة هامش سفلي قوي هنا لرفع البطاقة عن الحافة */
         margin-bottom: calc(40px + env(safe-area-inset-bottom)) !important;
     }
     .hadith-title { font-size: 13px; color: var(--primary); letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
@@ -191,7 +192,7 @@
         z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
         display: flex; align-items: flex-end; justify-content: center;
     }
-    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-overlay.active, .modal-overlay.open, .modal-overlay.show { opacity: 1; pointer-events: all; }
 
     .modal-content {
         width: 100%; max-width: 480px; background: #1e293b; border-radius: 24px 24px 0 0;
@@ -199,7 +200,7 @@
         transform: translateY(100%); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         border-top: 1px solid var(--glass-border); padding-bottom: max(24px, env(safe-area-inset-bottom));
     }
-    .modal-overlay.active .modal-content { transform: translateY(0); }
+    .modal-overlay.active .modal-content, .modal-overlay.open .modal-content, .modal-overlay.show .modal-content { transform: translateY(0); }
 
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .modal-title { font-size: 20px; font-weight: bold; }
@@ -302,9 +303,9 @@
         
         <div class="icon-btn" onclick="enterPowerMode()" title="وضع توفير الطاقة">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
-                <rect x="8" y="4" width="8" height="18" rx="1" ry="1"></rect>
-                <line x1="10" y1="1" x2="14" y2="1"></line>
-                <polygon points="12 7 9 13 13 13 11 19" fill="currentColor" stroke="none"></polygon>
+                <rect x="7" y="4" width="10" height="16" rx="2" ry="2"></rect>
+                <line x1="10" y1="2" x2="14" y2="2"></line>
+                <polygon points="12 9 10 13 14 13 12 17" fill="currentColor" stroke="none"></polygon>
             </svg>
         </div>
 
