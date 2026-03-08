@@ -1,274 +1,308 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+:root {
+        --primary: #10b981;
+        --primary-glow: rgba(16, 185, 129, 0.4);
+        --bg-dark: #020617;
+        --glass: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+    }
 
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon.png">
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
-<title>مسبحة | Masbaha</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="css/masbaha.css">
-
-<style>
     body {
-        height: 100dvh !important;
-        overflow: hidden !important;
+        margin: 0;
+        height: 100dvh;
+        overflow: hidden;
+        font-family: 'Tajawal', sans-serif;
+        background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-dark));
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        user-select: none;
+        overscroll-behavior-y: none;
     }
 
+    /* Main Layout */
     .app-container {
-        height: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        width: 100% !important;
-        max-width: 480px !important;
-        margin: 0 auto !important;
+        width: 100%;
+        max-width: 480px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: max(20px, env(safe-area-inset-top)) 20px max(10px, env(safe-area-inset-bottom));
+        position: relative;
+        transition: opacity 0.5s;
     }
 
+    /* Top Bar */
+    .top-bar {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        z-index: 10;
+        margin-bottom: 20px;
+    }
+
+    .dhikr-select-wrapper {
+        flex: 1;
+        position: relative;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    select {
+        width: 100%;
+        padding: 14px 16px;
+        appearance: none;
+        background: transparent;
+        border: none;
+        color: white;
+        font-family: 'Tajawal';
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .select-arrow {
+        position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+        pointer-events: none; opacity: 0.7;
+    }
+
+    .icon-btn {
+        width: 50px; height: 50px;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 24px;
+    }
+    .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
+
+    /* ===== MAIN AREA ===== */
     .main-area {
-        flex: 1 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        /* Padding left/right يضمن عدم خروج البطاقة عن الشاشة مع رفعها من الأسفل */
-        padding: 10px 20px calc(40px + env(safe-area-inset-bottom)) 20px !important;
-        overflow-y: auto !important; 
-        overflow-x: hidden !important;
+        flex: 1;
+        position: relative;
+        width: 100%;
     }
 
+    /* Circle – exactly in the middle */
     .counter-anchor {
-        position: relative !important;
-        margin: auto !important; /* لتوسيط الدائرة في المساحة المتبقية */
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(80vw, 320px);
+        height: min(80vw, 320px);
+        z-index: 10; /* لإبقاء الدائرة في المقدمة */
     }
 
+    .progress-wrapper {
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        transition: transform 0.1s;
+        border-radius: 50%;
+        box-shadow: 0 0 60px -20px var(--primary-glow);
+        position: relative;
+        z-index: 1;
+    }
+
+    .progress-wrapper:active { transform: scale(0.97); }
+
+    .mini-reset-btn {
+        position: absolute;
+        bottom: 0px; 
+        left: 0px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: 0.2s;
+    }
+
+    .mini-reset-btn:active {
+        transform: scale(0.9);
+        background: rgba(239, 68, 68, 0.2);
+    }
+
+    svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    circle { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.3s ease; }
+    .bg-circle { stroke: rgba(255,255,255,0.05); }
+    .fg-circle { stroke: url(#gradient); filter: drop-shadow(0 0 4px var(--primary)); }
+
+    .counter-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .count-label { font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
+    .count-number { 
+        font-size: clamp(60px, 15vw, 90px); 
+        font-weight: 700; 
+        line-height: 1;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .target-pill {
+        margin-top: 10px;
+        font-size: 14px;
+        background: rgba(0,0,0,0.4);
+        padding: 4px 12px;
+        border-radius: 20px;
+        color: var(--text-muted);
+    }
+
+    /* Hadith Card – Positioned exactly 20px below the circle */
     .hadith-card {
-        position: relative !important; 
-        top: auto !important;
-        bottom: auto !important;
-        left: auto !important;
-        right: auto !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 20px 0 0 0 !important; /* تصفير الهوامش الجانبية لمنع القص */
-        box-sizing: border-box !important;
-        flex-shrink: 0 !important;
-        transform: none !important;
+        position: absolute;
+        top: calc(50% + min(40vw, 160px) + 30px);
+        left: 20px;
+        right: 20px;
+        /* UPDATED: Added a hard limit from the bottom to prevent touching */
+        bottom: max(30px, env(safe-area-inset-bottom)); 
+        
+        /* UPDATED: Adjusted max-height to respect the new bottom limit */
+        max-height: calc(50dvh - min(40vw, 160px) - 80px);
+        overflow-y: auto;
+        
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 15px 20px;
+        backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        z-index: 5;
     }
-</style>
-</head>
 
-<body>
-<canvas id="confetti"></canvas>
-<div id="toast"><span>🔔 حان وقت ذكر الله</span></div>
+    .hadith-title { font-size: 12px; color: var(--primary); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
+    .hadith-text { font-family: 'Amiri', serif; font-size: 16px; line-height: 1.8; color: #e2e8f0; }
 
-<div id="powerModeOverlay" 
-     onclick="handlePowerTap()" 
-     ontouchstart="handleTouchStart(event)" 
-     ontouchend="handleTouchEnd(event)"
-     onmousedown="handleTouchStart(event)" 
-     onmouseup="handleTouchEnd(event)"
-     onmouseleave="handleTouchEnd(event)">
-    <div id="powerCount">0</div>
-    <div id="exitCircle"></div>
-    <div id="powerHint">اضغط مطولاً للخروج</div>
-</div>
-
-<div class="app-container" id="mainApp">
-    <div class="top-bar">
-        <div class="dhikr-select-wrapper">
-            <select id="dhikrSelect" onchange="changeDhikr()">
-                <option value="subhan">سبحان الله</option>
-                <option value="hamd">الحمد لله</option>
-                <option value="tahleel">لا إله إلا الله</option>
-                <option value="takbeer">الله أكبر</option>
-                <option value="wahdahu">لا إله إلا الله وحده لا شريك له، له الملك وله الحمد يحيي ويميت وهو على كل شيء قدير</option>
-                <option value="hawqala">لا حول ولا قوة الا بالله</option>
-                <option value="istighfar">أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه</option>
-                <option value="subhanwabihamdih">سبحان الله وبحمده</option>
-                <option value="salawat">اللهم صلَّ على سيدنا محمد</option>
-            </select>
-            <span class="select-arrow">▼</span>
-        </div>
-        
-        <div class="icon-btn" onclick="enterPowerMode()" title="وضع توفير الطاقة">
-            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="6" y="4" width="12" height="16" rx="2" ry="2"></rect>
-                <line x1="10" y1="2" x2="14" y2="2"></line>
-                <polyline points="12 8 10 13 14 13 12 18"></polyline>
-            </svg>
-        </div>
-
-        <div class="icon-btn" onclick="goHome()" title="الرئيسية">
-            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-        </div>
-
-        <div class="icon-btn" onclick="toggleSettings()" title="الإعدادات">
-            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </div>
-    </div>
-
-    <div class="main-area">
-        <div class="counter-anchor">
-            <div class="progress-wrapper" onclick="increment()">
-                <svg viewBox="0 0 200 200">
-                    <defs>
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#34d399" />
-                            <stop offset="100%" stop-color="#059669" />
-                        </linearGradient>
-                    </defs>
-                    <circle class="bg-circle" cx="100" cy="100" r="90" />
-                    <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="565.48" />
-                </svg>
-                <div class="counter-content">
-                    <span class="count-label">عدد التكرار</span>
-                    <span class="count-number" id="count">0</span>
-                    <div class="target-pill">الهدف: <span id="targetDisplay">33</span></div>
-                </div>
-            </div>
-            <div class="mini-reset-btn" onclick="resetCounter(event)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
-                    <path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-            </div>
-        </div>
-
-        <div class="hadith-card">
-            <div class="hadith-title">فضل الذكر</div>
-            <div class="hadith-text" id="hintBox">...</div>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) toggleSettings()">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="modal-title">الإعدادات</span>
-            <button class="close-btn" onclick="toggleSettings()">✕</button>
-        </div>
-        
-        <div class="setting-group">
-            <span class="group-title">عام</span>
-            <div class="setting-row">
-                <span class="setting-label">الهدف اليومي</span>
-                <input type="number" id="targetInput" min="1" onchange="saveTarget()">
-            </div>
-            <div class="setting-row">
-                <span class="setting-label">الصوت</span>
-                <label class="switch">
-                    <input type="checkbox" id="soundToggle" onchange="saveSettings()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-row">
-                <span class="setting-label">الاهتزاز</span>
-                <label class="switch">
-                    <input type="checkbox" id="vibrateToggle" onchange="saveSettings()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <span class="group-title">الإحصائيات الكلية (مدى الحياة)</span>
-            <table class="stats-table" id="statsTable"></table>
-            <div class="total-row">
-                <span>المجموع الكلي</span>
-                <span id="grandTotalDisplay">0</span>
-            </div>
-            <button class="btn-action" style="background:#ef4444; margin-top:15px; font-size:12px" onclick="resetStats()">تصفير الإحصائيات بالكامل</button>
-        </div>
-
-        <div class="setting-group">
-            <span class="group-title">معلومات</span>
-            <button class="btn-action" onclick="toggleMeanings()">📖 عرض معاني الأذكار</button>
-        </div>
-
-        <div class="setting-group">
-            <span class="group-title">إضافة ذكر خاص</span>
-            <input type="text" id="customDhikrInput" placeholder="أدخل نص الذكر هنا...">
-            <button class="btn-action" onclick="addCustomDhikr()">إضافة للقائمة</button>
-        </div>
-
-        <div class="setting-group">
-            <span class="group-title">التذكير اليومي</span>
-            <div class="setting-row">
-                <input type="time" id="reminderTime">
-            </div>
-            <button class="btn-action" onclick="setReminder()">حفظ التذكير</button>
-            <div id="reminderStatus" style="font-size: 12px; color: var(--primary); margin-top: 5px; display: none;">تم تفعيل التذكير ✅</div>
-        </div>
-
-        <button class="reset-btn-full" onclick="resetCounter(null)">تصفير العداد الحالي</button>
-        <br><br>
-        <div class="about-section">
-            <div class="app-version">Version 1.5</div>
-            <div class="dev-credit">𝔹 𝕪   /     𝕊 𝕠 𝕝 𝕚 𝕞 𝕒 𝕟    _    𝔸 𝕟 𝕒 𝕤</div>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="meaningsModal" onclick="if(event.target===this) toggleMeanings()">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="modal-title">معاني الأذكار</span>
-            <button class="close-btn" onclick="toggleMeanings()">✕</button>
-        </div>
-        
-        <div class="meaning-item">
-            <div class="meaning-head">سبحان الله</div>
-            <div class="meaning-desc">أنزه الله عن كل نقص وعيب، وعن مشابهة المخلوقين، وعن كل ما لا يليق بجلاله وكماله.</div>
-        </div>
-        <div class="meaning-item">
-            <div class="meaning-head">الحمد لله</div>
-            <div class="meaning-desc">إثبات كل صفات الكمال لله مع المحبة والتعظيم، وشكره على نعمه الظاهرة والباطنة.</div>
-        </div>
-        <div class="meaning-item">
-            <div class="meaning-head">لا إله إلا الله</div>
-            <div class="meaning-desc">لا معبود بحق في الوجود إلا الله، وهي كلمة التوحيد ومفتاح الجنة.</div>
-        </div>
-        <div class="meaning-item">
-            <div class="meaning-head">الله أكبر</div>
-            <div class="meaning-desc">الله أعظم من كل شيء؛ أكبر من الدنيا وهمومها ومشاكلها.</div>
-        </div>
-        <div class="meaning-item">
-            <div class="meaning-head">لا حول ولا قوة إلا بالله</div>
-            <div class="meaning-desc">لا قدرة على التحول من حال إلى حال (كالمعصية للطاعة)، ولا قوة على القيام بأمر إلا بعون الله.</div>
-        </div>
-        <div class="meaning-item">
-            <div class="meaning-head">سبحان الله وبحمده</div>
-            <div class="meaning-desc">جمع بين التنزيه عن النقص (سبحان الله) والثناء بالكمال (والحمد لله).</div>
-        </div>
-        <div class="meaning-item">
-            <div class="meaning-head">أستغفر الله العظيم...</div>
-            <div class="meaning-desc">
-                <b>الحي:</b> الذي له الحياة الكاملة التي لم تسبق بعدم ولا يلحقها زوال.<br>
-                <b>القيوم:</b> القائم بنفسه والمقيم لغيره. واسما (الحي القيوم) هما اسم الله الأعظم على قول أكثر أهل العلم.<br>
-                <b>وأتوب إليه:</b> أرجع إليه نادماً عازماً على عدم العودة للذنب.
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="js/masbaha.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(console.warn);
+    /* Modals (Settings & Meanings) */
+    .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
+        display: flex; align-items: flex-end; justify-content: center;
     }
-</script>
-</body>
-</html>
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal-content {
+        width: 100%; max-width: 480px;
+        background: #1e293b;
+        border-radius: 24px 24px 0 0;
+        padding: 24px;
+        max-height: 85vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        transform: translateY(100%); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border-top: 1px solid var(--glass-border);
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+    .modal-overlay.open .modal-content { transform: translateY(0); }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: 20px; font-weight: bold; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 0 10px;}
+
+    .setting-group { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .group-title { font-size: 14px; color: var(--primary); margin-bottom: 15px; font-weight: bold; display: block; }
+
+    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .setting-label { font-size: 16px; }
+
+    .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background-color: #334155; border-radius: 34px; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    input[type=number], input[type=text], input[type=time] {
+        background: #334155; border: none; color: white; padding: 10px; border-radius: 8px; font-size: 16px; width: 100%; box-sizing: border-box;
+    }
+    input[type=number] { width: 80px; text-align: center; }
+
+    .btn-action {
+        background: var(--primary); color: #020617; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; transition: 0.2s;
+    }
+    .btn-action:active { transform: scale(0.98); opacity: 0.9; }
+
+    .reset-btn-full {
+        width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer;
+    }
+
+    .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .stats-table td { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: var(--text-muted); }
+    .stats-table td:first-child { 
+        padding-left: 10px; 
+        white-space: normal; 
+        word-break: break-word; 
+        line-height: 1.5;
+    }
+    .stats-table td:last-child { text-align: left; color: white; font-weight: bold; font-family: sans-serif; white-space: nowrap; }
+    .total-row { display: flex; justify-content: space-between; font-weight: bold; color: var(--primary); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 16px; }
+
+    .about-section { text-align: center; padding: 10px 0; }
+    .app-version { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+    .dev-credit { font-family: sans-serif; font-size: 14px; color: var(--primary); letter-spacing: 1px; font-weight: bold; }
+
+    .meaning-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .meaning-item:last-child { border: none; }
+    .meaning-head { color: var(--primary); font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+    .meaning-desc { font-size: 14px; color: #e2e8f0; line-height: 1.6; }
+    .meaning-sub { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+
+    #toast {
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+        background: rgba(16, 185, 129, 0.9); color: white; padding: 12px 24px;
+        border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 200; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex; align-items: center; gap: 10px; backdrop-filter: blur(5px);
+        font-weight: bold;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+    #powerModeOverlay {
+        position: fixed; inset: 0; background: #000000; z-index: 999;
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        touch-action: none;
+    }
+    #powerModeOverlay.active { display: flex; }
+    #powerCount { font-size: 150px; color: #333; font-weight: bold; user-select: none; }
+    #powerHint { position: absolute; bottom: 50px; color: #222; font-size: 14px; }
+
+    #exitCircle {
+        position: absolute; width: 100px; height: 100px; border-radius: 50%;
+        border: 4px solid #475569;
+        opacity: 0.5; transform: scale(0.5);
+        transition: transform 3s linear, border-color 0.5s;
+        pointer-events: none;
+    }
+    #exitCircle.holding { 
+        opacity: 1; 
+        transform: scale(1.5); 
+        border-color: #ef4444;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    }
