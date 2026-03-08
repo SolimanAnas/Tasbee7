@@ -136,7 +136,6 @@
       background: none;
       border: none;
       color: var(--text);
-      /* Using !important to override system defaults */
       font-family: 'Amiri', serif !important; 
       font-size: 1.15rem;
       font-weight: 700;
@@ -147,7 +146,6 @@
       direction: rtl;
     }
 
-    /* Targeting the list items inside the scrollable menu */
     #section-select option {
       font-family: 'Amiri', serif !important;
       font-size: 1.1rem;
@@ -239,7 +237,7 @@
     <div class="toolbar">
       <button class="home-btn" onclick="location.href='index.html'">🏠</button>
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="ابحث عن دعاء...">
+        <input type="text" id="search-input" placeholder="ابحث في الأذكار والعناوين...">
       </div>
       <div class="theme-dock">
         <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
@@ -298,6 +296,11 @@
       render();
     }
 
+    // Helper function to remove Tashkeel
+    function normalizeText(text) {
+        return text.replace(/[ًٌٍَُِّْـ]/g, '');
+    }
+
     function buildUI() {
       const select = document.getElementById('section-select');
       App.data.forEach((sec, i) => {
@@ -311,8 +314,9 @@
             sIdx: i,
             iIdx: itemIdx,
             title: sec.title,
+            titleNorm: normalizeText(sec.title), // Store normalized title for better searching
             ar: item.ar,
-            norm: item.ar.replace(/[ًٌٍَُِّْـ]/g, '')
+            norm: normalizeText(item.ar)
           });
         });
       });
@@ -349,14 +353,19 @@
     }
 
     document.getElementById('search-input').oninput = (e) => {
-      const query = e.target.value.trim().replace(/[ًٌٍَُِّْـ]/g, '');
+      const query = normalizeText(e.target.value.trim());
+      
       if (!query) {
         if (App.isSearchMode) { App.isSearchMode = false; render(); }
         return;
       }
 
       App.isSearchMode = true;
-      const results = App.searchIndex.filter(x => x.norm.includes(query) || x.title.includes(query)).slice(0, 50);
+      
+      // Now searching through both normalized body text AND normalized title text
+      const results = App.searchIndex.filter(x => 
+          x.norm.includes(query) || x.titleNorm.includes(query)
+      ).slice(0, 50);
       
       document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
       document.getElementById('content-area').innerHTML = results.map(r => `
