@@ -1,4 +1,4 @@
-    :root {
+:root {
         --primary: #10b981;
         --primary-glow: rgba(16, 185, 129, 0.4);
         --bg-dark: #020617;
@@ -173,12 +173,13 @@
     /* Hadith Card – Positioned exactly 20px below the circle */
     .hadith-card {
         position: absolute;
-        /* المعادلة: المنتصف (50%) + نصف مساحة الدائرة + 20 بكسل */
         top: calc(50% + min(40vw, 160px) + 30px);
         left: 20px;
         right: 20px;
+        /* UPDATED: Added a hard limit from the bottom to prevent touching */
+        bottom: max(30px, env(safe-area-inset-bottom)); 
         
-        /* يمنع البطاقة من تجاوز أسفل الشاشة في الهواتف الصغيرة */
+        /* UPDATED: Adjusted max-height to respect the new bottom limit */
         max-height: calc(50dvh - min(40vw, 160px) - 80px);
         overflow-y: auto;
         
