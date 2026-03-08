@@ -144,7 +144,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .close-btn { background: none; border: none; color: inherit; font-size: 1.5rem; cursor: pointer; opacity: 0.8; }
 .selection-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 .selection-item { padding: 20px 15px; border-radius: 16px; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-primary); font-size: 18px; font-weight: bold; text-align: center; cursor: pointer; }
-.selection-item.active { background: var(--accent-main); color: #fff; }
+.selection-item.active { background: var(--accent-main); color: #fff; border-color: var(--accent-main); }
 .fav-item-container { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 10px; }
 .delete-fav-btn { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: none; padding: 10px; border-radius: 12px; cursor: pointer; }
 </style>
@@ -252,7 +252,7 @@ function toggleTheme() {
 }
 
 let appData = { reciters: [] }, selectedReciterIndex = 0, currentJuzData = [], selectedJuzIndex = 0, currentTrackUrl = "", isShuffle = false, isRepeat = false;
-let errorRetryCount = 0; // لضمان عدم الدخول في حلقة لا نهائية من الأخطاء
+let errorRetryCount = 0; // لضمان عدم الدخول في حلقة لا نهائية
 
 const audio = document.getElementById("audio"), reciterSelectBtn = document.getElementById("reciterSelectBtn"), juzSelectBtn = document.getElementById("juzSelectBtn");
 
@@ -282,17 +282,40 @@ async function loadMultipleJSONs() {
 
 function initData() {
   if (appData.reciters.length === 0) return;
+  
+  // استعادة الجلسة السابقة بدقة (قارئ وسورة)
+  let lastTrack = localStorage.getItem("lastTrack");
+  if (lastTrack && lastTrack.startsWith("http")) {
+      let foundReciterIndex = appData.reciters.findIndex(r => {
+          if (r.type === 'surah') return lastTrack.startsWith(r.baseUrl);
+          if (r.items) return r.items.some(i => i.url === lastTrack);
+          return false;
+      });
+      if (foundReciterIndex !== -1) {
+          selectedReciterIndex = foundReciterIndex;
+      }
+  }
+  
   reciterSelectBtn.innerText = appData.reciters[selectedReciterIndex].name;
   buildJuzData();
-  let lastTrack = localStorage.getItem("lastTrack");
-  if (lastTrack && lastTrack !== "undefined" && lastTrack.startsWith("http")) {
-    currentTrackUrl = lastTrack; audio.src = lastTrack;
-    document.getElementById("nowSurah").innerText = localStorage.getItem("lastSurah") || "";
-    document.getElementById("nowReciter").innerText = localStorage.getItem("lastReciter") || "";
-    document.getElementById("miniSurah").innerText = localStorage.getItem("lastSurah") || "";
-    document.getElementById("miniReciter").innerText = localStorage.getItem("lastReciter") || "";
-    checkFavStatus();
-  } else { prepareTrack(); }
+
+  if (lastTrack && lastTrack.startsWith("http")) {
+      let foundJuzIndex = currentJuzData.findIndex(j => j.url === lastTrack);
+      if (foundJuzIndex !== -1) {
+          selectedJuzIndex = foundJuzIndex;
+          juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+      }
+      
+      currentTrackUrl = lastTrack; 
+      audio.src = lastTrack;
+      document.getElementById("nowSurah").innerText = localStorage.getItem("lastSurah") || "";
+      document.getElementById("nowReciter").innerText = localStorage.getItem("lastReciter") || "";
+      document.getElementById("miniSurah").innerText = localStorage.getItem("lastSurah") || "";
+      document.getElementById("miniReciter").innerText = localStorage.getItem("lastReciter") || "";
+      checkFavStatus();
+  } else { 
+      prepareTrack(); 
+  }
 }
 
 function buildJuzData() {
@@ -308,7 +331,13 @@ function buildJuzData() {
       currentJuzData.push({ name: "سورة " + name, url: reciter.baseUrl + surahNumber + ".mp3" });
     });
   }
-  selectedJuzIndex = 0; juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+  
+  selectedJuzIndex = 0; 
+  if(currentJuzData.length > 0) {
+      juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+  } else {
+      juzSelectBtn.innerText = "قائمة فارغة";
+  }
 }
 
 function closeSelectionModal() { document.getElementById('selectionModal').classList.remove('active'); }
@@ -322,14 +351,22 @@ function openReciterModal() {
     let div = document.createElement('div');
     div.className = 'selection-item' + (i === selectedReciterIndex ? ' active' : '');
     div.innerText = r.name;
-    div.onclick = () => { selectedReciterIndex = i; reciterSelectBtn.innerText = r.name; buildJuzData(); prepareTrack(); closeSelectionModal(); };
+    div.onclick = () => { 
+        selectedReciterIndex = i; 
+        reciterSelectBtn.innerText = r.name; 
+        errorRetryCount = 0; // تصفير عداد الأخطاء
+        buildJuzData(); 
+        prepareTrack(); 
+        closeSelectionModal(); 
+        audio.play().catch(()=>{}); 
+    };
     list.appendChild(div);
   });
   document.getElementById('selectionModal').classList.add('active');
 }
 
 function openJuzModal() {
-  if (appData.reciters.length === 0) return;
+  if (currentJuzData.length === 0) return;
   document.getElementById('selectionModalTitle').innerText = "اختر السورة / الجزء";
   const list = document.getElementById('selectionList');
   list.innerHTML = '';
@@ -337,7 +374,14 @@ function openJuzModal() {
     let div = document.createElement('div');
     div.className = 'selection-item' + (i === selectedJuzIndex ? ' active' : '');
     div.innerText = j.name;
-    div.onclick = () => { selectedJuzIndex = i; juzSelectBtn.innerText = j.name; closeSelectionModal(); prepareTrack(); audio.play().catch(()=>{}); };
+    div.onclick = () => { 
+        selectedJuzIndex = i; 
+        juzSelectBtn.innerText = j.name; 
+        errorRetryCount = 0; // تصفير عداد الأخطاء
+        closeSelectionModal(); 
+        prepareTrack(); 
+        audio.play().catch(()=>{}); 
+    };
     list.appendChild(div);
   });
   document.getElementById('selectionModal').classList.add('active');
@@ -345,15 +389,24 @@ function openJuzModal() {
 
 function prepareTrack() {
   if(currentJuzData.length === 0) return; 
-  let url = currentJuzData[selectedJuzIndex].url, reciterName = appData.reciters[selectedReciterIndex].name, juzName = currentJuzData[selectedJuzIndex].name;
+  let url = currentJuzData[selectedJuzIndex].url;
+  let reciterName = appData.reciters[selectedReciterIndex].name;
+  let juzName = currentJuzData[selectedJuzIndex].name;
+
   if(currentTrackUrl !== url) {
     audio.src = url; currentTrackUrl = url;
-    document.getElementById("nowSurah").innerText = juzName; document.getElementById("nowReciter").innerText = reciterName;
-    document.getElementById("miniSurah").innerText = juzName; document.getElementById("miniReciter").innerText = reciterName;
-    document.getElementById("progress").value = 0; checkFavStatus();
-    localStorage.setItem("lastTrack", url); localStorage.setItem("lastSurah", juzName); localStorage.setItem("lastReciter", reciterName);
+    document.getElementById("nowSurah").innerText = juzName; 
+    document.getElementById("nowReciter").innerText = reciterName;
+    document.getElementById("miniSurah").innerText = juzName; 
+    document.getElementById("miniReciter").innerText = reciterName;
+    document.getElementById("progress").value = 0; 
+    checkFavStatus();
+    
+    localStorage.setItem("lastTrack", url); 
+    localStorage.setItem("lastSurah", juzName); 
+    localStorage.setItem("lastReciter", reciterName);
+    
     updateMediaSession(juzName, reciterName);
-    errorRetryCount = 0; // Reset error counter on new valid track
   }
 }
 
@@ -364,8 +417,7 @@ function updateMediaSession(title, artist) {
       title: title || "الاستماع للقرآن",
       artist: artist || "زاد المسلم",
       album: "زاد المسلم Pro",
-      // تم تحديث المسار ليكون متوافقاً مع أيقونة التطبيق الحقيقية
-      artwork: [{ src: "icon/icon-512.png", sizes: "512x512", type: "image/png" }]
+      artwork: [{ src: "icons/icon_512.png", sizes: "512x512", type: "image/png" }]
     });
     navigator.mediaSession.setActionHandler("play", () => audio.play());
     navigator.mediaSession.setActionHandler("pause", () => audio.pause());
@@ -376,6 +428,7 @@ function updateMediaSession(title, artist) {
 
 function togglePlay() {
   if(!currentTrackUrl) return;
+  errorRetryCount = 0;
   if (audio.paused) audio.play().catch(e => showToast("تعذر التشغيل"));
   else audio.pause();
 }
@@ -418,29 +471,33 @@ audio.addEventListener('ended', () => {
 
 audio.addEventListener('error', (e) => { 
   if(currentTrackUrl) {
-    console.error("Audio Load Error", e);
-    showToast("السورة غير متوفرة، جاري تخطيها...");
     updatePlayPauseUI(false);
     
-    // Auto-skip logic for broken links (max 3 retries to prevent endless loop)
     if (errorRetryCount < 3) {
+      showToast("جاري تخطي السورة غير المتوفرة...");
       errorRetryCount++;
       setTimeout(() => playNextTrack(), 1500); 
     } else {
-      document.getElementById("nowSurah").innerText = "خطأ متكرر في السيرفر"; 
+      showToast("تعذر التشغيل، يبدو أن السيرفر متوقف");
+      document.getElementById("nowSurah").innerText = "خطأ في السيرفر"; 
     }
   }
 });
 
-audio.addEventListener('play', () => { 
+// هذا الحدث يضمن تصفير الأخطاء فور نجاح التشغيل
+audio.addEventListener('playing', () => { 
+    errorRetryCount = 0; 
     updatePlayPauseUI(true); 
     document.getElementById("miniPlayer").classList.add("show");
     updateMediaSession(document.getElementById("nowSurah").innerText, document.getElementById("nowReciter").innerText);
 });
+
 audio.addEventListener('pause', () => updatePlayPauseUI(false));
+
 audio.addEventListener('loadedmetadata', () => { 
     document.getElementById("durationTime").innerText = formatTime(audio.duration); 
 });
+
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
   const percent = (audio.currentTime / audio.duration) * 100;
@@ -485,7 +542,31 @@ document.getElementById("favBtn").onclick = () => {
 };
 
 function checkFavStatus() { let favs = JSON.parse(localStorage.getItem("favorites") || "[]"); document.getElementById("favBtn").classList.toggle("active", favs.some(f => f.url === currentTrackUrl)); }
-function playFromFav(url, surah, reciter) { audio.src = url; currentTrackUrl = url; document.getElementById("nowSurah").innerText = surah; document.getElementById("nowReciter").innerText = reciter; audio.play(); closeSelectionModal(); }
+
+function playFromFav(url, surah, reciter) { 
+    audio.src = url; 
+    currentTrackUrl = url; 
+    document.getElementById("nowSurah").innerText = surah; 
+    document.getElementById("nowReciter").innerText = reciter; 
+    
+    // محاولة مزامنة UI مع المقطع المفضل
+    let foundReciterIndex = appData.reciters.findIndex(r => r.name === reciter);
+    if(foundReciterIndex !== -1) {
+        selectedReciterIndex = foundReciterIndex;
+        reciterSelectBtn.innerText = reciter;
+        buildJuzData();
+        let foundJuzIndex = currentJuzData.findIndex(j => j.url === url);
+        if(foundJuzIndex !== -1) {
+            selectedJuzIndex = foundJuzIndex;
+            juzSelectBtn.innerText = surah;
+        }
+    }
+    
+    errorRetryCount = 0;
+    audio.play().catch(()=>{}); 
+    closeSelectionModal(); 
+}
+
 function removeFav(index, e) { e.stopPropagation(); let favs = JSON.parse(localStorage.getItem("favorites") || "[]"); favs.splice(index, 1); localStorage.setItem("favorites", JSON.stringify(favs)); openFavModal(); checkFavStatus(); }
 
 window.addEventListener("load", () => {
