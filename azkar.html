@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0F172A">
-<title>Azkar</title>
+<title>الأذكار</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,8 +111,8 @@ body{
   align-items:center;
   justify-content:flex-start;  
   gap:12px;                    
-  /* تمت زيادة المساحة السفلية لمنع تداخل الدائرة مع الأزرار بعد رفعها */
-  padding: 0 20px 140px; 
+  /* تمت زيادة المساحة السفلية إلى 170 لمنع التداخل بعد رفع الأزرار */
+  padding: 0 20px 170px; 
   overflow-y:auto;              
 }
 
@@ -263,8 +263,8 @@ circle {
 /* --- UPDATED: Buttons Controls --- */
 .controls{
   position: absolute;
-  /* تم رفع الأزرار بزيادة المسافة وإضافة دعم للأجهزة التي تحوي شريط سفلي (Safe Area) */
-  bottom: calc(70px + env(safe-area-inset-bottom));
+  /* تم رفع الأزرار للأعلى بزيادة القيمة إلى 95px مع الحفاظ على منطقة الأمان السفلية */
+  bottom: calc(50px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
   display:flex;
@@ -352,6 +352,7 @@ circle {
 .settings-row h3 {
   color: var(--accent-main);
   margin: 0 0 10px 0;
+  font-size: 16px;
 }
 .theme-buttons {
   display: flex;
@@ -390,7 +391,7 @@ circle {
         <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
       </svg>
       <div class="counter-content">
-        <span class="count-label">Remaining</span>
+        <span class="count-label">المتبقي</span>
         <span class="count-number" id="counter">0</span>
       </div>
     </div>
@@ -399,9 +400,9 @@ circle {
 </div>
 
 <div class="controls">
-  <button class="btn" onclick="prev()">Previous</button>
-  <button class="btn" id="autoBtn" onclick="toggleAuto()">Auto</button>
-  <button class="btn" onclick="next()">Next</button>
+  <button class="btn" onclick="next()">التالي</button>
+  <button class="btn" id="autoBtn" onclick="toggleAuto()">تلقائي</button>
+  <button class="btn" onclick="prev()">السابق</button>
 </div>
 
 <div class="modal" id="translationModal" onclick="if(event.target===this) closeTranslation()">
@@ -416,17 +417,17 @@ circle {
     <div class="close" onclick="closeSettings()">✕</div>
     
     <div class="settings-row">
-      <h3>Font Size</h3>
+      <h3>حجم الخط</h3>
       <input type="range" min="22" max="40" value="28" id="fontSizeSlider"
              oninput="changeFontSize(this.value)">
     </div>
 
     <div class="settings-row">
-      <h3>Theme</h3>
+      <h3>المظهر</h3>
       <div class="theme-buttons">
-        <button class="btn" onclick="setTheme('dark')">Dark</button>
-        <button class="btn" onclick="setTheme('warm')">Warm</button>
-        <button class="btn" onclick="setTheme('light')">Light</button>
+        <button class="btn" onclick="setTheme('dark')">داكن</button>
+        <button class="btn" onclick="setTheme('warm')">دافئ</button>
+        <button class="btn" onclick="setTheme('light')">فاتح</button>
       </div>
     </div>
   </div>
@@ -443,7 +444,6 @@ const fullCircle = 565.48;
 
 const type = new URLSearchParams(window.location.search).get("type") || "morning";
 
-// Fetching from the assets folder
 fetch("assets/azkar.json")
 .then(res => res.json())
 .then(data => {
@@ -550,7 +550,7 @@ function toggleAuto() {
 function autoLoop() {
   if (!autoMode) return;
   increment();
-  setTimeout(autoLoop, 2000);
+  setTimeout(autoLoop, 3000);
 }
 
 /* Translation Modal */
