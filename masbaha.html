@@ -19,14 +19,35 @@
 <link rel="stylesheet" href="css/masbaha.css">
 
 <style>
-    .hadith-card {
-        /* إضافة مسافة سفلية ذكية تتكيف مع شريط الهاتف السفلي */
-        margin-bottom: calc(35px + env(safe-area-inset-bottom)) !important;
+    body {
+        height: 100dvh !important;
+        overflow: hidden !important;
     }
-    
+
+    .app-container {
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
     .main-area {
-        /* ضمان وجود مساحة تمرير أو مساحة داخلية كافية */
-        padding-bottom: env(safe-area-inset-bottom) !important;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        /* إضافة مسافة إجبارية من الأسفل لرفع البطاقة بقوة */
+        padding-bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+        /* السماح بالتمرير إذا كانت الشاشة صغيرة حتى لا يختفي المحتوى */
+        overflow-y: auto !important; 
+    }
+
+    .hadith-card {
+        /* إيقاف أي تموضع مطلق قد يكون موجوداً في ملف الـ CSS الخارجي */
+        position: relative !important; 
+        bottom: auto !important;
+        margin-top: 20px !important;
+        margin-bottom: 10px !important;
+        flex-shrink: 0 !important;
     }
 </style>
 </head>
