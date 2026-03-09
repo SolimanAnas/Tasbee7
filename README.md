@@ -18,18 +18,31 @@
 * **🤲 Azkar & Hisn Al-Muslim (الأذكار وحصن المسلم):** Morning, evening, and Ruqyah supplications with interactive counters.
 * **🎨 Modern UI (واجهة عصرية):** 3-Mode Theme System (Dark Glass, Light Glass, Plain Dark) that remembers your preference.
 * **📱 PWA Ready (تطبيق متكامل):** Installable on iOS and Android directly from the browser for a native app-like experience.
-
----
-🛠️ Tech Stack | التقنيات المستخدمة
-​Frontend: HTML5, Vanilla JavaScript, CSS3 (Custom Glassmorphism Design).
-​Audio Streaming: HLS.js for live radio and direct MP3 streaming.
-​Storage: Native browser localStorage for saving settings, bookmarks, and statistics.
-​PWA: Service Workers and Web App Manifest for offline caching and installation.
-
----
+*
+----
 
 ## 🚀 How to Run Locally | طريقة التشغيل المحلي
 
 1. Clone the repository (استنساخ المستودع):
    ```bash
    git clone [https://github.com/SolimanAnas/Tasbee7.git](https://github.com/SolimanAnas/Tasbee7.git)
+
+## 🛠️ Tech Stack | التقنيات المستخدمة
+* **Frontend:** HTML5, Vanilla JavaScript, CSS3 (Custom Glassmorphism Design).
+* **Audio Streaming:** HLS.js for live radio and direct MP3 streaming.
+* **Storage:** Native browser `localStorage` for saving settings, bookmarks, and statistics.
+* **PWA:** Service Workers and Web App Manifest for offline caching and installation.
+
+---
+
+## 👨‍💻 Author | المطور
+**Soliman Anas**
+* GitHub: [@SolimanAnas](https://github.com/SolimanAnas)
+* Live App: [Zad Al-Muslim](https://solimananas.github.io/Tasbee7)
+
+---
+*Made with ❤️ for the Muslim Ummah.*
+
+
+
+   
