@@ -25,11 +25,6 @@
 ​Audio Streaming: HLS.js for live radio and direct MP3 streaming.
 ​Storage: Native browser localStorage for saving settings, bookmarks, and statistics.
 ​PWA: Service Workers and Web App Manifest for offline caching and installation.
-​👨‍💻 Author | المطور
-​Soliman Anas
-​GitHub: @SolimanAnas
-​Live App: Zad Al-Muslim
-
 
 ---
 
