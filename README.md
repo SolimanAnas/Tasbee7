@@ -20,6 +20,18 @@
 * **📱 PWA Ready (تطبيق متكامل):** Installable on iOS and Android directly from the browser for a native app-like experience.
 
 ---
+🛠️ Tech Stack | التقنيات المستخدمة
+​Frontend: HTML5, Vanilla JavaScript, CSS3 (Custom Glassmorphism Design).
+​Audio Streaming: HLS.js for live radio and direct MP3 streaming.
+​Storage: Native browser localStorage for saving settings, bookmarks, and statistics.
+​PWA: Service Workers and Web App Manifest for offline caching and installation.
+​👨‍💻 Author | المطور
+​Soliman Anas
+​GitHub: @SolimanAnas
+​Live App: Zad Al-Muslim
+
+
+---
 
 ## 🚀 How to Run Locally | طريقة التشغيل المحلي
 
