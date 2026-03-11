@@ -69,25 +69,29 @@
         border: 1px solid var(--glass-border);
         border-radius: 16px;
         backdrop-filter: blur(10px);
+        overflow: hidden;
     }
 
     select {
         width: 100%;
-        padding: 14px 16px;
+        padding: 14px 16px 14px 40px; 
         appearance: none;
         background: transparent;
         border: none;
         color: white;
         font-family: 'Tajawal', sans-serif;
         font-size: 16px;
+        font-weight: 500;
         cursor: pointer;
         text-overflow: ellipsis;
+        text-align: right; 
+        direction: rtl; 
     }
-    select option { background: #1e293b; color: white; }
+    select option { background: #1e293b; color: white; text-align: right; }
 
     .select-arrow {
         position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-        pointer-events: none; opacity: 0.7;
+        pointer-events: none; opacity: 0.7; font-size: 12px;
     }
 
     .icon-btn {
@@ -150,6 +154,20 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.2s;
     }
     .mini-reset-btn:active { transform: scale(0.9); background: rgba(239, 68, 68, 0.2); }
+
+    .mini-power-btn {
+        position: absolute;
+        bottom: 0; right: 0;
+        width: 44px; height: 44px;
+        border-radius: 50%;
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid var(--primary-glow);
+        color: var(--primary);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; z-index: 20; backdrop-filter: blur(4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.2s;
+    }
+    .mini-power-btn:active { transform: scale(0.9); background: rgba(16, 185, 129, 0.2); }
 
     /* تم التعديل هنا: الدوران يطبق على الدائرة فقط وليس جميع الأيقونات */
     .progress-wrapper svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
@@ -285,7 +303,15 @@
 </div>
 
 <div class="app-container" id="mainApp">
+    
     <div class="top-bar">
+        <div class="icon-btn" onclick="goHome()" title="الرئيسية">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+        </div>
+
         <div class="dhikr-select-wrapper">
             <select id="dhikrSelect" onchange="changeDhikr()">
                 <option value="subhan">سبحان الله</option>
@@ -299,21 +325,6 @@
                 <option value="salawat">اللهم صلَّ على سيدنا محمد</option>
             </select>
             <span class="select-arrow">▼</span>
-        </div>
-        
-        <div class="icon-btn" onclick="enterPowerMode()" title="وضع توفير الطاقة">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
-                <rect x="7" y="4" width="10" height="16" rx="2" ry="2"></rect>
-                <line x1="10" y1="2" x2="14" y2="2"></line>
-                <polygon points="12 9 10 13 14 13 12 17" fill="currentColor" stroke="none"></polygon>
-            </svg>
-        </div>
-
-        <div class="icon-btn" onclick="goHome()" title="الرئيسية">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px;">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
         </div>
 
         <div class="icon-btn" onclick="toggleSettings()" title="الإعدادات">
@@ -340,9 +351,16 @@
                     <div class="target-pill">الهدف: <span id="targetDisplay">33</span></div>
                 </div>
             </div>
+            
             <div class="mini-reset-btn" onclick="resetCounter(event)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
                     <path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </div>
+
+            <div class="mini-power-btn" onclick="enterPowerMode()" title="وضع توفير الطاقة">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </div>
         </div>
