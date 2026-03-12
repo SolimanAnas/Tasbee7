@@ -21,11 +21,11 @@
       display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
       background: var(--glass-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); z-index: 20;
     }
-    .header-left { display: flex; gap: 4px; align-items: center; } 
+    .header-right { display: flex; align-items: center; } 
     .header-center { display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; text-align: center; }
     .header-center .nav-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 0.95rem; }
     #surahName { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
-    .header-actions { display: flex; gap: 4px; align-items: center; }
+    .header-left { display: flex; gap: 6px; align-items: center; }
     .icon-btn { background: none; border: none; color: inherit; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s; flex-shrink: 0; }
     .icon-btn:active { background: rgba(128,128,128,0.15); }
 
@@ -95,7 +95,7 @@
   </div>
 
   <header id="appHeader">
-    <div class="header-left">
+    <div class="header-right">
       <button class="icon-btn" onclick="goHome()" title="الرئيسية">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </button>
@@ -110,17 +110,19 @@
       </div>
     </div>
 
-    <div class="header-actions">
-      <button class="icon-btn" onclick="toggleAudioBar()" title="مشغل التلاوة">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+    <div class="header-left">
+      <button class="icon-btn" id="searchBtn" onclick="toggleSearchOverlay('toggle')" title="بحث في القرآن">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </button>
-      <button class="icon-btn" id="searchBtn" onclick="toggleSearchOverlay('toggle')" title="بحث في القرآن">🔎</button>
+      
       <a id="viewToggleBtn" class="icon-btn" href="quran.html?page=1" title="التبديل إلى المصحف المصور" style="text-decoration: none; color: inherit;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
       </a>
+
       <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </button>
+
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       </button>
@@ -181,12 +183,12 @@
           <button class="action-btn" onclick="playSelectedAyah()"><span style="font-size:1.2rem;">🔊</span> استماع للآية</button>
           <button class="action-btn" onclick="copySelectedAyah()"><span style="font-size:1.2rem;">📋</span> نسخ الآية</button>
           <button class="action-btn" onclick="fetchTranslation()"><span style="font-size:1.2rem;">🌍</span> ترجمة (English)</button>
-          <button class="action-btn" onclick="fetchTafsir()"><span style="font-size:1.2rem;">📖</span> التفسير</button>
+          <button class="action-btn" onclick="fetchTafsir('ar.muyassar')"><span style="font-size:1.2rem;">📖</span> التفسير</button>
       </div>
 
       <div class="tafsir-selector-row">
           <span style="font-size: 0.95rem; font-weight: bold; color: var(--text-primary);">اختر التفسير:</span>
-          <select id="tafsirSelect" class="custom-select" style="flex: 1;" onchange="if(currentAyahViewMode === 'tafsir') fetchTafsir()">
+          <select id="tafsirSelect" class="custom-select" style="flex: 1;" onchange="fetchTafsir()">
              <option value="ar.muyassar">التفسير الميسر</option>
              <option value="ar.jalalayn">تفسير الجلالين</option>
              <option value="ar.qurtubi">تفسير القرطبي</option>
@@ -203,10 +205,8 @@
           <div class="setting-row"><div class="setting-label">🔤 حجم الخط</div><div class="setting-control"><input type="range" id="fontSizeSlider" class="range-slider" min="16" max="60" value="28" step="1" oninput="changeFontSizeSlider(this.value)"><span id="fontSizeDisplay" class="font-size-indicator">28</span></div></div>
           <div class="setting-row"><div class="setting-label">🎨 لون النص</div><div class="setting-control"><select id="textColorSelect" class="custom-select" onchange="changeTextColor(this.value)"><option value="#1e2a3a">أسود (فاتح)</option><option value="#2a1f14">بني (داكن)</option><option value="#1e3a5f">أزرق داكن</option><option value="#5f4b3a">بني كلاسيكي</option></select></div></div>
           <div class="setting-row" style="cursor: pointer;" onclick="openBookmarksModal(); closeModal('settingsModal');"><div class="setting-label">🔖 المفضلة</div><div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div></div>
-          
-          <button class="offline-btn" id="offlineDownloadBtn" onclick="downloadOfflineData()">
-             ⬇ تحميل القرآن كاملاً (للقراءة بدون إنترنت)
-          </button>
+          <div class="setting-row" style="cursor: pointer;" onclick="window.location.href='quran.html?page=' + currentPage"><div class="setting-label">📖 التبديل للمصحف المصور</div><div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div></div>
+          <button class="offline-btn" id="offlineDownloadBtn" onclick="downloadOfflineData()">⬇ تحميل القرآن كاملاً (للقراءة بدون إنترنت)</button>
       </div>
   </div>
   
@@ -231,14 +231,12 @@
     let autoPlayNextPage = false;
     let audioBarActive = false;
 
-    // Ayah Menu & Swipe Logic Variables
     let selectedAyahGlobalNumber = 0;
     let selectedAyahLocalIndex = 0;
     let selectedAyahText = '';
     let currentAyahViewMode = 'none'; 
     let pendingAyahAction = null; 
 
-    // فتح الإعدادات
     function openSettingsModal() {
         const modal = document.getElementById('settingsModal');
         if (modal) modal.classList.add('active');
@@ -290,15 +288,12 @@
 
     pinchArea.addEventListener('touchmove', (e) => {
         if (e.touches.length === 2 && initialPinchDistance) {
-            if(e.cancelable) e.preventDefault(); // منع تكبير الشاشة الافتراضي للمتصفح
-            
+            if(e.cancelable) e.preventDefault(); 
             const currentDistance = Math.hypot(
                 e.touches[0].pageX - e.touches[1].pageX,
                 e.touches[0].pageY - e.touches[1].pageY
             );
-
             let newFontSize = initialPinchFontSize * (currentDistance / initialPinchDistance);
-            
             if (newFontSize < 16) newFontSize = 16;
             if (newFontSize > 60) newFontSize = 60;
 
@@ -336,7 +331,7 @@
         }
     }
 
-    // ================= AYAH MENU (SWIPEABLE & TAFSIRS) =================
+    // ================= AYAH MENU =================
     function openAyahMenu(index) {
         if (!currentPageAyahsData[index]) return;
         const ayah = currentPageAyahsData[index];
@@ -344,7 +339,6 @@
         selectedAyahLocalIndex = index;
         selectedAyahText = ayah.text;
 
-        // تنظيف اسم السورة بذكاء من التكرار
         let cleanName = ayah.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim();
         document.getElementById('ayahMenuTitle').textContent = `سورة ${cleanName} - آية ${ayah.numberInSurah}`;
         
@@ -352,7 +346,6 @@
         document.getElementById('ayahMenuOverlay').style.display = 'block';
         document.getElementById('ayahBottomSheet').classList.add('active');
 
-        // الذاكرة الذكية: عرض التفسير/الترجمة فوراً إذا كان مفعلاً
         if (currentAyahViewMode === 'tafsir') {
             fetchTafsir();
         } else if (currentAyahViewMode === 'translation') {
@@ -366,11 +359,9 @@
     function closeAyahMenu() {
         document.getElementById('ayahMenuOverlay').style.display = 'none';
         document.getElementById('ayahBottomSheet').classList.remove('active');
-        // تفريغ الذاكرة المؤقتة للنافذة عند إغلاقها لتفتح كأنها جديدة في المرة القادمة
         currentAyahViewMode = 'none';
     }
 
-    // Swipe Logic for Cross-Page Ayah Navigation
     let sheetStartX = 0; let sheetStartY = 0;
     const bottomSheet = document.getElementById('ayahBottomSheet');
     bottomSheet.addEventListener('touchstart', e => {
@@ -383,7 +374,6 @@
         
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
-                // سحب لليسار (الآية التالية)
                 if (selectedAyahLocalIndex < currentPageAyahsData.length - 1) {
                     openAyahMenu(selectedAyahLocalIndex + 1);
                 } else {
@@ -395,7 +385,6 @@
                     } else { showCustomToast("هذه آخر آية في المصحف."); }
                 }
             } else {
-                // سحب لليمين (الآية السابقة)
                 if (selectedAyahLocalIndex > 0) {
                     openAyahMenu(selectedAyahLocalIndex - 1);
                 } else {
@@ -421,13 +410,14 @@
         navigator.clipboard.writeText(fullText).then(() => { showCustomToast('تم نسخ الآية بنجاح ✔️'); });
     }
 
-    function fetchTafsir() {
+    function fetchTafsir(overrideId = null) {
         currentAyahViewMode = 'tafsir';
         const box = document.getElementById('ayahResultBox');
         box.innerHTML = 'جاري جلب التفسير... ⏳';
         box.classList.add('active');
         
-        let tafsirType = document.getElementById('tafsirSelect').value;
+        let tafsirType = overrideId || document.getElementById('tafsirSelect').value;
+        if(overrideId) document.getElementById('tafsirSelect').value = overrideId;
         let tafsirName = document.getElementById('tafsirSelect').options[document.getElementById('tafsirSelect').selectedIndex].text;
 
         fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahGlobalNumber}/${tafsirType}`)
