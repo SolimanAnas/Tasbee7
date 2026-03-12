@@ -21,7 +21,7 @@
       display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
       background: var(--glass-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); z-index: 20;
     }
-    .header-left { display: flex; gap: 4px; align-items: center; } /* تم إضافة الـ Flex للأزرار اليسرى */
+    .header-left { display: flex; gap: 4px; align-items: center; } 
     .header-center { display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; text-align: center; }
     .header-center .nav-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 0.95rem; }
     #surahName { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
@@ -99,9 +99,6 @@
       <button class="icon-btn" onclick="goHome()" title="الرئيسية">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </button>
-      <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      </button>
     </div>
 
     <div class="header-center">
@@ -121,6 +118,12 @@
       <a id="viewToggleBtn" class="icon-btn" href="quran.html?page=1" title="التبديل إلى المصحف المصور" style="text-decoration: none; color: inherit;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
       </a>
+      <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      </button>
+      <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
     </div>
   </header>
 
@@ -134,7 +137,7 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
         </button>
     </div>
-    <select class="custom-select" style="max-width: 140px; font-size: 0.9rem;" id="reciterSelect" onchange="changeReciter(this.value)">
+    <select class="custom-select" style="max-width: 150px; font-size: 0.9rem;" id="reciterSelect" onchange="changeReciter(this.value)">
         <option value="ar.minshawi">المنشاوي</option>
         <option value="ar.abdulbasitmurattal">عبد الباسط</option>
         <option value="ar.husary">الحصري</option>
@@ -197,7 +200,7 @@
   <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
       <div class="modal-content">
           <div class="modal-header"><span>الإعدادات</span><button class="close-btn" onclick="closeModal('settingsModal')">✕</button></div>
-          <div class="setting-row"><div class="setting-label">🔤 حجم الخط</div><div class="setting-control"><input type="range" id="fontSizeSlider" class="range-slider" min="20" max="45" value="28" step="1" oninput="changeFontSizeSlider(this.value)"><span id="fontSizeDisplay" class="font-size-indicator">28</span></div></div>
+          <div class="setting-row"><div class="setting-label">🔤 حجم الخط</div><div class="setting-control"><input type="range" id="fontSizeSlider" class="range-slider" min="16" max="60" value="28" step="1" oninput="changeFontSizeSlider(this.value)"><span id="fontSizeDisplay" class="font-size-indicator">28</span></div></div>
           <div class="setting-row"><div class="setting-label">🎨 لون النص</div><div class="setting-control"><select id="textColorSelect" class="custom-select" onchange="changeTextColor(this.value)"><option value="#1e2a3a">أسود (فاتح)</option><option value="#2a1f14">بني (داكن)</option><option value="#1e3a5f">أزرق داكن</option><option value="#5f4b3a">بني كلاسيكي</option></select></div></div>
           <div class="setting-row" style="cursor: pointer;" onclick="openBookmarksModal(); closeModal('settingsModal');"><div class="setting-label">🔖 المفضلة</div><div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div></div>
           
@@ -232,8 +235,14 @@
     let selectedAyahGlobalNumber = 0;
     let selectedAyahLocalIndex = 0;
     let selectedAyahText = '';
-    let currentAyahViewMode = 'none'; // 'tafsir', 'translation', 'none'
-    let pendingAyahAction = null; // Used for cross-page swiping
+    let currentAyahViewMode = 'none'; 
+    let pendingAyahAction = null; 
+
+    // فتح الإعدادات
+    function openSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        if (modal) modal.classList.add('active');
+    }
 
     function loadTextSettings() {
       const savedFontSize = localStorage.getItem('quranFontSize');
@@ -264,11 +273,48 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // الدالة المسؤولة عن فتح الإعدادات
-    function openSettingsModal() {
-        const modal = document.getElementById('settingsModal');
-        if (modal) modal.classList.add('active');
-    }
+    // ================= PINCH TO ZOOM LOGIC =================
+    let initialPinchDistance = null;
+    let initialPinchFontSize = null;
+    const pinchArea = document.getElementById('textContainer');
+
+    pinchArea.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            initialPinchDistance = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            );
+            initialPinchFontSize = fontSize;
+        }
+    }, { passive: false });
+
+    pinchArea.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialPinchDistance) {
+            if(e.cancelable) e.preventDefault(); // منع تكبير الشاشة الافتراضي للمتصفح
+            
+            const currentDistance = Math.hypot(
+                e.touches[0].pageX - e.touches[1].pageX,
+                e.touches[0].pageY - e.touches[1].pageY
+            );
+
+            let newFontSize = initialPinchFontSize * (currentDistance / initialPinchDistance);
+            
+            if (newFontSize < 16) newFontSize = 16;
+            if (newFontSize > 60) newFontSize = 60;
+
+            if (Math.abs(newFontSize - fontSize) > 1) {
+                fontSize = Math.round(newFontSize);
+                applyTextSettings(); 
+            }
+        }
+    }, { passive: false });
+
+    pinchArea.addEventListener('touchend', (e) => {
+        if (initialPinchDistance && e.touches.length < 2) {
+            localStorage.setItem('quranFontSize', fontSize);
+            initialPinchDistance = null;
+        }
+    });
 
     // ================= OFFLINE DOWNLOADER =================
     async function downloadOfflineData() {
@@ -298,7 +344,7 @@
         selectedAyahLocalIndex = index;
         selectedAyahText = ayah.text;
 
-        // تنظيف اسم السورة بذكاء (لإزالة سورة سورة)
+        // تنظيف اسم السورة بذكاء من التكرار
         let cleanName = ayah.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim();
         document.getElementById('ayahMenuTitle').textContent = `سورة ${cleanName} - آية ${ayah.numberInSurah}`;
         
@@ -320,6 +366,8 @@
     function closeAyahMenu() {
         document.getElementById('ayahMenuOverlay').style.display = 'none';
         document.getElementById('ayahBottomSheet').classList.remove('active');
+        // تفريغ الذاكرة المؤقتة للنافذة عند إغلاقها لتفتح كأنها جديدة في المرة القادمة
+        currentAyahViewMode = 'none';
     }
 
     // Swipe Logic for Cross-Page Ayah Navigation
@@ -340,7 +388,7 @@
                     openAyahMenu(selectedAyahLocalIndex + 1);
                 } else {
                     if (currentPage < 604) {
-                        showCustomToast("جاري الانتقال للصفحة التالية...");
+                        showCustomToast("جاري الانتقال للآية في الصفحة التالية...");
                         pendingAyahAction = 'first';
                         currentPage++;
                         updateContent();
@@ -352,7 +400,7 @@
                     openAyahMenu(selectedAyahLocalIndex - 1);
                 } else {
                     if (currentPage > 1) {
-                        showCustomToast("جاري الانتقال للصفحة السابقة...");
+                        showCustomToast("جاري الانتقال للآية في الصفحة السابقة...");
                         pendingAyahAction = 'last';
                         currentPage--;
                         updateContent();
@@ -540,10 +588,10 @@
 
     function handlePendingAyahAction() {
         if (pendingAyahAction === 'first') {
-            openAyahMenu(0);
+            setTimeout(() => openAyahMenu(0), 100);
             pendingAyahAction = null;
         } else if (pendingAyahAction === 'last') {
-            openAyahMenu(currentPageAyahsData.length - 1);
+            setTimeout(() => openAyahMenu(currentPageAyahsData.length - 1), 100);
             pendingAyahAction = null;
         }
     }
