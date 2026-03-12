@@ -1,0 +1,730 @@
+/* ================= style.css ================= */
+/* Shared styles for Quran viewer (image and text modes) */
+
+/* ================= ROOT & THEME ================= */
+:root {
+  --bg-light:          #f5f0e6;
+  --text-light:        #1e2a3a;
+  
+  /* وضع القراءة المريح (Parchment/Sepia) - still used for dark theme */
+  --bg-dark:           #e5d5b5; 
+  --text-dark:         #2a1f14; 
+  
+  --accent:            #b38b5d;
+  --radius-modal:      20px;
+  --shadow:            0 12px 48px rgba(0, 0, 0, 0.28);
+  --cb:                cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-speed:  0.28s;
+}
+
+body[data-theme="light"] {
+  --glass-bg:     rgba(248, 243, 232, 0.82);
+  --glass-border: rgba(179, 139, 93, 0.22);
+}
+body[data-theme="dark"] {
+  --glass-bg:     rgba(229, 213, 181, 0.85);
+  --glass-border: rgba(179, 139, 93, 0.25);
+}
+
+/* ================= RESET ================= */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Amiri', serif;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body[data-theme="light"] {
+  background: var(--bg-light);
+  color: var(--text-light);
+}
+body[data-theme="dark"] {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* ================= HEADER & NAVIGATORS ================= */
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: 20;
+  transition: transform var(--transition-speed) var(--cb),
+              opacity var(--transition-speed) var(--cb);
+}
+
+body.focus-mode header {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-center {
+  text-align: center;
+  flex: 1;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-item {
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.nav-item:active {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+#surahName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.divider {
+  opacity: 0.4;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  min-height: 38px;
+  font-size: 1.3rem; /* for emoji */
+}
+
+.icon-btn:active {
+  background: rgba(128, 128, 128, 0.15);
+}
+
+#bookmarkBtn.active {
+  color: #f5b342;
+  text-shadow: 0 0 10px rgba(245, 179, 66, 0.6);
+}
+
+/* ================= MAIN / READER ================= */
+main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  padding-top: 56px;
+}
+
+.page-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 25px;
+  will-change: transform, opacity;
+}
+
+/* Image styles */
+.mushaf-img {
+  max-height: 96%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transform: scale(1.16) translateY(-2%);
+  transform-origin: center center;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.35s ease;
+}
+
+body.full-view .mushaf-img {
+  transform: scale(1) translateY(0);
+}
+
+body[data-theme="dark"] .mushaf-img {
+  mix-blend-mode: multiply;
+  filter: brightness(0.95) sepia(0.3) contrast(1.05);
+}
+
+/* Text container styles */
+.quran-text-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 18px;
+  font-family: 'Amiri', serif;
+  line-height: 1.8;
+  text-align: justify;
+  direction: rtl;
+  font-size: 20px; /* default, will be overridden by js */
+  color: var(--text-light);
+  scroll-behavior: smooth;
+  background: transparent;
+  word-break: break-word;
+}
+
+body[data-theme="dark"] .quran-text-container {
+  color: var(--text-dark);
+}
+
+.quran-text-container .ayah-number {
+  display: inline-block;
+  font-size: 0.8em;
+  margin: 0 4px;
+  color: var(--accent);
+  font-weight: 400;
+  opacity: 0.9;
+  vertical-align: middle;
+}
+
+/* ================= GLASSMORPHISM MODAL BASE ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, visibility 0.22s;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-modal);
+  padding: 22px 20px;
+  width: min(360px, 94vw);
+  max-height: 85dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: var(--shadow);
+  color: inherit;
+  transform: scale(0.93) translateY(8px);
+  transition: transform 0.22s var(--cb);
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  padding: 2px 6px;
+  border-radius: 50%;
+  transition: opacity 0.2s, background 0.2s;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  background: rgba(128, 128, 128, 0.12);
+}
+
+/* ================= SETTINGS MODAL ================= */
+.modal-item {
+  padding: 13px 6px;
+  border-bottom: 1px solid var(--glass-border);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.18s;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-item:last-child {
+  border-bottom: none;
+}
+.modal-item:active {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.text-control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+.text-control-group button {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+}
+.text-control-group select {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: inherit;
+  font-family: inherit;
+  flex: 1;
+}
+.font-size-indicator {
+  min-width: 50px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* ================= ROLLER PAGE SELECTOR ================= */
+.picker-container {
+  position: relative;
+  height: 150px;
+  margin: 10px 0 20px;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+
+.picker-scroll {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+.picker-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.picker-item {
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  scroll-snap-align: center;
+  font-size: 1.4rem;
+  opacity: 0.3;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.picker-item.active {
+  opacity: 1;
+  font-size: 1.9rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.picker-highlight {
+  position: absolute;
+  top: 50px;
+  left: 10%;
+  right: 10%;
+  height: 50px;
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  pointer-events: none;
+  background: rgba(128, 128, 128, 0.06);
+  border-radius: 10px;
+}
+
+.manual-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.manual-input-group input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: rgba(128, 128, 128, 0.08);
+  color: inherit;
+  font-size: 1.1rem;
+  font-family: inherit;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.manual-input-group input:focus {
+  border-color: var(--accent);
+}
+
+.btn-go {
+  padding: 12px 26px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-go:active {
+  opacity: 0.8;
+}
+
+/* ================= SELECTOR LIST (Surah & Juz) ================= */
+.search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 40px;
+  border: 1px solid var(--glass-border);
+  background: rgba(128, 128, 128, 0.08);
+  color: inherit;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.selector-scroll {
+  max-height: 55dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.selector-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--glass-border);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+  font-size: 0.97rem;
+}
+
+.selector-item:last-child {
+  border-bottom: none;
+}
+.selector-item:active {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.selector-item .num-badge {
+  min-width: 28px;
+  height: 28px;
+  background: rgba(179, 139, 93, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.selector-item .name {
+  flex: 1;
+}
+
+.selector-item .page-tag {
+  font-size: 0.75rem;
+  opacity: 0.55;
+  background: rgba(128, 128, 128, 0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  opacity: 0.5;
+  padding: 20px;
+  font-size: 0.95rem;
+}
+
+/* ================= BOOKMARKS LIST ================= */
+.bookmark-item {
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--glass-border);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.bookmark-item:last-child {
+  border-bottom: none;
+}
+.bookmark-item:active {
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.bookmark-item .bm-page {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.bookmark-item .bm-surah {
+  font-size: 0.82rem;
+  opacity: 0.65;
+  margin-top: 2px;
+}
+
+/* ================= CONTEXT MENU ================= */
+.context-menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 18px 30px;
+  z-index: 200;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.25);
+  transform: translateY(110%);
+  transition: transform 0.32s var(--cb);
+}
+
+.context-menu.active {
+  transform: translateY(0);
+}
+
+.context-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.context-info {
+  text-align: center;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  background: rgba(128, 128, 128, 0.07);
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.6;
+}
+
+.context-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.context-btn {
+  background: rgba(128, 128, 128, 0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 13px 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.18s;
+  text-align: center;
+}
+
+.context-btn:active {
+  background: rgba(128, 128, 128, 0.2);
+}
+
+.context-btn.danger {
+  color: #e57373;
+  border-color: rgba(229, 115, 115, 0.2);
+}
+.context-btn.primary {
+  background: rgba(179, 139, 93, 0.15);
+  border-color: rgba(179, 139, 93, 0.3);
+  color: var(--accent);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 380px) {
+  .context-buttons {
+    grid-template-columns: 1fr;
+  }
+  .modal-content {
+    padding: 16px 14px;
+  }
+}
+
+/* Add to existing style.css */
+
+/* ================= SURAH PROGRESS BAR ================= */
+.surah-progress-bar {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 200px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-right: none;
+  border-radius: 0 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 15;
+  padding: 8px 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.surah-progress-bar:hover {
+  transform: translateY(-50%) scale(1.02);
+}
+
+.progress-fill {
+  width: 6px;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: height 0.2s ease;
+  min-height: 4px;
+  max-height: 180px;
+  margin-bottom: 8px;
+}
+
+.surah-info-tooltip {
+  position: absolute;
+  left: 35px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  pointer-events: none;
+  z-index: 16;
+}
+
+.surah-progress-bar:hover .surah-info-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ================= SLIDER STYLES ================= */
+.range-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--glass-border);
+  outline: none;
+  margin: 10px 0;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--glass-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.range-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--glass-border);
+}
+
+/* ================= SEARCH ICON (already have .icon-btn) */
+#searchBtn {
+  font-size: 1.3rem;
+  line-height: 1;
+}
