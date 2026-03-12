@@ -17,9 +17,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* ================= THEME VARIABLES ================= */
+/* ================= THEME VARIABLES (Transparency Reduced for Visibility) ================= */
 :root {
-  /* الافتراضي (Plain Dark) - بدون صورة خلفية */
   --bg-image: none;
   --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #020617);
   --bg-surface: #020617; 
@@ -27,26 +26,28 @@
   --text-secondary: #94a3b8;
   --accent-main: #10b981; 
   --accent-muted: rgba(16, 185, 129, 0.15);
-  --glass: rgba(255, 255, 255, 0.05); 
-  --glass-border: rgba(255, 255, 255, 0.1);
+  
+  /* الوضع العادي (السادة) - شفافية خفيفة جداً لزيادة الوضوح */
+  --glass: rgba(30, 41, 59, 0.9); 
+  --glass-border: rgba(255, 255, 255, 0.15);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   --overlay: transparent; 
 }
 
 [data-theme="dark"] {
-  /* المظهر الداكن الزجاجي (Dark Glass) - أصبح الافتراضي */
   --bg-image: url('images/Background-dark.png');
   --bg-gradient: none;
   --bg-surface: rgba(15, 23, 42, 0.5); 
   --accent-main: #34D399; 
   --accent-muted: rgba(255, 255, 255, 0.15);
-  --glass: rgba(15, 23, 42, 0.4); 
-  --glass-border: rgba(255, 255, 255, 0.15);
+  
+  /* الوضع الداكن - عتامة 85% لضمان وضوح النصوص فوق الصورة */
+  --glass: rgba(15, 23, 42, 0.85); 
+  --glass-border: rgba(255, 255, 255, 0.2);
   --overlay: rgba(15, 23, 42, 0.2); 
 }
 
 [data-theme="light"] {
-  /* المظهر الفاتح الزجاجي (Light Glass) */
   --bg-image: url('images/Background-light.png');
   --bg-gradient: none;
   --bg-surface: rgba(255, 255, 255, 0.35); 
@@ -54,8 +55,10 @@
   --text-secondary: #475569;
   --accent-main: #059669; 
   --accent-muted: rgba(5, 150, 105, 0.1);
-  --glass: rgba(255, 255, 255, 0.3); 
-  --glass-border: rgba(255, 255, 255, 0.4); 
+  
+  /* الوضع الفاتح - عتامة 90% للقراءة المريحة */
+  --glass: rgba(255, 255, 255, 0.9); 
+  --glass-border: rgba(255, 255, 255, 0.5); 
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
   --overlay: rgba(255, 255, 255, 0.1); 
 }
@@ -82,6 +85,15 @@ body {
   align-items: center;
   min-height: 100dvh;
   transition: color 0.3s ease, background 0.3s ease;
+  
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
 body::before {
@@ -100,8 +112,7 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 20px;
-  margin-top: env(safe-area-inset-top);
+  padding: calc(20px + env(safe-area-inset-top)) 20px 20px;
 }
 
 .title {
@@ -119,8 +130,8 @@ body::before {
   padding: 8px 12px;
   border-radius: 30px;
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .theme-dot {
@@ -209,11 +220,10 @@ body::before {
   stroke-width: 2;
 }
 
-/* كلاس التلوين الديناميكي لصور PNG باستخدام Mask */
 .icon-png {
   width: 28px;
   height: 28px;
-  background-color: currentColor; /* يسحب اللون تلقائياً من الأب (.icon) سواء كان أخضر أو أبيض عند الـ Hover */
+  background-color: currentColor; 
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -227,6 +237,47 @@ body::before {
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.4;
+}
+
+/* ================= MODALS & QURAN CHOICE ================= */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-content {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 24px; padding: 30px 20px; width: 100%; max-width: 340px;
+    text-align: center; transform: scale(0.9); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: var(--glass-shadow);
+}
+.modal-overlay.active .modal-content { transform: scale(1); }
+
+.confirm-icon { font-size: 45px; margin-bottom: 15px; }
+.confirm-title { font-size: 20px; font-weight: bold; color: var(--text-primary); margin-bottom: 10px; }
+.confirm-text { font-size: 15px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+
+/* أزرار اختيار نوع المصحف */
+.quran-option-btn {
+    width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border);
+    background: rgba(128, 128, 128, 0.1); color: var(--text-primary);
+    font-family: 'Tajawal', sans-serif; cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.quran-option-btn:active { transform: scale(0.96); background: rgba(128, 128, 128, 0.2); }
+.quran-option-btn.primary { background: var(--accent-main); color: #fff; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+.quran-option-btn.primary:active { opacity: 0.9; }
+.quran-opt-title { font-size: 16px; font-weight: bold; }
+.quran-opt-desc { font-size: 12.5px; opacity: 0.8; font-weight: normal; }
+
+/* Checkbox (تذكر اختياري) */
+.remember-choice-wrapper {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 20px; font-size: 14px; color: var(--text-primary); cursor: pointer;
+}
+.remember-choice-wrapper input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--accent-main); cursor: pointer;
 }
 
 /* ================= SAFE NAVIGATION ================= */
@@ -252,7 +303,7 @@ body.fade-out {
 <div class="content">
   <div class="grid">
 
-    <div class="card" onclick="go('quran.html')">
+    <div class="card" onclick="handleQuranClick()">
       <div class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -334,6 +385,47 @@ body.fade-out {
   </div>
 </div>
 
+<div class="modal-overlay" id="quranChoiceModal" onclick="if(event.target===this) closeQuranChoiceModal()">
+    <div class="modal-content">
+        <div class="confirm-icon">📖</div>
+        <div class="confirm-title">طريقة العرض</div>
+        <div class="confirm-text">كيف تفضل قراءة القرآن الكريم؟</div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button class="quran-option-btn primary" onclick="selectQuran('image')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 5px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span class="quran-opt-title">مصحف المدينة</span>
+                <span class="quran-opt-desc">موافق للمطبوع (الرسم العثماني الأصلي)</span>
+            </button>
+            
+            <button class="quran-option-btn" onclick="selectQuran('text')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 5px;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span class="quran-opt-title">المصحف النصي</span>
+                <span class="quran-opt-desc">سهولة القراءة، تكبير الخط، واستماع للتلاوة</span>
+            </button>
+        </div>
+
+        <label class="remember-choice-wrapper">
+            <input type="checkbox" id="rememberQuranChoice">
+            <span>عدم العرض مرة أخرى (تذكر اختياري)</span>
+        </label>
+
+        <div style="margin-top: 20px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; opacity: 0.9;">
+            💡 <b>تلميح:</b> يمكنك التبديل بينهما لاحقاً من خلال الأيقونات العلوية في صفحة المصحف.
+        </div>
+    </div>
+</div>
+
 <script>
 /* ===== PAGE NAVIGATION ===== */
 function go(page) {
@@ -350,8 +442,6 @@ window.addEventListener("pageshow", () => {
 /* ===== 3-MODE THEME SYSTEM ===== */
 function setTheme(mode) {
   document.documentElement.setAttribute("data-theme", mode);
-  
-  // حفظ السمة في الذاكرة لتستخدمها باقي الصفحات
   localStorage.setItem("themeMode", mode);
   
   document.querySelectorAll('.theme-dot').forEach(dot => {
@@ -368,22 +458,53 @@ function setTheme(mode) {
   }
 }
 
-/* LOAD SAVED THEME ON START */
 window.addEventListener("load", () => {
   let savedMode = localStorage.getItem("themeMode");
-  
-  // جعل الداكن الزجاجي هو الافتراضي (dark) إذا لم يكن هناك إعداد مسبق
   if (!savedMode || (savedMode !== "dark" && savedMode !== "light" && savedMode !== "plain-dark")) {
     savedMode = "dark";
   }
-  
   setTheme(savedMode);
 });
 
-/* ===== SERVICE WORKER ===== */
+/* ===== QURAN CHOICE LOGIC ===== */
+function handleQuranClick() {
+    const preferredVersion = localStorage.getItem('preferredQuranVersion');
+    
+    if (preferredVersion === 'image') {
+        go('quran.html');
+    } else if (preferredVersion === 'text') {
+        go('quran-text.html');
+    } else {
+        document.getElementById('quranChoiceModal').classList.add('active');
+    }
+}
+
+function closeQuranChoiceModal() {
+    document.getElementById('quranChoiceModal').classList.remove('active');
+}
+
+function selectQuran(type) {
+    const rememberChoice = document.getElementById('rememberQuranChoice').checked;
+    
+    if (rememberChoice) {
+        localStorage.setItem('preferredQuranVersion', type);
+    }
+    
+    if (type === 'image') {
+        go('quran.html');
+    } else {
+        go('quran-text.html');
+    }
+    
+    closeQuranChoiceModal();
+}
+
+/* ===== SERVICE WORKER FOR PWA ===== */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(err => {
-    console.log("Service Worker registration failed:", err);
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register("sw.js").catch(err => {
+      console.log("Service Worker registration failed:", err);
+    });
   });
 }
 </script>
