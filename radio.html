@@ -23,7 +23,7 @@
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   --overlay: rgba(15, 23, 42, 0.2); 
   --live-color: #ef4444; 
-  /* 🔴 تعتيم خلفية القائمة المنسدلة لزيادة الوضوح 🔴 */
+  /* خلفية القائمة شبه معتمة للوضوح العالي */
   --dropdown-bg: rgba(15, 23, 42, 0.95); 
 }
 
@@ -39,7 +39,6 @@
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
   --overlay: rgba(255, 255, 255, 0.1); 
   --live-color: #dc2626;
-  /* 🔴 تعتيم خلفية القائمة المنسدلة لزيادة الوضوح 🔴 */
   --dropdown-bg: rgba(255, 255, 255, 0.95);
 }
 
@@ -53,7 +52,7 @@ body {
   background-attachment: fixed; background-repeat: no-repeat;
   color: var(--text-primary); display: flex; justify-content: center;
   
-  /* 🔴 تم تقليل الحشوة السفلية لإنزال البطاقة 140 بكسل للأسفل 🔴 */
+  /* الحشوة السفلية موزونة لدفع المشغل للأسفل بشكل احترافي */
   padding: 20px 20px 100px; 
   min-height: 100dvh;
   transition: color 0.3s ease, background-image 0.3s ease;
@@ -116,33 +115,25 @@ label { font-size: 14px; color: var(--accent-main); font-weight: bold; }
 .custom-select-trigger .arrow { transition: transform 0.3s ease; font-size: 12px; opacity: 0.7; }
 .custom-select-trigger.open .arrow { transform: rotate(180deg); }
 
-/* القائمة المنسدلة الزجاجية المصلحة */
+/* القائمة المنسدلة الزجاجية (الضبابية الفائقة) */
 .custom-options {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
   background: var(--dropdown-bg); 
-  /* 🔴 زيادة قوة الضبابية بشكل كبير (Blur) 🔴 */
   backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px);
   border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   z-index: 999; max-height: 280px; overflow-y: auto; overflow-x: hidden; opacity: 0; visibility: hidden;
   transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex; flex-direction: column; 
   padding: 8px 4px 8px 8px; gap: 4px;
-  /* 🔴 إجبار شريط التمرير على البقاء داخل الزوايا المنحنية 🔴 */
   clip-path: inset(0 round 16px);
 }
 
 .custom-options.open { opacity: 1; visibility: visible; transform: translateY(0); }
 
-/* 🔴 إصلاح شريط التمرير (Slider Seeking Bar) 🔴 */
+/* شريط التمرير داخل القائمة المنحنية */
 .custom-options::-webkit-scrollbar { width: 5px; }
-.custom-options::-webkit-scrollbar-track { 
-    background: transparent; 
-    margin: 12px 0; /* يبعد الشريط عن الزوايا العلوية والسفلية الدائرية */
-}
-.custom-options::-webkit-scrollbar-thumb { 
-    background: var(--accent-main); 
-    border-radius: 10px; 
-}
+.custom-options::-webkit-scrollbar-track { background: transparent; margin: 12px 0; }
+.custom-options::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 10px; }
 
 .custom-option {
   padding: 12px 16px; color: var(--text-primary); cursor: pointer; border-radius: 10px;
@@ -309,7 +300,7 @@ label { font-size: 14px; color: var(--accent-main); font-weight: bold; }
     </div>
   </div>
 
-  <audio id="audio" preload="none" playsinline webkit-playsinline></audio>
+  <audio id="audio" preload="auto" playsinline webkit-playsinline></audio>
 </div>
 
 <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
@@ -370,8 +361,15 @@ const dropdownTrigger = document.querySelector('.custom-select-trigger');
 const dropdownOptions = document.getElementById('customOptionsList');
 const selectedText = document.querySelector('.selected-text');
 
-// --- تحديث الـ Media Session بمقاسات كاملة لدعم شاشات القفل ---
-const ARTWORK_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Quran_Kareem_Radio_Logo.svg/512px-Quran_Kareem_Radio_Logo.svg.png';
+// 🔴 تجهيز مصفوفة كاملة من الأيقونات للـ Media Session 🔴
+const RADIO_ARTWORK = [
+    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '96x96', type: 'image/png' },
+    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '128x128', type: 'image/png' },
+    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '192x192', type: 'image/png' },
+    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '256x256', type: 'image/png' },
+    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '384x384', type: 'image/png' },
+    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '512x512', type: 'image/png' }
+];
 
 function updateMediaSession(stationName) {
   if ('mediaSession' in navigator) {
@@ -379,14 +377,7 @@ function updateMediaSession(stationName) {
       title: stationName,
       artist: 'البث المباشر للإذاعة',
       album: 'تطبيق القرآن الكريم',
-      artwork: [
-        { src: ARTWORK_URL, sizes: '96x96', type: 'image/png' },
-        { src: ARTWORK_URL, sizes: '128x128', type: 'image/png' },
-        { src: ARTWORK_URL, sizes: '192x192', type: 'image/png' },
-        { src: ARTWORK_URL, sizes: '256x256', type: 'image/png' },
-        { src: ARTWORK_URL, sizes: '384x384', type: 'image/png' },
-        { src: ARTWORK_URL, sizes: '512x512', type: 'image/png' }
-      ]
+      artwork: RADIO_ARTWORK
     });
 
     navigator.mediaSession.setActionHandler('play', () => { audio.play(); });
@@ -451,17 +442,25 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// 🔴 محرك التشغيل الذكي: يُعطي الأولوية القصوى للمشغل الداخلي للهاتف (Native Player) لضمان العمل في الخلفية 🔴
 function loadStream(url) {
+  // إذا كان الرابط m3u8
   if (url.includes('.m3u8')) {
-    if (Hls.isSupported()) {
+    // الأولوية الأولى: هل يدعم متصفح الهاتف التشغيل الداخلي للـ HLS؟ (وهذا هو المهم للخلفية)
+    if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+      if (hls) { hls.destroy(); hls = null; }
+      audio.src = url;
+    } 
+    // الأولوية الثانية: إذا لم يدعم، نستخدم مكتبة hls.js كاحتياطي (ولكنها قد تتوقف في الخلفية في بعض الأجهزة)
+    else if (Hls.isSupported()) {
       if (hls) hls.destroy(); 
       hls = new Hls();
       hls.loadSource(url);
       hls.attachMedia(audio);
-    } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-      audio.src = url;
     }
-  } else {
+  } 
+  // إذا كان رابط MP3 أو Icecast عادي
+  else {
     if (hls) { hls.destroy(); hls = null; }
     audio.src = url;
   }
@@ -484,13 +483,21 @@ function prepareStation(url, stationName, updateSession = true) {
 function togglePlay() {
   if(!currentTrackUrl) return showToast("اختر إذاعة أولاً");
   if (audio.paused) {
-      audio.play().catch(e => showToast("تعذر الاتصال بالبث"));
+      // يجب استدعاء Play من تفاعل المستخدم مباشرة (User Gesture) لتسمح المتصفحات بالعمل في الخلفية
+      audio.play().then(() => {
+          updateMediaSession(nowStation.innerText);
+      }).catch(e => showToast("تعذر الاتصال بالبث"));
   } else {
       audio.pause();
   }
 }
 
 mainPlayBtn.onclick = togglePlay;
+
+// --- دورة حياة المشغل لضمان تزامن الـ UI و الـ Media Session ---
+audio.addEventListener('loadstart', () => { 
+    mainPlayBtn.classList.add('loading'); 
+});
 
 audio.addEventListener('play', () => { 
     mainPlayBtn.classList.add('loading'); 
@@ -499,7 +506,8 @@ audio.addEventListener('play', () => {
 audio.addEventListener('playing', () => { 
     mainPlayBtn.classList.remove('loading'); 
     updatePlayPauseUI(true); 
-    setTimeout(() => updateMediaSession(nowStation.innerText), 100);
+    // 🔴 تحديث قوي للـ Media Session فور نجاح تدفق الصوت 🔴
+    updateMediaSession(nowStation.innerText);
 });
 
 audio.addEventListener('waiting', () => { mainPlayBtn.classList.add('loading'); });
@@ -526,26 +534,19 @@ function updatePlayPauseUI(isPlaying) {
   }
 }
 
-function openFavModal() {
-  document.getElementById('favModal').classList.add('active');
-  renderFavList();
-}
-
-function closeFavModal() {
-  document.getElementById('favModal').classList.remove('active');
-}
+// ... [باقي دوال المفضلة كما هي دون تغيير] ...
+function openFavModal() { document.getElementById('favModal').classList.add('active'); renderFavList(); }
+function closeFavModal() { document.getElementById('favModal').classList.remove('active'); }
 
 favBtn.onclick = () => {
   if(!currentTrackUrl) return;
   let favs = JSON.parse(localStorage.getItem("radio_favorites") || "[]"), exists = favs.findIndex(f => f.url === currentTrackUrl);
   if(exists === -1) { 
-      favs.push({ name: nowStation.innerText, url: currentTrackUrl }); 
-      showToast("تمت الإضافة للمفضلة"); 
+      favs.push({ name: nowStation.innerText, url: currentTrackUrl }); showToast("تمت الإضافة للمفضلة"); 
   } else { 
       favs.splice(exists, 1); showToast("تمت الإزالة"); 
   }
-  localStorage.setItem("radio_favorites", JSON.stringify(favs)); 
-  checkFavStatus();
+  localStorage.setItem("radio_favorites", JSON.stringify(favs)); checkFavStatus();
   if(document.getElementById('favModal').classList.contains('active')) renderFavList();
 };
 
@@ -584,16 +585,14 @@ function playFromFav(url, name) {
         });
     }
     prepareStation(url, name); 
-    
-    audio.play().catch(()=>{}); 
+    audio.play().then(() => { updateMediaSession(name); }).catch(()=>{}); 
     closeFavModal(); 
 }
 
 function removeFav(index, e) { 
     e.stopPropagation(); 
     let favs = JSON.parse(localStorage.getItem("radio_favorites") || "[]"); 
-    favs.splice(index, 1); 
-    localStorage.setItem("radio_favorites", JSON.stringify(favs)); 
+    favs.splice(index, 1); localStorage.setItem("radio_favorites", JSON.stringify(favs)); 
     renderFavList(); checkFavStatus(); showToast("تم الحذف"); 
 }
 
