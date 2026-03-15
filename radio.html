@@ -23,7 +23,6 @@
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   --overlay: rgba(15, 23, 42, 0.2); 
   --live-color: #ef4444; 
-  /* خلفية القائمة شبه معتمة للوضوح العالي */
   --dropdown-bg: rgba(15, 23, 42, 0.95); 
 }
 
@@ -51,9 +50,7 @@ body {
   background-size: cover; background-position: center;
   background-attachment: fixed; background-repeat: no-repeat;
   color: var(--text-primary); display: flex; justify-content: center;
-  
-  /* الحشوة السفلية موزونة لدفع المشغل للأسفل بشكل احترافي */
-  padding: 20px 20px 100px; 
+  padding: 20px 20px 60px; 
   min-height: 100dvh;
   transition: color 0.3s ease, background-image 0.3s ease;
 }
@@ -115,7 +112,7 @@ label { font-size: 14px; color: var(--accent-main); font-weight: bold; }
 .custom-select-trigger .arrow { transition: transform 0.3s ease; font-size: 12px; opacity: 0.7; }
 .custom-select-trigger.open .arrow { transform: rotate(180deg); }
 
-/* القائمة المنسدلة الزجاجية  */
+/* القائمة المنسدلة الزجاجية */
 .custom-options {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0;
   background: var(--dropdown-bg); 
@@ -130,7 +127,7 @@ label { font-size: 14px; color: var(--accent-main); font-weight: bold; }
 
 .custom-options.open { opacity: 1; visibility: visible; transform: translateY(0); }
 
-/* شريط التمرير داخل القائمة المنحنية */
+/* شريط التمرير المخصص */
 .custom-options::-webkit-scrollbar { width: 5px; }
 .custom-options::-webkit-scrollbar-track { background: transparent; margin: 12px 0; }
 .custom-options::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 10px; }
@@ -295,12 +292,12 @@ label { font-size: 14px; color: var(--accent-main); font-weight: bold; }
       <button class="play-pause-btn" id="mainPlayBtn">
         <div class="loader" id="loader"></div>
         <svg id="playIcon" class="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-        <svg id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        <svg id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><rect x x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
       </button>
     </div>
   </div>
 
-  <audio id="audio" preload="auto" playsinline webkit-playsinline></audio>
+  <audio id="audio" preload="metadata" playsinline webkit-playsinline></audio>
 </div>
 
 <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
@@ -361,27 +358,24 @@ const dropdownTrigger = document.querySelector('.custom-select-trigger');
 const dropdownOptions = document.getElementById('customOptionsList');
 const selectedText = document.querySelector('.selected-text');
 
-// 🔴 تجهيز مصفوفة كاملة من الأيقونات للـ Media Session 🔴
+// 🔴 استخدام مسارات الصور المحلية لضمان عدم رفض النظام للجلسة في شاشة القفل 🔴
 const RADIO_ARTWORK = [
-    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '96x96', type: 'image/png' },
-    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '128x128', type: 'image/png' },
-    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '192x192', type: 'image/png' },
-    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '256x256', type: 'image/png' },
-    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '384x384', type: 'image/png' },
-    { src: 'https://cdn-icons-png.flaticon.com/512/3386/3386083.png', sizes: '512x512', type: 'image/png' }
+    { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    { src: 'icons/icon_512.png', sizes: '512x512', type: 'image/png' },
+    { src: 'icons/icon_1024.png', sizes: '1024x1024', type: 'image/png' }
 ];
 
 function updateMediaSession(stationName) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: stationName,
-      artist: 'البث المباشر للإذاعة',
-      album: 'تطبيق القرآن الكريم',
+      title: stationName || "إذاعة القرآن الكريم",
+      artist: 'البث المباشر',
+      album: 'زاد المسلم',
       artwork: RADIO_ARTWORK
     });
 
-    navigator.mediaSession.setActionHandler('play', () => { audio.play(); });
-    navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); });
+    navigator.mediaSession.setActionHandler('play', () => { togglePlay(); });
+    navigator.mediaSession.setActionHandler('pause', () => { togglePlay(); });
     navigator.mediaSession.setActionHandler('stop', () => { audio.pause(); });
   }
 }
@@ -442,27 +436,23 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// 🔴 محرك التشغيل الذكي: يُعطي الأولوية القصوى للمشغل الداخلي للهاتف (Native Player) لضمان العمل في الخلفية 🔴
+// 🔴 الأولوية القصوى للمشغل الداخلي (Native) للعمل في الخلفية 🔴
 function loadStream(url) {
-  // إذا كان الرابط m3u8
   if (url.includes('.m3u8')) {
-    // الأولوية الأولى: هل يدعم متصفح الهاتف التشغيل الداخلي للـ HLS؟ (وهذا هو المهم للخلفية)
     if (audio.canPlayType('application/vnd.apple.mpegurl')) {
       if (hls) { hls.destroy(); hls = null; }
       audio.src = url;
-    } 
-    // الأولوية الثانية: إذا لم يدعم، نستخدم مكتبة hls.js كاحتياطي (ولكنها قد تتوقف في الخلفية في بعض الأجهزة)
-    else if (Hls.isSupported()) {
+      audio.load();
+    } else if (Hls.isSupported()) {
       if (hls) hls.destroy(); 
       hls = new Hls();
       hls.loadSource(url);
       hls.attachMedia(audio);
     }
-  } 
-  // إذا كان رابط MP3 أو Icecast عادي
-  else {
+  } else {
     if (hls) { hls.destroy(); hls = null; }
     audio.src = url;
+    audio.load();
   }
 }
 
@@ -483,7 +473,6 @@ function prepareStation(url, stationName, updateSession = true) {
 function togglePlay() {
   if(!currentTrackUrl) return showToast("اختر إذاعة أولاً");
   if (audio.paused) {
-      // يجب استدعاء Play من تفاعل المستخدم مباشرة (User Gesture) لتسمح المتصفحات بالعمل في الخلفية
       audio.play().then(() => {
           updateMediaSession(nowStation.innerText);
       }).catch(e => showToast("تعذر الاتصال بالبث"));
@@ -494,7 +483,6 @@ function togglePlay() {
 
 mainPlayBtn.onclick = togglePlay;
 
-// --- دورة حياة المشغل لضمان تزامن الـ UI و الـ Media Session ---
 audio.addEventListener('loadstart', () => { 
     mainPlayBtn.classList.add('loading'); 
 });
@@ -506,7 +494,7 @@ audio.addEventListener('play', () => {
 audio.addEventListener('playing', () => { 
     mainPlayBtn.classList.remove('loading'); 
     updatePlayPauseUI(true); 
-    // 🔴 تحديث قوي للـ Media Session فور نجاح تدفق الصوت 🔴
+    // 🔴 تحديث الجلسة فوراً لضمان عدم إسقاط الهاتف للاتصال 🔴
     updateMediaSession(nowStation.innerText);
 });
 
@@ -534,19 +522,26 @@ function updatePlayPauseUI(isPlaying) {
   }
 }
 
-// ... [باقي دوال المفضلة كما هي دون تغيير] ...
-function openFavModal() { document.getElementById('favModal').classList.add('active'); renderFavList(); }
-function closeFavModal() { document.getElementById('favModal').classList.remove('active'); }
+function openFavModal() {
+  document.getElementById('favModal').classList.add('active');
+  renderFavList();
+}
+
+function closeFavModal() {
+  document.getElementById('favModal').classList.remove('active');
+}
 
 favBtn.onclick = () => {
   if(!currentTrackUrl) return;
   let favs = JSON.parse(localStorage.getItem("radio_favorites") || "[]"), exists = favs.findIndex(f => f.url === currentTrackUrl);
   if(exists === -1) { 
-      favs.push({ name: nowStation.innerText, url: currentTrackUrl }); showToast("تمت الإضافة للمفضلة"); 
+      favs.push({ name: nowStation.innerText, url: currentTrackUrl }); 
+      showToast("تمت الإضافة للمفضلة"); 
   } else { 
       favs.splice(exists, 1); showToast("تمت الإزالة"); 
   }
-  localStorage.setItem("radio_favorites", JSON.stringify(favs)); checkFavStatus();
+  localStorage.setItem("radio_favorites", JSON.stringify(favs)); 
+  checkFavStatus();
   if(document.getElementById('favModal').classList.contains('active')) renderFavList();
 };
 
@@ -585,14 +580,19 @@ function playFromFav(url, name) {
         });
     }
     prepareStation(url, name); 
-    audio.play().then(() => { updateMediaSession(name); }).catch(()=>{}); 
+    
+    audio.play().then(() => {
+        updateMediaSession(name);
+    }).catch(()=>{}); 
+    
     closeFavModal(); 
 }
 
 function removeFav(index, e) { 
     e.stopPropagation(); 
     let favs = JSON.parse(localStorage.getItem("radio_favorites") || "[]"); 
-    favs.splice(index, 1); localStorage.setItem("radio_favorites", JSON.stringify(favs)); 
+    favs.splice(index, 1); 
+    localStorage.setItem("radio_favorites", JSON.stringify(favs)); 
     renderFavList(); checkFavStatus(); showToast("تم الحذف"); 
 }
 
