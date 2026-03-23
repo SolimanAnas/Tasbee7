@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>باحث الأحاديث | زاد المسلم</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #10b981;
+        --bg-dark: #020617;
+        --glass: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+    body {
+        margin: 0; height: 100dvh; overflow: hidden;
+        font-family: 'Tajawal', sans-serif;
+        background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-dark));
+        color: var(--text-main); display: flex; justify-content: center;
+    }
+
+    .app-container {
+        width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column;
+        padding: max(20px, env(safe-area-inset-top)) 20px 0; position: relative;
+    }
+
+    /* Top Bar */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-title { font-size: 20px; font-weight: bold; margin: 0; color: white; }
+    
+    .icon-btn {
+        width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;
+        background: var(--glass); border: 1px solid var(--glass-border); border-radius: 14px;
+        color: white; cursor: pointer; transition: 0.2s;
+    }
+    .icon-btn:active { transform: scale(0.92); }
+
+    /* Main Area (Scrollable) */
+    .main-area { flex: 1; overflow-y: auto; padding-bottom: 40px; scroll-behavior: smooth; }
+    .main-area::-webkit-scrollbar { display: none; }
+
+    /* Hadith of the Day */
+    .daily-card {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(255, 255, 255, 0.05));
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 20px; padding: 20px; margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .daily-title { color: var(--primary); font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}
+    .daily-text { font-family: 'Amiri', serif; font-size: 18px; line-height: 1.8; color: #e2e8f0; }
+
+    /* Search Bar */
+    .search-wrapper {
+        display: flex; background: var(--glass); border: 1px solid var(--glass-border);
+        border-radius: 16px; padding: 5px; margin-bottom: 15px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+    }
+    .search-input {
+        flex: 1; background: transparent; border: none; color: white; padding: 0 15px;
+        font-family: 'Tajawal', sans-serif; font-size: 16px;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-btn {
+        background: var(--primary); color: #020617; border: none; border-radius: 12px;
+        width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    /* History Tags */
+    .history-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; }
+    .history-tag {
+        background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+        padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--text-muted);
+        cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;
+    }
+    .history-tag:active { background: rgba(255,255,255,0.1); }
+
+    /* Results */
+    .hadith-item {
+        background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px;
+        padding: 20px; margin-bottom: 15px; animation: fadeInUp 0.4s ease-out;
+    }
+    .badge-ok { background: rgba(16, 185, 129, 0.2); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+    .badge-warn { background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+    .hadith-text { font-family: 'Amiri', serif; font-size: 18px; line-height: 1.8; color: white; margin: 15px 0; }
+    .hadith-meta { font-size: 13px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; line-height: 1.6; }
+
+    /* Loader & Toast */
+    .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    #toast {
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+        background: rgba(16, 185, 129, 0.9); color: white; padding: 12px 24px; border-radius: 50px;
+        z-index: 200; transition: 0.4s; backdrop-filter: blur(5px); font-weight: bold;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="toast"><span></span></div>
+
+<div class="app-container">
+    <div class="top-bar">
+        <div class="icon-btn" onclick="window.location.href='index.html'" title="رجوع للمسبحة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </div>
+        <h1 class="page-title">باحث الأحاديث</h1>
+        <div style="width: 45px;"></div> </div>
+
+    <div class="main-area">
+        <div class="daily-card" id="dailyCard">
+           <div class="daily-title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;">
+        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path>
+        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+    </svg>
+    حديث اليوم
+</div>
+
+            <div class="daily-text" id="dailyHadithText">...</div>
+        </div>
+
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السنة النبوية..." onkeypress="handleEnter(event)">
+            <button class="search-btn" onclick="performSearch()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+
+        <div class="history-container" id="historyTags"></div>
+
+        <div class="loader" id="loader"></div>
+        <div id="resultsContainer">
+            <div style="text-align: center; color: var(--text-muted); margin-top: 40px; opacity: 0.6;" id="emptyState">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 60px; margin-bottom: 10px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <p>اكتب كلمة أو جملة من الحديث للتحقق من صحته</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================= حديث اليوم =================
+    const dailyHadiths = [
+        "قال رسول الله ﷺ: «عجبًا لأمرِ المؤمنِ، إن أمرَه كلَّه خيرٌ، وليس ذاك لأحدٍ إلا للمؤمنِ، إن أصابته سراءُ شكرَ، فكان خيرًا له، وإن أصابته ضراءُ صبر، فكان خيرًا له» [صحيح مسلم].",
+        "قال رسول الله ﷺ: «ما يُصِيبُ المُسْلِمَ، مِن نَصَبٍ ولَا وصَبٍ، ولَا هَمٍّ ولَا حُزْنٍ ولَا أذًى ولَا غَمٍّ، حتَّى الشَّوْكَةِ يُشَاكُهَا، إلَّا كَفَّرَ اللَّهُ بهَا مِن خَطَايَاهُ» [صحيح البخاري].",
+        "قال رسول الله ﷺ: «أحَبُّ الأعْمالِ إلى اللَّهِ تَعالى أدْوَمُها وإنْ قَلَّ» [صحيح مسلم].",
+        "قال رسول الله ﷺ: «مَن نَفَّسَ عن مُؤْمِنٍ كُرْبَةً مِن كُرَبِ الدُّنْيَا، نَفَّسَ اللَّهُ عنْه كُرْبَةً مِن كُرَبِ يَومِ القِيَامَةِ، ومَن يَسَّرَ علَى مُعْسِرٍ، يَسَّرَ اللَّهُ عليه في الدُّنْيَا والآخِرَةِ» [صحيح مسلم]."
+    ];
+    
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    document.getElementById('dailyHadithText').innerText = dailyHadiths[dayOfYear % dailyHadiths.length];
+
+    // ================= سجل البحث =================
+    let searchHistory = JSON.parse(localStorage.getItem('hadithHistory')) || [];
+
+    function renderHistory() {
+        const container = document.getElementById('historyTags');
+        container.innerHTML = '';
+        searchHistory.forEach(term => {
+            const tag = document.createElement('span');
+            tag.className = 'history-tag';
+            tag.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${term}`;
+            tag.onclick = () => { document.getElementById('searchInput').value = term; performSearch(); };
+            container.appendChild(tag);
+        });
+    }
+
+    function saveToHistory(term) {
+        if (!term) return;
+        searchHistory = searchHistory.filter(t => t !== term);
+        searchHistory.unshift(term);
+        if (searchHistory.length > 5) searchHistory.pop(); 
+        localStorage.setItem('hadithHistory', JSON.stringify(searchHistory));
+        renderHistory();
+    }
+
+    function handleEnter(e) { if (e.key === 'Enter') performSearch(); }
+
+    // ================= محرك البحث (محدث) =================
+    async function performSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (query.length < 3) {
+            showToast("⚠️ يرجى كتابة 3 حروف على الأقل");
+            return;
+        }
+
+        saveToHistory(query);
+        const resultsContainer = document.getElementById('resultsContainer');
+        const loader = document.getElementById('loader');
+        const emptyState = document.getElementById('emptyState');
+
+        if (emptyState) emptyState.style.display = 'none';
+        resultsContainer.innerHTML = '';
+        loader.style.display = 'block';
+
+        try {
+            // الاتصال بموقع الدرر السنية مباشرة باستخدام AllOrigins Proxy لتخطي حماية CORS
+            const dorarUrl = `https://dorar.net/dorar_api.json?skey=${encodeURIComponent(query)}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(dorarUrl)}`;
+            
+            const response = await fetch(proxyUrl);
+            const proxyData = await response.json();
+            
+            // استخراج البيانات القادمة من الدرر السنية
+            const data = JSON.parse(proxyData.contents);
+
+            loader.style.display = 'none';
+
+            // التأكد من وجود نتائج صالحة
+            if (!data || !data.ahadith || !data.ahadith.result || data.ahadith.result.includes("لا يوجد نتائج")) {
+                resultsContainer.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">لم نجد نتائج مطابقة، تأكد من الإملاء وحاول مجدداً.</div>';
+                return;
+            }
+
+            // تحويل الـ HTML القادم من الدرر السنية إلى عناصر قابلة للقراءة
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.ahadith.result, 'text/html');
+            
+            const hadithDivs = doc.querySelectorAll('.hadith');
+            const infoDivs = doc.querySelectorAll('.hadith-info');
+
+            for (let i = 0; i < hadithDivs.length; i++) {
+                // إزالة الترقيم من بداية الحديث 
+                let cleanHadith = hadithDivs[i].textContent.trim().replace(/^\d+\s*-\s*/, '');
+                let rawInfo = infoDivs[i] ? infoDivs[i].textContent.trim() : '';
+                
+                // تحديد حالة الحديث لإعطائه اللون المناسب
+                let badgeClass = "badge-ok";
+                let statusText = "مقبول / صحيح";
+                
+                if (rawInfo.includes('ضعيف') || rawInfo.includes('موضوع') || rawInfo.includes('باطل') || rawInfo.includes('منكر')) {
+                    badgeClass = "badge-warn";
+                    statusText = "ضعيف أو موضوع";
+                }
+
+                // تنسيق معلومات الحديث لتظهر بشكل مرتب
+                const formattedInfo = rawInfo.replace(/\|/g, '<br><span style="color:var(--primary);">•</span> ');
+
+                // تجهيز نص آمن تماماً للنسخ
+                const textToCopy = encodeURIComponent(`${cleanHadith}\n\nالمصادر:\n${rawInfo}`);
+
+                const card = document.createElement('div');
+                card.className = 'hadith-item';
+                
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <span class="${badgeClass}">${statusText}</span>
+                        <div class="icon-btn" style="width:35px; height:35px; background:rgba(255,255,255,0.05); border:none; cursor:pointer;" onclick="copyToClipboard('${textToCopy}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </div>
+                    </div>
+                    <div class="hadith-text">${cleanHadith}</div>
+                    <div class="hadith-meta">
+                        <span style="color:var(--primary);">•</span> ${formattedInfo}
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            }
+        } catch (error) {
+            loader.style.display = 'none';
+            resultsContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#f87171;">حدث خطأ في الاتصال. يرجى التأكد من الإنترنت أو المحاولة لاحقاً.</div>';
+            console.error("Fetch Error: ", error);
+        }
+    }
+
+    // ================= دوال مساعدة للنسخ والتنبيهات =================
+    function copyToClipboard(encodedText) {
+        try {
+            const decodedText = decodeURIComponent(encodedText);
+            navigator.clipboard.writeText(decodedText).then(() => {
+                showToast("✅ تم نسخ الحديث والمصدر بنجاح");
+            });
+        } catch (e) {
+            showToast("❌ فشل النسخ");
+        }
+    }
+
+    let toastTimeout;
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    window.onload = () => {
+        renderHistory();
+    };
+</script>
+</body>
+</html>
