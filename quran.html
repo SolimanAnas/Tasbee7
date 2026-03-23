@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>المصحف الشريف - صورة</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f5f0e6">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* ========== HEADER BALANCED LAYOUT ========== */
+    header#appHeader {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: calc(10px + env(safe-area-inset-top)) 8px 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--glass-bg, rgba(248, 243, 232, 0.85)); 
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border, rgba(179, 139, 93, 0.22)); z-index: 20;
+    }
+    [data-theme="dark"] header#appHeader { background: rgba(30, 41, 59, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+
+    .header-right, .header-left { display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+    
+    .header-center { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; padding: 0 4px; }
+    
+    .nav-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: background 0.2s; }
+    .nav-item:active { background: rgba(128,128,128,0.15); }
+    #surahName { font-size: 1.05rem; font-weight: 700; color: var(--accent, #10b981); margin-bottom: 0px; }
+    .meta-row { display: flex; justify-content: center; align-items: center; gap: 4px; width: 100%; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.9; }
+    .divider { opacity: 0.4; margin: 0 2px; }
+    
+    .icon-btn { background: none; border: none; color: inherit; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; transition: background 0.2s; flex-shrink: 0; }
+    .icon-btn:active { background: rgba(128,128,128,0.15); transform: scale(0.95); }
+
+    /* Settings UI */
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--glass-border); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-size: 1.05rem; font-weight: bold; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+    .offline-btn { width: 100%; padding: 14px; margin-top: 15px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: bold; font-family: 'Tajawal', sans-serif; cursor: pointer; font-size: 1rem; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .offline-btn:active { transform: scale(0.96); opacity: 0.9; }
+
+    /* ========== FLOATING EXACT SEARCH OVERLAY ========== */
+    .search-overlay { position: fixed; top: calc(70px + env(safe-area-inset-top)); left: 10px; right: 10px; margin: 0 auto; max-width: 500px; width: auto; background: var(--glass-bg, rgba(248, 243, 232, 0.95)); backdrop-filter: blur(30px); border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); border-radius: 20px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; transform: translateY(-20px) scale(0.95); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 65vh; }
+    [data-theme="dark"] .search-overlay { background: rgba(30, 41, 59, 0.95); border-color: rgba(255, 255, 255, 0.15); }
+    .search-overlay.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
+    .search-bar-row { display: flex; gap: 8px; align-items: center; width: 100%; box-sizing: border-box; }
+    .search-bar-row input { flex: 1 1 auto; min-width: 0; height: 45px; padding: 0 15px; border-radius: 25px; border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); background: rgba(128, 128, 128, 0.1); color: inherit; font-family: inherit; font-size: 1rem; outline: none; }
+    .search-bar-row input:focus { border-color: var(--accent, #10b981); background: rgba(128, 128, 128, 0.15); }
+    .close-search-btn { flex: 0 0 45px; width: 45px; height: 45px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
+    .search-results-container { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .search-results-container::-webkit-scrollbar { display: none; }
+    .search-result-item { background: rgba(128, 128, 128, 0.05); padding: 14px; border-radius: 16px; cursor: pointer; border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); transition: 0.2s; }
+    .search-result-item:active { background: rgba(128, 128, 128, 0.1); transform: scale(0.98); }
+    .res-meta { font-size: 0.85rem; color: var(--accent, #10b981); margin-bottom: 8px; font-weight: bold; }
+    .res-text { font-family: 'Amiri', serif; font-size: 1.3rem; line-height: 1.8; color: var(--text-primary); }
+    .search-highlight { background-color: rgba(255, 213, 79, 0.6); color: #000; border-radius: 4px; padding: 0 4px; }
+
+    /* ========== NATIVE TOAST ========== */
+    .custom-toast { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(100px); background: var(--glass-bg, rgba(248, 243, 232, 0.95)); backdrop-filter: blur(15px); color: var(--text-primary); border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 9999; font-family: 'Tajawal', sans-serif; font-size: 0.95rem; font-weight: bold; text-align: center; opacity: 0; transition: all 0.4s; pointer-events: none; }
+    [data-theme="dark"] .custom-toast { background: rgba(30, 41, 59, 0.95); border-color: rgba(255, 255, 255, 0.15); }
+    .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ========== VERSION SELECTOR MODAL ========== */
+    .version-modal-content {
+      max-width: 320px;
+      width: 90%;
+    }
+    .version-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 16px;
+      background: rgba(128,128,128,0.05);
+      border: 1px solid var(--glass-border, rgba(179,139,93,0.3));
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .version-item:active {
+      transform: scale(0.98);
+      background: rgba(128,128,128,0.1);
+    }
+    .version-thumb {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #ddd;
+    }
+    .version-info {
+      flex: 1;
+    }
+    .version-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+    .version-desc {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header id="appHeader">
+    <div class="header-right">
+      <button class="icon-btn" onclick="goHome()" title="الرئيسية">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </button>
+    </div>
+
+    <div class="header-center">
+      <div id="surahName" class="nav-item surah-nav" onclick="openSurahSelector()" title="اختر سورة">سورة الفاتحة</div>
+      <div class="meta-row">
+        <span id="juzName" class="nav-item juz-nav" onclick="openJuzSelector()" title="اختر جزء">الجزء ١</span>
+        <span class="divider">|</span>
+        <span id="pageName" class="nav-item page-nav" onclick="openPageSelector()" title="اختر صفحة">صفحة ١</span>
+      </div>
+    </div>
+
+    <div class="header-left">
+      <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      </button>
+
+      <a id="viewToggleBtn" class="icon-btn" href="quran-text.html?page=1" title="التبديل للمصحف النصي" style="text-decoration: none; color: inherit;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      </a>
+
+      <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-bar-row">
+      <input type="text" id="searchInput" placeholder="ابحث عن كلمة (مطابقة تامة)..." oninput="handleGlobalSearch(this.value)">
+      <button class="close-search-btn" onclick="toggleSearchOverlay('close')" title="إغلاق">✕</button>
+    </div>
+    <div class="search-results-container" id="searchResults">
+      <div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>
+    </div>
+  </div>
+
+  <main id="swipeArea">
+    <div class="page-frame" id="pageFrame">
+      <img id="pageImg" class="mushaf-img" src="" alt="صفحة القرآن" draggable="false" onerror="handleImageError(this)">
+      <div id="textContainer" class="quran-text-container" style="display: none;"></div>
+    </div>
+  </main>
+
+  <div id="customToast" class="custom-toast"></div>
+
+  <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
+    <div class="modal-content">
+      <div class="modal-header"><span>الإعدادات</span><button class="close-btn" onclick="closeModal('settingsModal')">✕</button></div>
+      
+      <div class="setting-row" style="cursor: pointer;" onclick="closeModal('settingsModal'); toggleSearchOverlay('toggle');">
+        <div class="setting-label">🔎 بحث في القرآن</div>
+        <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
+      </div>
+
+      <div class="setting-row" style="cursor: pointer;" onclick="openBookmarksModal(); closeModal('settingsModal');">
+        <div class="setting-label">🔖 المفضلة</div>
+        <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
+      </div>
+
+      <!-- New setting row for mushaf version -->
+      <div class="setting-row" style="cursor: pointer;" onclick="closeModal('settingsModal'); openVersionSelectorModal();">
+        <div class="setting-label">📖 نوع المصحف</div>
+        <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
+      </div>
+      
+      <button class="offline-btn" onclick="cacheAllPages()">⬇ تحميل جميع الصفحات (المصورة)</button>
+    </div>
+  </div>
+
+  <!-- Version Selector Modal -->
+  <div class="modal-overlay" id="versionSelectorModal" onclick="handleOverlayClick(event,'versionSelectorModal')">
+    <div class="modal-content version-modal-content">
+      <div class="modal-header"><span>اختر نوع المصحف</span><button class="close-btn" onclick="closeModal('versionSelectorModal')">✕</button></div>
+      <div id="versionList" class="selector-scroll" style="padding: 8px 0;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')"><div class="modal-content"><div class="modal-header"><span>الذهاب إلى صفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')">✕</button></div><div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div><div class="manual-input-group"><input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة" oninput="syncPickerWithInput()" onkeydown="if(event.key==='Enter') confirmPageSelection()"><button class="btn-go" onclick="confirmPageSelection()">انتقال</button></div></div></div>
+  <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')"><div class="modal-content"><div class="modal-header"><span>المفضلة</span><button class="close-btn" onclick="closeModal('bookmarksModal')">✕</button></div><div class="selector-scroll" id="bookmarksList"></div></div></div>
+  <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')"><div class="modal-content"><div class="modal-header"><span>اختر سورة</span><button class="close-btn" onclick="closeModal('surahSelectorModal')">✕</button></div><input class="search-input" id="surahSearch" type="search" placeholder="ابحث عن سورة..." oninput="filterSurahs(this.value)" autocomplete="off"><div class="selector-scroll" id="surahList"></div></div></div>
+  <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')"><div class="modal-content"><div class="modal-header"><span>اختر جزءًا</span><button class="close-btn" onclick="closeModal('juzSelectorModal')">✕</button></div><div class="selector-scroll" id="juzList"></div></div></div>
+
+  <div class="context-menu" id="contextMenu" style="display:none;">
+      <div class="context-handle"></div>
+      <div class="context-info" id="contextInfo"></div>
+      <div class="context-buttons">
+          <button class="context-btn primary" id="contextBookmarkBtn" onclick="contextToggleBookmark()">☆ إضافة للمفضلة</button>
+      </div>
+  </div>
+  <div id="contextOverlay" style="display:none;position:fixed;inset:0;z-index:199;" onclick="closeContextMenu()"></div>
+
+  <script src="js/quran-common.js"></script>
+
+  <script>
+    // ========== VERSION MANAGEMENT ==========
+    const versions = [
+      { id: 'mushaf', name: 'مصحف المدينة', path: 'mushaf/', thumb: 'mushaf/thumbnail.png', desc: ' بدون إطار' },
+      { id: 'mushaf-2', name: 'مصحف المدينة 2', path: 'mushaf-2/', thumb: 'mushaf-2/thumbnail.png', desc: ' إطار بني' }
+    ];
+
+    let currentVersion = localStorage.getItem('quranVersion') || 'mushaf';
+    let currentVersionPath = getVersionPath(currentVersion);
+
+    function getVersionPath(versionId) {
+      const ver = versions.find(v => v.id === versionId);
+      return ver ? ver.path : 'mushaf/';
+    }
+
+    function setVersion(versionId) {
+      currentVersion = versionId;
+      currentVersionPath = getVersionPath(versionId);
+      localStorage.setItem('quranVersion', versionId);
+      // Reload current page image
+      if (typeof updateContent === 'function') updateContent();
+      // Also reload adjacent preload
+      if (typeof preloadAdjacentPages === 'function') preloadAdjacentPages();
+      showCustomToast(`تم التبديل إلى ${versions.find(v => v.id === versionId).name}`);
+    }
+
+    function openVersionSelectorModal() {
+      const modal = document.getElementById('versionSelectorModal');
+      if (!modal) return;
+      const container = document.getElementById('versionList');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      versions.forEach(ver => {
+        const item = document.createElement('div');
+        item.className = 'version-item';
+        item.onclick = () => {
+          setVersion(ver.id);
+          closeModal('versionSelectorModal');
+        };
+        
+        const thumb = document.createElement('img');
+        thumb.className = 'version-thumb';
+        thumb.src = ver.thumb;
+        thumb.onerror = () => { thumb.src = 'mushaf/placeholder.png'; };
+        
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'version-info';
+        infoDiv.innerHTML = `<div class="version-name">${ver.name}</div><div class="version-desc">${ver.desc}</div>`;
+        
+        item.appendChild(thumb);
+        item.appendChild(infoDiv);
+        container.appendChild(item);
+      });
+      modal.classList.add('active');
+    }
+
+    // ========== IMAGE LOADING WITH PADDED & UNPADDED FALLBACK ==========
+    // Format page number with leading zeros (e.g., 1 -> 001)
+    function formatPageNumber(pageNum) {
+      return String(pageNum).padStart(3, '0');
+    }
+
+    // Try to load image with fallback: first padded, then unpadded
+    function loadPageImage(imgElement, pageNum) {
+      if (!imgElement) return;
+      const padded = formatPageNumber(pageNum);
+      const unpadded = pageNum.toString();
+      const basePath = currentVersionPath;
+      
+      let attempt = 0;
+      const urls = [
+        `${basePath}${padded}.png`,
+        `${basePath}${unpadded}.png`
+      ];
+      
+      function tryNext() {
+        if (attempt >= urls.length) {
+          imgElement.src = `${basePath}placeholder.png`;
+          console.warn(`Failed to load page ${pageNum} from any format`);
+          return;
+        }
+        const url = urls[attempt];
+        imgElement.src = url;
+        imgElement.onload = () => {
+          console.log(`Loaded: ${url}`);
+        };
+        imgElement.onerror = () => {
+          attempt++;
+          tryNext();
+        };
+      }
+      tryNext();
+    }
+
+    // Global error handler for img tag (called when onerror is set)
+    window.handleImageError = function(imgElement) {
+      // This is called when the initial src fails. We'll let loadPageImage handle it,
+      // but if it's already called from updateContent, we can simply re-run.
+      if (imgElement && currentPage) {
+        loadPageImage(imgElement, currentPage);
+      }
+    };
+
+    // Core update function
+    function updateContent() {
+      const img = document.getElementById('pageImg');
+      if (img && currentPage) {
+        loadPageImage(img, currentPage);
+      }
+      if (typeof updateMeta === 'function') updateMeta();
+      if (typeof updateBookmarkStar === 'function') updateBookmarkStar();
+      if (typeof updateToggleLink === 'function') updateToggleLink();
+      localStorage.setItem('lastPage', currentPage);
+    }
+
+    // Expose globally
+    window.updateContent = updateContent;
+
+    function updateToggleLink() {
+      const toggleBtn = document.getElementById('viewToggleBtn');
+      if (toggleBtn) toggleBtn.href = `quran-text.html?page=${currentPage}`;
+    }
+
+    // Override preloadAdjacentPages to try both formats
+    const originalPreload = window.preloadAdjacentPages;
+    window.preloadAdjacentPages = function() {
+      if (!currentPage) return;
+      const pages = [currentPage - 1, currentPage + 1];
+      pages.forEach(p => {
+        if (p >= 1 && p <= totalPages) {
+          // Preload both padded and unpadded versions (or just one is fine)
+          const padded = formatPageNumber(p);
+          const unpadded = p.toString();
+          const base = currentVersionPath;
+          const img1 = new Image();
+          img1.src = `${base}${padded}.png`;
+          const img2 = new Image();
+          img2.src = `${base}${unpadded}.png`;
+        }
+      });
+    };
+
+    // Override cacheAllPages to cache both formats
+    window.cacheAllPages = async function() {
+      const versionName = versions.find(v => v.id === currentVersion).name;
+      showCustomToast(`🔄 بدء تحميل جميع صفحات ${versionName}...`);
+      try {
+        const cache = await caches.open(`quran-pages-${currentVersion}`);
+        let successCount = 0;
+        for (let i = 1; i <= 604; i++) {
+          const padded = formatPageNumber(i);
+          const unpadded = i.toString();
+          const base = currentVersionPath;
+          const urls = [`${base}${padded}.png`, `${base}${unpadded}.png`];
+          let pageCached = false;
+          for (let url of urls) {
+            try {
+              const response = await fetch(url);
+              if (response.ok) {
+                await cache.put(url, response);
+                successCount++;
+                pageCached = true;
+                break; // only need one format per page
+              }
+            } catch (err) {
+              // continue to next format
+            }
+          }
+          if (successCount % 50 === 0 && successCount > 0) showCustomToast(`✅ تم تخزين ${successCount} صفحة`);
+        }
+        showCustomToast(`🎉 اكتمل التحميل! تم تخزين ${successCount} صفحة بنجاح.`);
+      } catch (err) {
+        showCustomToast("❌ حدث خطأ أثناء التحميل، تأكد من الاتصال بالإنترنت.");
+        console.error(err);
+      }
+    };
+
+    // Ensure goToPage works with new version
+    const originalGoToPage = window.goToPage;
+    window.goToPage = function(pageNum) {
+      if (pageNum >= 1 && pageNum <= totalPages) {
+        currentPage = pageNum;
+        updateContent();
+        if (typeof preloadAdjacentPages === 'function') preloadAdjacentPages();
+        updateToggleLink();
+      }
+    };
+
+    // Adjust navigateTo
+    const originalNavigateTo = typeof navigateTo === 'function' ? navigateTo : function(){};
+    window.navigateTo = function(newPage, direction) { 
+      originalNavigateTo(newPage, direction); 
+      setTimeout(updateToggleLink, 300);
+    };
+
+    // ========== EXISTING FUNCTIONS (unchanged but we keep them) ==========
+    function showCustomToast(message) {
+        const toast = document.getElementById('customToast');
+        if(!toast) return;
+        toast.innerHTML = message; toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function openSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        if (modal) modal.classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.remove('active');
+    }
+
+    function handleOverlayClick(event, modalId) {
+        if (event.target === event.currentTarget) closeModal(modalId);
+    }
+
+    function openBookmarksModal() {
+        const modal = document.getElementById('bookmarksModal');
+        if (modal) modal.classList.add('active');
+        if (typeof loadBookmarks === 'function') loadBookmarks();
+    }
+
+    // ========== GLOBAL QURAN SEARCH LOGIC ==========
+    let searchOverlayActive = false; let searchTimeout = null;
+
+    function toggleSearchOverlay(action = 'toggle') {
+      const overlay = document.getElementById('searchOverlay');
+      if (action === 'close') searchOverlayActive = false;
+      else if (action === 'jump') searchOverlayActive = false; 
+      else searchOverlayActive = !searchOverlayActive;
+      overlay.classList.toggle('active', searchOverlayActive);
+      if (searchOverlayActive) { document.getElementById('searchInput').focus(); } 
+      else if (action === 'close') {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchResults').innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>';
+      }
+    }
+
+    function handleGlobalSearch(query) {
+      query = query.trim();
+      const resultsDiv = document.getElementById('searchResults');
+      if (!query) { resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث (مطابقة تامة)...</div>'; return; }
+      resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color: var(--accent);">جاري البحث في القرآن الكريم... ⏳</div>';
+
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+          fetch(`https://api.alquran.cloud/v1/search/${query}/all/quran-simple-clean`)
+          .then(res => res.json())
+          .then(data => {
+              if (data.code === 200 && data.data.count > 0) {
+                  const exactRegex = new RegExp('(^|[^\\p{L}])' + query + '([^\\p{L}]|$)', 'ui');
+                  const exactMatches = data.data.matches.filter(m => exactRegex.test(m.text));
+                  if (exactMatches.length > 0) {
+                      let html = `<div style="text-align:center; margin-bottom: 10px; color: var(--accent); font-weight: bold; font-size: 14px;">تم العثور على ${exactMatches.length} نتيجة</div>`;
+                      html += exactMatches.map(m => `
+                          <div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
+                              <div class="res-meta">سورة ${m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim()} - آية ${m.numberInSurah}</div>
+                              <div class="res-text">${m.text.replace(new RegExp('(^|[^\\p{L}])(' + query + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div>
+                          </div>
+                      `).join('');
+                      resultsDiv.innerHTML = html;
+                  } else resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px;">لا توجد كلمة مطابقة تماماً لـ "'+ query +'"</div>';
+              } else resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px;">لا توجد نتائج لـ "'+ query +'"</div>';
+          }).catch(err => { resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color:#ef4444;">تعذر البحث، تأكد من الاتصال 🌐</div>'; });
+      }, 500); 
+    }
+
+    function jumpToSearchResult(ayahNumber) {
+        const resultsDiv = document.getElementById('searchResults');
+        resultsDiv.innerHTML = '<div style="text-align:center; padding:30px; font-size:16px; color: var(--accent); font-weight:bold;">جاري الانتقال للصفحة... ⏳</div>';
+        let cachedPage = localStorage.getItem('ayah_page_v1_' + ayahNumber);
+        if (cachedPage) { executeJump(parseInt(cachedPage)); } 
+        else {
+            fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        const targetPage = data.data.page;
+                        localStorage.setItem('ayah_page_v1_' + ayahNumber, targetPage);
+                        executeJump(targetPage);
+                    }
+                }).catch(() => { resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">حدث خطأ.</div>'; });
+        }
+    }
+
+    function executeJump(targetPage) {
+        toggleSearchOverlay('jump'); 
+        if (typeof goToPage === 'function') { goToPage(targetPage); } else { currentPage = targetPage; updateContent(); }
+        showCustomToast(`تم الانتقال إلى صفحة ${targetPage}`);
+    }
+
+    // ========== INITIALIZATION ==========
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pageParam = urlParams.get('page');
+      if (pageParam) { const page = parseInt(pageParam); if (page >= 1 && page <= totalPages) { currentPage = page; } }
+      const savedTheme = localStorage.getItem('quranTheme') || 'light'; document.body.setAttribute('data-theme', savedTheme);
+      
+      if(typeof commonInit === 'function') commonInit();
+      
+      updateToggleLink(); updateContent();
+      if(typeof preloadAdjacentPages === 'function') preloadAdjacentPages();
+    };
+
+    function goHome() { window.location.href = 'index.html'; }
+  </script>
+  <script> if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(console.warn); } </script>
+</body>
+</html>
