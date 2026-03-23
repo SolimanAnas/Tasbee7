@@ -13,7 +13,7 @@
     /* ========== HEADER BALANCED LAYOUT ========== */
     header#appHeader {
       position: absolute; top: 0; left: 0; right: 0;
-      padding: calc(10px + env(safe-area-inset-top)) 8px 8px;
+      padding: calc(4px + env(safe-area-inset-top)) 8px 2px;
       display: flex; justify-content: space-between; align-items: center;
       background: var(--glass-bg, rgba(248, 243, 232, 0.85)); 
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -147,13 +147,13 @@
     </div>
   </div>
 
-    <main id="swipeArea">
+  <main id="swipeArea">
     <div class="page-frame" id="pageFrame">
-      <img id="pageImg" class="mushaf-img" src="" alt="صفحة القرآن" draggable="false" onerror="handleImageError(this)" style="margin-top: -50px;">
+      <!-- Fixed: removed onerror attribute, handled in JS -->
+      <img id="pageImg" class="mushaf-img" src="" alt="صفحة القرآن" draggable="false" style="margin-top: -50px;">
       <div id="textContainer" class="quran-text-container" style="display: none;"></div>
     </div>
   </main>
-
 
   <div id="customToast" class="custom-toast"></div>
 
@@ -263,12 +263,10 @@
     }
 
     // ========== IMAGE LOADING WITH PADDED & UNPADDED FALLBACK ==========
-    // Format page number with leading zeros (e.g., 1 -> 001)
     function formatPageNumber(pageNum) {
       return String(pageNum).padStart(3, '0');
     }
 
-    // Try to load image with fallback: first padded, then unpadded
     function loadPageImage(imgElement, pageNum) {
       if (!imgElement) return;
       const padded = formatPageNumber(pageNum);
@@ -300,15 +298,6 @@
       tryNext();
     }
 
-    // Global error handler for img tag (called when onerror is set)
-    window.handleImageError = function(imgElement) {
-      // This is called when the initial src fails. We'll let loadPageImage handle it,
-      // but if it's already called from updateContent, we can simply re-run.
-      if (imgElement && currentPage) {
-        loadPageImage(imgElement, currentPage);
-      }
-    };
-
     // Core update function
     function updateContent() {
       const img = document.getElementById('pageImg');
@@ -336,7 +325,6 @@
       const pages = [currentPage - 1, currentPage + 1];
       pages.forEach(p => {
         if (p >= 1 && p <= totalPages) {
-          // Preload both padded and unpadded versions (or just one is fine)
           const padded = formatPageNumber(p);
           const unpadded = p.toString();
           const base = currentVersionPath;
@@ -368,7 +356,7 @@
                 await cache.put(url, response);
                 successCount++;
                 pageCached = true;
-                break; // only need one format per page
+                break;
               }
             } catch (err) {
               // continue to next format
@@ -401,7 +389,7 @@
       setTimeout(updateToggleLink, 300);
     };
 
-    // ========== EXISTING FUNCTIONS (unchanged but we keep them) ==========
+    // ========== EXISTING FUNCTIONS ==========
     function showCustomToast(message) {
         const toast = document.getElementById('customToast');
         if(!toast) return;
