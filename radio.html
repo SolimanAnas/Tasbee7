@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>إذاعة القرآن الكريم - زاد المسلم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    /* --- THEME SYSTEM (unchanged from your new version) --- */
+    :root {
+      --bg-image: url('images/Background-dark.png');
+      --bg-surface: rgba(15, 23, 42, 0.5);
+      --text-primary: #F8FAFC;
+      --text-secondary: #CBD5E1;
+      --accent-main: #34D399;
+      --accent-muted: rgba(255, 255, 255, 0.15);
+      --glass: rgba(15, 23, 42, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      --overlay: rgba(15, 23, 42, 0.2);
+      --live-color: #ef4444;
+      --dropdown-bg: rgba(15, 23, 42, 0.95);
+    }
+
+    [data-theme="light"] {
+      --bg-image: url('images/Background-light.png');
+      --bg-surface: rgba(255, 255, 255, 0.35);
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --accent-main: #059669;
+      --accent-muted: rgba(0, 0, 0, 0.05);
+      --glass: rgba(255, 255, 255, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+      --overlay: rgba(255, 255, 255, 0.1);
+      --live-color: #dc2626;
+      --dropdown-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Tajawal', sans-serif;
+      background-color: var(--bg-surface);
+      background-image: var(--bg-image);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+      padding: 60px 20px 100px;
+      min-height: 100dvh;
+      transition: color 0.3s ease, background-image 0.3s ease;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      z-index: -1;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--glass-shadow);
+      border-radius: 16px;
+      padding: 14px 16px;
+      z-index: 10;
+    }
+
+    .header-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 5px;
+      display: flex;
+      transition: 0.2s;
+    }
+
+    /* Card Layout */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--glass-shadow);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .picker-card {
+      margin-top: 2vh;
+      z-index: 100;
+    }
+
+    label {
+      font-size: 14px;
+      color: var(--accent-main);
+      font-weight: bold;
+    }
+
+    /* Dropdown UI with Search */
+    .custom-select-wrapper {
+      position: relative;
+    }
+
+    .custom-select-trigger {
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .custom-options {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: var(--dropdown-bg);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      z-index: 9999;
+      max-height: 350px;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .custom-options.open {
+      display: flex;
+    }
+
+    .search-container {
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: 'Tajawal', sans-serif;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .options-scroll {
+      overflow-y: auto;
+      flex: 1;
+      padding: 8px;
+    }
+
+    .custom-option {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .custom-option:hover,
+    .custom-option.selected {
+      background: var(--accent-muted);
+      color: var(--accent-main);
+    }
+
+    /* Player Area */
+    .now {
+      text-align: center;
+      padding: 40px 20px;
+      margin-top: auto;
+      z-index: 10;
+    }
+
+    .nowStation {
+      font-family: 'Amiri', serif;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--text-secondary);
+      border-radius: 50%;
+    }
+
+    .live-indicator.playing .pulse-dot {
+      background: var(--live-color);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .play-pause-btn {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: var(--accent-main);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .action-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--accent-muted);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    .action-btn.active {
+      color: var(--accent-main);
+      border-color: var(--accent-main);
+    }
+
+    /* Loader inside play button */
+    .loader {
+      display: none;
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .play-pause-btn.loading .play-icon,
+    .play-pause-btn.loading .pause-icon {
+      display: none !important;
+    }
+
+    .play-pause-btn.loading .loader {
+      display: block;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--dropdown-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .toast {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: var(--accent-main);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 50px;
+      transition: 0.4s;
+      z-index: 20000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="app">
+    <div class="header">
+      <div style="display: flex; gap: 10px;">
+        <button class="icon-btn" onclick="window.location.href='index.html'">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="toggleTheme()">
+          <svg id="themeIcon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="header-title">إذاعة القرآن الكريم</div>
+      <button class="icon-btn" onclick="openFavModal()">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="card picker-card">
+      <label>اختر الإذاعة</label>
+      <div class="custom-select-wrapper" id="radioDropdown">
+        <div class="custom-select-trigger" id="dropdownTrigger">
+          <span id="selectedText">جاري تحميل الإذاعات...</span>
+          <span>▼</span>
+        </div>
+        <div class="custom-options" id="dropdownOptions">
+          <div class="search-container">
+            <input type="text" class="search-input" id="radioSearch" placeholder="ابحث عن قارئ أو إذاعة...">
+          </div>
+          <div class="options-scroll" id="optionsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card now">
+      <div class="nowStation" id="nowStation">اختر إذاعة للبدء</div>
+      <div class="live-indicator" id="liveIndicator">
+        <div class="pulse-dot"></div>
+        <span id="liveText">متوقف</span>
+      </div>
+
+      <div class="controls">
+        <button class="action-btn" id="favBtn">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+
+        <button class="play-pause-btn" id="playBtn">
+          <div class="loader" id="loader"></div>
+          <svg id="playIcon" class="play-icon" viewBox="0 0 24 24" width="35" height="35" fill="white">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <svg id="pauseIcon" class="pause-icon" viewBox="0 0 24 24" width="35" height="35" fill="white" style="display:none;">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <audio id="audio" preload="none" playsinline></audio>
+  </div>
+
+  <div class="modal-overlay" id="favModal">
+    <div class="modal-content">
+      <h3 style="margin-top:0;">المفضلة</h3>
+      <div id="favList"></div>
+      <button onclick="closeFavModal()" style="margin-top:20px; width:100%; padding:10px; border-radius:10px; border:none; background:var(--accent-main); color:white;">إغلاق</button>
+    </div>
+  </div>
+
+  <script>
+    let allStations = [];
+    const staticStations = [
+      { name: "إذاعة القرآن الكريم - القاهرة", url: "https://n0b.radiojar.com/8s5u5tpdtwzuv" },
+      { name: "إذاعة القرآن الكريم - مكة", url: "https://stream.radiojar.com/0tpy1h0kxtzuv" }
+    ];
+
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const selectedText = document.getElementById('selectedText');
+    const optionsList = document.getElementById('optionsList');
+    const searchInput = document.getElementById('radioSearch');
+    const nowStation = document.getElementById('nowStation');
+    const liveIndicator = document.getElementById('liveIndicator');
+    const liveText = document.getElementById('liveText');
+    const favBtn = document.getElementById('favBtn');
+
+    let hls = null;
+    let currentStation = null;
+
+    // --- Media Session with local artwork ---
+    const artwork = [
+      { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+    ];
+
+    function updateMediaSession(stationName) {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: stationName || 'إذاعة القرآن الكريم',
+          artist: 'البث المباشر',
+          album: 'زاد المسلم',
+          artwork: artwork
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => togglePlay(true));
+        navigator.mediaSession.setActionHandler('pause', () => togglePlay(false));
+        navigator.mediaSession.setActionHandler('stop', () => {
+          audio.pause();
+          updateUI(false);
+        });
+        navigator.mediaSession.setActionHandler('seekbackward', () => {});
+        navigator.mediaSession.setActionHandler('seekforward', () => {});
+      }
+    }
+
+    // --- Load streams with HLS or direct ---
+    function loadStream(url, stationName) {
+      audio.pause();
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+
+      if (url.includes('.m3u8')) {
+        if (Hls.isSupported()) {
+          hls = new Hls();
+          hls.loadSource(url);
+          hls.attachMedia(audio);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            if (audio.paused) {
+              // do not auto-play
+            }
+          });
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              showToast('حدث خطأ في البث، حاول مرة أخرى');
+              updateUI(false);
+              playBtn.classList.remove('loading');
+            }
+          });
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+          audio.src = url;
+        } else {
+          showToast('متصفحك لا يدعم بث HLS');
+        }
+      } else {
+        audio.src = url;
+      }
+
+      // Update UI and media session
+      nowStation.innerText = stationName;
+      updateMediaSession(stationName);
+      checkFavStatus(url);
+    }
+
+    // --- Play/Pause with loading state and error handling ---
+    function togglePlay(forcePlay = null) {
+      if (!currentStation) {
+        showToast('اختر إذاعة أولاً');
+        return;
+      }
+
+      const shouldPlay = forcePlay !== null ? forcePlay : audio.paused;
+
+      if (shouldPlay) {
+        playBtn.classList.add('loading');
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            playBtn.classList.remove('loading');
+            updateUI(true);
+          }).catch((err) => {
+            console.error('Play failed:', err);
+            playBtn.classList.remove('loading');
+            showToast('تعذر التشغيل، حاول مرة أخرى');
+            updateUI(false);
+          });
+        } else {
+          // older browser
+          updateUI(true);
+        }
+      } else {
+        audio.pause();
+        updateUI(false);
+      }
+    }
+
+    function updateUI(isPlaying) {
+      if (isPlaying) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+        liveIndicator.classList.add('playing');
+        liveText.textContent = 'مباشر';
+      } else {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        liveIndicator.classList.remove('playing');
+        liveText.textContent = 'متوقف';
+        playBtn.classList.remove('loading');
+      }
+    }
+
+    // --- Event listeners for audio to update UI ---
+    audio.addEventListener('playing', () => {
+      playBtn.classList.remove('loading');
+      updateUI(true);
+    });
+    audio.addEventListener('pause', () => {
+      playBtn.classList.remove('loading');
+      updateUI(false);
+    });
+    audio.addEventListener('waiting', () => {
+      playBtn.classList.add('loading');
+    });
+    audio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      playBtn.classList.remove('loading');
+      updateUI(false);
+      showToast('خطأ في تشغيل البث');
+    });
+
+    // --- Favorites management ---
+    function checkFavStatus(url) {
+      const favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
+      favBtn.classList.toggle('active', favs.some(f => f.url === url));
+    }
+
+    function toggleFavorite() {
+      if (!currentStation) return;
+      let favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
+      const index = favs.findIndex(f => f.url === currentStation.url);
+      if (index === -1) {
+        favs.push(currentStation);
+        showToast('تمت الإضافة للمفضلة');
+      } else {
+        favs.splice(index, 1);
+        showToast('تمت الإزالة من المفضلة');
+      }
+      localStorage.setItem('favRadios', JSON.stringify(favs));
+      checkFavStatus(currentStation.url);
+    }
+
+    function openFavModal() {
+      const list = document.getElementById('favList');
+      const favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
+      if (favs.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد مفضلة</div>';
+      } else {
+        list.innerHTML = '';
+        favs.forEach(fav => {
+          const div = document.createElement('div');
+          div.style = "padding:15px; border-bottom:1px solid var(--glass-border); cursor:pointer; display:flex; justify-content:space-between; align-items:center;";
+          div.innerHTML = `
+            <span>${fav.name}</span>
+            <button onclick="removeFromFav('${fav.url}')" style="background:none; border:none; color:var(--live-color); cursor:pointer;">حذف</button>
+          `;
+          div.querySelector('span').onclick = (e) => {
+            e.stopPropagation();
+            selectStation(fav);
+            closeFavModal();
+          };
+          list.appendChild(div);
+        });
+      }
+      document.getElementById('favModal').classList.add('active');
+    }
+
+    function removeFromFav(url) {
+      let favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
+      favs = favs.filter(f => f.url !== url);
+      localStorage.setItem('favRadios', JSON.stringify(favs));
+      if (currentStation && currentStation.url === url) checkFavStatus(url);
+      openFavModal(); // refresh modal
+      showToast('تم الحذف');
+    }
+
+    function closeFavModal() {
+      document.getElementById('favModal').classList.remove('active');
+    }
+
+    // --- Station selection ---
+    function selectStation(station) {
+      currentStation = station;
+      selectedText.textContent = station.name;
+      nowStation.textContent = station.name;
+      localStorage.setItem('lastStation', JSON.stringify(station));
+      loadStream(station.url, station.name);
+      updateUI(false); // ensure UI shows stopped until user clicks play
+      playBtn.classList.remove('loading');
+      // Close dropdown
+      document.getElementById('dropdownOptions').classList.remove('open');
+    }
+
+    // --- Build dropdown with search ---
+    function renderList(list) {
+      optionsList.innerHTML = '';
+      if (list.length === 0) {
+        optionsList.innerHTML = '<div class="custom-option" style="text-align:center;">لا توجد نتائج</div>';
+        return;
+      }
+      list.forEach(station => {
+        const div = document.createElement('div');
+        div.className = 'custom-option';
+        div.textContent = station.name;
+        div.onclick = () => selectStation(station);
+        optionsList.appendChild(div);
+      });
+    }
+
+    // --- Load stations from JSON or fallback ---
+    async function init() {
+      try {
+        const response = await fetch('json/radio-01.json');
+        const data = await response.json();
+        allStations = data.stations;
+      } catch (e) {
+        console.warn('Using static stations');
+        allStations = staticStations;
+      }
+      renderList(allStations);
+      setupLastPlayed();
+    }
+
+    function setupLastPlayed() {
+      const last = JSON.parse(localStorage.getItem('lastStation'));
+      if (last && last.name && last.url) {
+        selectStation(last);
+      } else if (allStations.length) {
+        selectStation(allStations[0]);
+      }
+    }
+
+    // --- Search filter ---
+    searchInput.oninput = (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allStations.filter(s => s.name.toLowerCase().includes(term));
+      renderList(filtered);
+    };
+
+    // --- Dropdown toggle with click outside ---
+    document.getElementById('dropdownTrigger').onclick = (e) => {
+      e.stopPropagation();
+      const dropdown = document.getElementById('dropdownOptions');
+      dropdown.classList.toggle('open');
+      if (dropdown.classList.contains('open')) searchInput.focus();
+    };
+
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('radioDropdown').contains(e.target)) {
+        document.getElementById('dropdownOptions').classList.remove('open');
+      }
+    });
+
+    // --- Theme toggle ---
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    // --- Helpers ---
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    // --- Event listeners for UI buttons ---
+    playBtn.onclick = () => togglePlay();
+    favBtn.onclick = () => toggleFavorite();
+
+    // --- Load theme and start ---
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      init();
+    };
+  </script>
+</body>
+
+</html>
