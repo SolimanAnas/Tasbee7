@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="swipeAreviewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>المصحف الشريف - صورة</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f5f0e6">
@@ -10,66 +10,29 @@
   <link rel="stylesheet" href="css/style.css">
   
   <style>
-  /* ========== SLIM HEADER LAYOUT ========== */
-header#appHeader {
-  position: absolute; top: 0; left: 0; right: 0;
-  /* Removed top 4px padding, kept safe area, minimized bottom to 1px */
-  padding: env(safe-area-inset-top) 4px 1px;
-  display: flex; justify-content: space-between; align-items: center;
-  background: var(--glass-bg, rgba(248, 243, 232, 0.85)); 
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border, rgba(179, 139, 93, 0.22)); 
-  z-index: 20;
-  /* Forced height to be very short */
-  height: 40px; 
-}
+    /* ========== HEADER BALANCED LAYOUT ========== */
+    header#appHeader {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: calc(4px + env(safe-area-inset-top)) 8px 2px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--glass-bg, rgba(248, 243, 232, 0.85)); 
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border, rgba(179, 139, 93, 0.22)); z-index: 20;
+    }
+    [data-theme="dark"] header#appHeader { background: rgba(30, 41, 59, 0.85); border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
 
-[data-theme="dark"] header#appHeader { 
-  background: rgba(30, 41, 59, 0.85); 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15); 
-}
-
-.header-right, .header-left { display: flex; gap: 0px; align-items: center; flex-shrink: 0; }
-
-.header-center { 
-  flex: 1 1 auto; display: flex; flex-direction: column; 
-  align-items: center; justify-content: center; min-width: 0; padding: 0 2px; 
-}
-
-#surahName { 
-  font-size: 0.9rem; /* Reduced from 1.05rem */
-  font-weight: 700; 
-  color: var(--accent, #10b981); 
-  margin-bottom: -2px; /* Pulls meta-row closer */
-  line-height: 1; 
-}
-
-.meta-row { 
-  display: flex; justify-content: center; align-items: center; 
-  gap: 3px; width: 100%; 
-  font-size: 0.65rem; /* Reduced from 0.75rem */
-  color: var(--text-secondary); opacity: 0.8; 
-}
-
-.nav-item { 
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-  max-width: 100%; cursor: pointer; padding: 1px 4px; border-radius: 4px; 
-}
-
-.icon-btn { 
-  background: none; border: none; color: inherit; cursor: pointer; 
-  width: 30px; /* Reduced from 36px */
-  height: 30px; /* Reduced from 36px */
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-  font-size: 0.9rem; transition: background 0.2s; flex-shrink: 0; 
-}
-
-/* Added specific size for SVG icons inside the buttons */
-.icon-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
+    .header-right, .header-left { display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+    
+    .header-center { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; padding: 0 4px; }
+    
+    .nav-item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: background 0.2s; }
+    .nav-item:active { background: rgba(128,128,128,0.15); }
+    #surahName { font-size: 1.05rem; font-weight: 700; color: var(--accent, #10b981); margin-bottom: 0px; }
+    .meta-row { display: flex; justify-content: center; align-items: center; gap: 4px; width: 100%; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.9; }
+    .divider { opacity: 0.4; margin: 0 2px; }
+    
+    .icon-btn { background: none; border: none; color: inherit; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; transition: background 0.2s; flex-shrink: 0; }
+    .icon-btn:active { background: rgba(128,128,128,0.15); transform: scale(0.95); }
 
     /* Settings UI */
     .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--glass-border); }
@@ -146,19 +109,19 @@ header#appHeader {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      transform-origin: bottom;
-      transition: transform 0.2s ease;
+      transform-origin: center;
+      transition: transform 0.3s ease;
       display: block;
     }
 
     /* Specific zoom for: بدون إطار (mushaf) */
     .mushaf-img[data-ver="mushaf"] {
-      transform: scale(1.02, 1.1);
+      transform: scale(1.15, 1.1);
     }
 
     /* Specific zoom for: إطار بني (mushaf-2) */
     .mushaf-img[data-ver="mushaf-2"] {
-      transform: scale(1.2, 1.25);
+      transform: scale(1.2, 1.2);
     }
   </style>
 </head>
@@ -205,14 +168,12 @@ header#appHeader {
     </div>
   </div>
 
-  <main id="swipeArea" style="display: flex; flex-direction: column; min-height: 100vh; padding-top: calc(22px + env(safe-area-inset-top)); box-sizing: border-box; background: transparent;">
-    <div class="page-frame" id="pageFrame" style="flex: 1; display: flex; justify-content: center; align-items: center; padding-bottom: 20px;">
-      <img id="pageImg" class="mushaf-img" src="" alt="صفحة القرآن" draggable="false" style="max-width: 100%; height: auto; max-height: 92vh; object-fit: contain; transform-origin: center center; display: block;">
+  <main id="swipeArea">
+    <div class="page-frame" id="pageFrame">
+      <img id="pageImg" class="mushaf-img" src="" alt="صفحة القرآن" draggable="false">
       <div id="textContainer" class="quran-text-container" style="display: none;"></div>
     </div>
   </main>
-
-
 
   <div id="customToast" class="custom-toast"></div>
 
