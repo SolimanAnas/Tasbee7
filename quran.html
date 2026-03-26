@@ -3,174 +3,517 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>المصحف الشريف - صورة</title>
+  <title>المصحف الشريف - المصور (نسختان)</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f5f0e6">
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   
   <style>
-  /* ========== SLIM HEADER LAYOUT ========== */
-header#appHeader {
-  position: absolute; top: 0; left: 0; right: 0;
-  /* Removed top 4px padding, kept safe area, minimized bottom to 1px */
-  padding: env(safe-area-inset-top) 4px 1px;
-  display: flex; justify-content: space-between; align-items: center;
-  background: var(--glass-bg, rgba(248, 243, 232, 0.85)); 
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border, rgba(179, 139, 93, 0.22)); 
-  z-index: 20;
-  /* Forced height to be very short */
-  height: 50px; 
-}
-
-[data-theme="dark"] header#appHeader { 
-  background: rgba(30, 41, 59, 0.85); 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15); 
-}
-
-.header-right, .header-left { display: flex; gap: 0px; align-items: center; flex-shrink: 0; }
-
-.header-center { 
-  flex: 1 1 auto; display: flex; flex-direction: column; 
-  align-items: center; justify-content: center; min-width: 0; padding: 0 2px; 
-}
-
-#surahName { 
-  font-size: 0.9rem; /* Reduced from 1.05rem */
-  font-weight: 700; 
-  color: var(--accent, #10b981); 
-  margin-bottom: -2px; /* Pulls meta-row closer */
-  line-height: 1; 
-}
-
-.meta-row { 
-  display: flex; justify-content: center; align-items: center; 
-  gap: 3px; width: 100%; 
-  font-size: 0.65rem; /* Reduced from 0.75rem */
-  color: var(--text-secondary); opacity: 0.8; 
-}
-
-.nav-item { 
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-  max-width: 100%; cursor: pointer; padding: 1px 4px; border-radius: 4px; 
-}
-
-.icon-btn { 
-  background: none; border: none; color: inherit; cursor: pointer; 
-  width: 30px; /* Reduced from 36px */
-  height: 30px; /* Reduced from 36px */
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-  font-size: 0.9rem; transition: background 0.2s; flex-shrink: 0; 
-}
-
-/* Added specific size for SVG icons inside the buttons */
-.icon-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-
-    /* Settings UI */
-    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--glass-border); }
-    .setting-row:last-child { border-bottom: none; }
-    .setting-label { font-size: 1.05rem; font-weight: bold; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
-    .offline-btn { width: 100%; padding: 14px; margin-top: 15px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: bold; font-family: 'Tajawal', sans-serif; cursor: pointer; font-size: 1rem; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-    .offline-btn:active { transform: scale(0.96); opacity: 0.9; }
-
-    /* ========== FLOATING EXACT SEARCH OVERLAY ========== */
-    .search-overlay { position: fixed; top: calc(70px + env(safe-area-inset-top)); left: 10px; right: 10px; margin: 0 auto; max-width: 500px; width: auto; background: var(--glass-bg, rgba(248, 243, 232, 0.95)); backdrop-filter: blur(30px); border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); border-radius: 20px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; transform: translateY(-20px) scale(0.95); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 65vh; }
-    [data-theme="dark"] .search-overlay { background: rgba(30, 41, 59, 0.95); border-color: rgba(255, 255, 255, 0.15); }
-    .search-overlay.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
-    .search-bar-row { display: flex; gap: 8px; align-items: center; width: 100%; box-sizing: border-box; }
-    .search-bar-row input { flex: 1 1 auto; min-width: 0; height: 45px; padding: 0 15px; border-radius: 25px; border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); background: rgba(128, 128, 128, 0.1); color: inherit; font-family: inherit; font-size: 1rem; outline: none; }
-    .search-bar-row input:focus { border-color: var(--accent, #10b981); background: rgba(128, 128, 128, 0.15); }
-    .close-search-btn { flex: 0 0 45px; width: 45px; height: 45px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
-    .search-results-container { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .search-results-container::-webkit-scrollbar { display: none; }
-    .search-result-item { background: rgba(128, 128, 128, 0.05); padding: 14px; border-radius: 16px; cursor: pointer; border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); transition: 0.2s; }
-    .search-result-item:active { background: rgba(128, 128, 128, 0.1); transform: scale(0.98); }
-    .res-meta { font-size: 0.85rem; color: var(--accent, #10b981); margin-bottom: 8px; font-weight: bold; }
-    .res-text { font-family: 'Amiri', serif; font-size: 1.3rem; line-height: 1.8; color: var(--text-primary); }
-    .search-highlight { background-color: rgba(255, 213, 79, 0.6); color: #000; border-radius: 4px; padding: 0 4px; }
-
-    /* ========== NATIVE TOAST ========== */
-    .custom-toast { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(100px); background: var(--glass-bg, rgba(248, 243, 232, 0.95)); backdrop-filter: blur(15px); color: var(--text-primary); border: 1px solid var(--glass-border, rgba(179, 139, 93, 0.3)); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 9999; font-family: 'Tajawal', sans-serif; font-size: 0.95rem; font-weight: bold; text-align: center; opacity: 0; transition: all 0.4s; pointer-events: none; }
-    [data-theme="dark"] .custom-toast { background: rgba(30, 41, 59, 0.95); border-color: rgba(255, 255, 255, 0.15); }
-    .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-    /* ========== VERSION SELECTOR MODAL ========== */
-    .version-modal-content {
-      max-width: 320px;
-      width: 90%;
+    /* ========== HEADER LAYOUT (fixed, overlays border) ========== */
+    header#appHeader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: calc(4px + env(safe-area-inset-top)) 4px 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--glass-bg, rgba(248, 243, 232, 0.85));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border, rgba(179, 139, 93, 0.22));
+      z-index: 20;
     }
-    .version-item {
+    [data-theme="dark"] header#appHeader {
+      background: rgba(30, 41, 59, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .header-right, .header-left { display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+    .header-center {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      padding: 0 4px;
+    }
+
+    .nav-item {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .nav-item:active { background: rgba(128,128,128,0.15); }
+    #surahName {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent, #10b981);
+      margin-bottom: 0px;
+      font-family: 'Tajawal', sans-serif !important;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      opacity: 0.9;
+    }
+    .divider { opacity: 0.4; margin: 0 2px; }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 16px;
-      background: rgba(128,128,128,0.05);
-      border: 1px solid var(--glass-border, rgba(179,139,93,0.3));
+      justify-content: center;
+      font-size: 1.15rem;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .icon-btn:active {
+      background: rgba(128,128,128,0.15);
+      transform: scale(0.95);
+    }
+
+    /* ========== SETTINGS MODAL with version selector ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-content {
+      background: var(--glass-bg, rgba(248,243,232,0.95));
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
       cursor: pointer;
-      transition: 0.2s;
+      color: var(--text-primary);
     }
-    .version-item:active {
-      transform: scale(0.98);
-      background: rgba(128,128,128,0.1);
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--glass-border);
+      flex-wrap: wrap;
     }
-    .version-thumb {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 12px;
-      background: #ddd;
-    }
-    .version-info {
+    .setting-label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text-primary);
       flex: 1;
     }
-    .version-name {
+    .version-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .version-buttons {
+      display: flex;
+      gap: 8px;
+      background: rgba(128,128,128,0.1);
+      padding: 4px;
+      border-radius: 40px;
+    }
+    .version-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 18px;
+      border-radius: 30px;
       font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-primary);
     }
-    .version-desc {
-      font-size: 0.8rem;
-      opacity: 0.7;
+    .version-btn.active {
+      background: var(--accent, #10b981);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    
-    /* ========== DYNAMIC ZOOM FOR MUSHRAF VERSIONS ========== */
-    /* General settings for all pages */
+    .version-thumbnail {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .version-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .offline-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .selector-scroll {
+      max-height: 60vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    /* ========== FLOATING SEARCH OVERLAY ========== */
+    .search-overlay {
+      position: fixed;
+      top: calc(70px + env(safe-area-inset-top));
+      left: 10px;
+      right: 10px;
+      margin: 0 auto;
+      max-width: 500px;
+      width: auto;
+      background: var(--glass-bg, rgba(248, 243, 232, 0.95));
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateY(-20px) scale(0.95);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-height: 65vh;
+    }
+    .search-overlay.active {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: all;
+    }
+    .search-bar-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .search-bar-row input {
+      flex: 1;
+      height: 45px;
+      padding: 0 15px;
+      border-radius: 25px;
+      border: 1px solid var(--glass-border);
+      background: rgba(128,128,128,0.1);
+      color: inherit;
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+    }
+    .close-search-btn {
+      width: 45px;
+      height: 45px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: #ef4444;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .search-results-container {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .search-result-item {
+      background: rgba(128,128,128,0.05);
+      padding: 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      border: 1px solid var(--glass-border);
+      transition: 0.2s;
+    }
+    .res-meta {
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .res-text {
+      font-family: 'Amiri', serif;
+      font-size: 1.3rem;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .search-highlight {
+      background-color: rgba(255,213,79,0.6);
+      color: #000;
+      border-radius: 4px;
+      padding: 0 4px;
+    }
+
+    /* ========== MUSHRAF FRAME & LABELS ========== */
+    main#swipeArea {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      padding-top: 0px;
+      box-sizing: border-box;
+    }
+
+    .page-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Decorative borders - visible only for version 1 (mushaf-3) */
+    .mushaf-border-top,
+    .mushaf-border-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 20px;
+      pointer-events: none;
+      z-index: 10;
+      transition: opacity 0.2s;
+    }
+    .mushaf-border-top {
+      top: 0;
+      background: url('img/frame.png') repeat-x top, linear-gradient(#f5f0e6, #f5f0e6);
+      background-size: auto 100%, 100% 30px;
+      background-repeat: repeat-x, no-repeat;
+    }
+    .mushaf-border-bottom {
+      bottom: 0;
+      background: url('img/frame.png') repeat-x top;
+      background-size: auto 100%;
+      transform: rotate(180deg);
+    }
+    /* Hide borders for version 2 */
+    body.version-mushaf-2 .mushaf-border-top,
+    body.version-mushaf-2 .mushaf-border-bottom {
+      display: none;
+    }
+
+    /* Label boxes - hidden for version 2 */
+    body.version-mushaf-2 .label-box {
+      display: none;
+    }
+
+    .label-box {
+      position: absolute;
+      background: url('img/text-container.png') center/100% 100% no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+      font-weight: bold;
+      z-index: 15;
+      padding: 0 20px;
+      height: 18px;
+      min-width: 90px;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      font-family: 'ThuluthFont', 'Tajawal', sans-serif;
+      cursor: pointer;
+    }
+    .label-top-left {
+      top: 1px;
+      left: 20px;
+    }
+    .label-top-right {
+      top: 1px;
+      right: 20px;
+    }
+    .label-bottom {
+      bottom: 1px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Quran image with zoom transition */
     .mushaf-img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      transform-origin: bottom;
-      transition: transform 0.3s ease;
+      width: 100%;
+      height: auto;
       display: block;
+      margin: 0 auto;
+      pointer-events: auto;
+      user-select: none;
+      -webkit-touch-callout: none;
+      transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      transform-origin: center center;
     }
 
-    /* Specific zoom for: بدون إطار (mushaf) */
-    .mushaf-img[data-ver="mushaf"] {
-      width: 108%; 
-      max-width: 108%; 
-      flex-shrink: 0;
-      transform: scale(1.05, 1.1);
+    .quran-text-container {
+      display: none;
     }
 
-    /* Specific zoom for: إطار بني (mushaf-2) */
-    .mushaf-img[data-ver="mushaf-2"] {
-      transform: scale(1.2, 1.25);
+    .custom-toast {
+      position: fixed;
+      bottom: calc(30px + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--glass-bg, rgba(248,243,232,0.95));
+      backdrop-filter: blur(15px);
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+      padding: 12px 24px;
+      border-radius: 30px;
+      z-index: 9999;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.95rem;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      transition: all 0.4s;
+      pointer-events: none;
+    }
+    .custom-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .picker-container {
+      position: relative;
+      height: 250px;
+      overflow: hidden;
+    }
+    .picker-scroll {
+      height: 100%;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      text-align: center;
+    }
+    .picker-scroll div {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      scroll-snap-align: start;
+    }
+    .picker-highlight {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 50px;
+      transform: translateY(-50%);
+      border-top: 2px solid var(--accent);
+      border-bottom: 2px solid var(--accent);
+      pointer-events: none;
+    }
+    .manual-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .manual-input-group input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(128,128,128,0.1);
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 1rem;
+    }
+    .btn-go {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .selection-item {
+      padding: 12px;
+      background: rgba(128,128,128,0.05);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+    .selection-item:active {
+      background: var(--accent);
+      color: white;
     }
   </style>
 </head>
 <body data-theme="light">
 
+  <!-- Fixed header -->
   <header id="appHeader">
     <div class="header-right">
       <button class="icon-btn" onclick="goHome()" title="الرئيسية">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </button>
     </div>
 
@@ -185,19 +528,20 @@ header#appHeader {
 
     <div class="header-left">
       <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </button>
 
       <a id="viewToggleBtn" class="icon-btn" href="quran-text.html?page=1" title="التبديل للمصحف النصي" style="text-decoration: none; color: inherit;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
       </a>
 
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       </button>
     </div>
   </header>
 
+  <!-- Search overlay -->
   <div class="search-overlay" id="searchOverlay">
     <div class="search-bar-row">
       <input type="text" id="searchInput" placeholder="ابحث عن كلمة (مطابقة تامة)..." oninput="handleGlobalSearch(this.value)">
@@ -208,385 +552,484 @@ header#appHeader {
     </div>
   </div>
 
-  <  <main id="swipeArea" style="
-      position: fixed; 
-      top: calc(40px + env(safe-area-inset-top)); 
-      left: 0; right: 0; bottom: 0; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: flex-end; /* Pushes the frame to the bottom */
-      align-items: center; 
-      background: transparent;
-      overflow: hidden;
-  ">
-    <div class="page-frame" id="pageFrame" style="
-        width: 100%; 
-        height: 100%; 
-        display: flex; 
-        justify-content: center; 
-        align-items: flex-end; /* Pulls the image to the floor of the frame */
-        padding-bottom: 20px;  /* The requested 20px gap */
-        box-sizing: border-box;
-    ">
-      <img id="pageImg" class="mushaf-img" src="" alt="صفحة القرآن" draggable="false" style="
-          max-width: 100%; 
-          max-height: 100%; 
-          object-fit: contain; 
-          transform-origin: bottom center; /* Forces zoom to grow upward */
-          display: block;
-      ">
+  <!-- Main content -->
+  <main id="swipeArea">
+    <div class="page-frame" id="pageFrame">
+      <div class="mushaf-border-top"></div>
+      <div class="mushaf-border-bottom"></div>
+      <div class="label-box label-top-left" id="juzLabel" onclick="openJuzSelector()">الجزء ١</div>
+      <div class="label-box label-top-right" id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
+      <div class="label-box label-bottom" id="pageLabel" onclick="openPageSelector()">١</div>
+      <img id="pageImg" class="mushaf-img" src="mushaf-3/001.png" alt="صفحة القرآن" draggable="false" onerror="this.src='mushaf-3/placeholder.png'">
       <div id="textContainer" class="quran-text-container" style="display: none;"></div>
     </div>
   </main>
 
-
   <div id="customToast" class="custom-toast"></div>
 
+  <!-- Settings Modal with Version Selector -->
   <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
     <div class="modal-content">
       <div class="modal-header"><span>الإعدادات</span><button class="close-btn" onclick="closeModal('settingsModal')">✕</button></div>
       
+      <div class="setting-row">
+        <div class="setting-label">📖 إصدار المصحف</div>
+        <div class="version-control">
+          <div class="version-buttons">
+            <button class="version-btn" data-version="mushaf-3" id="version1Btn">نسخة 1</button>
+            <button class="version-btn" data-version="mushaf-2" id="version2Btn">نسخة 2</button>
+          </div>
+          <div class="version-thumbnail" id="versionThumbnailContainer">
+            <img id="versionThumbImg" src="" alt="معاينة" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+        </div>
+      </div>
+
       <div class="setting-row" style="cursor: pointer;" onclick="closeModal('settingsModal'); toggleSearchOverlay('toggle');">
         <div class="setting-label">🔎 بحث في القرآن</div>
-        <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
+        <div class="setting-control"><span style="font-size:1.5rem;">›</span></div>
       </div>
-
       <div class="setting-row" style="cursor: pointer;" onclick="openBookmarksModal(); closeModal('settingsModal');">
         <div class="setting-label">🔖 المفضلة</div>
-        <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
+        <div class="setting-control"><span style="font-size:1.5rem;">›</span></div>
       </div>
-
-      <div class="setting-row" style="cursor: pointer;" onclick="closeModal('settingsModal'); openVersionSelectorModal();">
-        <div class="setting-label">📖 نوع المصحف</div>
-        <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
-      </div>
-      
-      <button class="offline-btn" onclick="cacheAllPages()">⬇ تحميل جميع الصفحات (المصورة)</button>
+      <button class="offline-btn" id="offlineDownloadBtn" onclick="cacheAllPages()">⬇ تحميل جميع الصفحات (المصورة)</button>
     </div>
   </div>
 
-  <!-- Version Selector Modal -->
-  <div class="modal-overlay" id="versionSelectorModal" onclick="handleOverlayClick(event,'versionSelectorModal')">
-    <div class="modal-content version-modal-content">
-      <div class="modal-header"><span>اختر نوع المصحف</span><button class="close-btn" onclick="closeModal('versionSelectorModal')">✕</button></div>
-      <div id="versionList" class="selector-scroll" style="padding: 8px 0;"></div>
-    </div>
+  <!-- Other Modals -->
+  <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')">
+    <div class="modal-content"><div class="modal-header"><span>الذهاب إلى صفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')">✕</button></div>
+    <div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div>
+    <div class="manual-input-group"><input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة" oninput="syncPickerWithInput()" onkeydown="if(event.key==='Enter') confirmPageSelection()"><button class="btn-go" onclick="confirmPageSelection()">انتقال</button></div></div>
   </div>
 
-  <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')"><div class="modal-content"><div class="modal-header"><span>الذهاب إلى صفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')">✕</button></div><div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div><div class="manual-input-group"><input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة" oninput="syncPickerWithInput()" onkeydown="if(event.key==='Enter') confirmPageSelection()"><button class="btn-go" onclick="confirmPageSelection()">انتقال</button></div></div></div>
-  <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')"><div class="modal-content"><div class="modal-header"><span>المفضلة</span><button class="close-btn" onclick="closeModal('bookmarksModal')">✕</button></div><div class="selector-scroll" id="bookmarksList"></div></div></div>
-  <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')"><div class="modal-content"><div class="modal-header"><span>اختر سورة</span><button class="close-btn" onclick="closeModal('surahSelectorModal')">✕</button></div><input class="search-input" id="surahSearch" type="search" placeholder="ابحث عن سورة..." oninput="filterSurahs(this.value)" autocomplete="off"><div class="selector-scroll" id="surahList"></div></div></div>
-  <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')"><div class="modal-content"><div class="modal-header"><span>اختر جزءًا</span><button class="close-btn" onclick="closeModal('juzSelectorModal')">✕</button></div><div class="selector-scroll" id="juzList"></div></div></div>
-
-  <div class="context-menu" id="contextMenu" style="display:none;">
-      <div class="context-handle"></div>
-      <div class="context-info" id="contextInfo"></div>
-      <div class="context-buttons">
-          <button class="context-btn primary" id="contextBookmarkBtn" onclick="contextToggleBookmark()">☆ إضافة للمفضلة</button>
-      </div>
+  <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')">
+    <div class="modal-content"><div class="modal-header"><span>المفضلة</span><button class="close-btn" onclick="closeModal('bookmarksModal')">✕</button></div>
+    <div class="selector-scroll" id="bookmarksList"></div></div>
   </div>
-  <div id="contextOverlay" style="display:none;position:fixed;inset:0;z-index:199;" onclick="closeContextMenu()"></div>
+
+  <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')">
+    <div class="modal-content"><div class="modal-header"><span>اختر سورة</span><button class="close-btn" onclick="closeModal('surahSelectorModal')">✕</button></div>
+    <input class="search-input" id="surahSearch" type="search" placeholder="ابحث عن سورة..." oninput="filterSurahs(this.value)" autocomplete="off">
+    <div class="selector-scroll" id="surahList"></div></div>
+  </div>
+
+  <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')">
+    <div class="modal-content"><div class="modal-header"><span>اختر جزءًا</span><button class="close-btn" onclick="closeModal('juzSelectorModal')">✕</button></div>
+    <div class="selector-scroll" id="juzList"></div></div>
+  </div>
 
   <script src="js/quran-common.js"></script>
-
   <script>
     // ========== VERSION MANAGEMENT ==========
-    const versions = [
-      { id: 'mushaf', name: 'مصحف المدينة', path: 'mushaf/', thumb: 'mushaf/thumbnail.png', desc: ' بدون إطار' },
-      { id: 'mushaf-2', name: 'مصحف المدينة 2', path: 'mushaf-2/', thumb: 'mushaf-2/thumbnail.png', desc: ' إطار بني' }
-    ];
+    let currentMushafVersion = localStorage.getItem('quranVersion') || 'mushaf-3'; // 'mushaf-3' = نسخة 1 , 'mushaf-2' = نسخة 2
+    let isZoomed = true; // zoom is enabled by default
 
-    let currentVersion = localStorage.getItem('quranVersion') || 'mushaf';
-    let currentVersionPath = getVersionPath(currentVersion);
-
-    function getVersionPath(versionId) {
-      const ver = versions.find(v => v.id === versionId);
-      return ver ? ver.path : 'mushaf/';
+    function setMushafVersion(version) {
+      if (version !== currentMushafVersion) {
+        currentMushafVersion = version;
+        localStorage.setItem('quranVersion', version);
+        // reset zoom when version changes
+        resetZoom();
+        updateVersionButtonsUI();
+        updateVersionThumbnail();
+        updateVersionSpecificElements();
+        updateContent();
+        showCustomToast(`تم التبديل إلى ${version === 'mushaf-3' ? 'نسخة 1' : 'نسخة 2'}`);
+      }
     }
 
-    function setVersion(versionId) {
-      currentVersion = versionId;
-      currentVersionPath = getVersionPath(versionId);
-      localStorage.setItem('quranVersion', versionId);
-      // Reload current page image
-      if (typeof updateContent === 'function') updateContent();
-      // Also reload adjacent preload
-      if (typeof preloadAdjacentPages === 'function') preloadAdjacentPages();
-      showCustomToast(`تم التبديل إلى ${versions.find(v => v.id === versionId).name}`);
+    function updateVersionSpecificElements() {
+      if (currentMushafVersion === 'mushaf-2') {
+        document.body.classList.add('version-mushaf-2');
+      } else {
+        document.body.classList.remove('version-mushaf-2');
+      }
     }
-
-    function openVersionSelectorModal() {
-      const modal = document.getElementById('versionSelectorModal');
-      if (!modal) return;
-      const container = document.getElementById('versionList');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      versions.forEach(ver => {
-        const item = document.createElement('div');
-        item.className = 'version-item';
-        item.onclick = () => {
-          setVersion(ver.id);
-          closeModal('versionSelectorModal');
-        };
-        
-        const thumb = document.createElement('img');
-        thumb.className = 'version-thumb';
-        thumb.src = ver.thumb;
-        thumb.onerror = () => { thumb.src = 'mushaf/placeholder.png'; };
-        
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'version-info';
-        infoDiv.innerHTML = `<div class="version-name">${ver.name}</div><div class="version-desc">${ver.desc}</div>`;
-        
-        item.appendChild(thumb);
-        item.appendChild(infoDiv);
-        container.appendChild(item);
-      });
-      modal.classList.add('active');
-    }
-
-    // ========== IMAGE LOADING WITH PADDED & UNPADDED FALLBACK ==========
-    function formatPageNumber(pageNum) {
-      return String(pageNum).padStart(3, '0');
-    }
-
-    function loadPageImage(imgElement, pageNum) {
-      if (!imgElement) return;
-      const padded = formatPageNumber(pageNum);
-      const unpadded = pageNum.toString();
-      const basePath = currentVersionPath;
-      
-      let attempt = 0;
-      const urls = [
-        `${basePath}${padded}.png`,
-        `${basePath}${unpadded}.png`
-      ];
-      
-      function tryNext() {
-        if (attempt >= urls.length) {
-          imgElement.src = `${basePath}placeholder.png`;
-          console.warn(`Failed to load page ${pageNum} from any format`);
-          return;
+    
+    function updateVersionButtonsUI() {
+      const btn1 = document.getElementById('version1Btn');
+      const btn2 = document.getElementById('version2Btn');
+      if (btn1 && btn2) {
+        if (currentMushafVersion === 'mushaf-3') {
+          btn1.classList.add('active');
+          btn2.classList.remove('active');
+        } else {
+          btn2.classList.add('active');
+          btn1.classList.remove('active');
         }
-        const url = urls[attempt];
-        imgElement.src = url;
-        imgElement.onload = () => {
-          console.log(`Loaded: ${url}`);
-        };
-        imgElement.onerror = () => {
-          attempt++;
-          tryNext();
+      }
+    }
+    
+    function updateVersionThumbnail() {
+      const thumbImg = document.getElementById('versionThumbImg');
+      if (thumbImg) {
+        thumbImg.src = `${currentMushafVersion}/thumbnail.png`;
+        thumbImg.onerror = () => {
+          thumbImg.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="%23888"%3E%3Crect width="24" height="24" rx="4" stroke-width="1.5"/%3E%3Ctext x="12" y="17" text-anchor="middle" font-size="12"%3E📖%3C/text%3E%3C/svg%3E';
         };
       }
-      tryNext();
+    }
+    
+    // ========== ZOOM FUNCTIONALITY (non-uniform scales) ==========
+    function getZoomScaleForVersion() {
+      // returns { scaleX, scaleY }
+      if (currentMushafVersion === 'mushaf-3') {
+        // نسخة 1: scaleX = 1.1, scaleY = 1.15
+        return { scaleX: 1.1, scaleY: 1.15 };
+      } else {
+        // نسخة 2: scaleX = 1.2, scaleY = 1.21
+        return { scaleX: 1.2, scaleY: 1.21 };
+      }
     }
 
-    // Core update function (UPDATED: adds data-ver attribute)
-    function updateContent() {
+    function applyZoom(zoom) {
       const img = document.getElementById('pageImg');
-      if (img && currentPage) {
-        loadPageImage(img, currentPage);
-        // Set the data-ver attribute to apply version-specific zoom
-        img.setAttribute('data-ver', currentVersion);
+      if (!img) return;
+      if (zoom) {
+        const { scaleX, scaleY } = getZoomScaleForVersion();
+        img.style.transform = `scaleX(${scaleX}) scaleY(${scaleY})`;
+        isZoomed = true;
+      } else {
+        img.style.transform = 'none';
+        isZoomed = false;
       }
-      if (typeof updateMeta === 'function') updateMeta();
-      if (typeof updateBookmarkStar === 'function') updateBookmarkStar();
-      if (typeof updateToggleLink === 'function') updateToggleLink();
-      localStorage.setItem('lastPage', currentPage);
     }
 
-    // Expose globally
-    window.updateContent = updateContent;
+    function resetZoom() {
+      applyZoom(false);
+    }
 
+    function toggleZoom() {
+      if (isZoomed) {
+        resetZoom();
+      } else {
+        applyZoom(true);
+      }
+    }
+
+    // Double-tap / double-click handler
+    function setupDoubleTapZoom() {
+      const img = document.getElementById('pageImg');
+      if (!img) return;
+      let lastTap = 0;
+      img.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        const diff = now - lastTap;
+        if (diff < 300 && diff > 0) {
+          e.preventDefault();
+          toggleZoom();
+        }
+        lastTap = now;
+      });
+      img.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        toggleZoom();
+      });
+    }
+    
+    // ========== CORE FUNCTIONALITY ==========
+    function showCustomToast(message) {
+      const toast = document.getElementById('customToast');
+      if (!toast) return;
+      toast.innerHTML = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    function openSettingsModal() {
+      updateVersionButtonsUI();
+      updateVersionThumbnail();
+      document.getElementById('settingsModal').classList.add('active');
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    
+    function handleOverlayClick(event, modalId) {
+      if (event.target === document.getElementById(modalId)) closeModal(modalId);
+    }
+    
+    // Page navigation with version folder
+    function updateContent() {
+      const formattedPage = currentPage.toString().padStart(3, '0');
+      const img = document.getElementById('pageImg');
+      img.src = `${currentMushafVersion}/${formattedPage}.png`;
+      img.onerror = () => { img.src = `${currentMushafVersion}/placeholder.png`; };
+      // Apply current zoom state (preserves user's preference)
+      applyZoom(isZoomed);
+      updateMeta();
+      localStorage.setItem('lastPage', currentPage);
+      updateBookmarkStar();
+      updatePageLabels();
+    }
+    
+    function updatePageLabels() {
+      const juz = getCurrentJuz();
+      const surah = getCurrentSurah();
+      const juzLabel = document.getElementById('juzLabel');
+      const surahLabel = document.getElementById('surahLabel');
+      const pageLabel = document.getElementById('pageLabel');
+      if (juzLabel && juz) juzLabel.textContent = `الجزء ${juz.number}`;
+      if (surahLabel && surah) surahLabel.textContent = surah.name;
+      if (pageLabel) pageLabel.textContent = currentPage;
+    }
+    
     function updateToggleLink() {
       const toggleBtn = document.getElementById('viewToggleBtn');
       if (toggleBtn) toggleBtn.href = `quran-text.html?page=${currentPage}`;
     }
-
-    // Override preloadAdjacentPages to try both formats
-    const originalPreload = window.preloadAdjacentPages;
-    window.preloadAdjacentPages = function() {
-      if (!currentPage) return;
-      const pages = [currentPage - 1, currentPage + 1];
-      pages.forEach(p => {
-        if (p >= 1 && p <= totalPages) {
-          const padded = formatPageNumber(p);
-          const unpadded = p.toString();
-          const base = currentVersionPath;
-          const img1 = new Image();
-          img1.src = `${base}${padded}.png`;
-          const img2 = new Image();
-          img2.src = `${base}${unpadded}.png`;
-        }
-      });
-    };
-
-    // Override cacheAllPages to cache both formats
-    window.cacheAllPages = async function() {
-      const versionName = versions.find(v => v.id === currentVersion).name;
-      showCustomToast(`🔄 بدء تحميل جميع صفحات ${versionName}...`);
-      try {
-        const cache = await caches.open(`quran-pages-${currentVersion}`);
-        let successCount = 0;
-        for (let i = 1; i <= 604; i++) {
-          const padded = formatPageNumber(i);
-          const unpadded = i.toString();
-          const base = currentVersionPath;
-          const urls = [`${base}${padded}.png`, `${base}${unpadded}.png`];
-          let pageCached = false;
-          for (let url of urls) {
-            try {
-              const response = await fetch(url);
-              if (response.ok) {
-                await cache.put(url, response);
-                successCount++;
-                pageCached = true;
-                break;
-              }
-            } catch (err) {
-              // continue to next format
-            }
-          }
-          if (successCount % 50 === 0 && successCount > 0) showCustomToast(`✅ تم تخزين ${successCount} صفحة`);
-        }
-        showCustomToast(`🎉 اكتمل التحميل! تم تخزين ${successCount} صفحة بنجاح.`);
-      } catch (err) {
-        showCustomToast("❌ حدث خطأ أثناء التحميل، تأكد من الاتصال بالإنترنت.");
-        console.error(err);
-      }
-    };
-
-    // Ensure goToPage works with new version
-    const originalGoToPage = window.goToPage;
-    window.goToPage = function(pageNum) {
-      if (pageNum >= 1 && pageNum <= totalPages) {
-        currentPage = pageNum;
-        updateContent();
-        if (typeof preloadAdjacentPages === 'function') preloadAdjacentPages();
-        updateToggleLink();
-      }
-    };
-
-    // Adjust navigateTo
-    const originalNavigateTo = typeof navigateTo === 'function' ? navigateTo : function(){};
-    window.navigateTo = function(newPage, direction) { 
-      originalNavigateTo(newPage, direction); 
+    
+    const originalNavigateTo = typeof navigateTo === 'function' ? navigateTo : function () { };
+    navigateTo = function (newPage, direction) {
+      originalNavigateTo(newPage, direction);
       setTimeout(updateToggleLink, 300);
     };
-
-    // ========== EXISTING FUNCTIONS ==========
-    function showCustomToast(message) {
-        const toast = document.getElementById('customToast');
-        if(!toast) return;
-        toast.innerHTML = message; toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    function openSettingsModal() {
-        const modal = document.getElementById('settingsModal');
-        if (modal) modal.classList.add('active');
-    }
-
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) modal.classList.remove('active');
-    }
-
-    function handleOverlayClick(event, modalId) {
-        if (event.target === event.currentTarget) closeModal(modalId);
-    }
-
-    function openBookmarksModal() {
-        const modal = document.getElementById('bookmarksModal');
-        if (modal) modal.classList.add('active');
-        if (typeof loadBookmarks === 'function') loadBookmarks();
-    }
-
-    // ========== GLOBAL QURAN SEARCH LOGIC ==========
-    let searchOverlayActive = false; let searchTimeout = null;
-
+    
+    // ========== GLOBAL SEARCH ==========
+    let searchOverlayActive = false;
+    let searchTimeout = null;
+    
     function toggleSearchOverlay(action = 'toggle') {
       const overlay = document.getElementById('searchOverlay');
       if (action === 'close') searchOverlayActive = false;
-      else if (action === 'jump') searchOverlayActive = false; 
+      else if (action === 'jump') searchOverlayActive = false;
       else searchOverlayActive = !searchOverlayActive;
       overlay.classList.toggle('active', searchOverlayActive);
-      if (searchOverlayActive) { document.getElementById('searchInput').focus(); } 
+      if (searchOverlayActive) document.getElementById('searchInput').focus();
       else if (action === 'close') {
         document.getElementById('searchInput').value = '';
         document.getElementById('searchResults').innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>';
       }
     }
-
+    
     function handleGlobalSearch(query) {
       query = query.trim();
       const resultsDiv = document.getElementById('searchResults');
-      if (!query) { resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث (مطابقة تامة)...</div>'; return; }
+      if (!query) {
+        resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث (مطابقة تامة)...</div>';
+        return;
+      }
       resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color: var(--accent);">جاري البحث في القرآن الكريم... ⏳</div>';
-
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-          fetch(`https://api.alquran.cloud/v1/search/${query}/all/quran-simple-clean`)
+        fetch(`https://api.alquran.cloud/v1/search/${query}/all/quran-simple-clean`)
           .then(res => res.json())
           .then(data => {
-              if (data.code === 200 && data.data.count > 0) {
-                  const exactRegex = new RegExp('(^|[^\\p{L}])' + query + '([^\\p{L}]|$)', 'ui');
-                  const exactMatches = data.data.matches.filter(m => exactRegex.test(m.text));
-                  if (exactMatches.length > 0) {
-                      let html = `<div style="text-align:center; margin-bottom: 10px; color: var(--accent); font-weight: bold; font-size: 14px;">تم العثور على ${exactMatches.length} نتيجة</div>`;
-                      html += exactMatches.map(m => `
-                          <div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
-                              <div class="res-meta">سورة ${m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim()} - آية ${m.numberInSurah}</div>
-                              <div class="res-text">${m.text.replace(new RegExp('(^|[^\\p{L}])(' + query + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div>
-                          </div>
-                      `).join('');
-                      resultsDiv.innerHTML = html;
-                  } else resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px;">لا توجد كلمة مطابقة تماماً لـ "'+ query +'"</div>';
-              } else resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px;">لا توجد نتائج لـ "'+ query +'"</div>';
-          }).catch(err => { resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color:#ef4444;">تعذر البحث، تأكد من الاتصال 🌐</div>'; });
-      }, 500); 
+            if (data.code === 200 && data.data.count > 0) {
+              const exactRegex = new RegExp('(^|[^\\p{L}])' + query + '([^\\p{L}]|$)', 'ui');
+              const exactMatches = data.data.matches.filter(m => exactRegex.test(m.text));
+              if (exactMatches.length > 0) {
+                let html = `<div style="text-align:center; margin-bottom: 10px; color: var(--accent); font-weight: bold;">${exactMatches.length} نتيجة</div>`;
+                html += exactMatches.map(m => `
+                  <div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
+                    <div class="res-meta">سورة ${m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim()} - آية ${m.numberInSurah}</div>
+                    <div class="res-text">${m.text.replace(new RegExp('(^|[^\\p{L}])(' + query + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div>
+                  </div>
+                `).join('');
+                resultsDiv.innerHTML = html;
+              } else {
+                resultsDiv.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد كلمة مطابقة تماماً لـ "' + query + '"</div>';
+              }
+            } else {
+              resultsDiv.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج لـ "' + query + '"</div>';
+            }
+          })
+          .catch(() => resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">تعذر البحث، تأكد من الاتصال 🌐</div>');
+      }, 500);
     }
-
+    
     function jumpToSearchResult(ayahNumber) {
-        const resultsDiv = document.getElementById('searchResults');
-        resultsDiv.innerHTML = '<div style="text-align:center; padding:30px; font-size:16px; color: var(--accent); font-weight:bold;">جاري الانتقال للصفحة... ⏳</div>';
-        let cachedPage = localStorage.getItem('ayah_page_v1_' + ayahNumber);
-        if (cachedPage) { executeJump(parseInt(cachedPage)); } 
-        else {
-            fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.code === 200) {
-                        const targetPage = data.data.page;
-                        localStorage.setItem('ayah_page_v1_' + ayahNumber, targetPage);
-                        executeJump(targetPage);
-                    }
-                }).catch(() => { resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">حدث خطأ.</div>'; });
-        }
+      const resultsDiv = document.getElementById('searchResults');
+      resultsDiv.innerHTML = '<div style="text-align:center; padding:30px; font-size:16px; color: var(--accent);">جاري الانتقال للصفحة... ⏳</div>';
+      let cachedPage = localStorage.getItem('ayah_page_v1_' + ayahNumber);
+      if (cachedPage) executeJump(parseInt(cachedPage));
+      else {
+        fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`)
+          .then(res => res.json())
+          .then(data => { if (data.code === 200) { localStorage.setItem('ayah_page_v1_' + ayahNumber, data.data.page); executeJump(data.data.page); } })
+          .catch(() => resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">حدث خطأ.</div>');
+      }
     }
-
+    
     function executeJump(targetPage) {
-        toggleSearchOverlay('jump'); 
-        if (typeof goToPage === 'function') { goToPage(targetPage); } else { currentPage = targetPage; updateContent(); }
-        showCustomToast(`تم الانتقال إلى صفحة ${targetPage}`);
+      toggleSearchOverlay('jump');
+      goToPage(targetPage);
+      showCustomToast(`تم الانتقال إلى صفحة ${targetPage}`);
     }
-
+    
+    // ========== PAGE SELECTOR ==========
+    function updatePickerInput() {
+      const scroll = document.getElementById('pagePickerScroll');
+      const selected = Math.round(scroll.scrollTop / 50) + 1;
+      document.getElementById('gotoPageInput').value = selected;
+    }
+    function syncPickerWithInput() {
+      const val = parseInt(document.getElementById('gotoPageInput').value);
+      if (!isNaN(val) && val >= 1 && val <= 604) document.getElementById('pagePickerScroll').scrollTop = (val - 1) * 50;
+    }
+    function confirmPageSelection() {
+      const page = parseInt(document.getElementById('gotoPageInput').value);
+      if (page >= 1 && page <= 604) { goToPage(page); closeModal('pageSelectorModal'); }
+      else showCustomToast('رقم الصفحة غير صحيح (1-604)');
+    }
+    
+    // ========== BOOKMARKS ==========
+    function toggleBookmark() {
+      const surah = getCurrentSurah();
+      if (!surah) return;
+      let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
+      const key = `page_${currentPage}`;
+      const exists = bookmarks.find(b => b.key === key);
+      if (exists) { bookmarks = bookmarks.filter(b => b.key !== key); showCustomToast('تمت إزالة العلامة'); }
+      else { bookmarks.push({ key, surah: surah.name, page: currentPage }); showCustomToast('تمت إضافة العلامة'); }
+      localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+      updateBookmarkStar();
+    }
+    function updateBookmarkStar() {
+      const btn = document.getElementById('bookmarkBtn');
+      const bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
+      btn.classList.toggle('active', bookmarks.some(b => b.key === `page_${currentPage}`));
+    }
+    function openBookmarksModal() {
+      const list = document.getElementById('bookmarksList');
+      const bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
+      if (!bookmarks.length) list.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد علامات</div>';
+      else {
+        list.innerHTML = '';
+        bookmarks.forEach(b => {
+          const div = document.createElement('div');
+          div.className = 'selection-item';
+          div.textContent = `${b.surah} - صفحة ${b.page}`;
+          div.onclick = () => { goToPage(b.page); closeModal('bookmarksModal'); };
+          list.appendChild(div);
+        });
+      }
+      document.getElementById('bookmarksModal').classList.add('active');
+    }
+    
+    // ========== SURAH & JUZ ==========
+    function openSurahSelector() {
+      const list = document.getElementById('surahList');
+      list.innerHTML = '';
+      SURAH_MAP.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'selection-item';
+        div.textContent = `${s.number}. ${s.name}`;
+        div.onclick = () => { goToPage(s.page); closeModal('surahSelectorModal'); };
+        list.appendChild(div);
+      });
+      document.getElementById('surahSelectorModal').classList.add('active');
+    }
+    function openJuzSelector() {
+      const list = document.getElementById('juzList');
+      list.innerHTML = '';
+      for (let i = 1; i <= 30; i++) {
+        const div = document.createElement('div');
+        div.className = 'selection-item';
+        div.textContent = `الجزء ${i}`;
+        div.onclick = () => { goToPage(JUZ_START_PAGES[i-1]); closeModal('juzSelectorModal'); };
+        list.appendChild(div);
+      }
+      document.getElementById('juzSelectorModal').classList.add('active');
+    }
+    function openPageSelector() {
+      const scroll = document.getElementById('pagePickerScroll');
+      scroll.innerHTML = '';
+      for (let i = 1; i <= 604; i++) { const div = document.createElement('div'); div.textContent = i; scroll.appendChild(div); }
+      scroll.scrollTop = (currentPage - 1) * 50;
+      document.getElementById('pageSelectorModal').classList.add('active');
+    }
+    function filterSurahs(query) {
+      const list = document.getElementById('surahList');
+      const filtered = SURAH_MAP.filter(s => s.name.includes(query));
+      list.innerHTML = '';
+      filtered.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'selection-item';
+        div.textContent = `${s.number}. ${s.name}`;
+        div.onclick = () => { goToPage(s.page); closeModal('surahSelectorModal'); };
+        list.appendChild(div);
+      });
+    }
+    
+    // ========== CACHE ==========
+    function cacheAllPages() {
+      const btn = document.getElementById('offlineDownloadBtn');
+      btn.disabled = true;
+      btn.textContent = 'جاري التحميل...';
+      let count = 0;
+      const total = 604;
+      const cacheName = `quran-pages-${currentMushafVersion}`;
+      caches.open(cacheName).then(cache => {
+        for (let i = 1; i <= total; i++) {
+          const page = i.toString().padStart(3, '0');
+          const url = `${currentMushafVersion}/${page}.png`;
+          fetch(url).then(res => { if(res.ok) cache.put(url, res.clone()); count++; if(count===total) finish(); }).catch(()=>{ count++; if(count===total) finish(); });
+        }
+        function finish() { btn.disabled = false; btn.textContent = 'تم التحميل ✔️'; setTimeout(()=> btn.textContent = '⬇ تحميل جميع الصفحات (المصورة)', 3000); }
+      });
+    }
+    
+    // ========== LONG PRESS: open settings modal ==========
+    function setupLongPressToSettings() {
+      const img = document.getElementById('pageImg');
+      let pressTimer = null;
+      img.addEventListener('touchstart', (e) => {
+        pressTimer = setTimeout(() => {
+          openSettingsModal();
+          e.preventDefault();
+        }, 600);
+      });
+      img.addEventListener('touchend', () => clearTimeout(pressTimer));
+      img.addEventListener('touchmove', () => clearTimeout(pressTimer));
+      img.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        openSettingsModal();
+      });
+    }
+    
     // ========== INITIALIZATION ==========
-    window.onload = function() {
+    window.onload = function () {
+      if (typeof currentPage === 'undefined') window.currentPage = 1;
+      if (typeof totalPages === 'undefined') window.totalPages = 604;
+      if (typeof SURAH_MAP === 'undefined') window.SURAH_MAP = [];
+      if (typeof JUZ_START_PAGES === 'undefined') window.JUZ_START_PAGES = [];
+      if (typeof getCurrentSurah === 'undefined') window.getCurrentSurah = function () { return null; };
+      if (typeof getCurrentJuz === 'undefined') window.getCurrentJuz = function () { return null; };
+      if (typeof updateMeta === 'undefined') window.updateMeta = function () { };
+      if (typeof goToPage === 'undefined') {
+        window.goToPage = function (page) {
+          if (page >= 1 && page <= totalPages) { currentPage = page; updateContent(); }
+        };
+      }
+      
       const urlParams = new URLSearchParams(window.location.search);
       const pageParam = urlParams.get('page');
-      if (pageParam) { const page = parseInt(pageParam); if (page >= 1 && page <= totalPages) { currentPage = page; } }
-      const savedTheme = localStorage.getItem('quranTheme') || 'light'; document.body.setAttribute('data-theme', savedTheme);
+      if (pageParam) { const p = parseInt(pageParam); if (p>=1 && p<=totalPages) currentPage = p; }
+      else { const saved = parseInt(localStorage.getItem('lastPage')); if (saved && saved>=1 && saved<=totalPages) currentPage = saved; }
       
-      if(typeof commonInit === 'function') commonInit();
+      const savedTheme = localStorage.getItem('quranTheme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
+      if (typeof commonInit === 'function') commonInit();
       
-      updateToggleLink(); updateContent();
-      if(typeof preloadAdjacentPages === 'function') preloadAdjacentPages();
+      // version buttons
+      document.getElementById('version1Btn').addEventListener('click', () => setMushafVersion('mushaf-3'));
+      document.getElementById('version2Btn').addEventListener('click', () => setMushafVersion('mushaf-2'));
+      updateVersionButtonsUI();
+      updateVersionThumbnail();
+      updateVersionSpecificElements();
+      
+      updateContent();
+      updateToggleLink();
+      setupLongPressToSettings();
+      setupDoubleTapZoom();
     };
-
+    
     function goHome() { window.location.href = 'index.html'; }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
   </script>
-  <script> if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(console.warn); } </script>
 </body>
 </html>
