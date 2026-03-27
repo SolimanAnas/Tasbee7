@@ -2,10 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>حصن المسلم Pro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    /* ========== LOCAL FONTS ========== */
+    /* Scheherazade for body text */
+    @font-face {
+      font-family: 'Scheherazade';
+      src: url('fonts/Scheherazade.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Scheherazade';
+      src: url('fonts/Scheherazade.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    /* Amiri for headers / titles */
+    @font-face {
+      font-family: 'Amiri';
+      src: url('fonts/Amiri.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Amiri';
+      src: url('fonts/Amiri.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ========== THEMES (Solid Backgrounds + Glassy Elements) ========== */
     :root {
       --bg: #f4f7f9;
       --header-bg: linear-gradient(135deg, #2c3e50, #34495e);
@@ -13,8 +46,13 @@
       --text: #1a1a1a;
       --text-muted: #666;
       --accent: #3498db;
+      --accent-bg: rgba(52, 152, 219, 0.1);
       --border: #e1e8ed;
       --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      
+      /* Glass variables for Light Theme */
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.4);
     }
 
     [data-theme="sepia"] {
@@ -23,6 +61,12 @@
       --text: #5b4636;
       --text-muted: #8c7769;
       --border: #e6dfcc;
+      --accent: #b87333;
+      --accent-bg: rgba(184, 115, 51, 0.1);
+      
+      /* Glass variables for Sepia Theme */
+      --glass-bg: rgba(253, 246, 227, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.3);
     }
 
     [data-theme="dark"] {
@@ -32,15 +76,21 @@
       --text-muted: #b0b0b0;
       --border: #333;
       --header-bg: #1a1a1a;
+      --accent: #34D399; /* لون أخضر عصري للوضع الداكن */
+      --accent-bg: rgba(52, 211, 153, 0.1);
+      
+      /* Glass variables for Dark Theme */
+      --glass-bg: rgba(30, 30, 30, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.05);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
     body {
-      font-family: 'Amiri', serif !important;
+      font-family: 'Scheherazade', 'Amiri', serif !important;
       background: var(--bg);
       color: var(--text);
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, color 0.3s ease;
       line-height: 1.6;
       overflow-x: hidden;
     }
@@ -100,58 +150,63 @@
       border-radius: 12px;
       border: none;
       background: rgba(255,255,255,0.95);
-      font-family: 'Amiri', serif !important;
+      font-family: 'Scheherazade', 'Amiri', serif !important;
       font-size: 0.95rem;
       outline: none;
     }
 
-    /* --- Bottom Nav --- */
+    /* --- Bottom Nav (Glassmorphism) --- */
     .bottom-nav {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--card-bg);
-      border: 1px solid var(--border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
       padding: 8px 15px;
-      border-radius: 25px;
+      border-radius: 30px;
       display: flex;
       gap: 15px;
       align-items: center;
       box-shadow: 0 8px 24px rgba(0,0,0,0.15);
       z-index: 999;
+      width: 90%;
+      max-width: 400px;
     }
 
     .nav-btn {
       background: none;
       border: none;
       color: var(--text);
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       cursor: pointer;
+      padding: 5px 10px;
+    }
+    
+    .custom-select-btn {
+      flex: 1; 
+      background: transparent; 
+      border: none; 
+      color: var(--text);
+      font-family: 'Amiri', 'Scheherazade', serif !important; 
+      font-size: 1.15rem; 
+      font-weight: bold;
+      text-align: center; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      cursor: pointer; 
       padding: 5px;
     }
 
-    /* --- FIXED MENU FONT (AMIRI) --- */
-    #section-select {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-family: 'Amiri', serif !important; 
-      font-size: 1.15rem;
-      font-weight: 700;
-      max-width: 160px;
-      outline: none;
-      cursor: pointer;
-      text-align: center;
-      direction: rtl;
-    }
-
-    #section-select option {
-      font-family: 'Amiri', serif !important;
-      font-size: 1.1rem;
-      background: var(--card-bg);
-      color: var(--text);
-      direction: rtl;
+    /* --- HEADERS --- */
+    .section-title,
+    .search-result-title,
+    .card-header-title {
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      font-weight: bold;
     }
 
     /* --- Content --- */
@@ -167,9 +222,7 @@
     }
 
     .section-title {
-      font-family: 'Amiri', serif !important;
       font-size: 2.1rem;
-      font-weight: 700;
       color: var(--accent);
       margin-bottom: 5px;
     }
@@ -189,7 +242,7 @@
     }
 
     .card-arabic {
-      font-family: 'Amiri', serif !important;
+      font-family: 'Scheherazade', 'Amiri', serif !important;
       font-size: 1.75rem;
       line-height: 1.8;
       margin-bottom: 15px;
@@ -202,7 +255,7 @@
       color: var(--text-muted);
       border-top: 1px solid var(--border);
       padding-top: 10px;
-      font-family: 'Amiri', serif !important;
+      font-family: 'Scheherazade', 'Amiri', serif !important;
     }
 
     /* --- Themes --- */
@@ -219,13 +272,51 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
+    /* --- Custom Modal Dropdown (Glassmorphism) --- */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    
+    .modal-content {
+      background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 600px; max-height: 70vh; display: flex; flex-direction: column;
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.1); padding-bottom: env(safe-area-inset-bottom);
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+
+    .modal-header {
+      padding: 15px; text-align: center; border-bottom: 1px solid var(--border);
+      font-family: 'Amiri', 'Scheherazade', serif !important; font-weight: bold; font-size: 1.2rem;
+      position: relative; color: var(--text);
+    }
+    .close-modal { position: absolute; left: 15px; top: 15px; background: none; border: none; color: var(--text); font-size: 1.2rem; cursor: pointer; }
+    
+    .modal-body {
+      overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px;
+    }
+    .menu-item {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 15px; color: var(--text); font-family: 'Amiri', 'Scheherazade', serif !important;
+      font-size: 1.1rem; text-align: right; cursor: pointer; transition: 0.2s;
+    }
+    .menu-item:active { transform: scale(0.98); }
+    .menu-item.active-item { 
+      border-color: var(--accent); 
+      color: var(--accent); 
+      background: var(--accent-bg); 
+    }
+
     .hidden { display: none !important; }
     .highlight { background: #fff9c4 !important; color: #000 !important; }
 
     @media (max-width: 480px) {
       .card-arabic { font-size: 1.55rem; }
       .section-title { font-size: 1.7rem; }
-      #section-select { max-width: 135px; }
     }
   </style>
 </head>
@@ -252,15 +343,26 @@
       <h1 id="main-title" class="section-title">حصن المسلم</h1>
     </div>
     <div id="content-area">
-      <div style="text-align:center; padding:50px;">جاري التحميل بجمال الخط العربي...</div>
+      <div style="text-align:center; padding:50px;">جاري التحميل بخط شهريزاد الأصيل...</div>
     </div>
   </main>
 
   <nav class="bottom-nav">
     <button class="nav-btn" onclick="nav('next')">›</button>
-    <select id="section-select"></select>
+    <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()">اختر الباب</button>
     <button class="nav-btn" onclick="nav('prev')">‹</button>
   </nav>
+
+  <div class="modal-overlay" id="menuModal" onclick="if(event.target===this) closeMenu()">
+    <div class="modal-content">
+      <div class="modal-header">
+        فهرس الأبواب
+        <button class="close-modal" onclick="closeMenu()">✕</button>
+      </div>
+      <div class="modal-body" id="menuList">
+        </div>
+    </div>
+  </div>
 
   <script>
     const App = {
@@ -292,47 +394,72 @@
       ));
       
       App.data = results.flat();
-      buildUI();
+      buildMenu();
       render();
     }
 
-    // Helper function to remove Tashkeel
+    // Helper function to remove Tashkeel (diacritics)
     function normalizeText(text) {
         return text.replace(/[ًٌٍَُِّْـ]/g, '');
     }
 
-    function buildUI() {
-      const select = document.getElementById('section-select');
-      App.data.forEach((sec, i) => {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = sec.title;
-        select.appendChild(opt);
+    function buildMenu() {
+      const menuList = document.getElementById('menuList');
+      menuList.innerHTML = '';
 
+      App.data.forEach((sec, i) => {
+        // بناء أزرار القائمة المنسدلة
+        const btn = document.createElement('div');
+        btn.className = 'menu-item';
+        btn.textContent = sec.title;
+        btn.onclick = () => { selectSection(i); };
+        menuList.appendChild(btn);
+
+        // بناء كشاف البحث
         sec.items.forEach((item, itemIdx) => {
           App.searchIndex.push({
             sIdx: i,
             iIdx: itemIdx,
             title: sec.title,
-            titleNorm: normalizeText(sec.title), // Store normalized title for better searching
+            titleNorm: normalizeText(sec.title),
             ar: item.ar,
             norm: normalizeText(item.ar)
           });
         });
       });
+    }
 
-      select.onchange = (e) => {
-        App.currentIdx = parseInt(e.target.value);
-        App.isSearchMode = false;
-        render();
-      };
+    function openMenu() {
+      const items = document.querySelectorAll('.menu-item');
+      items.forEach((item, idx) => {
+        if (idx === App.currentIdx && !App.isSearchMode) {
+          item.classList.add('active-item');
+          setTimeout(() => item.scrollIntoView({ block: 'center' }), 100);
+        } else {
+          item.classList.remove('active-item');
+        }
+      });
+      document.getElementById('menuModal').classList.add('active');
+    }
+
+    function closeMenu() {
+      document.getElementById('menuModal').classList.remove('active');
+    }
+
+    function selectSection(idx) {
+      App.currentIdx = idx;
+      App.isSearchMode = false;
+      closeMenu();
+      document.getElementById('search-input').value = '';
+      render();
     }
 
     function render() {
       const section = App.data[App.currentIdx];
       if (!section) return;
+      
       document.getElementById('main-title').textContent = section.title;
-      document.getElementById('section-select').value = App.currentIdx;
+      document.getElementById('customSelectBtn').textContent = section.title;
       
       const html = section.items.map((item, i) => `
         <div class="card" data-item="${i}">
@@ -361,8 +488,8 @@
       }
 
       App.isSearchMode = true;
+      document.getElementById('customSelectBtn').textContent = "نتائج البحث";
       
-      // Now searching through both normalized body text AND normalized title text
       const results = App.searchIndex.filter(x => 
           x.norm.includes(query) || x.titleNorm.includes(query)
       ).slice(0, 50);
@@ -370,7 +497,7 @@
       document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
       document.getElementById('content-area').innerHTML = results.map(r => `
         <div class="card" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer; border-right:4px solid var(--accent)">
-          <div style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri',serif;">${r.title}</div>
+          <div class="search-result-title" style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri', 'Scheherazade', serif;">${r.title}</div>
           <div class="card-arabic" style="font-size:1.35rem;">${r.ar}</div>
         </div>
       `).join('');
