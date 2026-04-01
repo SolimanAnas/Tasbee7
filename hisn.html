@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>حصن المسلم Pro</title>
   <style>
     /* ========== LOCAL FONTS ========== */
-    /* Scheherazade for body text */
     @font-face {
       font-family: 'Scheherazade';
       src: url('fonts/Scheherazade.ttf') format('truetype');
@@ -21,8 +20,6 @@
       font-style: normal;
       font-display: swap;
     }
-    
-    /* Amiri for headers / titles */
     @font-face {
       font-family: 'Amiri';
       src: url('fonts/Amiri.ttf') format('truetype');
@@ -43,28 +40,27 @@
       --bg: #f4f7f9;
       --header-bg: linear-gradient(135deg, #2c3e50, #34495e);
       --card-bg: #ffffff;
-      --text: #1a1a1a;
+      --text: #000000;
       --text-muted: #666;
       --accent: #3498db;
       --accent-bg: rgba(52, 152, 219, 0.1);
       --border: #e1e8ed;
       --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      
-      /* Glass variables for Light Theme */
       --glass-bg: rgba(255, 255, 255, 0.85);
       --glass-border: rgba(255, 255, 255, 0.4);
+      
+      /* Dynamic Font Settings */
+      --dynamic-font-size: 1.75rem;
     }
 
     [data-theme="sepia"] {
       --bg: #f4ecd8;
       --card-bg: #fdf6e3;
-      --text: #5b4636;
+      --text: #5c3a21;
       --text-muted: #8c7769;
       --border: #e6dfcc;
       --accent: #b87333;
       --accent-bg: rgba(184, 115, 51, 0.1);
-      
-      /* Glass variables for Sepia Theme */
       --glass-bg: rgba(253, 246, 227, 0.85);
       --glass-border: rgba(255, 255, 255, 0.3);
     }
@@ -72,14 +68,12 @@
     [data-theme="dark"] {
       --bg: #121212;
       --card-bg: #1e1e1e;
-      --text: #e0e0e0;
+      --text: #ffffff;
       --text-muted: #b0b0b0;
       --border: #333;
       --header-bg: #1a1a1a;
-      --accent: #34D399; /* لون أخضر عصري للوضع الداكن */
+      --accent: #34D399;
       --accent-bg: rgba(52, 211, 153, 0.1);
-      
-      /* Glass variables for Dark Theme */
       --glass-bg: rgba(30, 30, 30, 0.85);
       --glass-border: rgba(255, 255, 255, 0.05);
     }
@@ -95,7 +89,6 @@
       overflow-x: hidden;
     }
 
-    /* --- Progress Bar --- */
     #scroll-progress {
       position: fixed;
       top: 0;
@@ -107,7 +100,6 @@
       transition: width 0.1s ease;
     }
 
-    /* --- Header --- */
     header {
       background: var(--header-bg);
       color: white;
@@ -126,7 +118,7 @@
       margin: 0 auto;
     }
 
-    .home-btn {
+    .header-btn {
       background: rgba(255,255,255,0.15);
       border: none;
       border-radius: 12px;
@@ -137,7 +129,11 @@
       justify-content: center;
       cursor: pointer;
       font-size: 1.2rem;
+      text-decoration: none;
+      color: white;
+      transition: 0.2s;
     }
+    .header-btn:active { transform: scale(0.95); }
 
     .search-box {
       flex: 1;
@@ -155,7 +151,6 @@
       outline: none;
     }
 
-    /* --- Bottom Nav (Glassmorphism) --- */
     .bottom-nav {
       position: fixed;
       bottom: 20px;
@@ -201,7 +196,6 @@
       padding: 5px;
     }
 
-    /* --- HEADERS --- */
     .section-title,
     .search-result-title,
     .card-header-title {
@@ -209,7 +203,6 @@
       font-weight: bold;
     }
 
-    /* --- Content --- */
     main {
       max-width: 800px;
       margin: 0 auto;
@@ -243,11 +236,11 @@
 
     .card-arabic {
       font-family: 'Scheherazade', 'Amiri', serif !important;
-      font-size: 1.75rem;
+      font-size: var(--dynamic-font-size);
+      color: var(--dynamic-font-color, var(--text));
       line-height: 1.8;
       margin-bottom: 15px;
       text-align: justify;
-      color: var(--text);
     }
 
     .card-ref {
@@ -258,21 +251,43 @@
       font-family: 'Scheherazade', 'Amiri', serif !important;
     }
 
-    /* --- Themes --- */
+    .card-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      padding: 5px;
+    }
+    
+    .action-btn svg { width: 24px; height: 24px; }
+    .action-btn:hover { color: var(--accent); }
+    .action-btn.bookmarked { color: #f59e0b; }
+
     .theme-dock {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
+    
     .dot {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      border: 2px solid white;
+      border: 2px solid var(--border);
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* --- Custom Modal Dropdown (Glassmorphism) --- */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s;
@@ -283,7 +298,7 @@
     .modal-content {
       background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0;
-      width: 100%; max-width: 600px; max-height: 70vh; display: flex; flex-direction: column;
+      width: 100%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;
       transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       box-shadow: 0 -10px 40px rgba(0,0,0,0.1); padding-bottom: env(safe-area-inset-bottom);
     }
@@ -299,20 +314,93 @@
     .modal-body {
       overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px;
     }
+
+    /* Settings Menu Specifics */
+    .setting-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px; border-bottom: 1px solid var(--border);
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    
+    .setting-row input[type="range"] { 
+      flex: 1; margin: 0 20px; direction: ltr; accent-color: var(--accent);
+    }
+    
+    .settings-action-btn {
+      background: var(--accent); color: white; border: none; border-radius: 8px;
+      padding: 8px 15px; font-family: inherit; font-size: 1rem; cursor: pointer;
+    }
+
+    /* Enhanced Color Picker UX */
+    .color-palette {
+      display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap;
+    }
+    
+    .color-swatch {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s ease;
+    }
+    .color-swatch:active { transform: scale(0.85); }
+    
+    .reset-color-btn {
+      background: var(--card-bg); color: var(--text); font-size: 1.2rem; text-decoration: none;
+    }
+
+    .custom-color-wrapper {
+      position: relative; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background: var(--card-bg); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .custom-color-wrapper span { font-size: 1.1rem; pointer-events: none; }
+    .custom-color-wrapper input[type="color"] {
+      position: absolute; top: -10px; left: -10px; width: 50px; height: 50px; cursor: pointer; opacity: 0;
+    }
+
     .menu-item {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
       padding: 15px; color: var(--text); font-family: 'Amiri', 'Scheherazade', serif !important;
       font-size: 1.1rem; text-align: right; cursor: pointer; transition: 0.2s;
     }
     .menu-item:active { transform: scale(0.98); }
-    .menu-item.active-item { 
-      border-color: var(--accent); 
-      color: var(--accent); 
-      background: var(--accent-bg); 
+    .menu-item.active-item { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg); padding: 10px 20px;
+      border-radius: 20px; font-family: 'Amiri', serif; font-size: 1rem;
+      opacity: 0; transition: 0.3s; pointer-events: none; z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
+    #toast.show { opacity: 1; }
 
     .hidden { display: none !important; }
-    .highlight { background: #fff9c4 !important; color: #000 !important; }
+    .highlight { background: var(--accent-bg) !important; }
+
+    /* About Modal Styles */
+    .about-text {
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      font-size: 1.2rem;
+      color: var(--text);
+      line-height: 1.8;
+      text-align: center;
+      padding: 20px;
+    }
+    .about-link {
+      display: inline-block;
+      margin-top: 15px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 25px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .about-link:active { transform: scale(0.95); }
 
     @media (max-width: 480px) {
       .card-arabic { font-size: 1.55rem; }
@@ -320,21 +408,17 @@
     }
   </style>
 </head>
-<body data-theme="light">
+<body>
 
   <div id="scroll-progress"></div>
 
   <header id="header">
     <div class="toolbar">
-      <button class="home-btn" onclick="location.href='index.html'">🏠</button>
+      <a href="index.html" class="header-btn">🏠</a>
       <div class="search-box">
         <input type="text" id="search-input" placeholder="ابحث في الأذكار والعناوين...">
       </div>
-      <div class="theme-dock">
-        <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
-        <div class="dot" style="background:#f4ecd8;" onclick="setTheme('sepia')"></div>
-        <div class="dot" style="background:#333;" onclick="setTheme('dark')"></div>
-      </div>
+      <button class="header-btn" onclick="openSettings()">⚙️</button>
     </div>
   </header>
 
@@ -348,9 +432,9 @@
   </main>
 
   <nav class="bottom-nav">
-    <button class="nav-btn" onclick="nav('next')">›</button>
+    <button class="nav-btn" onclick="nav('next')">‹</button>
     <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()">اختر الباب</button>
-    <button class="nav-btn" onclick="nav('prev')">‹</button>
+    <button class="nav-btn" onclick="nav('prev')">›</button>
   </nav>
 
   <div class="modal-overlay" id="menuModal" onclick="if(event.target===this) closeMenu()">
@@ -359,12 +443,93 @@
         فهرس الأبواب
         <button class="close-modal" onclick="closeMenu()">✕</button>
       </div>
-      <div class="modal-body" id="menuList">
-        </div>
+      <div class="modal-body" id="menuList"></div>
     </div>
   </div>
 
+  <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) closeSettings()">
+    <div class="modal-content">
+      <div class="modal-header">
+        الإعدادات
+        <button class="close-modal" onclick="closeSettings()">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="setting-row">
+          <span>المفضلة</span>
+          <button class="settings-action-btn" onclick="viewBookmarks()">⭐ عرض المفضلة</button>
+        </div>
+
+        <div class="setting-row">
+          <span>المظهر</span>
+          <div class="theme-dock">
+            <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
+            <div class="dot" style="background:#f4ecd8;" onclick="setTheme('sepia')"></div>
+            <div class="dot" style="background:#333;" onclick="setTheme('dark')"></div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span>حجم الخط</span>
+          <input type="range" id="fontSizeSlider" min="1" max="3" step="0.1" value="1.75" oninput="updateFontSize(this.value)">
+        </div>
+
+        <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+          <span>لون الخط</span>
+          <div class="color-palette" style="width: 100%;">
+            <button class="color-swatch reset-color-btn" onclick="resetFontColor()" title="استعادة اللون الافتراضي للمظهر">↺</button>
+            <div class="color-swatch" style="background:#000000;" onclick="updateFontColor('#000000')"></div>
+            <div class="color-swatch" style="background:#ffffff;" onclick="updateFontColor('#ffffff')"></div>
+            <div class="color-swatch" style="background:#1b5e20;" onclick="updateFontColor('#1b5e20')"></div>
+            <div class="color-swatch" style="background:#0d47a1;" onclick="updateFontColor('#0d47a1')"></div>
+            <div class="color-swatch" style="background:#5c3a21;" onclick="updateFontColor('#5c3a21')"></div>
+            <div class="custom-color-wrapper" title="لون مخصص">
+              <span>🎨</span>
+              <input type="color" id="fontColorPicker" onchange="updateFontColor(this.value)">
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span>عن التطبيق والكتاب</span>
+          <button class="settings-action-btn" onclick="openAbout()">ℹ️ التفاصيل</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="aboutModal" onclick="if(event.target===this) closeAbout()">
+    <div class="modal-content">
+      <div class="modal-header">
+        حول الكتاب
+        <button class="close-modal" onclick="closeAbout()">✕</button>
+      </div>
+      <div class="modal-body about-text">
+        <p>هذا المحتوى مأخوذ من:</p>
+        <p style="color: var(--accent); font-weight: bold; font-size: 1.5rem; margin: 10px 0;">حصن المسلم من أذكار الكتاب والسنة</p>
+        <p>للشيخ د. سعيد بن علي بن وهف القحطاني (رحمه الله)</p>
+        
+        <br>
+        <p>لتحميل النسخة الأصلية (PDF) من صفحة رسالة الحرمين:</p>
+        <a href="https://risala.prh.gov.sa/storage/contents/51/ar_hisnulmuslim.pdf" target="_blank" class="about-link">📥 اضغط هنا للتحميل</a>
+        
+        <br><br>
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+        <p style="font-size: 1rem; color: var(--text-muted);">
+          هذا جزء من تطبيق <strong style="color: var(--text);">زاد المسلم (Zad Al-Muslim)</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">تم النسخ بنجاح</div>
+
   <script>
+    const svgCopy = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+    const svgStarOutline = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+    const svgStarFilled = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+
     const App = {
       data: [],
       currentIdx: 0,
@@ -372,9 +537,10 @@
       isSearchMode: false
     };
 
-    function setTheme(t) {
-      document.body.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
+    let bookmarks = JSON.parse(localStorage.getItem('hisnBookmarks')) || [];
+
+    function saveCurrentSection(idx) {
+      localStorage.setItem('hisnCurrentIdx', idx);
     }
 
     window.onscroll = () => {
@@ -384,9 +550,23 @@
       document.getElementById("scroll-progress").style.width = scrolled + "%";
     };
 
+    function normalizeText(text) {
+        return text.replace(/[ًٌٍَُِّْـ]/g, '');
+    }
+
     async function init() {
       const savedTheme = localStorage.getItem('theme') || 'light';
-      setTheme(savedTheme);
+      setTheme(savedTheme, true);
+
+      const savedSize = localStorage.getItem('hisnFontSize') || '1.75';
+      const savedColor = localStorage.getItem('hisnFontColor');
+      
+      document.documentElement.style.setProperty('--dynamic-font-size', savedSize + 'rem');
+      document.getElementById('fontSizeSlider').value = savedSize;
+      
+      if (savedColor) {
+        document.documentElement.style.setProperty('--dynamic-font-color', savedColor);
+      }
 
       const parts = [1, 2, 3, 4, 5];
       const results = await Promise.all(parts.map(p => 
@@ -394,28 +574,28 @@
       ));
       
       App.data = results.flat();
+      
+      const cachedIdx = parseInt(localStorage.getItem('hisnCurrentIdx'));
+      if (!isNaN(cachedIdx) && cachedIdx >= 0 && cachedIdx < App.data.length) {
+        App.currentIdx = cachedIdx;
+      }
+
       buildMenu();
       render();
-    }
-
-    // Helper function to remove Tashkeel (diacritics)
-    function normalizeText(text) {
-        return text.replace(/[ًٌٍَُِّْـ]/g, '');
     }
 
     function buildMenu() {
       const menuList = document.getElementById('menuList');
       menuList.innerHTML = '';
+      App.searchIndex = [];
 
       App.data.forEach((sec, i) => {
-        // بناء أزرار القائمة المنسدلة
         const btn = document.createElement('div');
         btn.className = 'menu-item';
         btn.textContent = sec.title;
         btn.onclick = () => { selectSection(i); };
         menuList.appendChild(btn);
 
-        // بناء كشاف البحث
         sec.items.forEach((item, itemIdx) => {
           App.searchIndex.push({
             sIdx: i,
@@ -423,10 +603,121 @@
             title: sec.title,
             titleNorm: normalizeText(sec.title),
             ar: item.ar,
-            norm: normalizeText(item.ar)
+            norm: normalizeText(item.ar),
+            ref: item.ref || ''
           });
         });
       });
+    }
+
+    function buildCardHTML(item, sIdx, iIdx, searchTitle = null) {
+      const isBookmarked = bookmarks.includes(`${sIdx}-${iIdx}`);
+      const starIcon = isBookmarked ? svgStarFilled : svgStarOutline;
+      const bmClass = isBookmarked ? 'bookmarked' : '';
+      
+      const safeText = item.ar.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+      
+      const searchHeader = searchTitle ? `<div class="search-result-title" style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri', 'Scheherazade', serif;">${searchTitle}</div>` : '';
+      const contentClick = searchTitle ? `onclick="jumpTo(${sIdx}, ${iIdx})" style="cursor:pointer;"` : '';
+      const borderStyle = searchTitle ? 'border-right:4px solid var(--accent);' : '';
+      const referenceHtml = item.ref ? `<div class="card-ref">${item.ref}</div>` : '';
+
+      return `
+        <div class="card" data-item="${iIdx}" style="${borderStyle}">
+          <div ${contentClick}>
+            ${searchHeader}
+            <div class="card-arabic">${item.ar}</div>
+            ${referenceHtml}
+          </div>
+          <div class="card-actions">
+            <button class="action-btn" onclick="copyText('${safeText}')" title="نسخ">
+              ${svgCopy}
+            </button>
+            <button class="action-btn ${bmClass}" onclick="toggleBookmark(${sIdx}, ${iIdx}, this)" title="إضافة للمفضلة">
+              ${starIcon}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const section = App.data[App.currentIdx];
+      if (!section) return;
+      
+      document.getElementById('main-title').textContent = section.title;
+      document.getElementById('customSelectBtn').textContent = section.title;
+      
+      const html = section.items.map((item, i) => buildCardHTML(item, App.currentIdx, i)).join('');
+
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+      window.scrollTo(0, 0);
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    }
+
+    function toggleBookmark(sIdx, iIdx, btnElement) {
+      const id = `${sIdx}-${iIdx}`;
+      const index = bookmarks.indexOf(id);
+      
+      if (index > -1) {
+        bookmarks.splice(index, 1);
+        btnElement.classList.remove('bookmarked');
+        btnElement.innerHTML = svgStarOutline;
+      } else {
+        bookmarks.push(id);
+        btnElement.classList.add('bookmarked');
+        btnElement.innerHTML = svgStarFilled;
+      }
+      
+      localStorage.setItem('hisnBookmarks', JSON.stringify(bookmarks));
+    }
+
+    function viewBookmarks() {
+      closeSettings();
+      App.isSearchMode = true;
+      document.getElementById('customSelectBtn').textContent = "المفضلة";
+      document.getElementById('main-title').textContent = `المفضلة (${bookmarks.length})`;
+      
+      if(bookmarks.length === 0) {
+        document.getElementById('content-area').innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-muted);'>لا توجد أذكار في المفضلة بعد</div>";
+        return;
+      }
+
+      const html = bookmarks.map(id => {
+        const [s, i] = id.split('-');
+        const item = App.data[s].items[i];
+        return buildCardHTML(item, parseInt(s), parseInt(i), App.data[s].title);
+      }).join('');
+
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+    }
+
+    function setTheme(t, isInit = false) {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+      if (!isInit) resetFontColor(); 
+    }
+
+    function updateFontSize(val) {
+      document.documentElement.style.setProperty('--dynamic-font-size', val + 'rem');
+      localStorage.setItem('hisnFontSize', val);
+    }
+
+    function updateFontColor(val) {
+      document.documentElement.style.setProperty('--dynamic-font-color', val);
+      localStorage.setItem('hisnFontColor', val);
+    }
+
+    function resetFontColor() {
+      document.documentElement.style.removeProperty('--dynamic-font-color');
+      localStorage.removeItem('hisnFontColor');
     }
 
     function openMenu() {
@@ -441,40 +732,30 @@
       });
       document.getElementById('menuModal').classList.add('active');
     }
+    
+    function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
+    function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
+    function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
-    function closeMenu() {
-      document.getElementById('menuModal').classList.remove('active');
+    function openAbout() {
+      closeSettings();
+      document.getElementById('aboutModal').classList.add('active');
     }
+    function closeAbout() { document.getElementById('aboutModal').classList.remove('active'); }
 
     function selectSection(idx) {
       App.currentIdx = idx;
+      saveCurrentSection(idx);
       App.isSearchMode = false;
       closeMenu();
       document.getElementById('search-input').value = '';
       render();
     }
 
-    function render() {
-      const section = App.data[App.currentIdx];
-      if (!section) return;
-      
-      document.getElementById('main-title').textContent = section.title;
-      document.getElementById('customSelectBtn').textContent = section.title;
-      
-      const html = section.items.map((item, i) => `
-        <div class="card" data-item="${i}">
-          <div class="card-arabic">${item.ar}</div>
-          <div class="card-ref">${item.ref || ''}</div>
-        </div>
-      `).join('');
-
-      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
-      window.scrollTo(0, 0);
-    }
-
     function nav(dir) {
       if (dir === 'next' && App.currentIdx < App.data.length - 1) App.currentIdx++;
       if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
+      saveCurrentSection(App.currentIdx);
       App.isSearchMode = false;
       render();
     }
@@ -495,16 +776,14 @@
       ).slice(0, 50);
       
       document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
-      document.getElementById('content-area').innerHTML = results.map(r => `
-        <div class="card" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer; border-right:4px solid var(--accent)">
-          <div class="search-result-title" style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri', 'Scheherazade', serif;">${r.title}</div>
-          <div class="card-arabic" style="font-size:1.35rem;">${r.ar}</div>
-        </div>
-      `).join('');
+      
+      const html = results.map(r => buildCardHTML({ar: r.ar, ref: r.ref}, r.sIdx, r.iIdx, r.title)).join('');
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
     };
 
     window.jumpTo = (sIdx, iIdx) => {
       App.currentIdx = sIdx;
+      saveCurrentSection(sIdx);
       App.isSearchMode = false;
       document.getElementById('search-input').value = '';
       render();
@@ -524,6 +803,23 @@
       const diff = touchX - e.changedTouches[0].screenX;
       if (Math.abs(diff) > 80) diff > 0 ? nav('prev') : nav('next');
     }, {passive: true});
+
+    // Globals
+    window.openMenu = openMenu;
+    window.closeMenu = closeMenu;
+    window.openSettings = openSettings;
+    window.closeSettings = closeSettings;
+    window.openAbout = openAbout;
+    window.closeAbout = closeAbout;
+    window.nav = nav;
+    window.setTheme = setTheme;
+    window.jumpTo = jumpTo;
+    window.updateFontSize = updateFontSize;
+    window.updateFontColor = updateFontColor;
+    window.resetFontColor = resetFontColor;
+    window.copyText = copyText;
+    window.toggleBookmark = toggleBookmark;
+    window.viewBookmarks = viewBookmarks;
 
     init();
   </script>
