@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>محدد القبلة الذكي AR</title>
+    <title>محدد القبلة الذكي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     
@@ -28,7 +28,8 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: #000;
+            /* خلفية بديلة (Fallback) في حال عدم توفر الكاميرا */
+            background: radial-gradient(circle at 50% 0%, #1e293b, #020617);
             color: var(--text-main);
             overflow: hidden;
             width: 100vw;
@@ -44,7 +45,8 @@
             height: 100vh;
             object-fit: cover;
             z-index: 0;
-            filter: brightness(0.8); /* التعتيم قليلاً لإبراز الواجهة */
+            filter: brightness(0.7); /* التعتيم لإبراز الواجهة */
+            transition: opacity 0.5s ease;
         }
 
         /* ================= UI OVERLAYS ================= */
@@ -104,6 +106,24 @@
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-top: 8px;
+        }
+
+        /* زر الرجوع للرئيسية */
+        .back-btn {
+            position: absolute;
+            top: -10px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
         }
 
         /* ================= AR HUD (Compass & Arrow) ================= */
@@ -243,6 +263,9 @@
     <video id="camera-video" autoplay playsinline muted></video>
 
     <div id="top-panel" class="glass-panel" style="display: none;">
+        <button class="back-btn" onclick="window.location.href='index.html'" title="العودة للرئيسية">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
         <div class="stat-group">
             <div class="stat-value" id="dist-val">-- km</div>
             <div class="stat-label">المسافة للكعبة</div>
@@ -274,7 +297,7 @@
 
     <div id="bottom-panel" class="glass-panel" style="display: none;">
         <div id="status-text">جاري البحث عن القبلة...</div>
-        <div class="instruction-text">للمعايرة: حرك هاتفك على شكل رقم 8 (∞) باللغة الإنجليزية</div>
+        <div class="instruction-text" id="camera-status-text">حرك هاتفك على شكل رقم 8 (∞) للمعايرة</div>
     </div>
 
     <div id="setup-modal">
@@ -282,7 +305,7 @@
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
         <h1 id="setup-title">محدد القبلة AR</h1>
-        <p id="setup-desc">يحتاج التطبيق إلى صلاحيات الكاميرا، الموقع، والبوصلة لتقديم تجربة واقع معزز دقيقة لتحديد اتجاه القبلة.</p>
+        <p id="setup-desc">يحتاج التطبيق إلى صلاحيات الكاميرا والموقع لتقديم تجربة دقيقة. في حال تعذر تشغيل الكاميرا، سيعمل كبوصلة ذكية.</p>
         <button class="btn-primary" id="start-btn">بدء وتفعيل الصلاحيات</button>
         <div id="error-msg"></div>
     </div>
@@ -310,6 +333,7 @@
         const topPanel = document.getElementById('top-panel');
         const arHud = document.getElementById('ar-hud');
         const bottomPanel = document.getElementById('bottom-panel');
+        const cameraStatusText = document.getElementById('camera-status-text');
         
         const compassRing = document.getElementById('compass-ring');
         const qiblaArrowContainer = document.getElementById('qibla-arrow-container');
@@ -322,22 +346,29 @@
         // ================= INITIALIZATION =================
         startBtn.addEventListener('click', async () => {
             try {
-                // 1. Request iOS 13+ Compass Permission (Must be triggered by user action)
+                // 1. Request iOS 13+ Compass Permission
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     const permissionState = await DeviceOrientationEvent.requestPermission();
                     if (permissionState !== 'granted') {
-                        throw new Error('تم رفض صلاحية البوصلة.');
+                        throw new Error('تم رفض صلاحية البوصلة. لا يمكن تحديد الاتجاه.');
                     }
                 }
 
                 startBtn.innerText = "جاري تفعيل الكاميرا...";
                 
-                // 2. Start Camera (Back camera)
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" },
-                    audio: false
-                });
-                video.srcObject = stream;
+                // 2. Start Camera (With Fallback Logic)
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" },
+                        audio: false
+                    });
+                    video.srcObject = stream;
+                } catch (camErr) {
+                    console.warn("Camera fallback activated:", camErr);
+                    // إذا فشلت الكاميرا، نقوم بإخفاء عنصر الفيديو والاعتماد على الخلفية الافتراضية
+                    video.style.display = 'none';
+                    cameraStatusText.innerText = "ملاحظة: الكاميرا غير متاحة، تم التحويل لوضع البوصلة المظلم. حرك هاتفك للمعايرة (∞)";
+                }
 
                 startBtn.innerText = "جاري تحديد الموقع...";
 
@@ -363,36 +394,31 @@
                             requestAnimationFrame(updateAR);
                         }
                     },
-                    (error) => { throw new Error('الرجاء تفعيل الـ GPS لتحديد موقعك.'); },
+                    (error) => { throw new Error('الرجاء السماح بصلاحية الموقع (GPS) لنتمكن من تحديد القبلة.'); },
                     { enableHighAccuracy: true, maximumAge: 0 }
                 );
 
             } catch (err) {
                 errorMsg.style.display = 'block';
-                errorMsg.innerText = err.message || "حدث خطأ أثناء تفعيل الصلاحيات. تأكد من إعطاء الأذونات من إعدادات المتصفح.";
+                errorMsg.innerText = err.message || "حدث خطأ غير متوقع. يرجى التأكد من الصلاحيات.";
                 startBtn.innerText = "حاول مرة أخرى";
             }
         });
 
         // ================= SENSORS LOGIC =================
         function startSensors() {
-            // Android uses deviceorientationabsolute for absolute north
             window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-            // iOS uses webkitCompassHeading inside standard deviceorientation
             window.addEventListener('deviceorientation', handleOrientation, true);
         }
 
         function handleOrientation(event) {
             let heading = null;
 
-            // iOS Devices
             if (event.webkitCompassHeading != null) {
-                heading = event.webkitCompassHeading;
+                heading = event.webkitCompassHeading; // iOS
             } 
-            // Android Devices (Absolute)
             else if (event.absolute && event.alpha != null) {
-                // Alpha goes from 0 to 360 CCW, we need CW heading from North
-                heading = 360 - event.alpha;
+                heading = 360 - event.alpha; // Android
             }
 
             if (heading !== null) {
@@ -402,7 +428,6 @@
 
         // ================= MATH خوارزميات =================
         
-        // حساب زاوية القبلة باستخدام حساب المثلثات الكروية (Spherical Trigonometry)
         function calculateQibla() {
             const lat1 = userLat * (Math.PI / 180);
             const lng1 = userLng * (Math.PI / 180);
@@ -415,14 +440,13 @@
             const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
 
             let bearing = Math.atan2(y, x) * (180 / Math.PI);
-            qiblaAngle = (bearing + 360) % 360; // Normalize 0-360
+            qiblaAngle = (bearing + 360) % 360; 
             
             qiblaVal.innerText = `${Math.round(qiblaAngle)}°`;
         }
 
-        // حساب المسافة (Haversine Formula)
         function calculateDistance() {
-            const R = 6371; // Earth radius in km
+            const R = 6371; 
             const dLat = (KAABA_LAT - userLat) * Math.PI / 180;
             const dLng = (KAABA_LNG - userLng) * Math.PI / 180;
             
@@ -433,41 +457,37 @@
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             const distance = R * c;
             
-            dist-val.innerText = `${Math.round(distance).toLocaleString('en-US')} km`;
+            // تم تصحيح اسم المتغير هنا
+            distVal.innerText = `${Math.round(distance).toLocaleString('en-US')} كم`;
         }
 
         // ================= AR RENDER LOOP =================
         function updateAR() {
             if (currentHeading !== null && qiblaAngle !== null) {
                 
-                // 1. Smoothing Filter (Low-pass filter) to prevent jitter
+                // Smoothing Filter
                 if (smoothedHeading === null) smoothedHeading = currentHeading;
                 
                 let diff = currentHeading - smoothedHeading;
-                // Handling 360 degree wrap-around (e.g., jumping from 359 to 1)
                 diff = ((diff + 180) % 360) - 180;
-                if (diff < -180) diff += 360; // JS negative modulo fix
+                if (diff < -180) diff += 360; 
                 
-                smoothedHeading += diff * 0.15; // 0.15 is the smoothing factor
+                smoothedHeading += diff * 0.15; 
                 smoothedHeading = (smoothedHeading + 360) % 360;
 
                 headingVal.innerText = `${Math.round(smoothedHeading)}°`;
 
-                // 2. Rotate AR Elements
-                // Compass ring rotates opposite to heading to keep North pointing up
+                // Rotate AR Elements
                 compassRing.style.transform = `rotate(${-smoothedHeading}deg)`;
                 
-                // Qibla arrow rotates to point to Kaaba relative to North
-                // We keep it in a container that rotates independent of device heading
                 let relativeArrowAngle = qiblaAngle - smoothedHeading;
                 qiblaArrowContainer.style.transform = `rotate(${relativeArrowAngle}deg)`;
 
-                // 3. Check Alignment (Is user facing Qibla?)
-                // Allow a 5-degree margin of error
+                // Alignment Check (Facing Qibla)
                 let alignmentDiff = Math.abs((relativeArrowAngle + 360) % 360);
                 if (alignmentDiff > 180) alignmentDiff = 360 - alignmentDiff;
 
-                const isAlignedNow = alignmentDiff < 5;
+                const isAlignedNow = alignmentDiff < 5; // 5 degrees margin
 
                 if (isAlignedNow !== isAlignedState) {
                     isAlignedState = isAlignedNow;
@@ -475,7 +495,7 @@
                         document.body.classList.add('aligned');
                         statusText.innerText = "أنت باتجاه القبلة";
                         
-                        // Haptic Feedback (Vibration) - Throttle to prevent continuous buzzing
+                        // Vibrate
                         const now = Date.now();
                         if (navigator.vibrate && (now - lastVibrateTime > 2000)) {
                             navigator.vibrate([50, 100, 50]);
@@ -483,12 +503,11 @@
                         }
                     } else {
                         document.body.classList.remove('aligned');
-                        statusText.innerText = "استدر حتى يتوهج السهم...";
+                        statusText.innerText = "استدر حتى يتوهج السهم بالأخضر...";
                     }
                 }
             }
 
-            // Loop 60fps
             requestAnimationFrame(updateAR);
         }
     </script>
