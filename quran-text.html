@@ -504,7 +504,7 @@
             </div>
           </div>
 
-          <div class="setting-row"><div class="setting-label">🛞 سرعة التمرير</div><div class="setting-control"><input type="range" id="scrollSpeedSlider" class="range-slider" min="1" max="10" value="3" step="1" oninput="changeScrollSpeed(this.value)"><span id="scrollSpeedDisplay" class="font-size-indicator" style="background:#888;">3</span></div></div>
+          <div class="setting-row"><div class="setting-label">🛞 سرعة التمرير</div><div class="setting-control"><input type="range" id="scrollSpeedSlider" class="range-slider" min="1" max="10" value="5" step="1" oninput="changeScrollSpeed(this.value)"><span id="scrollSpeedDisplay" class="font-size-indicator" style="background:#888;">5</span></div></div>
 
           <div class="setting-row"><div class="setting-label">🎨 لون النص</div><div class="setting-control">
               <select id="textColorSelect" class="custom-select" onchange="changeTextColor(this.value)">
@@ -554,7 +554,8 @@
     let autoScrollInterval = null;
     let isAutoScrolling = false;
     let continueAutoScroll = false; 
-    let scrollSpeed = parseInt(localStorage.getItem('quranScrollSpeed')) || 3;
+    // Changed default speed from 3 to 5
+    let scrollSpeed = parseInt(localStorage.getItem('quranScrollSpeed')) || 5;
 
     function handlePendingAyahAction() { 
         if (pendingAyahAction === 'first') { setTimeout(() => openAyahMenu(0), 100); pendingAyahAction = null; } 
@@ -659,7 +660,8 @@
         isAutoScrolling = true;
         document.getElementById('autoScrollBtn').classList.add('active-scroll');
         
-        let speedMultiplier = (11 - scrollSpeed) * 15; 
+        // TRIPLED THE SPEED: Changed multiplier from 15 to 5
+        let speedMultiplier = (11 - scrollSpeed) * 5; 
         clearInterval(autoScrollInterval);
         
         autoScrollInterval = setInterval(() => {
