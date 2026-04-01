@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>الدعاء من الكتاب والسنة | Pro</title>
+  <style>
+    /* ========== LOCAL FONTS ========== */
+    @font-face {
+      font-family: 'Scheherazade';
+      src: url('fonts/Scheherazade.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Scheherazade';
+      src: url('fonts/Scheherazade.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Amiri';
+      src: url('fonts/Amiri.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Amiri';
+      src: url('fonts/Amiri.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ========== THEMES (Solid Backgrounds + Glassy Elements) ========== */
+    :root {
+      --bg: #f4f7f9;
+      --header-bg: linear-gradient(135deg, #2c3e50, #34495e);
+      --card-bg: #ffffff;
+      --text: #000000; 
+      --text-muted: #666;
+      --accent: #3498db;
+      --accent-bg: rgba(52, 152, 219, 0.1);
+      --border: #e1e8ed;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      
+      /* Dynamic Font Settings */
+      --dynamic-font-size: 1.75rem;
+    }
+
+    [data-theme="sepia"] {
+      --bg: #f4ecd8;
+      --card-bg: #fdf6e3;
+      --text: #5c3a21; 
+      --text-muted: #8c7769;
+      --border: #e6dfcc;
+      --accent: #b87333;
+      --accent-bg: rgba(184, 115, 51, 0.1);
+      --glass-bg: rgba(253, 246, 227, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #ffffff; 
+      --text-muted: #b0b0b0;
+      --border: #333;
+      --header-bg: #1a1a1a;
+      --accent: #34D399;
+      --accent-bg: rgba(52, 211, 153, 0.1);
+      --glass-bg: rgba(30, 30, 30, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      font-family: 'Scheherazade', 'Amiri', serif !important;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      width: 0%;
+      z-index: 1001;
+      transition: width 0.1s ease;
+    }
+
+    header {
+      background: var(--header-bg);
+      color: white;
+      padding: 10px 15px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      text-decoration: none;
+      color: white;
+      transition: 0.2s;
+    }
+    .header-btn:active { transform: scale(0.95); }
+
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 15px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255,255,255,0.95);
+      font-family: 'Scheherazade', 'Amiri', serif !important;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      padding: 8px 15px;
+      border-radius: 30px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      z-index: 999;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+    
+    .custom-select-btn {
+      flex: 1; 
+      background: transparent; 
+      border: none; 
+      color: var(--text);
+      font-family: 'Amiri', 'Scheherazade', serif !important; 
+      font-size: 1.15rem; 
+      font-weight: bold;
+      text-align: center; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      cursor: pointer; 
+      padding: 5px;
+    }
+
+    .section-title,
+    .search-result-title,
+    .card-header-title {
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 15px 100px; 
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 2.1rem;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    .cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card-arabic {
+      font-family: 'Scheherazade', 'Amiri', serif !important;
+      font-size: var(--dynamic-font-size);
+      color: var(--dynamic-font-color, var(--text));
+      line-height: 1.8;
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+
+    .card-ref {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      font-family: 'Scheherazade', 'Amiri', serif !important;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      padding: 5px;
+    }
+    
+    .action-btn svg { width: 24px; height: 24px; }
+    .action-btn:hover { color: var(--accent); }
+    .action-btn.bookmarked { color: #f59e0b; }
+
+    /* ========== BULLET LIST CSS ========== */
+    .bullet-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 30px 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border);
+    }
+    
+    .bullet-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-right: 35px;
+      margin-bottom: 20px;
+      font-family: 'Scheherazade', 'Amiri', serif !important;
+      font-size: var(--dynamic-font-size);
+      color: var(--dynamic-font-color, var(--text));
+      line-height: 1.8;
+      text-align: justify;
+      transition: background 0.3s;
+      border-radius: 8px;
+      padding-left: 10px;
+    }
+
+    .bullet-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .bullet-list li::before {
+      content: '▪';
+      position: absolute;
+      right: 5px;
+      top: 0;
+      color: var(--accent);
+      font-size: 1.2em;
+    }
+    /* ======================================================== */
+
+    .theme-dock {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+      z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    
+    .modal-content {
+      background: var(--glass-bg); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.1); padding-bottom: env(safe-area-inset-bottom);
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+
+    .modal-header {
+      padding: 15px; text-align: center; border-bottom: 1px solid var(--border);
+      font-family: 'Amiri', 'Scheherazade', serif !important; font-weight: bold; font-size: 1.2rem;
+      position: relative; color: var(--text);
+    }
+    
+    .close-modal { 
+      position: absolute; left: 15px; top: 15px; background: none; border: none; 
+      color: var(--text); font-size: 1.2rem; cursor: pointer; 
+    }
+    
+    .modal-body {
+      overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px;
+    }
+
+    .setting-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px; border-bottom: 1px solid var(--border);
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    
+    .setting-row input[type="range"] { 
+      flex: 1; margin: 0 20px; direction: ltr; accent-color: var(--accent);
+    }
+    
+    .settings-action-btn {
+      background: var(--accent); color: white; border: none; border-radius: 8px;
+      padding: 8px 15px; font-family: inherit; font-size: 1rem; cursor: pointer;
+    }
+
+    .color-palette {
+      display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap;
+    }
+    
+    .color-swatch {
+      width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s ease;
+    }
+    .color-swatch:active { transform: scale(0.85); }
+    
+    .reset-color-btn {
+      background: var(--card-bg); color: var(--text); font-size: 1.2rem; text-decoration: none;
+    }
+
+    .custom-color-wrapper {
+      position: relative; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background: var(--card-bg); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .custom-color-wrapper span { font-size: 1.1rem; pointer-events: none; }
+    .custom-color-wrapper input[type="color"] {
+      position: absolute; top: -10px; left: -10px; width: 50px; height: 50px; cursor: pointer; opacity: 0;
+    }
+
+    .menu-item {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 15px; color: var(--text); font-family: 'Amiri', 'Scheherazade', serif !important;
+      font-size: 1.1rem; text-align: right; cursor: pointer; transition: 0.2s;
+    }
+    .menu-item:active { transform: scale(0.98); }
+    .menu-item.active-item { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--text); color: var(--bg); padding: 10px 20px;
+      border-radius: 20px; font-family: 'Amiri', serif; font-size: 1rem;
+      opacity: 0; transition: 0.3s; pointer-events: none; z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    #toast.show { opacity: 1; }
+
+    .hidden { display: none !important; }
+    .highlight { background: var(--accent-bg) !important; }
+
+    /* About Modal Styles */
+    .about-text {
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      font-size: 1.2rem;
+      color: var(--text);
+      line-height: 1.8;
+      text-align: center;
+      padding: 20px;
+    }
+    .about-link {
+      display: inline-block;
+      margin-top: 15px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 25px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .about-link:active {
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 480px) {
+      .section-title { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="scroll-progress"></div>
+
+  <header>
+    <div class="toolbar">
+      <a href="hisn.html" class="header-btn">🏠</a>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="ابحث في الأدعية والعناوين...">
+      </div>
+      <button class="header-btn" onclick="openSettings()">⚙️</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="section-header">
+      <h1 id="main-title" class="section-title">الدعاء من الكتاب والسنة</h1>
+    </div>
+    <div id="content-area">
+      <div style="text-align:center; padding:50px;">جاري التحميل بخط شهريزاد الأصيل...</div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" onclick="nav('next')">›</button>
+    <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()">اختر الباب</button>
+    <button class="nav-btn" onclick="nav('prev')">‹</button>
+  </nav>
+
+  <div class="modal-overlay" id="menuModal" onclick="if(event.target===this) closeMenu()">
+    <div class="modal-content">
+      <div class="modal-header">
+        فهرس الأدعية
+        <button class="close-modal" onclick="closeMenu()">✕</button>
+      </div>
+      <div class="modal-body" id="menuList"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) closeSettings()">
+    <div class="modal-content">
+      <div class="modal-header">
+        الإعدادات
+        <button class="close-modal" onclick="closeSettings()">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="setting-row">
+          <span>المفضلة</span>
+          <button class="settings-action-btn" onclick="viewBookmarks()">⭐ عرض المفضلة</button>
+        </div>
+
+        <div class="setting-row">
+          <span>المظهر</span>
+          <div class="theme-dock">
+            <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
+            <div class="dot" style="background:#f4ecd8;" onclick="setTheme('sepia')"></div>
+            <div class="dot" style="background:#333;" onclick="setTheme('dark')"></div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span>حجم الخط</span>
+          <input type="range" id="fontSizeSlider" min="1" max="3" step="0.1" value="1.75" oninput="updateFontSize(this.value)">
+        </div>
+
+        <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+          <span>لون الخط</span>
+          <div class="color-palette" style="width: 100%;">
+            <button class="color-swatch reset-color-btn" onclick="resetFontColor()" title="استعادة اللون الافتراضي للمظهر">↺</button>
+            
+            <div class="color-swatch" style="background:#000000;" onclick="updateFontColor('#000000')"></div>
+            <div class="color-swatch" style="background:#ffffff;" onclick="updateFontColor('#ffffff')"></div>
+            <div class="color-swatch" style="background:#1b5e20;" onclick="updateFontColor('#1b5e20')"></div>
+            <div class="color-swatch" style="background:#0d47a1;" onclick="updateFontColor('#0d47a1')"></div>
+            <div class="color-swatch" style="background:#5c3a21;" onclick="updateFontColor('#5c3a21')"></div>
+            
+            <div class="custom-color-wrapper" title="لون مخصص">
+              <span>🎨</span>
+              <input type="color" id="fontColorPicker" onchange="updateFontColor(this.value)">
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <span>عن التطبيق والكتاب</span>
+          <button class="settings-action-btn" onclick="openAbout()">ℹ️ التفاصيل</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="aboutModal" onclick="if(event.target===this) closeAbout()">
+    <div class="modal-content">
+      <div class="modal-header">
+        حول الكتاب
+        <button class="close-modal" onclick="closeAbout()">✕</button>
+      </div>
+      <div class="modal-body about-text">
+        <p>هذا المحتوى مأخوذ من:</p>
+        <p style="color: var(--accent); font-weight: bold; font-size: 1.5rem; margin: 10px 0;">كتاب الدعاء من الكتاب والسنة</p>
+        <p>للشيخ د. سعيد بن علي بن وهف القحطاني (رحمه الله)</p>
+        
+        <br>
+        <p>لتحميل النسخة الأصلية (PDF) من صفحة رسالة الحرمين:</p>
+        <a href="https://risala.prh.gov.sa/storage/contents/70/ar_aldoaa_mn_alkitab.pdf" target="_blank" class="about-link">📥 اضغط هنا للتحميل</a>
+        
+        <br><br>
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+        <p style="font-size: 1rem; color: var(--text-muted);">
+          هذا جزء من تطبيق <strong style="color: var(--text);">زاد المسلم (Zad Al-Muslim)</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">تم النسخ بنجاح</div>
+
+  <script>
+    // ---------- DATA FOR "الدعاء من الكتاب والسنة" ----------
+    const DEFAULT_DUAA_DATA = [
+      {
+        title: "فضل الدعاء",
+        items: [
+          { ar: "قال تعالى: ﴿وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ إِنَّ الَّذِينَ يَسْتَكْبِرُونَ عَنْ عِبَادَتِي سَيَدْخُلُونَ جَهَنَّمَ دَاخِرِينَ﴾", ref: "غافر: 60" },
+          { ar: "قال رسول الله ﷺ: «الدعاء هو العبادة»", ref: "رواه أبو داود والترمذي" },
+          { ar: "قال رسول الله ﷺ: «إن ربكم تبارك وتعالى حيي كريم، يستحيي من عبده إذا رفع يديه إليه، أن يردهما صفراً»", ref: "رواه أبو داود والترمذي" }
+        ]
+      },
+      {
+        title: "آداب الدعاء وأسباب الإجابة",
+        items: [
+          { ar: "الإخلاص لله تعالى." },
+          { ar: "أن يبدأ بحمد الله والثناء عليه، ثم بالصلاة على النبي ﷺ ويختم بذلك." },
+          { ar: "الجزم في الدعاء واليقين بالإجابة." },
+          { ar: "الإلحاح في الدعاء وعدم الاستعجال." },
+          { ar: "حضور القلب في الدعاء، والدعاء في الرخاء والشدة." },
+          { ar: "عدم الدعاء بإثم أو قطيعة رحم." }
+        ]
+      },
+      {
+        title: "أوقات وأحوال وأماكن يستجاب فيها الدعاء",
+        items: [
+          { ar: "ليلة القدر، وجوف الليل الآخر." },
+          { ar: "دبر الصلوات المكتوبات." },
+          { ar: "بين الأذان والإقامة." },
+          { ar: "ساعة من كل ليلة، وساعة من يوم الجمعة." },
+          { ar: "عند نزول الغيث." },
+          { ar: "في السجود." },
+          { ar: "دعاء المسلم لأخيه بظهر الغيب." }
+        ]
+      },
+      {
+        title: "أدعية من القرآن الكريم (١)",
+        items: [
+          { ar: "﴿رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ﴾", ref: "البقرة: 127" },
+          { ar: "﴿رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ﴾", ref: "البقرة: 201" },
+          { ar: "﴿رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ﴾", ref: "البقرة: 286" }
+        ]
+      },
+      {
+        title: "أدعية نبوية جامعة",
+        items: [
+          { ar: "اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي ظُلْمًا كَثِيرًا، وَلَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ، فَاغْفِرْ لِي مَغْفِرَةً مِنْ عِنْدِكَ، وَارْحَمْنِي إِنَّكَ أَنْتَ الْغَفُورُ الرَّحِيمُ", ref: "متفق عليه" },
+          { ar: "اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ", ref: "رواه مسلم" }
+        ]
+      }
+    ];
+
+    const svgCopy = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+    const svgStarOutline = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+    const svgStarFilled = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+
+    let App = {
+      data: [],
+      currentIdx: 0,
+      searchIndex: [],
+      isSearchMode: false
+    };
+
+    let bookmarks = JSON.parse(localStorage.getItem('duaBookmarks')) || [];
+
+    // --- Caching Current Location ---
+    function saveCurrentSection(idx) {
+      localStorage.setItem('duaCurrentIdx', idx);
+    }
+
+    window.onscroll = () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById("scroll-progress").style.width = scrolled + "%";
+    };
+
+    function normalizeText(text) {
+      return text.replace(/[ًٌٍَُِّْـ]/g, '');
+    }
+
+    async function loadDuaaData() {
+      let externalData = [];
+      const maxParts = 5;
+      for (let p = 1; p <= maxParts; p++) {
+        try {
+          const res = await fetch(`assets/duaa-0${p}.json`);
+          if (res.ok) {
+            const partData = await res.json();
+            if (Array.isArray(partData)) externalData.push(...partData);
+          }
+        } catch(e) {}
+      }
+      App.data = externalData.length > 0 ? externalData : DEFAULT_DUAA_DATA;
+    }
+
+    function buildMenuAndSearchIndex() {
+      const menuList = document.getElementById('menuList');
+      menuList.innerHTML = '';
+      App.searchIndex = [];
+
+      App.data.forEach((sec, secIdx) => {
+        const btn = document.createElement('div');
+        btn.className = 'menu-item';
+        btn.textContent = sec.title;
+        btn.onclick = () => selectSection(secIdx);
+        menuList.appendChild(btn);
+
+        sec.items.forEach((item, itemIdx) => {
+          App.searchIndex.push({
+            sIdx: secIdx,
+            iIdx: itemIdx,
+            title: sec.title,
+            titleNorm: normalizeText(sec.title),
+            ar: item.ar,
+            norm: normalizeText(item.ar),
+            ref: item.ref || ''
+          });
+        });
+      });
+    }
+
+    function buildCardHTML(item, sIdx, iIdx, searchTitle = null) {
+      const isBookmarked = bookmarks.includes(`${sIdx}-${iIdx}`);
+      const starIcon = isBookmarked ? svgStarFilled : svgStarOutline;
+      const bmClass = isBookmarked ? 'bookmarked' : '';
+      
+      const safeText = item.ar.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+      
+      const searchHeader = searchTitle ? `<div class="search-result-title" style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri', 'Scheherazade', serif;">${searchTitle}</div>` : '';
+      const contentClick = searchTitle ? `onclick="jumpTo(${sIdx}, ${iIdx})" style="cursor:pointer;"` : '';
+      const borderStyle = searchTitle ? 'border-right:4px solid var(--accent);' : '';
+
+      return `
+        <div class="card" data-item="${iIdx}" style="${borderStyle}">
+          <div ${contentClick}>
+            ${searchHeader}
+            <div class="card-arabic">${item.ar}</div>
+            <div class="card-ref">${item.ref || 'الدعاء من الكتاب والسنة'}</div>
+          </div>
+          <div class="card-actions">
+            <button class="action-btn" onclick="copyText('${safeText}')" title="نسخ">
+              ${svgCopy}
+            </button>
+            <button class="action-btn ${bmClass}" onclick="toggleBookmark(${sIdx}, ${iIdx}, this)" title="إضافة للمفضلة">
+              ${starIcon}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const section = App.data[App.currentIdx];
+      if (!section) return;
+      
+      document.getElementById('main-title').textContent = section.title;
+      document.getElementById('customSelectBtn').textContent = section.title;
+      
+      // Update: Checking for specific bullet sections
+      const titleStr = section.title;
+      const isBulletSection = titleStr.includes('آداب الدعاء') || 
+                              titleStr.includes('أوقات وأحوال') || 
+                              titleStr.includes('فضل الدعاء');
+      
+      let html = '';
+      
+      if (isBulletSection && !App.isSearchMode) {
+        const listItems = section.items.map((item, i) => `
+          <li data-item="${i}">
+            ${item.ar}
+            ${item.ref ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">[${item.ref}]</div>` : ''}
+          </li>
+        `).join('');
+        html = `<div class="bullet-card"><ul class="bullet-list">${listItems}</ul></div>`;
+      } else {
+        html = section.items.map((item, i) => buildCardHTML(item, App.currentIdx, i)).join('');
+      }
+
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+      window.scrollTo(0, 0);
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
+    }
+
+    function toggleBookmark(sIdx, iIdx, btnElement) {
+      const id = `${sIdx}-${iIdx}`;
+      const index = bookmarks.indexOf(id);
+      
+      if (index > -1) {
+        bookmarks.splice(index, 1);
+        btnElement.classList.remove('bookmarked');
+        btnElement.innerHTML = svgStarOutline;
+      } else {
+        bookmarks.push(id);
+        btnElement.classList.add('bookmarked');
+        btnElement.innerHTML = svgStarFilled;
+      }
+      
+      localStorage.setItem('duaBookmarks', JSON.stringify(bookmarks));
+    }
+
+    function viewBookmarks() {
+      closeSettings();
+      App.isSearchMode = true;
+      document.getElementById('customSelectBtn').textContent = "المفضلة";
+      document.getElementById('main-title').textContent = `المفضلة (${bookmarks.length})`;
+      
+      if(bookmarks.length === 0) {
+        document.getElementById('content-area').innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-muted);'>لا توجد أدعية في المفضلة بعد</div>";
+        return;
+      }
+
+      const html = bookmarks.map(id => {
+        const [s, i] = id.split('-');
+        const item = App.data[s].items[i];
+        return buildCardHTML(item, parseInt(s), parseInt(i), App.data[s].title);
+      }).join('');
+
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+    }
+
+    function setTheme(t, isInit = false) {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('theme', t);
+      if (!isInit) resetFontColor(); 
+    }
+
+    function updateFontSize(val) {
+      document.documentElement.style.setProperty('--dynamic-font-size', val + 'rem');
+      localStorage.setItem('duaFontSize', val);
+    }
+
+    function updateFontColor(val) {
+      document.documentElement.style.setProperty('--dynamic-font-color', val);
+      localStorage.setItem('duaFontColor', val);
+    }
+
+    function resetFontColor() {
+      document.documentElement.style.removeProperty('--dynamic-font-color');
+      localStorage.removeItem('duaFontColor');
+    }
+
+    function openMenu() {
+      const items = document.querySelectorAll('.menu-item');
+      items.forEach((item, idx) => {
+        if (idx === App.currentIdx && !App.isSearchMode) {
+          item.classList.add('active-item');
+          setTimeout(() => item.scrollIntoView({ block: 'center' }), 100);
+        } else {
+          item.classList.remove('active-item');
+        }
+      });
+      document.getElementById('menuModal').classList.add('active');
+    }
+    
+    function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
+    function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
+    function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+
+    // NEW About Functions
+    function openAbout() {
+      closeSettings();
+      document.getElementById('aboutModal').classList.add('active');
+    }
+    function closeAbout() {
+      document.getElementById('aboutModal').classList.remove('active');
+    }
+
+    function selectSection(idx) {
+      App.currentIdx = idx;
+      saveCurrentSection(idx);
+      App.isSearchMode = false;
+      closeMenu();
+      document.getElementById('search-input').value = '';
+      render();
+    }
+
+    function nav(dir) {
+      if (dir === 'next' && App.currentIdx < App.data.length - 1) App.currentIdx++;
+      if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
+      saveCurrentSection(App.currentIdx);
+      App.isSearchMode = false;
+      render();
+    }
+
+    function handleSearch() {
+      const query = normalizeText(document.getElementById('search-input').value.trim());
+      if (!query) {
+        if (App.isSearchMode) { App.isSearchMode = false; render(); }
+        return;
+      }
+
+      App.isSearchMode = true;
+      document.getElementById('customSelectBtn').textContent = "نتائج البحث";
+      
+      const results = App.searchIndex.filter(x => 
+        x.norm.includes(query) || x.titleNorm.includes(query)
+      ).slice(0, 50);
+      
+      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
+      
+      const html = results.map(r => buildCardHTML({ar: r.ar, ref: r.ref}, r.sIdx, r.iIdx, r.title)).join('');
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+    }
+
+    window.jumpTo = (sIdx, iIdx) => {
+      App.currentIdx = sIdx;
+      saveCurrentSection(sIdx);
+      App.isSearchMode = false;
+      document.getElementById('search-input').value = '';
+      render();
+      
+      setTimeout(() => {
+        const el = document.querySelector(`[data-item="${iIdx}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight');
+          setTimeout(() => el.classList.remove('highlight'), 2000);
+        }
+      }, 300);
+    };
+
+    async function init() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme, true); 
+      
+      const savedSize = localStorage.getItem('duaFontSize') || '1.75';
+      const savedColor = localStorage.getItem('duaFontColor');
+      
+      document.documentElement.style.setProperty('--dynamic-font-size', savedSize + 'rem');
+      document.getElementById('fontSizeSlider').value = savedSize;
+      
+      if (savedColor) {
+        document.documentElement.style.setProperty('--dynamic-font-color', savedColor);
+      }
+
+      await loadDuaaData();
+      
+      const cachedIdx = parseInt(localStorage.getItem('duaCurrentIdx'));
+      if (!isNaN(cachedIdx) && cachedIdx >= 0 && cachedIdx < App.data.length) {
+        App.currentIdx = cachedIdx;
+      }
+
+      buildMenuAndSearchIndex();
+      render();
+      
+      document.getElementById('search-input').oninput = handleSearch;
+    }
+
+    let touchX = 0;
+    document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX, {passive: true});
+    document.addEventListener('touchend', e => {
+      const diff = touchX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 80) diff > 0 ? nav('prev') : nav('next');
+    }, {passive: true});
+
+    window.openMenu = openMenu;
+    window.closeMenu = closeMenu;
+    window.openSettings = openSettings;
+    window.closeSettings = closeSettings;
+    window.openAbout = openAbout;
+    window.closeAbout = closeAbout;
+    window.nav = nav;
+    window.setTheme = setTheme;
+    window.jumpTo = jumpTo;
+    window.updateFontSize = updateFontSize;
+    window.updateFontColor = updateFontColor;
+    window.resetFontColor = resetFontColor;
+    window.copyText = copyText;
+    window.toggleBookmark = toggleBookmark;
+    window.viewBookmarks = viewBookmarks;
+
+    init();
+  </script>
+</body>
+</html>
