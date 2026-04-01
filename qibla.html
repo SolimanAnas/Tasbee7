@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>محدد القبلة الذكي AR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= THEME & RESET ================= */
+        :root {
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.5);
+            --bg-glass: rgba(15, 23, 42, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #000;
+            color: var(--text-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ================= CAMERA BACKGROUND ================= */
+        #camera-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 0;
+            filter: brightness(0.8); /* التعتيم قليلاً لإبراز الواجهة */
+        }
+
+        /* ================= UI OVERLAYS ================= */
+        .glass-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* لوحة المعلومات العلوية */
+        #top-panel {
+            position: absolute;
+            top: env(safe-area-inset-top, 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .stat-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value { font-size: 1.2rem; font-weight: 700; direction: ltr; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* لوحة الحالة السفلية */
+        #bottom-panel {
+            position: absolute;
+            bottom: env(safe-area-inset-bottom, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        #status-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            transition: color 0.3s;
+        }
+
+        .instruction-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* ================= AR HUD (Compass & Arrow) ================= */
+        #ar-hud {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* حلقة البوصلة (تدور عكس اتجاه الهاتف) */
+        #compass-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: transform 0.1s linear;
+        }
+
+        .compass-mark {
+            position: absolute;
+            font-weight: 700;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            transform: translate(-50%, -50%);
+        }
+        .mark-n { top: 0; left: 50%; color: #ef4444; }
+        .mark-e { top: 50%; right: -15px; }
+        .mark-s { bottom: -20px; left: 50%; }
+        .mark-w { top: 50%; left: 0; }
+
+        /* المؤشر الأوسط (Reticle) */
+        #center-reticle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            z-index: 2;
+        }
+
+        /* سهم القبلة (الواقع المعزز) */
+        #qibla-arrow-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.1s linear;
+            z-index: 3;
+        }
+
+        #qibla-arrow {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            fill: white;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+            transition: all 0.3s ease;
+        }
+
+        /* ================= ALIGNMENT STATE (الوصول للقبلة) ================= */
+        body.aligned #qibla-arrow {
+            fill: var(--primary);
+            filter: drop-shadow(0 0 20px var(--primary-glow));
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+        body.aligned #bottom-panel {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+        body.aligned #status-text {
+            color: var(--primary);
+        }
+
+        /* ================= STARTUP/PERMISSION MODAL ================= */
+        #setup-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .kaaba-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            fill: var(--primary);
+        }
+
+        #setup-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+        #setup-desc { font-size: 1rem; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            box-shadow: 0 10px 20px var(--primary-glow);
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary:active { transform: scale(0.95); }
+
+        #error-msg {
+            color: #ef4444;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="camera-video" autoplay playsinline muted></video>
+
+    <div id="top-panel" class="glass-panel" style="display: none;">
+        <div class="stat-group">
+            <div class="stat-value" id="dist-val">-- km</div>
+            <div class="stat-label">المسافة للكعبة</div>
+        </div>
+        <div class="stat-group">
+            <div class="stat-value" id="qibla-val">--°</div>
+            <div class="stat-label">زاوية القبلة</div>
+        </div>
+        <div class="stat-group">
+            <div class="stat-value" id="heading-val">--°</div>
+            <div class="stat-label">اتجاهك الحالي</div>
+        </div>
+    </div>
+
+    <div id="ar-hud" style="display: none;">
+        <div id="compass-ring">
+            <div class="compass-mark mark-n">N</div>
+            <div class="compass-mark mark-e">E</div>
+            <div class="compass-mark mark-s">S</div>
+            <div class="compass-mark mark-w">W</div>
+        </div>
+        <div id="qibla-arrow-container">
+            <svg id="qibla-arrow" viewBox="0 0 24 24">
+                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+            </svg>
+        </div>
+        <div id="center-reticle"></div>
+    </div>
+
+    <div id="bottom-panel" class="glass-panel" style="display: none;">
+        <div id="status-text">جاري البحث عن القبلة...</div>
+        <div class="instruction-text">للمعايرة: حرك هاتفك على شكل رقم 8 (∞) باللغة الإنجليزية</div>
+    </div>
+
+    <div id="setup-modal">
+        <svg class="kaaba-icon" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <h1 id="setup-title">محدد القبلة AR</h1>
+        <p id="setup-desc">يحتاج التطبيق إلى صلاحيات الكاميرا، الموقع، والبوصلة لتقديم تجربة واقع معزز دقيقة لتحديد اتجاه القبلة.</p>
+        <button class="btn-primary" id="start-btn">بدء وتفعيل الصلاحيات</button>
+        <div id="error-msg"></div>
+    </div>
+
+    <script>
+        // ================= CONFIGURATION =================
+        const KAABA_LAT = 21.422487;
+        const KAABA_LNG = 39.826206;
+        
+        // ================= STATE VARIABLES =================
+        let userLat = null;
+        let userLng = null;
+        let qiblaAngle = null;
+        let currentHeading = null;
+        let smoothedHeading = null;
+        let isAlignedState = false;
+        let lastVibrateTime = 0;
+
+        // ================= DOM ELEMENTS =================
+        const modal = document.getElementById('setup-modal');
+        const startBtn = document.getElementById('start-btn');
+        const errorMsg = document.getElementById('error-msg');
+        
+        const video = document.getElementById('camera-video');
+        const topPanel = document.getElementById('top-panel');
+        const arHud = document.getElementById('ar-hud');
+        const bottomPanel = document.getElementById('bottom-panel');
+        
+        const compassRing = document.getElementById('compass-ring');
+        const qiblaArrowContainer = document.getElementById('qibla-arrow-container');
+        const statusText = document.getElementById('status-text');
+        
+        const distVal = document.getElementById('dist-val');
+        const qiblaVal = document.getElementById('qibla-val');
+        const headingVal = document.getElementById('heading-val');
+
+        // ================= INITIALIZATION =================
+        startBtn.addEventListener('click', async () => {
+            try {
+                // 1. Request iOS 13+ Compass Permission (Must be triggered by user action)
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    const permissionState = await DeviceOrientationEvent.requestPermission();
+                    if (permissionState !== 'granted') {
+                        throw new Error('تم رفض صلاحية البوصلة.');
+                    }
+                }
+
+                startBtn.innerText = "جاري تفعيل الكاميرا...";
+                
+                // 2. Start Camera (Back camera)
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+                video.srcObject = stream;
+
+                startBtn.innerText = "جاري تحديد الموقع...";
+
+                // 3. Get GPS Location
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        userLat = position.coords.latitude;
+                        userLng = position.coords.longitude;
+                        
+                        // Calculate Qibla Math
+                        calculateQibla();
+                        calculateDistance();
+                        
+                        // Reveal UI if hidden
+                        if(modal.style.display !== 'none') {
+                            modal.style.display = 'none';
+                            topPanel.style.display = 'flex';
+                            arHud.style.display = 'flex';
+                            bottomPanel.style.display = 'block';
+                            
+                            // Start Compass Listener & Render Loop
+                            startSensors();
+                            requestAnimationFrame(updateAR);
+                        }
+                    },
+                    (error) => { throw new Error('الرجاء تفعيل الـ GPS لتحديد موقعك.'); },
+                    { enableHighAccuracy: true, maximumAge: 0 }
+                );
+
+            } catch (err) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = err.message || "حدث خطأ أثناء تفعيل الصلاحيات. تأكد من إعطاء الأذونات من إعدادات المتصفح.";
+                startBtn.innerText = "حاول مرة أخرى";
+            }
+        });
+
+        // ================= SENSORS LOGIC =================
+        function startSensors() {
+            // Android uses deviceorientationabsolute for absolute north
+            window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+            // iOS uses webkitCompassHeading inside standard deviceorientation
+            window.addEventListener('deviceorientation', handleOrientation, true);
+        }
+
+        function handleOrientation(event) {
+            let heading = null;
+
+            // iOS Devices
+            if (event.webkitCompassHeading != null) {
+                heading = event.webkitCompassHeading;
+            } 
+            // Android Devices (Absolute)
+            else if (event.absolute && event.alpha != null) {
+                // Alpha goes from 0 to 360 CCW, we need CW heading from North
+                heading = 360 - event.alpha;
+            }
+
+            if (heading !== null) {
+                currentHeading = heading;
+            }
+        }
+
+        // ================= MATH خوارزميات =================
+        
+        // حساب زاوية القبلة باستخدام حساب المثلثات الكروية (Spherical Trigonometry)
+        function calculateQibla() {
+            const lat1 = userLat * (Math.PI / 180);
+            const lng1 = userLng * (Math.PI / 180);
+            const lat2 = KAABA_LAT * (Math.PI / 180);
+            const lng2 = KAABA_LNG * (Math.PI / 180);
+
+            const dLng = lng2 - lng1;
+
+            const y = Math.sin(dLng) * Math.cos(lat2);
+            const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+
+            let bearing = Math.atan2(y, x) * (180 / Math.PI);
+            qiblaAngle = (bearing + 360) % 360; // Normalize 0-360
+            
+            qiblaVal.innerText = `${Math.round(qiblaAngle)}°`;
+        }
+
+        // حساب المسافة (Haversine Formula)
+        function calculateDistance() {
+            const R = 6371; // Earth radius in km
+            const dLat = (KAABA_LAT - userLat) * Math.PI / 180;
+            const dLng = (KAABA_LNG - userLng) * Math.PI / 180;
+            
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(userLat * Math.PI / 180) * Math.cos(KAABA_LAT * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+                
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            
+            dist-val.innerText = `${Math.round(distance).toLocaleString('en-US')} km`;
+        }
+
+        // ================= AR RENDER LOOP =================
+        function updateAR() {
+            if (currentHeading !== null && qiblaAngle !== null) {
+                
+                // 1. Smoothing Filter (Low-pass filter) to prevent jitter
+                if (smoothedHeading === null) smoothedHeading = currentHeading;
+                
+                let diff = currentHeading - smoothedHeading;
+                // Handling 360 degree wrap-around (e.g., jumping from 359 to 1)
+                diff = ((diff + 180) % 360) - 180;
+                if (diff < -180) diff += 360; // JS negative modulo fix
+                
+                smoothedHeading += diff * 0.15; // 0.15 is the smoothing factor
+                smoothedHeading = (smoothedHeading + 360) % 360;
+
+                headingVal.innerText = `${Math.round(smoothedHeading)}°`;
+
+                // 2. Rotate AR Elements
+                // Compass ring rotates opposite to heading to keep North pointing up
+                compassRing.style.transform = `rotate(${-smoothedHeading}deg)`;
+                
+                // Qibla arrow rotates to point to Kaaba relative to North
+                // We keep it in a container that rotates independent of device heading
+                let relativeArrowAngle = qiblaAngle - smoothedHeading;
+                qiblaArrowContainer.style.transform = `rotate(${relativeArrowAngle}deg)`;
+
+                // 3. Check Alignment (Is user facing Qibla?)
+                // Allow a 5-degree margin of error
+                let alignmentDiff = Math.abs((relativeArrowAngle + 360) % 360);
+                if (alignmentDiff > 180) alignmentDiff = 360 - alignmentDiff;
+
+                const isAlignedNow = alignmentDiff < 5;
+
+                if (isAlignedNow !== isAlignedState) {
+                    isAlignedState = isAlignedNow;
+                    if (isAlignedState) {
+                        document.body.classList.add('aligned');
+                        statusText.innerText = "أنت باتجاه القبلة";
+                        
+                        // Haptic Feedback (Vibration) - Throttle to prevent continuous buzzing
+                        const now = Date.now();
+                        if (navigator.vibrate && (now - lastVibrateTime > 2000)) {
+                            navigator.vibrate([50, 100, 50]);
+                            lastVibrateTime = now;
+                        }
+                    } else {
+                        document.body.classList.remove('aligned');
+                        statusText.innerText = "استدر حتى يتوهج السهم...";
+                    }
+                }
+            }
+
+            // Loop 60fps
+            requestAnimationFrame(updateAR);
+        }
+    </script>
+</body>
+</html>
