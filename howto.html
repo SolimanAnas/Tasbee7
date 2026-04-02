@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>دليل الاستخدام - زاد المسلم</title>
+<meta name="theme-color" content="#10b981">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ================= THEME VARIABLES ================= */
+:root {
+  --bg-image: none;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #020617);
+  --bg-surface: #020617; 
+  --text-primary: #F8FAFC; 
+  --text-secondary: #94a3b8;
+  --accent-main: #10b981; 
+  --accent-muted: rgba(16, 185, 129, 0.15);
+  --glass: rgba(30, 41, 59, 0.6); 
+  --glass-card: rgba(30, 41, 59, 0.4); 
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] {
+  --bg-image: url('images/Background-dark.png');
+  --bg-gradient: none;
+  --bg-surface: #0f172a; 
+  --accent-main: #34D399; 
+  --glass: rgba(15, 23, 42, 0.85); 
+  --glass-card: rgba(15, 23, 42, 0.5);
+}
+
+[data-theme="light"] {
+  --bg-image: url('images/Background-light.png');
+  --bg-gradient: none;
+  --bg-surface: #f8fafc; 
+  --text-primary: #0F172A; 
+  --text-secondary: #475569;
+  --accent-main: #059669; 
+  --glass: rgba(255, 255, 255, 0.9); 
+  --glass-card: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.05); 
+  --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { 
+  margin: 0; 
+  font-family: 'Tajawal', sans-serif; 
+  background-color: var(--bg-surface); 
+  background-image: var(--bg-image); 
+  background: var(--bg-image, var(--bg-gradient)); 
+  background-size: cover; 
+  background-position: center; 
+  background-attachment: fixed; 
+  color: var(--text-primary); 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  min-height: 100dvh; 
+  transition: color 0.3s ease, background 0.3s ease; 
+  padding-top: env(safe-area-inset-top);
+}
+
+/* ================= TOP BAR ================= */
+.top-bar { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); }
+.back-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(16px); transition: 0.2s; color: var(--text-primary); }
+.back-btn:active { transform: scale(0.9); background: var(--accent-muted); }
+.back-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.spacer { width: 40px; }
+
+/* ================= CONTENT ================= */
+.content { flex: 1; width: 100%; max-width: 480px; padding: 10px 20px 40px; display: flex; flex-direction: column; gap: 12px; }
+
+.intro-text {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* ================= ACCORDION (FAQ) ================= */
+details {
+  background: var(--glass-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: var(--glass-shadow);
+}
+
+details[open] {
+  border-color: var(--accent-main);
+  background: var(--glass);
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none; /* Hide default arrow */
+  color: var(--text-primary);
+  user-select: none;
+}
+
+summary::-webkit-details-marker { display: none; } /* Hide in Safari */
+
+summary .icon-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+summary .icon-title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent-main);
+}
+
+summary .arrow {
+  transition: transform 0.3s ease;
+  color: var(--text-secondary);
+}
+
+details[open] summary .arrow {
+  transform: rotate(180deg);
+  color: var(--accent-main);
+}
+
+.details-content {
+  padding: 0 16px 16px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: 5px;
+  padding-top: 10px;
+  animation: fadeInDown 0.3s ease;
+}
+
+.details-content strong {
+  color: var(--text-primary);
+}
+
+.details-content ul {
+  padding-right: 20px;
+  margin: 10px 0 0 0;
+}
+
+.details-content li {
+  margin-bottom: 8px;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Page Transition */
+body.fade-out { opacity: 0; transition: opacity 0.25s; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="back-btn" onclick="goBack()" title="رجوع">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </div>
+  <div class="title">كيفية الاستخدام</div>
+  <div class="spacer"></div>
+</div>
+
+<div class="content">
+  <p class="intro-text">تعرف على أهم الميزات وكيفية الاستفادة القصوى من تطبيق زاد المسلم في حياتك اليومية.</p>
+
+  <details>
+    <summary>
+      <div class="icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        المصحف الشريف
+      </div>
+      <div class="arrow">▼</div>
+    </summary>
+    <div class="details-content">
+      <ul>
+        <li><strong>التبديل بين النسخ:</strong> يمكنك التبديل بين (المصحف المصور) و (المصحف النصي المتقدم) عبر زر التبديل أعلى الشاشة.</li>
+        <li><strong>التمرير التلقائي:</strong> في المصحف النصي، اضغط على أيقونة (🛞) للبدء في نزول الشاشة تلقائياً أثناء القراءة، ويمكنك التحكم بسرعته من الإعدادات.</li>
+        <li><strong>البحث السريع:</strong> استخدم علامة العدسة (🔎) للبحث عن أي كلمة في القرآن الكريم، واضغط على النتيجة للانتقال الفوري للآية.</li>
+        <li><strong>الاستماع والتفسير:</strong> في المصحف النصي، اضغط مطولاً على أي آية لفتح قائمة تتيح لك (الاستماع، التفسير، الترجمة، أو النسخ).</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <div class="icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        باحث الأحاديث (أوفلاين)
+      </div>
+      <div class="arrow">▼</div>
+    </summary>
+    <div class="details-content">
+      يقوم محرك البحث بالبحث في أبرز كتب السنة (بدون إنترنت).
+      <ul>
+        <li><strong>طريقة البحث:</strong> اكتب الكلمة في شريط البحث. إذا أردت نتائج مطابقة تماماً بالحركات، قم بتفعيل خيار <strong>(مطابقة التشكيل بدقة)</strong>.</li>
+        <li><strong>الحكم على الحديث:</strong> يظهر بجانب كل حديث حكمه ملوناً (أخضر للحديث الصحيح/الحسن، وأحمر للضعيف).</li>
+        <li><strong>تصفح الكتب:</strong> يمكنك قراءة الكتب الحديثية كاملة عبر زر (تصفح الكتب الحديثية).</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <div class="icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        مواقيت الصلاة والقبلة
+      </div>
+      <div class="arrow">▼</div>
+    </summary>
+    <div class="details-content">
+      <ul>
+        <li><strong>تحديد الموقع:</strong> من الصفحة الرئيسية، اضغط على شريط الصلاة لتحديد موقعك إما عبر الـ (GPS) أو بالبحث عن اسم مدينتك.</li>
+        <li><strong>محدد القبلة AR:</strong> يستخدم الكاميرا والبوصلة ليدلك على الكعبة. إذا لم يتحرك السهم، قم بمعايرة البوصلة بتحريك الهاتف على شكل رقم (8) باللغة الإنجليزية.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <div class="icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        المسبحة الذكية
+      </div>
+      <div class="arrow">▼</div>
+    </summary>
+    <div class="details-content">
+      <ul>
+        <li><strong>وضع توفير الطاقة:</strong> اضغط على أيقونة (الهلال/الطاقة) أسفل يمين المسبحة لتسويد الشاشة وحفظ البطارية. للخروج، <strong>اضغط مطولاً</strong> في منتصف الشاشة.</li>
+        <li><strong>إضافة ذكر خاص:</strong> من إعدادات المسبحة (⚙️)، يمكنك كتابة أي ذكر تريده وسيحفظ في قائمتك.</li>
+        <li><strong>التنبيهات:</strong> تفاعل المسبحة باهتزاز خفيف عند كل تسبيحة، واهتزاز قوي عند الوصول للهدف المحدد.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <div class="icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        الاستماع والإذاعة
+      </div>
+      <div class="arrow">▼</div>
+    </summary>
+    <div class="details-content">
+      <ul>
+        <li><strong>التشغيل في الخلفية:</strong> يمكنك تشغيل التلاوة أو الإذاعة والخروج من التطبيق لتصفح تطبيقات أخرى أو إغلاق الشاشة.</li>
+        <li><strong>المفضلة:</strong> اضغط على أيقونة (القلب) لحفظ القارئ أو الإذاعة للوصول السريع إليها لاحقاً عبر زر القائمة العلوية.</li>
+        <li><strong>المشغل المصغر:</strong> عند الانتقال بين الصفحات أثناء الاستماع، سيظهر لك مشغل مصغر أسفل الشاشة للتحكم بالصوت.</li>
+      </ul>
+    </div>
+  </details>
+  
+  <details>
+    <summary>
+      <div class="icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        ميزات عامة (أوفلاين)
+      </div>
+      <div class="arrow">▼</div>
+    </summary>
+    <div class="details-content">
+      تطبيق "زاد المسلم" مصمم ليعمل بكفاءة بدون إنترنت.
+      <ul>
+        <li><strong>تحميل البيانات:</strong> ننصحك بفتح التطبيق لمرة واحدة وتصفح أقسامه (الأذكار، الأدعية، الأحاديث) ليقوم بتحميلها وحفظها في جهازك.</li>
+        <li><strong>الوضع الليلي:</strong> يتوفر التطبيق بعدة مظاهر مريحة للعين، يمكنك التبديل بينها من أيقونة (الشمس/القمر) أعلى الشاشة.</li>
+      </ul>
+    </div>
+  </details>
+
+</div>
+
+<script>
+window.addEventListener("load", () => {
+    let savedMode = localStorage.getItem("themeMode");
+    if(!savedMode || !["dark","light","plain-dark"].includes(savedMode)) savedMode = "dark";
+    document.documentElement.setAttribute("data-theme", savedMode);
+});
+
+function goBack() {
+    document.body.classList.add("fade-out");
+    setTimeout(() => {
+        window.history.back();
+        setTimeout(() => { window.location.href = 'index.html'; }, 100);
+    }, 200);
+}
+
+window.addEventListener("pageshow", () => {
+    document.body.classList.remove("fade-out");
+});
+
+// Auto-close other details when one is opened
+const detailsElements = document.querySelectorAll("details");
+detailsElements.forEach((targetDetail) => {
+  targetDetail.addEventListener("click", () => {
+    detailsElements.forEach((detail) => {
+      if (detail !== targetDetail) {
+        detail.removeAttribute("open");
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
