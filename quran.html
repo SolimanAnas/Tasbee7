@@ -623,7 +623,7 @@
   <script src="js/quran-common.js"></script>
   <script>
     // ========== VERSION MANAGEMENT ==========
-    let currentMushafVersion = localStorage.getItem('quranVersion') || 'mushaf-3'; // 'mushaf-3' = نسخة 1 , 'mushaf-2' = نسخة 2
+    let currentMushafVersion = localStorage.getItem('quranVersion') || 'mushaf-2'; // 'mushaf-2' = نسخة 2 , 'mushaf-3' = نسخة 2
     let isZoomed = true; // zoom is enabled by default
 
     function setMushafVersion(version) {
@@ -684,19 +684,30 @@
       }
     }
 
-    function applyZoom(zoom) {
+        function applyZoom(zoom) {
       const img = document.getElementById('pageImg');
       if (!img) return;
+      
+      let transformStr = '';
+
       if (zoom) {
         const { scaleX, scaleY } = getZoomScaleForVersion();
-        img.style.transform = `scaleX(${scaleX}) scaleY(${scaleY})`;
+        transformStr = `scaleX(${scaleX}) scaleY(${scaleY})`;
         isZoomed = true;
       } else {
-        img.style.transform = 'none';
+        transformStr = `scaleX(1) scaleY(1)`; // الوضع الطبيعي
         isZoomed = false;
       }
+
+      // إضافة 10 بكسل للأسفل لنسخة 1 (mushaf-3) دائماً
+      if (currentMushafVersion === 'mushaf-3') {
+        transformStr += ` translateY(10px)`;
+      }
+
+      img.style.transform = transformStr;
     }
 
+    
     function resetZoom() {
       applyZoom(false);
     }
