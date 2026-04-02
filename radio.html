@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
@@ -10,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <style>
-    /* --- THEME SYSTEM (unchanged from your new version) --- */
+    /* --- THEME SYSTEM --- */
     :root {
       --bg-image: url('images/Background-dark.png');
       --bg-surface: rgba(15, 23, 42, 0.5);
@@ -107,6 +108,9 @@
       padding: 5px;
       display: flex;
       transition: 0.2s;
+    }
+    .icon-btn:active {
+      transform: scale(0.9);
     }
 
     /* Card Layout */
@@ -355,6 +359,7 @@
       border-radius: 50px;
       transition: 0.4s;
       z-index: 20000;
+      font-weight: bold;
     }
 
     .toast.show {
@@ -370,13 +375,13 @@
   <div class="app">
     <div class="header">
       <div style="display: flex; gap: 10px;">
-        <button class="icon-btn" onclick="window.location.href='index.html'">
+        <button class="icon-btn" onclick="window.location.href='index.html'" title="العودة للرئيسية">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           </svg>
         </button>
-        <button class="icon-btn" onclick="toggleTheme()">
-          <svg id="themeIcon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="icon-btn" onclick="toggleTheme()" title="تغيير المظهر">
+          <svg id="themeIconSun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -384,11 +389,16 @@
             <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
             <line x1="1" y1="12" x2="3" y2="12"></line>
             <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="themeIconMoon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
       </div>
       <div class="header-title">إذاعة القرآن الكريم</div>
-      <button class="icon-btn" onclick="openFavModal()">
+      <button class="icon-btn" onclick="openFavModal()" title="المفضلة">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
@@ -419,7 +429,7 @@
       </div>
 
       <div class="controls">
-        <button class="action-btn" id="favBtn">
+        <button class="action-btn" id="favBtn" title="إضافة للمفضلة">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
@@ -441,11 +451,11 @@
     <audio id="audio" preload="none" playsinline></audio>
   </div>
 
-  <div class="modal-overlay" id="favModal">
+  <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
     <div class="modal-content">
-      <h3 style="margin-top:0;">المفضلة</h3>
+      <h3 style="margin-top:0; text-align:center; color:var(--accent-main);">المفضلة</h3>
       <div id="favList"></div>
-      <button onclick="closeFavModal()" style="margin-top:20px; width:100%; padding:10px; border-radius:10px; border:none; background:var(--accent-main); color:white;">إغلاق</button>
+      <button onclick="closeFavModal()" style="margin-top:20px; width:100%; padding:12px; border-radius:12px; border:none; background:var(--accent-main); color:white; font-weight:bold; cursor:pointer;">إغلاق</button>
     </div>
   </div>
 
@@ -471,19 +481,21 @@
     let hls = null;
     let currentStation = null;
 
-    // --- Media Session with local artwork ---
-    const artwork = [
-      { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
-    ];
-
+    // --- Media Session Metadata Fix ---
     function updateMediaSession(stationName) {
       if ('mediaSession' in navigator) {
+        
+        // الحصول على الرابط الكامل للأيقونات لضمان ظهورها في نظام الهاتف (شاشة القفل)
+        const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+        
         navigator.mediaSession.metadata = new MediaMetadata({
           title: stationName || 'إذاعة القرآن الكريم',
           artist: 'البث المباشر',
-          album: 'زاد المسلم',
-          artwork: artwork
+          album: 'تطبيق زاد المسلم',
+          artwork: [
+            { src: `${baseUrl}/icons/icon-192.png`, sizes: '192x:192', type: 'image/png' },
+            { src: `${baseUrl}/icons/icon-512.png`, sizes: '512x512', type: 'image/png' }
+          ]
         });
 
         navigator.mediaSession.setActionHandler('play', () => togglePlay(true));
@@ -492,8 +504,12 @@
           audio.pause();
           updateUI(false);
         });
-        navigator.mediaSession.setActionHandler('seekbackward', () => {});
-        navigator.mediaSession.setActionHandler('seekforward', () => {});
+        
+        // مسح الإجراءات غير المدعومة في الراديو المباشر لتنظيف إشعار شاشة القفل
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('previoustrack', null);
+        navigator.mediaSession.setActionHandler('nexttrack', null);
       }
     }
 
@@ -553,10 +569,11 @@
           playPromise.then(() => {
             playBtn.classList.remove('loading');
             updateUI(true);
+            updateMediaSession(currentStation.name); // تحديث الميديا سيشن عند بدء التشغيل الفعلي
           }).catch((err) => {
             console.error('Play failed:', err);
             playBtn.classList.remove('loading');
-            showToast('تعذر التشغيل، حاول مرة أخرى');
+            showToast('تعذر التشغيل، تحقق من الاتصال بالإنترنت');
             updateUI(false);
           });
         } else {
@@ -628,18 +645,17 @@
       const list = document.getElementById('favList');
       const favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
       if (favs.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد مفضلة</div>';
+        list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.7;">قائمة المفضلة فارغة</div>';
       } else {
         list.innerHTML = '';
         favs.forEach(fav => {
           const div = document.createElement('div');
-          div.style = "padding:15px; border-bottom:1px solid var(--glass-border); cursor:pointer; display:flex; justify-content:space-between; align-items:center;";
+          div.style = "padding:15px 0; border-bottom:1px solid var(--glass-border); cursor:pointer; display:flex; justify-content:space-between; align-items:center;";
           div.innerHTML = `
-            <span>${fav.name}</span>
-            <button onclick="removeFromFav('${fav.url}')" style="background:none; border:none; color:var(--live-color); cursor:pointer;">حذف</button>
+            <span style="font-weight:bold;">${fav.name}</span>
+            <button onclick="removeFromFav('${fav.url}', event)" style="background:none; border:none; color:var(--live-color); cursor:pointer; font-weight:bold; padding:5px;">حذف</button>
           `;
-          div.querySelector('span').onclick = (e) => {
-            e.stopPropagation();
+          div.onclick = () => {
             selectStation(fav);
             closeFavModal();
           };
@@ -649,13 +665,14 @@
       document.getElementById('favModal').classList.add('active');
     }
 
-    function removeFromFav(url) {
+    function removeFromFav(url, event) {
+      event.stopPropagation(); // منع النقر من اختيار المحطة
       let favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
       favs = favs.filter(f => f.url !== url);
       localStorage.setItem('favRadios', JSON.stringify(favs));
       if (currentStation && currentStation.url === url) checkFavStatus(url);
-      openFavModal(); // refresh modal
-      showToast('تم الحذف');
+      openFavModal(); // تحديث القائمة
+      showToast('تم الحذف من المفضلة');
     }
 
     function closeFavModal() {
@@ -679,7 +696,7 @@
     function renderList(list) {
       optionsList.innerHTML = '';
       if (list.length === 0) {
-        optionsList.innerHTML = '<div class="custom-option" style="text-align:center;">لا توجد نتائج</div>';
+        optionsList.innerHTML = '<div class="custom-option" style="text-align:center;">لا توجد نتائج مطابقة</div>';
         return;
       }
       list.forEach(station => {
@@ -698,7 +715,7 @@
         const data = await response.json();
         allStations = data.stations;
       } catch (e) {
-        console.warn('Using static stations');
+        console.warn('استخدام القائمة الاحتياطية للإذاعات');
         allStations = staticStations;
       }
       renderList(allStations);
@@ -726,7 +743,11 @@
       e.stopPropagation();
       const dropdown = document.getElementById('dropdownOptions');
       dropdown.classList.toggle('open');
-      if (dropdown.classList.contains('open')) searchInput.focus();
+      if (dropdown.classList.contains('open')) {
+        searchInput.focus();
+        searchInput.value = ''; // مسح البحث عند فتح القائمة
+        renderList(allStations); 
+      }
     };
 
     document.addEventListener('click', (e) => {
@@ -741,6 +762,20 @@
       const next = current === 'light' ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
+      updateThemeIcon(next);
+    }
+    
+    function updateThemeIcon(theme) {
+      const sunIcon = document.getElementById('themeIconSun');
+      const moonIcon = document.getElementById('themeIconMoon');
+      
+      if(theme === 'light') {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      }
     }
 
     // --- Helpers ---
@@ -748,7 +783,7 @@
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
+      setTimeout(() => t.classList.remove('show'), 2500);
     }
 
     // --- Event listeners for UI buttons ---
@@ -759,6 +794,7 @@
     window.onload = () => {
       const savedTheme = localStorage.getItem('theme') || 'dark';
       document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
       init();
     };
   </script>
