@@ -78,45 +78,45 @@ label { font-size: 14px; color: var(--accent-main); font-weight: bold; }
 
 .custom-select-btn {
   padding: 14px 16px; border-radius: 12px; border: 1px solid var(--glass-border);
-  background: var(--bg-surface); color: var(--text-primary); font-size: 15px;
+  background: rgba(0,0,0,0.1); color: var(--text-primary); font-size: 15px;
   font-family: inherit; cursor: pointer; display: flex; justify-content: space-between;
-  align-items: center; transition: 0.3s;
+  align-items: center; transition: 0.3s; font-weight: 500;
 }
 .custom-select-btn:after { content: '▼'; font-size: 12px; opacity: 0.6; }
 
 /* Player Area */
-.now { text-align: center; padding: 15px; background: linear-gradient(145deg, var(--glass), var(--accent-muted)); margin-top: auto; }
-.nowSurah { font-family: 'Amiri', serif; font-size: 24px; margin-bottom: 4px; color: var(--text-primary); }
+.now { text-align: center; padding: 20px 15px; background: linear-gradient(145deg, var(--glass), var(--accent-muted)); margin-top: auto; }
+.nowSurah { font-family: 'Amiri', serif; font-size: 26px; margin-bottom: 4px; color: var(--text-primary); }
 .nowReciter { font-size: 14px; color: var(--text-secondary); }
 
-/* LTR Progress Bar (0 on Left, 100 on Right) */
+/* PROGRESS BAR (LTR, Buffered, Gradient) */
 .progress-container { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 15px; direction: ltr; }
 .time { font-size: 12px; color: var(--text-secondary); width: 45px; text-align: center; font-variant-numeric: tabular-nums; }
 input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; direction: ltr; }
 input[type=range]:focus { outline: none; }
-input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 4px; }
-input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--accent-main); cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: rgba(0,0,0,0.2); border-radius: 4px; }
+input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--accent-main); cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px rgba(0,0,0,0.4); }
 
 /* Controls */
-.controls-main { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 12px; margin-bottom: 5px; direction: ltr; }
+.controls-main { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 15px; margin-bottom: 10px; direction: ltr; }
 .controls-secondary { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding: 0 10px; direction: ltr; }
 
 .play-pause-btn {
-  width: 60px; height: 60px; border-radius: 50%; background: var(--accent-main); color: #FFFFFF; border: none;
-  display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s; flex-shrink: 0;
+  width: 64px; height: 64px; border-radius: 50%; background: var(--accent-main); color: #FFFFFF; border: none;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; flex-shrink: 0;
 }
 .play-pause-btn:active { transform: scale(0.92); }
 .play-pause-btn svg { width: 26px; height: 26px; fill: currentColor; }
 
 .skip-btn {
-  width: 40px; height: 40px; border-radius: 50%; background: transparent; color: var(--text-primary); border: none;
+  width: 44px; height: 44px; border-radius: 50%; background: transparent; color: var(--text-primary); border: none;
   display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
 }
 .skip-btn:active { background: var(--accent-muted); transform: scale(0.9); }
-.skip-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.skip-btn svg { width: 26px; height: 26px; fill: currentColor; }
 
 .action-btn {
-  background: var(--accent-muted); border: 1px solid var(--glass-border); width: 38px; height: 38px; border-radius: 50%; color: var(--text-primary);
+  background: var(--accent-muted); border: 1px solid var(--glass-border); width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary);
   display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; font-size: 13px; font-weight: bold;
 }
 .action-btn:active { transform: scale(0.9); }
@@ -135,80 +135,116 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 }
 .mini.show { transform: translateY(0); }
 .miniInfo { display: flex; flex-direction: column; }
-.mini-play-btn { background: var(--accent-main); color: #FFFFFF; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.mini-play-btn { background: var(--accent-main); color: #FFFFFF; border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .mini-play-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
 /* UI Elements */
 .toast {
   position: fixed; top: 20px; left: 50%; transform: translate(-50%, -100px);
-  background: var(--accent-main); color: #FFFFFF; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 100000; transition: 0.4s;
-  display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 200px;
+  background: var(--accent-main); color: #000; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 100000; transition: 0.4s;
+  display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 200px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 .toast.show { transform: translate(-50%, 0); }
-.download-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; display: none; }
-.download-progress-fill { height: 100%; width: 0%; background: #ffffff; transition: width 0.2s; }
+.download-progress-bar { width: 100%; height: 4px; background: rgba(0,0,0,0.2); border-radius: 2px; overflow: hidden; display: none; }
+.download-progress-fill { height: 100%; width: 0%; background: #000; transition: width 0.2s; }
 
-/* ================= BOTTOM SHEETS ================= */
+/* ================= FULL SCREEN BOTTOM SHEETS ================= */
 .sheet-overlay {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
 }
 .sheet-overlay.active { opacity: 1; pointer-events: all; }
 
 .bottom-sheet {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  position: fixed; bottom: 0; left: 0; right: 0; height: 90vh; /* FULL SCREEN FEEL */
+  background: var(--glass); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
   border-top: 1px solid var(--glass-border); border-radius: 30px 30px 0 0;
   transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
   z-index: 10000; display: flex; flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom, 20px);
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-  max-height: 90vh; /* Full screen feel */
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
 }
 .bottom-sheet.active { transform: translateY(0); }
 
-.drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 10px; margin: 12px auto; }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 15px; border-bottom: 1px solid var(--glass-border); }
-.sheet-header h2 { font-size: 1.3rem; color: var(--text-primary); margin: 0; font-weight: 800;}
-.sheet-content { padding: 15px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; height: 100%; }
+/* Drag handle is ONLY shown on the Settings Sheet now */
+.drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 10px; margin: 12px auto; flex-shrink: 0;}
+.sheet-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 15px; border-bottom: 1px solid var(--glass-border); flex-shrink: 0;}
+.sheet-header h2 { font-size: 1.4rem; color: var(--text-primary); margin: 0; font-weight: 800;}
+.sheet-content { padding: 15px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; flex: 1; }
 
-.search-container { margin-bottom: 5px; }
+.search-container { margin-bottom: 5px; flex-shrink: 0;}
 .search-input {
-  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2);
+  width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2);
   color: var(--text-primary); font-family: 'Tajawal', sans-serif; font-size: 15px; outline: none; transition: 0.2s;
 }
 .search-input:focus { border-color: var(--accent-main); }
 
 .selection-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;}
 .selection-item { padding: 16px 15px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-primary); font-size: 16px; font-weight: bold; text-align: center; cursor: pointer; transition: 0.2s; }
-.selection-item:active { transform: scale(0.98); }
-.selection-item.active { background: var(--accent-main); color: #fff; border-color: var(--accent-main); }
+.selection-item:active { transform: scale(0.98); background: rgba(255,255,255,0.1);}
+.selection-item.active { background: var(--accent-main); color: #fff; border-color: var(--accent-main); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);}
 
 /* Settings Items */
 .setting-row {
   display: flex; justify-content: space-between; align-items: center;
-  width: 100%; padding: 16px 15px; border-radius: 16px; background: rgba(255,255,255,0.05);
-  border: 1px solid var(--glass-border); font-size: 1rem; font-weight: 600;
+  width: 100%; padding: 18px 15px; border-radius: 16px; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border); font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: 0.2s;
 }
+.setting-row:active { transform: scale(0.98); }
 .toggle-switch {
-  width: 44px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 32px; position: relative; cursor: pointer; transition: 0.3s;
+  width: 50px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 32px; position: relative; cursor: pointer; transition: 0.3s;
 }
 .toggle-switch.active { background: var(--accent-main); }
 .toggle-switch::after {
-  content: ''; width: 18px; height: 18px; background: white; border-radius: 50%;
+  content: ''; width: 22px; height: 22px; background: white; border-radius: 50%;
   position: absolute; top: 3px; left: 3px; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-.toggle-switch.active::after { transform: translateX(20px); }
+.toggle-switch.active::after { transform: translateX(22px); }
 
-select {
-  background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--glass-border);
-  padding: 8px 12px; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer;
-}
-select option { background: #1e293b; color: #fff; }
-
-.danger-btn { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-family: inherit; transition: 0.2s;}
+.danger-btn { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 16px; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 1.05rem; width: 100%; font-family: inherit; transition: 0.2s; margin-top: auto;}
 .danger-btn:active { background: #ef4444; color: white;}
+
+/* SLEEP TIMER UI */
+.timer-view-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; flex: 1; gap: 20px;}
+.roller-picker {
+    display: flex; justify-content: center; align-items: center; width: 100%;
+    height: 180px; position: relative; font-size: 3rem; font-weight: bold;
+    mask-image: linear-gradient(to bottom, transparent, black 35%, black 65%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 35%, black 65%, transparent);
+    direction: ltr; font-variant-numeric: tabular-nums;
+}
+.picker-highlight {
+    position: absolute; top: 50%; left: 10%; right: 10%; height: 60px;
+    transform: translateY(-50%); background: rgba(255,255,255,0.05);
+    border-radius: 16px; pointer-events: none; z-index: 0;
+}
+.picker-col {
+    height: 100%; overflow-y: auto; scroll-snap-type: y mandatory;
+    scrollbar-width: none; width: 80px; text-align: center; z-index: 1;
+}
+.picker-col::-webkit-scrollbar { display: none; }
+.picker-item { height: 60px; line-height: 60px; scroll-snap-align: center; color: var(--text-secondary); transition: 0.2s; opacity: 0.3;}
+.picker-item.active { color: var(--text-primary); opacity: 1; transform: scale(1.15); }
+.picker-space { height: 60px; }
+.picker-colon { font-size: 2.5rem; color: var(--text-primary); z-index: 1; opacity: 0.5; padding-bottom: 8px;}
+
+/* Preset Grid */
+.timer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 320px; }
+.timer-preset-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    border-radius: 50%; aspect-ratio: 1/1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; color: var(--text-primary); cursor: pointer; transition: 0.2s;
+}
+.timer-preset-btn:active { transform: scale(0.9); }
+.timer-preset-btn.active { background: var(--accent-main); color: #fff; border-color: var(--accent-main); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+.timer-preset-btn span { font-size: 1.5rem; font-weight: bold; pointer-events: none;}
+.timer-preset-btn small { font-size: 0.8rem; opacity: 0.8; pointer-events: none;}
+
+.active-timer-display {
+    font-size: 4rem; font-weight: bold; letter-spacing: 2px; direction: ltr; font-variant-numeric: tabular-nums;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3); display: none;
+}
 </style>
 </head>
 
@@ -225,7 +261,7 @@ select option { background: #1e293b; color: #fff; }
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
     </button>
     <div class="header-title">الاستماع للقرآن</div>
-    <button class="icon-btn" onclick="haptic(); openSheet('settingsSheet')" title="الإعدادات">
+    <button class="icon-btn" onclick="haptic(); openSheet('settingsSheet', true)" title="الإعدادات">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
   </div>
@@ -286,14 +322,13 @@ select option { background: #1e293b; color: #fff; }
 <div class="sheet-overlay" id="sheetOverlay" onclick="closeAllSheets()"></div>
 
 <div id="selectionSheet" class="bottom-sheet">
-  <div class="drag-handle"></div>
   <div class="sheet-header">
     <h2 id="selectionSheetTitle">العنوان</h2>
     <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px;">✕</button>
   </div>
   <div class="sheet-content">
     <div id="searchContainer" class="search-container" style="display: none;">
-      <input type="text" id="reciterSearchInput" class="search-input" placeholder="ابحث عن قارئ..." autocomplete="off">
+      <input type="text" id="reciterSearchInput" class="search-input" placeholder="ابحث..." autocomplete="off">
     </div>
     <div class="selection-list" id="selectionList"></div>
   </div>
@@ -306,33 +341,69 @@ select option { background: #1e293b; color: #fff; }
     <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px;">✕</button>
   </div>
   <div class="sheet-content">
-    <div class="setting-row">
+    <div class="setting-row" onclick="haptic(); toggleThemeUI()">
         <span>المظهر الداكن</span>
-        <div class="toggle-switch" id="themeToggle" onclick="haptic(); toggleThemeUI()"></div>
+        <div class="toggle-switch" id="themeToggle"></div>
     </div>
-    <div class="setting-row">
+    <div class="setting-row" onclick="haptic(); toggleAutoPlayUI()">
         <span>التشغيل التلقائي للتالي</span>
-        <div class="toggle-switch active" id="autoplayToggle" onclick="haptic(); toggleAutoPlayUI()"></div>
+        <div class="toggle-switch active" id="autoplayToggle"></div>
     </div>
-    <div class="setting-row">
-        <span>مؤقت النوم (إيقاف تلقائي)</span>
-        <select id="sleepTimerSelect" onchange="haptic(); setSleepTimer(this.value)">
-            <option value="0">إيقاف</option>
-            <option value="15">15 دقيقة</option>
-            <option value="30">30 دقيقة</option>
-            <option value="60">60 دقيقة</option>
-        </select>
+    <div class="setting-row" onclick="haptic(); openSheet('timerSheet', false)">
+        <span>مؤقت النوم 😴</span>
+        <span style="color:var(--text-muted); font-size: 0.9rem;" id="timerStatusText">إيقاف ›</span>
     </div>
-    <div class="setting-row" onclick="haptic(); openFavSheet()" style="cursor:pointer;">
+    <div class="setting-row" onclick="haptic(); openFavSheet()">
         <span>المقاطع المفضلة ❤️</span>
         <span style="color:var(--text-muted);">›</span>
     </div>
-    <div class="setting-row" onclick="haptic(); window.location.href='about.html'" style="cursor:pointer;">
+    <div class="setting-row" onclick="haptic(); window.location.href='about.html'">
         <span>عن التطبيق ℹ️</span>
         <span style="color:var(--text-muted);">›</span>
     </div>
-    <div style="margin-top: 20px;">
-        <button class="danger-btn" onclick="haptic(); clearCache()">مسح الذاكرة المؤقتة (Cache)</button>
+    <button class="danger-btn" onclick="haptic(); clearCache()">مسح الذاكرة المؤقتة (Cache)</button>
+  </div>
+</div>
+
+<div id="timerSheet" class="bottom-sheet">
+  <div class="sheet-header">
+    <h2>مؤقت النوم</h2>
+    <button class="icon-btn" onclick="openSheet('settingsSheet', true)" style="width:36px;height:36px;">✕</button>
+  </div>
+  <div class="sheet-content" style="align-items: center; justify-content: center;">
+    
+    <div class="timer-view-wrapper">
+        <div class="roller-picker" id="rollerPicker">
+            <div class="picker-highlight"></div>
+            <div class="picker-col" id="h-picker" onscroll="onPickerScroll('h-picker')"></div>
+            <span class="picker-colon">:</span>
+            <div class="picker-col" id="m-picker" onscroll="onPickerScroll('m-picker')"></div>
+            <span class="picker-colon">:</span>
+            <div class="picker-col" id="s-picker" onscroll="onPickerScroll('s-picker')"></div>
+        </div>
+
+        <div class="active-timer-display" id="activeTimerDisplay">00:00:00</div>
+
+        <div class="timer-grid" id="timerGrid">
+            <button class="timer-preset-btn" onclick="haptic(); setPresetTimer(1)"><span>1</span><small>min</small></button>
+            <button class="timer-preset-btn" onclick="haptic(); setPresetTimer(3)"><span>3</span><small>min</small></button>
+            <button class="timer-preset-btn" onclick="haptic(); setPresetTimer(5)"><span>5</span><small>min</small></button>
+            <button class="timer-preset-btn" onclick="haptic(); setPresetTimer(10)"><span>10</span><small>min</small></button>
+            <button class="timer-preset-btn" onclick="haptic(); setPresetTimer(15)"><span>15</span><small>min</small></button>
+            <button class="timer-preset-btn" onclick="haptic(); setPresetTimer(30)"><span>30</span><small>min</small></button>
+        </div>
+
+        <div style="display: flex; gap: 20px; align-items: center; margin-top: 10px;">
+            <button class="icon-btn" style="background: rgba(255,255,255,0.1); width:50px; height:50px; border-radius:50%;" onclick="haptic(); cancelSleepTimer()">
+               <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            </button>
+            <button class="play-pause-btn" style="width:70px; height:70px; background: #8bb4f6; color: #000; box-shadow: 0 4px 20px rgba(139,180,246,0.4);" onclick="haptic(); startCustomTimer()">
+               <svg viewBox="0 0 24 24" width="30" fill="currentColor" id="timerPlayIcon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
+            <button class="icon-btn" style="background: rgba(255,255,255,0.1); width:50px; height:50px; border-radius:50%;" onclick="haptic(); closeAllSheets()">
+               <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </button>
+        </div>
     </div>
   </div>
 </div>
@@ -370,11 +441,17 @@ function showToast(msg, duration = 2500, showProgress = false) {
 }
 
 // ================= BOTTOM SHEETS LOGIC =================
-function openSheet(id) {
+function openSheet(id, enableDrag = false) {
     document.getElementById('sheetOverlay').classList.add('active');
+    document.querySelectorAll('.bottom-sheet').forEach(s => {
+        s.style.transform = '';
+        s.classList.remove('active');
+    });
     const sheet = document.getElementById(id);
     sheet.classList.add('active');
-    attachSheetDrag(id);
+    
+    // تفعيل السحب للإغلاق فقط إذا طلبنا ذلك صراحة (مثل نافذة الإعدادات)
+    if(enableDrag) attachSheetDrag(id);
 }
 
 function closeAllSheets() {
@@ -416,8 +493,7 @@ function attachSheetDrag(sheetId) {
 }
 
 // ================= SETTINGS & THEME =================
-let isAutoPlay = localStorage.getItem('audioAutoPlay') !== 'false'; // Default True
-let sleepTimerId = null;
+let isAutoPlay = localStorage.getItem('audioAutoPlay') !== 'false'; 
 
 function applySettingsUI() {
     let savedTheme = localStorage.getItem("themeMode") || 'dark';
@@ -441,21 +517,6 @@ function toggleAutoPlayUI() {
     showToast(isAutoPlay ? "تم تفعيل التشغيل التلقائي" : "تم إيقاف التشغيل التلقائي");
 }
 
-function setSleepTimer(minutes) {
-    if (sleepTimerId) clearTimeout(sleepTimerId);
-    minutes = parseInt(minutes);
-    if (minutes === 0) {
-        showToast("تم إيقاف مؤقت النوم");
-    } else {
-        showToast(`سيتم إيقاف التشغيل بعد ${minutes} دقيقة 😴`);
-        sleepTimerId = setTimeout(() => {
-            audio.pause();
-            showToast("تم إيقاف التشغيل (مؤقت النوم)");
-            document.getElementById('sleepTimerSelect').value = "0";
-        }, minutes * 60 * 1000);
-    }
-}
-
 function clearCache() {
     if(confirm("هل أنت متأكد من مسح الذاكرة المؤقتة للتطبيق؟ سيتم فقدان التفضيلات وآخر مقطع تم تشغيله.")){
         localStorage.removeItem('lastTrack');
@@ -466,6 +527,96 @@ function clearCache() {
         setTimeout(() => location.reload(), 1000);
     }
 }
+
+// ================= SLEEP TIMER ROLLER LOGIC =================
+let sleepTimerId = null;
+let sleepCountdownId = null;
+let sleepEndTime = 0;
+
+function initPicker(id, max) {
+    const col = document.getElementById(id);
+    let html = '<div class="picker-space"></div>';
+    for(let i=0; i<=max; i++) {
+        html += `<div class="picker-item" id="${id}-item-${i}">${i.toString().padStart(2, '0')}</div>`;
+    }
+    html += '<div class="picker-space"></div>';
+    col.innerHTML = html;
+    document.getElementById(`${id}-item-0`).classList.add('active');
+}
+
+function onPickerScroll(id) {
+    const col = document.getElementById(id);
+    const index = Math.round(col.scrollTop / 60);
+    col.querySelectorAll('.picker-item').forEach(el => el.classList.remove('active'));
+    const activeItem = document.getElementById(`${id}-item-${index}`);
+    if(activeItem) activeItem.classList.add('active');
+}
+
+function setPresetTimer(mins) {
+    document.getElementById('h-picker').scrollTo({top: 0, behavior: 'smooth'});
+    document.getElementById('m-picker').scrollTo({top: mins * 60, behavior: 'smooth'});
+    document.getElementById('s-picker').scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function startCustomTimer() {
+    const h = Math.round(document.getElementById('h-picker').scrollTop / 60);
+    const m = Math.round(document.getElementById('m-picker').scrollTop / 60);
+    const s = Math.round(document.getElementById('s-picker').scrollTop / 60);
+    
+    const ms = ((h * 3600) + (m * 60) + s) * 1000;
+    if(ms <= 0) return showToast("الرجاء اختيار وقت أولاً");
+
+    cancelSleepTimer(false); 
+    
+    sleepEndTime = Date.now() + ms;
+    updateTimerDisplay();
+    sleepCountdownId = setInterval(updateTimerDisplay, 1000);
+    
+    sleepTimerId = setTimeout(() => {
+        audio.pause();
+        cancelSleepTimer(false);
+        showToast("تم إيقاف التشغيل (مؤقت النوم) 😴");
+    }, ms);
+    
+    let totalMinsForStatus = Math.round(ms / 60000);
+    document.getElementById('timerStatusText').innerText = `مفعل (${totalMinsForStatus} د) ›`;
+    showToast(`سيتم إيقاف التشغيل بعد ${totalMinsForStatus} دقيقة 😴`);
+    
+    document.getElementById('rollerPicker').style.display = 'none';
+    document.getElementById('timerGrid').style.display = 'none';
+    document.getElementById('activeTimerDisplay').style.display = 'block';
+    document.getElementById('timerPlayIcon').innerHTML = '<rect x="6" y="6" width="12" height="12"></rect>'; 
+}
+
+function cancelSleepTimer(showMsg = true) {
+    if(sleepTimerId) clearTimeout(sleepTimerId);
+    if(sleepCountdownId) clearInterval(sleepCountdownId);
+    sleepTimerId = null;
+    sleepCountdownId = null;
+    sleepEndTime = 0;
+    
+    document.getElementById('timerStatusText').innerText = "إيقاف ›";
+    
+    document.getElementById('rollerPicker').style.display = 'flex';
+    document.getElementById('timerGrid').style.display = 'grid';
+    document.getElementById('activeTimerDisplay').style.display = 'none';
+    document.getElementById('timerPlayIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>'; 
+    
+    if(showMsg) showToast("تم إلغاء المؤقت");
+}
+
+function updateTimerDisplay() {
+    if(!sleepEndTime) return;
+    const remaining = Math.max(0, sleepEndTime - Date.now());
+    if(remaining === 0) { cancelSleepTimer(false); return; }
+    
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('activeTimerDisplay').innerText = 
+        `${h.toString().padStart(2,'0')} : ${m.toString().padStart(2,'0')} : ${s.toString().padStart(2,'0')}`;
+}
+
 
 // ================= APP DATA & LOGIC =================
 let appData = { reciters: [] }, selectedReciterIndex = 0, currentJuzData = [], selectedJuzIndex = 0, currentTrackUrl = "", isShuffle = false, isRepeat = false;
@@ -569,8 +720,8 @@ function renderReciterList(filterText = '') {
         selectedJuzIndex = newIndex !== -1 ? newIndex : 0; 
         
         juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
-        prepareTrack(true); // User initiated -> Play
         closeAllSheets();
+        prepareTrack(true); 
     };
     list.appendChild(div);
   });
@@ -586,31 +737,55 @@ function openReciterSheet() {
   const handler = (e) => renderReciterList(e.target.value);
   searchInput.removeEventListener('input', handler);
   searchInput.addEventListener('input', handler);
-  openSheet('selectionSheet');
+  openSheet('selectionSheet', false);
+  
+  setTimeout(()=>{
+      const list = document.getElementById('selectionList');
+      const activeItem = list.querySelector('.active');
+      if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
+}
+
+function renderJuzList(filterText = '') {
+  const list = document.getElementById('selectionList');
+  list.innerHTML = '';
+  const filtered = currentJuzData.filter(j => j.name.toLowerCase().includes(filterText.toLowerCase()));
+  if (filtered.length === 0) { list.innerHTML = '<div class="selection-item" style="text-align:center;">لا توجد نتائج</div>'; return; }
+  
+  filtered.forEach((j) => {
+    const originalIndex = currentJuzData.findIndex(orig => orig.name === j.name);
+    let div = document.createElement('div');
+    div.className = 'selection-item' + (originalIndex === selectedJuzIndex ? ' active' : '');
+    div.innerText = j.name;
+    div.onclick = () => { 
+        haptic();
+        selectedJuzIndex = originalIndex; 
+        juzSelectBtn.innerText = j.name; 
+        errorRetryCount = 0;
+        closeAllSheets(); 
+        prepareTrack(true); 
+    };
+    list.appendChild(div);
+  });
 }
 
 function openJuzSheet() {
   if (currentJuzData.length === 0) return;
   document.getElementById('selectionSheetTitle').innerText = "اختر السورة / الجزء";
-  document.getElementById('searchContainer').style.display = 'none';
-  const list = document.getElementById('selectionList');
-  list.innerHTML = '';
-  currentJuzData.forEach((j, i) => {
-    let div = document.createElement('div');
-    div.className = 'selection-item' + (i === selectedJuzIndex ? ' active' : '');
-    div.innerText = j.name;
-    div.onclick = () => { 
-        haptic();
-        selectedJuzIndex = i; 
-        juzSelectBtn.innerText = j.name; 
-        errorRetryCount = 0;
-        closeAllSheets(); 
-        prepareTrack(true); // User initiated -> Play
-    };
-    list.appendChild(div);
-  });
-  openSheet('selectionSheet');
-  setTimeout(()=> { const activeItem = list.querySelector('.active'); if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" }); }, 50);
+  document.getElementById('searchContainer').style.display = 'block';
+  const searchInput = document.getElementById('reciterSearchInput');
+  searchInput.value = '';
+  renderJuzList('');
+  const handler = (e) => renderJuzList(e.target.value);
+  searchInput.removeEventListener('input', handler);
+  searchInput.addEventListener('input', handler);
+  openSheet('selectionSheet', false);
+  
+  setTimeout(()=>{
+      const list = document.getElementById('selectionList');
+      const activeItem = list.querySelector('.active');
+      if(activeItem) activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
 }
 
 function prepareTrack(userInitiated = false) {
@@ -636,9 +811,12 @@ function prepareTrack(userInitiated = false) {
     updateMediaSession(juzName, reciterName);
   }
 
-  // Play Logic
   if (userInitiated || isAutoPlay) {
-      audio.play().catch(e => { console.log("Auto-play prevented", e); });
+      audio.load();
+      const playPromise = audio.play();
+      if(playPromise !== undefined){
+          playPromise.catch(e => { console.log("Auto-play prevented", e); });
+      }
   }
 }
 
@@ -669,8 +847,8 @@ function updateMediaSession(title, artist) {
   if ("mediaSession" in navigator) {
     const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: title || "الاستماع للقرآن", artist: artist || "زاد المسلم", album: "زاد المسلم Pro",
-      artwork: [{ src: `${baseUrl}/icon/icon-512.png`, sizes: "512x512", type: "image/png" }]
+      title: title || "الاستماع للقرآن", artist: artist || "زاد المسلم", album: "زاد المسلم",
+      artwork: [{ src: `${baseUrl}/icons/icon-512.png`, sizes: "512x512", type: "image/png" }]
     });
     navigator.mediaSession.setActionHandler("play", () => togglePlay());
     navigator.mediaSession.setActionHandler("pause", () => togglePlay());
@@ -695,7 +873,7 @@ function playNextTrack(userInitiated = false) {
   
   selectedJuzIndex = nextIndex;
   juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
-  prepareTrack(userInitiated); 
+  prepareTrack(userInitiated || isAutoPlay); 
 }
 
 function playPrevTrack() {
@@ -710,7 +888,7 @@ function playPrevTrack() {
 
 audio.addEventListener('ended', () => { 
   if (isRepeat) { audio.currentTime = 0; audio.play(); } 
-  else { playNextTrack(false); } // False indicates it ended naturally, rely on autoPlay flag
+  else { playNextTrack(false); } 
 });
 
 audio.addEventListener('error', () => { 
@@ -741,7 +919,7 @@ function updatePlayPauseUI(isPlaying) {
   else { playIcon.style.display = "block"; pauseIcon.style.display = "none"; miniPlayIcon.style.display = "block"; miniPauseIcon.style.display = "none"; }
 }
 
-// ================= PROGRESS BAR (Buffered & Left-to-Right) =================
+// ================= PROGRESS BAR (LTR Buffered Gradient) =================
 audio.addEventListener('loadedmetadata', () => { 
     document.getElementById("durationTime").innerText = formatTime(audio.duration); 
 });
@@ -750,18 +928,18 @@ function updateProgressBar() {
     if (!audio.duration) return;
     const percent = (audio.currentTime / audio.duration) * 100;
     
-    // Calculate buffered percentage
     let bufferPercent = percent;
-    if (audio.buffered.length > 0) {
-        const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
-        bufferPercent = (bufferedEnd / audio.duration) * 100;
+    for (let i = 0; i < audio.buffered.length; i++) {
+        if (audio.currentTime >= audio.buffered.start(i) && audio.currentTime <= audio.buffered.end(i)) {
+            bufferPercent = (audio.buffered.end(i) / audio.duration) * 100;
+            break;
+        }
     }
     
     document.getElementById("progress").value = percent;
     document.getElementById("currentTime").innerText = formatTime(audio.currentTime);
     
-    // LTR Gradient: Played (Accent) -> Buffered (Light White) -> Empty (Dark Transparent)
-    document.getElementById("progress").style.background = `linear-gradient(to right, var(--accent-main) ${percent}%, rgba(255,255,255,0.4) ${percent}%, rgba(255,255,255,0.4) ${bufferPercent}%, rgba(0,0,0,0.2) ${bufferPercent}%)`;
+    document.getElementById("progress").style.background = `linear-gradient(to right, var(--accent-main) 0%, var(--accent-main) ${percent}%, rgba(255,255,255,0.4) ${percent}%, rgba(255,255,255,0.4) ${bufferPercent}%, rgba(0,0,0,0.2) ${bufferPercent}%, rgba(0,0,0,0.2) 100%)`;
 }
 
 audio.addEventListener('timeupdate', updateProgressBar);
@@ -769,6 +947,7 @@ audio.addEventListener('progress', updateProgressBar);
 
 document.getElementById("progress").addEventListener('input', (e) => { 
     audio.currentTime = (e.target.value / 100) * audio.duration; 
+    updateProgressBar();
 });
 
 function formatTime(s) { if (isNaN(s)) return "00:00"; const m = Math.floor(s / 60), sec = Math.floor(s % 60); return `${m < 10 ? '0'+m : m}:${sec < 10 ? '0'+sec : sec}`; }
@@ -829,18 +1008,18 @@ async function downloadTrack() {
 
 // ================= FAVORITES =================
 function openFavSheet() {
-  closeAllSheets(); // Close settings if open
   document.getElementById('selectionSheetTitle').innerText = "مقاطع المفضلة";
   document.getElementById('searchContainer').style.display = 'none';
   const list = document.getElementById('selectionList');
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
   list.innerHTML = favs.length === 0 ? '<div style="text-align:center; padding:30px; opacity:0.5;">لا توجد مفضلات</div>' : '';
   favs.forEach((fav, index) => {
-    let div = document.createElement('div'); div.className = 'fav-item-container';
-    div.innerHTML = `<div style="cursor:pointer; width:80%;" onclick="haptic(); playFromFav('${fav.url}', '${fav.surah}', '${fav.reciter}')"><div style="font-weight:bold; color:var(--accent-main);">${fav.surah}</div><div style="font-size:12px; color:var(--text-secondary);">${fav.reciter}</div></div><button class="danger-btn" style="width:auto; padding:8px 12px;" onclick="haptic(); removeFav(${index}, event)">✕</button>`;
+    let div = document.createElement('div'); div.className = 'selection-item';
+    div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center'; div.style.padding = '12px 15px';
+    div.innerHTML = `<div style="cursor:pointer; width:80%; text-align:right;" onclick="haptic(); playFromFav('${fav.url}', '${fav.surah}', '${fav.reciter}')"><div style="font-weight:bold; color:var(--text-primary);">${fav.surah}</div><div style="font-size:13px; color:var(--accent-main);">${fav.reciter}</div></div><button class="danger-btn" style="width:auto; padding:8px 12px; margin:0;" onclick="haptic(); removeFav(${index}, event)">✕</button>`;
     list.appendChild(div);
   });
-  openSheet('selectionSheet');
+  openSheet('selectionSheet', false);
 }
 
 function toggleFavorite() {
@@ -874,6 +1053,9 @@ function removeFav(index, e) { e.stopPropagation(); let favs = JSON.parse(localS
 // ================= START =================
 window.addEventListener("load", () => {
   applySettingsUI();
+  initPicker('h-picker', 23);
+  initPicker('m-picker', 59);
+  initPicker('s-picker', 59);
   loadMultipleJSONs();
 });
 </script>
