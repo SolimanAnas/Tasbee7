@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>عن التطبيق - زاد المسلم</title>
+<meta name="theme-color" content="#10b981">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ================= THEME VARIABLES ================= */
+:root {
+  --main-bg: radial-gradient(circle at 50% 0%, #1e293b, #020617);
+  --bg-surface: #020617; 
+  --text-primary: #F8FAFC; 
+  --text-secondary: #94a3b8;
+  --accent-main: #10b981; 
+  --accent-muted: rgba(16, 185, 129, 0.15);
+  --glass: rgba(30, 41, 59, 0.6); 
+  --glass-card: rgba(30, 41, 59, 0.4); 
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] {
+  --main-bg: url('images/Background-dark.png');
+  --bg-surface: #0f172a; 
+  --accent-main: #34D399; 
+  --glass: rgba(15, 23, 42, 0.85); 
+  --glass-card: rgba(15, 23, 42, 0.5);
+}
+
+[data-theme="light"] {
+  --main-bg: url('images/Background-light.png');
+  --bg-surface: #f8fafc; 
+  --text-primary: #0F172A; 
+  --text-secondary: #475569;
+  --accent-main: #059669; 
+  --glass: rgba(255, 255, 255, 0.9); 
+  --glass-card: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.05); 
+  --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { 
+  margin: 0; 
+  font-family: 'Tajawal', sans-serif; 
+  background-color: var(--bg-surface); 
+  /* تم الإصلاح الجذري هنا لتعمل الخلفية بشكل ممتاز */
+  background-image: var(--main-bg); 
+  background-size: cover; 
+  background-position: center; 
+  background-attachment: fixed; 
+  background-repeat: no-repeat;
+  color: var(--text-primary); 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  min-height: 100dvh; 
+  transition: color 0.3s ease, background 0.3s ease; 
+  padding-top: env(safe-area-inset-top);
+}
+
+/* ================= TOP BAR ================= */
+.top-bar { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); }
+.back-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(16px); transition: 0.2s; color: var(--text-primary); }
+.back-btn:active { transform: scale(0.9); background: var(--accent-muted); }
+.back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.spacer { width: 38px; }
+
+/* ================= CONTENT & CARDS ================= */
+.content { flex: 1; width: 100%; max-width: 480px; padding: 10px 20px 40px; display: flex; flex-direction: column; gap: 16px; }
+
+/* App Header Section */
+.app-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 5px; margin-bottom: 5px; }
+.app-logo { width: 85px; height: 85px; border-radius: 22px; box-shadow: 0 8px 20px var(--accent-muted); margin-bottom: 12px; border: 2px solid rgba(255,255,255,0.1); object-fit: cover; background-color: var(--glass); }
+.app-name { font-size: 26px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: -0.5px; }
+.app-version { font-size: 13px; font-weight: 600; color: var(--text-secondary); background: var(--glass); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--glass-border); }
+
+/* Info Cards */
+.info-card { background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; backdrop-filter: blur(16px); box-shadow: var(--glass-shadow); }
+.card-title { font-size: 17px; font-weight: 800; color: var(--accent-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.card-text { font-size: 14px; line-height: 1.7; color: var(--text-primary); opacity: 0.9; margin: 0; }
+
+/* Features List */
+.features-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.features-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+.check-icon { color: var(--accent-main); background: var(--accent-muted); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.check-icon svg { width: 12px; height: 12px; stroke-width: 3; }
+
+/* Footer */
+.footer-text { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 15px; line-height: 1.6; }
+.heart-icon { color: #ef4444; display: inline-block; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+/* Page Transition */
+body.fade-out { opacity: 0; transition: opacity 0.25s; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="back-btn" onclick="goBack()" title="رجوع">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </div>
+  <div class="title">عن التطبيق</div>
+  <div class="spacer"></div>
+</div>
+
+<div class="content">
+  
+  <div class="app-header">
+    <img src="icons/icon-192.png" alt="شعار زاد المسلم" class="app-logo" onerror="this.src='icon/icon-192.png'">
+    <h1 class="app-name">زاد المسلم</h1>
+    <div class="app-version">الإصدار 1.0.0</div>
+  </div>
+
+  <div class="info-card">
+    <div class="card-title">📌 رسالتنا</div>
+    <p class="card-text">
+      تطبيق "زاد المسلم" هو رفيقك اليومي الشامل، صُمم ليكون واحة روحانية تجمع لك القرآن الكريم، السنة النبوية، والأذكار في واجهة واحدة عصرية ومريحة للعين. التطبيق <strong>مجاني بالكامل وخالي من الإعلانات</strong>، ويعمل في معظمه بدون الحاجة للاتصال بالإنترنت.
+    </p>
+  </div>
+
+  <div class="info-card">
+    <div class="card-title">✨ أهم المميزات</div>
+    <ul class="features-list">
+      <li>
+        <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        مصحف تفاعلي مع ميزة التسميع الذكي
+      </li>
+      <li>
+        <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        محرك بحث متقدم للأحاديث (أوفلاين)
+      </li>
+      <li>
+        <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        أذكار الصباح والمساء وحصن المسلم
+      </li>
+      <li>
+        <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        مسبحة إلكترونية مع إحصائيات متقدمة
+      </li>
+      <li>
+        <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        مواقيت الصلاة الدقيقة وبوصلة القبلة
+      </li>
+    </ul>
+  </div>
+
+  <div class="info-card" style="text-align: center;">
+    <div class="card-title" style="justify-content: center;">🤝 صدقة جارية</div>
+    <p class="card-text" style="font-size: 14px;">
+      تم تطوير هذا العمل ليكون صدقة جارية. نسألكم الدعاء بظهر الغيب لمن ساهم في برمجته، ونشره، واستخدامه.
+      <br><br>
+      إذا واجهتك أي مشكلة أو كان لديك اقتراح للتطوير، نسعد بتواصلك وتقييمك للتطبيق على المتجر.
+    </p>
+  </div>
+
+  <div class="footer-text">
+    صُنع بحب <span class="heart-icon">❤️</span> لخدمة الإسلام والمسلمين<br>
+    © 2026 جميع الحقوق محفوظة
+  </div>
+
+</div>
+
+<script>
+window.addEventListener("load", () => {
+    let savedMode = localStorage.getItem("themeMode");
+    if(!savedMode || !["dark","light","plain-dark"].includes(savedMode)) savedMode = "dark";
+    document.documentElement.setAttribute("data-theme", savedMode);
+});
+
+function goBack() {
+    document.body.classList.add("fade-out");
+    setTimeout(() => {
+        window.history.back();
+        setTimeout(() => { window.location.href = 'index.html'; }, 100);
+    }, 200);
+}
+
+window.addEventListener("pageshow", () => {
+    document.body.classList.remove("fade-out");
+});
+</script>
+</body>
+</html>
