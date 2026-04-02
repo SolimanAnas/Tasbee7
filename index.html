@@ -171,14 +171,13 @@ body::before { content: ''; position: fixed; inset: 0; background: var(--overlay
 .label { font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.3; width: 100%; text-align: center; }
 
 /* ================= BOTTOM SHEET OVERLAY ================= */
-/* تم إضافة هذه الطبقة لإغلاق القائمة عند النقر خارجها وتعتيم الخلفية */
 .sheet-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 9998; /* تحت الـ Sheet مباشرة */
+  z-index: 9998;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -188,7 +187,7 @@ body::before { content: ''; position: fixed; inset: 0; background: var(--overlay
   pointer-events: all;
 }
 
-/* ================= BOTTOM SHEET (Glassmorphism) ================= */
+/* ================= BOTTOM SHEET ================= */
 .bottom-sheet {
   position: fixed;
   bottom: 0;
@@ -206,13 +205,11 @@ body::before { content: ''; position: fixed; inset: 0; background: var(--overlay
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
-  /* منع التداخل */
   display: flex;
   flex-direction: column;
 }
 .bottom-sheet.active { transform: translateY(0); }
 
-/* مقبض السحب (Drag Handle) */
 .drag-handle {
   width: 40px;
   height: 5px;
@@ -246,7 +243,6 @@ body::before { content: ''; position: fixed; inset: 0; background: var(--overlay
 }
 .sheet-content {
   padding: 16px 20px;
-  /* لتجنب انقطاع المحتوى في الشاشات الصغيرة */
   padding-bottom: env(safe-area-inset-bottom, 30px); 
 }
 .setting-item {
@@ -325,7 +321,7 @@ select#calcMethod option {
 .countdown-timer { font-size: 1.1rem; font-weight: 800; letter-spacing: 1px; direction: ltr; }
 
 /* ================= PRAYER TIMES LIST ================= */
-.prayer-times-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 260px; overflow-y: auto; }
+.prayer-times-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 260px; overflow-y: auto; transition: opacity 0.2s; }
 .prayer-item { display: flex; justify-content: space-between; padding: 10px 14px; background: var(--glass-card); border-radius: 16px; font-weight: 600; border: 1px solid var(--glass-border); font-size: 0.9rem; }
 .prayer-item.next-prayer { background: var(--accent-muted); color: var(--accent-main); border-color: var(--accent-main); }
 .location-controls { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px solid var(--glass-border); padding-top: 10px; }
@@ -334,6 +330,7 @@ select#calcMethod option {
 .loc-input-group input::placeholder { color: var(--text-secondary); opacity: 0.7; }
 .loc-input-group button { background: var(--accent-main); color: white; border: none; border-radius: 14px; padding: 0 16px; font-weight: bold; cursor: pointer; }
 .gps-btn { background: rgba(16, 185, 129, 0.1); color: var(--accent-main); border: 1px solid var(--accent-main); padding: 10px; border-radius: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.swipe-area { touch-action: pan-y; }
 
 /* Stats Grid Glassmorphism */
 .stats-grid {
@@ -564,7 +561,14 @@ body.fade-out { opacity: 0; transition: opacity 0.25s; }
       </div>
       <div class="prayer-times-list" id="prayerTimesList"></div>
     </div>
-    <div class="location-controls"><button class="gps-btn" id="gpsBtn" onclick="startGPS()">📍 تحديد موقعي (GPS)</button><div class="loc-input-group"><input type="text" id="cityInput" list="citiesDataList" placeholder="أو ابحث عن مدينتك..."><datalist id="citiesDataList" class="cities-datalist-opts"></datalist><button onclick="saveCity()">حفظ</button></div></div>
+    <div class="location-controls">
+        <button class="gps-btn" id="gpsBtn" onclick="startGPS()">📍 تحديد موقعي (GPS)</button>
+        <div class="loc-input-group">
+            <input type="text" id="cityInput" list="citiesDataList" placeholder="أو ابحث عن مدينتك..." onkeypress="if(event.key === 'Enter') saveCity()">
+            <datalist id="citiesDataList" class="cities-datalist-opts"></datalist>
+            <button onclick="saveCity()">حفظ</button>
+        </div>
+    </div>
   </div>
 </div>
 
@@ -579,48 +583,257 @@ let notificationPermissionGranted = false, azanEnabled = false, azkarEnabled = f
 let lastNotificationSent = { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
 let selectedDisplayDate = new Date();
 
-// Helper: serialize/deserialize prayer times for cache
-function serializeTimes(times) {
-  const obj = {};
-  for (let k in times) {
-    if (times[k] instanceof Date) obj[k] = times[k].getTime();
-  }
-  return obj;
-}
-function deserializeTimes(obj) {
-  const result = {};
-  for (let k in obj) {
-    result[k] = new Date(obj[k]);
-  }
-  return result;
+// --- Logic from Old Version (Stable, direct Adhan calc, no complex caching) ---
+const prayerNamesAr = { fajr: 'الفجر', sunrise: 'الشروق', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+
+function formatTimeArabic12h(dateObj) {
+    if(!dateObj || isNaN(dateObj.getTime())) return "--:--";
+    let hours = dateObj.getHours();
+    let minutes = dateObj.getMinutes();
+    let ampm = hours >= 12 ? 'م' : 'ص';
+    hours = hours % 12 || 12; 
+    let minsStr = minutes < 10 ? '0' + minutes : minutes;
+    return `${hours}:${minsStr} ${ampm}`;
 }
 
-// Cache functions
-function getCachedPrayerTimes(lat, lng, date) {
-  const key = `prayer_${lat}_${lng}_${date.toDateString()}`;
-  const raw = localStorage.getItem(key);
-  if (!raw) return null;
-  try {
-    const data = JSON.parse(raw);
-    if (Date.now() - data.timestamp < 5 * 60 * 1000) {
-      return {
-        current: deserializeTimes(data.current),
-        display: deserializeTimes(data.display)
-      };
+function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+}
+
+function updateModalDateText() {
+    const isToday = isSameDay(selectedDisplayDate, new Date());
+    let dateStr = selectedDisplayDate.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' });
+    document.getElementById('modalDateText').innerText = isToday ? "اليوم" : dateStr;
+    const yyyy = selectedDisplayDate.getFullYear();
+    const mm = String(selectedDisplayDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(selectedDisplayDate.getDate()).padStart(2, '0');
+    document.getElementById('datePickerInput').value = `${yyyy}-${mm}-${dd}`;
+}
+
+function changePrayerDate(offset) {
+    selectedDisplayDate.setDate(selectedDisplayDate.getDate() + offset);
+    document.getElementById('prayerTimesList').style.opacity = '0.3';
+    setTimeout(() => { refreshPrayerTimes(); document.getElementById('prayerTimesList').style.opacity = '1'; }, 150);
+}
+
+function onDatePicked(val) {
+    if(!val) return;
+    selectedDisplayDate = new Date(val);
+    document.getElementById('prayerTimesList').style.opacity = '0.3';
+    setTimeout(() => { refreshPrayerTimes(); document.getElementById('prayerTimesList').style.opacity = '1'; }, 150);
+}
+
+function startCountdown(nextPrayerDateObj, nextPrayerNameAr) {
+    if (countdownInterval) clearInterval(countdownInterval);
+    const labelDisplay = document.getElementById('nextPrayerLabel');
+    const timerDisplay = document.getElementById('countdownTimer');
+    
+    if(!nextPrayerDateObj) {
+        labelDisplay.innerText = "⏳ يرجى تحديد الموقع";
+        timerDisplay.innerText = "--:--:--";
+        return;
     }
-  } catch(e) {}
-  return null;
-}
-function setCachedPrayerTimes(lat, lng, date, current, display) {
-  const key = `prayer_${lat}_${lng}_${date.toDateString()}`;
-  const data = {
-    timestamp: Date.now(),
-    current: serializeTimes(current),
-    display: serializeTimes(display)
-  };
-  localStorage.setItem(key, JSON.stringify(data));
+    
+    labelDisplay.innerText = `⏳ للصلاة: ${nextPrayerNameAr}`;
+    
+    countdownInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const diff = nextPrayerDateObj.getTime() - now;
+        
+        if (diff <= 0) { 
+            refreshPrayerTimes(); 
+            return; 
+        }
+        
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        timerDisplay.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
 }
 
+function getCalculationMethod() { 
+  switch(calcMethod) { 
+    case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura(); 
+    case 'Egypt': return adhan.CalculationMethod.Egyptian(); 
+    case 'Karachi': return adhan.CalculationMethod.Karachi(); 
+    default: return adhan.CalculationMethod.MuslimWorldLeague(); 
+  } 
+}
+
+function updateTickerText(text) {
+    document.getElementById('ticker1').innerText = text;
+    document.getElementById('ticker2').innerText = text;
+}
+
+function updateUIWithPrayerTimes(lat, lng) {
+    if(!window.adhan) { updateTickerText("جاري تحميل مكتبة المواقيت..."); return; }
+    
+    if(!lat || !lng) { 
+        updateTickerText("📍 اضغط لاختيار الموقع (GPS أو مدينة)"); 
+        document.getElementById('prayerTimesList').innerHTML = '<div style="text-align:center; opacity:0.6; padding:10px;">يرجى تحديد موقعك لعرض الأوقات</div>'; 
+        document.getElementById('currentCityDisplay').innerText = `📍 مدينتك: غير محددة`;
+        return; 
+    }
+    
+    try {
+        const coordinates = new adhan.Coordinates(lat, lng);
+        const params = getCalculationMethod();
+        params.madhab = adhan.Madhab.Shafi;
+        
+        const now = new Date();
+        const currentPrayerTimes = new adhan.PrayerTimes(coordinates, now, params);
+        
+        let nextPrayerEnum = currentPrayerTimes.nextPrayer(); 
+        let nextPrayerDateObj = nextPrayerEnum !== 'none' ? currentPrayerTimes[nextPrayerEnum] : null;
+        let nextPrayerNameAr = prayerNamesAr[nextPrayerEnum];
+        
+        if (nextPrayerEnum === 'none') {
+            let tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+            let tmwTimes = new adhan.PrayerTimes(coordinates, tomorrow, params);
+            nextPrayerEnum = 'fajr'; nextPrayerDateObj = tmwTimes.fajr; nextPrayerNameAr = prayerNamesAr['fajr'];
+        }
+        
+        startCountdown(nextPrayerDateObj, nextPrayerNameAr);
+        
+        let tickerStr = "";
+        const prayerOrder = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"];
+        for (const key of prayerOrder) {
+            if(currentPrayerTimes[key]) tickerStr += ` • ${prayerNamesAr[key]}: ${formatTimeArabic12h(currentPrayerTimes[key])} `;
+        }
+        updateTickerText(tickerStr.substring(3)); 
+        
+        const displayPrayerTimes = new adhan.PrayerTimes(coordinates, selectedDisplayDate, params);
+        const isDisplayingToday = isSameDay(selectedDisplayDate, now);
+        
+        let modalHtml = "";
+        for (const key of prayerOrder) {
+            const prayerDateObj = displayPrayerTimes[key]; 
+            if (!prayerDateObj) continue;
+            const time12h = formatTimeArabic12h(prayerDateObj);
+            const isNext = (isDisplayingToday && key === nextPrayerEnum);
+            modalHtml += `<div class="prayer-item ${isNext ? 'next-prayer' : ''}"><span>${prayerNamesAr[key]}</span><span>${time12h}</span></div>`;
+        }
+        document.getElementById('prayerTimesList').innerHTML = modalHtml;
+        
+        const savedCityName = localStorage.getItem('current_location_name') || "موقع محفوظ";
+        document.getElementById('currentCityDisplay').innerText = `📍 مدينتك: ${savedCityName}`;
+        updateModalDateText();
+        
+        const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+        document.getElementById('hijriDateDisplay').innerText = hijri;
+
+        // Notifications logic
+        if(azanEnabled && notificationPermissionGranted && navigator.serviceWorker.controller){
+          for(let p of ["fajr","dhuhr","asr","maghrib","isha"]){
+            let prayerTime=currentPrayerTimes[p];
+            if(prayerTime){
+              let diffMs=Math.abs(prayerTime-now);
+              if(diffMs<60000 && !lastNotificationSent[p]){
+                navigator.serviceWorker.controller.postMessage({
+                  type: 'AZAN_NOTIFICATION',
+                  prayer: p,
+                  name: prayerNamesAr[p],
+                  timestamp: prayerTime.getTime()
+                });
+                if(azanAudioEnabled && azanAudio) azanAudio.play().catch(()=>{});
+                lastNotificationSent[p]=true;
+              } else if(diffMs>60000) lastNotificationSent[p]=false;
+            }
+          }
+        }
+
+    } catch(e) {
+        console.error("Adhan Calculation Error:", e);
+        updateTickerText("خطأ في الحساب الفلكي");
+    }
+}
+
+function refreshPrayerTimes() {
+    const lat = localStorage.getItem('prayer_lat');
+    const lng = localStorage.getItem('prayer_lng');
+    if(lat && lng) updateUIWithPrayerTimes(parseFloat(lat), parseFloat(lng));
+    else updateUIWithPrayerTimes(null, null);
+}
+
+function startGPS() {
+    const btn = document.getElementById('gpsBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ جاري التحديد...';
+    
+    if(!navigator.geolocation) { 
+      alert("المتصفح لا يدعم تحديد الموقع (GPS)"); 
+      btn.innerHTML = originalText; 
+      return; 
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const lat = pos.coords.latitude, lng = pos.coords.longitude;
+            localStorage.setItem('prayer_lat', lat);
+            localStorage.setItem('prayer_lng', lng);
+            localStorage.setItem('current_location_name', 'موقعك الحالي (GPS)'); 
+            localStorage.removeItem('prayer_city');
+            selectedDisplayDate = new Date(); 
+            refreshPrayerTimes();
+            
+            btn.innerHTML = '✔️ تم التحديد';
+            setTimeout(() => { if(document.getElementById('gpsBtn')) btn.innerHTML = originalText; }, 2000);
+            setTimeout(closePrayerModal, 1000);
+        },
+        (err) => { 
+          btn.innerHTML = originalText; 
+          alert("الرجاء السماح بصلاحية الموقع (GPS) أو اختيار مدينة."); 
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+    );
+}
+
+function getCityCoordinates(cityName) { 
+    if(typeof cityCoordinatesMap === 'undefined') return null;
+    const key = Object.keys(cityCoordinatesMap).find(k => k === cityName || k.toLowerCase() === cityName.toLowerCase()); 
+    return key ? cityCoordinatesMap[key] : null; 
+}
+
+function saveCity() {
+    const cityInput = document.getElementById('cityInput').value.trim();
+    if(!cityInput) return;
+    const coords = getCityCoordinates(cityInput);
+    if(coords) {
+        const exactName = Object.keys(cityCoordinatesMap).find(k => k.toLowerCase() === cityInput.toLowerCase()) || cityInput;
+        localStorage.setItem('prayer_lat', coords.lat);
+        localStorage.setItem('prayer_lng', coords.lng);
+        localStorage.setItem('current_location_name', exactName); 
+        localStorage.removeItem('prayer_city');
+        selectedDisplayDate = new Date(); 
+        refreshPrayerTimes();
+        document.getElementById('cityInput').value = '';
+        closePrayerModal(); // إغلاق المودال مباشرة بعد الحفظ
+    } else { 
+      alert(`لم نتعرف على "${cityInput}". تأكد من الإملاء أو اختر من القائمة.`); 
+    }
+}
+
+// Swipe Support for Modal (مع عكس الاتجاه للغة العربية RTL)
+document.addEventListener('DOMContentLoaded', () => {
+    const swipeArea = document.getElementById('swipeArea');
+    if(swipeArea) {
+      let touchstartX = 0, touchendX = 0;
+      swipeArea.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive: true});
+      swipeArea.addEventListener('touchend', e => {
+          touchendX = e.changedTouches[0].screenX;
+          const swipeThreshold = 50; 
+          // تم عكس الإشارات: سحب لليمين يعود للخلف، وسحب لليسار يتقدم للأمام
+          if (touchendX > touchstartX + swipeThreshold) changePrayerDate(-1);
+          else if (touchendX < touchstartX - swipeThreshold) changePrayerDate(1);
+      }, {passive: true});
+    }
+});
+
+// --- AUDIO & SETTINGS ---
 function initAudio() { 
   azanAudio = new Audio('assets/azan.mp3'); 
   azanAudio.preload = 'auto';
@@ -644,150 +857,7 @@ function setCalcMethod(method) {
   refreshPrayerTimes(); 
 }
 
-function getCalculationMethod() { 
-  switch(calcMethod) { 
-    case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura(); 
-    case 'Egypt': return adhan.CalculationMethod.Egyptian(); 
-    case 'Karachi': return adhan.CalculationMethod.Karachi(); 
-    default: return adhan.CalculationMethod.MuslimWorldLeague(); 
-  } 
-}
-
-function formatTimeArabic12h(dateObj) { 
-  if(!dateObj) return '--:--'; 
-  let h=dateObj.getHours(), m=dateObj.getMinutes(), ampm=h>=12?'م':'ص'; 
-  h=h%12||12; 
-  return `${h}:${m.toString().padStart(2,'0')} ${ampm}`; 
-}
-function isSameDay(d1,d2) { return d1.toDateString()===d2.toDateString(); }
-const prayerNamesAr={fajr:'الفجر',sunrise:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
-
-function updateModalDateText() { 
-  let isToday=isSameDay(selectedDisplayDate,new Date()); 
-  let ds=selectedDisplayDate.toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'short'}); 
-  document.getElementById('modalDateText').innerText=isToday?'اليوم':ds; 
-  let y=selectedDisplayDate.getFullYear(),m=String(selectedDisplayDate.getMonth()+1).padStart(2,'0'),d=String(selectedDisplayDate.getDate()).padStart(2,'0'); 
-  document.getElementById('datePickerInput').value=`${y}-${m}-${d}`; 
-}
-function changePrayerDate(offset){ selectedDisplayDate.setDate(selectedDisplayDate.getDate()+offset); refreshPrayerTimes(); }
-function onDatePicked(val){ if(val){ selectedDisplayDate=new Date(val); refreshPrayerTimes(); } }
-
-function startCountdown(nextDate,name){ 
-  if(countdownInterval) clearInterval(countdownInterval); 
-  const label=document.getElementById('nextPrayerLabel'), timer=document.getElementById('countdownTimer'); 
-  if(!nextDate){ label.innerText="⏳ يرجى تحديد الموقع"; timer.innerText="--:--:--"; return; } 
-  label.innerText=`⏳ للصلاة: ${name}`; 
-  countdownInterval=setInterval(()=>{ 
-    let diff=nextDate.getTime()-Date.now(); 
-    if(diff<=0){ refreshPrayerTimes(); return; } 
-    let h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000); 
-    timer.innerText=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; 
-  },1000); 
-}
-
-function updateTickerText(t){ 
-  const t1 = document.getElementById('ticker1');
-  const t2 = document.getElementById('ticker2');
-  if(t1) t1.innerText = t;
-  if(t2) t2.innerText = t;
-}
-
-function updateUIWithPrayerTimes(lat,lng){ 
-  if(!window.adhan){ updateTickerText("جاري تحميل مكتبة المواقيت..."); return; } 
-  if(!lat||!lng){ 
-    updateTickerText("📍 اضغط لاختيار الموقع (GPS أو مدينة)"); 
-    document.getElementById('prayerTimesList').innerHTML='<div style="text-align:center; padding:10px;">يرجى تحديد موقعك</div>'; 
-    document.getElementById('currentCityDisplay').innerText="📍 مدينتك: غير محددة"; 
-    return; 
-  } 
-  try{ 
-    const coords=new adhan.Coordinates(lat,lng); 
-    const params=getCalculationMethod(); 
-    params.madhab=adhan.Madhab.Shafi; 
-    const now=new Date(); 
-    let currentTimes, displayTimes;
-    const cached = getCachedPrayerTimes(lat,lng,selectedDisplayDate);
-    if(cached && isSameDay(selectedDisplayDate,now)){
-      currentTimes = cached.current;
-      displayTimes = cached.display;
-    } else {
-      currentTimes = new adhan.PrayerTimes(coords,now,params);
-      displayTimes = new adhan.PrayerTimes(coords,selectedDisplayDate,params);
-      setCachedPrayerTimes(lat,lng,selectedDisplayDate,currentTimes,displayTimes);
-    }
-    
-    let next=currentTimes.nextPrayer(), nextDate=next!=='none'?currentTimes[next]:null, nextName=prayerNamesAr[next]; 
-    if(next==='none'){ let tom=new Date(now); tom.setDate(tom.getDate()+1); let tomTimes=new adhan.PrayerTimes(coords,tom,params); next='fajr'; nextDate=tomTimes.fajr; nextName=prayerNamesAr.fajr; } 
-    startCountdown(nextDate,nextName); 
-    let ticker=""; ["fajr","sunrise","dhuhr","asr","maghrib","isha"].forEach(k=>{ if(currentTimes[k]) ticker+=` • ${prayerNamesAr[k]}: ${formatTimeArabic12h(currentTimes[k])} `; }); 
-    updateTickerText(ticker.substring(3)); 
-    const isToday=isSameDay(selectedDisplayDate,now); 
-    let html=""; 
-    for(let k of ["fajr","sunrise","dhuhr","asr","maghrib","isha"]){ 
-      let t=displayTimes[k]; if(!t) continue; 
-      let cls=(isToday && k===next)?'next-prayer':''; 
-      html+=`<div class="prayer-item ${cls}"><span>${prayerNamesAr[k]}</span><span>${formatTimeArabic12h(t)}</span></div>`; 
-    } 
-    document.getElementById('prayerTimesList').innerHTML=html; 
-    document.getElementById('currentCityDisplay').innerText=`📍 مدينتك: ${localStorage.getItem('current_location_name')||"موقع محفوظ"}`; 
-    updateModalDateText(); 
-    document.getElementById('hijriDateDisplay').innerText=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'}).format(now); 
-    
-    // Notifications via Service Worker
-    if(azanEnabled && notificationPermissionGranted && navigator.serviceWorker.controller){
-      for(let p of ["fajr","dhuhr","asr","maghrib","isha"]){
-        let prayerTime=currentTimes[p];
-        if(prayerTime){
-          let diffMs=Math.abs(prayerTime-now);
-          if(diffMs<60000 && !lastNotificationSent[p]){
-            navigator.serviceWorker.controller.postMessage({
-              type: 'AZAN_NOTIFICATION',
-              prayer: p,
-              name: prayerNamesAr[p],
-              timestamp: prayerTime.getTime()
-            });
-            if(azanAudioEnabled && azanAudio) azanAudio.play().catch(()=>{});
-            lastNotificationSent[p]=true;
-          } else if(diffMs>60000) lastNotificationSent[p]=false;
-        }
-      }
-    }
-  } catch(e){ console.error(e); updateTickerText("خطأ في الحساب"); } 
-}
-
-function refreshPrayerTimes(){ 
-  let lat=localStorage.getItem('prayer_lat'), lng=localStorage.getItem('prayer_lng'); 
-  if(lat&&lng) updateUIWithPrayerTimes(parseFloat(lat),parseFloat(lng)); 
-  else updateUIWithPrayerTimes(null,null); 
-}
-
-function startGPS(){ 
-  if(navigator.geolocation){ 
-    if(watchId) navigator.geolocation.clearWatch(watchId); 
-    const btn = document.getElementById('gpsBtn');
-    if(btn) btn.disabled = true;
-    if(btn) btn.innerHTML = '⏳ جاري التحديد...';
-    watchId = navigator.geolocation.watchPosition(pos=>{ 
-      localStorage.setItem('prayer_lat',pos.coords.latitude); 
-      localStorage.setItem('prayer_lng',pos.coords.longitude); 
-      localStorage.setItem('current_location_name','موقعك الحالي (GPS)'); 
-      selectedDisplayDate=new Date(); 
-      refreshPrayerTimes(); 
-      if(watchId) navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-      if(btn) { btn.disabled = false; btn.innerHTML = '📍 تحديد موقعي (GPS)'; }
-      setTimeout(closePrayerModal, 1000);
-    }, err=>{ 
-      console.warn(err); 
-      if(btn) { btn.disabled = false; btn.innerHTML = '📍 تحديد موقعي (GPS)'; }
-      if(!localStorage.getItem('prayer_lat')) alert("تعذر الحصول على الموقع، الرجاء اختيار مدينة يدوياً."); 
-    }, {enableHighAccuracy:true, maximumAge:30000, timeout:10000}); 
-  } else alert("المتصفح لا يدعم GPS"); 
-}
-
-function getCityCoordinates(city){ if(typeof cityCoordinatesMap==='undefined') return null; let k=Object.keys(cityCoordinatesMap).find(c=>c===city||c.toLowerCase()===city.toLowerCase()); return k?cityCoordinatesMap[k]:null; }
-function saveCity(){ let inp=document.getElementById('cityInput').value.trim(); if(!inp) return; let c=getCityCoordinates(inp); if(c){ localStorage.setItem('prayer_lat',c.lat); localStorage.setItem('prayer_lng',c.lng); localStorage.setItem('current_location_name',Object.keys(cityCoordinatesMap).find(k=>k.toLowerCase()===inp.toLowerCase())||inp); selectedDisplayDate=new Date(); refreshPrayerTimes(); document.getElementById('cityInput').value=''; } else alert("لم نتعرف على المدينة"); }
-
+// --- MODALS & SHEETS ---
 function openPrayerModal(){ selectedDisplayDate=new Date(); refreshPrayerTimes(); document.getElementById('prayerModal').classList.add('active'); }
 function closePrayerModal(){ document.getElementById('prayerModal').classList.remove('active'); }
 
@@ -806,72 +876,44 @@ function setTheme(mode){
   else if(mode==='light') document.querySelector('.theme-light')?.classList.add('active'); 
 }
 
-// Improved Bottom sheet with drag to dismiss & overlay click
+// Bottom sheet with drag to dismiss
 function attachSheetDrag(sheetId){
   const sheet = document.getElementById(sheetId);
   if(!sheet) return;
   let startY = 0, currentY = 0;
-  
   const onTouchStart = (e) => {
-    // لا تبدأ السحب إذا كان المستخدم يمرر داخل المحتوى (إلا لو كان في الأعلى تماماً)
     const content = sheet.querySelector('.sheet-content');
     if (content && content.contains(e.target) && content.scrollTop > 0) return;
     startY = e.touches[0].clientY;
-    sheet.style.transition = 'none'; // تعطيل الأنيميشن لتتبع الإصبع
+    sheet.style.transition = 'none'; 
   };
-  
   const onTouchMove = (e) => {
     if(!startY) return;
     currentY = e.touches[0].clientY;
     const diff = currentY - startY;
     if(diff > 0) {
-      // سحب للأسفل
-      e.preventDefault(); // منع التمرير الافتراضي للصفحة
+      e.preventDefault(); 
       sheet.style.transform = `translateY(${diff}px)`;
     }
   };
-  
   const onTouchEnd = () => {
     if(!startY) return;
-    sheet.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)'; // إعادة الأنيميشن
-    
-    // إذا سحب أكثر من 80 بكسل للأسفل، أغلق القائمة
+    sheet.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)'; 
     if(currentY && (currentY - startY > 80)) {
       closeAllSheets();
     } else {
-      // إرجاعها للأعلى إذا لم يكن السحب كافياً
       sheet.style.transform = 'translateY(0)';
     }
     startY = 0;
     currentY = 0;
   };
-  
   sheet.addEventListener('touchstart', onTouchStart, { passive: false });
   sheet.addEventListener('touchmove', onTouchMove, { passive: false });
   sheet.addEventListener('touchend', onTouchEnd);
 }
-
-function openSettingsSheet() { 
-  document.getElementById('sheetOverlay').classList.add('active');
-  document.getElementById('settingsSheet').classList.add('active'); 
-  attachSheetDrag('settingsSheet'); 
-}
-
-function openStatsSheet() { 
-  updateStats(); 
-  drawStreakCanvas(); 
-  document.getElementById('sheetOverlay').classList.add('active');
-  document.getElementById('statsSheet').classList.add('active'); 
-  attachSheetDrag('statsSheet'); 
-}
-
-function closeAllSheets() { 
-  document.getElementById('sheetOverlay').classList.remove('active');
-  document.querySelectorAll('.bottom-sheet').forEach(s => {
-    s.style.transform = ''; // إرجاع الترانزفورم للوضع الافتراضي
-    s.classList.remove('active');
-  }); 
-}
+function openSettingsSheet(){ document.getElementById('sheetOverlay').classList.add('active'); document.getElementById('settingsSheet').classList.add('active'); attachSheetDrag('settingsSheet'); }
+function openStatsSheet(){ updateStats(); drawStreakCanvas(); document.getElementById('sheetOverlay').classList.add('active'); document.getElementById('statsSheet').classList.add('active'); attachSheetDrag('statsSheet'); }
+function closeAllSheets(){ document.getElementById('sheetOverlay').classList.remove('active'); document.querySelectorAll('.bottom-sheet').forEach(s=>{ s.style.transform=''; s.classList.remove('active'); }); }
 
 // Notifications
 async function requestNotificationPermission(){ 
