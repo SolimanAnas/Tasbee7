@@ -509,7 +509,6 @@
 </head>
 <body data-theme="light">
 
-  <!-- Fixed header -->
   <header id="appHeader">
     <div class="header-right">
       <button class="icon-btn" onclick="goHome()" title="الرئيسية">
@@ -536,12 +535,11 @@
       </a>
 
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       </button>
     </div>
   </header>
 
-  <!-- Search overlay -->
   <div class="search-overlay" id="searchOverlay">
     <div class="search-bar-row">
       <input type="text" id="searchInput" placeholder="ابحث عن كلمة (مطابقة تامة)..." oninput="handleGlobalSearch(this.value)">
@@ -552,7 +550,6 @@
     </div>
   </div>
 
-  <!-- Main content -->
   <main id="swipeArea">
     <div class="page-frame" id="pageFrame">
       <div class="mushaf-border-top"></div>
@@ -567,7 +564,6 @@
 
   <div id="customToast" class="custom-toast"></div>
 
-  <!-- Settings Modal with Version Selector -->
   <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
     <div class="modal-content">
       <div class="modal-header"><span>الإعدادات</span><button class="close-btn" onclick="closeModal('settingsModal')">✕</button></div>
@@ -597,7 +593,6 @@
     </div>
   </div>
 
-  <!-- Other Modals -->
   <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')">
     <div class="modal-content"><div class="modal-header"><span>الذهاب إلى صفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')">✕</button></div>
     <div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div>
@@ -622,15 +617,35 @@
 
   <script src="js/quran-common.js"></script>
   <script>
+    // --- Daily Tracking Function for Stats (Quran Pages/Juz) ---
+    function checkDailyResetKhatma() {
+        const today = new Date().toDateString();
+        const lastDate = localStorage.getItem("khatma_last_date");
+        
+        if (lastDate !== today) {
+            localStorage.setItem("khatma_today", "0");
+            localStorage.setItem("khatma_last_date", today);
+        }
+    }
+    
+    // تسجيل الصفحة المقروءة عند تحميل المحتوى
+    function trackQuranReading() {
+        checkDailyResetKhatma();
+        let pagesReadToday = parseInt(localStorage.getItem("khatma_today") || "0");
+        localStorage.setItem("khatma_today", pagesReadToday + 1);
+        
+        let totalPagesRead = parseInt(localStorage.getItem("total_khatma_pages") || "0");
+        localStorage.setItem("total_khatma_pages", totalPagesRead + 1);
+    }
+
     // ========== VERSION MANAGEMENT ==========
-    let currentMushafVersion = localStorage.getItem('quranVersion') || 'mushaf-2'; // 'mushaf-2' = نسخة 2 , 'mushaf-3' = نسخة 2
+    let currentMushafVersion = localStorage.getItem('quranVersion') || 'mushaf-2'; // 'mushaf-2' = نسخة 2 , 'mushaf-3' = نسخة 1
     let isZoomed = true; // zoom is enabled by default
 
     function setMushafVersion(version) {
       if (version !== currentMushafVersion) {
         currentMushafVersion = version;
         localStorage.setItem('quranVersion', version);
-        // reset zoom when version changes
         resetZoom();
         updateVersionButtonsUI();
         updateVersionThumbnail();
@@ -672,19 +687,16 @@
       }
     }
     
-    // ========== ZOOM FUNCTIONALITY (non-uniform scales) ==========
+    // ========== ZOOM FUNCTIONALITY ==========
     function getZoomScaleForVersion() {
-      // returns { scaleX, scaleY }
       if (currentMushafVersion === 'mushaf-3') {
-        // نسخة 1:
         return { scaleX: 1.05, scaleY: 1.17 };
       } else {
-        // نسخة 2: scaleX = 1.2, scaleY = 1.21
         return { scaleX: 1.2, scaleY: 1.21 };
       }
     }
 
-        function applyZoom(zoom) {
+    function applyZoom(zoom) {
       const img = document.getElementById('pageImg');
       if (!img) return;
       
@@ -695,11 +707,10 @@
         transformStr = `scaleX(${scaleX}) scaleY(${scaleY})`;
         isZoomed = true;
       } else {
-        transformStr = `scaleX(1) scaleY(1)`; // الوضع الطبيعي
+        transformStr = `scaleX(1) scaleY(1)`; 
         isZoomed = false;
       }
 
-      // إضافة 10 بكسل للأسفل لنسخة 1 (mushaf-3) دائماً
       if (currentMushafVersion === 'mushaf-3') {
         transformStr += ` translateY(10px)`;
       }
@@ -707,20 +718,9 @@
       img.style.transform = transformStr;
     }
 
-    
-    function resetZoom() {
-      applyZoom(false);
-    }
+    function resetZoom() { applyZoom(false); }
+    function toggleZoom() { if (isZoomed) resetZoom(); else applyZoom(true); }
 
-    function toggleZoom() {
-      if (isZoomed) {
-        resetZoom();
-      } else {
-        applyZoom(true);
-      }
-    }
-
-    // Double-tap / double-click handler
     function setupDoubleTapZoom() {
       const img = document.getElementById('pageImg');
       if (!img) return;
@@ -763,18 +763,21 @@
       if (event.target === document.getElementById(modalId)) closeModal(modalId);
     }
     
-    // Page navigation with version folder
     function updateContent() {
       const formattedPage = currentPage.toString().padStart(3, '0');
       const img = document.getElementById('pageImg');
       img.src = `${currentMushafVersion}/${formattedPage}.png`;
       img.onerror = () => { img.src = `${currentMushafVersion}/placeholder.png`; };
-      // Apply current zoom state (preserves user's preference)
+      
       applyZoom(isZoomed);
-      updateMeta();
+      
+      if(typeof updateMeta === 'function') updateMeta();
       localStorage.setItem('lastPage', currentPage);
       updateBookmarkStar();
       updatePageLabels();
+      
+      // --- تحديث الإحصائيات ---
+      trackQuranReading();
     }
     
     function updatePageLabels() {
@@ -1033,6 +1036,8 @@
       updateVersionThumbnail();
       updateVersionSpecificElements();
       
+      checkDailyResetKhatma(); // التأكد من الإحصائيات عند الفتح
+
       updateContent();
       updateToggleLink();
       setupLongPressToSettings();
