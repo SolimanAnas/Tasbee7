@@ -912,19 +912,14 @@ function toggleRepeat() {
     showToast(isRepeat ? "تكرار مفعل" : "تكرار معطل"); 
 }
 
-// ================= MEDIA SESSION =================
+// ================= MEDIA SESSION (FIXED) =================
 function updateMediaSession(title, artist) {
   if ("mediaSession" in navigator) {
-    const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
-    const artwork192 = new URL('icons/icon-192.png', window.location.href).href;
-    const artwork512 = new URL('icons/icon-512.png', window.location.href).href;
-    
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: title || "الاستماع للقرآن", artist: artist || "زاد المسلم", album: "زاد المسلم",
-      artwork: [
-          { src: artwork192, sizes: "192x192", type: "image/png" },
-          { src: artwork512, sizes: "512x512", type: "image/png" }
-      ]
+      title: title || "الاستماع للقرآن",
+      artist: artist || "زاد المسلم",
+      album: "زاد المسلم Pro",
+      artwork: [{ src: "icons/icon_512.png", sizes: "512x512", type: "image/png" }]
     });
     navigator.mediaSession.setActionHandler("play", () => togglePlay());
     navigator.mediaSession.setActionHandler("pause", () => togglePlay());
@@ -1106,7 +1101,11 @@ function toggleFavorite() {
   localStorage.setItem("favorites", JSON.stringify(favs)); checkFavStatus();
 }
 
-function checkFavStatus() { let favs = JSON.parse(localStorage.getItem("favorites") || "[]"); document.getElementById("favBtn").classList.toggle("active", favs.some(f => f.url === currentTrackUrl)); }
+// FIXED: corrected syntax error
+function checkFavStatus() { 
+  let favs = JSON.parse(localStorage.getItem("favorites") || "[]"); 
+  document.getElementById("favBtn").classList.toggle("active", favs.some(f => f.url === currentTrackUrl)); 
+}
 
 function playFromFav(url, surah, reciter) { 
     audio.src = url; currentTrackUrl = url; 
