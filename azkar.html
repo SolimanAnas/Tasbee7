@@ -111,7 +111,6 @@ body{
   align-items:center;
   justify-content:flex-start;  
   gap:12px;                    
-  /* تمت زيادة المساحة السفلية إلى 170 لمنع التداخل بعد رفع الأزرار */
   padding: 0 20px 170px; 
   overflow-y:auto;              
 }
@@ -260,10 +259,9 @@ circle {
   100% { filter: drop-shadow(0 0 0px var(--accent-main)); }
 }
 
-/* --- UPDATED: Buttons Controls --- */
+/* --- Buttons Controls --- */
 .controls{
   position: absolute;
-  /* تم رفع الأزرار للأعلى بزيادة القيمة إلى 95px مع الحفاظ على منطقة الأمان السفلية */
   bottom: calc(90px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
@@ -451,6 +449,18 @@ fetch("assets/azkar.json")
   loadZikr();
 });
 
+/* --- Daily Tracking Function for Stats --- */
+function checkDailyResetAzkar() {
+    const today = new Date().toDateString();
+    const lastDate = localStorage.getItem("azkar_last_date");
+    
+    if (lastDate !== today) {
+        // يوم جديد: تصفير عداد "أذكار اليوم"
+        localStorage.setItem("azkar_today", "0");
+        localStorage.setItem("azkar_last_date", today);
+    }
+}
+
 /* Swipe */
 const swipeArea = document.querySelector(".zikr-container");
 swipeArea.addEventListener("touchstart", e => {
@@ -464,9 +474,6 @@ swipeArea.addEventListener("touchend", e => {
 function handleSwipe() {
   const diff = touchStartX - touchEndX;
   if (Math.abs(diff) < 50) return;
-  // تم عكس المنطق هنا ليتناسب مع السحب باللغة العربية (RTL)
-  // تمرير لليمين (diff < 0) يذهب للتالي
-  // تمرير لليسار (diff > 0) يعود للسابق
   diff > 0 ? prev() : next();
 }
 
@@ -507,6 +514,16 @@ function increment() {
   const target = azkarData[currentIndex].count;
   if (currentCount < target) {
     currentCount++;
+    
+    // --- تحديث إحصائيات الأذكار لتعمل مع الصفحة الرئيسية ---
+    checkDailyResetAzkar();
+    let todayAzkar = parseInt(localStorage.getItem("azkar_today") || "0");
+    localStorage.setItem("azkar_today", todayAzkar + 1);
+
+    let totalAzkar = parseInt(localStorage.getItem("total_azkar") || "0");
+    localStorage.setItem("total_azkar", totalAzkar + 1);
+    // ---------------------------------------------------------
+
     updateProgress();
     if (currentCount === target) {
       if (navigator.vibrate) {
@@ -597,8 +614,10 @@ function goHome() {
   window.location.href = "index.html";
 }
 
-/* Load saved preferences */
+/* Load saved preferences & Init */
 window.addEventListener("load", () => {
+  checkDailyResetAzkar(); // التأكد من التصفير اليومي عند فتح الصفحة
+
   const savedSize = localStorage.getItem("zikrFontSize");
   if (savedSize) {
     document.documentElement.style.setProperty('--zikr-size', savedSize + 'px');
