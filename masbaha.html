@@ -374,7 +374,6 @@
                 </div>
             </div>
             
-            <!-- زر تصفير العداد الحالي -->
             <div class="mini-reset-btn" onclick="openResetModal(event)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;">
                     <path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -431,7 +430,6 @@
                 <span>المجموع الكلي</span>
                 <span id="grandTotalDisplay">0</span>
             </div>
-            <!-- زر تصفير الإحصائيات الكلية - معدل لاستخدام المودال -->
             <button class="btn-action" style="background:#ef4444; margin-top:15px; font-size:12px" onclick="openResetStatsModal()">تصفير الإحصائيات بالكامل</button>
         </div>
 
@@ -455,7 +453,6 @@
             <div id="reminderStatus" style="font-size: 12px; color: var(--primary); margin-top: 5px; display: none;">تم تفعيل التذكير ✅</div>
         </div>
 
-        <!-- زر تصفير العداد الحالي - معدل لاستخدام المودال -->
         <button class="reset-btn-full" onclick="openResetModal(null)">تصفير العداد الحالي</button>
         <br><br>
         <div class="about-section">
@@ -507,7 +504,6 @@
     </div>
 </div>
 
-<!-- مودال تأكيد تصفير العداد الحالي (مع ترتيب الأزرار الصحيح: نعم أولاً ثم إلغاء) -->
 <div class="modal-overlay" id="confirmResetModal">
     <div class="modal-content" style="border-radius:20px; text-align:center;">
         
@@ -520,7 +516,6 @@
         </p>
 
         <div style="display:flex; gap:10px;">
-            <!-- زر التأكيد أولاً (يظهر في أقصى اليمين في RTL) -->
             <button class="btn-action" style="background:#ef4444;" onclick="confirmResetCounter()">نعم، تصفير</button>
             <button class="btn-action" style="background:#334155; color:white;" onclick="closeResetModal()">إلغاء</button>
         </div>
@@ -528,7 +523,6 @@
     </div>
 </div>
 
-<!-- مودال تأكيد تصفير الإحصائيات الكلية (جديد) -->
 <div class="modal-overlay" id="confirmResetStatsModal">
     <div class="modal-content" style="border-radius:20px; text-align:center;">
         
@@ -541,7 +535,6 @@
         </p>
 
         <div style="display:flex; gap:10px;">
-            <!-- زر التأكيد أولاً (يمين) -->
             <button class="btn-action" style="background:#ef4444;" onclick="confirmResetStats()">نعم، مسح الكل</button>
             <button class="btn-action" style="background:#334155; color:white;" onclick="closeResetStatsModal()">إلغاء</button>
         </div>
@@ -549,7 +542,6 @@
     </div>
 </div>
 
-<!-- ========== كود JavaScript الكامل مع التعديلات ========== -->
 <script>
     // --- Data ---
     const defaultTargets = {
@@ -612,7 +604,22 @@
 
         checkReminderPermission();
         setInterval(checkReminderTime, 60000);
+        
+        // التحقق من اليوم لتصفير العداد اليومي إذا بدأ يوم جديد
+        checkDailyReset();
         loadCounter();
+    }
+    
+    // --- Daily Tracking Function ---
+    function checkDailyReset() {
+        const today = new Date().toDateString();
+        const lastDate = localStorage.getItem("masbaha_last_date");
+        
+        if (lastDate !== today) {
+            // يوم جديد: نقوم بتصفير عداد "تسبيحات اليوم"
+            localStorage.setItem("masbaha_today", "0");
+            localStorage.setItem("masbaha_last_date", today);
+        }
     }
 
     function cKey(){ return "counter_" + currentDhikr }
@@ -660,8 +667,14 @@
         
         let total = parseInt(localStorage.getItem(totalKey(currentDhikr)) || 0);
         localStorage.setItem(totalKey(currentDhikr), total + 1);
+        
         let grandTotal = parseInt(localStorage.getItem("grand_total") || 0);
         localStorage.setItem("grand_total", grandTotal + 1);
+        
+        // --- تحديث إحصائيات اليوم للصفحة الرئيسية (index.html) ---
+        checkDailyReset(); // التأكد من أننا في نفس اليوم أولاً
+        let todayCount = parseInt(localStorage.getItem("masbaha_today") || "0");
+        localStorage.setItem("masbaha_today", todayCount + 1);
 
         document.getElementById("count").innerText = count;
         document.getElementById("powerCount").innerText = count; 
@@ -735,7 +748,7 @@
         navigator.vibrate([50,50,50]);
     }
 
-    // --- Stats (full names, no trim) ---
+    // --- Stats ---
     function renderStats() {
         const table = document.getElementById("statsTable");
         table.innerHTML = ""; 
@@ -754,11 +767,6 @@
         }
         localStorage.setItem("grand_total", grandTotal);
         document.getElementById("grandTotalDisplay").innerText = grandTotal.toLocaleString('en-US');
-    }
-
-    // تم تعديل دالة resetStats لاستخدام المودال بدلاً من confirm
-    function resetStats() {
-        // تم نقل الكود إلى confirmResetStats
     }
 
     // --- Custom Dhikr ---
@@ -873,16 +881,9 @@
     }
 
     function confirmResetCounter() {
-        // تصفير العداد في localStorage
         localStorage.setItem(cKey(), 0);
-        
-        // إعادة تحميل العداد (تحديث الشاشة)
         loadCounter();
-        
-        // إغلاق المودال
         closeResetModal();
-        
-        // إغلاق قائمة الإعدادات إذا كانت مفتوحة
         if(document.getElementById("settingsModal").classList.contains("open")) {
             toggleSettings();
         }
@@ -898,32 +899,23 @@
     }
 
     function confirmResetStats() {
-        // مسح جميع الإحصائيات
         const select = document.getElementById("dhikrSelect");
         for (let i = 0; i < select.options.length; i++) {
             localStorage.setItem(totalKey(select.options[i].value), 0);
         }
         localStorage.setItem("grand_total", 0);
-        
-        // تحديث العرض
         renderStats();
-        
-        // إغلاق المودال
         closeResetStatsModal();
     }
 
-    // تعطيل دالة resetCounter القديمة واستبدالها
     window.resetCounter = function(e) {
         if(e) e.stopPropagation();
         openResetModal(e);
     };
 
-    // --- Start the app ---
     window.onload = init;
 
-    // أحداث إضافية للمودالات
     document.addEventListener('DOMContentLoaded', function() {
-        // مودال العداد الحالي
         const modal1 = document.getElementById('confirmResetModal');
         if (modal1) {
             modal1.addEventListener('click', function(e) {
@@ -935,7 +927,6 @@
             content1.addEventListener('click', function(e) { e.stopPropagation(); });
         }
 
-        // مودال الإحصائيات
         const modal2 = document.getElementById('confirmResetStatsModal');
         if (modal2) {
             modal2.addEventListener('click', function(e) {
