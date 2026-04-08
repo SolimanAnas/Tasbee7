@@ -58,12 +58,14 @@
     .search-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--bg-surface); color: var(--text-primary); margin-bottom: 15px; font-size: 1rem; }    
     
     /* ========== SEARCH OVERLAY ========== */    
-    .search-overlay { position: fixed; top: calc(70px + env(safe-area-inset-top)); left: 50%; width: 90%; max-width: 500px; background: var(--glass-bg, rgba(248, 243, 232, 0.95)); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 15px; display: flex; flex-direction: column; gap: 12px; transform: translateX(-50%) translateY(-20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 70vh; box-sizing: border-box; }    
-    .search-overlay.active { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }    
-    .search-bar-row { display: flex; gap: 8px; align-items: center; }    
-    .search-bar-row input { flex: 1; height: 45px; padding: 0 15px; border-radius: 25px; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.1); color: inherit; font-family: inherit; font-size: 1rem; outline: none; }    
-    .close-search-btn { width: 45px; height: 45px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }    
-    .search-results-container { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }    
+    .search-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 99; opacity: 0; visibility: hidden; transition: 0.3s ease; }    
+    .search-backdrop.active { opacity: 1; visibility: visible; }    
+    .search-overlay { position: fixed; top: 12vh; left: 50%; transform: translateX(-50%) translateY(-20px) scale(0.95); width: calc(100% - 24px); max-width: 500px; background: var(--glass-bg, rgba(248, 243, 232, 0.98)); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 12px; display: flex; flex-direction: column; gap: 10px; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); z-index: 100; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); max-height: 75vh; box-sizing: border-box; }    
+    .search-overlay.active { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; pointer-events: all; }    
+    .search-bar-row { display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; }    
+    .search-bar-row input { flex: 1; min-width: 0; height: 45px; padding: 0 15px; border-radius: 25px; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.1); color: inherit; font-family: inherit; font-size: 1rem; outline: none; box-sizing: border-box; }    
+    .close-search-btn { width: 40px; height: 40px; flex-shrink: 0; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }    
+    .search-results-container { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; flex: 1; }    
     .search-result-item { background: rgba(128,128,128,0.05); padding: 14px; border-radius: 16px; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.2s; }    
     .res-meta { font-size: 0.85rem; color: var(--accent); margin-bottom: 8px; font-weight: bold; }    
     .res-text { font-family: 'Amiri', serif; font-size: 1.3rem; line-height: 1.8; color: var(--text-primary); }    
@@ -83,7 +85,7 @@
     .label-bottom { bottom: calc(1px + env(safe-area-inset-bottom, 0)); left: 50%; transform: translateX(-50%); }    
     
     /* ========== HIGHLIGHT OVERLAY ========== */    
-    .mushaf-container { position: relative; display: block; width: 95%; margin: 0 auto; transform-origin: center center; transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1); }    
+    .mushaf-container { position: relative; display: block; width: 100%; margin: 0 auto; transform-origin: center center; transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1); }    
     .mushaf-img { width: 100%; height: auto; display: block; transform: none !important; pointer-events: auto; user-select: none; -webkit-touch-callout: none; transition: opacity 0.15s ease-in-out; }    
     .highlight-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }    
     .ayah-highlight { position: absolute; background-color: rgba(16, 185, 129, 0.0); cursor: pointer; pointer-events: auto; border-radius: 4px; transition: background-color 0.2s ease; }    
