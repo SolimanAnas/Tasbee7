@@ -445,6 +445,27 @@
   </div>    
   
   <script>    
+    // --- Daily Tracking Function for Stats (Quran Pages/Juz) ---
+    function checkDailyResetKhatma() {
+        const today = new Date().toDateString();
+        const lastDate = localStorage.getItem("khatma_last_date");
+        
+        if (lastDate !== today) {
+            localStorage.setItem("khatma_today", "0");
+            localStorage.setItem("khatma_last_date", today);
+        }
+    }
+    
+    // تسجيل الصفحة المقروءة عند تحميل المحتوى أو التقليب
+    function trackQuranReading() {
+        checkDailyResetKhatma();
+        let pagesReadToday = parseInt(localStorage.getItem("khatma_today") || "0");
+        localStorage.setItem("khatma_today", pagesReadToday + 1);
+        
+        let totalPagesRead = parseInt(localStorage.getItem("total_khatma_pages") || "0");
+        localStorage.setItem("total_khatma_pages", totalPagesRead + 1);
+    }
+
     // ========== PAGE CACHING ==========    
     function determineInitialPage() {    
       const urlParams = new URLSearchParams(window.location.search);    
@@ -461,7 +482,7 @@
     let tafsirDb = null;    
     let currentTafsirId = null;    
     let windowCurrentAyahGlobal = null;    
-    let tafsirDBs = {}; // Cache for loaded Tafsir DBs    
+    let tafsirDBs = {}; 
   
     async function initDatabase() {    
       try {    
@@ -501,7 +522,6 @@
       }    
     }    
   
-    // التوسيع لملء الشاشة    
     function toggleTafsirFullscreen() {    
       const modal = document.getElementById('tafsirModal');    
       if (modal.style.height === '100vh') {    
@@ -515,7 +535,6 @@
       }    
     }    
   
-    // التنقل بين الآيات في التفسير    
     async function getAyahPage(surah, ayah) {    
         if(!db) return null;    
         try {    
@@ -559,7 +578,6 @@
       }    
     }    
   
-    // السحب للتنقل في التفسير (Swipe RTL)    
     let tafsirTouchStartX = 0;    
     const tafsirModalEl = document.getElementById('tafsirModal');    
         
@@ -570,8 +588,8 @@
     tafsirModalEl.addEventListener('touchend', e => {    
       const touchEndX = e.changedTouches[0].screenX;    
       const diff = touchEndX - tafsirTouchStartX;    
-      if (diff > 60) prevTafsirAyah(); // السحب لليمين -> الآية السابقة    
-      else if (diff < -60) nextTafsirAyah(); // السحب لليسار -> الآية التالية    
+      if (diff > 60) prevTafsirAyah(); 
+      else if (diff < -60) nextTafsirAyah(); 
     }, {passive: true});    
   
     async function getTafsirText(dbName, surah, ayah) {    
@@ -600,6 +618,10 @@
       } catch(e) { return "حدث خطأ أثناء استخراج التفسير."; }    
     }    
   
+    function closeTafsirModal() {
+      document.getElementById('tafsirModal').classList.remove('visible');
+    }
+
     async function contextShowTafsir(isNavigation = false) {    
       if(!isNavigation) closeContextMenu();    
       if(!windowCurrentAyahGlobal) { showCustomToast("الرجاء تحديد آية أولاً"); return; }    
@@ -612,8 +634,6 @@
             
       try {    
         let ayahText = "";    
-        
-        // جلب النص الإملائي البسيط    
         const apiRes = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`);    
         const apiData = await apiRes.json();    
               
@@ -638,7 +658,6 @@
               
         contentDiv.innerHTML = html;    
   
-        // تحديث التظليل    
         highlightAyah(surah, ayah);
   
       } catch(e) {    
@@ -654,6 +673,14 @@
     }    
   
     // ========== PAGE TRANSITION ==========    
+    // تم إصلاح دالة goToPage (كانت معرفة في commonInit بطريقة تتعارض، الآن مدمجة بشكل مباشر)
+    window.goToPage = function (page) {
+        if (page >= 1 && page <= 604) {
+            currentPage = page;
+            updateContent();
+        }
+    };
+
     function updateContent() {    
       const formattedPage = currentPage.toString().padStart(3, '0');    
       const img = document.getElementById('pageImg');    
@@ -671,6 +698,9 @@
       localStorage.setItem('lastPage', currentPage);    
       updateBookmarkStar();    
       updatePageLabels();    
+      
+      // --- تحديث الإحصائيات للصفحة الرئيسية ---
+      trackQuranReading();
             
       loadAyahHighlights(currentPage);    
     }    
@@ -771,7 +801,6 @@
             
         let pressTimer;    
         div.addEventListener('touchstart', (e) => { 
-            // Only trigger Context Menu on explicit long press
             pressTimer = setTimeout(() => { highlightAyah(rect.surah, rect.ayah); showContextMenu(rect.surah, rect.ayah); }, 500); 
         });    
         div.addEventListener('touchend', () => clearTimeout(pressTimer)); div.addEventListener('touchmove', () => clearTimeout(pressTimer));    
@@ -1319,13 +1348,11 @@
       }    
     }    
         
-    // Updated Jump logic to highlight the searched ayah!    
     function executeJump(targetPage, globalAyahNumber) {    
       toggleSearchOverlay('close');    
       goToPage(targetPage);    
       showCustomToast(`تم الانتقال إلى صفحة ${targetPage}`);    
             
-      // Delay slightly to let the page render then find the ayah and highlight it    
       setTimeout(() => {    
           fetch(`https://api.alquran.cloud/v1/ayah/${globalAyahNumber}`)    
             .then(res => res.json())    
@@ -1347,6 +1374,32 @@
       }, 500);    
     }    
   
+    // ========== SWIPE LOGIC ==========
+    let pageSwipeStartX = 0;
+    
+    document.addEventListener('touchstart', e => {
+      // Ignore swipe if we are touching menus, modals, input fields, or audio player
+      if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
+      pageSwipeStartX = e.changedTouches[0].screenX;
+    }, {passive: true});
+
+    document.addEventListener('touchend', e => {
+      if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
+      
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - pageSwipeStartX;
+      
+      if (Math.abs(diff) > 80) { 
+        if (diff > 0) {
+          // Swipe Right (RTL: Go to previous page)
+          if (currentPage > 1) { goToPage(currentPage - 1); }
+        } else {
+          // Swipe Left (RTL: Go to next page)
+          if (currentPage < 604) { goToPage(currentPage + 1); }
+        }
+      }
+    }, {passive: true});
+
     // ========== WINDOW INITIALIZATION ==========    
     window.onload = function () {    
       const imgCont = document.getElementById('mushafContainer');  
@@ -1370,20 +1423,14 @@
       if (typeof getCurrentJuz === 'undefined') window.getCurrentJuz = function () { return null; };    
       if (typeof updateMeta === 'undefined') window.updateMeta = function () { };    
             
-      window.goToPage = function (page) {    
-        if (page >= 1 && page <= totalPages) {     
-          currentPage = page;     
-          updateContent();     
-        }    
-      };    
-            
       const savedTheme = localStorage.getItem('quranTheme') || 'light';    
       document.body.setAttribute('data-theme', savedTheme);    
       if (typeof commonInit === 'function') commonInit();    
             
       updateVersionButtonsUI();    
       updateVersionSpecificElements();    
-            
+      
+      checkDailyResetKhatma();
       updateContent();    
             
       expandedReciterSelect.value = currentReciter;    
