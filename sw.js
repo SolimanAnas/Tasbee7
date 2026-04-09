@@ -1,6 +1,5 @@
-const CACHE_NAME = "zad-muslim-v2"; // تم رفع الإصدار لتحديث الكاش القديم
+const CACHE_NAME = "zad-muslim-v3"; // تم رفع الإصدار
 
-// استخدمنا المسارات النسبية (./) لتعمل بشكل مثالي على GitHub Pages وأي استضافة
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -21,20 +20,28 @@ const STATIC_ASSETS = [
   "./data/adhan.js",
   "./assets/azkar.json",
   "./assets/azan.mp3"
-  // أضف هنا أي ملفات أخرى أساسية مثل صور الخلفيات أو الأيقونات إذا أردت عملها أوفلاين
 ];
 
 /* INSTALL */
 self.addEventListener("install", event => {
-  self.skipWaiting();
+  self.skipWaiting(); // تفعيل السيرفيس وركر الجديد فوراً
 
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       console.log("Caching static assets...");
-      // نستخدم catch لضمان أنه إذا فشل ملف واحد (مثل صورة محذوفة) لا يفشل الـ SW بالكامل
-      return cache.addAll(STATIC_ASSETS).catch(err => {
-        console.error("تحذير: بعض الملفات في STATIC_ASSETS غير موجودة", err);
-      });
+      
+      // استخدام { cache: 'no-store' } يمنع المتصفح من تسليم نسخ قديمة من كاش المتصفح العادي
+      // ويجبره على تحميل النسخ الأحدث من السيرفر مباشرة لتخزينها في السيرفيس وركر
+      return Promise.all(
+        STATIC_ASSETS.map(url => {
+          return fetch(url, { cache: 'no-store' })
+            .then(response => {
+              if (!response.ok) throw new Error(`Failed to fetch ${url}`);
+              return cache.put(url, response);
+            })
+            .catch(err => console.error(`تحذير: فشل تخزين ${url}`, err));
+        })
+      );
     })
   );
 });
@@ -45,19 +52,18 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          // ⚠️ خطوة حرجة: استثنينا كاش "quran-offline-v1" لمنع حذفه!
+          // ⚠️ استثناء كاش الصور والملفات الصوتية المحملة أوفلاين
           .filter(key => key !== CACHE_NAME && !key.startsWith("quran-offline"))
           .map(key => caches.delete(key))
       )
     )
   );
 
-  return self.clients.claim();
+  return self.clients.claim(); // السيطرة على الصفحات المفتوحة فوراً
 });
 
 /* FETCH */
 self.addEventListener("fetch", event => {
-
   const req = event.request;
 
   /* Ignore non-GET */
@@ -65,7 +71,7 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(req.url);
 
-  /* Do NOT cache radio/audio streams in the main static cache */
+  /* تجاهل البث الإذاعي والملفات الصوتية لعدم تكييشها في الكاش الأساسي */
   if (
     url.hostname.includes("mp3quran") ||
     url.hostname.includes("archive.org") ||
@@ -73,12 +79,12 @@ self.addEventListener("fetch", event => {
     url.pathname.endsWith(".mp3") ||
     url.pathname.endsWith(".m3u8")
   ) {
-    // نترك المتصفح يتعامل معها، أو كاش المصحف المخصص سيلتقطها إن كانت محملة
     return;
   }
 
-  /* HTML → Network First (لجلب التحديثات فوراً، مع العودة للكاش في حال انقطاع النت) */
-  if (req.headers.get("accept").includes("text/html")) {
+  /* 1. HTML → Network First (لجلب التحديثات فوراً) */
+  // استخدمنا req.mode === 'navigate' كشرط أكثر دقة لالتقاط تنقلات الصفحات
+  if (req.mode === "navigate" || req.headers.get("accept").includes("text/html")) {
     event.respondWith(
       fetch(req)
         .then(res => {
@@ -87,9 +93,8 @@ self.addEventListener("fetch", event => {
           return res;
         })
         .catch(() => {
-          // إذا انقطع الإنترنت، حاول جلب الصفحة من الكاش
+          // في حال انقطاع الإنترنت، جلب الصفحة المكيشة
           return caches.match(req).then(cachedRes => {
-            // إذا لم يجد الصفحة (مثلاً فتح رابط خاطئ)، قم بتحويله للصفحة الرئيسية أوفلاين
             return cachedRes || caches.match("./index.html"); 
           });
         })
@@ -97,21 +102,21 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  /* Static files → Cache First (لتحميل أسرع وتوفير البيانات) */
+  /* 2. Static files → Stale-While-Revalidate (السر في التحديثات السلسة) */
   event.respondWith(
-    caches.match(req).then(cacheRes => {
-      return (
-        cacheRes ||
-        fetch(req).then(networkRes => {
-          // نتأكد من أن الاستجابة صالحة قبل حفظها في الكاش لتجنب حفظ صفحات الخطأ
-          if (networkRes && networkRes.status === 200 && networkRes.type === 'basic') {
-            const copy = networkRes.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
-          }
-          return networkRes;
-        }).catch(err => console.log("Offline fetch fallback:", req.url))
-      );
+    caches.match(req).then(cachedRes => {
+      // إطلاق طلب جلب صامت في الخلفية لتحديث الملفات في الكاش
+      const fetchPromise = fetch(req).then(networkRes => {
+        if (networkRes && networkRes.status === 200 && networkRes.type === 'basic') {
+          const copy = networkRes.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+        }
+        return networkRes;
+      }).catch(err => console.log("Offline fetch fallback:", req.url));
+
+      // إذا كان الملف موجوداً في الكاش، اعرضه فوراً (أداء صاروخي)
+      // في نفس الوقت، سيتم تحديث الكاش في الخلفية عبر fetchPromise للمرة القادمة
+      return cachedRes || fetchPromise;
     })
   );
-
 });
