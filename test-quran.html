@@ -759,15 +759,21 @@
   
       if(words.length === 0) return;    
       const grouped = groupWordsIntoAyahLines(words);    
-      if(img.complete) drawAyahHighlights(grouped, img, overlay);    
-      else {    
-          const oldOnload = img.onload;    
+      
+      if(img.complete && img.naturalWidth > 500) {
+          drawAyahHighlights(grouped, img, overlay);
+      } else {    
+          const oldOnload = img.onload;
           img.onload = () => { if(oldOnload) oldOnload(); drawAyahHighlights(grouped, img, overlay); };    
       }    
     }    
   
     function drawAyahHighlights(rects, img, overlay) {    
-      const refW = img.naturalWidth || 1024; const refH = img.naturalHeight || 1636;    
+      const refW = (img.naturalWidth && img.naturalWidth > 500) ? img.naturalWidth : 1024; 
+      const refH = (img.naturalHeight && img.naturalHeight > 500) ? img.naturalHeight : 1636;    
+      
+      overlay.style.direction = 'ltr'; 
+
       for(let rect of rects) {    
         const div = document.createElement('div');    
         div.className = 'ayah-highlight';    
@@ -1391,11 +1397,11 @@
       
       if (Math.abs(diff) > 80) { 
         if (diff > 0) {
-          // Swipe Right (RTL: Go to previous page)
-          if (currentPage > 1) { goToPage(currentPage - 1); }
-        } else {
-          // Swipe Left (RTL: Go to next page)
+          // Swipe Right (RTL: Go to NEXT page because next page is on the left)
           if (currentPage < 604) { goToPage(currentPage + 1); }
+        } else {
+          // Swipe Left (RTL: Go to PREV page)
+          if (currentPage > 1) { goToPage(currentPage - 1); }
         }
       }
     }, {passive: true});
