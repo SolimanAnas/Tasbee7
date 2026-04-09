@@ -499,16 +499,10 @@
   .label-bottom    { bottom: calc(1px + env(safe-area-inset-bottom, 0)); left: 50%; transform: translateX(-50%); }
 
   /* ========== MUSHAF CONTAINER ========== */
-    .mushaf-container {
+  .mushaf-container {
     position: relative; display: block;
-    
-    /* 1. Expand width beyond 100% to zoom in and crop the white margins */
-    width: 101%; 
-    
-    /* 2. Center the enlarged container (-8% on each side equals the 16% extra width) */
-    margin: 0 -8%; 
-    
-    transform-origin: top center;
+    width: 100%; margin: 0 auto;
+    transform-origin: center center;
     transition: transform 0.2s cubic-bezier(0.2,0.9,0.4,1.1);
   }
   .mushaf-img {
@@ -2215,20 +2209,11 @@
       }
     }
 
-       function applyZoom() {
+    function applyZoom() {
       const container = document.getElementById('mushafContainer');
       if (!container) return;
-      
-      // Removed the distorted scaleX and scaleY. 
-      // The CSS width now handles uniform scaling.
-      // We only use translateY to push the text below the top UI labels.
-      if (currentMushafVersion === 'mushaf-1') {
-          container.style.transform = `translateY(15px)`;
-      } else {
-          container.style.transform = `translateY(25px)`;
-      }
+      container.style.transform = currentMushafVersion === 'mushaf-1' ? `scaleX(0.96) scaleY(1.17) translateY(10px)` : `scaleX(1.1) scaleY(1.21)`;
     }
-
 
     // ========== CORE FUNCTIONALITY ==========
     function showCustomToast(message) {
