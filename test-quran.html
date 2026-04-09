@@ -673,7 +673,6 @@
     }    
   
     // ========== PAGE TRANSITION ==========    
-    // تم إصلاح دالة goToPage (كانت معرفة في commonInit بطريقة تتعارض، الآن مدمجة بشكل مباشر)
     window.goToPage = function (page) {
         if (page >= 1 && page <= 604) {
             currentPage = page;
@@ -690,7 +689,12 @@
       windowCurrentAyahGlobal = null;    
   
       img.src = `${currentMushafVersion}/${formattedPage}.png`;    
-      img.onload = () => { img.style.opacity = '1'; };    
+      
+      // التعديل 1: رسم التظليل يتم استدعاؤه بداخل onload لضمان التحميل الكامل للصورة
+      img.onload = () => { 
+        img.style.opacity = '1'; 
+        loadAyahHighlights(currentPage);
+      };    
       img.onerror = () => { img.src = `${currentMushafVersion}/placeholder.png`; img.style.opacity = '1'; };    
             
       applyZoom();    
@@ -699,10 +703,7 @@
       updateBookmarkStar();    
       updatePageLabels();    
       
-      // --- تحديث الإحصائيات للصفحة الرئيسية ---
-      trackQuranReading();
-            
-      loadAyahHighlights(currentPage);    
+      trackQuranReading();    
     }    
   
     // ========== AYAH HIGHLIGHT RENDERING ==========    
@@ -760,17 +761,15 @@
       if(words.length === 0) return;    
       const grouped = groupWordsIntoAyahLines(words);    
       
-      if(img.complete && img.naturalWidth > 500) {
-          drawAyahHighlights(grouped, img, overlay);
-      } else {    
-          const oldOnload = img.onload;
-          img.onload = () => { if(oldOnload) oldOnload(); drawAyahHighlights(grouped, img, overlay); };    
-      }    
+      // نستدعي دالة الرسم مباشرة هنا (تم إزالة الفحص المعقد لأن الاستدعاء أصبح بعد onload)
+      drawAyahHighlights(grouped, img, overlay);    
     }    
   
     function drawAyahHighlights(rects, img, overlay) {    
-      const refW = (img.naturalWidth && img.naturalWidth > 500) ? img.naturalWidth : 1024; 
-      const refH = (img.naturalHeight && img.naturalHeight > 500) ? img.naturalHeight : 1636;    
+      // التعديل 2: إجبار الأبعاد المرجعية على 1024x1636 لأن إحداثيات قاعدة بيانات ayarects مصممة عليها.
+      // الاعتماد على img.naturalWidth في المتصفحات قد يعطي أبعاداً أعلى فيصغر التظليل (Scaled-down).
+      const refW = 1024; 
+      const refH = 1636;    
       
       overlay.style.direction = 'ltr'; 
 
@@ -1381,10 +1380,10 @@
     }    
   
     // ========== SWIPE LOGIC ==========
+    // التعديل 3: إصلاح اتجاه التقليب ليكون متوافقاً مع القراءة العربية (RTL)
     let pageSwipeStartX = 0;
     
     document.addEventListener('touchstart', e => {
-      // Ignore swipe if we are touching menus, modals, input fields, or audio player
       if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
       pageSwipeStartX = e.changedTouches[0].screenX;
     }, {passive: true});
@@ -1397,10 +1396,10 @@
       
       if (Math.abs(diff) > 80) { 
         if (diff > 0) {
-          // Swipe Right (RTL: Go to NEXT page because next page is on the left)
+          // السحب لليمين: الانتقال للصفحة التالية (RTL)
           if (currentPage < 604) { goToPage(currentPage + 1); }
         } else {
-          // Swipe Left (RTL: Go to PREV page)
+          // السحب لليسار: الرجوع للصفحة السابقة
           if (currentPage > 1) { goToPage(currentPage - 1); }
         }
       }
@@ -1411,13 +1410,13 @@
       const imgCont = document.getElementById('mushafContainer');  
       let pressTimerCont = null;  
       imgCont.addEventListener('touchstart', (e) => {  
-        if(e.target.classList.contains('ayah-highlight')) return; // <-- added  
+        if(e.target.classList.contains('ayah-highlight')) return;  
         pressTimerCont = setTimeout(() => { showGeneralMenu(); e.preventDefault(); }, 600);  
       });  
       imgCont.addEventListener('touchend', () => clearTimeout(pressTimerCont));  
       imgCont.addEventListener('touchmove', () => clearTimeout(pressTimerCont));  
       imgCont.addEventListener('contextmenu', (e) => {   
-        if(e.target.classList.contains('ayah-highlight')) return; // <-- added  
+        if(e.target.classList.contains('ayah-highlight')) return;   
         e.preventDefault();   
         showGeneralMenu();   
       });  
