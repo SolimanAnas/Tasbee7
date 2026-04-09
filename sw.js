@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v3"; // تم رفع الإصدار
+const CACHE_NAME = "zad-muslim-v4"; // تم رفع الإصدار
 
 const STATIC_ASSETS = [
   "./",
