@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a" id="metaThemeColor">
+<title>باحث الأحاديث | زاد المسلم</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    /* ================= الألوان والثيمات ================= */
+    :root[data-theme="dark"] {
+        --primary: #10b981;
+        --bg-color1: #1e293b;
+        --bg-color2: #020617;
+        --glass: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --meta-color: #0f172a;
+    }
+
+    :root[data-theme="light"] {
+        --primary: #059669;
+        --bg-color1: #f8fafc;
+        --bg-color2: #e2e8f0;
+        --glass: rgba(0, 0, 0, 0.05);
+        --glass-border: rgba(0, 0, 0, 0.1);
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --card-bg: #ffffff;
+        --meta-color: #e2e8f0;
+    }
+
+    :root[data-theme="sepia"] {
+        --primary: #854d0e;
+        --bg-color1: #f4ecd8;
+        --bg-color2: #e9dec3;
+        --glass: rgba(109, 76, 65, 0.05);
+        --glass-border: rgba(109, 76, 65, 0.15);
+        --text-main: #3e2723;
+        --text-muted: #795548;
+        --card-bg: #faf6ed;
+        --meta-color: #e9dec3;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+    @font-face {
+        font-family: 'ScheherazadeFont';
+        src: url('fonts/Scheherazade.ttf') format('truetype');
+        font-display: swap;
+    }
+
+    body {
+        margin: 0; height: 100dvh; overflow: hidden;
+        font-family: 'Tajawal', sans-serif;
+        background: radial-gradient(circle at 50% 0%, var(--bg-color1), var(--bg-color2));
+        color: var(--text-main); display: flex; justify-content: center;
+        transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    .app-container {
+        width: 100%; max-width: 480px; height: 100%; display: flex; flex-direction: column;
+        padding: max(20px, env(safe-area-inset-top)) 20px 0; position: relative;
+    }
+
+    /* Top Bar */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-title { font-size: 18px; font-weight: bold; margin: 0; }
+    .top-actions { display: flex; gap: 8px; }
+    
+    .icon-btn {
+        width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+        background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px;
+        color: var(--text-main); cursor: pointer; transition: 0.2s; font-size: 20px;
+    }
+    .icon-btn:active { transform: scale(0.92); }
+
+    /* Main Area */
+    .main-area { flex: 1; overflow-y: auto; padding-bottom: 40px; scroll-behavior: smooth; }
+    .main-area::-webkit-scrollbar { display: none; }
+
+    /* Buttons */
+    .action-btn {
+        display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+        background: var(--glass); border: 1px solid var(--glass-border); padding: 12px;
+        border-radius: 16px; color: var(--text-main); font-weight: bold; font-family: inherit;
+        cursor: pointer; margin-bottom: 20px; transition: 0.2s; font-size: 15px;
+    }
+    .action-btn:active { transform: scale(0.97); }
+    .action-btn svg { width: 18px; stroke: var(--primary); }
+
+    /* Daily Card */
+    .daily-card {
+        background: var(--card-bg); border: 1px solid var(--glass-border);
+        border-radius: 20px; padding: 20px; margin-bottom: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .daily-title { color: var(--primary); font-size: 14px; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;}
+    .daily-text { font-family: 'ScheherazadeFont', serif; font-size: 22px; line-height: 1.8; }
+    .daily-meta { font-family: 'Tajawal', sans-serif; font-size: 13px; color: var(--primary); display: block; margin-top: 10px; font-weight: bold;}
+
+    /* Search Bar */
+    .search-wrapper {
+        display: flex; background: var(--card-bg); border: 1px solid var(--glass-border);
+        border-radius: 16px; padding: 5px; margin-bottom: 15px; position: sticky; top: 0; z-index: 10; align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); backdrop-filter: blur(10px);
+    }
+    .search-input {
+        flex: 1; background: transparent; border: none; color: var(--text-main); padding: 0 15px;
+        font-family: 'Tajawal', sans-serif; font-size: 16px; width: 100%;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .clear-input-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px; display: none; font-size: 16px; cursor: pointer; }
+    
+    /* Books Filter */
+    .books-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+    .book-label {
+        background: var(--card-bg); border: 1px solid var(--glass-border);
+        padding: 6px 12px; border-radius: 20px; font-size: 12px; color: var(--text-muted);
+        cursor: pointer; transition: 0.2s; user-select: none; display: flex; align-items: center; gap: 5px;
+    }
+    .book-label input { display: none; }
+    .book-label:has(input:checked) { background: rgba(16, 185, 129, 0.15); border-color: var(--primary); color: var(--text-main); font-weight: bold; }
+
+    /* History Tags */
+    .history-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center; }
+    .history-tag {
+        background: var(--card-bg); border: 1px solid var(--glass-border);
+        padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--text-muted);
+        cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;
+    }
+    .history-tag:active { transform: scale(0.95); }
+    .clear-history-btn {
+        background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #ef4444; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;
+        cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;
+    }
+
+    /* Results */
+    .results-summary {
+        background: var(--card-bg); border: 1px solid var(--glass-border);
+        padding: 12px 15px; border-radius: 14px; margin-bottom: 20px; font-size: 14px; 
+        text-align: center; display: none; line-height: 1.6;
+    }
+    .results-summary span { font-weight: bold; margin: 0 4px; }
+    .summary-ok { color: var(--primary); }
+    .summary-warn { color: #f87171; }
+
+    .hadith-item { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 15px; animation: fadeInUp 0.4s ease-out; }
+    .badge-ok { background: rgba(16, 185, 129, 0.15); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+    .badge-warn { background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+    .hadith-text { font-family: 'ScheherazadeFont', serif; font-size: 22px; line-height: 1.8; margin: 15px 0; text-align: justify; }
+    .hadith-meta { font-size: 13px; color: var(--text-muted); border-top: 1px solid var(--glass-border); padding-top: 10px; line-height: 1.6; }
+    .search-highlight { background-color: var(--primary); color: #fff; border-radius: 4px; padding: 0 4px; font-weight: bold; }
+
+    /* Action Icons in Cards */
+    .card-actions { display: flex; gap: 6px; }
+    .card-action-btn {
+        width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+        background: transparent; border: 1px solid var(--glass-border); border-radius: 8px;
+        color: var(--text-main); cursor: pointer; transition: 0.2s; text-decoration: none;
+    }
+    .card-action-btn:active { transform: scale(0.9); background: var(--glass); }
+
+    /* Loader & Intersect Indicator */
+    .loader { border: 3px solid var(--glass-border); border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+    .scroll-loader { text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px; display: none; }
+    
+    /* Modal (تصفح الكتب) */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+        display: flex; justify-content: center; align-items: center; z-index: 1000;
+        opacity: 0; pointer-events: none; transition: 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-content {
+        background: var(--bg-color1); border: 1px solid var(--glass-border);
+        width: 90%; max-width: 380px; border-radius: 24px; padding: 25px;
+        transform: translateY(20px); transition: 0.3s ease; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: bold; font-size: 18px; }
+    .book-link-btn {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--card-bg); border: 1px solid var(--glass-border);
+        padding: 15px; border-radius: 14px; margin-bottom: 10px; color: var(--text-main);
+        text-decoration: none; font-weight: 500; transition: 0.2s;
+    }
+    .book-link-btn:active { transform: scale(0.96); background: var(--glass); }
+
+    /* Toast */
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary); color: white; padding: 12px 24px; border-radius: 50px; z-index: 2000; transition: 0.4s cubic-bezier(0.22, 1, 0.36, 1); font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div id="toast"><span></span></div>
+
+<div class="modal-overlay" id="booksModal" onclick="if(event.target === this) toggleModal(false)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>📚 تصفح الكتب الحديثية</span>
+            <button class="clear-input-btn" style="display:block; padding:0;" onclick="toggleModal(false)">✕</button>
+        </div>
+        <div id="modalBooksContainer"></div>
+    </div>
+</div>
+
+<div class="app-container">
+    <div class="top-bar">
+        <div class="icon-btn" onclick="window.location.href='index.html'" aria-label="رجوع">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px; stroke-linecap:round; stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </div>
+        
+        <h1 class="page-title">باحث الأحاديث</h1>
+        
+        <div class="top-actions">
+            <div class="icon-btn" onclick="cycleTheme()" title="تغيير المظهر">🌗</div>
+            <div class="icon-btn" onclick="downloadDatabase()" title="تحميل قاعدة البيانات المدمجة">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px; stroke-linecap:round; stroke-linejoin:round;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-area">
+        <div id="dbStatus" style="text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:10px;">جاري تحميل الكتب... ⏳</div>
+        
+        <div class="daily-card" id="dailyCard">
+           <div class="daily-title">
+               <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px; stroke-linecap:round; stroke-linejoin:round;"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path></svg>
+                    حديث عشوائي (من زادك)
+               </div>
+            </div>
+           <div class="daily-text" id="dailyHadithText">جاري التحميل...</div>
+        </div>
+
+        <button class="action-btn" onclick="toggleModal(true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            تصفح الكتب الحديثية
+        </button>
+
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السنة..." disabled>
+            <button class="clear-input-btn" id="clearInputBtn" onclick="clearSearchField()">✕</button>
+        </div>
+
+        <div class="books-filter" id="booksFilter">
+            </div>
+
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:15px;">
+            <input type="checkbox" id="strictTashkeel" onchange="initiateSearch()" style="accent-color:var(--primary); width:16px; height:16px;"> 
+            مطابقة التشكيل بدقة
+        </label>
+
+        <div class="history-container" id="historyTags"></div>
+
+        <div class="loader" id="loader"></div>
+        <div id="resultsSummary" class="results-summary"></div>
+        <div id="resultsContainer"></div>
+        
+        <div id="scrollTrigger" class="scroll-loader">جاري تحميل المزيد...</div>
+    </div>
+</div>
+
+<script>
+    // ================= نظام الثيمات (Themes) =================
+    const THEMES = ['dark', 'light', 'sepia'];
+    let currentThemeIndex = parseInt(localStorage.getItem('appThemeIndex')) || 0;
+
+    function applyTheme() {
+        const theme = THEMES[currentThemeIndex];
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('appThemeIndex', currentThemeIndex);
+        
+        const rootStyles = getComputedStyle(document.documentElement);
+        document.getElementById('metaThemeColor').content = rootStyles.getPropertyValue('--meta-color').trim();
+    }
+
+    function cycleTheme() {
+        currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+        applyTheme();
+    }
+    
+    applyTheme();
+
+    // ================= تهيئة الكتب وقاعدة البيانات =================
+    const BOOKS_INFO = [
+        { id: 'bukhari', name: 'صحيح البخاري' },
+        { id: 'muslim', name: 'صحيح مسلم' },
+        { id: 'abudawud', name: 'سنن أبي داود' },
+        { id: 'tirmidhi', name: 'جامع الترمذي' },
+        { id: 'nasai', name: 'سنن النسائي' },
+        { id: 'ibnmajah', name: 'سنن ابن ماجه' }
+    ];
+
+    let localDatabase = [];
+    let currentSearchResults = [];
+    let currentRenderIndex = 0;
+    const CHUNK_SIZE = 20; 
+    let scrollObserver = null;
+
+    async function loadBooks() {
+        const status = document.getElementById('dbStatus');
+        renderBookFilters();
+        renderModalBooks(); 
+        renderHistory(); 
+
+        try {
+            // تحميل ملف الفهرس المترجم (عربي)
+            let translatedIndex = {};
+            try {
+                const indexRes = await fetch('hadith/Index-translated.json');
+                if (indexRes.ok) translatedIndex = await indexRes.json();
+            } catch(e) { console.log("ملف الفهرس المترجم غير متوفر"); }
+
+            const fetchPromises = BOOKS_INFO.map(book => 
+                fetch(`hadith/${book.id}.json`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => ({ id: book.id, name: book.name, data }))
+                    .catch(() => null)
+            );
+
+            const results = await Promise.all(fetchPromises);
+            
+            results.forEach(res => {
+                if (res && res.data && res.data.hadiths) {
+                    res.data.hadiths.forEach(h => {
+                        let sectionName = "";
+                        let sectionNumber = "";
+                        
+                        // استخراج اسم الباب العربي من ملف الفهرس
+                        if (h.reference && h.reference.book !== undefined) {
+                            sectionNumber = h.reference.book.toString();
+                            if (translatedIndex[res.id] && translatedIndex[res.id].sections) {
+                                sectionName = translatedIndex[res.id].sections[sectionNumber] || "";
+                            }
+                        }
+
+                        localDatabase.push({
+                            bookId: res.id,
+                            bookName: res.name,
+                            sectionName: sectionName,
+                            sectionNumber: sectionNumber,
+                            text: h.text,
+                            number: h.hadithnumber || h.arabicnumber,
+                            grades: h.grades || []
+                        });
+                    });
+                }
+            });
+
+            if (localDatabase.length > 0) {
+                status.innerHTML = `✅ تم تحميل ${localDatabase.length.toLocaleString('ar-EG')} حديث`;
+                status.style.color = 'var(--primary)';
+                document.getElementById('searchInput').disabled = false;
+                
+                fetchRandomHadith();
+            } else {
+                throw new Error("لم يتم العثور على أحاديث");
+            }
+            setTimeout(() => status.style.display = 'none', 3000);
+        } catch (error) {
+            status.innerHTML = `❌ تأكد من وجود مجلد hadith وملفات JSON بداخله`;
+            status.style.color = '#ef4444';
+            document.getElementById('dailyHadithText').innerHTML = "تعذر تحميل قاعدة البيانات.";
+        }
+    }
+
+    // ================= سجل البحث =================
+    let searchHistory = JSON.parse(localStorage.getItem('hadithHistory')) || [];
+
+    function renderHistory() {
+        const container = document.getElementById('historyTags');
+        container.innerHTML = '';
+        if (searchHistory.length === 0) return;
+
+        searchHistory.forEach(term => {
+            const tag = document.createElement('span');
+            tag.className = 'history-tag';
+            tag.innerText = term;
+            tag.onclick = () => { 
+                document.getElementById('searchInput').value = term; 
+                document.getElementById('clearInputBtn').style.display = 'block';
+                initiateSearch(); 
+            };
+            container.appendChild(tag);
+        });
+
+        const clearBtn = document.createElement('span');
+        clearBtn.className = 'clear-history-btn';
+        clearBtn.innerHTML = `✕ مسح السجل`;
+        clearBtn.onclick = clearHistory;
+        container.appendChild(clearBtn);
+    }
+
+    function saveToHistory(term) {
+        if (!term || term.length < 3) return;
+        searchHistory = searchHistory.filter(t => t !== term);
+        searchHistory.unshift(term);
+        if (searchHistory.length > 6) searchHistory.pop(); 
+        localStorage.setItem('hadithHistory', JSON.stringify(searchHistory));
+        renderHistory();
+    }
+
+    function clearHistory() {
+        searchHistory = [];
+        localStorage.removeItem('hadithHistory');
+        renderHistory();
+        showToast("🧹 تم مسح سجل البحث");
+    }
+
+    // ================= دوال واجهة المستخدم والتحميل =================
+    function renderBookFilters() {
+        const container = document.getElementById('booksFilter');
+        BOOKS_INFO.forEach(book => {
+            const label = document.createElement('label');
+            label.className = 'book-label';
+            label.innerHTML = `<input type="checkbox" value="${book.id}" checked onchange="initiateSearch()"> ${book.name}`;
+            container.appendChild(label);
+        });
+    }
+
+    function renderModalBooks() {
+        const container = document.getElementById('modalBooksContainer');
+        BOOKS_INFO.forEach(book => {
+            const link = document.createElement('a');
+            link.href = `hadith-viewer.html?book=${book.id}`;
+            link.className = 'book-link-btn';
+            link.innerHTML = `
+                <span>${book.name}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            `;
+            container.appendChild(link);
+        });
+    }
+
+    function toggleModal(show) {
+        const modal = document.getElementById('booksModal');
+        if (show) modal.classList.add('active');
+        else modal.classList.remove('active');
+    }
+
+    function downloadDatabase() {
+        if (localDatabase.length === 0) {
+            showToast("⚠️ جاري تحميل القاعدة، يرجى الانتظار...");
+            return;
+        }
+        showToast("⏳ جاري التجهيز...");
+        
+        const dataStr = JSON.stringify(localDatabase);
+        const blob = new Blob([dataStr], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Zad_AlMuslim_DB.json';
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            showToast("✅ تم التحميل");
+        }, 100);
+    }
+
+    function copyToClipboard(encodedText) {
+        try {
+            navigator.clipboard.writeText(decodeURIComponent(encodedText)).then(() => {
+                showToast("✅ تم النسخ بنجاح");
+            });
+        } catch (e) {
+            showToast("❌ فشل النسخ");
+        }
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ================= الحديث العشوائي واستخراج الحكم =================
+    function getHadithGrade(bookId, grades) {
+        if (bookId === 'bukhari' || bookId === 'muslim') return { text: 'صحيح', isOk: true };
+        if (!grades || grades.length === 0) return { text: 'غير محدد', isOk: true };
+        const albani = grades.find(g => g.name.toLowerCase().includes('albani'));
+        const targetGrade = (albani ? albani.grade : grades[0].grade).toLowerCase();
+        const isOk = !targetGrade.includes('daif') && !targetGrade.includes('mawdu');
+        let arGrade = targetGrade;
+        if(targetGrade.includes('sahih')) arGrade = 'صحيح';
+        else if(targetGrade.includes('hasan')) arGrade = 'حسن';
+        else if(targetGrade.includes('daif')) arGrade = 'ضعيف';
+        else if(targetGrade.includes('mawdu')) arGrade = 'موضوع';
+        return { text: arGrade, isOk };
+    }
+
+    async function fetchRandomHadith() {
+        try {
+            const res = await fetch('hadith/rand-hadith.json');
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const random = data[Math.floor(Math.random() * data.length)];
+                    const text = random.hadith || random.text || "";
+                    const source = random.source || random.bookName || "";
+                    const grade = random.grade || (random.grades ? getHadithGrade('', random.grades).text : "");
+                    
+                    const textToCopy = encodeURIComponent(`${text}\n\n[${source} - ${grade}]`);
+
+                    document.getElementById('dailyHadithText').innerHTML = `
+                        ${text}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                            <span class="daily-meta">[${source} - ${grade}]</span>
+                            <div class="card-actions">
+                                <button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="نسخ الحديث">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return; 
+                }
+            }
+        } catch (e) {
+            console.log("rand-hadith.json غير متوفر، سيتم استخدام قاعدة البيانات المحلية كبديل.");
+        }
+        setDynamicHadith();
+    }
+
+    function setDynamicHadith() {
+        const pool = localDatabase.filter(h => h.text.length <= 300 && getHadithGrade(h.bookId, h.grades).isOk);
+        const source = pool.length > 0 ? pool : localDatabase;
+        const random = source[Math.floor(Math.random() * source.length)];
+        const gradeInfo = getHadithGrade(random.bookId, random.grades);
+        const sectionText = random.sectionName ? `(${random.sectionName})` : '';
+
+        const textToCopy = encodeURIComponent(`${random.text}\n\n[${random.bookName} ${sectionText} - رقم ${random.number} - ${gradeInfo.text}]`);
+
+        document.getElementById('dailyHadithText').innerHTML = `
+            ${random.text}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                <span class="daily-meta">[${random.bookName} ${sectionText} - رقم ${random.number} - ${gradeInfo.text}]</span>
+                <div class="card-actions">
+                    <button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="نسخ الحديث">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                    ${random.sectionNumber ? `
+                    <a href="hadith-viewer.html?book=${random.bookId}&section=${random.sectionNumber}" class="card-action-btn" title="عرض في الكتاب">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    </a>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // ================= البحث النظيف والخالي من الأخطاء =================
+    const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
+    const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
+    
+    function normalizeText(text) {
+        return (text || "")
+            .replace(TASHKEEL_REGEX, '')
+            .replace(/[أإآ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي');
+    }
+    
+    function escapeRegex(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    function buildRegex(query) {
+        let clean = normalizeText(query), pattern = "";
+        for (let char of clean) {
+            if (/[اأإآ]/.test(char)) pattern += "[أإآا]";
+            else if (/[ةه]/.test(char)) pattern += "[ةه]";
+            else if (/[ىي]/.test(char)) pattern += "[ىي]";
+            else if (char === ' ') pattern += "\\s+";
+            else pattern += escapeRegex(char);
+            
+            if (char !== ' ') pattern += "[" + TASHKEEL_STR + "]*";
+        }
+        return new RegExp('(' + pattern + ')', 'g');
+    }
+
+    let typingTimer;
+    const searchInput = document.getElementById('searchInput');
+    
+    searchInput.addEventListener('input', () => {
+        document.getElementById('clearInputBtn').style.display = searchInput.value ? 'block' : 'none';
+        clearTimeout(typingTimer);
+        if (searchInput.value.trim().length >= 3) typingTimer = setTimeout(initiateSearch, 500);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchInput.blur(); 
+            const query = searchInput.value.trim();
+            if (query.length >= 3) {
+                saveToHistory(query);
+                initiateSearch();
+            }
+        }
+    });
+
+    function clearSearchField() {
+        searchInput.value = '';
+        document.getElementById('clearInputBtn').style.display = 'none';
+        document.getElementById('resultsContainer').innerHTML = '';
+        document.getElementById('resultsSummary').style.display = 'none';
+    }
+
+    function initiateSearch() {
+        const query = searchInput.value.trim();
+        if (query.length < 3) return;
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('resultsContainer').innerHTML = '';
+        document.getElementById('resultsSummary').style.display = 'none';
+        setTimeout(() => performSearchEngine(query), 50);
+    }
+
+    function performSearchEngine(query) {
+        const isStrict = document.getElementById('strictTashkeel').checked;
+        const normQuery = normalizeText(query);
+        const selectedBooks = Array.from(document.querySelectorAll('#booksFilter input:checked')).map(cb => cb.value);
+
+        currentSearchResults = localDatabase.filter(item => {
+            if (!selectedBooks.includes(item.bookId)) return false;
+            return isStrict ? item.text.includes(query) : n.ormalizeText(item.text).includes(normQuery);
+        });
+
+        document.getElementById('loader').style.display = 'none';
+        currentRenderIndex = 0;
+
+        if (currentSearchResults.length === 0) {
+            document.getElementById('resultsContainer').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد نتائج مطابقة.</div>';
+            return;
+        }
+
+        let okCount = 0, warnCount = 0;
+        currentSearchResults.forEach(h => getHadithGrade(h.bookId, h.grades).isOk ? okCount++ : warnCount++);
+
+        const summary = document.getElementById('resultsSummary');
+        summary.style.display = 'block';
+        summary.innerHTML = `تم العثور على <span>${currentSearchResults.length}</span> نتيجة<br><span class="summary-ok">${okCount} مقبول</span> | <span class="summary-warn">${warnCount} مردود/ضعيف</span>`;
+
+        renderNextChunk();
+        setupIntersectionObserver();
+    }
+
+    function renderNextChunk() {
+        const container = document.getElementById('resultsContainer');
+        const fragment = document.createDocumentFragment();
+        const end = Math.min(currentRenderIndex + CHUNK_SIZE, currentSearchResults.length);
+        const query = searchInput.value.trim();
+        const highlightRegex = document.getElementById('strictTashkeel').checked ? new RegExp('(' + escapeRegex(query) + ')', 'g') : buildRegex(query);
+
+        for (let i = currentRenderIndex; i < end; i++) {
+            const hadith = currentSearchResults[i];
+            const gradeInfo = getHadithGrade(hadith.bookId, hadith.grades);
+            const badgeClass = gradeInfo.isOk ? "badge-ok" : "badge-warn";
+            const highlightedText = hadith.text.replace(highlightRegex, '<span class="search-highlight">$1</span>');
+            
+            const sectionDisplay = hadith.sectionName ? `(${hadith.sectionName})` : '';
+            const textToCopy = encodeURIComponent(`${hadith.text}\n\nالكتاب: ${hadith.bookName} ${sectionDisplay}\nرقم الحديث: ${hadith.number}\nالحكم: ${gradeInfo.text}`);
+
+            const card = document.createElement('div');
+            card.className = 'hadith-item';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="${badgeClass}">${gradeInfo.text}</span>
+                    <div class="card-actions">
+                        <button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="نسخ">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        ${hadith.sectionNumber ? `
+                        <a href="hadith-viewer.html?book=${hadith.bookId}&section=${hadith.sectionNumber}" class="card-action-btn" title="عرض في الكتاب">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </a>` : ''}
+                    </div>
+                </div>
+                <div class="hadith-text">${highlightedText}</div>
+                <div class="hadith-meta">
+                    <b>الكتاب:</b> ${hadith.bookName} ${sectionDisplay} | <b>رقم الحديث:</b> ${hadith.number}
+                </div>
+            `;
+            fragment.appendChild(card);
+        }
+        
+        container.appendChild(fragment);
+        currentRenderIndex = end;
+        document.getElementById('scrollTrigger').style.display = (currentRenderIndex < currentSearchResults.length) ? 'block' : 'none';
+    }
+
+    function setupIntersectionObserver() {
+        if (scrollObserver) scrollObserver.disconnect();
+        const trigger = document.getElementById('scrollTrigger');
+        scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && currentRenderIndex < currentSearchResults.length) renderNextChunk();
+        }, { rootMargin: '100px' });
+        scrollObserver.observe(trigger);
+    }
+
+    window.onload = loadBooks;
+</script>
+</body>
+</html>
