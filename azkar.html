@@ -242,6 +242,13 @@ circle {
   margin-bottom: 5px;
 }
 
+.count-total {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary); /* استخدام لون هادئ ليكون مريحاً للعين */
+  margin-top: -2px; /* لتقليل المسافة بينه وبين الرقم الكبير */
+}
+
 .count-number {
   font-size: clamp(36px, 10vw, 54px);
   font-weight: 700;
@@ -388,10 +395,13 @@ circle {
         <circle class="bg-circle" cx="100" cy="100" r="90"/>
         <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
       </svg>
-      <div class="counter-content">
+                  <div class="counter-content">
         <span class="count-label">المتبقي</span>
         <span class="count-number" id="counter">0</span>
+        <span class="count-total">من <span id="targetCount">0</span></span>
       </div>
+
+
     </div>
   </div>
 
@@ -478,6 +488,7 @@ function handleSwipe() {
 }
 
 /* Load Zikr with fade */
+/* Load Zikr with fade */
 function loadZikr() {
   const container = document.querySelector(".zikr-container");
   container.classList.remove("fade-in");
@@ -494,20 +505,30 @@ function loadZikr() {
         document.getElementById("zikrIndexCounter").innerText = `${currentNum} من ${totalNum}`;
     }
     updateProgress();
+    
+    // --- السطر الجديد لإعادة التمرير إلى الأعلى ---
+    document.querySelector(".zikr-scroll-area").scrollTop = 0;
+    
     container.classList.remove("fade-out");
     container.classList.add("fade-in");
   }, 200);
 }
 
+
 function updateProgress() {
   if(!azkarData) return;
   const target = azkarData[currentIndex].count;
   const remaining = target - currentCount;
+  
+  // السطر الجديد لتحديث الرقم الإجمالي
+  document.getElementById("targetCount").innerText = target; 
+  
   document.getElementById("counter").innerText = remaining;
   const percent = currentCount / target;
   const offset = fullCircle - (fullCircle * percent);
   document.getElementById("progressCircle").style.strokeDashoffset = offset;
 }
+
 
 function increment() {
   if(!azkarData) return;
