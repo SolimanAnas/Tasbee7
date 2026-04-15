@@ -41,7 +41,14 @@
     --radius-lg:       22px;
     --radius-xl:       28px;
     --sheet-radius:    26px;
-    --header-h:        58px;
+    --header-h:        52px;
+    --frame-size:      20px;
+    --label-h:         28px;
+    --reader-side-space: clamp(12px, 2.8vw, 34px);
+    --page-max-width:  42rem;
+    --page-ratio:      0.6259168704;
+    --page-surface:    #FBF7EF;
+    --page-shadow:     0 22px 58px rgba(91, 67, 28, 0.18);
     --transition-fast: 0.18s cubic-bezier(0.4,0,0.2,1);
     --transition-med:  0.28s cubic-bezier(0.22,1,0.36,1);
     --transition-slow: 0.38s cubic-bezier(0.22,1,0.36,1);
@@ -70,21 +77,32 @@
     font-family: 'Tajawal', sans-serif;
     background: #FAF6EE;
     margin: 0;
+    min-height: 100dvh;
     overscroll-behavior: none;
+    overflow: hidden;
+    color: var(--text-primary);
+    transition: background var(--transition-med), color var(--transition-med);
   }
-  [data-theme="dark"] body { background: #0B131E; }
+  body[data-theme="dark"] { background: #0B131E; }
+  body.reader-ui-hidden main#swipeArea {
+    padding-top: calc(env(safe-area-inset-top) + var(--label-h) + var(--frame-size) + 18px);
+  }
+  body.reader-ui-hidden .label-top-left,
+  body.reader-ui-hidden .label-top-right {
+    top: calc(env(safe-area-inset-top) + var(--frame-size) + 8px);
+  }
 
   /* ========== HEADER ========== */
   header#appHeader {
     position: fixed; top: 0; left: 0; right: 0;
     height: calc(var(--header-h) + env(safe-area-inset-top));
-    padding: calc(env(safe-area-inset-top) + 6px) 8px 6px;
-    display: flex; align-items: center; justify-content: space-between; gap: 4px;
+    padding: calc(env(safe-area-inset-top) + 4px) calc(8px + env(safe-area-inset-right)) 4px calc(8px + env(safe-area-inset-left));
+    display: flex; align-items: center; justify-content: space-between; gap: 2px;
     background: var(--glass-bg);
     backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border-bottom: 1px solid var(--glass-border);
     box-shadow: 0 1px 12px var(--glass-shadow);
-    z-index: 20; transition: transform var(--transition-slow);
+    z-index: 40; transition: transform var(--transition-slow);
   }
   header#appHeader.hidden-ui { transform: translateY(-110%); }
   [data-theme="dark"] header#appHeader {
@@ -105,7 +123,7 @@
   /* Surah name - center of header */
   #surahName {
     font-family: 'Amiri', serif;
-    font-size: 1.1rem;
+    font-size: 1.04rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 0.01em;
@@ -128,7 +146,7 @@
     background: var(--text-hint); opacity: 0.6; flex-shrink: 0;
   }
   .nav-item {
-    font-size: 0.76rem; font-weight: 500;
+    font-size: 0.74rem; font-weight: 500;
     color: var(--text-secondary);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     cursor: pointer;
@@ -141,7 +159,7 @@
   .icon-btn {
     background: none; border: none; color: var(--text-primary);
     cursor: pointer;
-    width: 40px; height: 40px; border-radius: var(--radius-sm);
+    width: 38px; height: 38px; border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
     transition: background var(--transition-fast), transform var(--transition-fast);
     flex-shrink: 0;
@@ -455,24 +473,57 @@
 
   /* ========== MUSHAF FRAME ========== */
   main#swipeArea {
-    position: relative; width: 100%; height: 100vh;
-    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    isolation: isolate;
+    touch-action: pan-y pinch-zoom;
+    padding-top: calc(env(safe-area-inset-top) + var(--header-h) + var(--label-h) + var(--frame-size) + 24px);
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--label-h) + var(--frame-size) + 24px);
+    padding-left: calc(var(--reader-side-space) + env(safe-area-inset-left));
+    padding-right: calc(var(--reader-side-space) + env(safe-area-inset-right));
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,0.7), transparent 42%),
+      linear-gradient(180deg, #FBF8F1 0%, #F3E9D5 100%);
+    color-scheme: light;
+  }
+  body[data-theme="dark"] main#swipeArea {
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 40%),
+      linear-gradient(180deg, #FAF5E8 0%, #F0E6CF 100%);
   }
   .page-frame {
-    position: relative; width: 100%; height: 100%;
-    overflow-y: auto; overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    max-width: min(100%, 1180px);
+    margin: 0 auto;
+    will-change: transform, opacity;
+    background: transparent;
   }
   .mushaf-border-top, .mushaf-border-bottom {
-    position: fixed; left: 0; right: 0; height: 20px;
-    pointer-events: none; z-index: 10;
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: var(--frame-size);
+    pointer-events: none;
+    z-index: 24;
   }
- .mushaf-border-top {
-  top: env(safe-area-inset-top, 0); /* Updated */
-  background: url('img/frame.png') repeat-x top,
-              linear-gradient(#f5f0e6, #f5f0e6);
-  background-size: auto 100%, 100% 30px;
-  background-repeat: repeat-x, no-repeat;
-}
+  .mushaf-border-top {
+    top: 0;
+    background: url('img/frame.png') repeat-x top,
+                linear-gradient(#f5f0e6, #f5f0e6);
+    background-size: auto 100%, 100% 30px;
+    background-repeat: repeat-x, no-repeat;
+  }
   .mushaf-border-bottom {
     bottom: env(safe-area-inset-bottom, 0);
     background: url('img/frame.png') repeat-x top;
@@ -488,29 +539,79 @@
     background: url('img/text-container.png') center/100% 100% no-repeat;
     display: flex; align-items: center; justify-content: center;
     color: var(--text-primary); font-weight: 700;
-    z-index: 15; padding: 0 20px;
-    height: 18px; min-width: 90px;
-    font-size: 0.9rem; white-space: nowrap;
+    z-index: 34;
+    padding: 0 18px;
+    height: var(--label-h);
+    min-width: clamp(86px, 16vw, 130px);
+    max-width: min(42vw, 220px);
+    font-size: 0.88rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-family: 'ThuluthFont', 'Amiri', serif;
     cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
   }
- .label-top-left  { top: calc(1px + env(safe-area-inset-top, 0)); left: 20px; } /* Updated */
-.label-top-right { top: calc(1px + env(safe-area-inset-top, 0)); right: 20px; } /* Updated */
-  .label-bottom    { bottom: calc(1px + env(safe-area-inset-bottom, 0)); left: 50%; transform: translateX(-50%); }
+  .label-top-left  { top: calc(env(safe-area-inset-top) + var(--header-h) + 8px); left: clamp(12px, 2.8vw, 28px); }
+  .label-top-right { top: calc(env(safe-area-inset-top) + var(--header-h) + 8px); right: clamp(12px, 2.8vw, 28px); }
+  .label-bottom    { bottom: calc(env(safe-area-inset-bottom) + var(--frame-size) + 10px); left: 50%; transform: translateX(-50%); }
 
   /* ========== MUSHAF CONTAINER ========== */
-  ..mushaf-container {
-  position: relative; display: block;
-    width: 102%; margin: 0 -5%; /* Centers the wider container */
-    transform-origin: center center;
-    transition: transform 0.2s cubic-bezier(0.2,0.9,0.4,1.1);
+  .mushaf-container {
+    position: relative;
+    display: block;
+    width: min(
+      100%,
+      var(--page-max-width),
+      calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--header-h) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 48px) * var(--page-ratio))
+    );
+    max-width: min(100%, var(--page-max-width));
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--header-h) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 48px);
+    aspect-ratio: 1024 / 1636;
+    overflow: hidden;
+    margin-inline: auto;
+    border-radius: clamp(18px, 2.6vw, 30px);
+    background: var(--page-surface);
+    box-shadow: var(--page-shadow);
+    border: 1px solid rgba(184, 136, 12, 0.12);
+    transition: box-shadow var(--transition-med), transform var(--transition-med);
+  }
+  body.reader-ui-hidden .mushaf-container {
+    width: min(
+      100%,
+      var(--page-max-width),
+      calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 32px) * var(--page-ratio))
+    );
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 32px);
+  }
+  body.version-mushaf-2 .mushaf-container {
+    --page-ratio: 0.7392197125;
+    aspect-ratio: 1080 / 1461;
   }
   .mushaf-img {
-    width: 100%; height: auto; display: block;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    object-position: center center;
     transform: none !important;
-    pointer-events: auto; user-select: none;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-drag: none;
     -webkit-touch-callout: none;
+    background: var(--page-surface);
     transition: opacity 0.18s ease-in-out;
+  }
+  body.version-mushaf-2 .mushaf-img { object-fit: contain; }
+  body[data-theme="dark"] .mushaf-container {
+    background: var(--page-surface);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+  }
+  body[data-theme="dark"] .mushaf-img {
+    mix-blend-mode: normal;
+    filter: none;
   }
   .highlight-overlay {
     position: absolute; top: 0; left: 0;
@@ -924,6 +1025,50 @@
     box-shadow: 0 3px 12px var(--accent-glow);
   }
   .btn-go:active { opacity: 0.85; transform: scale(0.96); }
+
+  @media (max-width: 640px) {
+    :root {
+      --header-h: 50px;
+      --label-h: 26px;
+      --reader-side-space: 10px;
+      --page-max-width: 100%;
+    }
+    .icon-btn { width: 36px; height: 36px; }
+    #surahName { font-size: 1rem; }
+    .nav-item { font-size: 0.72rem; padding: 2px 6px; }
+    .label-box {
+      min-width: 78px;
+      max-width: calc(50vw - 16px);
+      font-size: 0.82rem;
+      padding: 0 14px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --page-max-width: 47rem;
+      --reader-side-space: 20px;
+    }
+    .page-frame { max-width: 1240px; }
+  }
+
+  @media (min-width: 1200px) {
+    :root {
+      --page-max-width: 50rem;
+      --reader-side-space: clamp(24px, 6vw, 72px);
+    }
+  }
+
+  @media (max-height: 760px) {
+    :root {
+      --header-h: 48px;
+      --label-h: 24px;
+    }
+    main#swipeArea {
+      padding-top: calc(env(safe-area-inset-top) + var(--header-h) + var(--label-h) + var(--frame-size) + 18px);
+      padding-bottom: calc(env(safe-area-inset-bottom) + var(--label-h) + var(--frame-size) + 18px);
+    }
+  }
   </style>
 </head>
 <body data-theme="light">
@@ -997,13 +1142,12 @@
 
   <!-- ===== MAIN ===== -->
   <main id="swipeArea">
+    <div class="mushaf-border-top"></div>
+    <div class="mushaf-border-bottom"></div>
+    <div class="label-box label-top-left"  id="juzLabel"   onclick="openJuzSelector()">الجزء ١</div>
+    <div class="label-box label-top-right" id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
+    <div class="label-box label-bottom"    id="pageLabel"  onclick="openPageSelector()">١</div>
     <div class="page-frame" id="pageFrame">
-      <div class="mushaf-border-top"></div>
-      <div class="mushaf-border-bottom"></div>
-      <div class="label-box label-top-left"  id="juzLabel"   onclick="openJuzSelector()">الجزء ١</div>
-      <div class="label-box label-top-right" id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
-      <div class="label-box label-bottom"    id="pageLabel"  onclick="openPageSelector()">١</div>
-
       <div id="mushafContainer" class="mushaf-container">
         <img id="pageImg" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
         <div id="highlightOverlay" class="highlight-overlay"></div>
@@ -1535,6 +1679,9 @@
   <script src="js/quran-common.js"></script>
 
   <script>
+    window.__quranCustomGestures = true;
+    let suppressReaderTapUntil = 0;
+
     // --- Daily Tracking Function for Stats (Quran Pages/Juz) ---
     function checkDailyResetKhatma() {
         const today = new Date().toDateString();
@@ -1768,13 +1915,38 @@
         }
     };
 
+    const pageImagePreloaders = new Map();
+
+    function preloadNearbyPages(page) {
+      [page - 1, page + 1]
+        .filter(p => p >= 1 && p <= 604)
+        .forEach(p => {
+          const key = `${currentMushafVersion}:${p}`;
+          if (pageImagePreloaders.has(key)) return;
+          const preloadImg = new Image();
+          preloadImg.decoding = 'async';
+          preloadImg.src = `${currentMushafVersion}/${p.toString().padStart(3, '0')}.png`;
+          pageImagePreloaders.set(key, preloadImg);
+        });
+
+      while (pageImagePreloaders.size > 8) {
+        const oldestKey = pageImagePreloaders.keys().next().value;
+        pageImagePreloaders.delete(oldestKey);
+      }
+    }
+
     function updateContent() {
       const formattedPage = currentPage.toString().padStart(3, '0');
       const img = document.getElementById('pageImg');
       img.style.opacity = '0';
+      img.decoding = 'async';
       document.getElementById('highlightOverlay').innerHTML = '';
       img.src = `${currentMushafVersion}/${formattedPage}.png`;
-      img.onload = () => { img.style.opacity = '1'; loadAyahHighlights(currentPage); };
+      img.onload = () => {
+        img.style.opacity = '1';
+        loadAyahHighlights(currentPage);
+        preloadNearbyPages(currentPage);
+      };
       img.onerror = () => { img.src = `${currentMushafVersion}/placeholder.png`; img.style.opacity = '1'; };
       applyZoom();
       if(typeof updateMeta === 'function') updateMeta();
@@ -1852,12 +2024,9 @@
           e.stopPropagation(); clickCount++;
           if (clickCount === 1) {
             singleClickTimer = setTimeout(() => {
+                if (Date.now() < suppressReaderTapUntil) { clickCount = 0; return; }
                 clickCount = 0;
-                const header = document.getElementById('appHeader');
-                const miniPlayer = document.getElementById('audioMiniPlayer');
-                header.classList.toggle('hidden-ui');
-                miniPlayer.classList.add('hidden-ui');
-                miniPlayer.classList.remove('visible');
+                setReaderUIHidden(!document.body.classList.contains('reader-ui-hidden'));
                 if (!isPlaying) {
                   document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
                   windowCurrentAyahGlobal = null;
@@ -1892,12 +2061,9 @@
     }
 
     document.getElementById('mushafContainer').addEventListener('click', (e) => {
+      if (Date.now() < suppressReaderTapUntil) return;
       if(e.target.id === 'pageImg' || e.target.id === 'highlightOverlay') {
-        const header = document.getElementById('appHeader');
-        const miniPlayer = document.getElementById('audioMiniPlayer');
-        header.classList.toggle('hidden-ui');
-        miniPlayer.classList.add('hidden-ui');
-        miniPlayer.classList.remove('visible');
+        setReaderUIHidden(!document.body.classList.contains('reader-ui-hidden'));
         if (!isPlaying) {
           document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
           windowCurrentAyahGlobal = null;
@@ -2212,7 +2378,8 @@
     function applyZoom() {
       const container = document.getElementById('mushafContainer');
       if (!container) return;
-      container.style.transform = currentMushafVersion === 'mushaf-1' ? `scaleX(1.02) scaleY(1.17) translateY(8px)` : `scaleX(1.1) scaleY(1.21)`;
+      container.dataset.version = currentMushafVersion;
+      container.style.transform = 'none';
     }
 
     // ========== CORE FUNCTIONALITY ==========
@@ -2223,7 +2390,22 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    function openSettingsModal() { updateVersionButtonsUI(); document.getElementById('settingsModal').classList.add('active'); }
+    function setReaderUIHidden(hidden) {
+      const header = document.getElementById('appHeader');
+      const miniPlayerEl = document.getElementById('audioMiniPlayer');
+      document.body.classList.toggle('reader-ui-hidden', hidden);
+      if (header) header.classList.toggle('hidden-ui', hidden);
+      if (miniPlayerEl) {
+        miniPlayerEl.classList.toggle('hidden-ui', hidden);
+        if (hidden) miniPlayerEl.classList.remove('visible');
+      }
+    }
+
+    function openSettingsModal() {
+      setReaderUIHidden(false);
+      updateVersionButtonsUI();
+      document.getElementById('settingsModal').classList.add('active');
+    }
     function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
     function handleOverlayClick(event, modalId) { if (event.target === document.getElementById(modalId)) closeModal(modalId); }
 
@@ -2251,6 +2433,7 @@
           overlay.classList.remove('active');
           document.getElementById('searchBackdrop').classList.remove('active');
       } else {
+          setReaderUIHidden(false);
           overlay.classList.toggle('active');
           document.getElementById('searchBackdrop').classList.toggle('active');
       }
@@ -2288,6 +2471,7 @@
       btn.classList.toggle('active', bookmarks.some(b => b.key === `page_${currentPage}`));
     }
     function openBookmarksModal() {
+      setReaderUIHidden(false);
       const list = document.getElementById('bookmarksList');
       const bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
       if (!bookmarks.length) {
@@ -2306,6 +2490,7 @@
     }
 
     function openSurahSelector() {
+      setReaderUIHidden(false);
       const list = document.getElementById('surahList');
       list.innerHTML = '';
       SURAH_MAP.forEach(s => {
@@ -2318,6 +2503,7 @@
       document.getElementById('surahSelectorModal').classList.add('active');
     }
     function openJuzSelector() {
+      setReaderUIHidden(false);
       const list = document.getElementById('juzList');
       list.innerHTML = '';
       for (let i = 1; i <= 30; i++) {
@@ -2330,6 +2516,7 @@
       document.getElementById('juzSelectorModal').classList.add('active');
     }
     function openPageSelector() {
+      setReaderUIHidden(false);
       const scroll = document.getElementById('pagePickerScroll');
       scroll.innerHTML = '';
       for (let i = 1; i <= 604; i++) { const div = document.createElement('div'); div.textContent = i; scroll.appendChild(div); }
@@ -2458,20 +2645,91 @@
     }
 
     // ========== SWIPE LOGIC ==========
-    let pageSwipeStartX = 0;
-    document.addEventListener('touchstart', e => {
-      if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
-      pageSwipeStartX = e.changedTouches[0].screenX;
-    }, {passive: true});
-    document.addEventListener('touchend', e => {
-      if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
-      const touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - pageSwipeStartX;
-      if (Math.abs(diff) > 80) {
-        if (diff > 0) { if (currentPage < 604) { goToPage(currentPage + 1); } }
-        else { if (currentPage > 1) { goToPage(currentPage - 1); } }
-      }
-    }, {passive: true});
+    function initReaderSwipe() {
+      const swipeAreaEl = document.getElementById('swipeArea');
+      if (!swipeAreaEl) return;
+
+      const MIN_VELOCITY = 0.32;
+      const AXIS_RATIO = 1.35;
+      const LOCK_DISTANCE = 12;
+      const VERTICAL_CANCEL = 20;
+      const interactiveSelector = '.modal-content, .audio-expanded-sheet, .audio-mini-player, .search-overlay, .search-backdrop, input, textarea, select, button, a, .icon-btn, .nav-item, .label-box, .close-btn, .selector-scroll, .selection-item, .sheet-drag-handle, .ayah-highlight';
+      const maxPages = typeof totalPages === 'number' ? totalPages : 604;
+      const getMinDistance = () => Math.max(64, Math.min(window.innerWidth * 0.14, 118));
+      const getFastDistance = () => Math.max(38, Math.min(window.innerWidth * 0.08, 72));
+
+      let startX = 0;
+      let startY = 0;
+      let startTime = 0;
+      let tracking = false;
+      let cancelled = false;
+      let lockedAxis = '';
+
+      swipeAreaEl.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1 || e.target.closest(interactiveSelector)) {
+          tracking = false;
+          cancelled = true;
+          lockedAxis = '';
+          return;
+        }
+        const touch = e.changedTouches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startTime = performance.now();
+        tracking = true;
+        cancelled = false;
+        lockedAxis = '';
+      }, { passive: true });
+
+      swipeAreaEl.addEventListener('touchmove', (e) => {
+        if (!tracking || cancelled) return;
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+
+        if (!lockedAxis && (absX > LOCK_DISTANCE || absY > LOCK_DISTANCE)) {
+          lockedAxis = absX > absY * 1.12 ? 'x' : 'y';
+        }
+
+        if ((lockedAxis === 'y' && absY > VERTICAL_CANCEL) || absY > absX * 1.2 + VERTICAL_CANCEL) {
+          cancelled = true;
+        }
+      }, { passive: true });
+
+      swipeAreaEl.addEventListener('touchend', (e) => {
+        if (!tracking) return;
+        tracking = false;
+        if (cancelled || isTransitioning) return;
+
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        const elapsed = Math.max(performance.now() - startTime, 1);
+        const velocityX = absX / elapsed;
+        const horizontalIntent = lockedAxis !== 'y' && absX > absY * AXIS_RATIO;
+        const deliberateSwipe = horizontalIntent && (
+          absX >= getMinDistance() ||
+          (absX >= getFastDistance() && velocityX >= MIN_VELOCITY)
+        );
+
+        if (!deliberateSwipe) return;
+
+        suppressReaderTapUntil = Date.now() + 320;
+
+        if (deltaX > 0 && currentPage < maxPages) goToPage(currentPage + 1);
+        if (deltaX < 0 && currentPage > 1) goToPage(currentPage - 1);
+      }, { passive: true });
+
+      swipeAreaEl.addEventListener('touchcancel', () => {
+        tracking = false;
+        cancelled = true;
+        lockedAxis = '';
+      }, { passive: true });
+    }
 
     // ========== WINDOW INITIALIZATION ==========
     window.onload = function () {
@@ -2498,6 +2756,7 @@
       const savedTheme = localStorage.getItem('quranTheme') || 'light';
       document.body.setAttribute('data-theme', savedTheme);
       if (typeof commonInit === 'function') commonInit();
+      initReaderSwipe();
 
       updateVersionButtonsUI();
       updateVersionSpecificElements();
