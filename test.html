@@ -501,7 +501,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    display: grid;
+    display: inline-block;
     place-items: center;
     overflow: hidden;
     max-width: min(100%, 1180px);
@@ -535,11 +535,11 @@
   body.version-mushaf-2 .label-box { display: none; }
 
   .label-box {
-    position: fixed;
+	position: relative;
     background: url('img/text-container.png') center/100% 100% no-repeat;
     display: flex; align-items: center; justify-content: center;
     color: var(--text-primary); font-weight: 700;
-    z-index: 34;
+    z-index: 20;
     padding: 0 18px;
     height: var(--label-h);
     min-width: clamp(86px, 16vw, 130px);
@@ -554,42 +554,77 @@
     pointer-events: auto;
     touch-action: manipulation;
   }
-  .label-top-left  { top: calc(env(safe-area-inset-top) + var(--header-h) + 8px); left: clamp(12px, 2.8vw, 28px); }
-  .label-top-right { top: calc(env(safe-area-inset-top) + var(--header-h) + 8px); right: clamp(12px, 2.8vw, 28px); }
-  .label-bottom    { bottom: calc(env(safe-area-inset-bottom) + var(--frame-size) + 10px); left: 50%; transform: translateX(-50%); }
+  
+  .frame-top,
+.frame-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--frame-size);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  z-index: 10;
+}
 
+.frame-top {
+  top: 0;
+  justify-content: space-between;
+}
+
+.frame-bottom {
+  bottom: 0;
+  justify-content: center;
+}
+
+.label-left {
+  margin-inline-end: auto;
+}
+
+.label-right {
+  margin-inline-start: auto;
+}
+
+.label-center {
+  margin: auto;
+}
+  
   /* ========== MUSHAF CONTAINER ========== */
-  .mushaf-container {
-    position: relative;
-    display: block;
-    width: min(
-      100%,
-      var(--page-max-width),
-      calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--header-h) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 48px) * var(--page-ratio))
-    );
-    max-width: min(100%, var(--page-max-width));
-    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--header-h) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 48px);
-    aspect-ratio: 1024 / 1636;
-    overflow: hidden;
-    margin-inline: auto;
-    border-radius: clamp(18px, 2.6vw, 30px);
-    background: var(--page-surface);
-    box-shadow: var(--page-shadow);
-    border: 1px solid rgba(184, 136, 12, 0.12);
-    transition: box-shadow var(--transition-med), transform var(--transition-med);
-  }
+.mushaf-container {
+  position: relative;
+  z-index: 1;
+
+  /* 🔥 OLD MAGIC (keep this exactly) */
+  width: 107%;
+  margin: 0 -3.5%;
+
+  /* ✅ CONTROL SIZE PROPERLY */
+  max-width: 100%;
+  height: auto;
+
+  /* KEEP RATIO */
+  aspect-ratio: 1024 / 1636;
+
+  overflow: hidden;
+
+  border-radius: clamp(12px, 2vw, 24px);
+  background: var(--page-surface);
+  box-shadow: var(--page-shadow);
+  border: 1px solid rgba(184, 136, 12, 0.12);
+
+  transition: box-shadow var(--transition-med), transform var(--transition-med);
+}
   body.reader-ui-hidden .mushaf-container {
-    width: min(
-      100%,
-      var(--page-max-width),
-      calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 32px) * var(--page-ratio))
-    );
-    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - (var(--label-h) * 2) - (var(--frame-size) * 2) - 32px);
-  }
-  body.version-mushaf-2 .mushaf-container {
-    --page-ratio: 0.7392197125;
-    aspect-ratio: 1080 / 1461;
-  }
+  height: calc(
+    100dvh
+    - (var(--label-h) * 2)
+    - (var(--frame-size) * 2)
+    - 8px
+  );
+}
+body.version-mushaf-2 .mushaf-container {
+  aspect-ratio: 1080 / 1461;
+}
   .mushaf-img {
     width: 100%;
     height: 100%;
@@ -1065,9 +1100,9 @@
       --label-h: 24px;
     }
     main#swipeArea {
-      padding-top: calc(env(safe-area-inset-top) + var(--header-h) + var(--label-h) + var(--frame-size) + 18px);
-      padding-bottom: calc(env(safe-area-inset-bottom) + var(--label-h) + var(--frame-size) + 18px);
-    }
+  padding-left: 6px;
+  padding-right: 6px;
+}
   }
   </style>
 </head>
@@ -1142,18 +1177,36 @@
 
   <!-- ===== MAIN ===== -->
   <main id="swipeArea">
-    <div class="mushaf-border-top"></div>
-    <div class="mushaf-border-bottom"></div>
-    <div class="label-box label-top-left"  id="juzLabel"   onclick="openJuzSelector()">الجزء ١</div>
-    <div class="label-box label-top-right" id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
-    <div class="label-box label-bottom"    id="pageLabel"  onclick="openPageSelector()">١</div>
-    <div class="page-frame" id="pageFrame">
-      <div id="mushafContainer" class="mushaf-container">
-        <img id="pageImg" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
-        <div id="highlightOverlay" class="highlight-overlay"></div>
+  <div class="mushaf-border-top"></div>
+  <div class="mushaf-border-bottom"></div>
+
+  <div class="page-frame" id="pageFrame">
+
+    <!-- TOP FRAME -->
+    <div class="frame-top">
+      <div class="label-box label-left" id="juzLabel" onclick="openJuzSelector()">
+        الجزء ١
+      </div>
+      <div class="label-box label-right" id="surahLabel" onclick="openSurahSelector()">
+        سورة الفاتحة
       </div>
     </div>
-  </main>
+
+    <!-- PAGE -->
+    <div id="mushafContainer" class="mushaf-container">
+      <img id="pageImg" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
+      <div id="highlightOverlay" class="highlight-overlay"></div>
+    </div>
+
+    <!-- BOTTOM FRAME -->
+    <div class="frame-bottom">
+      <div class="label-box label-center" id="pageLabel" onclick="openPageSelector()">
+        ١
+      </div>
+    </div>
+
+  </div>
+</main>
 
   <div id="customToast" class="custom-toast"></div>
 
