@@ -486,7 +486,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
     <span class="nav-label">إنجازاتي</span>
   </div>
   <div class="nav-item" onclick="openSettingsSheet()">
-    <div class="icon-mask" style="-webkit-mask-image:url('icon/settings.svg'); mask-image:url('icon/settings.svg');"></div>
+    <div class="icon-mask" style="-webkit-mask-image:url('icons/settings.svg'); mask-image:url('icons/settings.svg');"></div>
     <span class="nav-label">الإعدادات</span>
   </div>
 </nav>
@@ -891,10 +891,17 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(reg => {
         console.log('SW registered');
-        // FIX: Permission request is handled by notifications.js to avoid double prompts.
-        // Only call enablePush() here if permission is already granted.
-        if (Notification.permission === 'granted') {
-          enablePush();
+        // طلب الصلاحية إذا كانت غير محددة
+        if (Notification.permission === 'default') {
+           Notification.requestPermission().then(permission => {
+             // إذا وافق المستخدم، نفعل الـ Push
+             if(permission === 'granted') {
+               enablePush();
+             }
+           });
+        } else if (Notification.permission === 'granted') {
+           // إذا كان موافقاً مسبقاً، نفعل الـ Push بصمت
+           enablePush();
         }
       })
       .catch(e => console.log('SW error', e));
