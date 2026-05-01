@@ -1,5 +1,6 @@
-const CACHE_NAME = "zad-muslim-v5"; // تم رفع الإصدار لتحديث الكاش القديم
+const CACHE_NAME = "zad-muslim-v6"; // رفعنا الإصدار ليقوم المتصفح بالتحديث
 
+// تأكد من أن المسارات في STATIC_ASSETS مطابقة تماماً للموجود في مجلدات مشروعك.
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -17,7 +18,11 @@ const STATIC_ASSETS = [
   "./manifest.json",
   "./css/style.css",
   "./js/notifications.js",
-  "./js/quran-common.js"
+  "./js/quran-common.js",
+  "./icon/icon-192.png", // تم التوحيد مع مسار index.html
+  "./icon/icon-512.png", // تم التوحيد
+  "./icon/duaa.png",
+  "./icon/settings.svg"
 ];
 
 const DEEP_LINKS = {
@@ -30,13 +35,26 @@ const DEEP_LINKS = {
   default: "./index.html"
 };
 
+// ⚠️ التعديل الجوهري: تحميل الملفات واحداً تلو الآخر. 
+// إذا استخدمنا `cache.addAll` وفشل ملف واحد (مثلاً أيقونة غير موجودة)، سيفشل الكاش بالكامل.
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_ASSETS).catch(err => {
-        console.error("Cache warning:", err);
-      });
+    caches.open(CACHE_NAME).then(async cache => {
+      console.log("📦 Caching assets one by one...");
+      for (let asset of STATIC_ASSETS) {
+        try {
+          const response = await fetch(asset);
+          if (response.ok) {
+            await cache.put(asset, response);
+          } else {
+            console.warn(`⚠️ Failed to cache: ${asset} (Status: ${response.status})`);
+          }
+        } catch (err) {
+          console.error(`🚨 Network error while caching: ${asset}`, err);
+        }
+      }
+      console.log("✅ Caching process completed.");
     })
   );
 });
@@ -45,11 +63,12 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(key => key !== CACHE_NAME && !key.startsWith("quran-offline"))
+        keys.filter(key => key !== CACHE_NAME && !key.startsWith("quran-offline") && !key.startsWith("quran-pages"))
           .map(key => caches.delete(key))
       )
     )
   );
+  console.log("✅ SW activated");
   return self.clients.claim();
 });
 
@@ -72,7 +91,7 @@ self.addEventListener("fetch", event => {
         caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         return res;
       }).catch(() => {
-        // تم إضافة الأقواس الناقصة وخاصية ignoreSearch لضمان عمل الروابط العميقة أوفلاين
+        // ⚠️ تم إصلاح الـ Syntax Error (الأقواس) وتمت إضافة ignoreSearch للروابط العميقة أوفلاين
         return caches.match(req, { ignoreSearch: true }).then(cachedRes => 
           cachedRes || caches.match("./index.html", { ignoreSearch: true })
         );
@@ -89,24 +108,34 @@ self.addEventListener("fetch", event => {
           caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
         return networkRes;
-      }).catch(err => console.log("Offline:", req.url))
+      }).catch(err => console.log("📡 Offline fallback for:", req.url))
     )
   );
 });
 
+// Push notification receive
 self.addEventListener("push", event => {
-  const data = event.data ? event.data.json() : {};
+  let data = {};
+  
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: "🔔 Zad Al-Muslim", body: "تذكير جديد" };
+  }
+  
+  const notificationData = data.data || {};
+  const targetUrl = notificationData.url || DEEP_LINKS[notificationData.type] || DEEP_LINKS.default;
   
   const options = {
-    body: data.body || "زاد المسلم - تذكير",
-    icon: "./img/icon-192.png", // تأكد من المسار حسب مجلداتك
-    badge: "./img/icon-96.png",
+    body: data.body || "زاد المسلم",
+    icon: "./icon/icon-192.png", // تم التوحيد مع مسار index.html
+    badge: "./icon/icon-96.png",
     vibrate: [200, 100, 200],
     tag: data.tag || "zad-muslim",
     renotify: true,
     data: { 
-      url: data.url || DEEP_LINKS[data.type] || DEEP_LINKS.default,
-      type: data.type || "default"
+      url: targetUrl,
+      type: notificationData.type || "default"
     },
     actions: [
       { action: "open", title: "فتح" },
@@ -114,26 +143,36 @@ self.addEventListener("push", event => {
     ]
   };
 
-  event.waitUntil(self.registration.showNotification(data.title || "🔔 Zad Al-Muslim", options));
+  console.log("📨 Push received:", data.title);
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title || "🔔 Zad Al-Muslim", options)
+  );
 });
 
+// Notification click handler
 self.addEventListener("notificationclick", event => {
   event.notification.close();
   
   if (event.action === "dismiss") return;
   
   const targetUrl = event.notification.data?.url || DEEP_LINKS.default;
-  // تحويل الرابط إلى رابط كامل لسهولة العثور على التبويبة المفتوحة
   const fullTargetUrl = new URL(targetUrl, self.location.origin).href;
+  
+  console.log("👆 Notification clicked, opening:", fullTargetUrl);
   
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      // Check if already open
       for (const client of clientList) {
         if (client.url === fullTargetUrl || client.url.includes(targetUrl.replace('./', ''))) {
           return client.focus();
         }
       }
+      // Open new
       return clients.openWindow(fullTargetUrl);
     })
   );
 });
+
+console.log("✅ Service Worker v6 loaded");
