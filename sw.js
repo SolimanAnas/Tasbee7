@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v6"; // رفعنا الإصدار ليقوم المتصفح بالتحديث
+const CACHE_NAME = "zad-muslim-v7"; // bumped for notifications.js v4.0 fix
 
 // تأكد من أن المسارات في STATIC_ASSETS مطابقة تماماً للموجود في مجلدات مشروعك.
 const STATIC_ASSETS = [
@@ -129,7 +129,7 @@ self.addEventListener("push", event => {
   const options = {
     body: data.body || "زاد المسلم",
     icon: "./icon/icon-192.png", // تم التوحيد مع مسار index.html
-    badge: "./icon/icon-96.png",
+    badge: "./icon/icon-192.png",
     vibrate: [200, 100, 200],
     tag: data.tag || "zad-muslim",
     renotify: true,
@@ -175,4 +175,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v6 loaded");
+console.log("✅ Service Worker v7 loaded");
