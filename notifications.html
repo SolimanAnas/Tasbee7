@@ -372,10 +372,14 @@
       document.getElementById('toggleQuiet').checked = s.quietHours;
       document.getElementById('toggleStreak').checked = s.streakReminders;
       
-      // Location
-      const city = localStorage.getItem('userCity') || 'غير محدد';
-      const country = localStorage.getItem('userCountry') || '';
-      document.getElementById('locationInfo').textContent = `${city}${country ? '، ' + country : ''}`;
+      // FIX: Use current_location_name (stored by index.html GPS/city flow)
+      // Fall back to userCity/userCountry if available
+      const locationName = localStorage.getItem('current_location_name')
+                        || localStorage.getItem('userCity')
+                        || 'غير محدد';
+      const country = (!localStorage.getItem('current_location_name') && localStorage.getItem('userCountry'))
+                        ? '، ' + localStorage.getItem('userCountry') : '';
+      document.getElementById('locationInfo').textContent = locationName + country;
       
       // Prayer times list
       const timesList = document.getElementById('timesList');
@@ -407,12 +411,20 @@
     }
 
     async function refreshLocation() {
-      if(typeof NotificationSystem !== 'undefined') {
-        localStorage.removeItem('userCity');
-        await NotificationSystem.initAutoPrayerTimes();
-        updateUI();
-        alert('تم تحديث موقعك بنجاح ✅');
-      }
+      if(typeof NotificationSystem === 'undefined') return;
+      // FIX: Clear all location keys (index.html uses prayer_lat/lng, notifications.js uses userCity)
+      localStorage.removeItem('userCity');
+      localStorage.removeItem('userCountry');
+      localStorage.removeItem('prayer_lat');
+      localStorage.removeItem('prayer_lng');
+      localStorage.removeItem('current_location_name');
+      // Temporarily enable autoLocation so initAutoPrayerTimes can run
+      const prevAutoLocation = NotificationSystem.settings.autoLocation;
+      NotificationSystem.settings.autoLocation = true;
+      await NotificationSystem.initAutoPrayerTimes();
+      NotificationSystem.settings.autoLocation = prevAutoLocation;
+      updateUI();
+      alert('تم تحديث موقعك بنجاح ✅');
     }
 
     function showManualTimes() {

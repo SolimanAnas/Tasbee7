@@ -891,17 +891,10 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(reg => {
         console.log('SW registered');
-        // طلب الصلاحية إذا كانت غير محددة
-        if (Notification.permission === 'default') {
-           Notification.requestPermission().then(permission => {
-             // إذا وافق المستخدم، نفعل الـ Push
-             if(permission === 'granted') {
-               enablePush();
-             }
-           });
-        } else if (Notification.permission === 'granted') {
-           // إذا كان موافقاً مسبقاً، نفعل الـ Push بصمت
-           enablePush();
+        // FIX: Permission request is handled by notifications.js to avoid double prompts.
+        // Only call enablePush() here if permission is already granted.
+        if (Notification.permission === 'granted') {
+          enablePush();
         }
       })
       .catch(e => console.log('SW error', e));
