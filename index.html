@@ -467,7 +467,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <div class="fc-text">اتجاه القبلة</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('duaa.html')">
-      <div class="fc-icon-wrap"><div class="icon-mask" style="-webkit-mask-image:url('icons/duaa.png'); mask-image:url('icons/duaa.png');"></div></div>
+      <div class="fc-icon-wrap"><div class="icon-mask" style="-webkit-mask-image:url('icon/duaa.png'); mask-image:url('icon/duaa.png');"></div></div>
       <div class="fc-text">بستان الدعاء</div>
     </div>
   </div>
@@ -486,7 +486,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
     <span class="nav-label">إنجازاتي</span>
   </div>
   <div class="nav-item" onclick="openSettingsSheet()">
-    <div class="icon-mask" style="-webkit-mask-image:url('icons/settings.svg'); mask-image:url('icons/settings.svg');"></div>
+    <div class="icon-mask" style="-webkit-mask-image:url('icon/settings.svg'); mask-image:url('icon/settings.svg');"></div>
     <span class="nav-label">الإعدادات</span>
   </div>
 </nav>
@@ -725,7 +725,6 @@ function startGPS() {
       refreshPrayerTimes();
       btn.innerText = "تم التحديد بنجاح!";
       
-      // Notify NotificationSystem about the update
       if (typeof NotificationSystem !== 'undefined') {
          NotificationSystem.refreshPrayerTimes();
       }
@@ -754,7 +753,6 @@ function saveCity() {
     localStorage.setItem('current_location_name', exact);
     refreshPrayerTimes();
 
-    // Notify NotificationSystem about the update
     if (typeof NotificationSystem !== 'undefined') {
        NotificationSystem.refreshPrayerTimes();
     }
@@ -831,6 +829,48 @@ function updateStats() {
   document.getElementById('statStreak').innerText  = streak;
 }
 
+// ======================== PUSH NOTIFICATION SETUP ========================
+async function enablePush() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    
+    // تأكد من أن محرك الإشعارات جاهز ويحتوي على رابط السيرفر
+    if (!NotificationSystem || !NotificationSystem.config || !NotificationSystem.config.serverUrl) {
+      console.warn("إعدادات سيرفر الـ Push غير متوفرة بعد.");
+      return;
+    }
+
+    // تحقق مما إذا كان المستخدم مسجلاً بالفعل لتجنب الاتصال بالسيرفر كل مرة
+    const existingSub = await reg.pushManager.getSubscription();
+    if (existingSub) {
+      console.log("المستخدم مسجل بالفعل في الإشعارات (Push).");
+      return;
+    }
+
+    // جلب المفتاح العام من السيرفر
+    const res = await fetch(`${NotificationSystem.config.serverUrl}/vapidPublicKey`);
+    if (!res.ok) throw new Error("تعذر جلب مفتاح VAPID من السيرفر");
+    const vapidKey = await res.text();
+
+    // تسجيل المستخدم في مدير الإشعارات
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: vapidKey
+    });
+
+    // إرسال بيانات الاشتراك إلى السيرفر الخاص بك
+    await fetch(`${NotificationSystem.config.serverUrl}/subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sub)
+    });
+
+    console.log("✅ PUSH ENABLED - تم تفعيل الإشعارات بنجاح");
+  } catch (err) {
+    console.warn("⚠️ PUSH ENABLE FAILED (قد يكون السيرفر مغلقاً حالياً):", err.message);
+  }
+}
+
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('themeMode');
   if(!saved) autoTheme(); else setTheme(saved);
@@ -851,8 +891,17 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(reg => {
         console.log('SW registered');
+        // طلب الصلاحية إذا كانت غير محددة
         if (Notification.permission === 'default') {
-           Notification.requestPermission();
+           Notification.requestPermission().then(permission => {
+             // إذا وافق المستخدم، نفعل الـ Push
+             if(permission === 'granted') {
+               enablePush();
+             }
+           });
+        } else if (Notification.permission === 'granted') {
+           // إذا كان موافقاً مسبقاً، نفعل الـ Push بصمت
+           enablePush();
         }
       })
       .catch(e => console.log('SW error', e));
