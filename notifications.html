@@ -344,36 +344,62 @@
     // App logic
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
+      
+      // ✅ FIX: فرض القيم الافتراضية (True) لأي إعداد غير موجود مسبقاً
+      if (typeof NotificationSystem !== 'undefined') {
+        let settingsChanged = false;
+        const defaultKeys = ['enabled', 'azkarMorning', 'azkarEvening', 'fridayKahf', 'preReminders', 'autoLocation', 'quietHours', 'streakReminders'];
+        
+        defaultKeys.forEach(key => {
+          if (NotificationSystem.settings[key] === undefined || NotificationSystem.settings[key] === null) {
+            NotificationSystem.settings[key] = true;
+            settingsChanged = true;
+          }
+        });
+
+        // حفظ الإعدادات إذا تم إضافة القيم الافتراضية
+        if (settingsChanged) {
+          if (typeof NotificationSystem.saveSettings === 'function') {
+            NotificationSystem.saveSettings();
+          } else {
+            localStorage.setItem('notificationSettings', JSON.stringify(NotificationSystem.settings));
+          }
+        }
+      }
+
       updateUI();
     });
 
     function updateUI() {
       if(typeof NotificationSystem === 'undefined') return;
 
-      const s = NotificationSystem.settings;
-      const state = NotificationSystem.state;
-      const times = NotificationSystem.prayerTimes;
+      const s = NotificationSystem.settings || {};
+      const state = NotificationSystem.state || {};
+      const times = NotificationSystem.prayerTimes || {};
+      
+      // دالة مساعدة تجلب القيمة وتفترض True إذا لم تكن موجودة لتجنب إغلاق الأزرار
+      const getVal = (key) => s[key] !== undefined ? s[key] : true;
       
       // Status
-      document.getElementById('statusText').textContent = s.enabled ? 'الإشعارات مفعلة' : 'الإشعارات متوقفة';
-      document.getElementById('statusDot').className = s.enabled ? 'status-dot active' : 'status-dot inactive';
+      const isEnabled = getVal('enabled');
+      document.getElementById('statusText').textContent = isEnabled ? 'الإشعارات مفعلة' : 'الإشعارات متوقفة';
+      document.getElementById('statusDot').className = isEnabled ? 'status-dot active' : 'status-dot inactive';
       
       // Streak
       document.getElementById('streakCount').textContent = state.streak || 0;
       document.getElementById('bigStreak').textContent = state.streak || 0;
       
-      // Settings toggles
-      document.getElementById('toggleEnabled').checked = s.enabled;
-      document.getElementById('toggleMorning').checked = s.azkarMorning;
-      document.getElementById('toggleEvening').checked = s.azkarEvening;
-      document.getElementById('toggleFriday').checked = s.fridayKahf;
-      document.getElementById('togglePreReminders').checked = s.preReminders;
-      document.getElementById('toggleAutoLocation').checked = s.autoLocation;
-      document.getElementById('toggleQuiet').checked = s.quietHours;
-      document.getElementById('toggleStreak').checked = s.streakReminders;
+      // Settings toggles (سيتم تفعيلها افتراضياً إذا كانت undefined)
+      document.getElementById('toggleEnabled').checked = isEnabled;
+      document.getElementById('toggleMorning').checked = getVal('azkarMorning');
+      document.getElementById('toggleEvening').checked = getVal('azkarEvening');
+      document.getElementById('toggleFriday').checked = getVal('fridayKahf');
+      document.getElementById('togglePreReminders').checked = getVal('preReminders');
+      document.getElementById('toggleAutoLocation').checked = getVal('autoLocation');
+      document.getElementById('toggleQuiet').checked = getVal('quietHours');
+      document.getElementById('toggleStreak').checked = getVal('streakReminders');
       
-      // FIX: Use current_location_name (stored by index.html GPS/city flow)
-      // Fall back to userCity/userCountry if available
+      // Location
       const locationName = localStorage.getItem('current_location_name')
                         || localStorage.getItem('userCity')
                         || 'غير محدد';
@@ -412,17 +438,17 @@
 
     async function refreshLocation() {
       if(typeof NotificationSystem === 'undefined') return;
-      // FIX: Clear all location keys (index.html uses prayer_lat/lng, notifications.js uses userCity)
       localStorage.removeItem('userCity');
       localStorage.removeItem('userCountry');
       localStorage.removeItem('prayer_lat');
       localStorage.removeItem('prayer_lng');
       localStorage.removeItem('current_location_name');
-      // Temporarily enable autoLocation so initAutoPrayerTimes can run
+      
       const prevAutoLocation = NotificationSystem.settings.autoLocation;
       NotificationSystem.settings.autoLocation = true;
       await NotificationSystem.initAutoPrayerTimes();
       NotificationSystem.settings.autoLocation = prevAutoLocation;
+      
       updateUI();
       alert('تم تحديث موقعك بنجاح ✅');
     }
