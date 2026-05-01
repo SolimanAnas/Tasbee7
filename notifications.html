@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>الإشعارات الذكية - زاد المسلم</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --- THEME VARIABLES --- */
+    :root {
+      --bg-image: url('images/Background-light.png');
+      --bg-surface: #F8FAFC;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --text-primary: #0F172A;
+      --text-secondary: #64748b;
+      --accent-main: #10B981;
+      --accent-muted: rgba(16, 185, 129, 0.15);
+      --glass-border: rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    [data-theme="dark"] {
+      --bg-image: url('images/Background-dark.png');
+      --bg-surface: #0F172A;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --accent-main: #10B981;
+      --accent-muted: rgba(16, 185, 129, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      font-family: 'Tajawal', sans-serif; 
+      background-color: var(--bg-surface); 
+      background-image: var(--bg-image);
+      background-size: cover;
+      background-attachment: fixed;
+      color: var(--text-primary); 
+      padding-bottom: 80px; 
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: calc(15px + env(safe-area-inset-top)) 20px 15px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      margin-bottom: 20px;
+    }
+
+    .top-bar h1 { font-size: 1.2rem; margin: 0; font-weight: 800; color: var(--text-primary); }
+    .icon-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: var(--accent-muted); }
+    .icon-btn:active { transform: scale(0.9); }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 0 16px; }
+    
+    .subtitle { text-align: center; margin-bottom: 20px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; }
+    
+    /* Status & Streak */
+    .status-bar { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); padding: 14px 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; margin-left: 10px; box-shadow: 0 0 8px currentColor; }
+    .status-dot.active { background: #10B981; color: #10B981; }
+    .status-dot.inactive { background: #EF4444; color: #EF4444; }
+    .status-text-wrap { display: flex; align-items: center; font-weight: bold; font-size: 1rem; }
+    
+    .streak-display { display: flex; align-items: center; justify-content: space-between; padding: 20px; background: linear-gradient(135deg, var(--accent-main), #059669); border-radius: 16px; margin-bottom: 20px; color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+    .streak-number { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .streak-label { color: rgba(255,255,255,0.9); font-size: 0.9rem; font-weight: 500; }
+    .streak-icon { font-size: 3rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+    
+    /* Cards */
+    .card { background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+    .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; }
+    .card-icon { font-size: 1.5rem; background: var(--accent-muted); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .card h2 { font-size: 1.1rem; margin: 0; font-weight: 700; color: var(--text-primary); }
+    .card p { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+    
+    /* Toggles */
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-label { display: flex; flex-direction: column; flex: 1; padding-left: 15px; }
+    .toggle-label span { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+    .toggle-label small { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+    
+    /* Custom Switch */
+    .switch { position: relative; width: 50px; height: 28px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(128,128,128,0.3); border-radius: 34px; transition: .3s; }
+    .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    input:checked + .slider { background: var(--accent-main); }
+    input:checked + .slider:before { transform: translateX(22px); }
+    
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 0.95rem; border-bottom: 1px dashed var(--glass-border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text-secondary); font-weight: 600;}
+    .info-value { font-weight: 800; color: var(--accent-main); font-family: monospace; font-size: 1.1rem; }
+    
+    /* Buttons */
+    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+    .btn { flex: 1; padding: 14px; border: none; border-radius: 12px; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary { background: var(--accent-main); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .btn-secondary { background: var(--accent-muted); color: var(--accent-main); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .btn:active { transform: scale(0.96); }
+    
+    .location-card { background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; }
+    .location-card h2, .location-card p { color: white; }
+    .location-card .card-icon { background: rgba(255,255,255,0.2); }
+    .location-card .toggle-row { border-color: rgba(255,255,255,0.1); }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header class="top-bar">
+    <button class="icon-btn" onclick="window.location.href='index.html'" title="الرئيسية">🏠</button>
+    <h1>الإشعارات الذكية</h1>
+    <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تغيير المظهر">🌙</button>
+  </header>
+
+  <div class="container">
+    <p class="subtitle">تحكم كامل في تنبيهاتك وعباداتك اليومية</p>
+    
+    <div class="status-bar">
+      <div class="status-text-wrap">
+        <div class="status-dot active" id="statusDot"></div>
+        <span id="statusText">نظام الإشعارات نشط</span>
+      </div>
+      <span style="font-size:0.85rem; color:var(--text-secondary); font-weight: bold;">
+        الاستمرارية: <strong id="streakCount" style="color:var(--accent-main); font-size:1rem;">0</strong> يوم
+      </span>
+    </div>
+    
+    <div class="streak-display">
+      <div>
+        <div class="streak-number" id="bigStreak">0</div>
+        <div class="streak-label">يوم متتالي من العبادة</div>
+      </div>
+      <div class="streak-icon">🔥</div>
+    </div>
+    
+    <div class="card location-card">
+      <div class="card-header">
+        <span class="card-icon">📍</span>
+        <div>
+          <h2>الموقع الجغرافي (تلقائي)</h2>
+          <p id="locationInfo">جاري تحديد الموقع...</p>
+        </div>
+      </div>
+      <button class="btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="refreshLocation()">
+        🔄 تحديث الموقع الآن
+      </button>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🕌</span>
+        <div>
+          <h2>أوقات الصلاة</h2>
+          <p>جلب المواقيت تلقائياً حسب مدينتك</p>
+        </div>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>تفعيل التنبيهات الأساسية</span>
+          <small>السماح للتطبيق بإرسال إشعارات الصلوات والأذكار</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleEnabled" onchange="toggleSetting('enabled', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>تذكير مسبق للصلاة</span>
+          <small>تنبيه قبل دخول وقت الصلاة بـ 10 دقائق لتستعد</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="togglePreReminders" onchange="toggleSetting('preReminders', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>الضبط التلقائي للموقع</span>
+          <small>الاعتماد على إحداثياتك لتحديد المواقيت بدقة</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleAutoLocation" onchange="toggleSetting('autoLocation', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="refreshTimes()">🔄 تحديث الأوقات</button>
+        <button class="btn btn-secondary" onclick="showManualTimes()">⚙️ ضبط يدوي</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📿</span>
+        <div>
+          <h2>الأذكار اليومية</h2>
+          <p>تنبيهات أذكار الصباح والمساء</p>
+        </div>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>تذكير أذكار الصباح</span>
+          <small>بين الساعة 4 و 8 صباحاً</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleMorning" onchange="toggleSetting('azkarMorning', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>تذكير أذكار المساء</span>
+          <small>بين الساعة 3 و 6 مساءً</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleEvening" onchange="toggleSetting('azkarEvening', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>الرسائل التحفيزية</span>
+          <small>تشجيع يومي للحفاظ على الاستمرارية (الستريك)</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleStreak" onchange="toggleSetting('streakReminders', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🕋</span>
+        <div>
+          <h2>المناسبات الخاصة</h2>
+          <p>يوم الجمعة وشهر رمضان المبارك</p>
+        </div>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>سورة الكهف - الجمعة</span>
+          <small>تذكير أسبوعي بقراءة السورة يوم الجمعة</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleFriday" onchange="toggleSetting('fridayKahf', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🌙</span>
+        <div>
+          <h2>ساعات الهدوء</h2>
+          <p>نوم هادئ وبدون إزعاج</p>
+        </div>
+      </div>
+      
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <span>تفعيل وضع السكون</span>
+          <small>إيقاف الإشعارات مؤقتاً من 11 مساءً حتى 5 صباحاً</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleQuiet" onchange="toggleSetting('quietHours', this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">⏱️</span>
+        <div>
+          <h2>مواقيت الصلاة الحالية</h2>
+          <p>بناءً على موقعك الجغرافي المسجل</p>
+        </div>
+      </div>
+      <div id="timesList" style="margin-top: 10px;"></div>
+    </div>
+    
+    <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="testNotification()">
+      🧪 إرسال إشعار تجريبي الآن
+    </button>
+  </div>
+  
+  <script src="js/notifications.js"></script>
+  <script>
+    // Theme logic
+    function initTheme() {
+      const savedTheme = localStorage.getItem('themeMode') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('themeMode', newTheme);
+      updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if(theme === 'dark') {
+        themeBtn.innerText = '☀️';
+      } else {
+        themeBtn.innerText = '🌙';
+      }
+    }
+
+    // App logic
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      updateUI();
+    });
+
+    function updateUI() {
+      if(typeof NotificationSystem === 'undefined') return;
+
+      const s = NotificationSystem.settings;
+      const state = NotificationSystem.state;
+      const times = NotificationSystem.prayerTimes;
+      
+      // Status
+      document.getElementById('statusText').textContent = s.enabled ? 'الإشعارات مفعلة' : 'الإشعارات متوقفة';
+      document.getElementById('statusDot').className = s.enabled ? 'status-dot active' : 'status-dot inactive';
+      
+      // Streak
+      document.getElementById('streakCount').textContent = state.streak || 0;
+      document.getElementById('bigStreak').textContent = state.streak || 0;
+      
+      // Settings toggles
+      document.getElementById('toggleEnabled').checked = s.enabled;
+      document.getElementById('toggleMorning').checked = s.azkarMorning;
+      document.getElementById('toggleEvening').checked = s.azkarEvening;
+      document.getElementById('toggleFriday').checked = s.fridayKahf;
+      document.getElementById('togglePreReminders').checked = s.preReminders;
+      document.getElementById('toggleAutoLocation').checked = s.autoLocation;
+      document.getElementById('toggleQuiet').checked = s.quietHours;
+      document.getElementById('toggleStreak').checked = s.streakReminders;
+      
+      // Location
+      const city = localStorage.getItem('userCity') || 'غير محدد';
+      const country = localStorage.getItem('userCountry') || '';
+      document.getElementById('locationInfo').textContent = `${city}${country ? '، ' + country : ''}`;
+      
+      // Prayer times list
+      const timesList = document.getElementById('timesList');
+      if (times && Object.keys(times).length > 0) {
+        timesList.innerHTML = Object.entries(times).map(([key, prayer]) => `
+          <div class="info-row">
+            <span class="info-label">${prayer.name}</span>
+            <span class="info-value">${String(prayer.hour).padStart(2, '0')}:${String(prayer.minute).padStart(2, '0')}</span>
+          </div>
+        `).join('');
+      } else {
+        timesList.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 10px;">جاري تحميل المواقيت...</div>';
+      }
+    }
+
+    function toggleSetting(key, value) {
+      if(typeof NotificationSystem !== 'undefined') {
+        NotificationSystem.toggleSetting(key, value);
+        updateUI();
+      }
+    }
+
+    async function refreshTimes() {
+      if(typeof NotificationSystem !== 'undefined') {
+        await NotificationSystem.refreshPrayerTimes();
+        updateUI();
+        alert('تم تحديث أوقات الصلاة بنجاح ✅');
+      }
+    }
+
+    async function refreshLocation() {
+      if(typeof NotificationSystem !== 'undefined') {
+        localStorage.removeItem('userCity');
+        await NotificationSystem.initAutoPrayerTimes();
+        updateUI();
+        alert('تم تحديث موقعك بنجاح ✅');
+      }
+    }
+
+    function showManualTimes() {
+      alert('ميزة الضبط اليدوي قيد التطوير وسيتم توفيرها قريباً ⏳');
+    }
+
+    function testNotification() {
+      if(typeof NotificationSystem !== 'undefined') {
+        NotificationSystem.showNotification('🔔 اختبار الإشعارات', {
+          body: 'نظام الإشعارات الذكي يعمل بكفاءة! استمر في وردك ✅',
+          tag: 'test',
+          data: { url: './index.html', type: 'test' }
+        });
+      }
+    }
+  </script>
+</body>
+</html>

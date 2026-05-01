@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v4"; // تم رفع الإصدار
+const CACHE_NAME = "zad-muslim-v5"; // تم رفع الإصدار لتحديث الكاش القديم
 
 const STATIC_ASSETS = [
   "./",
@@ -13,110 +13,127 @@ const STATIC_ASSETS = [
   "./duaa.html",
   "./hadith.html",
   "./qibla.html",
+  "./notifications.html",
   "./manifest.json",
   "./css/style.css",
-  "./js/quran-common.js",
-  "./data/cities.js",
-  "./data/adhan.js",
-  "./assets/azkar.json",
-  "./assets/azan.mp3"
+  "./js/notifications.js",
+  "./js/quran-common.js"
 ];
 
-/* INSTALL */
-self.addEventListener("install", event => {
-  self.skipWaiting(); // تفعيل السيرفيس وركر الجديد فوراً
+const DEEP_LINKS = {
+  prayer: "./quran.html",
+  azkar: "./azkar.html",
+  kahf: "./quran.html?surah=18",
+  masbaha: "./masbaha.html",
+  hisn: "./hisn.html",
+  radio: "./radio.html",
+  default: "./index.html"
+};
 
+self.addEventListener("install", event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log("Caching static assets...");
-      
-      // استخدام { cache: 'no-store' } يمنع المتصفح من تسليم نسخ قديمة من كاش المتصفح العادي
-      // ويجبره على تحميل النسخ الأحدث من السيرفر مباشرة لتخزينها في السيرفيس وركر
-      return Promise.all(
-        STATIC_ASSETS.map(url => {
-          return fetch(url, { cache: 'no-store' })
-            .then(response => {
-              if (!response.ok) throw new Error(`Failed to fetch ${url}`);
-              return cache.put(url, response);
-            })
-            .catch(err => console.error(`تحذير: فشل تخزين ${url}`, err));
-        })
-      );
+      return cache.addAll(STATIC_ASSETS).catch(err => {
+        console.error("Cache warning:", err);
+      });
     })
   );
 });
 
-/* ACTIVATE */
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys
-          // ⚠️ استثناء كاش الصور والملفات الصوتية المحملة أوفلاين
-          .filter(key => key !== CACHE_NAME && !key.startsWith("quran-offline"))
+        keys.filter(key => key !== CACHE_NAME && !key.startsWith("quran-offline"))
           .map(key => caches.delete(key))
       )
     )
   );
-
-  return self.clients.claim(); // السيطرة على الصفحات المفتوحة فوراً
+  return self.clients.claim();
 });
 
-/* FETCH */
 self.addEventListener("fetch", event => {
   const req = event.request;
-
-  /* Ignore non-GET */
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
 
-  /* تجاهل البث الإذاعي والملفات الصوتية لعدم تكييشها في الكاش الأساسي */
-  if (
-    url.hostname.includes("mp3quran") ||
-    url.hostname.includes("archive.org") ||
-    url.hostname.includes("radiojar") ||
-    url.pathname.endsWith(".mp3") ||
-    url.pathname.endsWith(".m3u8")
-  ) {
+  if (url.hostname.includes("mp3quran") || url.hostname.includes("archive.org") ||
+      url.hostname.includes("radiojar") || url.pathname.endsWith(".mp3") ||
+      url.pathname.endsWith(".m3u8")) {
     return;
   }
 
-  /* 1. HTML → Network First (لجلب التحديثات فوراً) */
-  // استخدمنا req.mode === 'navigate' كشرط أكثر دقة لالتقاط تنقلات الصفحات
-  if (req.mode === "navigate" || req.headers.get("accept").includes("text/html")) {
+  if (req.headers.get("accept").includes("text/html")) {
     event.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
-          return res;
-        })
-        .catch(() => {
-          // في حال انقطاع الإنترنت، جلب الصفحة المكيشة
-          return caches.match(req).then(cachedRes => {
-            return cachedRes || caches.match("./index.html"); 
-          });
-        })
+      fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+        return res;
+      }).catch(() => {
+        // تم إضافة الأقواس الناقصة وخاصية ignoreSearch لضمان عمل الروابط العميقة أوفلاين
+        return caches.match(req, { ignoreSearch: true }).then(cachedRes => 
+          cachedRes || caches.match("./index.html", { ignoreSearch: true })
+        );
+      })
     );
     return;
   }
 
-  /* 2. Static files → Stale-While-Revalidate (السر في التحديثات السلسة) */
   event.respondWith(
-    caches.match(req).then(cachedRes => {
-      // إطلاق طلب جلب صامت في الخلفية لتحديث الملفات في الكاش
-      const fetchPromise = fetch(req).then(networkRes => {
-        if (networkRes && networkRes.status === 200 && networkRes.type === 'basic') {
+    caches.match(req).then(cacheRes => cacheRes ||
+      fetch(req).then(networkRes => {
+        if (networkRes && networkRes.status === 200 && networkRes.type === "basic") {
           const copy = networkRes.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
         return networkRes;
-      }).catch(err => console.log("Offline fetch fallback:", req.url));
+      }).catch(err => console.log("Offline:", req.url))
+    )
+  );
+});
 
-      // إذا كان الملف موجوداً في الكاش، اعرضه فوراً (أداء صاروخي)
-      // في نفس الوقت، سيتم تحديث الكاش في الخلفية عبر fetchPromise للمرة القادمة
-      return cachedRes || fetchPromise;
+self.addEventListener("push", event => {
+  const data = event.data ? event.data.json() : {};
+  
+  const options = {
+    body: data.body || "زاد المسلم - تذكير",
+    icon: "./img/icon-192.png", // تأكد من المسار حسب مجلداتك
+    badge: "./img/icon-96.png",
+    vibrate: [200, 100, 200],
+    tag: data.tag || "zad-muslim",
+    renotify: true,
+    data: { 
+      url: data.url || DEEP_LINKS[data.type] || DEEP_LINKS.default,
+      type: data.type || "default"
+    },
+    actions: [
+      { action: "open", title: "فتح" },
+      { action: "dismiss", title: "إغلاق" }
+    ]
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title || "🔔 Zad Al-Muslim", options));
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  
+  if (event.action === "dismiss") return;
+  
+  const targetUrl = event.notification.data?.url || DEEP_LINKS.default;
+  // تحويل الرابط إلى رابط كامل لسهولة العثور على التبويبة المفتوحة
+  const fullTargetUrl = new URL(targetUrl, self.location.origin).href;
+  
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if (client.url === fullTargetUrl || client.url.includes(targetUrl.replace('./', ''))) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(fullTargetUrl);
     })
   );
 });
