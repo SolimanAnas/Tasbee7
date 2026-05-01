@@ -136,7 +136,6 @@ input, textarea, select {
 .top-bar {
   display: flex; justify-content: space-between; align-items: flex-end;
   padding: calc(env(safe-area-inset-top) + 20px) var(--spacing-md) 10px;
-  /* تم إزالة position: sticky ليختفي عند النزول */
   position: relative;
   background: transparent;
 }
@@ -146,7 +145,7 @@ input, textarea, select {
   color: var(--on-base);
   line-height: 1;
   text-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin: 0 auto; /* توسيط العنوان */
+  margin: 0 auto;
 }
 
 /* ======================== PRAYER WIDGET ======================== */
@@ -242,20 +241,16 @@ input, textarea, select {
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   cursor: pointer;
-  
-  /* الأسطر المصححة لترتيب الأيقونة والنص بجانب بعضهما */
   display: flex; 
-  flex-direction: row; /* عرض كصف (جنباً إلى جنب) */
-  align-items: center; /* توسيط عمودي للأيقونة مع النص */
-  justify-content: flex-start; /* البدء من اليمين */
-  
+  flex-direction: row; 
+  align-items: center; 
+  justify-content: flex-start; 
   gap: 12px;
   transition: transform var(--ease-smooth), background var(--ease-smooth);
 }
  
 .feature-card:active { transform: scale(0.96); background: var(--surface-raised); }
 
-/* توحيد الألوان: خلفية خضراء وأيقونة بيضاء للجميع */
 .fc-icon-wrap {
   width: 40px; height: 40px;
   border-radius: var(--radius-sm);
@@ -263,7 +258,7 @@ input, textarea, select {
   background: var(--primary) !important;
   color: #ffffff !important;
 }
-.fc-icon-wrap svg { width: 20px; height: 20px; stroke-width: ; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fc-icon-wrap svg { width: 20px; height: 20px; stroke-width: 2; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
 .icon-mask {
   width: 22px; height: 22px;
@@ -283,11 +278,9 @@ input, textarea, select {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
-  
   display: flex;
   align-items: center;
-  justify-content: space-evenly; /* توزيع المسافات بالتساوي بدلاً من دفعها للأطراف */
-  
+  justify-content: space-evenly;
   height: 70px;
   z-index: 40;
 }
@@ -300,29 +293,17 @@ input, textarea, select {
   text-align: center;
   gap: 4px;
   height: 100%;
-  
   width: 75px;
-  /* عرض ثابت بدلاً من flex: 1 لفرض التمركز */
-  
   color: var(--on-surface-variant);
   cursor: pointer;
   transition: color var(--ease-smooth);
 }
-  .nav-item svg {
-  width: 24px;
-  height: 24px;
-  display: block;
-}
+.nav-item svg { width: 24px; height: 24px; display: block; }
 .nav-item.active { color: var(--primary); }
-.nav-item svg,
-.nav-item .icon-mask {
-  width: 24px;
-  height: 24px;
-  stroke-width: 2;
-  stroke: currentColor;
-  fill: none;
-  display: block;
-  margin: 0 auto;
+.nav-item svg, .nav-item .icon-mask {
+  width: 24px; height: 24px;
+  stroke-width: 2; stroke: currentColor; fill: none;
+  display: block; margin: 0 auto;
 }
 .nav-item.active svg { fill: currentColor; stroke: none; }
 .nav-item.active .icon-mask { background-color: var(--primary); }
@@ -418,22 +399,17 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
     <div class="feature-card glass-panel" onclick="go('azkar.html?type=morning')">
       <div class="fc-icon-wrap">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="5"></circle>
-  
-  <!-- Top / Bottom -->
-  <line x1="12" y1="1" x2="12" y2="3"></line>
-  <line x1="12" y1="21" x2="12" y2="23"></line>
-  
-  <!-- Left / Right -->
-  <line x1="1" y1="12" x2="3" y2="12"></line>
-  <line x1="21" y1="12" x2="23" y2="12"></line>
-  
-  <!-- Diagonals -->
-  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-</svg></div>
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+       </svg>
+      </div>
       <div class="fc-text">أذكار الصباح</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('azkar.html?type=night')">
@@ -445,68 +421,42 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <div class="fc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
       <div class="fc-text">الاستماع للقرآن</div>
     </div>
-  <div class="feature-card glass-panel" onclick="go('radio.html')">
-  
-  <div class="fc-icon-wrap">
-    <svg viewBox="0 0 200 200" width="100%" height="100%" fill="none"
-         stroke="currentColor" stroke-width="10"
-         stroke-linecap="round" stroke-linejoin="round">
-
-      <!-- Antenna -->
-      <path d="M140 60 L90 20"/>
-
-      <!-- Radio body -->
-      <rect x="20" y="60" width="160" height="115" rx="20"/>
-
-      <!-- Lines (speaker/text) -->
-      <path d="M50 92 L85 92"/>
-      <path d="M50 117.5 L85 117.5"/>
-      <path d="M50 143 L85 143"/>
-
-      <!-- Dial -->
-      <circle cx="140" cy="117.5" r="22"/>
-
-    </svg>
-  </div>
-
-  <div class="fc-text">إذاعة القرآن</div>
-
-</div>
+    <div class="feature-card glass-panel" onclick="go('radio.html')">
+      <div class="fc-icon-wrap">
+        <svg viewBox="0 0 200 200" width="100%" height="100%" fill="none"
+             stroke="currentColor" stroke-width="10"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M140 60 L90 20"/>
+          <rect x="20" y="60" width="160" height="115" rx="20"/>
+          <path d="M50 92 L85 92"/>
+          <path d="M50 117.5 L85 117.5"/>
+          <path d="M50 143 L85 143"/>
+          <circle cx="140" cy="117.5" r="22"/>
+        </svg>
+      </div>
+      <div class="fc-text">إذاعة القرآن</div>
+    </div>
 
     <div class="feature-card glass-panel" onclick="go('masbaha.html')">
-  
-  <div class="fc-icon-wrap">
-    <svg viewBox="0 0 200 200" width="100%" height="100%" fill="none"
-         stroke="currentColor" stroke-width="10"
-         stroke-linecap="round" stroke-linejoin="round">
-
-      <!-- Body -->
-      <path d="M65 20 L135 20 A35 35 0 0 1 170 55 L170 85 
-               C170 120 150 130 140 155 
-               A40 40 0 0 1 60 155 
-               C50 130 30 120 30 85 
-               L30 55 
-               A35 35 0 0 1 65 20 Z"/>
-
-      <!-- Inner panel -->
-      <rect x="46" y="44" width="108" height="48" rx="10"/>
-
-      <!-- Buttons -->
-      <rect x="63" y="58" width="6" height="20" rx="3"/>
-      <rect x="131" y="58" width="6" height="20" rx="3"/>
-
-      <!-- Main bead -->
-      <circle cx="100" cy="155" r="16"/>
-
-      <!-- Small detail -->
-      <circle cx="140" cy="115" r="2"/>
-
-    </svg>
-  </div>
-
-  <div class="fc-text">المسبحة</div>
-
-</div>
+      <div class="fc-icon-wrap">
+        <svg viewBox="0 0 200 200" width="100%" height="100%" fill="none"
+             stroke="currentColor" stroke-width="10"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M65 20 L135 20 A35 35 0 0 1 170 55 L170 85 
+                   C170 120 150 130 140 155 
+                   A40 40 0 0 1 60 155 
+                   C50 130 30 120 30 85 
+                   L30 55 
+                   A35 35 0 0 1 65 20 Z"/>
+          <rect x="46" y="44" width="108" height="48" rx="10"/>
+          <rect x="63" y="58" width="6" height="20" rx="3"/>
+          <rect x="131" y="58" width="6" height="20" rx="3"/>
+          <circle cx="100" cy="155" r="16"/>
+          <circle cx="140" cy="115" r="2"/>
+        </svg>
+      </div>
+      <div class="fc-text">المسبحة</div>
+    </div>
     <div class="feature-card glass-panel" onclick="go('hisn.html')">
       <div class="fc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
       <div class="fc-text">حصن المسلم</div>
@@ -552,20 +502,20 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <button class="theme-btn active" id="t-dark" onclick="setTheme('dark')">داكن</button>
       <button class="theme-btn" id="t-plain" onclick="setTheme('plain-dark')">أسود OLED</button>
     </div>
-    <div class="setting-item" onclick="toggleNotification('azan')">
+
+    <div class="setting-item" onclick="go('notifications.html'); closeAllSheets();">
       <div class="setting-info">
-        <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div class="s-text"><div class="s-title">تنبيهات الأذان</div><div class="s-desc">إشعار صامت عند كل صلاة</div></div>
+        <div class="s-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </div>
+        <div class="s-text">
+          <div class="s-title">الإشعارات الذكية</div>
+          <div class="s-desc">إدارة تنبيهات الأذان والأذكار</div>
+        </div>
       </div>
-      <div class="switch" id="azanToggle"></div>
+      <div class="setting-control"><span style="font-size:1.5rem; color:var(--on-surface-variant);">›</span></div>
     </div>
-    <div class="setting-item" onclick="toggleAzanAudio()">
-      <div class="setting-info">
-        <div class="s-icon"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
-        <div class="s-text"><div class="s-title">صوت الأذان</div><div class="s-desc">تشغيل الأذان داخل التطبيق</div></div>
-      </div>
-      <div class="switch" id="azanAudioToggle"></div>
-    </div>
+
     <div class="setting-item">
       <div class="setting-info">
         <div class="s-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg></div>
@@ -580,7 +530,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       </div>
     </div>
     
-        <div class="setting-item" onclick="go('howto.html'); closeAllSheets();">
+    <div class="setting-item" onclick="go('howto.html'); closeAllSheets();">
       <div class="setting-info">
         <div class="s-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
@@ -607,15 +557,6 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
         </div>
         <div class="s-text"><div class="s-title">عن التطبيق</div></div>
-      </div>
-    </div>
-
-    <div class="setting-item" onclick="go('test.html'); closeAllSheets();">
-      <div class="setting-info">
-        <div class="s-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-        </div>
-        <div class="s-text"><div class="s-title">صفحة الاختبار</div></div>
       </div>
     </div>
 
@@ -672,12 +613,12 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
 <script src="data/cities.js"></script>
 <script src="data/adhan.js"></script>
+
+<script src="js/notifications.js"></script>
+
 <script>
 let countdownInterval = null;
 let calcMethod = localStorage.getItem('calcMethod') || 'MWL';
-let azanAudio = null, azanAudioEnabled = false;
-let notificationPermissionGranted = false, azanEnabled = false, azkarEnabled = false;
-let lastNotificationSent = { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
 const prayerNamesAr = { fajr:'الفجر', sunrise:'الشروق', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء' };
 
 function formatTimeArabic12h(d) {
@@ -760,19 +701,6 @@ function updateUIWithPrayerTimes(lat, lng) {
     const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'}).format(now);
     document.getElementById('homeHijri').innerText = hijri;
 
-    if(azanEnabled && notificationPermissionGranted && navigator.serviceWorker.controller) {
-      for(const p of ["fajr","dhuhr","asr","maghrib","isha"]) {
-        const ptime = pt[p];
-        if(ptime) {
-          const diff = Math.abs(ptime - now);
-          if(diff < 60000 && !lastNotificationSent[p]) {
-            navigator.serviceWorker.controller.postMessage({type:'AZAN_NOTIFICATION', prayer:p, name:prayerNamesAr[p], timestamp:ptime.getTime()});
-            if(azanAudioEnabled && azanAudio) azanAudio.play().catch(()=>{});
-            lastNotificationSent[p] = true;
-          } else if(diff > 60000) lastNotificationSent[p] = false;
-        }
-      }
-    }
   } catch(e) { console.error(e); }
 }
 
@@ -796,6 +724,12 @@ function startGPS() {
       localStorage.setItem('current_location_name', 'موقعك الحالي (GPS)');
       refreshPrayerTimes();
       btn.innerText = "تم التحديد بنجاح!";
+      
+      // Notify NotificationSystem about the update
+      if (typeof NotificationSystem !== 'undefined') {
+         NotificationSystem.refreshPrayerTimes();
+      }
+
       setTimeout(() => { btn.innerText = orig; closeLocationModal(); }, 1000);
     },
     () => { btn.innerText = orig; alert("الرجاء السماح بصلاحية الموقع."); },
@@ -819,6 +753,12 @@ function saveCity() {
     localStorage.setItem('prayer_lng', coords.lng);
     localStorage.setItem('current_location_name', exact);
     refreshPrayerTimes();
+
+    // Notify NotificationSystem about the update
+    if (typeof NotificationSystem !== 'undefined') {
+       NotificationSystem.refreshPrayerTimes();
+    }
+
     document.getElementById('cityInput').value = ''; 
     closeLocationModal();
   } else { alert(`لم نتعرف على "${v}". تأكد من الإملاء.`); }
@@ -861,39 +801,12 @@ function setTheme(mode) {
   document.getElementById(id)?.classList.add('active');
 }
 function autoTheme() { setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
-function toggleNotification(type) {
-  const toggle = document.getElementById(type==='azan'?'azanToggle':'azkarToggle');
-  const enabled = toggle.classList.contains('active');
-  if(!enabled) {
-    if(!('Notification' in window) || Notification.permission!=='granted') {
-      if('Notification' in window) Notification.requestPermission().then(p => { if(p==='granted') notificationPermissionGranted=true; });
-    }
-    toggle.classList.add('active');
-    if(type==='azan') azanEnabled=true; else azkarEnabled=true;
-    localStorage.setItem(type+'Enabled','true');
-  } else {
-    toggle.classList.remove('active');
-    if(type==='azan') azanEnabled=false; else azkarEnabled=false;
-    localStorage.setItem(type+'Enabled','false');
-  }
-}
-function initAudio() {
-  azanAudio = new Audio('assets/azan.mp3'); azanAudio.preload = 'auto';
-  const once = () => { azanAudio.play().then(()=>azanAudio.pause()).catch(()=>{}); document.removeEventListener('click', once); };
-  document.addEventListener('click', once);
-}
-function toggleAzanAudio() {
-  azanAudioEnabled = !azanAudioEnabled;
-  localStorage.setItem('azanAudioEnabled', azanAudioEnabled);
-  document.getElementById('azanAudioToggle')?.classList.toggle('active', azanAudioEnabled);
-  if(azanAudioEnabled && !azanAudio) initAudio();
-}
+
 function setCalcMethod(m) { calcMethod=m; localStorage.setItem('calcMethod',m); refreshPrayerTimes(); }
 function resetData() { if(confirm('تأكيد مسح جميع البيانات؟')) { localStorage.clear(); location.reload(); } }
 function shareApp() {
   const link = 'https://solimananas.github.io/Tasbee7/';
   
-  // التحقق مما إذا كان هاتف المستخدم يدعم المشاركة الأصلية (Native Share)
   if (navigator.share) {
     navigator.share({
       title: 'زاد المسلم',
@@ -901,14 +814,13 @@ function shareApp() {
       url: link
     }).catch(console.error);
   } else {
-    // إذا لم يدعم الهاتف المشاركة، سيتم نسخ الرابط للحافظة
     navigator.clipboard.writeText(link).then(() => {
       alert('تم نسخ رابط التطبيق بنجاح!');
     }).catch(err => {
       console.error('فشل النسخ: ', err);
     });
   }
-  closeAllSheets(); // إغلاق قائمة الإعدادات بعد الضغط
+  closeAllSheets(); 
 }
 
 function updateStats() {
@@ -930,21 +842,20 @@ window.addEventListener('load', () => {
   initQuranHero();
   refreshPrayerTimes();
   
-  azanEnabled = localStorage.getItem('azanEnabled')==='true';
-  azanAudioEnabled = localStorage.getItem('azanAudioEnabled')==='true';
-  if(azanEnabled) document.getElementById('azanToggle')?.classList.add('active');
-  if(azanAudioEnabled) document.getElementById('azanAudioToggle')?.classList.add('active');
-  
   const saved2 = localStorage.getItem('calcMethod');
   if(saved2) { calcMethod=saved2; const sel=document.getElementById('calcMethod'); if(sel) sel.value=calcMethod; }
-  
-  if('Notification' in window && Notification.permission==='granted') notificationPermissionGranted=true;
-  initAudio();
 });
 
-if('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW error',e));
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => {
+        console.log('SW registered');
+        if (Notification.permission === 'default') {
+           Notification.requestPermission();
+        }
+      })
+      .catch(e => console.log('SW error', e));
   });
 }
 </script>
