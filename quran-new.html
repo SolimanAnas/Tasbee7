@@ -1895,7 +1895,7 @@
       const v = getVariantInfo(currentMushafVariant);
       img.style.opacity = '0';
       document.getElementById('highlightOverlay').innerHTML = '';
-      img.src = `${currentMushafVariant}/${formattedPage}.${v.ext}`;
+      img.src = `mushaf pages/${currentMushafVariant}/${formattedPage}.${v.ext}`;
       img.onload = () => { img.style.opacity = '1'; loadAyahHighlights(currentPage); };
       img.onerror = () => { img.style.opacity = '1'; };
       if(typeof updateMeta === 'function') updateMeta();
@@ -2370,7 +2370,7 @@
         const thumb = document.createElement('div');
         thumb.className = 'mushaf-card-thumb';
         const img = document.createElement('img');
-        img.src = `${v.id}/001.${v.ext}`;
+        img.src = `mushaf pages/${v.id}/001.${v.ext}`;
         img.alt = v.nameAr;
         img.loading = 'lazy';
         img.onerror = function() { this.style.display = 'none'; };
@@ -2541,7 +2541,8 @@
       const v = getVariantInfo(currentMushafVariant);
       caches.open(cacheName).then(cache => {
         for (let i = 1; i <= total; i++) {
-          const page = i.toString().padStart(3, '0'); const url = `${currentMushafVariant}/${page}.${v.ext}`;
+          const page = i.toString().padStart(3, '0'); const url = 
+`mushaf pages/${currentMushafVariant}/${page}.${v.ext}`;
           fetch(url).then(res => { if(res.ok) cache.put(url, res.clone()); count++; if(count===total) finish(); }).catch(()=>{ count++; if(count===total) finish(); });
         }
         function finish() {
