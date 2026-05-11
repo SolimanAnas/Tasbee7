@@ -483,6 +483,8 @@
   .mushaf-container {
   position: relative; display: block;
     width: 100%; margin: 0;
+    transform-origin: top center;
+    overflow: visible;
   }
   .mushaf-img {
     width: 100%; height: auto; display: block;
@@ -1893,9 +1895,12 @@
       const formattedPage = currentPage.toString().padStart(3, '0');
       const img = document.getElementById('pageImg');
       const v = getVariantInfo(currentMushafVariant);
+      const cal = getVariantHighlightCal();
+      const container = document.getElementById('mushafContainer');
       img.style.opacity = '0';
       document.getElementById('highlightOverlay').innerHTML = '';
       img.src = `mushaf pages/${currentMushafVariant}/${formattedPage}.${v.ext}`;
+      container.style.transform = `scale(${cal.imgScaleX}, ${cal.imgScaleY}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
       img.onload = () => { img.style.opacity = '1'; loadAyahHighlights(currentPage); };
       img.onerror = () => { img.style.opacity = '1'; };
       if(typeof updateMeta === 'function') updateMeta();
@@ -1941,7 +1946,9 @@
             scaleX: 1.00, scaleY: 0.90,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.035, shiftY: 0.040
+            shiftX: -0.035, shiftY: 0.040,
+            imgScaleX: 1.0, imgScaleY: 1.3,
+            imgshiftX: 0.0, imgshiftY: -0.11
           };
         case 'mushaf-borderd':
           return {
@@ -1949,7 +1956,9 @@
             scaleX: 0.90, scaleY: 1.00,
             padTop: 0.0, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.035, shiftY: -0.015
+            shiftX: -0.035, shiftY: -0.015,
+            imgScaleX: 1.1, imgScaleY: 1.5,
+            imgshiftX: 0.0, imgshiftY: -0.16
           };
         case 'mushaf-colored':
         default:
@@ -1958,7 +1967,9 @@
             scaleX: 1.10, scaleY: 1.00,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.090, shiftY: 0.000
+            shiftX: -0.090, shiftY: 0.000,
+            imgScaleX: 1.0, imgScaleY: 1.3,
+            imgshiftX: 0.0, imgshiftY: -0.1
           };
       }
     }
