@@ -42,7 +42,7 @@
     --radius-lg:       22px;
     --radius-xl:       28px;
     --sheet-radius:    26px;
-    --header-h:        42px;
+    --header-h:        58px;
     --transition-fast: 0.18s cubic-bezier(0.4,0,0.2,1);
     --transition-med:  0.28s cubic-bezier(0.22,1,0.36,1);
     --transition-slow: 0.38s cubic-bezier(0.22,1,0.36,1);
@@ -79,96 +79,94 @@
   header#appHeader {
     position: fixed; top: 0; left: 0; right: 0;
     height: calc(var(--header-h) + env(safe-area-inset-top));
-    padding: calc(env(safe-area-inset-top) + 2px) 8px 2px;
+    padding: calc(env(safe-area-inset-top) + 6px) 8px 6px;
     display: flex; align-items: center; justify-content: space-between; gap: 4px;
-    background: rgba(250, 246, 238, 0.92);
-    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-    border-bottom: 1px solid rgba(175, 140, 85, 0.15);
-    box-shadow: 0 1px 12px rgba(60, 40, 10, 0.06);
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 1px 12px var(--glass-shadow);
     z-index: 20; transition: transform var(--transition-slow);
-  }
-  header#appHeader::after {
-    content: ''; position: absolute;
-    bottom: 0; left: 10%; right: 10%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(184, 136, 12, 0.25), transparent);
   }
   header#appHeader.hidden-ui { transform: translateY(-110%); }
   [data-theme="dark"] header#appHeader {
-    background: rgba(11,19,30,0.95);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-  [data-theme="dark"] header#appHeader::after {
-    background: linear-gradient(90deg, transparent, rgba(184, 136, 12, 0.15), transparent);
+    background: rgba(11,19,30,0.96);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
   }
 
   .header-right, .header-left {
-    display: flex; gap: 0; align-items: center; flex-shrink: 0;
+    display: flex; gap: 2px; align-items: center; flex-shrink: 0;
   }
   .header-center {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    min-width: 0; padding: 0 4px;
-    gap: 0px;
+    min-width: 0; padding: 0 2px;
+    gap: 1px;
   }
 
   /* Surah name - center of header */
   #surahName {
     font-family: 'Amiri', serif;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
     cursor: pointer;
-    padding: 0 6px;
-    border-radius: 4px;
+    padding: 2px 10px;
+    border-radius: 8px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 100%;
-    transition: color 0.2s ease;
-    line-height: 1.35;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    line-height: 1.3;
   }
-  #surahName:hover { color: #d4a017; }
+  #surahName:active { background: var(--accent-light); color: var(--accent); }
 
   .meta-row {
     display: flex; align-items: center; justify-content: center;
-    gap: 3px; width: 100%;
+    gap: 6px; width: 100%;
   }
   .meta-dot {
-    width: 2px; height: 2px; border-radius: 50%;
-    background: var(--accent); opacity: 0.5; flex-shrink: 0;
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--text-hint); opacity: 0.6; flex-shrink: 0;
   }
   .nav-item {
-    font-size: 0.68rem; font-weight: 500;
-    color: var(--text-hint);
+    font-size: 0.76rem; font-weight: 500;
+    color: var(--text-secondary);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     cursor: pointer;
-    padding: 1px 5px; border-radius: 4px;
-    transition: color 0.2s ease;
+    padding: 2px 7px; border-radius: 6px;
+    transition: background var(--transition-fast), color var(--transition-fast);
   }
-  .nav-item:hover { color: var(--accent); }
+  .nav-item:active { background: var(--accent-light); color: var(--accent); }
 
   /* Icon buttons */
   .icon-btn {
-    background: none; border: none; color: var(--text-secondary);
+    background: none; border: none; color: var(--text-primary);
     cursor: pointer;
-    width: 30px; height: 30px; border-radius: 8px;
+    width: 40px; height: 40px; border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    transition: background var(--transition-fast), transform var(--transition-fast);
     flex-shrink: 0;
     position: relative;
   }
-  .icon-btn:hover {
-    background: rgba(26, 112, 64, 0.08);
-    color: var(--accent);
-    transform: translateY(-1px);
-  }
   .icon-btn:active {
-    transform: scale(0.92);
+    background: var(--bg-surface);
+    transform: scale(0.90);
   }
-  .icon-btn svg { display: block; stroke-width: 2.0; }
+  .icon-btn svg { display: block; }
 
   /* Bookmark active state */
   #bookmarkBtn.active svg { stroke: var(--gold); fill: var(--gold); }
+
+  /* Settings spin icon */
+  .settings-icon-mask {
+    width: 22px; height: 22px;
+    background-color: currentColor;
+    -webkit-mask: url('icons/settings.svg') no-repeat center;
+    mask: url('icons/settings.svg') no-repeat center;
+    -webkit-mask-size: contain; mask-size: contain;
+    transition: transform 0.45s ease-in-out;
+  }
+  .icon-btn:active .settings-icon-mask { transform: rotate(90deg); }
 
   /* ========== MODALS ========== */
   .modal-overlay {
@@ -460,15 +458,10 @@
   main#swipeArea {
     position: relative; width: 100%; height: 100vh;
     box-sizing: border-box;
-    padding-top: 30px;
-  }
-  .page-frame {
-    align-items: flex-start !important;
-    padding-bottom: 0 !important;
   }
   .page-frame {
     position: relative; width: 100%; height: 100%;
-    overflow: hidden;
+    overflow-y: auto; overflow-x: hidden;
   }
   /* borders removed as requested */
   .label-box {
@@ -974,7 +967,7 @@
   <header id="appHeader">
     <div class="header-right">
       <button class="icon-btn" onclick="goHome()" title="الرئيسية">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
@@ -992,21 +985,18 @@
 
     <div class="header-left">
       <button class="icon-btn" id="searchIconBtn" onclick="toggleSearchOverlay('toggle')" title="بحث">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
       </button>
       <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
         </svg>
       </button>
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
+        <div class="settings-icon-mask"></div>
       </button>
     </div>
   </header>
@@ -1958,7 +1948,7 @@
             pageTopY: 0.00, pageBotY: 1.00,
             shiftX: -0.035, shiftY: 0.040,
             imgScaleX: 1.0, imgScaleY: 1.3,
-            imgshiftX: 0.0, imgshiftY: 0.0
+            imgshiftX: 0.0, imgshiftY: -0.11
           };
         case 'mushaf-borderd':
           return {
@@ -1967,19 +1957,19 @@
             padTop: 0.0, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
             shiftX: -0.035, shiftY: -0.015,
-            imgScaleX: 1.3, imgScaleY: 1.5,
-            imgshiftX: 0.0, imgshiftY: 0.0
+            imgScaleX: 1.1, imgScaleY: 1.5,
+            imgshiftX: 0.0, imgshiftY: -0.16
           };
         case 'mushaf-colored':
         default:
           return {
             refW: 1024, refH: 1636,
-            scaleX: 1.06, scaleY: 1.00,
+            scaleX: 1.10, scaleY: 1.00,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.060, shiftY: 0.008,
-            imgScaleX: 1.0, imgScaleY: 1.2,
-            imgshiftX: 0.0, imgshiftY: 0.0
+            shiftX: -0.090, shiftY: 0.000,
+            imgScaleX: 1.0, imgScaleY: 1.3,
+            imgshiftX: 0.0, imgshiftY: -0.1
           };
       }
     }
