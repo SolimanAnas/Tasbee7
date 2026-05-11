@@ -42,7 +42,7 @@
     --radius-lg:       22px;
     --radius-xl:       28px;
     --sheet-radius:    26px;
-    --header-h:        58px;
+    --header-h:        42px;
     --transition-fast: 0.18s cubic-bezier(0.4,0,0.2,1);
     --transition-med:  0.28s cubic-bezier(0.22,1,0.36,1);
     --transition-slow: 0.38s cubic-bezier(0.22,1,0.36,1);
@@ -79,94 +79,96 @@
   header#appHeader {
     position: fixed; top: 0; left: 0; right: 0;
     height: calc(var(--header-h) + env(safe-area-inset-top));
-    padding: calc(env(safe-area-inset-top) + 6px) 8px 6px;
+    padding: calc(env(safe-area-inset-top) + 2px) 8px 2px;
     display: flex; align-items: center; justify-content: space-between; gap: 4px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid var(--glass-border);
-    box-shadow: 0 1px 12px var(--glass-shadow);
+    background: rgba(250, 246, 238, 0.92);
+    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+    border-bottom: 1px solid rgba(175, 140, 85, 0.15);
+    box-shadow: 0 1px 12px rgba(60, 40, 10, 0.06);
     z-index: 20; transition: transform var(--transition-slow);
+  }
+  header#appHeader::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(184, 136, 12, 0.25), transparent);
   }
   header#appHeader.hidden-ui { transform: translateY(-110%); }
   [data-theme="dark"] header#appHeader {
-    background: rgba(11,19,30,0.96);
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    background: rgba(11,19,30,0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  [data-theme="dark"] header#appHeader::after {
+    background: linear-gradient(90deg, transparent, rgba(184, 136, 12, 0.15), transparent);
   }
 
   .header-right, .header-left {
-    display: flex; gap: 2px; align-items: center; flex-shrink: 0;
+    display: flex; gap: 0; align-items: center; flex-shrink: 0;
   }
   .header-center {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    min-width: 0; padding: 0 2px;
-    gap: 1px;
+    min-width: 0; padding: 0 4px;
+    gap: 0px;
   }
 
   /* Surah name - center of header */
   #surahName {
     font-family: 'Amiri', serif;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.01em;
+    color: var(--gold);
+    letter-spacing: 0.04em;
     cursor: pointer;
-    padding: 2px 10px;
-    border-radius: 8px;
+    padding: 0 6px;
+    border-radius: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 100%;
-    transition: background var(--transition-fast), color var(--transition-fast);
-    line-height: 1.3;
+    transition: color 0.2s ease;
+    line-height: 1.35;
   }
-  #surahName:active { background: var(--accent-light); color: var(--accent); }
+  #surahName:hover { color: #d4a017; }
 
   .meta-row {
     display: flex; align-items: center; justify-content: center;
-    gap: 6px; width: 100%;
+    gap: 3px; width: 100%;
   }
   .meta-dot {
-    width: 3px; height: 3px; border-radius: 50%;
-    background: var(--text-hint); opacity: 0.6; flex-shrink: 0;
+    width: 2px; height: 2px; border-radius: 50%;
+    background: var(--accent); opacity: 0.5; flex-shrink: 0;
   }
   .nav-item {
-    font-size: 0.76rem; font-weight: 500;
-    color: var(--text-secondary);
+    font-size: 0.68rem; font-weight: 500;
+    color: var(--text-hint);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     cursor: pointer;
-    padding: 2px 7px; border-radius: 6px;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    padding: 1px 5px; border-radius: 4px;
+    transition: color 0.2s ease;
   }
-  .nav-item:active { background: var(--accent-light); color: var(--accent); }
+  .nav-item:hover { color: var(--accent); }
 
   /* Icon buttons */
   .icon-btn {
-    background: none; border: none; color: var(--text-primary);
+    background: none; border: none; color: var(--text-secondary);
     cursor: pointer;
-    width: 40px; height: 40px; border-radius: var(--radius-sm);
+    width: 30px; height: 30px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    transition: background var(--transition-fast), transform var(--transition-fast);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
     flex-shrink: 0;
     position: relative;
   }
-  .icon-btn:active {
-    background: var(--bg-surface);
-    transform: scale(0.90);
+  .icon-btn:hover {
+    background: rgba(26, 112, 64, 0.08);
+    color: var(--accent);
+    transform: translateY(-1px);
   }
-  .icon-btn svg { display: block; }
+  .icon-btn:active {
+    transform: scale(0.92);
+  }
+  .icon-btn svg { display: block; stroke-width: 2.0; }
 
   /* Bookmark active state */
   #bookmarkBtn.active svg { stroke: var(--gold); fill: var(--gold); }
-
-  /* Settings spin icon */
-  .settings-icon-mask {
-    width: 22px; height: 22px;
-    background-color: currentColor;
-    -webkit-mask: url('icons/settings.svg') no-repeat center;
-    mask: url('icons/settings.svg') no-repeat center;
-    -webkit-mask-size: contain; mask-size: contain;
-    transition: transform 0.45s ease-in-out;
-  }
-  .icon-btn:active .settings-icon-mask { transform: rotate(90deg); }
 
   /* ========== MODALS ========== */
   .modal-overlay {
@@ -351,10 +353,10 @@
   /* ========== SEARCH OVERLAY ========== */
   .search-backdrop {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     z-index: 99; opacity: 0; visibility: hidden;
-    transition: opacity var(--transition-med), visibility var(--transition-med);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
   .search-backdrop.active { opacity: 1; visibility: visible; }
 
@@ -364,104 +366,198 @@
     left: 12px; right: 12px;
     max-width: 520px; margin: 0 auto;
     background: var(--glass-bg);
-    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    padding: 14px 14px 10px;
-    display: flex; flex-direction: column; gap: 10px;
+    border-radius: calc(var(--radius-xl) + 4px);
+    padding: 6px 0 10px;
+    display: flex; flex-direction: column;
     opacity: 0; pointer-events: none;
-    transform: translateY(-12px) scale(0.97);
-    transition: all var(--transition-slow);
+    transform: translateY(-16px) scale(0.96);
+    transition: all 0.35s cubic-bezier(0.32,0.72,0,1);
     z-index: 100;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.18);
-    max-height: 74vh;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    max-height: 76vh;
   }
   .search-overlay.active {
     transform: translateY(0) scale(1);
     opacity: 1; pointer-events: all;
   }
 
-  .search-bar-row {
-    display: flex; align-items: center; gap: 8px; width: 100%;
+  .search-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 6px;
   }
-  .search-bar-row input {
-    flex: 1; min-width: 0;
-    height: 46px; padding: 0 14px 0 10px;
+  .search-header-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .search-header-title {
+    flex: 1; font-weight: 700; font-size: 1rem;
+    color: var(--text-primary);
+  }
+  .search-header-close {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--bg-surface); border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-secondary);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    flex-shrink: 0;
+  }
+  .search-header-close:hover { background: rgba(220,53,69,0.08); color: var(--danger); }
+  .search-header-close:active { transform: scale(0.9); }
+  .search-header-close svg { display: block; }
+
+  .search-bar-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px; margin-bottom: 6px;
+  }
+  .search-input-wrap {
+    flex: 1; position: relative; display: flex; align-items: center;
+  }
+  .search-input-wrap input {
+    width: 100%; height: 44px;
+    padding: 0 38px 0 14px;
     border-radius: var(--radius-md);
     border: 1.5px solid var(--glass-border);
     background: var(--bg-surface);
     color: var(--text-primary);
     font-family: inherit; font-size: 0.97rem;
-    outline: none; transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .search-bar-row input:focus {
+  .search-input-wrap input:focus {
     border-color: var(--accent-border);
     box-shadow: 0 0 0 3px var(--accent-light);
   }
-  .search-bar-row input::placeholder { color: var(--text-hint); }
-
-  .close-search-btn {
-    width: 42px; height: 42px; flex-shrink: 0;
-    background: var(--danger-light);
-    border: 1px solid rgba(217,64,64,0.2);
-    color: var(--danger);
-    border-radius: 50%;
+  .search-input-wrap input::placeholder { color: var(--text-hint); }
+  .search-input-clear {
+    position: absolute; left: 8px; top: 50%;
+    transform: translateY(-50%);
+    width: 26px; height: 26px; border-radius: 50%;
+    border: none; background: var(--bg-surface);
+    color: var(--text-hint); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: background var(--transition-fast), transform var(--transition-fast);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease, background 0.2s ease;
   }
-  .close-search-btn:active { background: var(--danger); color: white; transform: scale(0.9); }
-
-  .search-overlay-title {
-    display: flex; align-items: center; gap: 8px;
-    font-weight: 700; font-size: 1rem;
-    color: var(--text-primary);
-  }
-  .search-overlay-title svg { color: var(--accent); }
+  .search-input-clear.visible { opacity: 1; pointer-events: auto; }
+  .search-input-clear:hover { background: rgba(220,53,69,0.08); color: var(--danger); }
+  .search-input-clear svg { display: block; }
 
   .search-results-container {
-    overflow-y: auto; display: flex; flex-direction: column; gap: 8px; flex: 1;
-    padding-bottom: 4px;
+    overflow-y: auto; display: flex; flex-direction: column;
+    flex: 1;
+    padding: 0 14px 4px;
   }
   .search-hint {
-    text-align: center; padding: 24px 16px;
+    text-align: center; padding: 28px 16px;
     color: var(--text-hint); font-size: 0.9rem;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
   }
+  .search-hint-icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--bg-surface);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-hint); opacity: 0.5;
+  }
+
+  .search-section-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-hint);
+    padding: 10px 2px 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .search-section-label svg { opacity: 0.6; }
+
   .search-result-item {
     background: var(--bg-surface);
-    padding: 13px 14px; border-radius: var(--radius-md);
+    padding: 12px 14px; border-radius: var(--radius-md);
     cursor: pointer;
     border: 1px solid var(--glass-border);
-    transition: all var(--transition-fast);
+    transition: all 0.2s ease;
+    margin-bottom: 6px;
   }
   .search-result-item:active {
     background: var(--accent-light);
     border-color: var(--accent-border);
+    transform: scale(0.985);
   }
+
+  .search-result-surah {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .search-result-surah-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+  }
+  .search-result-surah-name {
+    font-weight: 600; font-size: 0.95rem;
+    color: var(--text-primary); flex: 1;
+  }
+  .search-result-surah-page {
+    font-size: 0.75rem; color: var(--text-hint);
+    flex-shrink: 0;
+  }
+
   .res-meta {
-    font-size: 0.8rem; color: var(--accent);
-    margin-bottom: 6px; font-weight: 700;
-    display: flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--accent);
+    margin-bottom: 4px; font-weight: 600;
+    display: flex; align-items: center; gap: 5px;
   }
+  .res-meta svg { flex-shrink: 0; }
   .res-text {
-    font-family: 'Amiri', serif; font-size: 1.25rem;
-    line-height: 1.9; color: var(--text-primary);
+    font-family: 'Amiri', serif; font-size: 1.2rem;
+    line-height: 1.8; color: var(--text-primary);
+    word-break: break-all;
   }
   .search-highlight {
-    background-color: rgba(184,136,12,0.25);
-    color: var(--gold); border-radius: 4px; padding: 0 3px;
+    background: rgba(184,136,12,0.2);
+    color: var(--gold); border-radius: 3px; padding: 1px 3px;
     font-weight: 700;
+  }
+  .search-loading {
+    text-align: center; padding: 24px; color: var(--accent);
+    font-size: 0.9rem;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .search-loading .spinner {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2.5px solid var(--glass-border);
+    border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .search-empty {
+    text-align: center; padding: 28px 16px;
+    color: var(--text-hint); font-size: 0.9rem;
+  }
+  .search-empty strong { color: var(--text-secondary); }
+  .search-error {
+    text-align: center; padding: 24px;
+    color: var(--danger); font-size: 0.9rem;
   }
 
   /* ========== MUSHAF FRAME ========== */
   main#swipeArea {
     position: relative; width: 100%; height: 100vh;
     box-sizing: border-box;
+    padding-top: 30px;
+  }
+  .page-frame {
+    align-items: flex-start !important;
+    padding-bottom: 0 !important;
   }
   .page-frame {
     position: relative; width: 100%; height: 100%;
-    overflow-y: auto; overflow-x: hidden;
+    overflow: hidden;
   }
   /* borders removed as requested */
   .label-box {
@@ -475,9 +571,16 @@
     font-family: 'ThuluthFont', 'Amiri', serif;
     cursor: pointer;
   }
-  .label-top-left  { top: 1px; left: 20px; }
-  .label-top-right { top: 1px; right: 20px; }
+  .label-top-left  { top: 31px; left: 20px; }
+  .label-top-right { top: 31px; right: 20px; }
   .label-bottom    { bottom: calc(1px + env(safe-area-inset-bottom, 0)); left: 50%; transform: translateX(-50%); }
+  /* per-variant fine-tuning for top labels */
+  body[data-variant="mushaf-colored"] .label-top-left,
+  body[data-variant="mushaf-colored"] .label-top-right { top: -5px; }
+  body[data-variant="mushaf-tajweed"] .label-top-left,
+  body[data-variant="mushaf-tajweed"] .label-top-right { top: 10px; }
+  body[data-variant="mushaf-borderd"] .label-top-left,
+  body[data-variant="mushaf-borderd"] .label-top-right { top: 15px; }
 
   /* ========== MUSHAF CONTAINER ========== */
   .mushaf-container {
@@ -593,12 +696,23 @@
     padding: 12px 20px calc(20px + env(safe-area-inset-bottom));
     z-index: 1001;
     transform: translateY(100%);
-    transition: transform var(--transition-slow);
+    transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
     max-height: 88vh; overflow-y: auto;
     box-shadow: 0 -8px 40px rgba(0,0,0,0.22);
     border-top: 1px solid var(--glass-border);
+    will-change: transform;
   }
   .audio-expanded-sheet.visible { transform: translateY(0); }
+
+  .sheet-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .sheet-backdrop.visible { opacity: 1; visibility: visible; }
 
   .sheet-drag-handle {
     width: 44px; height: 4px;
@@ -611,27 +725,80 @@
   .expanded-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 18px;
+    gap: 8px;
   }
   .sheet-title {
     font-weight: 700; font-size: 1.1rem;
     color: var(--text-primary);
     display: flex; align-items: center; gap: 10px;
+    flex: 1; min-width: 0;
   }
   .sheet-title-icon {
     width: 36px; height: 36px; border-radius: 10px;
     background: var(--accent-light);
     display: flex; align-items: center; justify-content: center;
-    color: var(--accent);
+    color: var(--accent); flex-shrink: 0;
   }
+  .sheet-header-actions {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .sheet-icon-btn {
+    background: var(--bg-surface); border: none;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-secondary);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+  .sheet-icon-btn:hover { background: rgba(26,112,64,0.08); color: var(--accent); }
+  .sheet-icon-btn:active { transform: scale(0.9); }
+  .sheet-icon-btn svg { display: block; }
   .close-sheet {
     background: var(--bg-surface); border: none;
     width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; color: var(--text-secondary);
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
   }
-  .close-sheet:active { background: var(--danger-light); color: var(--danger); }
+  .close-sheet:hover { background: rgba(220,53,69,0.08); color: var(--danger); }
+  .close-sheet:active { transform: scale(0.9); }
   .close-sheet svg { display: block; }
+
+  /* mushaf version selector row in sheet */
+  .sheet-mushaf-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 12px;
+  }
+  .sheet-mushaf-row:active {
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  .sheet-mushaf-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .sheet-mushaf-info { flex: 1; min-width: 0; }
+  .sheet-mushaf-label {
+    font-size: 0.75rem; color: var(--text-hint);
+    font-weight: 500; line-height: 1.2;
+  }
+  .sheet-mushaf-value {
+    font-size: 0.95rem; font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sheet-mushaf-arrow {
+    color: var(--text-hint);
+    flex-shrink: 0; display: flex;
+  }
 
   /* Reciter selector */
   .reciter-wrapper { position: relative; margin-bottom: 18px; }
@@ -967,7 +1134,7 @@
   <header id="appHeader">
     <div class="header-right">
       <button class="icon-btn" onclick="goHome()" title="الرئيسية">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           <polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
@@ -985,18 +1152,21 @@
 
     <div class="header-left">
       <button class="icon-btn" id="searchIconBtn" onclick="toggleSearchOverlay('toggle')" title="بحث">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
       </button>
       <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
         </svg>
       </button>
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
-        <div class="settings-icon-mask"></div>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
       </button>
     </div>
   </header>
@@ -1005,27 +1175,39 @@
   <div class="search-backdrop" id="searchBackdrop" onclick="toggleSearchOverlay('close')"></div>
 
   <div class="search-overlay" id="searchOverlay">
-    <div class="search-overlay-title">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      البحث في المصحف
-    </div>
-    <div class="search-bar-row">
-      <input type="text" id="searchInput" placeholder="ابحث عن كلمة (مطابقة تامة)..."
-             onkeydown="if(event.key==='Enter'){ this.blur(); handleGlobalSearch(this.value); }">
-      <button class="close-search-btn" onclick="toggleSearchOverlay('close')" title="إغلاق">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <div class="search-header">
+      <div class="search-header-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <span class="search-header-title">البحث في القرآن</span>
+      <button class="search-header-close" onclick="toggleSearchOverlay('close')" title="إغلاق">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
     </div>
+    <div class="search-bar-row">
+      <div class="search-input-wrap">
+        <input type="text" id="searchInput" placeholder="كلمة، آية، أو اسم سورة..."
+               oninput="onSearchInput(this.value)"
+               onkeydown="if(event.key==='Enter'){ this.blur(); handleGlobalSearch(this.value); }">
+        <button class="search-input-clear" id="searchClearBtn" onclick="clearSearch()" title="مسح">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
     <div class="search-results-container" id="searchResults">
       <div class="search-hint">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        اكتب كلمة للبحث واضغط Enter
+        <div class="search-hint-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        اكتب كلمة للبحث في القرآن الكريم<br><span style="font-size:0.8rem;opacity:0.6;">يمكنك البحث في الآيات وأسماء السور</span>
       </div>
     </div>
   </div>
@@ -1035,8 +1217,8 @@
     <div class="page-frame" id="pageFrame">
       <div class="mushaf-border-top"></div>
       <div class="mushaf-border-bottom"></div>
-      <div class="label-box label-top-left"  id="juzLabel"   onclick="openJuzSelector()">الجزء ١</div>
-      <div class="label-box label-top-right" id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
+      <div class="label-box label-top-left"  id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
+      <div class="label-box label-top-right" id="juzLabel"   onclick="openJuzSelector()">الجزء ١</div>
       <div class="label-box label-bottom"    id="pageLabel"  onclick="openPageSelector()">١</div>
 
       <div id="mushafContainer" class="mushaf-container">
@@ -1086,6 +1268,9 @@
   </div>
 
   <!-- ===== AUDIO EXPANDED SHEET ===== -->
+  <!-- ===== AUDIO EXPANDED SHEET BACKDROP ===== -->
+  <div class="sheet-backdrop" id="audioSheetBackdrop"></div>
+
   <div id="audioExpandedSheet" class="audio-expanded-sheet">
     <div class="sheet-drag-handle"></div>
     <div class="expanded-header">
@@ -1097,11 +1282,18 @@
         </div>
         المشغل الصوتي
       </div>
-      <button class="close-sheet" onclick="closeAudioExpanded()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
+      <div class="sheet-header-actions">
+        <button class="sheet-icon-btn" onclick="closeAudioExpanded(); toggleSearchOverlay('toggle')" title="بحث">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <button class="close-sheet" onclick="closeAudioExpanded()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="reciter-wrapper">
@@ -1212,7 +1404,9 @@
     </div>
   </div>
 
-  <!-- ===== CONTEXT MENU SHEET ===== -->
+  <!-- ===== CONTEXT MENU SHEET BACKDROP ===== -->
+  <div class="sheet-backdrop" id="contextSheetBackdrop"></div>
+
   <div id="contextMenuSheet" class="audio-expanded-sheet" style="z-index: 1002;">
     <div class="sheet-drag-handle"></div>
     <div class="expanded-header">
@@ -1224,11 +1418,37 @@
         </div>
         الإجراءات
       </div>
-      <button class="close-sheet" onclick="closeContextMenu()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      <div class="sheet-header-actions">
+        <button class="sheet-icon-btn" onclick="closeContextMenu(); toggleSearchOverlay('toggle')" title="بحث">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <button class="close-sheet" onclick="closeContextMenu()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mushaf version selector -->
+    <div class="sheet-mushaf-row" onclick="closeContextMenu(); openMushafSelectorModal();">
+      <div class="sheet-mushaf-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
-      </button>
+      </div>
+      <div class="sheet-mushaf-info">
+        <div class="sheet-mushaf-label">المصحف الحالي</div>
+        <div class="sheet-mushaf-value" id="contextMushafLabel">إطار بني</div>
+      </div>
+      <div class="sheet-mushaf-arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
     </div>
 
     <!-- Ayah-specific actions (shown/hidden via JS) -->
@@ -1300,6 +1520,9 @@
       </button>
     </div>
   </div>
+
+  <!-- ===== TAFSIR SHEET BACKDROP ===== -->
+  <div class="sheet-backdrop" id="tafsirSheetBackdrop"></div>
 
   <!-- ===== TAFSIR SHEET ===== -->
   <div id="tafsirModal" class="audio-expanded-sheet" style="z-index: 1003; display: flex; flex-direction: column; transition: all 0.3s ease;">
@@ -1629,6 +1852,8 @@
     // ========== LEGACY SQLITE DATABASE (for colored & tajweed) ==========
     let db = null;
     let dbReady = false;
+    let ayahCountMap = {};
+    const AYAH_COUNTS_FALLBACK = [0,7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
 
     async function initDatabase() {
       try {
@@ -1641,10 +1866,22 @@
         if(view[0] !== 83 || view[1] !== 81 || view[2] !== 76 || view[3] !== 105) throw new Error("Invalid SQLite format");
         db = new SQL.Database(view);
         dbReady = true;
+        buildAyahCountMap();
         console.log('Legacy DB loaded');
       } catch(e) {
         console.error("DB error:", e);
       }
+    }
+
+    function buildAyahCountMap() {
+      try {
+        const stmt = db.prepare("SELECT soraid, MAX(ayaid) as cnt FROM ayarects GROUP BY soraid ORDER BY soraid");
+        while(stmt.step()) {
+          const row = stmt.getAsObject();
+          ayahCountMap[row.soraid] = row.cnt;
+        }
+        stmt.free();
+      } catch(e) { console.error("Ayah count map error:", e); }
     }
 
     // ========== V3 COORDINATE SYSTEM (JSON-BASED) ==========
@@ -1792,10 +2029,11 @@
       const step = direction === 'next' ? 1 : -1;
       let targetSurah = surah;
       let targetAyah = ayah + step;
-      if (targetAyah < 1) { targetSurah--; targetAyah = 999; }
+      const maxAyah = ayahCountMap[targetSurah] || AYAH_COUNTS_FALLBACK[targetSurah] || 286;
+      if (targetAyah < 1) { targetSurah--; targetAyah = ayahCountMap[targetSurah] || AYAH_COUNTS_FALLBACK[targetSurah] || 286; }
+      if (targetAyah > maxAyah) { targetSurah++; targetAyah = 1; }
       if (targetSurah < 1) return null;
       if (targetSurah > 114) return null;
-      if (targetAyah > 286) { targetAyah = 1; }
       try {
         const res = await fetch(`https://api.alquran.cloud/v1/ayah/${targetSurah}:${targetAyah}`);
         const data = await res.json();
@@ -1804,6 +2042,25 @@
         }
       } catch(e) {}
       return { surah: targetSurah, ayah: targetAyah, page: null };
+    }
+
+    async function getFirstAyahOfPage(page) {
+      let rects;
+      if (currentMushafVariant === 'mushaf-borderd') {
+        rects = parseCoordsForPage(page);
+      } else {
+        rects = getLegacyCoordsForPage(page);
+      }
+      if (!rects || rects.length === 0) return null;
+      return { surah: rects[0].surah, ayah: rects[0].ayah, page: page };
+    }
+
+    async function getNextAyahDb(surah, ayah) {
+      return findAdjacentAyah(surah, ayah, 'next');
+    }
+
+    async function getPrevAyahDb(surah, ayah) {
+      return findAdjacentAyah(surah, ayah, 'prev');
     }
 
     async function nextTafsirAyah() {
@@ -1847,6 +2104,7 @@
 
     function closeTafsirModal() {
       document.getElementById('tafsirModal').classList.remove('visible');
+      document.getElementById('tafsirSheetBackdrop').classList.remove('visible');
     }
 
     async function contextShowTafsir(isNavigation = false) {
@@ -1856,6 +2114,7 @@
       const contentDiv = document.getElementById('tafsirContent');
       const selectedTafsir = document.getElementById('tafsirSelect').value;
       document.getElementById('tafsirModal').classList.add('visible');
+      document.getElementById('tafsirSheetBackdrop').classList.add('visible');
       contentDiv.innerHTML = '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
       try {
         const [ayaTextRes, tafRes] = await Promise.all([
@@ -1899,9 +2158,15 @@
       const container = document.getElementById('mushafContainer');
       img.style.opacity = '0';
       document.getElementById('highlightOverlay').innerHTML = '';
-      img.src = `mushaf pages/${currentMushafVariant}/${formattedPage}.${v.ext}`;
+      img.src = getImagePath(currentMushafVariant, formattedPage, v.ext);
       container.style.transform = `scale(${cal.imgScaleX}, ${cal.imgScaleY}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
-      img.onload = () => { img.style.opacity = '1'; loadAyahHighlights(currentPage); };
+      img.onload = () => {
+        img.style.opacity = '1';
+        loadAyahHighlights(currentPage);
+        if (windowCurrentAyahGlobal && isPlaying) {
+          highlightAyah(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
+        }
+      };
       img.onerror = () => { img.style.opacity = '1'; };
       if(typeof updateMeta === 'function') updateMeta();
       localStorage.setItem('lastPage', currentPage);
@@ -1948,28 +2213,28 @@
             pageTopY: 0.00, pageBotY: 1.00,
             shiftX: -0.035, shiftY: 0.040,
             imgScaleX: 1.0, imgScaleY: 1.3,
-            imgshiftX: 0.0, imgshiftY: -0.11
+            imgshiftX: 0.0, imgshiftY: 0.0
           };
         case 'mushaf-borderd':
           return {
             refW: 415, refH: 650,
-            scaleX: 0.90, scaleY: 1.00,
-            padTop: 0.0, padBot: 0.00,
+            scaleX: 0.99, scaleY: 1.00,
+            padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.035, shiftY: -0.015,
-            imgScaleX: 1.1, imgScaleY: 1.5,
-            imgshiftX: 0.0, imgshiftY: -0.16
+            shiftX: -0.09, shiftY: -0.015,
+            imgScaleX: 1.2, imgScaleY: 1.4,
+            imgshiftX: 0.0, imgshiftY: 0.0
           };
         case 'mushaf-colored':
         default:
           return {
             refW: 1024, refH: 1636,
-            scaleX: 1.10, scaleY: 1.00,
+            scaleX: 1.06, scaleY: 1.00,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.090, shiftY: 0.000,
-            imgScaleX: 1.0, imgScaleY: 1.3,
-            imgshiftX: 0.0, imgshiftY: -0.1
+            shiftX: -0.060, shiftY: 0.008,
+            imgScaleX: 1.0, imgScaleY: 1.2,
+            imgshiftX: 0.0, imgshiftY: 0.0
           };
       }
     }
@@ -2141,6 +2406,10 @@
        } else if (rangeRepeatToggle.checked && rTo > 0 && windowCurrentAyahGlobal.ayah >= rTo) {
            if (currentRangeRepeat < rCount - 1) nextAyahNum = rFrom;
            else return;
+       } else {
+         const maxAyah = ayahCountMap[nextSurah] || AYAH_COUNTS_FALLBACK[nextSurah] || 286;
+         if (nextAyahNum > maxAyah) { nextSurah++; nextAyahNum = 1; }
+         if (nextSurah > 114) return;
        }
        const nextData = await fetchAudioData(nextSurah, nextAyahNum);
        if (nextData && nextData.audio) {
@@ -2152,6 +2421,7 @@
 
     async function startPlayback(surah, ayah) {
       if(!surah || !ayah) return;
+      windowCurrentAyahGlobal = { surah: parseInt(surah), ayah: parseInt(ayah) };
       const data = await fetchAudioData(surah, ayah);
       if(!data) {
           const next = await getNextAyahDb(surah, ayah);
@@ -2167,14 +2437,13 @@
     function playCurrent() {
       if(currentIndex >= currentPlaylist.length) { stopAudio(); return; }
       const item = currentPlaylist[currentIndex];
+      windowCurrentAyahGlobal = { surah: item.surah, ayah: item.ayah };
       if (item.page && item.page !== currentPage) { window.goToPage(item.page); }
       audioPlayer.src = item.audioUrl;
       audioPlayer.playbackRate = parseFloat(speedSelect.value);
       audioPlayer.play().catch(e => showCustomToast("خطأ في التشغيل"));
       isPlaying = true; updatePlayButtons(true);
       highlightAyah(item.surah, item.ayah);
-      const highlightDiv = document.querySelector(`.ayah-highlight[data-surah="${item.surah}"][data-ayah="${item.ayah}"]`);
-      if(highlightDiv) highlightDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
       preloadNext();
     }
 
@@ -2196,7 +2465,6 @@
        } else {
            const next = await getNextAyahDb(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
            if (next) {
-               windowCurrentAyahGlobal = { surah: next.surah, ayah: next.ayah };
                startPlayback(next.surah, next.ayah);
            } else {
                stopAudio(); showCustomToast("تم ختم القرآن الكريم");
@@ -2211,7 +2479,6 @@
        }
        const prev = await getPrevAyahDb(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
        if (prev) {
-           windowCurrentAyahGlobal = { surah: prev.surah, ayah: prev.ayah };
            startPlayback(prev.surah, prev.ayah);
        } else {
            showCustomToast("هذه بداية المصحف");
@@ -2273,7 +2540,10 @@
       }
     }
 
-    function toggleExpandPlayer() { expandedSheet.classList.add('visible'); }
+    function toggleExpandPlayer() {
+      expandedSheet.classList.add('visible');
+      document.getElementById('audioSheetBackdrop').classList.add('visible');
+    }
     function openRepeatSettings() { closeContextMenu(); toggleExpandPlayer(); }
 
     expandedPlayPause.onclick = () => togglePlayPause();
@@ -2283,20 +2553,52 @@
       updateReciterUI();
       if(currentPlaylist.length) startPlayback(currentPlaylist[0].surah, currentPlaylist[0].ayah);
     };
-    function closeAudioExpanded() { expandedSheet.classList.remove('visible'); }
+    function closeAudioExpanded() {
+      expandedSheet.classList.remove('visible');
+      document.getElementById('audioSheetBackdrop').classList.remove('visible');
+    }
 
     // ========== CONTEXT MENU ==========
     const contextSheet = document.getElementById('contextMenuSheet');
 
     function setupSheetDragClose(sheet) {
       if(!sheet) return;
-      const handle = sheet.querySelector('.sheet-drag-handle');
-      if(!handle) return;
-      let touchStartY = 0;
-      handle.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, {passive:true});
-      handle.addEventListener('touchmove', (e) => {
-        if(e.touches[0].clientY - touchStartY > 50) sheet.classList.remove('visible');
-      }, {passive:true});
+      let touchStartY = 0, touchCurrentY = 0, isDragging = false;
+      const backdropMap = {
+        audioExpandedSheet: 'audioSheetBackdrop',
+        contextMenuSheet: 'contextSheetBackdrop',
+        tafsirModal: 'tafsirSheetBackdrop'
+      };
+      const onStart = (e) => {
+        if (e.target.closest('.reciter-selector') || e.target.closest('input') || e.target.closest('button')) return;
+        touchStartY = e.touches[0].clientY;
+        touchCurrentY = touchStartY;
+        isDragging = true;
+      };
+      const onMove = (e) => {
+        if (!isDragging) return;
+        touchCurrentY = e.touches[0].clientY;
+        const diff = touchCurrentY - touchStartY;
+        if (diff > 0) {
+          sheet.style.transform = `translateY(${Math.min(diff, 250)}px)`;
+          sheet.style.transition = 'none';
+        }
+      };
+      const onEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        const diff = touchCurrentY - touchStartY;
+        sheet.style.transition = '';
+        sheet.style.transform = '';
+        if (diff > 80) {
+          sheet.classList.remove('visible');
+          const backdropId = backdropMap[sheet.id];
+          if (backdropId) document.getElementById(backdropId).classList.remove('visible');
+        }
+      };
+      sheet.addEventListener('touchstart', onStart, {passive:true});
+      sheet.addEventListener('touchmove', onMove, {passive:true});
+      sheet.addEventListener('touchend', onEnd, {passive:true});
     }
 
     function showContextMenu(surah, ayah) {
@@ -2304,17 +2606,29 @@
       document.getElementById('contextPlayBtn').style.display = 'flex';
       document.getElementById('contextCopyBtn').style.display = 'flex';
       document.getElementById('contextTafsirBtn').style.display = 'flex';
+      updateContextMushafLabel();
       contextSheet.classList.add('visible');
+      document.getElementById('contextSheetBackdrop').classList.add('visible');
     }
 
     function showGeneralMenu() {
         document.getElementById('contextPlayBtn').style.display = 'none';
         document.getElementById('contextCopyBtn').style.display = 'none';
         document.getElementById('contextTafsirBtn').style.display = 'none';
+        updateContextMushafLabel();
         contextSheet.classList.add('visible');
+        document.getElementById('contextSheetBackdrop').classList.add('visible');
     }
 
-    function closeContextMenu() { contextSheet.classList.remove('visible'); }
+    function updateContextMushafLabel() {
+      const label = document.getElementById('contextMushafLabel');
+      if (label) label.textContent = getVariantInfo(currentMushafVariant).nameAr;
+    }
+
+    function closeContextMenu() {
+      contextSheet.classList.remove('visible');
+      document.getElementById('contextSheetBackdrop').classList.remove('visible');
+    }
     function navigateToJuz()   { closeContextMenu(); openJuzSelector(); }
     function navigateToSurah() { closeContextMenu(); openSurahSelector(); }
     function navigateToPage()  { closeContextMenu(); openPageSelector(); }
@@ -2343,11 +2657,13 @@
     ];
 
     let currentMushafVariant = localStorage.getItem('quranV3Variant') || 'mushaf-colored';
+    document.body.setAttribute('data-variant', currentMushafVariant);
 
     function setMushafVariant(variantId) {
       if (variantId !== currentMushafVariant) {
         currentMushafVariant = variantId;
         localStorage.setItem('quranV3Variant', variantId);
+        document.body.setAttribute('data-variant', variantId);
         updateVariantUI();
         updateContent();
         const v = getVariantInfo(variantId);
@@ -2357,6 +2673,10 @@
 
     function getVariantInfo(variantId) {
       return MUSHAF_VARIANTS.find(v => v.id === variantId) || MUSHAF_VARIANTS[0];
+    }
+    function getImagePath(variantId, page, ext) {
+      const dir = variantId === 'mushaf-borderd' ? 'mushaf-2' : `mushaf pages/${variantId}`;
+      return `${dir}/${page}.${ext}`;
     }
 
     function updateVariantUI() {
@@ -2381,7 +2701,7 @@
         const thumb = document.createElement('div');
         thumb.className = 'mushaf-card-thumb';
         const img = document.createElement('img');
-        img.src = `mushaf pages/${v.id}/001.${v.ext}`;
+        img.src = getImagePath(v.id, '001', v.ext);
         img.alt = v.nameAr;
         img.loading = 'lazy';
         img.onerror = function() { this.style.display = 'none'; };
@@ -2552,8 +2872,7 @@
       const v = getVariantInfo(currentMushafVariant);
       caches.open(cacheName).then(cache => {
         for (let i = 1; i <= total; i++) {
-          const page = i.toString().padStart(3, '0'); const url = 
-`mushaf pages/${currentMushafVariant}/${page}.${v.ext}`;
+          const page = i.toString().padStart(3, '0'); const url = getImagePath(currentMushafVariant, page, v.ext);
           fetch(url).then(res => { if(res.ok) cache.put(url, res.clone()); count++; if(count===total) finish(); }).catch(()=>{ count++; if(count===total) finish(); });
         }
         function finish() {
@@ -2568,45 +2887,132 @@
 
     // ========== SEARCH ENGINE ==========
     let searchTimeout = null;
+
+    function normalizeArabic(text) {
+      return text.replace(/[أإآا]/g, 'ا')
+                 .replace(/[ؤ]/g, 'و')
+                 .replace(/[ئىي]/g, 'ي')
+                 .replace(/[ة]/g, 'ه')
+                 .replace(/[ًٌٍَُِّْٓٔﹰﹱﹲﹳﹴﹶﹷﹸﹹﹺﹻﹼﹽﹾﹿ]/g, '')
+                 .replace(/\u0652|\u064e|\u064f|\u0650|\u064b|\u064c|\u064d|\u0651/g, '')
+                 .trim();
+    }
+
+    function onSearchInput(value) {
+      const clearBtn = document.getElementById('searchClearBtn');
+      clearBtn.classList.toggle('visible', value.length > 0);
+      if (value.trim().length >= 2) {
+        handleGlobalSearch(value);
+      } else {
+        document.getElementById('searchResults').innerHTML =
+          '<div class="search-hint"><div class="search-hint-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>اكتب كلمة للبحث في القرآن الكريم<br><span style="font-size:0.8rem;opacity:0.6;">يمكنك البحث في الآيات وأسماء السور</span></div>';
+      }
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInput').focus();
+      onSearchInput('');
+    }
+
+    function toggleSearchOverlay(action = 'toggle') {
+      const overlay = document.getElementById('searchOverlay');
+      if (action === 'close') {
+          overlay.classList.remove('active');
+          document.getElementById('searchBackdrop').classList.remove('active');
+      } else {
+          overlay.classList.toggle('active');
+          document.getElementById('searchBackdrop').classList.toggle('active');
+      }
+      if (overlay.classList.contains('active')) {
+        document.getElementById('searchInput').focus();
+        onSearchInput(document.getElementById('searchInput').value);
+      }
+    }
+
     function handleGlobalSearch(query) {
       query = query.trim();
       const resultsDiv = document.getElementById('searchResults');
-      if (!query) {
-        resultsDiv.innerHTML = '<div class="search-hint"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:0.3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>اكتب كلمة للبحث في جميع السور</div>';
-        return;
-      }
-      resultsDiv.innerHTML = '<div style="text-align:center; padding:24px; color:var(--accent); font-size:0.95rem;">جاري البحث...</div>';
+      if (!query || query.length < 2) return;
+
+      resultsDiv.innerHTML = '<div class="search-loading"><div class="spinner"></div>جاري البحث...</div>';
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-        fetch(`https://api.alquran.cloud/v1/search/${query}/all/quran-simple-clean`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.code === 200 && data.data.count > 0) {
-              const exactRegex = new RegExp('(^|[^\\p{L}])' + query + '([^\\p{L}]|$)', 'ui');
-              const exactMatches = data.data.matches.filter(m => exactRegex.test(m.text));
-              if (exactMatches.length > 0) {
-                let html = `<div style="text-align:center; margin-bottom:10px; color:var(--accent); font-weight:700; font-size:0.9rem;">${exactMatches.length} نتيجة</div>`;
-                html += exactMatches.map(m => `
-                  <div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
-                    <div class="res-meta">
-                      <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                      ${m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim()} — آية ${m.numberInSurah}
-                    </div>
-                    <div class="res-text">${m.text.replace(new RegExp('(^|[^\\p{L}])(' + query + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div>
+        const normalizedQuery = normalizeArabic(query);
+        const surahResults = SURAH_MAP.filter(s => normalizeArabic(s.name).includes(normalizedQuery));
+        Promise.all([
+          fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/quran-simple-clean`)
+            .then(r => r.json()).catch(() => null),
+        ]).then(([apiData]) => {
+          let html = '';
+          // Surah results
+          if (surahResults.length > 0) {
+            html += '<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>السور</div>';
+            surahResults.forEach(s => {
+              html += `<div class="search-result-item" onclick="goToPage(${s.page}); toggleSearchOverlay('close');">
+                <div class="search-result-surah">
+                  <div class="search-result-surah-num">${s.number}</div>
+                  <div class="search-result-surah-name">${s.name.replace(new RegExp(normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<span class="search-highlight">${m}</span>`)}</div>
+                  <div class="search-result-surah-page">صفحة ${s.page}</div>
+                </div>
+              </div>`;
+            });
+          }
+          // Ayah results
+          if (apiData && apiData.code === 200 && apiData.data.count > 0) {
+            const queryPattern = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const exactMatches = apiData.data.matches.filter(m => {
+              const normText = normalizeArabic(m.text);
+              return normText.includes(normalizedQuery);
+            });
+            if (exactMatches.length > 0) {
+              const label = surahResults.length > 0 ? 'الآيات' : `${exactMatches.length} نتيجة`;
+              html += `<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${label}</div>`;
+              const display = exactMatches.slice(0, 25);
+              html += display.map(m => {
+                const normText = normalizeArabic(m.text);
+                const idx = normText.indexOf(normalizedQuery);
+                let displayText = m.text;
+                if (idx !== -1) {
+                  const re = new RegExp(normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split('').join('[ًٌٍَُِّْٓٔ]*?'), 'gi');
+                  displayText = m.text.replace(re, match => `<span class="search-highlight">${match}</span>`);
+                }
+                return `<div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
+                  <div class="res-meta">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    ${m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim()} — آية ${m.numberInSurah}
                   </div>
-                `).join('');
-                resultsDiv.innerHTML = html;
-              } else {
-                resultsDiv.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-hint);">لا توجد كلمة مطابقة تماماً لـ "${query}"</div>`;
+                  <div class="res-text">${displayText}</div>
+                </div>`;
+              }).join('');
+              if (exactMatches.length > 25) {
+                html += `<div style="text-align:center;padding:10px;color:var(--text-hint);font-size:0.85rem;">و ${exactMatches.length - 25} نتيجة أخرى...</div>`;
               }
-            } else {
-              resultsDiv.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-hint);">لا توجد نتائج لـ "${query}"</div>`;
+            } else if (surahResults.length === 0) {
+              html = `<div class="search-empty">لا توجد نتائج لـ "<strong>${query}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">حاول بكلمة مختلفة</span></div>`;
             }
-          })
-          .catch(() => {
-            resultsDiv.innerHTML = '<div style="text-align:center; padding:24px; color:var(--danger);">تعذر البحث، تأكد من الاتصال بالإنترنت</div>';
-          });
-      }, 500);
+          } else if (surahResults.length === 0) {
+            html = `<div class="search-empty">لا توجد نتائج لـ "<strong>${query}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">حاول بكلمة مختلفة</span></div>`;
+          }
+          resultsDiv.innerHTML = html;
+        }).catch(() => {
+          if (surahResults.length > 0) {
+            let html = '<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>السور</div>';
+            surahResults.forEach(s => {
+              html += `<div class="search-result-item" onclick="goToPage(${s.page}); toggleSearchOverlay('close');">
+                <div class="search-result-surah">
+                  <div class="search-result-surah-num">${s.number}</div>
+                  <div class="search-result-surah-name">${s.name}</div>
+                  <div class="search-result-surah-page">صفحة ${s.page}</div>
+                </div>
+              </div>`;
+            });
+            resultsDiv.innerHTML = html;
+          } else {
+            resultsDiv.innerHTML = '<div class="search-error">تعذر البحث، تأكد من الاتصال بالإنترنت</div>';
+          }
+        });
+      }, 400);
     }
 
     function jumpToSearchResult(ayahNumber) {
@@ -2711,6 +3117,11 @@
 
       expandedReciterSelect.value = currentReciter;
       updateReciterUI();
+
+      // Backdrop click closes sheets
+      document.getElementById('contextSheetBackdrop').addEventListener('click', closeContextMenu);
+      document.getElementById('audioSheetBackdrop').addEventListener('click', closeAudioExpanded);
+      document.getElementById('tafsirSheetBackdrop').addEventListener('click', closeTafsirModal);
 
       setupSheetDragClose(contextSheet);
       setupSheetDragClose(document.getElementById('tafsirModal'));
