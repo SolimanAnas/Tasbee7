@@ -656,8 +656,10 @@ function commonInit() {
   // We'll call updateContent from the mode's own onload, not here.
 
   // gesture init
-  initGestures();
-  disableNativeLongPress();
+  if (window.__quranCustomGestures !== true) {
+    initGestures();
+    disableNativeLongPress();
+  }
 
   // page roller init
   initPageRoller();
