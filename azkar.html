@@ -183,8 +183,8 @@ body{
 /* ===== Circle styles ===== */
 .counter-anchor {
   position: relative;
-  width: min(60vw, 260px);     
-  height: min(60vw, 260px);
+  width: min(42vw, 182px);     /* reduced by 30% from min(60vw, 260px) */
+  height: min(42vw, 182px);
   margin: 0 auto;
   flex-shrink: 0;               
 }
@@ -237,20 +237,20 @@ circle {
 }
 
 .count-label {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-secondary);
-  margin-bottom: 5px;
+  margin-bottom: 3px;
 }
 
 .count-total {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary); /* استخدام لون هادئ ليكون مريحاً للعين */
-  margin-top: -2px; /* لتقليل المسافة بينه وبين الرقم الكبير */
+  color: var(--text-secondary);
+  margin-top: -2px;
 }
 
 .count-number {
-  font-size: clamp(36px, 10vw, 54px);
+  font-size: clamp(28px, 7vw, 40px);
   font-weight: 700;
   line-height: 1;
   color: var(--text-primary);
@@ -278,6 +278,19 @@ circle {
   justify-content:center;
   flex-wrap:wrap;               
   z-index: 50; 
+  transition: bottom 0.3s ease;
+}
+
+body.player-active .controls {
+  bottom: calc(140px + env(safe-area-inset-bottom));
+}
+
+.page-wrapper {
+  transition: padding-bottom 0.3s ease;
+}
+
+body.player-active .page-wrapper {
+  padding-bottom: 220px;
 }
 
 .btn{
@@ -444,6 +457,92 @@ circle {
   text-align: center;
   font-weight: 500;
 }
+
+/* --- Sound Options Popup --- */
+.sound-options {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 500;
+}
+
+.sound-options.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sound-options-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 20px;
+  width: 85%;
+  max-width: 320px;
+  transform: scale(0.95);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sound-options.active .sound-options-content {
+  transform: scale(1);
+}
+
+.sound-options-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.sound-option-btn {
+  background: var(--bg-main);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s ease;
+}
+
+.sound-option-btn:active {
+  background: var(--accent-muted);
+}
+
+.sound-option-btn.active-source {
+  border-color: var(--accent-main);
+  color: var(--accent-main);
+  font-weight: 600;
+}
+
+.sound-option-btn .check {
+  margin-right: auto;
+  color: var(--accent-main);
+  font-weight: bold;
+  opacity: 0;
+}
+
+.sound-option-btn.active-source .check {
+  opacity: 1;
+}
 </style>
 </head>
 
@@ -452,7 +551,7 @@ circle {
 <div class="top-bar">
   <div class="top-bar-group">
     <div class="icon-btn" onclick="goHome()">🏠</div>
-    <div class="icon-btn" onclick="toggleAudio()" title="تشغيل الصوت">🔊</div>
+    <div class="icon-btn" id="soundBtn" title="تشغيل الصوت">🔊</div>
   </div>
   
   <div class="zikr-index-counter" id="zikrIndexCounter"></div>
@@ -523,6 +622,22 @@ circle {
   </div>
 </div>
 
+<!-- Sound Options Popup -->
+<div class="sound-options" id="soundOptions" onclick="if(event.target===this) closeSoundOptions()">
+  <div class="sound-options-content">
+    <div class="sound-options-title">خيارات الصوت</div>
+    <button class="sound-option-btn" id="optMorning" onclick="setAudioSource('morning')">
+      <span>☀️</span><span>أذكار الصباح</span><span class="check">✓</span>
+    </button>
+    <button class="sound-option-btn" id="optNight" onclick="setAudioSource('night')">
+      <span>🌙</span><span>أذكار المساء</span><span class="check">✓</span>
+    </button>
+    <button class="sound-option-btn" onclick="hidePlayerFromOptions()">
+      <span>👁️</span><span>إخفاء المشغل</span>
+    </button>
+  </div>
+</div>
+
 <!-- Floating Mini Audio Player -->
 <div class="mini-player" id="miniPlayer" role="region" aria-label="مشغل الصوت">
   <button class="mini-player-btn" id="playPauseBtn" onclick="togglePlayPause()" aria-label="تشغيل/إيقاف">▶</button>
@@ -564,14 +679,58 @@ function checkDailyResetAzkar() {
     }
 }
 
-/* Swipe */
+/* Swipe + Pinch-to-zoom on zikr card */
 const swipeArea = document.querySelector(".zikr-container");
+let pinchInitialDistance = 0;
+let pinchInitialSize = 28;
+let isPinching = false;
+const FONT_MIN = 22;
+const FONT_MAX = 40;
+
+function getDistance(t1, t2) {
+  const dx = t1.clientX - t2.clientX;
+  const dy = t1.clientY - t2.clientY;
+  return Math.hypot(dx, dy);
+}
+
 swipeArea.addEventListener("touchstart", e => {
-  touchStartX = e.changedTouches[0].screenX;
-});
+  if (e.touches.length === 2) {
+    isPinching = true;
+    pinchInitialDistance = getDistance(e.touches[0], e.touches[1]);
+    const currentSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--zikr-size'));
+    pinchInitialSize = isNaN(currentSize) ? 28 : currentSize;
+  } else if (e.touches.length === 1) {
+    touchStartX = e.changedTouches[0].screenX;
+  }
+}, { passive: true });
+
+swipeArea.addEventListener("touchmove", e => {
+  if (isPinching && e.touches.length === 2) {
+    const dist = getDistance(e.touches[0], e.touches[1]);
+    if (pinchInitialDistance > 0) {
+      const scale = dist / pinchInitialDistance;
+      let newSize = Math.round(pinchInitialSize * scale);
+      newSize = Math.max(FONT_MIN, Math.min(FONT_MAX, newSize));
+      document.documentElement.style.setProperty('--zikr-size', newSize + 'px');
+      const slider = document.getElementById('fontSizeSlider');
+      if (slider) slider.value = newSize;
+      localStorage.setItem("zikrFontSize", newSize);
+    }
+    if (e.cancelable) e.preventDefault();
+  }
+}, { passive: false });
+
 swipeArea.addEventListener("touchend", e => {
+  if (isPinching) {
+    if (e.touches.length === 0) isPinching = false;
+    return;
+  }
   touchEndX = e.changedTouches[0].screenX;
   handleSwipe();
+});
+
+swipeArea.addEventListener("touchcancel", () => {
+  isPinching = false;
 });
 
 function handleSwipe() {
@@ -730,13 +889,15 @@ function goHome() {
 
 /* --- Audio Mini Player --- */
 let audio = null;
+let audioSource = type; // 'morning' or 'night' — defaults to URL type
+const SOURCES = {
+  morning: 'assets/media/Azkar-morning.mp3',
+  night:   'assets/media/Azkar-night.mp3'
+};
 
 function initAudio() {
   if (audio) return audio;
-  const audioFile = (type === 'morning')
-    ? 'assets/media/Azkar-morning.mp3'
-    : 'assets/media/Azkar-night.mp3';
-  audio = new Audio(audioFile);
+  audio = new Audio(SOURCES[audioSource] || SOURCES.morning);
   audio.preload = 'metadata';
 
   audio.addEventListener('play', () => {
@@ -764,9 +925,19 @@ function initAudio() {
   return audio;
 }
 
+function showMiniPlayer() {
+  document.getElementById('miniPlayer').classList.add('active');
+  document.body.classList.add('player-active');
+}
+
+function hideMiniPlayer() {
+  document.getElementById('miniPlayer').classList.remove('active');
+  document.body.classList.remove('player-active');
+}
+
 function toggleAudio() {
   const a = initAudio();
-  document.getElementById('miniPlayer').classList.add('active');
+  showMiniPlayer();
   if (a.paused) {
     a.play().catch(err => console.warn('Audio play failed:', err));
   } else {
@@ -788,7 +959,7 @@ function closeMiniPlayer() {
     audio.pause();
     audio.currentTime = 0;
   }
-  document.getElementById('miniPlayer').classList.remove('active');
+  hideMiniPlayer();
 }
 
 function seekAudio(e) {
@@ -806,6 +977,119 @@ function formatTime(seconds) {
   const sec = Math.floor(seconds % 60);
   return `${min}:${sec.toString().padStart(2, '0')}`;
 }
+
+/* --- Sound Options (long-press) --- */
+function openSoundOptions() {
+  if (navigator.vibrate) navigator.vibrate(30);
+  // Mark current selection
+  document.getElementById('optMorning').classList.toggle('active-source', audioSource === 'morning');
+  document.getElementById('optNight').classList.toggle('active-source', audioSource === 'night');
+  document.getElementById('soundOptions').classList.add('active');
+}
+
+function closeSoundOptions() {
+  document.getElementById('soundOptions').classList.remove('active');
+}
+
+function setAudioSource(src) {
+  if (audioSource === src && audio) {
+    closeSoundOptions();
+    return;
+  }
+  audioSource = src;
+  // Reset audio with new source
+  const wasPlaying = audio && !audio.paused;
+  if (audio) {
+    audio.pause();
+    audio.src = SOURCES[src];
+    audio.load();
+  } else {
+    initAudio();
+  }
+  document.getElementById('currentTime').innerText = '0:00';
+  document.getElementById('totalTime').innerText = '0:00';
+  document.getElementById('progressFill').style.width = '0%';
+  showMiniPlayer();
+  if (wasPlaying) {
+    audio.play().catch(err => console.warn('Audio play failed:', err));
+  }
+  closeSoundOptions();
+}
+
+function hidePlayerFromOptions() {
+  closeMiniPlayer();
+  closeSoundOptions();
+}
+
+/* --- Long-press handler on 🔊 icon --- */
+(function setupSoundBtn() {
+  const soundBtn = document.getElementById('soundBtn');
+  let pressTimer = null;
+  let longPressFired = false;
+  let pressActive = false;
+  const LONG_PRESS_MS = 500;
+
+  function startPress(e) {
+    if (pressActive) return;
+    pressActive = true;
+    longPressFired = false;
+    pressTimer = setTimeout(() => {
+      longPressFired = true;
+      openSoundOptions();
+    }, LONG_PRESS_MS);
+  }
+
+  function endPress(e) {
+    if (!pressActive) return;
+    pressActive = false;
+    clearTimeout(pressTimer);
+    if (!longPressFired) {
+      toggleAudio();
+    }
+  }
+
+  function cancelPress() {
+    pressActive = false;
+    clearTimeout(pressTimer);
+  }
+
+  // Use pointer events to unify mouse + touch
+  if ('PointerEvent' in window) {
+    soundBtn.addEventListener('pointerdown', startPress);
+    soundBtn.addEventListener('pointerup', endPress);
+    soundBtn.addEventListener('pointerleave', cancelPress);
+    soundBtn.addEventListener('pointercancel', cancelPress);
+  } else {
+    soundBtn.addEventListener('touchstart', startPress, { passive: true });
+    soundBtn.addEventListener('touchend', endPress);
+    soundBtn.addEventListener('touchcancel', cancelPress);
+    soundBtn.addEventListener('mousedown', startPress);
+    soundBtn.addEventListener('mouseup', endPress);
+    soundBtn.addEventListener('mouseleave', cancelPress);
+  }
+  // Prevent context menu on long-press
+  soundBtn.addEventListener('contextmenu', e => e.preventDefault());
+})();
+
+/* --- Swipe left/right on mini player to hide --- */
+(function setupPlayerSwipe() {
+  const player = document.getElementById('miniPlayer');
+  let pStartX = 0, pStartY = 0;
+  const SWIPE_THRESHOLD = 60;
+
+  player.addEventListener('touchstart', e => {
+    pStartX = e.changedTouches[0].screenX;
+    pStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  player.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].screenX - pStartX;
+    const dy = e.changedTouches[0].screenY - pStartY;
+    if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      closeMiniPlayer();
+    }
+  });
+})();
 
 /* Load saved preferences & Init */
 window.addEventListener("load", () => {
