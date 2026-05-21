@@ -157,7 +157,7 @@ self.addEventListener("notificationclick", event => {
   if (event.action === "dismiss") return;
   
   const targetUrl = event.notification.data?.url || DEEP_LINKS.default;
-  const fullTargetUrl = new URL(targetUrl, self.location.origin).href;
+  const fullTargetUrl = new URL(targetUrl, self.location.href).href;
   
   console.log("👆 Notification clicked, opening:", fullTargetUrl);
   

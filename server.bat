@@ -1,13 +1,37 @@
 @echo off
-echo Starting Python server...
+title Tasbee7 Flask Server
+cd /d "%~dp0"
 
-:: Open the server in a new command prompt window so you can see its logs
+echo ====================================
+echo  Tasbee7 - Flask Server Launcher
+echo ====================================
+echo.
+
+:: Check Python
+where python >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERROR] Python not found. Install Python and try again.
+    pause
+    exit /b 1
+)
+
+echo [1/2] Installing Flask...
+python -m pip install flask -q
+
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to install Flask.
+    pause
+    exit /b 1
+)
+
+echo [2/2] Starting Flask server...
 start cmd /k "python server.py"
 
-:: Wait 2 seconds to give the server time to fully start up
-timeout /t 2 /nobreak >nul
+timeout /t 3 /nobreak >nul
 
-echo Opening index.html...
-
-:: Open the HTML file in your default web browser
-start index.html
+echo.
+echo Opening http://localhost:5000 ...
+start http://localhost:5000
+echo.
+echo Server is running. Close the Flask window to stop.
+echo ====================================
