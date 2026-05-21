@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v8"; // bumped for icon path fix
+const CACHE_NAME = "zad-muslim-v9"; // bumped for push server config
 
 // تأكد من أن المسارات في STATIC_ASSETS مطابقة تماماً للموجود في مجلدات مشروعك.
 const STATIC_ASSETS = [
@@ -176,4 +176,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v8 loaded");
+console.log("✅ Service Worker v9 loaded");
