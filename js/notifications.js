@@ -330,9 +330,9 @@ const NotificationSystem = {
 
   // ========== SHOW NOTIFICATION ==========
   async showNotification(title, options = {}) {
-    if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); return; }
-    if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); return; }
-    if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return; }
+    if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); return false; }
+    if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); return false; }
+    if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return false; }
 
     const notifOptions = {
       icon: './icons/icon-192.png',
@@ -351,14 +351,17 @@ const NotificationSystem = {
       if (!this.swRegistration) throw new Error('No SW registration available');
       await this.swRegistration.showNotification(title, notifOptions);
       console.log('🔔 Notification sent via SW:', title);
+      return true;
     } catch (err) {
       console.warn('⚠️ SW notification failed, using Notification API:', err.message);
       try {
         const n = new Notification(title, notifOptions);
         console.log('🔔 Notification sent via Notification API:', title);
         setTimeout(() => n.close(), 5000);
+        return true;
       } catch (e2) {
         console.error('❌ All notification methods failed:', e2);
+        return false;
       }
     }
   },
