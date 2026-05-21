@@ -470,12 +470,20 @@
           body: 'نظام الإشعارات يعمل بكفاءة! ✅',
           tag: 'test',
           forceQuiet: true,
+          forceEnable: true,
           data: { url: './index.html', type: 'test' }
         });
         if(result) { alert('✅ تم عرض الإشعار بنجاح'); }
-        else { alert('⚠️ لم يتم عرض الإشعار (قد يكون مغلقاً أو محظوراً)'); }
+        else { alert('⚠️ لم يتم عرض الإشعار - تحقق من صلاحية الإشعارات في المتصفح'); }
       } catch(e) {
-        alert('❌ فشل الإشعار: ' + e.message);
+        alert('❌ فشل الإشعار عبر النظام: ' + e.message);
+        alert('💡 تجربة إشعار مباشر...');
+        try {
+          const n = new Notification('🔔 اختبار مباشر', { body: 'هذا إشعار مباشر من المتصفح ✅' });
+          setTimeout(() => n.close(), 5000);
+        } catch(e2) {
+          alert('❌ فشل الإشعار المباشر أيضاً: ' + e2.message + ' - المتصفح قد لا يدعم الإشعارات');
+        }
       }
     }
   </script>
