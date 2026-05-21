@@ -293,6 +293,9 @@ const NotificationSystem = {
   },
 
   // ========== STATE ==========
+  // Settings schema version — bumped to auto-fix corrupted localStorage from older buggy versions
+  SETTINGS_VERSION: 2,
+
   generateUserId() {
     let id = localStorage.getItem('notificationUserId');
     if (!id) {
@@ -306,7 +309,14 @@ const NotificationSystem = {
     try {
       const savedSettings = localStorage.getItem('notificationSettings');
       if (savedSettings) {
-        this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+        const parsed = JSON.parse(savedSettings);
+        // Version 1 (no _version field) may have corrupted enabled=false
+        // Reset to true so scheduled notifications work again
+        if (!parsed._version) {
+          parsed.enabled = true;
+          parsed._version = this.SETTINGS_VERSION;
+        }
+        this.settings = { ...this.settings, ...parsed };
       }
 
       const savedTimes = localStorage.getItem('prayerTimes');
@@ -324,18 +334,21 @@ const NotificationSystem = {
   },
 
   saveState() {
-    localStorage.setItem('notificationSettings', JSON.stringify(this.settings));
+    const settingsToSave = { ...this.settings, _version: this.SETTINGS_VERSION };
+    localStorage.setItem('notificationSettings', JSON.stringify(settingsToSave));
     localStorage.setItem('notificationState', JSON.stringify(this.state));
   },
 
   // ========== SHOW NOTIFICATION ==========
   async showNotification(title, options = {}) {
+    this._lastError = null;
+
     if (options.forceEnable) {
-      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return false; }
+      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
     } else {
-      if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); return false; }
-      if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); return false; }
-      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return false; }
+      if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); this._lastError = 'settings_disabled'; return false; }
+      if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); this._lastError = 'quiet_hours'; return false; }
+      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
     }
 
     const notifOptions = {
@@ -352,7 +365,7 @@ const NotificationSystem = {
       if (!this.swRegistration) {
         this.swRegistration = await navigator.serviceWorker.ready;
       }
-      if (!this.swRegistration) throw new Error('No SW registration available');
+      if (!this.swRegistration) throw new Error('لا يوجد Service Worker مسجل');
       await this.swRegistration.showNotification(title, notifOptions);
       console.log('🔔 Notification sent via SW:', title);
       return true;
@@ -365,6 +378,7 @@ const NotificationSystem = {
         return true;
       } catch (e2) {
         console.error('❌ All notification methods failed:', e2);
+        this._lastError = 'SW: ' + err.message + ' | API: ' + e2.message;
         return false;
       }
     }
