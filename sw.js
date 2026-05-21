@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v7"; // bumped for notifications.js v4.0 fix
+const CACHE_NAME = "zad-muslim-v8"; // bumped for icon path fix
 
 // تأكد من أن المسارات في STATIC_ASSETS مطابقة تماماً للموجود في مجلدات مشروعك.
 const STATIC_ASSETS = [
@@ -19,10 +19,10 @@ const STATIC_ASSETS = [
   "./css/style.css",
   "./js/notifications.js",
   "./js/quran-common.js",
-  "./icon/icon-192.png", // تم التوحيد مع مسار index.html
-  "./icon/icon-512.png", // تم التوحيد
-  "./icon/duaa.png",
-  "./icon/settings.svg"
+  "./icons/icon-192.png",
+  "./icons/icon_512.png",
+  "./icons/duaa.png",
+  "./icons/settings.svg"
 ];
 
 const DEEP_LINKS = {
@@ -128,8 +128,8 @@ self.addEventListener("push", event => {
   
   const options = {
     body: data.body || "زاد المسلم",
-    icon: "./icon/icon-192.png", // تم التوحيد مع مسار index.html
-    badge: "./icon/icon-192.png",
+    icon: "./icons/icon-192.png",
+    badge: "./icons/icon-192.png",
     vibrate: [200, 100, 200],
     tag: data.tag || "zad-muslim",
     renotify: true,
@@ -163,13 +163,14 @@ self.addEventListener("notificationclick", event => {
   
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
-      // Check if already open
+      const targetPath = new URL(fullTargetUrl).pathname;
       for (const client of clientList) {
-        if (client.url === fullTargetUrl || client.url.includes(targetUrl.replace('./', ''))) {
+        const clientPath = new URL(client.url).pathname;
+        if (clientPath === targetPath) {
+          client.navigate(fullTargetUrl);
           return client.focus();
         }
       }
-      // Open new
       return clients.openWindow(fullTargetUrl);
     })
   );
