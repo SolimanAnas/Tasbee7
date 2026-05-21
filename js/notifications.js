@@ -1,4 +1,4 @@
-// js/notifications.js - FIXED v4.0
+// js/notifications.js - FIXED v4.1
 // Islamic Notification System — Local Mode with Push Support
 
 const NotificationSystem = {
@@ -350,9 +350,8 @@ const NotificationSystem = {
     if (Notification.permission !== 'granted') return;
 
     const notifOptions = {
-      // FIX: Corrected icon path — was './icons/' (plural), correct is './icon/'
-      icon: './icon/icon-192.png',
-      badge: './icon/icon-192.png',
+      icon: './icons/icon-192.png',
+      badge: './icons/icon-192.png',
       vibrate: [200, 100, 200],
       tag: 'zad-muslim',
       renotify: true,
