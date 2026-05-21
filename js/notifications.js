@@ -330,9 +330,9 @@ const NotificationSystem = {
 
   // ========== SHOW NOTIFICATION ==========
   async showNotification(title, options = {}) {
-    if (!this.settings.enabled) return;
-    if (this.isQuietHours() && !options.forceQuiet) return;
-    if (Notification.permission !== 'granted') return;
+    if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); return; }
+    if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); return; }
+    if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return; }
 
     const notifOptions = {
       icon: './icons/icon-192.png',
@@ -345,16 +345,18 @@ const NotificationSystem = {
     };
 
     try {
-      // FIX: Recover swRegistration if null (e.g., opened on notifications.html directly)
       if (!this.swRegistration) {
         this.swRegistration = await navigator.serviceWorker.ready;
       }
+      if (!this.swRegistration) throw new Error('No SW registration available');
       await this.swRegistration.showNotification(title, notifOptions);
+      console.log('🔔 Notification sent via SW:', title);
     } catch (err) {
-      // FIX: Graceful fallback to Notification constructor when SW is unavailable
       console.warn('⚠️ SW notification failed, using Notification API:', err.message);
       try {
-        new Notification(title, notifOptions);
+        const n = new Notification(title, notifOptions);
+        console.log('🔔 Notification sent via Notification API:', title);
+        setTimeout(() => n.close(), 5000);
       } catch (e2) {
         console.error('❌ All notification methods failed:', e2);
       }
