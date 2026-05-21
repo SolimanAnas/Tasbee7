@@ -5,7 +5,7 @@ const NotificationSystem = {
 
   // ========== CONFIG ==========
   config: {
-    serverUrl: 'https://zad-push-server.your-account.workers.dev',  // ← Replace with your actual worker URL
+    serverUrl: 'https://zad-push-server.solimananas2012.workers.dev',
     vapidPublicKey: 'BFBoJ96GEU6t_hIBX_MaWHQRTSdChk2yA78dDNcQuNyXfiL2gFVnyRsrZW5d1kO5aEY2oCkafBQHX7kRU3tS1Y',
     quietHoursStart: 23,
     quietHoursEnd: 5,
