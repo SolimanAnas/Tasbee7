@@ -458,16 +458,25 @@
       alert('ميزة الضبط اليدوي قيد التطوير وسيتم توفيرها قريباً ⏳');
     }
 
-    function testNotification() {
+    async function testNotification() {
       if(typeof NotificationSystem === 'undefined') { alert('⚠️ نظام الإشعارات لم يتم تحميله بعد'); return; }
       if(Notification.permission === 'denied') { alert('⚠️ تم رفض الإشعارات مسبقاً. يرجى السماح من إعدادات المتصفح.'); return; }
-      NotificationSystem.showNotification('🔔 اختبار الإشعارات', {
-        body: 'نظام الإشعارات يعمل بكفاءة! ✅',
-        tag: 'test',
-        forceQuiet: true,
-        data: { url: './index.html', type: 'test' }
-      });
-      setTimeout(() => alert('✅ تم إرسال الإشعار التجريبي'), 500);
+      if(Notification.permission === 'default') {
+        const result = await Notification.requestPermission();
+        if(result !== 'granted') { alert('⚠️ لم يتم منح صلاحية الإشعارات'); return; }
+      }
+      try {
+        const result = await NotificationSystem.showNotification('🔔 اختبار الإشعارات', {
+          body: 'نظام الإشعارات يعمل بكفاءة! ✅',
+          tag: 'test',
+          forceQuiet: true,
+          data: { url: './index.html', type: 'test' }
+        });
+        if(result) { alert('✅ تم عرض الإشعار بنجاح'); }
+        else { alert('⚠️ لم يتم عرض الإشعار (قد يكون مغلقاً أو محظوراً)'); }
+      } catch(e) {
+        alert('❌ فشل الإشعار: ' + e.message);
+      }
     }
   </script>
 </body>
