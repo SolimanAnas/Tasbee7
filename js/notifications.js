@@ -233,8 +233,8 @@ const NotificationSystem = {
 
   // AlAdhan API method codes
   getCalcMethodCode() {
-    const map = { MWL: 3, UmmAlQura: 4, Egypt: 5, Karachi: 1 };
-    return map[localStorage.getItem('calcMethod') || 'MWL'] || 3;
+    const map = { MWL: 3, UmmAlQura: 4, Egypt: 5, Karachi: 1, UAE: 20 };
+    return map[localStorage.getItem('calcMethod') || 'UAE'] || 3;
   },
 
   // FIX: New method — fetch by coordinates (aligns with index.html GPS flow)

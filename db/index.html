@@ -539,6 +539,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
         <div class="s-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg></div>
         <div class="s-text" style="flex:1;"><div class="s-title">طريقة الحساب</div>
           <select id="calcMethod" onchange="setCalcMethod(this.value)" class="input-styled" style="padding:8px; margin-top:6px;">
+            <option value="UAE">الإمارات - الهيئة العامة للشئون الإسلامية والأوقاف</option>
             <option value="MWL">رابطة العالم الإسلامي</option>
             <option value="UmmAlQura">أم القرى</option>
             <option value="Egypt">الهيئة المصرية</option>
@@ -642,7 +643,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
 <script>
 let countdownInterval = null;
-let calcMethod = localStorage.getItem('calcMethod') || 'MWL';
+let calcMethod = localStorage.getItem('calcMethod') || 'UAE';
 const prayerNamesAr = { fajr:'الفجر', sunrise:'الشروق', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء' };
 
 function formatTimeArabic12h(d) {
@@ -678,6 +679,7 @@ function getCalculationMethod() {
     case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura();
     case 'Egypt':     return adhan.CalculationMethod.Egyptian();
     case 'Karachi':   return adhan.CalculationMethod.Karachi();
+    case 'UAE':       return adhan.CalculationMethod.Dubai();
     default:          return adhan.CalculationMethod.MuslimWorldLeague();
   }
 }
