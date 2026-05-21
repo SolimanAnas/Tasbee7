@@ -8,8 +8,7 @@ const NotificationSystem = {
     serverUrl: '',              // Set to your push server URL to enable push mode
     quietHoursStart: 23,
     quietHoursEnd: 5,
-    preReminderMinutes: 10,
-    apiEndpoint: 'https://api.aladhan.com/v1/timings'
+    preReminderMinutes: 10
   },
 
   // ========== SUPPORT CHECK ==========
@@ -231,31 +230,31 @@ const NotificationSystem = {
     await this.fetchPrayerTimesByCity(city, country);
   },
 
-  // AlAdhan API method codes
-  getCalcMethodCode() {
-    const map = { MWL: 3, UmmAlQura: 4, Egypt: 5, Karachi: 1, UAE: 20 };
-    return map[localStorage.getItem('calcMethod') || 'UAE'] || 3;
+  // Use adhan.js library (same as index.html) for consistent prayer times
+  getAdhanMethod() {
+    if (typeof adhan === 'undefined') return null;
+    const method = localStorage.getItem('calcMethod') || 'UAE';
+    switch (method) {
+      case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura();
+      case 'Egypt':     return adhan.CalculationMethod.Egyptian();
+      case 'Karachi':   return adhan.CalculationMethod.Karachi();
+      case 'UAE':       return adhan.CalculationMethod.Dubai();
+      default:          return adhan.CalculationMethod.MuslimWorldLeague();
+    }
   },
 
-  // FIX: New method — fetch by coordinates (aligns with index.html GPS flow)
   async fetchPrayerTimesByCoords(lat, lng) {
     try {
-      const today = new Date();
-      const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
-      const method = this.getCalcMethodCode();
-
-      const url = `${this.config.apiEndpoint}/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      if (data.data && data.data.timings) {
-        this.parsePrayerTimings(data.data.timings);
-        console.log('✅ Prayer times fetched by coordinates');
-      }
+      const calcMethod = this.getAdhanMethod();
+      if (!calcMethod) throw new Error('adhan.js not loaded');
+      calcMethod.madhab = adhan.Madhab.Shafi;
+      const coords = new adhan.Coordinates(lat, lng);
+      const now = new Date();
+      const pt = new adhan.PrayerTimes(coords, now, calcMethod);
+      this.parseAdhanTimes(pt);
+      console.log('✅ Prayer times calculated via adhan.js (coords)');
     } catch (err) {
       console.warn('⚠️ fetchPrayerTimesByCoords failed:', err.message);
-      // Fall back to cached times
       const saved = localStorage.getItem('prayerTimes');
       if (saved) {
         try { this.prayerTimes = { ...this.defaultTimes, ...JSON.parse(saved) }; } catch (e) {}
@@ -265,46 +264,32 @@ const NotificationSystem = {
 
   async fetchPrayerTimesByCity(city, country) {
     try {
-      const today = new Date();
-      const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
-      const method = this.getCalcMethodCode();
-
-      const url = `https://api.aladhan.com/v1/timingsByCity/${dateStr}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${method}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      if (data.data && data.data.timings) {
-        this.parsePrayerTimings(data.data.timings);
-        console.log('✅ Prayer times fetched by city:', city);
-      }
+      const calcMethod = this.getAdhanMethod();
+      if (!calcMethod) throw new Error('adhan.js not loaded');
+      calcMethod.madhab = adhan.Madhab.Shafi;
+      const coords = new adhan.Coordinates(24.7136, 46.6753);
+      const now = new Date();
+      const pt = new adhan.PrayerTimes(coords, now, calcMethod);
+      this.parseAdhanTimes(pt);
+      console.log('✅ Prayer times calculated via adhan.js (city fallback)');
     } catch (err) {
       console.warn('⚠️ fetchPrayerTimesByCity failed:', err.message);
     }
   },
 
-  // Kept for backward compatibility
   async fetchPrayerTimes(city, country) {
     await this.fetchPrayerTimesByCity(city, country);
   },
 
-  parsePrayerTimings(timings) {
+  parseAdhanTimes(pt) {
     this.prayerTimes = {
-      fajr:    this.parseTime(timings.Fajr,    'الفجر'),
-      dhuhr:   this.parseTime(timings.Dhuhr,   'الظهر'),
-      asr:     this.parseTime(timings.Asr,     'العصر'),
-      maghrib: this.parseTime(timings.Maghrib, 'المغرب'),
-      isha:    this.parseTime(timings.Isha,    'العشاء')
+      fajr:    { hour: pt.fajr.getHours(),    minute: pt.fajr.getMinutes(),    name: 'الفجر' },
+      dhuhr:   { hour: pt.dhuhr.getHours(),   minute: pt.dhuhr.getMinutes(),   name: 'الظهر' },
+      asr:     { hour: pt.asr.getHours(),     minute: pt.asr.getMinutes(),     name: 'العصر' },
+      maghrib: { hour: pt.maghrib.getHours(), minute: pt.maghrib.getMinutes(), name: 'المغرب' },
+      isha:    { hour: pt.isha.getHours(),    minute: pt.isha.getMinutes(),    name: 'العشاء' }
     };
     localStorage.setItem('prayerTimes', JSON.stringify(this.prayerTimes));
-  },
-
-  // FIX: AlAdhan sometimes returns "05:12 (+03)" — strip timezone offset
-  parseTime(timeStr, name) {
-    if (!timeStr) return { hour: 0, minute: 0, name };
-    const clean = timeStr.split(' ')[0];
-    const [h, m] = clean.split(':').map(Number);
-    return { hour: h || 0, minute: m || 0, name };
   },
 
   // ========== STATE ==========
