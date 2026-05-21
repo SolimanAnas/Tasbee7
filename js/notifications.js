@@ -414,6 +414,25 @@ const NotificationSystem = {
     this.saveState();
   },
 
+  // ========== PUSH SERVER NOTIFY ==========
+  async tryPushNotify(tag, title, body, extra = {}) {
+    if (!this.settings.pushEnabled || !this.config.serverUrl) return;
+    try {
+      const res = await fetch(`${this.config.serverUrl}/notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title, body, tag,
+          data: { url: extra.url || './index.html', type: tag }
+        })
+      });
+      const result = await res.json();
+      console.log(`📨 Push notified: ${result.sent} delivered`);
+    } catch (e) {
+      console.warn('⚠️ Push notify failed:', e.message);
+    }
+  },
+
   // ========== SCHEDULING ==========
   scheduleChecks() {
     if (this.checkInterval) clearInterval(this.checkInterval);
@@ -423,7 +442,6 @@ const NotificationSystem = {
 
   checkAndNotify() {
     if (!this.settings.enabled) return;
-    if (this.settings.pushEnabled) return; // server handles it
 
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -441,6 +459,7 @@ const NotificationSystem = {
         tag: 'azkar-morning',
         data: { url: './azkar.html?type=morning', type: 'azkar' }
       });
+      this.tryPushNotify('azkar-morning', '🌅 أذكار الصباح', 'اللهم بك أصبحنا — ابدأ يومك بالأذكار', { url: './azkar.html?type=morning' });
       this.markTriggered('azkar-morning');
     }
 
@@ -451,6 +470,7 @@ const NotificationSystem = {
         tag: 'azkar-evening',
         data: { url: './azkar.html?type=night', type: 'azkar' }
       });
+      this.tryPushNotify('azkar-evening', '🌙 أذكار المساء', 'اللهم بك أمسينا — اختتم يومك بالأذكار', { url: './azkar.html?type=night' });
       this.markTriggered('azkar-evening');
     }
 
@@ -463,6 +483,7 @@ const NotificationSystem = {
         tag: 'friday-kahf',
         data: { url: './quran.html?surah=18', type: 'kahf' }
       });
+      this.tryPushNotify('friday-kahf', '🕋 يوم الجمعة المبارك', 'لا تنسَ قراءة سورة الكهف اليوم', { url: './quran.html?surah=18' });
       this.markTriggered('friday-kahf');
     }
 
@@ -476,6 +497,7 @@ const NotificationSystem = {
         tag: 'streak-reminder',
         data: { url: './index.html', type: 'default' }
       });
+      this.tryPushNotify('streak-reminder', '🔥 حافظ على استمراريتك!', `لديك ${this.state.streak} يوم متتالي — لا تكسر السلسلة`);
       this.markTriggered('streak-reminder');
     }
   },
@@ -494,6 +516,7 @@ const NotificationSystem = {
           tag: `pre-${key}`,
           data: { url: './index.html', type: 'prayer' }
         });
+        this.tryPushNotify(`pre-${key}`, `⏰ تذكير: ${prayer.name}`, `باقي ${this.config.preReminderMinutes} دقائق على أذان ${prayer.name}`);
         this.markTriggered(`pre-${key}`);
       }
 
@@ -504,6 +527,7 @@ const NotificationSystem = {
           tag: `prayer-${key}`,
           data: { url: './index.html', type: 'prayer' }
         });
+        this.tryPushNotify(`prayer-${key}`, `🕌 حان وقت ${prayer.name}`, `الآن وقت صلاة ${prayer.name} — حي على الصلاة`);
         this.markTriggered(key);
       }
     }
@@ -571,6 +595,9 @@ const NotificationSystem = {
   },
 
   testPush() {
+    if (this.settings.pushEnabled && this.config.serverUrl) {
+      this.tryPushNotify('test', '🧪 اختبار الإشعارات', 'نظام الإشعارات يعمل بكفاءة! ✅');
+    }
     return this.showNotification('🧪 اختبار الإشعارات', {
       body: 'نظام الإشعارات يعمل بكفاءة! ✅',
       tag: 'test',
