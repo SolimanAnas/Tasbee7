@@ -360,10 +360,11 @@
 
         // حفظ الإعدادات إذا تم إضافة القيم الافتراضية
         if (settingsChanged) {
-          if (typeof NotificationSystem.saveSettings === 'function') {
-            NotificationSystem.saveSettings();
+          if (typeof NotificationSystem.saveState === 'function') {
+            NotificationSystem.saveState();
           } else {
-            localStorage.setItem('notificationSettings', JSON.stringify(NotificationSystem.settings));
+            var toSave = Object.assign({}, NotificationSystem.settings, { _version: 2 });
+            localStorage.setItem('notificationSettings', JSON.stringify(toSave));
           }
         }
       }
@@ -474,7 +475,10 @@
           data: { url: './index.html', type: 'test' }
         });
         if(result) { alert('✅ تم عرض الإشعار بنجاح'); }
-        else { alert('⚠️ لم يتم عرض الإشعار - تحقق من صلاحية الإشعارات في المتصفح'); }
+        else {
+          var errMsg = NotificationSystem._lastError || 'غير معروف';
+          alert('⚠️ لم يتم عرض الإشعار\nالسبب: ' + errMsg + '\n\n📌 تحقق من صلاحية الإشعارات في إعدادات المتصفح/الجهاز');
+        }
       } catch(e) {
         alert('❌ فشل الإشعار عبر النظام: ' + e.message);
         alert('💡 تجربة إشعار مباشر...');
