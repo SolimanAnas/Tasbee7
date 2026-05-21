@@ -330,9 +330,13 @@ const NotificationSystem = {
 
   // ========== SHOW NOTIFICATION ==========
   async showNotification(title, options = {}) {
-    if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); return false; }
-    if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); return false; }
-    if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return false; }
+    if (options.forceEnable) {
+      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return false; }
+    } else {
+      if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); return false; }
+      if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); return false; }
+      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); return false; }
+    }
 
     const notifOptions = {
       icon: './icons/icon-192.png',
