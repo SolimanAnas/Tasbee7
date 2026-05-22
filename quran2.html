@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -716,10 +715,6 @@
     position: relative; width: 100%; height: 100%;
     overflow: hidden; will-change: auto;
   }
-  body[data-variant="mushaf-borderd"] .page-frame,
-  body[data-variant="mushaf-green"] .page-frame {
-    overflow: visible;
-  }
   .mushaf-container {
     position: relative; display: flex; align-items: flex-start; justify-content: center;
     width: 100%; height: 100%; margin: -20px 0 0;
@@ -744,10 +739,6 @@
   .page-frame {
     position: relative; width: 100%; height: 100%;
     overflow: hidden;
-  }
-  body[data-variant="mushaf-borderd"] .page-frame,
-  body[data-variant="mushaf-green"] .page-frame {
-    overflow: visible;
   }
   /* borders removed as requested */
   .label-box {
@@ -780,12 +771,12 @@
   body[data-variant="mushaf-colored"] .label-top-right { top: 30px; }
   body[data-variant="mushaf-tajweed"] .label-top-left,
   body[data-variant="mushaf-tajweed"] .label-top-right { top: 30px; }
-  body[data-variant="mushaf-borderd"] .label-top-left  { top: 10px; left: 60px; }
-  body[data-variant="mushaf-borderd"] .label-top-right { top: 10px; right: 60px; }
-  body[data-variant="mushaf-green"] .label-top-left   { top: 10px; left: 70px; }
-  body[data-variant="mushaf-green"] .label-top-right  { top: 10px; right: 70px; }
+  body[data-variant="mushaf-borderd"] .label-top-left  { top: 40px; left: 70px; }
+  body[data-variant="mushaf-borderd"] .label-top-right { top: 40px; right: 70px; }
+  body[data-variant="mushaf-green"] .label-top-left   { top: 40px; left: 70px; }
+  body[data-variant="mushaf-green"] .label-top-right  { top: 40px; right: 70px; }
   body[data-variant="mushaf-madina1441"] .label-top-left,
-  body[data-variant="mushaf-madina1441"] .label-top-right { top: 25px; }
+  body[data-variant="mushaf-madina1441"] .label-top-right { top: 30px; }
 
   /* per-variant background themes */
   body[data-variant="mushaf-tajweed"] {
@@ -861,19 +852,19 @@
   /* ========== AUDIO MINI PLAYER ========== */
   .audio-mini-player {
     position: fixed;
-    bottom: calc(16px + env(safe-area-inset-bottom));
-    left: 14px; right: 14px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 12px; right: 12px;
     background: var(--glass-bg);
     backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-    border-radius: 20px;
-    padding: 10px 10px 10px 14px;
+    border-radius: 16px;
+    padding: 7px 8px 7px 12px;
     display: flex; align-items: center; justify-content: space-between;
     z-index: 1000;
     transform: translateY(130%);
     transition: transform var(--transition-slow);
-    box-shadow: 0 6px 28px rgba(0,0,0,0.22);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
     border: 1px solid var(--glass-border);
-    gap: 10px;
+    gap: 8px;
   }
   .audio-mini-player.visible { transform: translateY(0); }
   .audio-mini-player.hidden-ui { transform: translateY(130%) !important; }
@@ -883,7 +874,7 @@
     flex: 1; overflow: hidden; cursor: pointer; min-width: 0;
   }
   .mini-player-avatar {
-    width: 38px; height: 38px; border-radius: 10px;
+    width: 32px; height: 32px; border-radius: 8px;
     background: var(--accent-light);
     border: 1px solid var(--accent-border);
     display: flex; align-items: center; justify-content: center;
@@ -891,12 +882,12 @@
   }
   .mini-player-text { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
   .reciter-name {
-    font-size: 0.92rem; font-weight: 700;
+    font-size: 0.85rem; font-weight: 700;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     color: var(--text-primary);
   }
   .mini-playing-label {
-    font-size: 0.72rem; color: var(--accent); font-weight: 500;
+    font-size: 0.68rem; color: var(--accent); font-weight: 500;
     display: flex; align-items: center; gap: 4px;
   }
   .expand-icon {
@@ -910,18 +901,18 @@
   .mini-ctrl-btn {
     background: transparent; border: none;
     color: var(--text-primary); cursor: pointer;
-    width: 36px; height: 36px; border-radius: 10px;
+    width: 30px; height: 30px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     transition: background var(--transition-fast), transform var(--transition-fast);
   }
   .mini-ctrl-btn:active { transform: scale(0.85); background: var(--bg-surface); }
   .mini-play-btn {
     background: var(--accent); border: none;
-    width: 42px; height: 42px; border-radius: 13px;
+    width: 36px; height: 36px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     color: white; cursor: pointer; flex-shrink: 0;
     transition: all var(--transition-fast);
-    box-shadow: 0 3px 12px var(--accent-glow);
+    box-shadow: 0 3px 10px var(--accent-glow);
   }
   .mini-play-btn:active { transform: scale(0.88); box-shadow: none; }
 
@@ -1269,36 +1260,101 @@
   }
   .custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
+  /* ========== ZOOM HINT OVERLAY ========== */
   .zoom-hint {
-    position: fixed;
-    bottom: calc(90px + env(safe-area-inset-bottom));
-    left: 50%; transform: translateX(-50%) scale(0.7);
-    background: var(--text-primary);
-    color: var(--glass-bg);
-    padding: 10px 20px; border-radius: 30px;
-    z-index: 9999;
-    font-family: 'Tajawal', sans-serif; font-size: 0.85rem; font-weight: 600;
-    display: flex; align-items: center; gap: 8px;
-    text-align: center; opacity: 0;
-    pointer-events: none;
-    white-space: nowrap;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-    transition: none;
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
   }
   .zoom-hint.show {
     opacity: 1; pointer-events: auto;
-    animation: zoomHintPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   .zoom-hint.hiding {
     opacity: 0; pointer-events: none;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.28s ease;
   }
-  @keyframes zoomHintPop {
-    0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
-    60% { transform: translateX(-50%) scale(1.08); opacity: 1; }
-    100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  .zoom-hint-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    padding: 36px 28px 28px;
+    max-width: 300px; width: 85%;
+    text-align: center;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.12);
+    transform: scale(0.82) translateY(24px);
+    transition: transform 0.42s cubic-bezier(0.34,1.52,0.64,1);
+    direction: rtl;
   }
-  .zoom-hint-icon { font-size: 1.1rem; line-height: 1; }
+  .zoom-hint.show .zoom-hint-card {
+    transform: scale(1) translateY(0);
+  }
+  .zoom-hint.hiding .zoom-hint-card {
+    transform: scale(0.88) translateY(16px);
+    transition: transform 0.22s ease-in;
+  }
+
+  /* ---- gesture SVG ---- */
+  .zoom-hint-gesture {
+    width: 130px; height: 100px;
+    margin: 0 auto 22px;
+    position: relative;
+  }
+  .pinch-svg { width: 100%; height: 100%; overflow: visible; }
+
+  .zh-finger-l { animation: zhSpreadL 2.4s cubic-bezier(0.45,0,0.55,1) infinite; }
+  .zh-finger-r { animation: zhSpreadR 2.4s cubic-bezier(0.45,0,0.55,1) infinite; }
+  .zh-glow-l   { animation: zhSpreadL 2.4s cubic-bezier(0.45,0,0.55,1) infinite; }
+  .zh-glow-r   { animation: zhSpreadR 2.4s cubic-bezier(0.45,0,0.55,1) infinite; }
+  .zh-arrow-l  { animation: zhArrowL 2.4s ease-in-out infinite; }
+  .zh-arrow-r  { animation: zhArrowR 2.4s ease-in-out infinite; }
+
+  @keyframes zhSpreadL {
+    0%, 18%   { transform: translateX(0); }
+    50%, 68%  { transform: translateX(-22px); }
+    88%, 100% { transform: translateX(0); }
+  }
+  @keyframes zhSpreadR {
+    0%, 18%   { transform: translateX(0); }
+    50%, 68%  { transform: translateX(22px); }
+    88%, 100% { transform: translateX(0); }
+  }
+  @keyframes zhArrowL {
+    0%, 18%   { opacity: 0; transform: translateX(0); }
+    35%, 60%  { opacity: 1; transform: translateX(-6px); }
+    80%, 100% { opacity: 0; transform: translateX(0); }
+  }
+  @keyframes zhArrowR {
+    0%, 18%   { opacity: 0; transform: translateX(0); }
+    35%, 60%  { opacity: 1; transform: translateX(6px); }
+    80%, 100% { opacity: 0; transform: translateX(0); }
+  }
+
+  /* ---- card text ---- */
+  .zoom-hint-title {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1.05rem; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 8px;
+  }
+  .zoom-hint-body {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.83rem; line-height: 1.7;
+    color: var(--text-secondary); margin-bottom: 24px;
+  }
+  .zoom-hint-dismiss {
+    display: inline-block;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 50px;
+    padding: 11px 40px;
+    font-family: 'Tajawal', sans-serif; font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  .zoom-hint-dismiss:hover  { opacity: 0.88; }
+  .zoom-hint-dismiss:active { transform: scale(0.95); }
 
   /* ========== PAGE PICKER ========== */
   .picker-container { position: relative; height: 240px; overflow: hidden; }
@@ -1506,8 +1562,43 @@
 
   <div id="customToast" class="custom-toast"></div>
   <div id="zoomHint" class="zoom-hint" onclick="dismissZoomHint()">
-    <span class="zoom-hint-icon">👆🤏</span>
-    <span class="zoom-hint-text">قرص بإصبعين للتكبير/التصغير</span>
+    <div class="zoom-hint-card" onclick="event.stopPropagation()">
+
+      <!-- Animated pinch gesture -->
+      <div class="zoom-hint-gesture">
+        <svg class="pinch-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- glow beneath each finger -->
+          <ellipse class="zh-glow-l" cx="62" cy="88" rx="14" ry="5" fill="var(--accent)" opacity="0.18"/>
+          <ellipse class="zh-glow-r" cx="98" cy="88" rx="14" ry="5" fill="var(--accent)" opacity="0.18"/>
+
+          <!-- left finger -->
+          <g class="zh-finger-l">
+            <rect x="51" y="18" width="22" height="68" rx="11" fill="var(--accent)"/>
+            <rect x="54" y="24" width="7" height="18" rx="3.5" fill="white" opacity="0.28"/>
+          </g>
+
+          <!-- right finger -->
+          <g class="zh-finger-r">
+            <rect x="87" y="18" width="22" height="68" rx="11" fill="var(--accent)"/>
+            <rect x="90" y="24" width="7" height="18" rx="3.5" fill="white" opacity="0.28"/>
+          </g>
+
+          <!-- spread arrows -->
+          <g class="zh-arrow-l" opacity="0">
+            <line x1="44" y1="52" x2="28" y2="52" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="34,46 28,52 34,58" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g class="zh-arrow-r" opacity="0">
+            <line x1="116" y1="52" x2="132" y2="52" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="126,46 132,52 126,58" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="zoom-hint-title">تكبير الصفحة وتصغيرها</div>
+      <div class="zoom-hint-body">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير</div>
+      <button class="zoom-hint-dismiss" onclick="dismissZoomHint()">فهمت</button>
+    </div>
   </div>
 
   <!-- ===== AUDIO MINI PLAYER ===== -->
@@ -1578,24 +1669,24 @@
 
     <div class="reciter-wrapper">
       <select id="expandedReciterSelect" class="reciter-selector">
-        <option value="ar.husary">محمود خليل الحصري</option>
-        <option value="ar.abdulbasitmurattal">عبد الباسط عبد الصمد</option>
-        <option value="ar.minshawi">محمد صديق المنشاوي</option>
-        <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
-        <option value="ar.abdurrahmaansudais">عبدالرحمن السديس</option>
-        <option value="ar.saudshuraim">سعود الشريم</option>
-        <option value="ar.ahmedajamy">أحمد العجمي</option>
-        <option value="ar.alafasy">مشاري العفاسي</option>
-        <option value="ar.hudhaify">علي الحذيفي</option>
-        <option value="ar.muhammadayyoub">محمد أيوب</option>
-        <option value="ar.muhammadjibreel">محمد جبريل</option>
-        <option value="ar.abdullahbasfar">عبدالله بصفر</option>
-        <option value="ar.hanirifai">هاني الرفاعي</option>
-        <option value="ar.ibrahimakhdar">إبراهيم الأخضر</option>
+        <option value="ar.husary"              data-short="الحصري">محمود خليل الحصري</option>
+        <option value="ar.abdulbasitmurattal"  data-short="عبد الباسط">عبد الباسط عبد الصمد</option>
+        <option value="ar.minshawi"            data-short="المنشاوي">محمد صديق المنشاوي</option>
+        <option value="ar.mahermuaiqly"        data-short="المعيقلي">ماهر المعيقلي</option>
+        <option value="ar.abdurrahmaansudais"  data-short="السديس">عبدالرحمن السديس</option>
+        <option value="ar.saudshuraim"         data-short="الشريم">سعود الشريم</option>
+        <option value="ar.ahmedajamy"          data-short="العجمي">أحمد العجمي</option>
+        <option value="ar.alafasy"             data-short="العفاسي">مشاري العفاسي</option>
+        <option value="ar.hudhaify"            data-short="الحذيفي">علي الحذيفي</option>
+        <option value="ar.muhammadayyoub"      data-short="أيوب">محمد أيوب</option>
+        <option value="ar.muhammadjibreel"     data-short="جبريل">محمد جبريل</option>
+        <option value="ar.abdullahbasfar"      data-short="بصفر">عبدالله بصفر</option>
+        <option value="ar.hanirifai"           data-short="الرفاعي">هاني الرفاعي</option>
+        <option value="ar.ibrahimakhdar"       data-short="الأخضر">إبراهيم الأخضر</option>
         <optgroup label="التلاوات المجودة">
-          <option value="ar.abdulsamad">عبد الباسط (مجود)</option>
-          <option value="ar.husarymujawwad">الحصري (مجود)</option>
-          <option value="ar.minshawimujawwad">المنشاوي (مجود)</option>
+          <option value="ar.abdulsamad"        data-short="عبد الباسط">عبد الباسط (مجود)</option>
+          <option value="ar.husarymujawwad"    data-short="الحصري">الحصري (مجود)</option>
+          <option value="ar.minshawimujawwad"  data-short="المنشاوي">المنشاوي (مجود)</option>
         </optgroup>
       </select>
       <span class="select-chevron">
@@ -2197,74 +2288,9 @@
       } catch(e) { console.error("Ayah count map error:", e); }
     }
 
-    // ========== V3 COORDINATE SYSTEM (JSON-BASED) ==========
     let windowCurrentAyahGlobal = null;
-    let medinaCoords = null;   // loaded from json/medina2_coords.json
-    let mushafMapData = null;  // loaded from json/mushaf2_map.json
-    let pageAyahCache = {};    // { page: [ {surah, ayah, x, y, w, h, segments:[]} ] }
 
-    async function initCoordinateSystem() {
-      try {
-        const [coordsRes, mapRes] = await Promise.all([
-          fetch('json/medina2_coords.json'),
-          fetch('json/mushaf2_map.json')
-        ]);
-        if (coordsRes.ok) medinaCoords = await coordsRes.json();
-        if (mapRes.ok) mushafMapData = await mapRes.json();
-        console.log('V3 coordinates loaded');
-      } catch(e) {
-        console.error('Coordinate load error:', e);
-      }
-    }
-
-    function parseCoordsForPage(page) {
-      if (pageAyahCache[page]) return pageAyahCache[page];
-      if (!medinaCoords || !mushafMapData) return [];
-
-      const mapPages = mushafMapData.pages || {};
-      const pageMap = mapPages[page];
-      if (!pageMap || pageMap.length === 0) return [];
-
-      const grouped = {};
-      pageMap.forEach(item => {
-        const key = `${item.s}_${item.a}`;
-        if (!grouped[key]) grouped[key] = { surah: item.s, ayah: item.a, segments: [] };
-        grouped[key].segments.push({ x: item.x, y: item.y, w: item.w, h: item.h });
-      });
-
-      const merged = [];
-      Object.values(grouped).forEach(g => {
-        if (g.segments.length === 0) return;
-        g.segments.sort((a, b) => a.y - b.y);
-        let lines = [];
-        let currentLine = [g.segments[0]];
-        for (let i = 1; i < g.segments.length; i++) {
-          if (Math.abs(g.segments[i].y - currentLine[currentLine.length - 1].y) < 10) {
-            currentLine.push(g.segments[i]);
-          } else {
-            lines.push(currentLine);
-            currentLine = [g.segments[i]];
-          }
-        }
-        if (currentLine.length > 0) lines.push(currentLine);
-        lines.forEach(line => {
-          let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-          line.forEach(s => {
-            minX = Math.min(minX, s.x); maxX = Math.max(maxX, s.x + s.w);
-            minY = Math.min(minY, s.y); maxY = Math.max(maxY, s.y + s.h);
-          });
-          merged.push({
-            surah: g.surah, ayah: g.ayah,
-            x: minX, y: minY, w: maxX - minX, h: maxY - minY
-          });
-        });
-      });
-
-      pageAyahCache[page] = merged;
-      return merged;
-    }
-
-    // ========== LEGACY COORDINATE FETCH (SQLITE, for colored & tajweed) ==========
+    // ========== LEGACY COORDINATE FETCH (SQLITE) ==========
     function groupWordsIntoAyahLines(words) {
       const ayahs = {};
       words.forEach(w => {
@@ -2311,7 +2337,13 @@
         stmt.free();
       } catch(e) { return []; }
       if (words.length === 0) return [];
-      return groupWordsIntoAyahLines(words);
+      const rects = groupWordsIntoAyahLines(words);
+      const cal = getVariantHighlightCal();
+      const LEGACY_REF_W = 1024, LEGACY_REF_H = 1636;
+      const sx = cal.refW / LEGACY_REF_W;
+      const sy = cal.refH / LEGACY_REF_H;
+      rects.forEach(r => { r.x *= sx; r.y *= sy; r.w *= sx; r.h *= sy; });
+      return rects;
     }
 
     function toggleTafsirFullscreen() {
@@ -2328,12 +2360,7 @@
     }
 
     async function getPageAyahsForTafsir(page) {
-      let rects;
-      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-green') {
-        rects = parseCoordsForPage(page);
-      } else {
-        rects = getLegacyCoordsForPage(page);
-      }
+      const rects = getLegacyCoordsForPage(page);
       if (!rects || rects.length === 0) return null;
       return { surah: rects[0].surah, ayah: rects[0].ayah };
     }
@@ -2358,12 +2385,7 @@
     }
 
     async function getFirstAyahOfPage(page) {
-      let rects;
-      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-green') {
-        rects = parseCoordsForPage(page);
-      } else {
-        rects = getLegacyCoordsForPage(page);
-      }
+      const rects = getLegacyCoordsForPage(page);
       if (!rects || rects.length === 0) return null;
       return { surah: rects[0].surah, ayah: rects[0].ayah, page: page };
     }
@@ -2493,7 +2515,7 @@
       trackQuranReading();
     }
 
-    // ========== AYAH HIGHLIGHT RENDERING (uses JSON coords) ==========
+    // ========== AYAH HIGHLIGHT RENDERING (uses SQLite coords) ==========
 
     function getVariantImageDims() {
       switch (currentMushafVariant) {
@@ -2511,12 +2533,7 @@
       const img = document.getElementById('pageImg');
       overlay.innerHTML = '';
 
-      let rects;
-      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-green') {
-        rects = parseCoordsForPage(pageNumber);
-      } else {
-        rects = getLegacyCoordsForPage(pageNumber);
-      }
+      const rects = getLegacyCoordsForPage(pageNumber);
       if (!rects || rects.length === 0) return;
       drawAyahHighlights(rects, img, overlay);
     }
@@ -2527,13 +2544,13 @@ function getVariantHighlightCal() {
       switch (currentMushafVariant) {
         case 'mushaf-madina1441':
           return {
-            refW: 415, refH: 650,
-            scaleX: 1.08, scaleY: 1.00,
+           refW: 415, refH: 650,
+            scaleX: 1.12, scaleY: 0.90,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.15, shiftY: -0.015,
-            imgScaleX: 1.08, imgScaleY: 1.115,
-            imgshiftX: 0.0, imgshiftY: -0.055
+            shiftX: -0.165, shiftY: 0.03,
+            imgScaleX: 1.01, imgScaleY: 1.1,
+            imgshiftX: 0.0, imgshiftY: -0.065
           };
         case 'mushaf-tajweed':
           return {
@@ -2548,12 +2565,12 @@ function getVariantHighlightCal() {
         case 'mushaf-borderd':
           return {
             refW: 415, refH: 650,
-            scaleX: 0.96, scaleY: 0.78,
+            scaleX: 0.96, scaleY: 0.72,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.0, pageBotY: 1.00,
             shiftX: -0.09, shiftY: -0.014,
             imgScaleX: 1.2, imgScaleY: 1.4,
-            imgshiftX: 0.0, imgshiftY: -0.030
+            imgshiftX: 0.0, imgshiftY: -0.005
           };
         case 'mushaf-green':
           return {
@@ -2569,7 +2586,7 @@ function getVariantHighlightCal() {
         default:
           return {
             refW: 1024, refH: 1636,
-            scaleX: 1.09, scaleY: 0.82,
+            scaleX: 1.09, scaleY: 0.78,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
             shiftX: -0.07, shiftY: 0.001,
@@ -2718,7 +2735,8 @@ function getVariantHighlightCal() {
           }
           expandedReciterSelect.value = currentReciter;
           if(miniReciterName && expandedReciterSelect.selectedIndex >= 0) {
-              miniReciterName.textContent = expandedReciterSelect.options[expandedReciterSelect.selectedIndex].text;
+              const opt = expandedReciterSelect.options[expandedReciterSelect.selectedIndex];
+              miniReciterName.textContent = opt.dataset.short || opt.text;
           }
       }
       localStorage.setItem('quranReciter', currentReciter);
@@ -3476,7 +3494,7 @@ function getVariantHighlightCal() {
       zoomHintTimeout = setTimeout(() => {
         hint.classList.remove('show');
         hint.classList.add('hiding');
-      }, 2500);
+      }, 5000);
     }
 
     // ========== SWIPE LOGIC ==========
@@ -3548,11 +3566,8 @@ function getVariantHighlightCal() {
       updateVariantUI();
       checkDailyResetKhatma();
 
-      // Load both coordinate systems, then render
-      Promise.all([
-        initCoordinateSystem(),
-        initDatabase()
-      ]).then(() => {
+      // Load SQLite database, then render
+      initDatabase().then(() => {
         updateContent();
       }).catch(() => {
         updateContent();
