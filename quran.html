@@ -2431,7 +2431,12 @@
     }
 
     async function getPageAyahsForTafsir(page) {
-      const rects = getLegacyCoordsForPage(page);
+      let rects;
+      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-green') {
+        rects = getMedinaCoordsForPage(page);
+      } else {
+        rects = getLegacyCoordsForPage(page);
+      }
       if (!rects || rects.length === 0) return null;
       return { surah: rects[0].surah, ayah: rects[0].ayah };
     }
@@ -2457,7 +2462,7 @@
 
     async function getFirstAyahOfPage(page) {
       let rects;
-      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441') {
+      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-green') {
         rects = getMedinaCoordsForPage(page);
       } else {
         rects = getLegacyCoordsForPage(page);
@@ -2610,7 +2615,7 @@
       overlay.innerHTML = '';
 
       let rects;
-      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441') {
+      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-green') {
         rects = getMedinaCoordsForPage(pageNumber);
       } else {
         rects = getLegacyCoordsForPage(pageNumber);
@@ -2626,21 +2631,21 @@ function getVariantHighlightCal() {
         case 'mushaf-madina1441':
           return {
            refW: 415, refH: 650,
-            scaleX: 1.05, scaleY: 0.95,
+            scaleX: 1.07, scaleY: 0.95,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.12, shiftY: 0.015,
-            imgScaleX: 1.01, imgScaleY: 1.1,
-            imgshiftX: 0.0, imgshiftY: -0.065
+            shiftX: -0.14, shiftY: 0.015,
+            imgScaleX: 1.03, imgScaleY: 1.09,
+            imgshiftX: 0.0, imgshiftY: -0.060
           };
         case 'mushaf-tajweed':
           return {
             refW: 415, refH: 650,
-            scaleX: 1.0, scaleY: 0.82,
+            scaleX: 1.05, scaleY: 0.92,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.01, shiftY: 0.10,
-            imgScaleX: 1.01, imgScaleY: 1.1,
+            shiftX: -0.13, shiftY: 0.029,
+            imgScaleX: 1.02, imgScaleY: 1.1,
             imgshiftX: 0.0, imgshiftY: -0.065
           };
         case 'mushaf-borderd':
@@ -2656,10 +2661,10 @@ function getVariantHighlightCal() {
         case 'mushaf-green':
           return {
             refW: 415, refH: 650,
-            scaleX: 0.94, scaleY: 0.70,
+            scaleX: 0.98, scaleY: 0.780,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.0, pageBotY: 1.00,
-            shiftX: -0.0, shiftY: 0.1,
+            shiftX: -0.09, shiftY: 0.045,
             imgScaleX: 1.2, imgScaleY: 1.3,
             imgshiftX: 0.0, imgshiftY: -0.055
           };

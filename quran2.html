@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
   <script src="js/quranpages.data.js"></script>
+  <script src="js/medina2.data.js"></script>
 
   <style>
   @font-face {
@@ -2297,6 +2298,68 @@
     }
 
     let windowCurrentAyahGlobal = null;
+    let medinaCoordsByAyah = null;
+
+    async function initMedinaCoords() {
+      try {
+        let data;
+        if (window.__MEDINA2_COORDS__) {
+          data = window.__MEDINA2_COORDS__;
+        } else {
+          const res = await fetch('json/medina2_coords.json');
+          data = await res.json();
+        }
+        medinaCoordsByAyah = {};
+        data.forEach(item => {
+          const parts = item.id.replace('v', '').split('_');
+          const surah = parseInt(parts[0]);
+          const ayah = parseInt(parts[1]);
+          const key = `${surah}_${ayah}`;
+          if (!medinaCoordsByAyah[key]) medinaCoordsByAyah[key] = [];
+          medinaCoordsByAyah[key].push({ top: item.top, left: item.left, width: item.width, height: item.height });
+        });
+      } catch(e) {
+        console.error('medina2_coords load error:', e);
+      }
+    }
+
+    function getMedinaCoordsForPage(pageNumber) {
+      if (!db || !dbReady || !medinaCoordsByAyah) return [];
+      const query = `SELECT DISTINCT soraid, ayaid FROM ayarects WHERE page = ${pageNumber} ORDER BY soraid, ayaid`;
+      const ayahs = [];
+      try {
+        const stmt = db.prepare(query);
+        while(stmt.step()) {
+          const row = stmt.getAsObject();
+          ayahs.push({ surah: row.soraid, ayah: row.ayaid });
+        }
+        stmt.free();
+      } catch(e) { return []; }
+      const rects = [];
+      ayahs.forEach(({surah, ayah}) => {
+        const key = `${surah}_${ayah}`;
+        const segments = medinaCoordsByAyah[key];
+        if (!segments || segments.length === 0) return;
+        segments.sort((a, b) => a.top - b.top);
+        let lines = [];
+        let currentLine = [];
+        segments.forEach(s => {
+          if (currentLine.length === 0) currentLine.push(s);
+          else if (Math.abs(s.top - currentLine[currentLine.length - 1].top) < 10) currentLine.push(s);
+          else { lines.push(currentLine); currentLine = [s]; }
+        });
+        if (currentLine.length > 0) lines.push(currentLine);
+        lines.forEach(line => {
+          let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+          line.forEach(s => {
+            minX = Math.min(minX, s.left); maxX = Math.max(maxX, s.left + s.width);
+            minY = Math.min(minY, s.top); maxY = Math.max(maxY, s.top + s.height);
+          });
+          rects.push({ surah, ayah, x: minX, y: minY, w: maxX - minX, h: maxY - minY });
+        });
+      });
+      return rects;
+    }
 
     // ========== LEGACY COORDINATE FETCH (SQLITE) ==========
     function groupWordsIntoAyahLines(words) {
@@ -2368,7 +2431,12 @@
     }
 
     async function getPageAyahsForTafsir(page) {
-      const rects = getLegacyCoordsForPage(page);
+      let rects;
+      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-green') {
+        rects = getMedinaCoordsForPage(page);
+      } else {
+        rects = getLegacyCoordsForPage(page);
+      }
       if (!rects || rects.length === 0) return null;
       return { surah: rects[0].surah, ayah: rects[0].ayah };
     }
@@ -2393,7 +2461,12 @@
     }
 
     async function getFirstAyahOfPage(page) {
-      const rects = getLegacyCoordsForPage(page);
+      let rects;
+      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-green') {
+        rects = getMedinaCoordsForPage(page);
+      } else {
+        rects = getLegacyCoordsForPage(page);
+      }
       if (!rects || rects.length === 0) return null;
       return { surah: rects[0].surah, ayah: rects[0].ayah, page: page };
     }
@@ -2541,7 +2614,12 @@
       const img = document.getElementById('pageImg');
       overlay.innerHTML = '';
 
-      const rects = getLegacyCoordsForPage(pageNumber);
+      let rects;
+      if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-madina1441' || currentMushafVariant === 'mushaf-tajweed' || currentMushafVariant === 'mushaf-green') {
+        rects = getMedinaCoordsForPage(pageNumber);
+      } else {
+        rects = getLegacyCoordsForPage(pageNumber);
+      }
       if (!rects || rects.length === 0) return;
       drawAyahHighlights(rects, img, overlay);
     }
@@ -3574,8 +3652,11 @@ function getVariantHighlightCal() {
       updateVariantUI();
       checkDailyResetKhatma();
 
-      // Load SQLite database, then render
-      initDatabase().then(() => {
+      // Load coordinate sources, then render
+      Promise.all([
+        initDatabase(),
+        initMedinaCoords()
+      ]).then(() => {
         updateContent();
       }).catch(() => {
         updateContent();
