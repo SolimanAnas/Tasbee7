@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script src="js/quranpages.data.js"></script>
 
   <style>
   @font-face {
@@ -2263,10 +2264,17 @@
       try {
         const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
         window.SQL = SQL;
-        const response = await fetch('quranpages.sqlite');
-        if(!response.ok) throw new Error("Main DB not found");
-        const buffer = await response.arrayBuffer();
-        const view = new Uint8Array(buffer);
+        let view;
+        if (window.__SQLITE_DATA_B64__) {
+          const binaryStr = atob(window.__SQLITE_DATA_B64__);
+          view = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) view[i] = binaryStr.charCodeAt(i);
+        } else {
+          const response = await fetch('quranpages.sqlite');
+          if(!response.ok) throw new Error("Main DB not found");
+          const buffer = await response.arrayBuffer();
+          view = new Uint8Array(buffer);
+        }
         if(view[0] !== 83 || view[1] !== 81 || view[2] !== 76 || view[3] !== 105) throw new Error("Invalid SQLite format");
         db = new SQL.Database(view);
         dbReady = true;
