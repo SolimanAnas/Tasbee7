@@ -6,13 +6,20 @@
   <title>المصحف الشريف - النسخة المتطورة V3</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#FAF6EE">
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
   <script src="js/quranpages.data.js"></script>
   <script src="js/medina2.data.js"></script>
 
   <style>
+  @font-face {
+    font-family: 'Amiri';
+    src: url('fonts/Amiri.ttf') format('truetype');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
   @font-face {
     font-family: 'ScheherazadeLocal';
     src: url('fonts/Scheherazade.ttf') format('truetype');
@@ -1357,6 +1364,14 @@
   }
   .zoom-hint-dismiss:hover  { opacity: 0.88; }
   .zoom-hint-dismiss:active { transform: scale(0.95); }
+  .zoom-hint-no-show {
+    display: block; width: 100%; margin-top: 10px;
+    background: none; border: none; padding: 6px;
+    font-family: 'Tajawal', sans-serif; font-size: 0.8rem;
+    color: var(--text-secondary); cursor: pointer;
+    transition: color 0.2s;
+  }
+  .zoom-hint-no-show:hover { color: var(--text-primary); }
 
   /* ========== PAGE PICKER ========== */
   .picker-container { position: relative; height: 240px; overflow: hidden; }
@@ -1464,24 +1479,34 @@
   .q-word--hidden  { color:transparent !important; background:rgba(128,128,128,0.15); border-radius:4px; }
 
   .tasmee-text-panel {
-    position:fixed; bottom:0; left:0; right:0;
-    height:44dvh;
+    position:fixed; inset:0;
     background:var(--glass-bg); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
-    border-top:1px solid var(--glass-border);
-    border-radius:22px 22px 0 0;
-    padding:12px 16px calc(16px + env(safe-area-inset-bottom));
-    overflow-y:auto;
     z-index:800;
     transform:translateY(100%);
     transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);
+    display:flex; flex-direction:column;
+    direction:rtl;
+  }
+  .tasmee-text-panel.active { transform:translateY(0); }
+  .tasmee-text-panel-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    border-bottom:1px solid var(--glass-border);
+    flex-shrink:0;
+  }
+  .tasmee-text-panel-title {
+    font-family:'Tajawal',sans-serif; font-size:1rem; font-weight:700;
+    color:var(--text-primary); display:flex; align-items:center; gap:8px;
+  }
+  .tasmee-text-panel-scroll {
+    flex:1; overflow-y:auto;
+    padding:16px 16px calc(80px + env(safe-area-inset-bottom));
     font-family:'ScheherazadeLocal',serif;
     font-size:1.35rem;
     line-height:2.2;
-    direction:rtl;
     text-align:justify;
   }
-  .tasmee-text-panel.active { transform:translateY(0); }
-  .tasmee-text-panel-handle { width:40px; height:5px; background:rgba(128,128,128,0.3); border-radius:10px; margin:0 auto 10px auto; }
+  .tasmee-text-panel-handle { display:none; }
 
   .tasmee-active-bar {
     position:fixed; bottom:calc(20px + env(safe-area-inset-bottom));
@@ -1499,13 +1524,13 @@
   .tasmee-progress-text { flex:1; font-size:0.9rem; font-weight:bold; color:var(--text-primary); text-align:center; font-family:'Tajawal',sans-serif; }
 
   .tasmee-score-ring { display:flex; flex-direction:column; align-items:center; padding:12px 0 16px; }
-  .tasmee-score-number { font-size:3rem; font-weight:800; color:var(--accent); line-height:1; }
+  .tasmee-score-number { font-size:3rem; font-weight:800; color:var(--accent); line-height:1; font-family:'Amiri',serif; }
   .tasmee-score-label { font-size:0.85rem; color:var(--text-secondary); margin-top:6px; font-family:'Tajawal',sans-serif; }
   .tasmee-stat-row { display:flex; justify-content:space-around; padding:12px 0; border-top:1px solid var(--glass-border); margin-top:6px; }
   .tasmee-stat { text-align:center; }
-  .tasmee-stat-val { font-size:1.4rem; font-weight:700; }
+  .tasmee-stat-val { font-size:1.4rem; font-weight:700; font-family:'Amiri',serif; }
   .tasmee-stat-lbl { font-size:0.75rem; color:var(--text-secondary); font-family:'Tajawal',sans-serif; margin-top:2px; }
-  .tasmee-missed-list { max-height:140px; overflow-y:auto; background:rgba(217,64,64,0.06); border:1px solid rgba(217,64,64,0.2); border-radius:12px; padding:10px 14px; margin-top:8px; font-size:1.05rem; line-height:1.9; text-align:right; direction:rtl; color:var(--danger); word-break:break-word; }
+  .tasmee-missed-list { max-height:140px; overflow-y:auto; background:rgba(217,64,64,0.06); border:1px solid rgba(217,64,64,0.2); border-radius:12px; padding:10px 14px; margin-top:8px; font-size:1.15rem; line-height:2; text-align:right; direction:rtl; color:var(--danger); word-break:break-word; font-family:'Amiri',serif; }
 
   .tasmee-setup-content { padding:10px 0; }
   .tasmee-setup-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--glass-border); font-family:'Tajawal',sans-serif; }
@@ -1514,6 +1539,68 @@
   .tasmee-start-btn:active { transform:scale(0.96); opacity:0.9; }
   .tasmee-end-btn { background:rgba(217,64,64,0.12); color:var(--danger); border:none; border-radius:10px; padding:8px 14px; font-family:'Tajawal',sans-serif; font-weight:bold; cursor:pointer; font-size:0.85rem; }
   .tasmee-pause-btn { background:rgba(128,128,128,0.12); color:var(--text-primary); border:none; border-radius:10px; padding:8px 14px; font-family:'Tajawal',sans-serif; cursor:pointer; font-size:0.9rem; }
+
+  /* ===== HOW TO USE SHEET ===== */
+  .how-to-use-sheet {
+    position: fixed; inset: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
+    z-index: 1200;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    display: flex; flex-direction: column;
+    direction: rtl;
+  }
+  .how-to-use-sheet.visible { transform: translateX(0); }
+
+  .htu-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: calc(env(safe-area-inset-top) + 14px) 20px 14px;
+    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+  }
+  .htu-header-title {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Tajawal', sans-serif; font-size: 1.1rem; font-weight: 700;
+    color: var(--text-primary);
+  }
+  .htu-header-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(138,90,220,0.14); color: #8A5ADC;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .htu-close {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(128,128,128,0.1); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary); transition: background 0.2s;
+  }
+  .htu-close:hover { background: rgba(128,128,128,0.2); }
+
+  .htu-body {
+    flex: 1; overflow-y: auto;
+    padding: 12px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+  .htu-card {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 16px 4px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .htu-card-icon {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .htu-card-body { flex: 1; }
+  .htu-card-title {
+    font-family: 'Tajawal', sans-serif; font-size: 0.95rem; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 4px;
+  }
+  .htu-card-desc {
+    font-family: 'Tajawal', sans-serif; font-size: 0.82rem; line-height: 1.75;
+    color: var(--text-secondary);
+  }
   </style>
 </head>
 <body>
@@ -1663,6 +1750,7 @@
       <div class="zoom-hint-title">تكبير الصفحة وتصغيرها</div>
       <div class="zoom-hint-body">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير</div>
       <button class="zoom-hint-dismiss" onclick="dismissZoomHint()">فهمت</button>
+      <button class="zoom-hint-no-show" onclick="dismissZoomHintForever()">لا تُظهر مجدداً</button>
     </div>
   </div>
 
@@ -1860,6 +1948,9 @@
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
         </button>
+        <button class="sheet-icon-btn" onclick="closeContextMenu(); openTasmeeSetup()" title="التسميع">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
         <button class="sheet-icon-btn" onclick="closeContextMenu(); openSettingsModal()" title="الإعدادات">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
@@ -2028,8 +2119,14 @@
 
   <!-- ===== TASMEE' TEXT PANEL ===== -->
   <div class="tasmee-text-panel" id="tasmeeTextPanel">
-    <div class="tasmee-text-panel-handle"></div>
-    <div id="tasmeeTextContent" style="font-family:'ScheherazadeLocal',serif;"></div>
+    <div class="tasmee-text-panel-header">
+      <div class="tasmee-text-panel-title">
+        <div class="tasmee-mic-indicator" id="tasmeePanelMicDot" style="width:10px;height:10px;flex-shrink:0;"></div>
+        التسميع
+      </div>
+      <button onclick="endTasmeeSession()" style="background:rgba(217,64,64,0.1);color:var(--danger);border:none;border-radius:8px;padding:6px 14px;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;">إنهاء</button>
+    </div>
+    <div class="tasmee-text-panel-scroll" id="tasmeeTextContent"></div>
   </div>
 
   <!-- ===== TASMEE' SETUP SHEET ===== -->
@@ -2229,6 +2326,28 @@
           </div>
         </div>
 
+        <!-- How to use -->
+        <div class="setting-row clickable" onclick="closeModal('settingsModal'); openHowToUse();">
+          <div class="setting-label">
+            <span class="row-icon" style="background:rgba(138,90,220,0.12);color:#8A5ADC;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">كيفية الاستخدام</div>
+              <div class="label-sub">دليل الميزات والتنقل</div>
+            </div>
+          </div>
+          <span class="row-chevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </span>
+        </div>
+
         <!-- Download -->
         <button class="offline-btn" id="offlineDownloadBtn" onclick="cacheAllPages()">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -2238,6 +2357,144 @@
           </svg>
           تحميل جميع الصفحات للقراءة بدون إنترنت
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOW TO USE SHEET ===== -->
+  <div class="sheet-backdrop" id="howToUseBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1199;" onclick="closeHowToUse()"></div>
+  <div id="howToUseSheet" class="how-to-use-sheet">
+    <div class="htu-header">
+      <div class="htu-header-title">
+        <div class="htu-header-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        كيفية الاستخدام
+      </div>
+      <button class="htu-close" onclick="closeHowToUse()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="htu-body">
+      <!-- Navigation -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(var(--accent-rgb,26,112,64),0.12);color:var(--accent);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">التنقل بين الصفحات</div>
+          <div class="htu-card-desc">اسحب يميناً للصفحة التالية، أو يساراً للصفحة السابقة. يمكنك أيضاً استخدام سهمي التنقل في الشاشة.</div>
+        </div>
+      </div>
+
+      <!-- Zoom -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(var(--accent-rgb,26,112,64),0.12);color:var(--accent);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">التكبير والتصغير</div>
+          <div class="htu-card-desc">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير. انقر مرتين لإعادة الحجم الافتراضي.</div>
+        </div>
+      </div>
+
+      <!-- Audio -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(168,106,0,0.12);color:#A86A00;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">الاستماع للقرآن</div>
+          <div class="htu-card-desc">اضغط على أيقونة الصوت في الشريط العلوي لفتح مشغل الصوت. اختر القارئ والسورة والآية، واستمع بصوت عالٍ.</div>
+        </div>
+      </div>
+
+      <!-- Context menu -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(0,106,168,0.12);color:#006AA8;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">قائمة الإجراءات</div>
+          <div class="htu-card-desc">اضغط على أيقونة النقاط الثلاث (⋮) في أسفل الشاشة لفتح قائمة الإجراءات — الانتقال إلى آية أو جزء أو سورة، التفسير، والإعدادات.</div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(168,0,106,0.12);color:#A8006A;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">البحث في القرآن</div>
+          <div class="htu-card-desc">اضغط على أيقونة البحث للبحث في كامل نص القرآن الكريم. ستُنقل مباشرةً إلى الصفحة التي تحتوي على الآية.</div>
+        </div>
+      </div>
+
+      <!-- Tasmee -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(217,64,64,0.12);color:#D94040;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">وضع التسميع</div>
+          <div class="htu-card-desc">اضغط على أيقونة الميكروفون لتفعيل التسميع. يستمع التطبيق إلى تلاوتك ويُصحّح كل كلمة في الوقت الفعلي مع تقرير نهائي بنسبة الصواب.</div>
+        </div>
+      </div>
+
+      <!-- Bookmarks -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(168,130,0,0.12);color:#A88200;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">المفضلة والعلامات</div>
+          <div class="htu-card-desc">اضغط على أيقونة الإشارة المرجعية لحفظ صفحتك الحالية. يمكنك الوصول إلى المحفوظات من الإعدادات.</div>
+        </div>
+      </div>
+
+      <!-- Offline -->
+      <div class="htu-card" style="border-bottom:none;">
+        <div class="htu-card-icon" style="background:rgba(50,130,200,0.12);color:#3282C8;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">القراءة بدون إنترنت</div>
+          <div class="htu-card-desc">من الإعدادات اضغط "تحميل جميع الصفحات" لتخزين القرآن كاملاً على جهازك والقراءة دون اتصال بالإنترنت.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -3381,6 +3638,15 @@ function getVariantHighlightCal() {
     function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
     function handleOverlayClick(event, modalId) { if (event.target === document.getElementById(modalId)) closeModal(modalId); }
 
+    function openHowToUse() {
+      document.getElementById('howToUseBackdrop').style.display = 'block';
+      requestAnimationFrame(() => document.getElementById('howToUseSheet').classList.add('visible'));
+    }
+    function closeHowToUse() {
+      document.getElementById('howToUseSheet').classList.remove('visible');
+      setTimeout(() => { document.getElementById('howToUseBackdrop').style.display = 'none'; }, 420);
+    }
+
     function updatePageLabels() {
       const juzLabel = document.getElementById('juzLabel');
       const surahLabel = document.getElementById('surahLabel');
@@ -3731,7 +3997,12 @@ function getVariantHighlightCal() {
       hint.classList.add('hiding');
       clearTimeout(zoomHintTimeout);
     }
+    function dismissZoomHintForever() {
+      localStorage.setItem('zoom_hint_dismissed', '1');
+      dismissZoomHint();
+    }
     function showZoomHint() {
+      if (localStorage.getItem('zoom_hint_dismissed') === '1') return;
       const hint = document.getElementById('zoomHint');
       if (!hint) return;
       hint.classList.remove('hiding');

@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v10"; // expanded static assets
+const CACHE_NAME = "zad-muslim-v11"; // added tasmee-engine.js
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -33,6 +33,7 @@ const STATIC_ASSETS = [
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
   "./js/quran-common.js",
+  "./js/tasmee-engine.js",
 
   // ===== Fonts =====
   "./fonts/Tajawal-Bold.ttf",
@@ -125,7 +126,7 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  if (req.headers.get("accept").includes("text/html")) {
+  if (req.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
