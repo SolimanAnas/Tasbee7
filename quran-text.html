@@ -15,7 +15,7 @@
     @font-face {
       font-family: 'MadinahFont';
       src: url('fonts/uthmani-colored.ttf') format('opentype'),
-           url('fonts/UthmanicHafs.ttf') format('truetype');
+           url('fonts/UthmanicHafs_V20.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
@@ -59,6 +59,13 @@
     .font-preview-AmiriFont { font-family: 'AmiriFont', serif; font-size: 1.2rem; }
     .font-preview-UrduFont { font-family: 'UrduFont', sans-serif; font-size: 1.2rem; }
     .font-preview-ScheherazadeFont { font-family: 'ScheherazadeFont', serif; font-size: 1.2rem; }
+
+    :root {
+      --danger: #D94040;
+      --text-primary: #1e2a3a;
+      --text-secondary: #7a6248;
+    }
+    body.real-dark-mode { --text-primary: #f0ead8; --text-secondary: #b0a090; }
 
     /* ========== QURAN TEXT TYPOGRAPHY ========== */
     div.quran-text-container {
@@ -229,6 +236,40 @@
     .audio-btn { background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .audio-btn.primary { background: var(--accent); color: #fff; border: none; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
 
+    /* ========== TASMEE' WORD SPANS ========== */
+    .q-word { display:inline; border-radius:4px; padding:1px 2px; transition:background 0.25s ease, color 0.25s ease; }
+    .q-word--active  { background:rgba(184,136,12,0.25); color:var(--accent); }
+    .q-word--correct { background:rgba(26,112,64,0.18); color:var(--accent); font-weight:bold; }
+    .q-word--fuzzy   { background:rgba(255,165,0,0.22); color:#D47A00; }
+    .q-word--missed  { background:rgba(217,64,64,0.15); color:var(--danger); text-decoration:line-through; }
+    .q-word--hidden  { color:transparent !important; background:rgba(128,128,128,0.12); border-radius:4px; user-select:none; }
+
+    /* ========== TASMEE' ACTIVE BAR ========== */
+    .tasmee-active-bar { position:fixed; bottom:calc(20px + env(safe-area-inset-bottom)); left:15px; right:15px; max-width:500px; margin:0 auto; background:var(--glass-bg); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); border:1px solid rgba(217,64,64,0.4); border-radius:20px; padding:10px 16px; display:none; align-items:center; justify-content:space-between; gap:10px; z-index:91; box-shadow:0 4px 20px rgba(217,64,64,0.15); }
+    .tasmee-active-bar.active { display:flex; }
+    .tasmee-mic-indicator { width:12px; height:12px; border-radius:50%; background:var(--danger); flex-shrink:0; animation:tasmeePulse 1.2s ease-in-out infinite; }
+    .tasmee-mic-indicator.paused { animation:none; background:var(--text-secondary); }
+    @keyframes tasmeePulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.55;} }
+    .tasmee-progress-text { flex:1; font-size:0.9rem; font-weight:bold; color:var(--text-primary); text-align:center; font-family:'Tajawal',sans-serif; }
+
+    /* ========== TASMEE' RESULT MODAL ========== */
+    .tasmee-score-ring { display:flex; flex-direction:column; align-items:center; padding:12px 0 16px; }
+    .tasmee-score-number { font-size:3rem; font-weight:800; color:var(--accent); line-height:1; }
+    .tasmee-score-label { font-size:0.85rem; color:var(--text-secondary); margin-top:6px; font-family:'Tajawal',sans-serif; }
+    .tasmee-stat-row { display:flex; justify-content:space-around; padding:12px 0; border-top:1px solid var(--glass-border); margin-top:6px; }
+    .tasmee-stat { text-align:center; }
+    .tasmee-stat-val { font-size:1.4rem; font-weight:700; }
+    .tasmee-stat-lbl { font-size:0.75rem; color:var(--text-secondary); font-family:'Tajawal',sans-serif; margin-top:2px; }
+    .tasmee-missed-list { max-height:140px; overflow-y:auto; background:rgba(217,64,64,0.06); border:1px solid rgba(217,64,64,0.2); border-radius:12px; padding:10px 14px; margin-top:8px; font-size:1.1rem; line-height:1.9; text-align:right; direction:rtl; color:var(--danger); word-break:break-word; }
+
+    /* ========== TASMEE' TOGGLE ========== */
+    .tasmee-toggle { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+    .tasmee-toggle input { opacity:0; width:0; height:0; }
+    .tasmee-toggle-slider { position:absolute; cursor:pointer; inset:0; background:rgba(128,128,128,0.25); border-radius:12px; transition:0.3s; }
+    .tasmee-toggle-slider:before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s; }
+    .tasmee-toggle input:checked + .tasmee-toggle-slider { background:var(--accent); }
+    .tasmee-toggle input:checked + .tasmee-toggle-slider:before { transform:translateX(20px); }
+
     /* ========== AYAH BOTTOM SHEET ========== */
     .ayah-bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--glass-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0; padding: 15px 20px calc(20px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); z-index: 1000; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); max-height: 85vh; overflow-y: auto; }
     .ayah-bottom-sheet.active { transform: translateY(0); }
@@ -363,6 +404,10 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
       </a>
 
+      <button class="icon-btn" id="tasmeeBtn" onclick="openTasmeeSetup()" title="وضع التسميع">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" />
@@ -450,6 +495,123 @@
 
       <div class="result-box" id="ayahResultBox">اختر أحد الخيارات بالأعلى...</div>
       <div class="swipe-hint">↔️ اسحب يميناً أو يساراً للتنقل بين الآيات</div>
+  </div>
+
+  <!-- ===== TASMEE' SETUP SHEET ===== -->
+  <div id="tasmeeSetupOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;" onclick="closeTasmeeSetup()"></div>
+  <div class="ayah-bottom-sheet" id="tasmeeSetupSheet" style="z-index:1001;max-height:100dvh;height:100dvh;border-radius:0;border-top:none;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div class="sheet-header" style="padding-top:calc(env(safe-area-inset-top) + 10px);flex-shrink:0;border-bottom:1px solid var(--glass-border);">
+      <span style="font-size:1.1rem;font-weight:700;font-family:'Tajawal',sans-serif;">وضع التسميع</span>
+      <button class="icon-btn" onclick="closeTasmeeSetup()" style="width:34px;height:34px;font-size:1.1rem;">✕</button>
+    </div>
+
+    <!-- Hero -->
+    <div style="display:flex;flex-direction:column;align-items:center;padding:20px 16px 14px;gap:8px;flex-shrink:0;">
+      <div style="width:60px;height:60px;border-radius:50%;background:rgba(26,112,64,0.1);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-secondary);text-align:center;margin:0;font-family:'Tajawal',sans-serif;line-height:1.5;">
+        تلاوة من الحفظ — يستمع التطبيق ويُصحّح الكلمات في الوقت الفعلي
+      </p>
+    </div>
+
+    <!-- Settings (scrollable) -->
+    <div style="flex:1;overflow-y:auto;padding:0 0 8px;">
+      <div style="padding:6px 16px 4px;font-size:0.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em;font-family:'Tajawal',sans-serif;">النطاق</div>
+
+      <div class="setting-row">
+        <div class="setting-label">نوع النطاق</div>
+        <div class="setting-control">
+          <select id="tasmeeRangeSelect" class="custom-select" onchange="toggleTasmeeCustomRange(this.value)">
+            <option value="page">الصفحة الحالية</option>
+            <option value="custom">نطاق مخصص</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="tasmeeCustomRange" style="display:none;" class="setting-row">
+        <div class="setting-label">من آية</div>
+        <div class="setting-control" style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="tasmeeFrom" class="custom-select" style="width:65px;text-align:center;" min="1" value="1">
+          <span style="color:var(--text-secondary);">إلى</span>
+          <input type="number" id="tasmeeTo" class="custom-select" style="width:65px;text-align:center;" min="1" value="5">
+        </div>
+      </div>
+
+      <div style="padding:10px 16px 4px;font-size:0.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em;font-family:'Tajawal',sans-serif;border-top:1px solid var(--glass-border);margin-top:4px;">الخيارات</div>
+
+      <div class="setting-row">
+        <div class="setting-label">إخفاء النص — اختبار الحفظ</div>
+        <div class="setting-control">
+          <label class="tasmee-toggle">
+            <input type="checkbox" id="tasmeeHideText">
+            <span class="tasmee-toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">إظهار نهاية الآية ﴿٧﴾</div>
+        <div class="setting-control">
+          <label class="tasmee-toggle">
+            <input type="checkbox" id="tasmeeShowAyahEnd" checked>
+            <span class="tasmee-toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">الانتقال التلقائي للصفحة التالية</div>
+        <div class="setting-control">
+          <label class="tasmee-toggle">
+            <input type="checkbox" id="tasmeeAutoFlip" checked>
+            <span class="tasmee-toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-row" style="border-bottom:none;">
+        <div class="setting-label">صوت التنبيه عند الإجابة</div>
+        <div class="setting-control">
+          <label class="tasmee-toggle">
+            <input type="checkbox" id="tasmeeAudioFeedback" checked>
+            <span class="tasmee-toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start button (fixed at bottom) -->
+    <div style="padding:12px 16px calc(12px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid var(--glass-border);">
+      <button id="startTasmeeBtn" onclick="startTasmeeSession()" style="width:100%;padding:14px 20px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:1.05rem;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(26,112,64,0.3);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        ابدأ التسميع
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TASMEE' ACTIVE BAR ===== -->
+  <div class="tasmee-active-bar" id="tasmeeActiveBar">
+    <div class="tasmee-mic-indicator" id="tasmeeMicIndicator"></div>
+    <div class="tasmee-progress-text" id="tasmeeProgressText">٠ / ٠ كلمة</div>
+    <button class="audio-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()" title="إيقاف مؤقت" style="width:38px;height:38px;font-size:1rem;">⏸</button>
+    <button class="audio-btn" onclick="endTasmeeSession()" title="إنهاء التسميع" style="width:38px;height:38px;font-size:0.8rem;background:rgba(217,64,64,0.12);color:var(--danger);">إنهاء</button>
+  </div>
+
+  <!-- ===== TASMEE' RESULTS MODAL ===== -->
+  <div class="modal-overlay" id="tasmeeResultsModal" onclick="handleOverlayClick(event,'tasmeeResultsModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>نتيجة التسميع</span>
+        <button class="close-btn" onclick="closeModal('tasmeeResultsModal')">✕</button>
+      </div>
+      <div id="tasmeeResultsBody"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="offline-btn" style="flex:1;margin-top:0;" onclick="retryTasmeeSession()">إعادة التسميع</button>
+        <button class="offline-btn" style="flex:1;margin-top:0;background:rgba(128,128,128,0.15);color:var(--text-primary);" onclick="closeModal('tasmeeResultsModal')">إغلاق</button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
@@ -939,8 +1101,9 @@
               handlePendingAyahAction(); 
               prefetchNextPage(); 
               applyTextSettings(); 
-              setupLongPressForAyahs(); 
+              setupLongPressForAyahs();
               if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
+              if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
               return;
           }
       } catch(e) { localStorage.removeItem(cacheKey); }
@@ -1001,8 +1164,9 @@
             handlePendingAyahAction(); 
             prefetchNextPage(); 
             applyTextSettings();
-            setupLongPressForAyahs(); 
+            setupLongPressForAyahs();
             if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
+            if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
           } else { txtCont.innerHTML = '<div style="text-align:center; padding:50px;">عذراً، لم يتم العثور على النص</div>'; }
       }).catch(err => { txtCont.innerHTML = `<div class="error-log"><b>Error:</b><br>${err.message}</div>`; });
     }
@@ -1147,10 +1311,14 @@
     }
 
     const orgNav = typeof navigateTo === 'function' ? navigateTo : function(){};
-    navigateTo = function(newPage, dir) { 
-        stopAutoScroll(); if(!autoPlayNextPage) stopAudio(); 
-        orgNav(newPage, dir); 
-        setTimeout(() => { updateToggleLink(); updateSurahProgress(); updatePageLabels(); }, 300); 
+    navigateTo = function(newPage, dir) {
+        stopAutoScroll(); if(!autoPlayNextPage) stopAudio();
+        if (tasmeeEngine && tasmeeEngine.isActive) {
+            tasmeeEngine.endSession();
+            showCustomToast('تم إنهاء التسميع عند تغيير الصفحة');
+        }
+        orgNav(newPage, dir);
+        setTimeout(() => { updateToggleLink(); updateSurahProgress(); updatePageLabels(); }, 300);
     };
 
     window.onload = function() {
@@ -1178,6 +1346,226 @@
     };
 
     function goHome() { window.location.href = 'index.html'; }
+
+    // ============================================================
+    //  TASMEE' CONTROLLER
+    // ============================================================
+    let tasmeeEngine = null;
+    let tasmeeLastAyahData = null;
+    let tasmeeLastAyahOffset = 0;
+    let tasmeeCurrentAyahHighlight = -1;
+    let tasmeeAutoAdvanceSettings = null; // { hideText, audioFb } for auto page-flip restart
+
+    function openTasmeeSetup() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        showCustomToast('وضع التسميع غير مدعوم على هذا المتصفح — جرب Chrome أو Edge');
+        return;
+      }
+      // Restore saved preferences
+      document.getElementById('tasmeeHideText').checked = localStorage.getItem('tasmee_hide_text') === '1';
+      document.getElementById('tasmeeShowAyahEnd').checked = localStorage.getItem('tasmee_show_ayah_end') !== '0';
+      document.getElementById('tasmeeAutoFlip').checked = localStorage.getItem('tasmee_auto_flip') !== '0';
+      document.getElementById('tasmeeAudioFeedback').checked = localStorage.getItem('tasmee_audio_feedback') !== '0';
+      const savedRange = localStorage.getItem('tasmee_last_range') || 'page';
+      document.getElementById('tasmeeRangeSelect').value = savedRange;
+      toggleTasmeeCustomRange(savedRange);
+      document.getElementById('tasmeeSetupOverlay').style.display = 'block';
+      document.getElementById('tasmeeSetupSheet').classList.add('active');
+    }
+
+    function closeTasmeeSetup() {
+      document.getElementById('tasmeeSetupOverlay').style.display = 'none';
+      document.getElementById('tasmeeSetupSheet').classList.remove('active');
+    }
+
+    function toggleTasmeeCustomRange(val) {
+      document.getElementById('tasmeeCustomRange').style.display = val === 'custom' ? 'flex' : 'none';
+    }
+
+    function startTasmeeSession() {
+      closeTasmeeSetup();
+      stopAudio();
+
+      const range = document.getElementById('tasmeeRangeSelect').value;
+      const hideText = document.getElementById('tasmeeHideText').checked;
+      const showAyahEnd = document.getElementById('tasmeeShowAyahEnd').checked;
+      const autoFlip = document.getElementById('tasmeeAutoFlip').checked;
+      const audioFb = document.getElementById('tasmeeAudioFeedback').checked;
+
+      localStorage.setItem('tasmee_hide_text', hideText ? '1' : '0');
+      localStorage.setItem('tasmee_show_ayah_end', showAyahEnd ? '1' : '0');
+      localStorage.setItem('tasmee_auto_flip', autoFlip ? '1' : '0');
+      localStorage.setItem('tasmee_audio_feedback', audioFb ? '1' : '0');
+      localStorage.setItem('tasmee_last_range', range);
+
+      // Apply ayah-end visibility
+      document.querySelectorAll('.ayah-number').forEach(el => {
+        el.style.visibility = showAyahEnd ? '' : 'hidden';
+      });
+
+      let ayahSlice = currentPageAyahsData.slice();
+      let ayahOffset = 0;
+      if (range === 'custom') {
+        const from = Math.max(0, parseInt(document.getElementById('tasmeeFrom').value) - 1) || 0;
+        const to = parseInt(document.getElementById('tasmeeTo').value) || currentPageAyahsData.length;
+        ayahOffset = from;
+        ayahSlice = currentPageAyahsData.slice(from, Math.min(to, currentPageAyahsData.length));
+      }
+      if (ayahSlice.length === 0) {
+        showCustomToast('لا توجد آيات في النطاق المحدد. حمّل صفحة أولاً.');
+        return;
+      }
+      tasmeeLastAyahData = ayahSlice;
+      tasmeeLastAyahOffset = ayahOffset;
+
+      const btn = document.getElementById('tasmeeBtn');
+      if (btn) btn.disabled = true;
+
+      tasmeeCurrentAyahHighlight = -1;
+      tasmeeEngine = new TasmeeEngine({
+        audioFeedback: audioFb,
+        onWordMatch: (_idx, _state, progress) => {
+          const el = document.getElementById('tasmeeProgressText');
+          if (el) el.textContent = `${progress.done} / ${progress.total} كلمة`;
+          // Highlight the ayah currently being recited
+          const domAyahIdx = progress.currentAyahIdx + tasmeeLastAyahOffset;
+          if (progress.currentAyahIdx >= 0 && domAyahIdx !== tasmeeCurrentAyahHighlight) {
+            if (tasmeeCurrentAyahHighlight >= 0) {
+              const prev = document.getElementById(`ayah-wrapper-${tasmeeCurrentAyahHighlight}`);
+              if (prev) prev.classList.remove('playing-highlight');
+            }
+            tasmeeCurrentAyahHighlight = domAyahIdx;
+            const curr = document.getElementById(`ayah-wrapper-${domAyahIdx}`);
+            if (curr) curr.classList.add('playing-highlight');
+          }
+        },
+        onSessionEnd: (summary) => {
+          document.getElementById('tasmeeActiveBar').classList.remove('active');
+          if (btn) btn.disabled = false;
+          // Restore ayah-end visibility and ayah highlights
+          document.querySelectorAll('.ayah-number').forEach(el => { el.style.visibility = ''; });
+          if (tasmeeCurrentAyahHighlight >= 0) {
+            const prev = document.getElementById(`ayah-wrapper-${tasmeeCurrentAyahHighlight}`);
+            if (prev) prev.classList.remove('playing-highlight');
+            tasmeeCurrentAyahHighlight = -1;
+          }
+          const engRef = tasmeeEngine;
+          tasmeeEngine = null;
+          // Auto-advance to next page if the whole page was completed
+          if (summary.completed && autoFlip && currentPage < 604) {
+            tasmeeAutoAdvanceSettings = { hideText, audioFb };
+            currentPage++;
+            updateContent();
+            showCustomToast('انتهت الصفحة! جاري الانتقال للصفحة التالية...');
+            window._tasmeeRenderCb = () => _tasmeeAutoStart();
+            return;
+          }
+          engRef._showResultModal(summary);
+        }
+      });
+
+      tasmeeEngine.startSession(ayahSlice, { hideText, ayahOffset })
+        .then(() => {
+          document.getElementById('tasmeeProgressText').textContent = `٠ / ${tasmeeEngine._wordTokens.length} كلمة`;
+          document.getElementById('tasmeeMicIndicator').classList.remove('paused');
+          document.getElementById('tasmeePauseBtn').textContent = '⏸';
+          document.getElementById('tasmeeActiveBar').classList.add('active');
+        })
+        .catch(err => {
+          if (btn) btn.disabled = false;
+          tasmeeEngine = null;
+          showCustomToast('تعذر الوصول للميكروفون: ' + (err.message || err));
+        });
+    }
+
+    function pauseOrResumeTasmee() {
+      if (!tasmeeEngine) return;
+      if (tasmeeEngine.isPaused) {
+        tasmeeEngine.resumeSession();
+        document.getElementById('tasmeePauseBtn').textContent = '⏸';
+      } else {
+        tasmeeEngine.pauseSession();
+        document.getElementById('tasmeePauseBtn').textContent = '▶';
+      }
+    }
+
+    function endTasmeeSession() {
+      if (!tasmeeEngine) return;
+      tasmeeEngine.endSession();
+    }
+
+    function retryTasmeeSession() {
+      closeModal('tasmeeResultsModal');
+      openTasmeeSetup();
+    }
+
+    function _tasmeeAutoStart() {
+      if (!tasmeeAutoAdvanceSettings) return;
+      const { hideText, audioFb } = tasmeeAutoAdvanceSettings;
+      const autoFlip = localStorage.getItem('tasmee_auto_flip') !== '0';
+      tasmeeAutoAdvanceSettings = null;
+      if (!currentPageAyahsData || currentPageAyahsData.length === 0) return;
+      tasmeeLastAyahData = currentPageAyahsData.slice();
+      tasmeeLastAyahOffset = 0;
+      const btn = document.getElementById('tasmeeBtn');
+      if (btn) btn.disabled = true;
+      // Apply ayah-end visibility from saved pref
+      const showAyahEnd = localStorage.getItem('tasmee_show_ayah_end') !== '0';
+      document.querySelectorAll('.ayah-number').forEach(el => { el.style.visibility = showAyahEnd ? '' : 'hidden'; });
+      tasmeeCurrentAyahHighlight = -1;
+      tasmeeEngine = new TasmeeEngine({
+        audioFeedback: audioFb,
+        onWordMatch: (_idx, _state, progress) => {
+          const el = document.getElementById('tasmeeProgressText');
+          if (el) el.textContent = `${progress.done} / ${progress.total} كلمة`;
+          const domAyahIdx = progress.currentAyahIdx + tasmeeLastAyahOffset;
+          if (progress.currentAyahIdx >= 0 && domAyahIdx !== tasmeeCurrentAyahHighlight) {
+            if (tasmeeCurrentAyahHighlight >= 0) {
+              const prev = document.getElementById(`ayah-wrapper-${tasmeeCurrentAyahHighlight}`);
+              if (prev) prev.classList.remove('playing-highlight');
+            }
+            tasmeeCurrentAyahHighlight = domAyahIdx;
+            const curr = document.getElementById(`ayah-wrapper-${domAyahIdx}`);
+            if (curr) curr.classList.add('playing-highlight');
+          }
+        },
+        onSessionEnd: (summary) => {
+          document.getElementById('tasmeeActiveBar').classList.remove('active');
+          if (btn) btn.disabled = false;
+          document.querySelectorAll('.ayah-number').forEach(el => { el.style.visibility = ''; });
+          if (tasmeeCurrentAyahHighlight >= 0) {
+            const prev = document.getElementById(`ayah-wrapper-${tasmeeCurrentAyahHighlight}`);
+            if (prev) prev.classList.remove('playing-highlight');
+            tasmeeCurrentAyahHighlight = -1;
+          }
+          const engRef = tasmeeEngine;
+          tasmeeEngine = null;
+          if (summary.completed && autoFlip && currentPage < 604) {
+            tasmeeAutoAdvanceSettings = { hideText, audioFb };
+            currentPage++;
+            updateContent();
+            showCustomToast('انتهت الصفحة! جاري الانتقال للصفحة التالية...');
+            window._tasmeeRenderCb = () => _tasmeeAutoStart();
+            return;
+          }
+          engRef._showResultModal(summary);
+        }
+      });
+      tasmeeEngine.startSession(currentPageAyahsData, { hideText, ayahOffset: 0 })
+        .then(() => {
+          document.getElementById('tasmeeProgressText').textContent = `٠ / ${tasmeeEngine._wordTokens.length} كلمة`;
+          document.getElementById('tasmeeMicIndicator').classList.remove('paused');
+          document.getElementById('tasmeePauseBtn').textContent = '⏸';
+          document.getElementById('tasmeeActiveBar').classList.add('active');
+        })
+        .catch(err => {
+          if (btn) btn.disabled = false;
+          tasmeeEngine = null;
+          showCustomToast('تعذر بدء التسميع: ' + (err.message || err));
+        });
+    }
   </script>
+  <script src="js/tasmee-engine.js"></script>
 </body>
 </html>
