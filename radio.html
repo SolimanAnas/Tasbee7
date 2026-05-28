@@ -449,7 +449,7 @@
       </div>
     </div>
 
-    <video id="audio" preload="metadata" playsinline crossorigin="anonymous" style="display:none;"></video>
+    <audio id="audio" preload="metadata" playsinline crossorigin="anonymous"></audio>
   </div>
 
   <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
@@ -477,37 +477,31 @@
 
     let hls = null;
     let currentStation = null;
+    let userWantsPlay = false;
 
-    // --- Media Session Metadata Fix ---
+    // --- Media Session ---
+    // Build correct base URL regardless of subdirectory deployment (e.g. GitHub Pages /Tasbee7/)
+    const _mediaBase = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
+
     function updateMediaSession(stationName) {
-      if ('mediaSession' in navigator) {
-        
-        // الحصول على الرابط الكامل للأيقونات لضمان ظهورها في نظام الهاتف (شاشة القفل)
-        const base = window.location.origin;
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: stationName || 'إذاعة القرآن الكريم',
-          artist: 'البث المباشر',
-          album: 'زاد المسلم',
-          artwork: [
-            { src: `${base}/icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
-            { src: `${base}/icons/icon_512.png`, sizes: '512x512', type: 'image/png' },
-            { src: `${base}/icons/icon_1024.png`, sizes: '1024x1024', type: 'image/png' }
-          ]
-        });
-
-        navigator.mediaSession.setActionHandler('play', () => togglePlay(true));
-        navigator.mediaSession.setActionHandler('pause', () => togglePlay(false));
-        navigator.mediaSession.setActionHandler('stop', () => {
-          audio.pause();
-          updateUI(false);
-        });
-        
-        // مسح الإجراءات غير المدعومة في الراديو المباشر لتنظيف إشعار شاشة القفل
-        navigator.mediaSession.setActionHandler('seekbackward', null);
-        navigator.mediaSession.setActionHandler('seekforward', null);
-        navigator.mediaSession.setActionHandler('previoustrack', null);
-        navigator.mediaSession.setActionHandler('nexttrack', null);
-      }
+      if (!('mediaSession' in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: stationName || 'إذاعة القرآن الكريم',
+        artist: 'البث المباشر',
+        album: 'زاد المسلم',
+        artwork: [
+          { src: `${_mediaBase}/icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
+          { src: `${_mediaBase}/icons/icon_512.png`, sizes: '512x512', type: 'image/png' },
+          { src: `${_mediaBase}/icons/icon_1024.png`, sizes: '1024x1024', type: 'image/png' }
+        ]
+      });
+      navigator.mediaSession.setActionHandler('play', () => togglePlay(true));
+      navigator.mediaSession.setActionHandler('pause', () => togglePlay(false));
+      navigator.mediaSession.setActionHandler('stop', () => { audio.pause(); updateUI(false); });
+      navigator.mediaSession.setActionHandler('seekbackward', null);
+      navigator.mediaSession.setActionHandler('seekforward', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
     }
 
     const isMobile = /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
@@ -559,24 +553,26 @@
       const shouldPlay = forcePlay !== null ? forcePlay : audio.paused;
 
       if (shouldPlay) {
+        userWantsPlay = true;
         playBtn.classList.add('loading');
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
             playBtn.classList.remove('loading');
             updateUI(true);
-            updateMediaSession(currentStation.name); // تحديث الميديا سيشن عند بدء التشغيل الفعلي
+            updateMediaSession(currentStation.name);
           }).catch((err) => {
             console.error('Play failed:', err);
             playBtn.classList.remove('loading');
             showToast('تعذر التشغيل، تحقق من الاتصال بالإنترنت');
+            userWantsPlay = false;
             updateUI(false);
           });
         } else {
-          // older browser
           updateUI(true);
         }
       } else {
+        userWantsPlay = false;
         audio.pause();
         updateUI(false);
       }
@@ -594,6 +590,9 @@
         liveIndicator.classList.remove('playing');
         liveText.textContent = 'متوقف';
         playBtn.classList.remove('loading');
+      }
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
       }
     }
 
@@ -614,6 +613,19 @@
       playBtn.classList.remove('loading');
       updateUI(false);
       showToast('خطأ في تشغيل البث');
+    });
+
+    // --- Background playback guard (Android Chrome pauses audio when page hides) ---
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && userWantsPlay && audio.paused) {
+        audio.play().catch(() => {});
+      }
+    });
+    // If audio is paused unexpectedly while page is hidden (system interruption), try once to resume
+    audio.addEventListener('pause', () => {
+      if (userWantsPlay && document.visibilityState === 'hidden') {
+        setTimeout(() => { if (audio.paused) audio.play().catch(() => {}); }, 500);
+      }
     });
 
     // --- Favorites management ---
