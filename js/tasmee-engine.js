@@ -29,7 +29,12 @@ class TasmeeEngine {
     this._restartAttempts = 0;
     this._ayahOffset = ayahOffset;
 
-    await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Probe mic permission now (browser shows dialog here), then release the stream
+    // before SpeechRecognition takes over to avoid dual-capture conflicts.
+    if (navigator.mediaDevices?.getUserMedia) {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+    }
 
     this._injectWordSpans(hideText);
     this._highlightWord(0, 'active');
