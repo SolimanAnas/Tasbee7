@@ -483,15 +483,15 @@
       if ('mediaSession' in navigator) {
         
         // الحصول على الرابط الكامل للأيقونات لضمان ظهورها في نظام الهاتف (شاشة القفل)
-        const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-        
+        const base = window.location.origin;
         navigator.mediaSession.metadata = new MediaMetadata({
           title: stationName || 'إذاعة القرآن الكريم',
           artist: 'البث المباشر',
-          album: 'تطبيق زاد المسلم',
+          album: 'زاد المسلم',
           artwork: [
-            { src: `${baseUrl}/icons/icon-192.png`, sizes: '192x:192', type: 'image/png' },
-            { src: `${baseUrl}/icons/icon-512.png`, sizes: '512x512', type: 'image/png' }
+            { src: `${base}/icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
+            { src: `${base}/icons/icon_512.png`, sizes: '512x512', type: 'image/png' },
+            { src: `${base}/icons/icon_1024.png`, sizes: '1024x1024', type: 'image/png' }
           ]
         });
 
@@ -510,40 +510,26 @@
       }
     }
 
-    // --- iOS detection: native HLS needed for PWA background playback ---
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMobile = /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
 
     function supportsNativeHLS() {
       return audio.canPlayType('application/vnd.apple.mpegurl');
     }
 
-    // --- Load streams with HLS or direct ---
     function loadStream(url, stationName) {
       audio.pause();
-      if (hls) {
-        hls.destroy();
-        hls = null;
-      }
+      if (hls) { hls.destroy(); hls = null; }
 
       if (url.includes('.m3u8')) {
-        // iOS: use native HLS for background playback in PWA
-        if (isIOS && supportsNativeHLS()) {
+        if (supportsNativeHLS()) {
           audio.src = url;
         } else if (Hls.isSupported()) {
-          hls = new Hls();
+          hls = new Hls({ enableWorker: true, lowLatencyMode: true });
           hls.loadSource(url);
           hls.attachMedia(audio);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {});
-          hls.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) {
-              showToast('حدث خطأ في البث، حاول مرة أخرى');
-              updateUI(false);
-              playBtn.classList.remove('loading');
-            }
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            if (data.fatal) { showToast('حدث خطأ في البث'); updateUI(false); }
           });
-        } else if (supportsNativeHLS()) {
-          audio.src = url;
         } else {
           showToast('متصفحك لا يدعم بث HLS');
         }
