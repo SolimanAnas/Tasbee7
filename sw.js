@@ -1,7 +1,7 @@
-const CACHE_NAME = "zad-muslim-v9"; // bumped for push server config
+const CACHE_NAME = "zad-muslim-v10"; // expanded static assets
 
-// تأكد من أن المسارات في STATIC_ASSETS مطابقة تماماً للموجود في مجلدات مشروعك.
 const STATIC_ASSETS = [
+  // ===== App Shell (HTML) =====
   "./",
   "./index.html",
   "./quran.html",
@@ -15,14 +15,55 @@ const STATIC_ASSETS = [
   "./hadith.html",
   "./qibla.html",
   "./notifications.html",
+  "./howto.html",
+  "./about.html",
+
+  // ===== Config =====
   "./manifest.json",
+
+  // ===== Styles =====
   "./css/style.css",
+
+  // ===== Core JS =====
+  "./data/cities.js",
+  "./data/adhan.js",
+  "./js/native-init.js",
   "./js/notifications.js",
+  "./js/plugins/capacitor-core.js",
+  "./js/plugins/capacitor-shim.js",
+  "./js/plugins/local-notifications.js",
   "./js/quran-common.js",
+
+  // ===== Fonts =====
+  "./fonts/Tajawal-Bold.ttf",
+  "./fonts/Scheherazade.ttf",
+  "./fonts/uthmani-colored.ttf",
+  "./fonts/UthmanicHafs_V20.ttf",
+  "./fonts/Amiri.ttf",
+  "./fonts/almushaf.ttf",
+
+  // ===== Icons =====
   "./icons/icon-192.png",
   "./icons/icon_512.png",
   "./icons/duaa.png",
-  "./icons/settings.svg"
+  "./icons/duaa.svg",
+  "./icons/settings.svg",
+  "./icons/masbaha.png",
+  "./icons/masbaha.svg",
+  "./icons/radio.png",
+  "./icons/radio.svg",
+  "./icons/qibla.svg",
+
+  // ===== Background images =====
+  "./images/Background-dark.png",
+  "./images/Background-light.png",
+
+  // ===== Quran page images =====
+  "./img/text-container.png",
+  "./img/text-container_txt.png",
+  "./img/frame.png",
+  "./img/Sura_border.svg",
+  "./img/Basmala.svg"
 ];
 
 const DEEP_LINKS = {
@@ -176,4 +217,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v9 loaded");
+console.log("✅ Service Worker v10 loaded");
