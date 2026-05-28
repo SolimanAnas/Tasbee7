@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="js/radio-stations.js"></script>
 
   <style>
     /* --- THEME SYSTEM --- */
@@ -448,7 +449,7 @@
       </div>
     </div>
 
-    <audio id="audio" preload="none" playsinline></audio>
+    <audio id="audio" preload="metadata" playsinline crossorigin="anonymous"></audio>
   </div>
 
   <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
@@ -461,10 +462,6 @@
 
   <script>
     let allStations = [];
-    const staticStations = [
-      { name: "إذاعة القرآن الكريم - القاهرة", url: "https://n0b.radiojar.com/8s5u5tpdtwzuv" },
-      { name: "إذاعة القرآن الكريم - مكة", url: "https://stream.radiojar.com/0tpy1h0kxtzuv" }
-    ];
 
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
@@ -513,6 +510,14 @@
       }
     }
 
+    // --- iOS detection: native HLS needed for PWA background playback ---
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    function supportsNativeHLS() {
+      return audio.canPlayType('application/vnd.apple.mpegurl');
+    }
+
     // --- Load streams with HLS or direct ---
     function loadStream(url, stationName) {
       audio.pause();
@@ -522,15 +527,14 @@
       }
 
       if (url.includes('.m3u8')) {
-        if (Hls.isSupported()) {
+        // iOS: use native HLS for background playback in PWA
+        if (isIOS && supportsNativeHLS()) {
+          audio.src = url;
+        } else if (Hls.isSupported()) {
           hls = new Hls();
           hls.loadSource(url);
           hls.attachMedia(audio);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            if (audio.paused) {
-              // do not auto-play
-            }
-          });
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {});
           hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
               showToast('حدث خطأ في البث، حاول مرة أخرى');
@@ -538,7 +542,7 @@
               playBtn.classList.remove('loading');
             }
           });
-        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+        } else if (supportsNativeHLS()) {
           audio.src = url;
         } else {
           showToast('متصفحك لا يدعم بث HLS');
@@ -547,7 +551,6 @@
         audio.src = url;
       }
 
-      // Update UI and media session
       nowStation.innerText = stationName;
       updateMediaSession(stationName);
       checkFavStatus(url);
@@ -708,16 +711,10 @@
       });
     }
 
-    // --- Load stations from JSON or fallback ---
-    async function init() {
-      try {
-        const response = await fetch('json/radio-01.json');
-        const data = await response.json();
-        allStations = data.stations;
-      } catch (e) {
-        console.warn('استخدام القائمة الاحتياطية للإذاعات');
-        allStations = staticStations;
-      }
+    // --- Load stations from global variable ---
+    function init() {
+      allStations = typeof RADIO_STATIONS !== 'undefined' ? RADIO_STATIONS : [];
+      window.__stations = allStations;
       renderList(allStations);
       setupLastPlayed();
     }
