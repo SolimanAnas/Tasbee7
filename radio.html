@@ -449,7 +449,7 @@
       </div>
     </div>
 
-    <audio id="audio" preload="metadata" playsinline crossorigin="anonymous"></audio>
+    <video id="audio" preload="metadata" playsinline crossorigin="anonymous" style="display:none;"></video>
   </div>
 
   <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
@@ -513,7 +513,8 @@
     const isMobile = /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
 
     function supportsNativeHLS() {
-      return audio.canPlayType('application/vnd.apple.mpegurl');
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      return isSafari && audio.canPlayType('application/vnd.apple.mpegurl');
     }
 
     function loadStream(url, stationName) {
@@ -527,8 +528,14 @@
           hls = new Hls({ enableWorker: true, lowLatencyMode: true });
           hls.loadSource(url);
           hls.attachMedia(audio);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {});
           hls.on(Hls.Events.ERROR, (_, data) => {
-            if (data.fatal) { showToast('حدث خطأ في البث'); updateUI(false); }
+            if (data.fatal) {
+              hls.destroy();
+              hls = null;
+              showToast('حدث خطأ في البث');
+              updateUI(false);
+            }
           });
         } else {
           showToast('متصفحك لا يدعم بث HLS');
