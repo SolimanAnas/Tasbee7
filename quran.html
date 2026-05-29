@@ -3136,15 +3136,7 @@ function getVariantHighlightCal() {
           if (clickCount === 1) {
             singleClickTimer = setTimeout(() => {
               clickCount = 0;
-              const header = document.getElementById('appHeader');
-              const miniPlayer = document.getElementById('audioMiniPlayer');
-              header.classList.toggle('hidden-ui');
-              miniPlayer.classList.add('hidden-ui');
-              miniPlayer.classList.remove('visible');
-              if (!isPlaying) {
-                document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
-                windowCurrentAyahGlobal = null;
-              }
+              toggleHeaderUI();
             }, 300);
           } else if (clickCount === 2) {
             clearTimeout(singleClickTimer);
@@ -3179,15 +3171,7 @@ function getVariantHighlightCal() {
 
     document.getElementById('mushafContainer').addEventListener('click', (e) => {
       if(e.target.id === 'pageImg' || e.target.id === 'highlightOverlay') {
-        const header = document.getElementById('appHeader');
-        const miniPlayer = document.getElementById('audioMiniPlayer');
-        header.classList.toggle('hidden-ui');
-        miniPlayer.classList.add('hidden-ui');
-        miniPlayer.classList.remove('visible');
-        if (!isPlaying) {
-          document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
-          windowCurrentAyahGlobal = null;
-        }
+        toggleHeaderUI();
       }
     });
 
@@ -3394,7 +3378,36 @@ function getVariantHighlightCal() {
 
     speedSelect.onchange = () => { if(audioPlayer) audioPlayer.playbackRate = parseFloat(speedSelect.value); };
 
+    // ── Header/UI show-hide ────────────────────────────────────────────────────
+    let _headerHidden = false;
+    let _headerToggleLock = false;
+
+    function setHeaderVisible(show) {
+      if (_headerHidden === !show) return; // already in desired state
+      _headerHidden = !show;
+      const header = document.getElementById('appHeader');
+      header.classList.toggle('hidden-ui', !show);
+      if (!show) {
+        // hide mini-player together with header
+        miniPlayer.classList.add('hidden-ui');
+        miniPlayer.classList.remove('visible');
+        if (!isPlaying) {
+          document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
+          windowCurrentAyahGlobal = null;
+        }
+      }
+    }
+
+    function toggleHeaderUI() {
+      if (_headerToggleLock) return;
+      _headerToggleLock = true;
+      setTimeout(() => { _headerToggleLock = false; }, 420); // longer than 380ms transition
+      setHeaderVisible(_headerHidden); // flip state
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     function showMiniPlayerForAyah(surah, ayah, autoplay = false) {
+      setHeaderVisible(true); // ensure header is visible when mini-player appears
       miniPlayer.classList.remove('hidden-ui');
       miniPlayer.classList.add('visible');
       rangeFromInput.value = ayah; rangeToInput.value = ''; currentRangeRepeat = 0;
