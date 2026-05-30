@@ -1615,12 +1615,12 @@
       overflow: hidden;
     }
 
-    /* Bug 1+2 — center the mushaf; flex-child fills remaining height */
+    /* Bug 1+2 — horizontally center; align-start so scale extends down, not up */
     .page-frame {
       flex: 1 1 0;
       min-height: 0;
       display: flex !important;
-      align-items: center !important;
+      align-items: flex-start !important;
       justify-content: center !important;
       overflow: hidden;
       padding-bottom: 0 !important;
@@ -1635,11 +1635,12 @@
       transform-origin: top center;
     }
 
-    /* Bug 1 — image constrained to available height, width follows aspect ratio */
+    /* Bug 1 — JS sets maxHeight accounting for the sy scale factor;
+       no !important so the inline JS style takes effect */
     .mushaf-img {
       width: auto !important;
       max-width: 90vw !important;
-      max-height: calc(100vh - var(--header-h) - env(safe-area-inset-top) - 90px) !important;
+      max-height: none;
       height: auto !important;
     }
 
@@ -1649,6 +1650,304 @@
       margin-top: 12px !important;
     }
   }
+
+  /* ===== DESKTOP PAGE NAV BUTTONS (non-touch only) ===== */
+  .desktop-page-nav { display: none; }
+
+  @media (min-width: 700px) and (hover: hover) and (pointer: fine) {
+    .desktop-page-nav {
+      display: flex;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 80px;
+      background: rgba(26, 112, 64, 0.82);
+      border: none;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      cursor: pointer;
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+      transition: background var(--transition-fast), transform var(--transition-fast),
+                  box-shadow var(--transition-fast);
+    }
+    .desktop-page-nav:hover {
+      background: rgba(26, 112, 64, 1);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.30);
+    }
+    .desktop-page-nav:active { transform: translateY(-50%) scale(0.93); }
+    .desktop-page-nav svg { display: block; pointer-events: none; }
+    .desktop-page-nav.disabled { opacity: 0.18; pointer-events: none; }
+
+    /* prev is on the LEFT edge — round corners on the right side */
+    .desktop-nav-prev {
+      left: 0;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+    /* next is on the RIGHT edge — round corners on the left side */
+    .desktop-nav-next {
+      right: 0;
+      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    }
+  }
+  /* ===== MUSHAF DOWNLOAD MODAL ===== */
+  #dlModal {
+    position: fixed; inset: 0; z-index: 9998;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: radial-gradient(ellipse 90% 85% at 50% 38%,
+      rgba(72,44,8,0.91) 0%, rgba(11,6,1,0.97) 100%);
+    backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1);
+  }
+  #dlModal.active { opacity: 1; pointer-events: all; }
+
+  .dl-sheet {
+    position: relative;
+    background: linear-gradient(158deg, #FFFAEF 0%, #FFF4D8 100%);
+    border: 1px solid rgba(184,136,12,0.36);
+    border-radius: 26px;
+    box-shadow:
+      0 50px 120px rgba(0,0,0,0.58),
+      0 0 0 1px rgba(255,228,110,0.12) inset;
+    width: min(780px, 100%);
+    max-height: 90vh;
+    overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: none;
+    transform: translateY(22px) scale(0.97);
+    transition: transform 0.55s cubic-bezier(0.22,1,0.36,1);
+  }
+  .dl-sheet::-webkit-scrollbar { display: none; }
+  #dlModal.active .dl-sheet { transform: translateY(0) scale(1); }
+
+  /* Gold top line */
+  .dl-sheet::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg,
+      transparent 0%, #B8880C 18%, #F5D060 50%, #B8880C 82%, transparent 100%);
+    border-radius: 26px 26px 0 0;
+  }
+
+  .dl-header {
+    padding: 30px 28px 14px; text-align: center;
+  }
+  .dl-icon {
+    width: 58px; height: 58px; margin: 0 auto 14px;
+    background: linear-gradient(140deg, #A97808 0%, #E8B84B 55%, #C99A1A 100%);
+    border-radius: 17px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 7px 22px rgba(184,136,12,0.40), 0 1px 0 rgba(255,228,110,0.5) inset;
+  }
+  .dl-title {
+    font-family: 'Amiri', serif;
+    font-size: 1.45rem; font-weight: 700;
+    color: #1A0E02; margin: 0 0 7px; line-height: 1.35;
+  }
+  .dl-subtitle {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.86rem; color: #785428; margin: 0; line-height: 1.7;
+  }
+
+  .dl-divider {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 28px; margin: 14px 0 10px;
+  }
+  .dl-div-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(184,136,12,0.24), transparent);
+  }
+  .dl-div-gem {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(184,136,12,0.42);
+  }
+
+  /* Variant cards — horizontal RTL scroll row */
+  .dl-variants {
+    display: flex; flex-direction: row; gap: 12px;
+    padding: 4px 20px 10px;
+    overflow-x: auto; overflow-y: visible;
+    direction: rtl;               /* start from right, scroll left */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(184,136,12,0.45) rgba(184,136,12,0.10);
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  .dl-variants::-webkit-scrollbar { height: 5px; }
+  .dl-variants::-webkit-scrollbar-track { background: rgba(184,136,12,0.10); border-radius: 3px; }
+  .dl-variants::-webkit-scrollbar-thumb { background: rgba(184,136,12,0.45); border-radius: 3px; }
+  .dl-variants::-webkit-scrollbar-thumb:hover { background: rgba(184,136,12,0.70); }
+  /* cards inside must be ltr so text/images render correctly */
+  .dl-vcard { direction: ltr; }
+
+  /* Settings hint */
+  .dl-settings-hint {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 6px 20px 4px;
+    font-family: 'Tajawal', sans-serif; font-size: 0.78rem;
+    color: #A89060; text-align: center; line-height: 1.5;
+  }
+
+  .dl-vcard {
+    flex: 0 0 140px;
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,0.55);
+    border: 2px solid rgba(184,136,12,0.14);
+    border-radius: 14px; cursor: pointer; overflow: hidden;
+    scroll-snap-align: start;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .dl-vcard:hover {
+    border-color: rgba(184,136,12,0.38);
+    box-shadow: 0 6px 18px rgba(184,136,12,0.14);
+    transform: translateY(-2px);
+  }
+  .dl-vcard.dl-selected {
+    border-color: #B8880C;
+    box-shadow: 0 0 0 3px rgba(184,136,12,0.18), 0 6px 20px rgba(184,136,12,0.18);
+  }
+
+  /* Big thumbnail */
+  .dl-thumb {
+    width: 100%; height: 185px; position: relative; overflow: hidden;
+    background: rgba(184,136,12,0.06);
+    flex-shrink: 0;
+  }
+  .dl-thumb img {
+    width: 100%; height: 100%; object-fit: contain; display: block;
+  }
+  /* Selected overlay with checkmark */
+  .dl-thumb-ov {
+    position: absolute; inset: 0;
+    background: rgba(184,136,12,0.18);
+    display: flex; align-items: flex-end; justify-content: flex-end;
+    padding: 8px; opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .dl-vcard.dl-selected .dl-thumb-ov { opacity: 1; }
+  .dl-chk {
+    width: 24px; height: 24px;
+    background: #B8880C; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transform: scale(0.7);
+    transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
+  }
+  .dl-vcard.dl-selected .dl-chk { transform: scale(1); }
+
+  /* Card body */
+  .dl-vbody {
+    padding: 9px 10px 11px;
+    background: rgba(255,255,255,0.7);
+  }
+  .dl-vname {
+    font-family: 'Amiri', serif; font-size: 0.92rem; font-weight: 700;
+    color: #1A0E02; margin: 0 0 3px; line-height: 1.3;
+    text-align: center;
+  }
+  .dl-vsize {
+    font-size: 0.67rem; color: #A89060;
+    display: flex; align-items: center; justify-content: center; gap: 3px;
+  }
+
+  /* Footer */
+  .dl-footer {
+    padding: 16px 18px 24px;
+    display: flex; gap: 10px; flex-direction: row-reverse; align-items: center;
+  }
+  .dl-btn-go {
+    flex: 1; padding: 13px 20px;
+    background: linear-gradient(135deg, #8F5E06 0%, #C9952E 50%, #A97808 100%);
+    color: #FFF8E8; border: none; border-radius: 13px;
+    font-family: 'Tajawal', sans-serif; font-size: 0.98rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.02em;
+    box-shadow: 0 5px 18px rgba(184,136,12,0.34);
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+  }
+  .dl-btn-go:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(184,136,12,0.44); }
+  .dl-btn-go:disabled { opacity: 0.36; cursor: default; }
+  .dl-btn-skip {
+    padding: 13px 17px;
+    background: transparent;
+    border: 1.5px solid rgba(184,136,12,0.22);
+    border-radius: 13px;
+    font-family: 'Tajawal', sans-serif; font-size: 0.88rem; color: #785428;
+    cursor: pointer; transition: background 0.18s, border-color 0.18s;
+  }
+  .dl-btn-skip:hover { background: rgba(184,136,12,0.07); border-color: rgba(184,136,12,0.35); }
+
+  /* Progress */
+  .dl-progress { padding: 20px 28px 28px; text-align: center; }
+  .dl-ring-wrap { position: relative; width: 110px; height: 110px; margin: 0 auto 16px; }
+  .dl-ring-svg { transform: rotate(-90deg); }
+  .dl-ring-bg { fill: none; stroke: rgba(184,136,12,0.12); stroke-width: 9; }
+  .dl-ring-fill {
+    fill: none; stroke: url(#dlGrad); stroke-width: 9;
+    stroke-linecap: round;
+    stroke-dasharray: 307.88;
+    stroke-dashoffset: 307.88;
+    transition: stroke-dashoffset 0.45s cubic-bezier(0.22,1,0.36,1);
+  }
+  .dl-ring-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .dl-ring-pct {
+    font-family: 'Amiri', serif; font-size: 1.55rem; font-weight: 700;
+    color: #1A0E02; line-height: 1;
+  }
+  .dl-ring-sub { font-size: 0.68rem; color: #A89060; margin-top: 3px; }
+
+  .dl-prog-name {
+    font-family: 'Amiri', serif; font-size: 1.05rem; font-weight: 700;
+    color: #1A0E02; margin-bottom: 4px;
+  }
+  .dl-prog-pages {
+    font-family: 'Tajawal', sans-serif; font-size: 0.8rem; color: #785428; margin-bottom: 14px;
+  }
+  .dl-bar { height: 5px; background: rgba(184,136,12,0.12); border-radius: 3px; overflow: hidden; }
+  .dl-bar-fill {
+    height: 100%; border-radius: 3px; width: 0%;
+    background: linear-gradient(90deg, #8F5E06, #F5D060, #8F5E06);
+    background-size: 200% 100%;
+    transition: width 0.4s ease;
+    animation: dlShimmer 2.4s linear infinite;
+  }
+  @keyframes dlShimmer { to { background-position: -200% 0; } }
+  .dl-status { font-size: 0.76rem; color: #A89060; margin-top: 10px; min-height: 18px; }
+
+  /* Done */
+  .dl-done { padding: 28px 28px 32px; text-align: center; }
+  .dl-done-ring {
+    width: 66px; height: 66px; margin: 0 auto 16px;
+    background: linear-gradient(135deg, #1A7040, #2EAA60);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 26px rgba(26,112,64,0.38);
+    animation: dlPopIn 0.48s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes dlPopIn { from { transform: scale(0.45); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .dl-done-title {
+    font-family: 'Amiri', serif; font-size: 1.38rem; font-weight: 700;
+    color: #1A7040; margin: 0 0 8px;
+  }
+  .dl-done-sub {
+    font-family: 'Tajawal', sans-serif; font-size: 0.86rem; color: #785428;
+    margin: 0 0 22px; line-height: 1.65;
+  }
+  .dl-done-btn {
+    padding: 13px 38px;
+    background: linear-gradient(135deg, #1A7040, #2EAA60);
+    color: white; border: none; border-radius: 13px;
+    font-family: 'Tajawal', sans-serif; font-size: 0.98rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 5px 18px rgba(26,112,64,0.34);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .dl-done-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,112,64,0.44); }
   </style>
 </head>
 <body>
@@ -1759,6 +2058,24 @@
       </div>
     </div>
   </main>
+
+  <!-- Desktop-only page navigation (hidden on touch screens via CSS) -->
+  <button class="desktop-page-nav desktop-nav-prev" id="desktopPrevBtn"
+          title="الصفحة السابقة"
+          onclick="desktopNavPrev()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+  <button class="desktop-page-nav desktop-nav-next" id="desktopNextBtn"
+          title="الصفحة التالية"
+          onclick="desktopNavNext()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </button>
 
   <div id="customToast" class="custom-toast"></div>
   <div id="zoomHint" class="zoom-hint" onclick="dismissZoomHint()">
@@ -2403,7 +2720,7 @@
         </div>
 
         <!-- Download -->
-        <button class="offline-btn" id="offlineDownloadBtn" onclick="cacheAllPages()">
+        <button class="offline-btn" id="offlineDownloadBtn" onclick="dlOpenFromSettings()">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -3028,10 +3345,37 @@
     }
 
     // ========== PAGE TRANSITION ==========
+    function syncDesktopNavBtns() {
+      const prev = document.getElementById('desktopPrevBtn');
+      const next = document.getElementById('desktopNextBtn');
+      if (prev) prev.classList.toggle('disabled', currentPage <= 1);
+      if (next) next.classList.toggle('disabled', currentPage >= 604);
+    }
+    window.desktopNavPrev = function() { if (currentPage > 1)   goToPage(currentPage - 1); };
+    window.desktopNavNext = function() { if (currentPage < 604) goToPage(currentPage + 1); };
+
+    function syncPlayerWidth() {
+      const player = document.getElementById('audioMiniPlayer');
+      if (!player) return;
+      if (window.innerWidth < 700) {
+        player.style.left  = '';
+        player.style.right = '';
+        return;
+      }
+      const img = document.getElementById('pageImg');
+      if (!img || !img.offsetWidth) return;
+      // getBoundingClientRect reflects the visual (post-transform) position
+      const rect = img.getBoundingClientRect();
+      const pad = 4; // small inset so it sits just inside the image edges
+      player.style.left  = Math.max(8, Math.round(rect.left  + pad)) + 'px';
+      player.style.right = Math.max(8, Math.round(window.innerWidth - rect.right + pad)) + 'px';
+    }
+
     window.goToPage = function (page) {
         if (page >= 1 && page <= 604) {
             currentPage = page;
             updateContent();
+            syncDesktopNavBtns();
         }
     };
 
@@ -3052,12 +3396,25 @@
         sx = borderZoomState ? 1.0 : 1.2;
         sy = borderZoomState ? 1.3 : 1.4;
       }
-      container.style.transform = `scale(${sx}, ${sy}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
+      if (window.innerWidth >= 700) {
+        // Large screens: skip the imgshiftY/X translate — it pushes the image
+        // down and clips the bottom. Flex layout centres horizontally instead.
+        container.style.transform = `scale(${sx}, ${sy})`;
+        const headerEl = document.getElementById('appHeader');
+        const availH = window.innerHeight - (headerEl ? headerEl.offsetHeight : 44) - 90;
+        img.style.maxHeight = Math.floor(availH / sy) + 'px';
+        img.style.width = 'auto';
+      } else {
+        container.style.transform = `scale(${sx}, ${sy}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
+        img.style.maxHeight = '';
+        img.style.width = '';
+      }
       img.onload = () => {
         img.style.opacity = '1';
         const overlay = document.getElementById('highlightOverlay');
         overlay.style.width  = img.offsetWidth  + 'px';
         overlay.style.height = img.offsetHeight + 'px';
+        syncPlayerWidth();
         loadAyahHighlights(currentPage);
         if (windowCurrentAyahGlobal && isPlaying) {
           highlightAyah(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
@@ -3586,7 +3943,7 @@ function getVariantHighlightCal() {
 
     // ========== V3 MUSHAF VARIANT MANAGEMENT ==========
     const MUSHAF_VARIANTS = [
-      { id: 'mushaf-colored',    nameAr: 'مصحف المدينة',       desc: 'المصحف الملون - النسخة الافتراضية',        ext: 'webp' },
+      { id: 'mushaf-colored',    nameAr: '   مصحف المدينة - لفظ الجلالة ملون',       desc: 'المصحف الملون - خط سميك',        ext: 'webp' },
       { id: 'mushaf-madina1441', nameAr: 'مصحف المدينة 1441', desc: 'مصحف المدينة النبوية - طبعة 1441',            ext: 'webp' },
       { id: 'mushaf-tajweed',    nameAr: 'مصحف التجويد',       desc: 'مصحف التجويد الملون',                    ext: 'webp' },
       { id: 'mushaf-borderd',    nameAr: 'مصحف المدينة 1421', desc: 'مصحف المدينة النبوية - طبعة 1421',                 ext: 'png' },
@@ -4103,6 +4460,138 @@ function getVariantHighlightCal() {
       }
     }, {passive: true});
 
+    // ========== DOWNLOAD MODAL ==========
+    const DL_KEY   = 'quranV3DlDone';
+    const DL_CACHE = 'quran-mushaf-images-v1';
+    const DL_SIZES = {
+      'mushaf-colored':    '~65 ميجابايت',
+      'mushaf-madina1441': '~70 ميجابايت',
+      'mushaf-tajweed':    '~75 ميجابايت',
+      'mushaf-borderd':    '~120 ميجابايت',
+      'mushaf-green':      '~65 ميجابايت',
+    };
+    let dlSelected  = new Set(['mushaf-colored']);
+    let dlRunning   = false;
+
+    function dlInit() {
+      if (localStorage.getItem(DL_KEY)) return;
+      dlBuildCards();
+      setTimeout(() => document.getElementById('dlModal')?.classList.add('active'), 800);
+    }
+
+    function dlBuildCards() {
+      const wrap = document.getElementById('dlVariants');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      MUSHAF_VARIANTS.filter(v => v.ext).forEach(v => {
+        const sel  = dlSelected.has(v.id);
+        const thumb = v.id === 'mushaf-tajweed' ? '003' : '001';
+        const src   = getImagePath(v.id, thumb, v.ext);
+        const div   = document.createElement('div');
+        div.className = 'dl-vcard' + (sel ? ' dl-selected' : '');
+        div.dataset.vid = v.id;
+        div.innerHTML = `
+          <div class="dl-thumb">
+            <img src="${src}" alt="${v.nameAr}" loading="eager" onerror="this.style.opacity=0">
+            <div class="dl-thumb-ov">
+              <div class="dl-chk">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="dl-vbody">
+            <div class="dl-vname">${v.nameAr}</div>
+            <div class="dl-vsize">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              ${DL_SIZES[v.id] || '~70 ميجابايت'}
+            </div>
+          </div>`;
+        div.onclick = () => {
+          if (dlSelected.has(v.id)) dlSelected.delete(v.id);
+          else                       dlSelected.add(v.id);
+          div.classList.toggle('dl-selected', dlSelected.has(v.id));
+          document.getElementById('dlGoBtn').disabled = (dlSelected.size === 0);
+        };
+        wrap.appendChild(div);
+      });
+    }
+
+    function dlSkip() {
+      document.getElementById('dlModal')?.classList.remove('active');
+      localStorage.setItem(DL_KEY, '1');
+    }
+    function dlClose() {
+      document.getElementById('dlModal')?.classList.remove('active');
+    }
+
+    function dlOpenFromSettings() {
+      closeModal('settingsModal');
+      // Reset modal to selection view
+      document.getElementById('dlSelectSection').style.display   = 'block';
+      document.getElementById('dlProgressSection').style.display = 'none';
+      document.getElementById('dlDoneSection').style.display     = 'none';
+      // Pre-select current variant
+      dlSelected = new Set([currentMushafVariant]);
+      dlBuildCards();
+      document.getElementById('dlModal')?.classList.add('active');
+    }
+
+    async function dlStart() {
+      if (dlRunning || dlSelected.size === 0) return;
+      dlRunning = true;
+      document.getElementById('dlSelectSection').style.display  = 'none';
+      document.getElementById('dlProgressSection').style.display = 'block';
+
+      const variants   = [...dlSelected];
+      const totalPages = variants.length * 604;
+      let   done       = 0;
+      const BATCH      = 6;
+      let   cache      = null;
+      try { cache = 'caches' in window ? await caches.open(DL_CACHE) : null; } catch {}
+
+      for (const vid of variants) {
+        const v = MUSHAF_VARIANTS.find(m => m.id === vid);
+        if (!v?.ext) continue;
+        document.getElementById('dlProgName').textContent = v.nameAr;
+
+        for (let p = 1; p <= 604; p += BATCH) {
+          const batch = [];
+          for (let i = p; i < Math.min(p + BATCH, 605); i++) {
+            const pad  = i.toString().padStart(3, '0');
+            const path = getImagePath(vid, pad, v.ext);
+            batch.push(
+              fetch(path).then(r => { if (r.ok && cache) cache.put(path, r); }).catch(() => {})
+            );
+          }
+          await Promise.all(batch);
+          done += batch.length;
+          const pct = Math.round((done / totalPages) * 100);
+          const pageNum = Math.min(p + BATCH - 1, 604);
+          document.getElementById('dlPct').textContent      = pct + '%';
+          document.getElementById('dlBarFill').style.width  = pct + '%';
+          document.getElementById('dlProgPages').textContent = `صفحة ${pageNum} من ٦٠٤`;
+          document.getElementById('dlStatusMsg').textContent = `جاري التحميل…  ${done} / ${totalPages}`;
+          document.getElementById('dlRingFill').style.strokeDashoffset =
+            (307.88 * (1 - pct / 100)).toFixed(2);
+        }
+      }
+
+      dlRunning = false;
+      localStorage.setItem(DL_KEY, '1');
+
+      // Switch to a downloaded variant: keep current if it was downloaded, else use first downloaded
+      const downloadedList = variants;
+      const targetVariant  = downloadedList.includes(currentMushafVariant)
+                             ? currentMushafVariant
+                             : downloadedList[0];
+      if (targetVariant && targetVariant !== currentMushafVariant) {
+        setMushafVariant(targetVariant);
+      }
+
+      document.getElementById('dlProgressSection').style.display = 'none';
+      document.getElementById('dlDoneSection').style.display     = 'block';
+    }
+
     // ========== WINDOW INITIALIZATION ==========
     window.onload = function () {
       const imgCont = document.getElementById('mushafContainer');
@@ -4162,8 +4651,10 @@ function getVariantHighlightCal() {
         initMedinaCoords()
       ]).then(() => {
         updateContent();
+        syncDesktopNavBtns();
       }).catch(() => {
         updateContent();
+        syncDesktopNavBtns();
       });
 
       // Sync overlay size with image on any layout/viewport change
@@ -4174,6 +4665,7 @@ function getVariantHighlightCal() {
           overlay.style.width  = img.offsetWidth  + 'px';
           overlay.style.height = img.offsetHeight + 'px';
         }
+        syncPlayerWidth();
       };
       const ro = new ResizeObserver(syncOverlay);
       const imgEl = document.getElementById('pageImg');
@@ -4192,6 +4684,9 @@ function getVariantHighlightCal() {
       setupSheetDragClose(contextSheet);
       setupSheetDragClose(document.getElementById('tafsirModal'));
       setupSheetDragClose(expandedSheet);
+
+      // Show download modal on first visit
+      dlInit();
     };
 
     function goHome() { window.location.href = 'index.html'; }
@@ -4381,5 +4876,79 @@ function getVariantHighlightCal() {
 
   </script>
   <script src="js/tasmee-engine.js"></script>
+
+  <!-- ===== MUSHAF DOWNLOAD MODAL ===== -->
+  <div id="dlModal">
+    <div class="dl-sheet">
+
+      <!-- Header -->
+      <div class="dl-header">
+        <div class="dl-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
+        <h2 class="dl-title">حفظ المصحف الشريف</h2>
+        <p class="dl-subtitle">اختر نسخة المصحف لحفظها على جهازك<br>للاستخدام دون الحاجة إلى اتصال بالإنترنت</p>
+      </div>
+
+      <div class="dl-divider">
+        <div class="dl-div-line"></div><div class="dl-div-gem"></div><div class="dl-div-line"></div>
+      </div>
+
+      <!-- Selection section -->
+      <div id="dlSelectSection">
+        <div id="dlVariants" class="dl-variants"></div>
+        <div class="dl-settings-hint">
+          يمكنك دائماً تحميل نسخة المصحف من الإعدادات ⚙️
+        </div>
+        <div class="dl-footer">
+          <button class="dl-btn-go" id="dlGoBtn" onclick="dlStart()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-left:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            تحميل المحدد
+          </button>
+          <button class="dl-btn-skip" onclick="dlSkip()">لاحقاً</button>
+        </div>
+      </div>
+
+      <!-- Progress section -->
+      <div id="dlProgressSection" class="dl-progress" style="display:none">
+        <div class="dl-ring-wrap">
+          <svg class="dl-ring-svg" width="110" height="110" viewBox="0 0 110 110">
+            <defs>
+              <linearGradient id="dlGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#8F5E06"/>
+                <stop offset="50%"  stop-color="#F5D060"/>
+                <stop offset="100%" stop-color="#8F5E06"/>
+              </linearGradient>
+            </defs>
+            <circle class="dl-ring-bg"   cx="55" cy="55" r="49"/>
+            <circle class="dl-ring-fill" cx="55" cy="55" r="49" id="dlRingFill"/>
+          </svg>
+          <div class="dl-ring-center">
+            <div class="dl-ring-pct" id="dlPct">0%</div>
+            <div class="dl-ring-sub">مكتمل</div>
+          </div>
+        </div>
+        <div class="dl-prog-name"  id="dlProgName"></div>
+        <div class="dl-prog-pages" id="dlProgPages">جاري التحضير…</div>
+        <div class="dl-bar"><div class="dl-bar-fill" id="dlBarFill"></div></div>
+        <div class="dl-status"     id="dlStatusMsg"></div>
+      </div>
+
+      <!-- Done section -->
+      <div id="dlDoneSection" class="dl-done" style="display:none">
+        <div class="dl-done-ring">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="dl-done-title">تمّ الحفظ بنجاح!</div>
+        <div class="dl-done-sub">يمكنك الآن تصفّح المصحف الشريف<br>دون اتصال بالإنترنت</div>
+        <button class="dl-done-btn" onclick="dlClose()">ابدأ القراءة</button>
+      </div>
+
+    </div>
+  </div>
 </body>
 </html>
