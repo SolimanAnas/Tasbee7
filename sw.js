@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v12"; // added fonts, assets, api fix
+const CACHE_NAME = "zad-muslim-v13"; // skip .onnx in SW, model fallback
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -66,9 +66,6 @@ const STATIC_ASSETS = [
   "./assets/part5.json",
   "./assets/media/Azkar-morning.mp3",
   "./assets/media/Azkar-night.mp3",
-
-  // ===== Models =====
-  "./models/fastconformer_ar_ctc_q8.onnx",
 
   // ===== Icons =====
   "./icons/icon-192.png",
@@ -149,7 +146,8 @@ self.addEventListener("fetch", event => {
 
   if (url.hostname.includes("mp3quran") || url.hostname.includes("archive.org") ||
       url.hostname.includes("radiojar") || url.hostname.includes("api.alquran.cloud") ||
-      url.pathname.endsWith(".mp3") || url.pathname.endsWith(".m3u8")) {
+      url.pathname.endsWith(".mp3") || url.pathname.endsWith(".m3u8") ||
+      url.pathname.endsWith(".onnx")) {
     return;
   }
 
@@ -245,4 +243,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v12 loaded");
+console.log("✅ Service Worker v13 loaded");
