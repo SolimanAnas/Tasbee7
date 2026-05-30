@@ -236,11 +236,7 @@ function goToPage(pageNum) {
 }
 
 function preloadAdjacentPages() {
-  // Can be overridden by mode if needed; default for image mode.
-  if (img && img.style.display !== 'none') {
-    if (currentPage > 1)          new Image().src = `mushaf/${currentPage - 1}.png`;
-    if (currentPage < totalPages) new Image().src = `mushaf/${currentPage + 1}.png`;
-  }
+  // V3 handles its own preloading via getImagePath(); this is a no-op for legacy modes.
 }
 
 // ============================================================
@@ -622,12 +618,17 @@ async function cacheAllPages() {
     return;
   }
   alert('جاري تخزين الصفحات للاستخدام بدون إنترنت...\nقد يستغرق ذلك بضع دقائق.');
+  const v = typeof getVariantInfo === 'function' ? getVariantInfo(currentMushafVariant || 'mushaf-colored') : { ext: 'webp' };
   const cache  = await caches.open('quran-mushaf-v1');
   let loaded   = 0;
 
   for (let i = 1; i <= totalPages; i++) {
     try {
-      await cache.add(`mushaf/${i}.png`);
+      const page = i.toString().padStart(3, '0');
+      const url = typeof getImagePath === 'function'
+        ? getImagePath(currentMushafVariant || 'mushaf-colored', page, v.ext)
+        : `mushaf/${i}.png`;
+      await cache.add(url);
       loaded++;
     } catch (err) {
       console.warn(`فشل تخزين الصفحة ${i}:`, err);
