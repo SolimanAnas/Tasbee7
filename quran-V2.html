@@ -368,6 +368,11 @@
   }
   .offline-btn:active { opacity: 0.85; transform: scale(0.98); }
   .offline-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .offline-btn-danger {
+    background: var(--danger);
+    box-shadow: 0 4px 16px var(--danger-light);
+    margin-top: 6px;
+  }
 
   /* Selector scroll */
   .selector-scroll {
@@ -3780,7 +3785,7 @@ function getVariantHighlightCal() {
           lbl.className = 'rp-group-lbl';
           lbl.textContent = child.label;
           panel.appendChild(lbl);
-          [...child.options].forEach(opt => panel.appendChild(makeRpItem(opt, sel)));
+          [...child.children].forEach(opt => panel.appendChild(makeRpItem(opt, sel)));
         } else if (child.tagName === 'OPTION') {
           panel.appendChild(makeRpItem(child, sel));
         }

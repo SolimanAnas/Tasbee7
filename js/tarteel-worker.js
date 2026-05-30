@@ -293,10 +293,41 @@ async function recognize(audio) {
   }
 }
 
+// ── Stream recognition (no processing/error messages, silent partial results) ──
+let _streamBusy = false;
+const STREAM_MAX_SAMPLES = 16000 * 7; // cap at 7s for speed
+
+async function recognizeStream(audio) {
+  if (!session || _streamBusy) return;
+  _streamBusy = true;
+  try {
+    // Use last N seconds if audio is very long
+    const slice = audio.length > STREAM_MAX_SAMPLES
+      ? audio.subarray(audio.length - STREAM_MAX_SAMPLES)
+      : audio;
+    const { features, timeFrames } = computeMelSpec(slice);
+    const inputTensor = new ort.Tensor('float32', features, [1, N_MELS, timeFrames]);
+    const lenTensor = new ort.Tensor('int64', BigInt64Array.from([BigInt(timeFrames)]), [1]);
+    const out = await session.run({
+      [session.inputNames[0]]: inputTensor,
+      [session.inputNames[1]]: lenTensor,
+    });
+    const logprobs = out[session.outputNames[0]];
+    const T = logprobs.dims[1];
+    const vocabSize = logprobs.dims[2];
+    const rawData = logprobs.data.subarray(0, T * vocabSize);
+    const transcript = ctcDecode(rawData, T);
+    const match = matchVerse(transcript);
+    self.postMessage({ type: 'stream_result', transcript, match });
+  } catch (_) { /* silent */ }
+  _streamBusy = false;
+}
+
 // ── Message handler ───────────────────────────────────────────────────────────
 self.onmessage = function(e) {
   if (e.data.type === 'init') initModel();
   if (e.data.type === 'recognize') recognize(e.data.audio);
+  if (e.data.type === 'stream') recognizeStream(e.data.audio);
 };
 
 self.addEventListener('unhandledrejection', e => {
