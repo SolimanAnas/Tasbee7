@@ -2,7 +2,6 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <script src="coi-serviceworker.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>المصحف الشريف - النسخة المتطورة V3</title>
   <link rel="manifest" href="manifest.json">
@@ -4566,7 +4565,7 @@ function getVariantHighlightCal() {
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
-          تحميل النموذج (131 MB)
+          تحميل النموذج
         </button>
       </div>
 
@@ -4813,7 +4812,7 @@ function getVariantHighlightCal() {
   }
 
   // ── Settings row: check model cache status and update label ──────────────
-  const _TARTEEL_MODEL_URL = 'https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0/fastconformer_ar_ctc_q8.onnx';
+  const _TARTEEL_MODEL_URL = './models/fastconformer_ar_ctc_q8.onnx';
   const _TARTEEL_CACHE_NAME = 'tarteel-model-v1';
 
   async function tarteelUpdateSettingsRow() {
@@ -4824,16 +4823,16 @@ function getVariantHighlightCal() {
       const cache = await caches.open(_TARTEEL_CACHE_NAME);
       const cached = await cache.match(_TARTEEL_MODEL_URL);
       if (cached) {
-        statusEl.textContent = 'محمّل — جاهز للاستخدام بدون إنترنت';
+        statusEl.textContent = 'جاهز — النموذج مدمج في التطبيق';
         statusEl.style.color = 'var(--accent)';
         chevronEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
       } else {
-        statusEl.textContent = 'غير محمّل — اضغط للتحميل (131 MB)';
+        statusEl.textContent = 'جاهز — اضغط للإعداد';
         statusEl.style.color = '';
         chevronEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
       }
     } catch (e) {
-      statusEl.textContent = 'اضغط للتحميل (131 MB)';
+      statusEl.textContent = 'اضغط للإعداد';
     }
   }
 

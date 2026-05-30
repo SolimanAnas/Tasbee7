@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v11"; // added tasmee-engine.js
+const CACHE_NAME = "zad-muslim-v12"; // added fonts, assets, api fix
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -36,12 +36,39 @@ const STATIC_ASSETS = [
   "./js/tasmee-engine.js",
 
   // ===== Fonts =====
+  "./fonts/Tajawal.ttf",
   "./fonts/Tajawal-Bold.ttf",
   "./fonts/Scheherazade.ttf",
   "./fonts/uthmani-colored.ttf",
   "./fonts/UthmanicHafs_V20.ttf",
+  "./fonts/UthmanicHafs.otf",
   "./fonts/Amiri.ttf",
   "./fonts/almushaf.ttf",
+  "./fonts/qortoba.ttf",
+  "./fonts/naskh.otf",
+  "./fonts/me_quran.ttf",
+  "./fonts/basmalah.ttf",
+
+  // ===== Assets =====
+  "./assets/audio.json",
+  "./assets/azkar.json",
+  "./assets/azan.mp3",
+  "./assets/husn.pdf",
+  "./assets/duaa-01.json",
+  "./assets/duaa-02.json",
+  "./assets/duaa-03.json",
+  "./assets/duaa-04.json",
+  "./assets/duaa-05.json",
+  "./assets/part1.json",
+  "./assets/part2.json",
+  "./assets/part3.json",
+  "./assets/part4.json",
+  "./assets/part5.json",
+  "./assets/media/Azkar-morning.mp3",
+  "./assets/media/Azkar-night.mp3",
+
+  // ===== Models =====
+  "./models/fastconformer_ar_ctc_q8.onnx",
 
   // ===== Icons =====
   "./icons/icon-192.png",
@@ -121,8 +148,8 @@ self.addEventListener("fetch", event => {
   const url = new URL(req.url);
 
   if (url.hostname.includes("mp3quran") || url.hostname.includes("archive.org") ||
-      url.hostname.includes("radiojar") || url.pathname.endsWith(".mp3") ||
-      url.pathname.endsWith(".m3u8")) {
+      url.hostname.includes("radiojar") || url.hostname.includes("api.alquran.cloud") ||
+      url.pathname.endsWith(".mp3") || url.pathname.endsWith(".m3u8")) {
     return;
   }
 
@@ -150,7 +177,7 @@ self.addEventListener("fetch", event => {
           caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
         return networkRes;
-      }).catch(err => console.log("📡 Offline fallback for:", req.url))
+      }).catch(err => new Response("Offline", { status: 503, statusText: "Service Unavailable", headers: { "Content-Type": "text/plain" } }))
     )
   );
 });
@@ -218,4 +245,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v10 loaded");
+console.log("✅ Service Worker v12 loaded");

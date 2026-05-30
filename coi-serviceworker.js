@@ -26,6 +26,9 @@ if (typeof window === 'undefined') {
         if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
             return;
         }
+        if (r.destination === "worker") {
+            return;
+        }
 
         const request = (coepCredentialless && r.mode === "no-cors")
             ? new Request(r, {
