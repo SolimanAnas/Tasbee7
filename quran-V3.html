@@ -4743,14 +4743,19 @@ function getVariantHighlightCal() {
     try {
       _tarteelStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       const chunks = [];
-      _tarteelRecorder = new MediaRecorder(_tarteelStream);
+      const preferredTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+      const mimeType = preferredTypes.find(t => MediaRecorder.isTypeSupported(t)) || '';
+      _tarteelRecorder = mimeType
+        ? new MediaRecorder(_tarteelStream, { mimeType })
+        : new MediaRecorder(_tarteelStream);
       _tarteelRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
       _tarteelRecorder.onstop = async () => {
         _tarteelStream.getTracks().forEach(t => t.stop());
         _tarteelStream = null;
         if (chunks.length === 0) return;
         try {
-          const blob = new Blob(chunks, { type: _tarteelRecorder.mimeType });
+          const blobType = _tarteelRecorder.mimeType || mimeType || 'audio/webm';
+          const blob = new Blob(chunks, { type: blobType });
           const arrayBuf = await blob.arrayBuffer();
           const decoded = await new AudioContext().decodeAudioData(arrayBuf);
           // Resample to 16 kHz using OfflineAudioContext
