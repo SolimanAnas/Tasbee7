@@ -11,6 +11,7 @@ ort.env.wasm.numThreads = 1;
 ort.env.wasm.numThreads = 1; // single-thread avoids SharedArrayBuffer / CORP headers
 
 const MODEL_URL = new URL('../models/fastconformer_ar_ctc_q8.onnx', self.location.href).href;
+const MODEL_FALLBACK = 'https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0/fastconformer_ar_ctc_q8.onnx';
 const CACHE_NAME = 'tarteel-model-v1';
 
 // Mel spectrogram constants (NeMo-compatible)
@@ -217,14 +218,25 @@ async function loadModel() {
     self.postMessage({ type: 'loading', progress: 95, status: 'جاري التهيئة من الكاش...' });
     return await cached.arrayBuffer();
   }
-  self.postMessage({ type: 'loading', progress: 0, status: 'جاري تحميل النموذج...' });
-  const buf = await fetchWithProgress(MODEL_URL, pct =>
-    self.postMessage({ type: 'loading', progress: Math.round(pct * 0.92), status: pct + '%' })
-  );
-  await cache.put(MODEL_URL, new Response(new Uint8Array(buf), {
-    headers: { 'Content-Type': 'application/octet-stream' }
-  }));
-  return buf;
+  // Try local model first, then fallback URL
+  const urls = [MODEL_URL, MODEL_FALLBACK];
+  let lastError = null;
+  for (const url of urls) {
+    try {
+      self.postMessage({ type: 'loading', progress: 0, status: 'جاري تحميل النموذج...' });
+      const buf = await fetchWithProgress(url, pct =>
+        self.postMessage({ type: 'loading', progress: Math.round(pct * 0.92), status: pct + '%' })
+      );
+      await cache.put(MODEL_URL, new Response(new Uint8Array(buf), {
+        headers: { 'Content-Type': 'application/octet-stream' }
+      }));
+      return buf;
+    } catch (e) {
+      lastError = e;
+      continue;
+    }
+  }
+  throw lastError || new Error('Failed to fetch model from all sources');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
