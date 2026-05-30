@@ -11,7 +11,7 @@ ort.env.wasm.numThreads = 1;
 ort.env.wasm.numThreads = 1; // single-thread avoids SharedArrayBuffer / CORP headers
 
 const MODEL_URL = new URL('../models/fastconformer_ar_ctc_q8.onnx', self.location.href).href;
-const MODEL_FALLBACK = 'https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0/fastconformer_ar_ctc_q8.onnx';
+const MODEL_FALLBACK = 'https://github.com/SolimanAnas/Tasbee7/releases/download/v1.0.0/fastconformer_ar_ctc_q8.onnx';
 const CACHE_NAME = 'tarteel-model-v1';
 
 // Mel spectrogram constants (NeMo-compatible)
