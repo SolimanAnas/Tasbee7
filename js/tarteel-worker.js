@@ -12,8 +12,7 @@ ort.env.wasm.numThreads = 1; // single-thread avoids SharedArrayBuffer / CORP he
 
 const MODEL_URL = new URL('../models/fastconformer_ar_ctc_q8.onnx', self.location.href).href;
 const MODEL_FALLBACKS = [
-  'https://github.com/SolimanAnas/Tasbee7/releases/download/v1.0.0/fastconformer_ar_ctc_q8.onnx',
-  'https://corsproxy.io/?' + encodeURIComponent('https://github.com/SolimanAnas/Tasbee7/releases/download/v1.0.0/fastconformer_ar_ctc_q8.onnx'),
+  'https://pub-cc0cb21aa3184d36978638448759d480.r2.dev/fastconformer_ar_ctc_q8.onnx',
 ];
 const CACHE_NAME = 'tarteel-model-v1';
 
