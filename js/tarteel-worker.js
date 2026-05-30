@@ -11,7 +11,10 @@ ort.env.wasm.numThreads = 1;
 ort.env.wasm.numThreads = 1; // single-thread avoids SharedArrayBuffer / CORP headers
 
 const MODEL_URL = new URL('../models/fastconformer_ar_ctc_q8.onnx', self.location.href).href;
-const MODEL_FALLBACK = 'https://github.com/SolimanAnas/Tasbee7/releases/download/v1.0.0/fastconformer_ar_ctc_q8.onnx';
+const MODEL_FALLBACKS = [
+  'https://github.com/SolimanAnas/Tasbee7/releases/download/v1.0.0/fastconformer_ar_ctc_q8.onnx',
+  'https://corsproxy.io/?' + encodeURIComponent('https://github.com/SolimanAnas/Tasbee7/releases/download/v1.0.0/fastconformer_ar_ctc_q8.onnx'),
+];
 const CACHE_NAME = 'tarteel-model-v1';
 
 // Mel spectrogram constants (NeMo-compatible)
@@ -218,8 +221,8 @@ async function loadModel() {
     self.postMessage({ type: 'loading', progress: 95, status: 'جاري التهيئة من الكاش...' });
     return await cached.arrayBuffer();
   }
-  // Try local model first, then fallback URL
-  const urls = [MODEL_URL, MODEL_FALLBACK];
+  // Try local model first, then fallback URLs
+  const urls = [MODEL_URL, ...MODEL_FALLBACKS];
   let lastError = null;
   for (const url of urls) {
     try {
