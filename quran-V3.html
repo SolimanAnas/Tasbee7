@@ -4748,13 +4748,14 @@ function getVariantHighlightCal() {
       _tarteelRecorder = mimeType
         ? new MediaRecorder(_tarteelStream, { mimeType })
         : new MediaRecorder(_tarteelStream);
+      const recorderRef = _tarteelRecorder;
       _tarteelRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
       _tarteelRecorder.onstop = async () => {
         _tarteelStream.getTracks().forEach(t => t.stop());
         _tarteelStream = null;
         if (chunks.length === 0) return;
         try {
-          const blobType = _tarteelRecorder.mimeType || mimeType || 'audio/webm';
+          const blobType = recorderRef.mimeType || mimeType || 'audio/webm';
           const blob = new Blob(chunks, { type: blobType });
           const arrayBuf = await blob.arrayBuffer();
           const decoded = await new AudioContext().decodeAudioData(arrayBuf);
