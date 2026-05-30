@@ -1,12 +1,16 @@
 // tarteel-worker.js - ES module Web Worker
 // Pipeline: 16kHz audio -> mel spectrogram -> ONNX CTC -> Levenshtein -> surah:ayah
+//
+// Model: NVIDIA FastConformer Arabic CTC (CC-BY-4.0)
+// Original: https://github.com/yazinsai/offline-tarteel (by Yazin Insai)
+// See ATTRIBUTION.md for license compliance.
 
 import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.24.2/dist/ort.wasm.bundle.min.mjs';
 
 ort.env.wasm.numThreads = 1;
 ort.env.wasm.numThreads = 1; // single-thread avoids SharedArrayBuffer / CORP headers
 
-const MODEL_URL = 'https://github.com/yazinsai/offline-tarteel/releases/download/v0.1.0/fastconformer_ar_ctc_q8.onnx';
+const MODEL_URL = new URL('../models/fastconformer_ar_ctc_q8.onnx', self.location.href).href;
 const CACHE_NAME = 'tarteel-model-v1';
 
 // Mel spectrogram constants (NeMo-compatible)

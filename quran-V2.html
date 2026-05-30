@@ -1039,28 +1039,109 @@
     flex-shrink: 0; display: flex;
   }
 
-  /* Reciter selector */
+  /* Reciter selector — native hidden, custom UI takes over */
   .reciter-wrapper { position: relative; margin-bottom: 18px; }
-  .reciter-selector {
-    width: 100%; padding: 12px 42px 12px 14px;
-    border-radius: var(--radius-md);
-    background: var(--bg-surface);
-    border: 1.5px solid var(--glass-border);
-    color: var(--text-primary);
-    font-family: inherit; font-size: 0.95rem; font-weight: 600;
-    outline: none; appearance: none;
-    cursor: pointer;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  }
-  .reciter-selector:focus {
-    border-color: var(--accent-border);
-    box-shadow: 0 0 0 3px var(--accent-light);
-  }
+  #expandedReciterSelect { display: none; }
+  .reciter-selector { display: none; }
+  /* keep chevron for other selects (tafsir etc.) but hide in reciter-wrapper */
+  .reciter-wrapper .select-chevron { display: none; }
   .select-chevron {
     position: absolute; left: 14px; top: 50%;
     transform: translateY(-50%);
     pointer-events: none; color: var(--text-hint);
     display: flex; align-items: center;
+  }
+
+  /* ── Custom reciter trigger button ── */
+  .reciter-trigger {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 11px 14px; border: none;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    cursor: pointer; text-align: right;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+  }
+  .reciter-trigger:hover { background: var(--bg-surface-hover); border-color: var(--accent-border); }
+  .reciter-wrapper.rp-open .reciter-trigger {
+    border-color: var(--accent-border);
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    background: var(--bg-surface-hover);
+  }
+  .reciter-trigger-icon {
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center; color: var(--accent);
+  }
+  .reciter-trigger-body { flex: 1; min-width: 0; }
+  .reciter-trigger-lbl {
+    font-family: 'Tajawal', sans-serif; font-size: 0.66rem;
+    color: var(--text-hint); margin-bottom: 2px; display: block;
+  }
+  .reciter-trigger-name {
+    font-family: 'Amiri', serif; font-size: 1.02rem; font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+  }
+  .reciter-trigger-arrow {
+    color: var(--text-hint); flex-shrink: 0;
+    transition: transform var(--transition-fast);
+  }
+  .reciter-wrapper.rp-open .reciter-trigger-arrow { transform: rotate(180deg); }
+
+  /* ── Reciter picker panel ── */
+  .reciter-picker {
+    display: none;
+    background: var(--glass-bg);
+    border: 1.5px solid var(--accent-border); border-top: none;
+    border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md);
+    overflow: hidden; max-height: 240px; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: var(--accent-border) transparent;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .reciter-wrapper.rp-open .reciter-picker { display: block; }
+  .rp-group-lbl {
+    padding: 5px 14px; font-size: 0.68rem; font-weight: 700;
+    color: var(--text-hint); letter-spacing: 0.05em;
+    background: var(--bg-surface); border-bottom: 1px solid var(--glass-border);
+  }
+  .rp-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer;
+    border-bottom: 1px solid var(--glass-border);
+    transition: background var(--transition-fast);
+  }
+  .rp-item:last-child { border-bottom: none; }
+  .rp-item:hover { background: var(--bg-surface-hover); }
+  .rp-item.rp-active { background: var(--accent-light); }
+  .rp-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--glass-border); background: transparent;
+    transition: all 0.15s;
+  }
+  .rp-item.rp-active .rp-dot { background: var(--accent); border-color: var(--accent); }
+  .rp-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--text-primary); flex: 1; }
+  .rp-item.rp-active .rp-name { color: var(--accent); font-weight: 700; }
+
+  /* ── Audio expanded sheet — large screen ── */
+  @media (min-width: 700px) {
+    .audio-expanded-sheet {
+      top: calc(var(--header-h) + env(safe-area-inset-top));
+      max-height: calc(100vh - var(--header-h) - env(safe-area-inset-top));
+      height:     calc(100vh - var(--header-h) - env(safe-area-inset-top));
+      border-radius: 0; overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .audio-expanded-sheet .sheet-drag-handle { display: none; }
+    .audio-expanded-sheet .expanded-header,
+    .audio-expanded-sheet .reciter-wrapper,
+    .audio-expanded-sheet .controls-row,
+    .audio-expanded-sheet .repeat-options {
+      max-width: 620px; width: 100%;
+      margin-left: auto; margin-right: auto;
+    }
+    .audio-expanded-sheet .repeat-options { flex: 1; }
+    /* Pin header — never auto-hide on desktop */
+    header#appHeader { transform: none !important; }
   }
 
   /* Audio controls */
@@ -2186,6 +2267,28 @@
     </div>
 
     <div class="reciter-wrapper">
+      <!-- Custom trigger (replaces native select visually) -->
+      <button class="reciter-trigger" onclick="toggleReciterPicker()">
+        <div class="reciter-trigger-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
+        <div class="reciter-trigger-body">
+          <span class="reciter-trigger-lbl">القارئ الحالي</span>
+          <span class="reciter-trigger-name" id="reciterTriggerName">…</span>
+        </div>
+        <div class="reciter-trigger-arrow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </button>
+      <!-- Picker panel (populated by JS) -->
+      <div class="reciter-picker" id="reciterPickerEl"></div>
+      <!-- Hidden native select — JS reads/writes this -->
       <select id="expandedReciterSelect" class="reciter-selector">
         <option value="ar.husary"              data-short="الحصري">محمود خليل الحصري</option>
         <option value="ar.abdulbasitmurattal"  data-short="عبد الباسط">عبد الباسط عبد الصمد</option>
@@ -3636,12 +3739,63 @@ function getVariantHighlightCal() {
               currentReciter = expandedReciterSelect.options[0].value;
           }
           expandedReciterSelect.value = currentReciter;
-          if(miniReciterName && expandedReciterSelect.selectedIndex >= 0) {
+          if(expandedReciterSelect.selectedIndex >= 0) {
               const opt = expandedReciterSelect.options[expandedReciterSelect.selectedIndex];
-              miniReciterName.textContent = opt.dataset.short || opt.text;
+              if(miniReciterName) miniReciterName.textContent = opt.dataset.short || opt.text;
+              const tn = document.getElementById('reciterTriggerName');
+              if(tn) tn.textContent = opt.text;
           }
       }
       localStorage.setItem('quranReciter', currentReciter);
+    }
+
+    // ── Custom reciter picker ──
+    function toggleReciterPicker() {
+      const wrap = document.querySelector('.reciter-wrapper');
+      if (!wrap) return;
+      const opening = !wrap.classList.contains('rp-open');
+      wrap.classList.toggle('rp-open', opening);
+      if (opening) buildReciterPicker();
+      // close when clicking outside
+      if (opening) {
+        setTimeout(() => {
+          document.addEventListener('click', closeReciterPickerOutside, { once: true });
+        }, 0);
+      }
+    }
+    function closeReciterPickerOutside(e) {
+      if (!e.target.closest('.reciter-wrapper')) {
+        document.querySelector('.reciter-wrapper')?.classList.remove('rp-open');
+      }
+    }
+    function buildReciterPicker() {
+      const panel = document.getElementById('reciterPickerEl');
+      if (!panel) return;
+      panel.innerHTML = '';
+      const sel = document.getElementById('expandedReciterSelect');
+      [...sel.children].forEach(child => {
+        if (child.tagName === 'OPTGROUP') {
+          const lbl = document.createElement('div');
+          lbl.className = 'rp-group-lbl';
+          lbl.textContent = child.label;
+          panel.appendChild(lbl);
+          [...child.options].forEach(opt => panel.appendChild(makeRpItem(opt, sel)));
+        } else if (child.tagName === 'OPTION') {
+          panel.appendChild(makeRpItem(child, sel));
+        }
+      });
+    }
+    function makeRpItem(opt, sel) {
+      const item = document.createElement('div');
+      item.className = 'rp-item' + (opt.value === sel.value ? ' rp-active' : '');
+      item.innerHTML = `<div class="rp-dot"></div><div class="rp-name">${opt.text}</div>`;
+      item.onclick = (e) => {
+        e.stopPropagation();
+        sel.value = opt.value;
+        sel.dispatchEvent(new Event('change'));
+        document.querySelector('.reciter-wrapper')?.classList.remove('rp-open');
+      };
+      return item;
     }
 
     async function fetchAudioData(surah, ayah) {
@@ -3706,6 +3860,24 @@ function getVariantHighlightCal() {
       isPlaying = true; updatePlayButtons(true);
       highlightAyah(item.surah, item.ayah);
       preloadNext();
+      // Media Session API — app icon instead of browser chrome icon
+      if ('mediaSession' in navigator) {
+        const surahName = document.getElementById('surahLabel')?.textContent || `سورة ${item.surah}`;
+        const recOpt = expandedReciterSelect.options[expandedReciterSelect.selectedIndex];
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title:  `${surahName} — الآية ${item.ayah}`,
+          artist: recOpt ? recOpt.text : '',
+          album:  'المصحف الشريف',
+          artwork: [
+            { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+          ]
+        });
+        navigator.mediaSession.setActionHandler('play',          () => { audioPlayer.play(); isPlaying = true;  updatePlayButtons(true); });
+        navigator.mediaSession.setActionHandler('pause',         () => { audioPlayer.pause(); isPlaying = false; updatePlayButtons(false); });
+        navigator.mediaSession.setActionHandler('nexttrack',     () => nextAyah());
+        navigator.mediaSession.setActionHandler('previoustrack', () => prevAyah());
+      }
     }
 
     async function nextAyah() {
@@ -3788,16 +3960,21 @@ function getVariantHighlightCal() {
     speedSelect.onchange = () => { if(audioPlayer) audioPlayer.playbackRate = parseFloat(speedSelect.value); };
 
     // ── Header/UI show-hide ────────────────────────────────────────────────────
-    let _headerHidden = false;
+    let _headerHidden     = false;
     let _headerToggleLock = false;
+    let _headerLastShown  = Date.now();   // timestamp when header was last shown
 
     function setHeaderVisible(show) {
+      // On large screens the header is always visible (CSS pins it); skip JS logic
+      if (window.innerWidth >= 700) return;
       if (_headerHidden === !show) return; // already in desired state
+      // Prevent hiding if header was shown less than 1.5 s ago (stops fast-flicker)
+      if (!show && Date.now() - _headerLastShown < 1500) return;
+      if (show) _headerLastShown = Date.now();
       _headerHidden = !show;
       const header = document.getElementById('appHeader');
       header.classList.toggle('hidden-ui', !show);
       if (!show) {
-        // hide mini-player together with header
         miniPlayer.classList.add('hidden-ui');
         miniPlayer.classList.remove('visible');
         if (!isPlaying) {
@@ -3808,9 +3985,10 @@ function getVariantHighlightCal() {
     }
 
     function toggleHeaderUI() {
+      if (window.innerWidth >= 700) return; // always visible on desktop
       if (_headerToggleLock) return;
       _headerToggleLock = true;
-      setTimeout(() => { _headerToggleLock = false; }, 420); // longer than 380ms transition
+      setTimeout(() => { _headerToggleLock = false; }, 420);
       setHeaderVisible(_headerHidden); // flip state
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -3860,7 +4038,7 @@ function getVariantHighlightCal() {
         tafsirModal: 'tafsirSheetBackdrop'
       };
       const onStart = (e) => {
-        if (e.target.closest('.reciter-selector') || e.target.closest('input') || e.target.closest('button')) return;
+        if (e.target.closest('.reciter-selector') || e.target.closest('.reciter-trigger') || e.target.closest('.reciter-picker') || e.target.closest('input') || e.target.closest('button')) return;
         touchStartY = e.touches[0].clientY;
         touchCurrentY = touchStartY;
         isDragging = true;
