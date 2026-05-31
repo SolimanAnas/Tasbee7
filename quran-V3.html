@@ -1710,6 +1710,10 @@
     body[data-variant="mushaf-green"]   .mushaf-container {
       margin-top: 12px !important;
     }
+
+    #mushafContainer2:not(.dual-active) {
+      display: none !important;
+    }
   }
 
   /* ===== DESKTOP PAGE NAV BUTTONS (non-touch only) ===== */
@@ -2070,6 +2074,127 @@
     header#appHeader { transform: none !important; }
   }
 
+  /* ===== FIT-WIDTH MODE (desktop only) ===== */
+  @media (min-width: 700px) {
+    body.fit-width main#swipeArea {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+    body.fit-width .page-frame {
+      overflow: visible !important;
+      height: auto !important;
+      min-height: 100%;
+    }
+    body.fit-width .mushaf-container {
+      width: 100% !important;
+      transform: none !important;
+      margin: 0 !important;
+    }
+    body.fit-width .mushaf-img {
+      width: 100% !important;
+      max-width: 100% !important;
+      max-height: none !important;
+      height: auto !important;
+    }
+    body.fit-width .highlight-overlay {
+      position: relative !important;
+    }
+    body.fit-width .desktop-page-nav {
+      display: none !important;
+    }
+  }
+
+  /* ===== DUAL-PAGE MODE (desktop only) ===== */
+  @media (min-width: 700px) {
+    body.dual-page main#swipeArea {
+      overflow: hidden !important;
+    }
+    body.dual-page .page-frame {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      justify-content: center !important;
+      gap: 0;
+      overflow: hidden !important;
+      height: 100%;
+      padding: 0 12px;
+    }
+    body.dual-page .mushaf-container {
+      flex: 1 1 0 !important;
+      min-width: 0;
+      max-width: 46vw;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      width: auto !important;
+      transform: none !important;
+      padding-bottom: 0;
+      overflow: hidden;
+    }
+    body.dual-page .mushaf-img {
+      flex: 1 1 0;
+      min-height: 0;
+      width: 100% !important;
+      max-width: 100% !important;
+      max-height: calc(100% - 32px) !important;
+      height: auto !important;
+      object-fit: contain;
+    }
+    body.dual-page .dual-page-label {
+      display: flex !important;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+      height: 28px;
+      padding: 0 18px;
+      font-family: 'ThuluthFont', 'Amiri', serif;
+      font-size: 0.78rem;
+      color: rgba(139, 105, 40, 0.70);
+      background: linear-gradient(to right, transparent 0%, rgba(139, 105, 40, 0.04) 30%, rgba(139, 105, 40, 0.04) 70%, transparent 100%);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    body.dual-page .dual-page-separator {
+      flex-shrink: 0;
+      width: 28px;
+      align-self: stretch;
+      position: relative;
+    }
+    body.dual-page .dual-page-separator::before {
+      content: '';
+      position: absolute;
+      top: 3%; bottom: 3%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1.5px;
+      background: linear-gradient(to bottom, transparent 0%, rgba(139, 105, 40, 0.06) 4%, rgba(139, 105, 40, 0.20) 12%, rgba(139, 105, 40, 0.38) 30%, rgba(139, 105, 40, 0.45) 50%, rgba(139, 105, 40, 0.38) 70%, rgba(139, 105, 40, 0.20) 88%, rgba(139, 105, 40, 0.06) 96%, transparent 100%);
+      box-shadow: 0 0 4px rgba(139, 105, 40, 0.10);
+    }
+    body.dual-page .dual-page-separator::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      width: 8px; height: 8px;
+      background: linear-gradient(135deg, rgba(139, 105, 40, 0.35), rgba(139, 105, 40, 0.18));
+      border: 1px solid rgba(139, 105, 40, 0.25);
+      border-radius: 1.5px;
+      box-shadow: 0 0 6px rgba(139, 105, 40, 0.12);
+    }
+    body.dual-page .label-bottom {
+      display: none !important;
+    }
+    body.dual-page .mushaf-border-top,
+    body.dual-page .mushaf-border-bottom {
+      display: none !important;
+    }
+  }
+
+  .icon-btn.mode-active {
+    color: var(--accent) !important;
+    background: rgba(26, 112, 64, 0.12) !important;
+  }
+
   /* ===== MUSHAF DOWNLOAD MODAL ===== */
   #dlModal {
     position: fixed; inset: 0; z-index: 9998;
@@ -2427,6 +2552,17 @@
           <line x1="12" y1="19" x2="12" y2="22"/>
         </svg>
       </button>
+      <button class="icon-btn" id="fitWidthBtn" onclick="toggleFitWidth()" title="عرض بالعرض الكامل" style="display:none">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="dualPageBtn" onclick="toggleDualPage()" title="صفحتان كالمصحف" style="display:none">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/>
+        </svg>
+      </button>
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -2495,6 +2631,12 @@
       <div id="mushafContainer" class="mushaf-container">
         <img id="pageImg" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
         <div id="highlightOverlay" class="highlight-overlay"></div>
+        <div class="dual-page-label" id="dualPageLabel1" style="display:none"></div>
+      </div>
+      <div class="dual-page-separator" id="dualPageSep" style="display:none"></div>
+      <div id="mushafContainer2" class="mushaf-container" style="display:none">
+        <img id="pageImg2" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
+        <div class="dual-page-label" id="dualPageLabel2" style="display:none"></div>
       </div>
     </div>
   </main>
@@ -3829,11 +3971,10 @@
 
     // ========== PAGE TRANSITION ==========
     window.goToPage = function (page) {
-        if (page >= 1 && page <= 604) {
-            currentPage = page;
-            updateContent();
-            syncDesktopNavBtns();
-        }
+        page = Math.max(1, Math.min(604, page));
+        currentPage = page;
+        updateContent();
+        syncDesktopNavBtns();
     };
 
     function updateContent() {
@@ -3853,15 +3994,54 @@
         sx = borderZoomState ? 1.0 : 1.2;
         sy = borderZoomState ? 1.3 : 1.4;
       }
-      if (window.innerWidth >= 700) {
-        // Large screens: skip the imgshiftY/X translate — it pushes the image
-        // down and clips the bottom. Flex layout centres horizontally instead.
+      /* ── Second page for dual-page mode ── */
+      const container2 = document.getElementById('mushafContainer2');
+      const img2 = document.getElementById('pageImg2');
+      const sep = document.getElementById('dualPageSep');
+      const label1 = document.getElementById('dualPageLabel1');
+      const label2 = document.getElementById('dualPageLabel2');
+      const isDual = dualPage && window.innerWidth >= 700;
+      const isFitW = fitWidth && window.innerWidth >= 700;
+
+      if (isDual) {
+        container.style.transform = 'none';
+        img.style.maxHeight = '';
+        img.style.width = '';
+        const nextPage = Math.min(currentPage + 1, 604);
+        const showSecond = nextPage !== currentPage;
+        if (container2) container2.classList.toggle('dual-active', showSecond);
+        if (sep) sep.style.display = showSecond ? '' : 'none';
+        if (label1) { label1.style.display = ''; label1.textContent = currentPage; }
+        if (label2) {
+          if (showSecond) { label2.style.display = ''; label2.textContent = nextPage; }
+          else { label2.style.display = 'none'; }
+        }
+        const formattedNext = nextPage.toString().padStart(3, '0');
+        img2.style.opacity = '0';
+        img2.src = getImagePath(currentMushafVariant, formattedNext, v.ext);
+        img2.onload = () => { img2.style.opacity = '1'; };
+        img2.onerror = () => { img2.style.opacity = '1'; };
+        img2.style.maxHeight = '';
+        img2.style.width = '';
+        if (container2) container2.style.transform = 'none';
+      } else {
+        if (container2) container2.classList.remove('dual-active');
+        if (sep) sep.style.display = 'none';
+        if (label1) label1.style.display = 'none';
+        if (label2) label2.style.display = 'none';
+      }
+
+      if (!isDual && isFitW) {
+        container.style.transform = 'none';
+        img.style.maxHeight = '';
+        img.style.width = '';
+      } else if (!isDual && window.innerWidth >= 700) {
         container.style.transform = `scale(${sx}, ${sy})`;
         const headerEl = document.getElementById('appHeader');
         const availH = window.innerHeight - (headerEl ? headerEl.offsetHeight : 44) - 90;
         img.style.maxHeight = Math.floor(availH / sy) + 'px';
         img.style.width = 'auto';
-      } else {
+      } else if (!isDual) {
         container.style.transform = `scale(${sx}, ${sy}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
         img.style.maxHeight = '';
         img.style.width = '';
@@ -4313,11 +4493,65 @@ function getVariantHighlightCal() {
     function syncDesktopNavBtns() {
       const prev = document.getElementById('desktopPrevBtn');
       const next = document.getElementById('desktopNextBtn');
+      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
       if (prev) prev.classList.toggle('disabled', currentPage <= 1);
       if (next) next.classList.toggle('disabled', currentPage >= 604);
     }
-    window.desktopNavPrev = function() { if (currentPage > 1)   goToPage(currentPage - 1); };
-    window.desktopNavNext = function() { if (currentPage < 604) goToPage(currentPage + 1); };
+    window.desktopNavPrev = function() {
+      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
+      if (currentPage > 1) goToPage(currentPage - step);
+    };
+    window.desktopNavNext = function() {
+      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
+      if (currentPage < 604) goToPage(currentPage + step);
+    };
+
+    /* ── Fit-width & dual-page modes (desktop only) ── */
+    let fitWidth = localStorage.getItem('quranFitWidth') === '1';
+    let dualPage = localStorage.getItem('quranDualPage') === '1';
+
+    /* ── Fit-width toggle ── */
+    window.toggleFitWidth = function() {
+      if (window.innerWidth < 700) return;
+      fitWidth = !fitWidth;
+      dualPage = false;
+      localStorage.setItem('quranFitWidth', fitWidth ? '1' : '0');
+      localStorage.setItem('quranDualPage', '0');
+      document.body.classList.toggle('fit-width', fitWidth);
+      document.body.classList.remove('dual-page');
+      document.getElementById('fitWidthBtn')?.classList.toggle('mode-active', fitWidth);
+      document.getElementById('dualPageBtn')?.classList.remove('mode-active');
+      updateContent();
+    };
+
+    /* ── Dual-page toggle ── */
+    window.toggleDualPage = function() {
+      if (window.innerWidth < 700) return;
+      dualPage = !dualPage;
+      fitWidth = false;
+      localStorage.setItem('quranDualPage', dualPage ? '1' : '0');
+      localStorage.setItem('quranFitWidth', '0');
+      document.body.classList.toggle('dual-page', dualPage);
+      document.body.classList.remove('fit-width');
+      document.getElementById('dualPageBtn')?.classList.toggle('mode-active', dualPage);
+      document.getElementById('fitWidthBtn')?.classList.remove('mode-active');
+      if (dualPage && currentPage % 2 === 0 && currentPage > 1) currentPage--;
+      updateContent();
+    };
+
+    /* ── Show mode buttons on desktop ── */
+    function initDesktopModes() {
+      if (window.innerWidth >= 700) {
+        const fb = document.getElementById('fitWidthBtn');
+        const db = document.getElementById('dualPageBtn');
+        if (fb) { fb.style.display = ''; fb.classList.toggle('mode-active', fitWidth); }
+        if (db) { db.style.display = ''; db.classList.toggle('mode-active', dualPage); }
+      }
+      document.body.classList.toggle('fit-width', fitWidth && window.innerWidth >= 700);
+      document.body.classList.toggle('dual-page', dualPage && window.innerWidth >= 700);
+    }
+    initDesktopModes();
+    window.addEventListener('resize', initDesktopModes);
 
     // ── Sync audio player width to mushaf image ──
     function syncPlayerWidth() {
@@ -4639,10 +4873,22 @@ function getVariantHighlightCal() {
       if (typeof getCurrentSurah === 'function') { const s = getCurrentSurah(); if(s) sName = s.name; }
       if (juzLabel && jName) juzLabel.textContent = jName;
       if (surahLabel && sName) surahLabel.textContent = sName;
-      if (pageLabel) pageLabel.textContent = currentPage;
+      if (pageLabel) {
+        if (dualPage && window.innerWidth >= 700 && currentPage < 604) {
+          pageLabel.textContent = `${currentPage}-${currentPage + 1}`;
+        } else {
+          pageLabel.textContent = currentPage;
+        }
+      }
       if (topJuzName && jName) topJuzName.textContent = jName;
       if (topSurahName && sName) topSurahName.textContent = sName;
-      if (topPageName) topPageName.textContent = `صفحة ${currentPage}`;
+      if (topPageName) {
+        if (dualPage && window.innerWidth >= 700 && currentPage < 604) {
+          topPageName.textContent = `صفحة ${currentPage}-${currentPage + 1}`;
+        } else {
+          topPageName.textContent = `صفحة ${currentPage}`;
+        }
+      }
     }
 
     function toggleSearchOverlay(action = 'toggle') {
@@ -5167,18 +5413,29 @@ function getVariantHighlightCal() {
     // ========== SWIPE LOGIC ==========
     let pageSwipeStartX = 0;
     document.addEventListener('touchstart', e => {
+      if (fitWidth && window.innerWidth >= 700) return;
       if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
       pageSwipeStartX = e.changedTouches[0].screenX;
     }, {passive: true});
     document.addEventListener('touchend', e => {
+      if (fitWidth && window.innerWidth >= 700) return;
       if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
       const touchEndX = e.changedTouches[0].screenX;
       const diff = touchEndX - pageSwipeStartX;
+      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
       if (Math.abs(diff) > 80) {
-        if (diff > 0) { if (currentPage < 604) { goToPage(currentPage + 1); } }
-        else { if (currentPage > 1) { goToPage(currentPage - 1); } }
+        if (diff > 0) { if (currentPage < 604) { goToPage(currentPage + step); } }
+        else { if (currentPage > 1) { goToPage(currentPage - step); } }
       }
     }, {passive: true});
+
+    // ========== KEYBOARD NAV (desktop) ==========
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); goToPage(currentPage - step); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); goToPage(currentPage + step); }
+    });
 
     // ========== WINDOW INITIALIZATION ==========
     window.onload = function () {
