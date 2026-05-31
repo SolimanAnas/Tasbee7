@@ -2435,7 +2435,7 @@
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
         </svg>
       </button>
-<button class="icon-btn" id="tarteelMicBtn" onclick="openTarteelSheet()" title="تعرف على الآية">
+<button class="icon-btn" id="tarteelMicBtn" onclick="startTasmeeFollow()" title="التسميع — استمع وتابع">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
           <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
@@ -3603,6 +3603,9 @@
       }
     }
 
+    /* Per-page Y offsets for medina2 coord misalignment (pages with surah headers) */
+    const MEDINA_PAGE_Y_OFFSETS = { 1: -63, 2: -65, 50: -38 };
+
     function getMedinaCoordsForPage(pageNumber) {
       if (!db || !dbReady || !medinaCoordsByAyah) return [];
       const query = `SELECT DISTINCT soraid, ayaid FROM ayarects WHERE page = ${pageNumber} ORDER BY soraid, ayaid`;
@@ -3616,6 +3619,7 @@
         stmt.free();
       } catch(e) { return []; }
       const rects = [];
+      const yOff = MEDINA_PAGE_Y_OFFSETS[pageNumber] || 0;
       ayahs.forEach(({surah, ayah}) => {
         const key = `${surah}_${ayah}`;
         const segments = medinaCoordsByAyah[key];
@@ -3633,7 +3637,7 @@
           let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
           line.forEach(s => {
             minX = Math.min(minX, s.left); maxX = Math.max(maxX, s.left + s.width);
-            minY = Math.min(minY, s.top); maxY = Math.max(maxY, s.top + s.height);
+            minY = Math.min(minY, s.top + yOff); maxY = Math.max(maxY, s.top + s.height + yOff);
           });
           rects.push({ surah, ayah, x: minX, y: minY, w: maxX - minX, h: maxY - minY });
         });
@@ -5979,49 +5983,182 @@ function getVariantHighlightCal() {
     return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
   }
 
-  async function startAITasmee() {
-    if (!_tarteelReady) return;
-    closeTarteelSheet();
+  // ── follow-mode state ─────────────────────────────────────────────────
+  let _tpFollowMode = false;   // header-mic mode: auto-navigate + follow
+  let _tpSwitching = false;    // guard against concurrent page switches
 
-    showCustomToast('جاري تحميل آيات الصفحة...');
-    let ayahs;
+  // Load a page's ayahs in reading order from the API, falling back to the
+  // local coordinates (offline) so the panel still works without a network.
+  async function _tpLoadAyahs(page) {
     try {
-      const r = await fetch(`https://api.alquran.cloud/v1/page/${currentPage}/ar.uthmani`);
+      const r = await fetch(`https://api.alquran.cloud/v1/page/${page}/ar.uthmani`);
       const d = await r.json();
-      ayahs = d.data.ayahs.map(a => ({
-        surah: a.surah.number, ayah: a.numberInSurah,
-        text: a.text, surahName: a.surah.name
-      }));
-    } catch (_) {
-      showCustomToast('تعذر تحميل آيات الصفحة'); return;
-    }
+      if (d && d.data && d.data.ayahs) {
+        return d.data.ayahs.map(a => ({
+          surah: a.surah.number, ayah: a.numberInSurah,
+          text: a.text, surahName: a.surah.name
+        }));
+      }
+    } catch (_) {}
+    const words = _tpGetWordCoords(page);
+    const seen = new Set(), list = [];
+    words.forEach(w => {
+      const k = w.surah + '_' + w.ayah;
+      if (!seen.has(k)) { seen.add(k); list.push({ surah: w.surah, ayah: w.ayah, surahName: 'سورة ' + w.surah }); }
+    });
+    list.sort((a, b) => a.surah - b.surah || a.ayah - b.ayah);
+    return list;
+  }
 
-    _tp.ayahs = ayahs;
-    _tp.revealed = new Set();
-    _tp.errors = 0;
-    _tp.expectedIdx = null;
-    _tp.showText = false;
-    _tp.recording = false;
-    _tp.masksByAyah = {};
-    _tp.revealedMasks = new Set();
-    _tp.peekMode = false;
+  // Which mushaf page is a given ayah on? (from the SQLite rects table)
+  function _tpLookupPage(surah, ayah) {
+    if (!db || !dbReady) return null;
+    try {
+      const stmt = db.prepare(`SELECT page FROM ayarects WHERE soraid = ${surah} AND ayaid = ${ayah} LIMIT 1`);
+      let page = null;
+      if (stmt.step()) page = stmt.getAsObject().page;
+      stmt.free();
+      return page || null;
+    } catch (e) { return null; }
+  }
 
-    document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(currentPage)}`;
+  function _tpResetPanelChrome(page) {
+    document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(page)}`;
     document.getElementById('tpRecTimer').textContent = '00:00';
     document.getElementById('tpRecDot').className = 'tp-rec-dot';
     document.getElementById('tpErrorPill').textContent = 'أخطاء ٠';
-
     const mb = document.getElementById('tpMicBtn');
     mb.className = 'tp-mic-btn';
     document.getElementById('tpMicIcon').style.display = '';
     document.getElementById('tpStopIcon').style.display = 'none';
     document.getElementById('tpEyeBtn').classList.remove('active');
+  }
 
-    // Render word-level masks on the mushaf image
-    _tpRenderImageMasks(currentPage);
-
+  // Open / reset the masking panel for `page`.
+  async function _tpOpenPanel(page) {
+    _tp.ayahs = await _tpLoadAyahs(page);
+    _tp.revealed = new Set();
+    _tp.errors = 0;
+    _tp.expectedIdx = null;
+    _tp.showText = false;
+    _tp.peekMode = false;
+    _tp.recording = false;
+    _tp.masksByAyah = {};
+    _tp.revealedMasks = new Set();
+    _tp.lastFollowIdx = -1; _tp.lastFollowPage = -1;
+    _tp.followLocked = false; _tp.followNum = 0;
+    _tpResetPanelChrome(page);
+    _tpRenderImageMasks(page);
     document.getElementById('tasmeeProPanel').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+  }
+
+  // Navigate the mushaf to `page`, then rebuild masks + ayah list for it.
+  async function _tpSwitchToPage(page) {
+    _tpSwitching = true;
+    try {
+      if (typeof goToPage === 'function') goToPage(page);
+      const img = document.getElementById('pageImg');
+      await new Promise(res => {
+        if (img.complete && img.naturalWidth) return res();
+        const done = () => { img.removeEventListener('load', done); res(); };
+        img.addEventListener('load', done, { once: true });
+        setTimeout(res, 4000);
+      });
+      _tp.ayahs = await _tpLoadAyahs(page);
+      _tp.revealed = new Set();
+      _tp.expectedIdx = null;
+      _tp.masksByAyah = {};
+      _tp.revealedMasks = new Set();
+      document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(page)}`;
+      _tpRenderImageMasks(page);
+      await new Promise(r => setTimeout(r, 60));
+    } finally { _tpSwitching = false; }
+  }
+
+  // Tarteel-sheet entry: open the panel on the page currently shown.
+  async function startAITasmee() {
+    if (!_tarteelReady) return;
+    closeTarteelSheet();
+    _tpFollowMode = false;
+    showCustomToast('جاري تحميل آيات الصفحة...');
+    await _tpOpenPanel(currentPage);
+  }
+
+  // Header-mic entry: open the panel and start listening. Recognition will
+  // auto-jump to the recited ayah's page and follow along (reveal previous,
+  // keep the current ayah and what follows hidden).
+  async function startTasmeeFollow() {
+    if (!_tarteelReady) {
+      showCustomToast('يجب تحميل نموذج التسميع أولاً');
+      if (typeof openTarteelSheet === 'function') openTarteelSheet();
+      return;
+    }
+    _tpFollowMode = true;
+    await _tpOpenPanel(currentPage);
+    showCustomToast('ابدأ التلاوة… سيتم الانتقال للصفحة تلقائياً');
+    if (!_tp.recording) tpToggleRecord();
+  }
+
+  // Reveal the ayahs BEFORE `idx` (already recited context). Keep the current
+  // ayah and everything after it hidden; outline the current as the active spot.
+  function _tpRevealBefore(idx, scroll) {
+    for (let i = 0; i < idx; i++) {
+      if (_tp.revealed.has(i)) continue;
+      _tp.revealed.add(i);
+      const a = _tp.ayahs[i];
+      if (a) _tpRevealAyahMasks(a.surah, a.ayah, false);
+    }
+    _tpSetExpected(idx, !scroll); // current stays masked, just outlined
+  }
+
+  // Global running ayah number (1-based across the whole mushaf) — used to judge
+  // whether a new recognition is a small forward step or a noisy far jump.
+  function _tpGlobalAyahNum(surah, ayah) {
+    if (!surah || !ayah) return 0;
+    let n = 0;
+    for (let s = 1; s < surah; s++) {
+      n += (ayahCountMap[s] || (typeof AYAH_COUNTS_FALLBACK !== 'undefined' ? AYAH_COUNTS_FALLBACK[s] : 0) || 0);
+    }
+    return n + ayah;
+  }
+
+  // How far ahead a match may be before we treat it as noise rather than progress.
+  const _TP_FOLLOW_WINDOW = 4;
+
+  // Core follow step. Locks onto the first confident ayah, then only moves
+  // FORWARD a little at a time — ignoring backward matches and far over-jumps —
+  // so once the place is found the reciter continues from there without the page
+  // flipping around.
+  async function _tpFollowToAyah(surah, ayah, score) {
+    if (_tpSwitching) return;
+    const num = _tpGlobalAyahNum(surah, ayah);
+    if (!num) return;
+
+    if (!_tp.followLocked) {
+      // require a confident first hit so we don't lock onto a wrong place
+      if (score != null && score < 0.6) return;
+      _tp.followLocked = true;
+      _tp.followNum = num;
+    } else {
+      const delta = num - _tp.followNum;
+      if (delta < 0 || delta > _TP_FOLLOW_WINDOW) return; // backward / over-jump → ignore
+      if (delta > 0 && score != null && score < 0.45) return; // weak forward hint → ignore
+      _tp.followNum = num;
+    }
+
+    let idx = _tp.ayahs.findIndex(a => a.surah === surah && a.ayah === ayah);
+    if (idx < 0) {
+      const page = _tpLookupPage(surah, ayah);
+      if (page && page !== currentPage) {
+        await _tpSwitchToPage(page);
+        idx = _tp.ayahs.findIndex(a => a.surah === surah && a.ayah === ayah);
+      }
+    }
+    if (idx < 0) return;
+    const changed = _tp.lastFollowIdx !== idx || _tp.lastFollowPage !== currentPage;
+    _tp.lastFollowIdx = idx; _tp.lastFollowPage = currentPage;
+    _tpRevealBefore(idx, changed);
   }
 
   // ── Word-level coordinate extraction ──────────────────────────────────
@@ -6316,10 +6453,20 @@ function getVariantHighlightCal() {
           if (!_tp.recording || _tpAllSamples.length === 0) return;
           const total = _tpAllSamples.reduce((s,c) => s+c.length, 0);
           if (total < 16000 * 1.2) return;
-          const merged = new Float32Array(total);
-          let pos = 0;
-          _tpAllSamples.forEach(c => { merged.set(c, pos); pos += c.length; });
-          _tarteelWorker.postMessage({ type: 'stream', audio: merged.slice() });
+          // only recognise the most recent ~8s so the match reflects the CURRENT
+          // ayah being recited, letting the follow advance instead of re-matching
+          // the whole growing buffer (which made the page jump around)
+          const WINDOW = 16000 * 8;
+          const len = Math.min(total, WINDOW);
+          const merged = new Float32Array(len);
+          let need = len, pos = len;
+          for (let i = _tpAllSamples.length - 1; i >= 0 && need > 0; i--) {
+            const c = _tpAllSamples[i];
+            const take = Math.min(c.length, need);
+            pos -= take; need -= take;
+            merged.set(c.subarray(c.length - take), pos);
+          }
+          _tarteelWorker.postMessage({ type: 'stream', audio: merged });
         }, 1800);
         document.getElementById('tpLiveStrip').classList.add('active');
         document.getElementById('tpLiveStrip').innerHTML =
@@ -6343,44 +6490,30 @@ function getVariantHighlightCal() {
       sp.style.animationDelay = (i * 0.04) + 's';
       strip.appendChild(sp);
     });
-    if (data.match && data.match.score > 0.55) {
-      const idx = _tp.ayahs.findIndex(a => a.surah === data.match.surah && a.ayah === data.match.ayah);
-      if (idx >= 0 && !_tp.revealed.has(idx)) _tpSetExpected(idx, true);
+    // live following: lock onto the place, then only move forward from there
+    if (data.match && data.match.score > 0.5) {
+      _tpFollowToAyah(data.match.surah, data.match.ayah, data.match.score);
     }
   }
 
-  function _aiHandleResult(result) {
+  // Final recognition (when the reciter stops, or a one-shot result): jump to the
+  // ayah's page if needed and reveal everything before it. The recited (current)
+  // ayah and the following ones stay hidden.
+  async function _aiHandleResult(result) {
     _tarteelProcessing = false;
     document.getElementById('tpMicBtn').className = 'tp-mic-btn';
+    document.getElementById('tpMicIcon').style.display = '';
+    document.getElementById('tpStopIcon').style.display = 'none';
     document.getElementById('tpRecTimer').textContent = '00:00';
     document.getElementById('tpRecDot').className = 'tp-rec-dot';
     document.getElementById('tpLiveStrip').classList.remove('active');
     if (!result || !result.surah) {
       showCustomToast('لم يُتعرَّف على الآية — حاول مجدداً');
-      _tp.errors++; _tpUpdateErrorPill(); return;
-    }
-    const matchIdx = _tp.ayahs.findIndex(a => a.surah === result.surah && a.ayah === result.ayah);
-    if (matchIdx < 0) {
-      showCustomToast((result.surahName || 'سورة') + ' — الآية ' + result.ayah + ' (ليست في هذه الصفحة)');
-      _tp.errors++; _tpUpdateErrorPill();
-      if (_tp.expectedIdx !== null) {
-        const ex = _tp.ayahs[_tp.expectedIdx];
-        if (ex) _tpFlashErrorMask(ex.surah, ex.ayah);
-      }
       return;
     }
-    const isCorrect = _tp.expectedIdx === null || matchIdx === _tp.expectedIdx;
-    if (!isCorrect) {
-      // wrong/skipped ayah: flag the ayah we were waiting for, count an error
-      const ex = _tp.ayahs[_tp.expectedIdx];
-      if (ex) _tpFlashErrorMask(ex.surah, ex.ayah);
-      _tp.errors++; _tpUpdateErrorPill();
-    }
-    // reveal the recited ayah and backfill any earlier hidden ayat on the page
-    _tpRevealUpTo(matchIdx);
-    const a = _tp.ayahs[matchIdx];
-    showCustomToast((isCorrect ? '✓ ' : '✗ ') + (a.surahName || 'سورة') + ' — الآية ' + _tpArabicNum(a.ayah));
-    _tpSetExpected(matchIdx + 1 < _tp.ayahs.length ? matchIdx + 1 : null);
+    await _tpFollowToAyah(result.surah, result.ayah, result.score);
+    const a = _tp.ayahs.find(x => x.surah === result.surah && x.ayah === result.ayah);
+    showCustomToast((a && a.surahName ? a.surahName : (result.surahName || 'سورة')) + ' — الآية ' + _tpArabicNum(result.ayah));
   }
 
   function _aiSetProcessing() { _tarteelProcessing = true; document.getElementById('tpMicBtn').className = 'tp-mic-btn processing'; }
@@ -6410,7 +6543,7 @@ function getVariantHighlightCal() {
   }
 
   function closeTasmeePro() {
-    _tarteelTasmeeMode = false; _tp.recording = false;
+    _tarteelTasmeeMode = false; _tp.recording = false; _tpFollowMode = false;
     clearInterval(_tp.timerInterval); clearInterval(_tpStreamTimer);
     if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
     if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
