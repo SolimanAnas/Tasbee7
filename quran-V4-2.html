@@ -1974,66 +1974,56 @@
     box-shadow: inset 0 0 0 2px rgba(231, 76, 60, 0.65);
   }
 
-  /* bottom controls bar */
+  /* bottom controls bar — single row: errors · nav · record */
   .tp-bottom-bar {
     position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
     background: var(--glass-bg);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--glass-border);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; gap: 10px;
+    direction: ltr; /* errors · nav · record, left→right regardless of page dir */
     z-index: 1301;
   }
   .tp-error-pill {
     background: rgba(231, 76, 60, 0.12); color: #e74c3c;
     border: 1px solid rgba(231, 76, 60, 0.3);
-    padding: 7px 16px; border-radius: 30px;
-    font-size: 0.82rem; font-weight: 700;
+    padding: 7px 14px; border-radius: 30px;
+    font-size: 0.8rem; font-weight: 700;
     font-family: 'Tajawal', sans-serif;
-    white-space: nowrap; min-width: 60px; text-align: center;
+    white-space: nowrap; text-align: center; flex-shrink: 0;
   }
-  .tp-nav-btns { display: flex; align-items: center; gap: 4px; }
+  /* nav group takes the middle space and centres its buttons */
+  .tp-nav-btns { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
   .tp-icon-btn {
     width: 40px; height: 40px; border-radius: 50%;
     background: var(--bg-surface); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     color: var(--text-secondary); font-size: 0.85rem;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
     font-family: 'Tajawal', sans-serif;
   }
   .tp-icon-btn:hover { background: var(--bg-surface-hover); }
+  .tp-icon-btn:active { transform: scale(0.92); }
   .tp-icon-btn.active { color: var(--accent); background: var(--accent-light); }
 
-  /* floating stop button */
-  .tp-stop-btn {
-    position: fixed; bottom: calc(18px + env(safe-area-inset-bottom));
-    right: 18px; z-index: 1302;
-    width: 64px; height: 64px; border-radius: 50%; border: none;
-    background: #e74c3c; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.45);
-    transition: all var(--transition-fast);
-  }
-  .tp-stop-btn:active { transform: scale(0.9); }
-
-  /* floating mic button */
+  /* primary record / stop toggle, anchored at the bar's end */
   .tp-mic-btn {
-    position: fixed; bottom: calc(18px + env(safe-area-inset-bottom));
-    right: 96px; z-index: 1302;
-    width: 64px; height: 64px; border-radius: 50%; border: none;
-    background: #27ae60; cursor: pointer;
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    background: #27ae60; cursor: pointer; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(39,174,96,0.45);
-    transition: all var(--transition-fast);
+    box-shadow: 0 4px 16px rgba(39,174,96,0.45);
+    transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
   }
+  .tp-mic-btn:active { transform: scale(0.93); }
   .tp-mic-btn.recording {
     background: #e74c3c;
-    box-shadow: 0 4px 20px rgba(231,76,60,0.45);
+    box-shadow: 0 4px 16px rgba(231,76,60,0.45);
     animation: record-pulse 1s ease-in-out infinite;
   }
   .tp-mic-btn.processing {
     background: var(--gold);
-    box-shadow: 0 4px 20px rgba(184,136,12,0.4);
+    box-shadow: 0 4px 16px rgba(184,136,12,0.4);
     animation: none;
   }
 
@@ -2049,10 +2039,10 @@
   .tp-flash-correct { animation: tp-flash-correct 1s ease-out; }
   .tp-flash-error   { animation: tp-flash-error 1s ease-out; }
 
-  /* live transcript strip */
+  /* live transcript strip — floats just above the bottom bar */
   .tp-live-strip {
-    position: fixed; bottom: calc(64px + env(safe-area-inset-bottom) + 10px);
-    left: 0; right: 0; z-index: 1302;
+    position: fixed; bottom: calc(84px + env(safe-area-inset-bottom));
+    left: 0; right: 0; z-index: 1300;
     padding: 8px 20px;
     background: rgba(0,0,0,0.55);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -5652,9 +5642,10 @@ function getVariantHighlightCal() {
     <div class="tp-bottom-bar">
       <div class="tp-error-pill" id="tpErrorPill">أخطاء ٠</div>
       <div class="tp-nav-btns">
-        <button class="tp-icon-btn" onclick="tpPrev()" title="السابق">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <polyline points="15 18 9 12 15 6"/>
+        <button class="tp-icon-btn" id="tpEyeBtn" onclick="tpToggleText()" title="إظهار/إخفاء">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
           </svg>
         </button>
         <button class="tp-icon-btn" onclick="tpSkipBack()" title="رجوع آيتين">
@@ -5662,33 +5653,24 @@ function getVariantHighlightCal() {
             <polyline points="19 18 13 12 19 6"/><polyline points="11 18 5 12 11 6"/>
           </svg>
         </button>
-        <button class="tp-icon-btn" id="tpEyeBtn" onclick="tpToggleText()" title="إظهار/إخفاء">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
+        <button class="tp-icon-btn" onclick="tpPrev()" title="السابق">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
       </div>
+      <!-- Primary record / stop toggle -->
+      <button class="tp-mic-btn" id="tpMicBtn" onclick="tpToggleRecord()" title="تسجيل">
+        <svg id="tpMicIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+        <svg id="tpStopIcon" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display:none">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+        </svg>
+      </button>
     </div>
-
-    <!-- Floating mic button -->
-    <button class="tp-mic-btn" id="tpMicBtn" onclick="tpToggleRecord()">
-      <svg id="tpMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-        <line x1="12" y1="19" x2="12" y2="22"/>
-      </svg>
-      <svg id="tpStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
-        <rect x="3" y="3" width="18" height="18" rx="3"/>
-      </svg>
-    </button>
-
-    <!-- Floating stop button -->
-    <button class="tp-stop-btn" id="tpStopTasmeeBtn" onclick="closeTasmeePro()">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
   </div>
 
   <script>
