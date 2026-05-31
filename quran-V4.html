@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>المصحف الشريف - النسخة المتطورة V3</title>
+  <title>المصحف الشريف - النسخة المتطورة V4</title>
   <link rel="icon" href="icons/icon-192.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#FAF6EE">
@@ -1918,45 +1918,38 @@
     min-width: 60px; text-align: center;
   }
 
-  /* scrollable ayah area */
-  .tp-content {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding: 20px 20px 140px;
-    direction: rtl; text-align: right;
-    font-family: 'Amiri', serif;
+  /* image container for masking mode */
+  .tp-image-container {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
   }
-  .tp-ayah {
-    display: inline;
-    font-size: 1.35rem; line-height: 2.4;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
+  .tp-image-container img {
+    max-width: 100%; max-height: 100%; object-fit: contain;
+    user-select: none; -webkit-user-select: none;
   }
-  .tp-ayah-text {
-    color: transparent;
-    transition: color 0.4s ease, filter 0.4s ease;
+
+  /* word-level mask overlays */
+  .tasmee-mask {
+    position: absolute;
+    background-color: var(--bg-page);
+    border-radius: 3px;
+    z-index: 10;
+    pointer-events: none;
+    will-change: opacity, background-color;
+    transition: opacity 0.25s ease, background-color 0.15s ease;
   }
-  .tp-ayah-text.show { color: rgba(128,100,60,0.35); }
-  .tp-ayah.revealed .tp-ayah-text,
-  .tp-ayah.revealed .tp-ayah-text.show { color: var(--text-primary); }
-  .tp-ayah.correct .tp-ayah-text { color: var(--text-primary); }
-  .tp-ayah.error .tp-ayah-text { color: var(--danger); }
-  .tp-ayah-marker {
-    display: inline-block;
-    font-size: 1rem; color: var(--accent);
-    margin: 0 3px;
-    font-family: 'Tajawal', sans-serif;
+  .tasmee-mask.revealed {
+    opacity: 0 !important;
+    background-color: transparent !important;
+    pointer-events: none;
   }
-  .tp-ayah.current-expected .tp-ayah-marker {
-    background: var(--accent-light); border-radius: 50%;
-    padding: 0 4px;
+  .tasmee-mask.peek-mode {
+    opacity: 0.25 !important;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
   }
-  .tp-surah-name {
-    display: block; width: 100%; text-align: center;
-    font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
-    color: var(--text-secondary); font-weight: 600;
-    padding: 8px 0 4px; margin: 8px 0;
-    border-top: 1px solid var(--glass-border);
-    border-bottom: 1px solid var(--glass-border);
+  .tasmee-mask.flash-error {
+    background-color: rgba(231, 76, 60, 0.4) !important;
   }
 
   /* bottom controls bar */
@@ -1969,17 +1962,15 @@
     display: flex; align-items: center; justify-content: space-between;
     z-index: 1301;
   }
-  .tp-rec-indicator {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.8rem; color: var(--text-secondary);
-    font-family: 'Tajawal', sans-serif; min-width: 60px;
+  .tp-error-pill {
+    background: rgba(231, 76, 60, 0.12); color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    padding: 7px 16px; border-radius: 30px;
+    font-size: 0.82rem; font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    white-space: nowrap; min-width: 60px; text-align: center;
   }
-  .tp-rec-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--text-hint); flex-shrink: 0;
-  }
-  .tp-rec-dot.recording { background: #e74c3c; animation: pulse-dot 0.8s infinite; }
-  .tp-action-btns { display: flex; align-items: center; gap: 4px; }
+  .tp-nav-btns { display: flex; align-items: center; gap: 4px; }
   .tp-icon-btn {
     width: 40px; height: 40px; border-radius: 50%;
     background: var(--bg-surface); border: none; cursor: pointer;
@@ -1991,10 +1982,22 @@
   .tp-icon-btn:hover { background: var(--bg-surface-hover); }
   .tp-icon-btn.active { color: var(--accent); background: var(--accent-light); }
 
+  /* floating stop button */
+  .tp-stop-btn {
+    position: fixed; bottom: calc(18px + env(safe-area-inset-bottom));
+    right: 18px; z-index: 1302;
+    width: 64px; height: 64px; border-radius: 50%; border: none;
+    background: #e74c3c; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.45);
+    transition: all var(--transition-fast);
+  }
+  .tp-stop-btn:active { transform: scale(0.9); }
+
   /* floating mic button */
   .tp-mic-btn {
     position: fixed; bottom: calc(18px + env(safe-area-inset-bottom));
-    right: 18px; z-index: 1302;
+    right: 96px; z-index: 1302;
     width: 64px; height: 64px; border-radius: 50%; border: none;
     background: #27ae60; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -5614,25 +5617,13 @@ function getVariantHighlightCal() {
       <span class="tp-error-badge" id="tpErrorBadge">٠ أخطاء</span>
     </div>
 
-    <!-- Ayah text area -->
-    <div class="tp-content" id="tpContent"></div>
-
-    <!-- Live transcript strip (shown during recording) -->
-    <div class="tp-live-strip" id="tpLiveStrip"></div>
+    <!-- Image container with word masks -->
+    <div class="tp-image-container" id="tpImageContainer"></div>
 
     <!-- Bottom bar -->
     <div class="tp-bottom-bar">
-      <div class="tp-rec-indicator">
-        <span class="tp-rec-dot" id="tpRecDot"></span>
-        <span id="tpRecTimer">00:00</span>
-      </div>
-      <div class="tp-action-btns">
-        <button class="tp-icon-btn" id="tpEyeBtn" onclick="tpToggleText()" title="إظهار/إخفاء">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
+      <div class="tp-error-pill" id="tpErrorPill">أخطاء ٠</div>
+      <div class="tp-nav-btns">
         <button class="tp-icon-btn" onclick="tpPrev()" title="السابق">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <polyline points="15 18 9 12 15 6"/>
@@ -5641,6 +5632,12 @@ function getVariantHighlightCal() {
         <button class="tp-icon-btn" onclick="tpSkipBack()" title="رجوع آيتين">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <polyline points="19 18 13 12 19 6"/><polyline points="11 18 5 12 11 6"/>
+          </svg>
+        </button>
+        <button class="tp-icon-btn" id="tpEyeBtn" onclick="tpToggleText()" title="إظهار/إخفاء">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
           </svg>
         </button>
       </div>
@@ -5655,6 +5652,13 @@ function getVariantHighlightCal() {
       </svg>
       <svg id="tpStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
         <rect x="3" y="3" width="18" height="18" rx="3"/>
+      </svg>
+    </button>
+
+    <!-- Floating stop button -->
+    <button class="tp-stop-btn" id="tpStopBtn" onclick="closeTasmeePro()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
     </button>
   </div>
@@ -5954,16 +5958,18 @@ function getVariantHighlightCal() {
     recorder: null,
     timerInterval: null,
     timerStart: 0,
+    masksByAyah: {},    // {surah_ayah: [maskDiv, ...]} — word-level masks
+    revealedMasks: new Set(), // mask divs that have been revealed
+    peekMode: false,
+    maskContainer: null,
   };
 
   function _tpArabicNum(n) {
     return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
   }
 
-  // ── open full-screen panel ────────────────────────────────────────────
   async function startAITasmee() {
     if (!_tarteelReady) return;
-    // close the Tarteel sheet first, then open full-screen panel
     closeTarteelSheet();
 
     showCustomToast('جاري تحميل آيات الصفحة...');
@@ -5971,7 +5977,6 @@ function getVariantHighlightCal() {
     try {
       const r = await fetch(`https://api.alquran.cloud/v1/page/${currentPage}/ar.uthmani`);
       const d = await r.json();
-      // Group by surah for section headers
       ayahs = d.data.ayahs.map(a => ({
         surah: a.surah.number, ayah: a.numberInSurah,
         text: a.text, surahName: a.surah.name
@@ -5980,67 +5985,187 @@ function getVariantHighlightCal() {
       showCustomToast('تعذر تحميل آيات الصفحة'); return;
     }
 
-    // Reset state
     _tp.ayahs = ayahs;
     _tp.revealed = new Set();
     _tp.errors = 0;
     _tp.expectedIdx = null;
     _tp.showText = false;
     _tp.recording = false;
+    _tp.masksByAyah = {};
+    _tp.revealedMasks = new Set();
+    _tp.peekMode = false;
 
-    // Render ayahs
-    _tpRenderAyahs();
-
-    // Update header
     document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(currentPage)}`;
     document.getElementById('tpErrorBadge').textContent = '٠ أخطاء';
+    document.getElementById('tpErrorPill').textContent = 'أخطاء ٠';
 
-    // Reset mic button
     const mb = document.getElementById('tpMicBtn');
     mb.className = 'tp-mic-btn';
     document.getElementById('tpMicIcon').style.display = '';
     document.getElementById('tpStopIcon').style.display = 'none';
-
-    // Reset eye button
     document.getElementById('tpEyeBtn').classList.remove('active');
 
-    // Show panel
+    // Render word-level masks on the mushaf image
+    _tpRenderImageMasks(currentPage);
+
     document.getElementById('tasmeeProPanel').style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
 
-  function _tpRenderAyahs() {
-    const container = document.getElementById('tpContent');
-    container.innerHTML = '';
-    let lastSurah = null;
-    _tp.ayahs.forEach((a, i) => {
-      if (a.surah !== lastSurah) {
-        const div = document.createElement('div');
-        div.className = 'tp-surah-name';
-        div.textContent = a.surahName;
-        container.appendChild(div);
-        lastSurah = a.surah;
+  // ── Word-level coordinate extraction ──────────────────────────────────
+  function getWordLevelLegacyCoords(pageNumber) {
+    if (!db || !dbReady) return [];
+    const query = `SELECT soraid, ayaid, minx, maxx, miny, maxy FROM ayarects WHERE page = ${pageNumber}`;
+    const words = [];
+    try {
+      const stmt = db.prepare(query);
+      while(stmt.step()) {
+        const row = stmt.getAsObject();
+        words.push({ surah: row.soraid, ayah: row.ayaid, x: row.minx, y: row.miny, w: row.maxx - row.minx, h: row.maxy - row.miny });
       }
-      const span = document.createElement('span');
-      span.className = 'tp-ayah';
-      span.id = 'tp-a-' + i;
-      span.dataset.idx = i;
-      const textSpan = document.createElement('span');
-      textSpan.className = 'tp-ayah-text';
-      a.text.split(' ').forEach(w => {
-        const ws = document.createElement('span');
-        ws.className = 'tp-word';
-        ws.textContent = w + ' ';
-        textSpan.appendChild(ws);
-      });
-      const markerSpan = document.createElement('span');
-      markerSpan.className = 'tp-ayah-marker';
-      markerSpan.textContent = ' ﴾' + _tpArabicNum(a.ayah) + '﴿ ';
-      markerSpan.onclick = (e) => { e.stopPropagation(); _tpSelectAyah(i); };
-      span.appendChild(textSpan);
-      span.appendChild(markerSpan);
-      container.appendChild(span);
+      stmt.free();
+    } catch(e) { return []; }
+    if (words.length === 0) return [];
+    const cal = getVariantHighlightCal();
+    const LEGACY_REF_W = 1024, LEGACY_REF_H = 1636;
+    const sx = cal.refW / LEGACY_REF_W;
+    const sy = cal.refH / LEGACY_REF_H;
+    words.forEach(r => { r.x *= sx; r.y *= sy; r.w *= sx; r.h *= sy; });
+    // Detect markers: last word of each ayah that is roughly square and small
+    const ayahGroups = {};
+    words.forEach(w => {
+      const key = `${w.surah}_${w.ayah}`;
+      if (!ayahGroups[key]) ayahGroups[key] = [];
+      ayahGroups[key].push(w);
     });
+    for (const key in ayahGroups) {
+      const group = ayahGroups[key];
+      if (group.length === 0) continue;
+      const last = group[group.length - 1];
+      const area = last.w * last.h;
+      const ratio = last.w / last.h;
+      last.isMarker = (ratio > 0.6 && ratio < 1.6 && area < 3000);
+      last.wordIndex = group.length - 1;
+      group.forEach((w, i) => { if (w !== last) { w.wordIndex = i; w.isMarker = false; } });
+    }
+    return words;
+  }
+
+  function getWordLevelMedinaCoords(pageNumber) {
+    if (!db || !dbReady || !medinaCoordsByAyah) return [];
+    const query = `SELECT DISTINCT soraid, ayaid FROM ayarects WHERE page = ${pageNumber} ORDER BY soraid, ayaid`;
+    const ayahs = [];
+    try {
+      const stmt = db.prepare(query);
+      while(stmt.step()) {
+        const row = stmt.getAsObject();
+        ayahs.push({ surah: row.soraid, ayah: row.ayaid });
+      }
+      stmt.free();
+    } catch(e) { return []; }
+    const words = [];
+    ayahs.forEach(({surah, ayah}) => {
+      const key = `${surah}_${ayah}`;
+      const segments = medinaCoordsByAyah[key];
+      if (!segments || segments.length === 0) return;
+      segments.sort((a, b) => a.top - b.top);
+      segments.forEach((s, i) => {
+        words.push({ surah, ayah, x: s.left, y: s.top, w: s.width, h: s.height, wordIndex: i });
+      });
+      if (words.length > 0) {
+        const last = words[words.length - 1];
+        const area = last.w * last.h;
+        const ratio = last.w / last.h;
+        last.isMarker = (ratio > 0.6 && ratio < 1.6 && area < 2000);
+        words.slice(0, -1).forEach(w => { w.isMarker = false; });
+      }
+    });
+    return words;
+  }
+
+  function _tpGetWordCoords(pageNumber) {
+    const variant = currentMushafVariant || 'mushaf-colored';
+    if (variant === 'mushaf-borderd' || variant === 'mushaf-madina1441' || variant === 'mushaf-tajweed' || variant === 'mushaf-green') {
+      return getWordLevelMedinaCoords(pageNumber);
+    }
+    return getWordLevelLegacyCoords(pageNumber);
+  }
+
+  function _tpRenderImageMasks(pageNumber) {
+    const container = document.getElementById('tpImageContainer');
+    container.innerHTML = '';
+    const img = document.getElementById('pageImg');
+    const cal = getVariantHighlightCal();
+    // Clone the page image
+    const maskImg = document.createElement('img');
+    maskImg.src = img.src;
+    maskImg.style.maxWidth = '100%';
+    maskImg.style.maxHeight = '100%';
+    maskImg.style.objectFit = 'contain';
+    maskImg.draggable = false;
+    container.appendChild(maskImg);
+    _tp.maskContainer = container;
+    // Get word-level coords
+    const words = _tpGetWordCoords(pageNumber);
+    if (!words || words.length === 0) return;
+    // Wait for image to load then render masks
+    const renderMasks = () => {
+      const imgW = maskImg.offsetWidth;
+      const imgH = maskImg.offsetHeight;
+      if (!imgW || !imgH) return;
+      const yRange = cal.pageBotY - cal.pageTopY;
+      words.forEach(w => {
+        if (w.isMarker) return;
+        const mask = document.createElement('div');
+        mask.className = 'tasmee-mask';
+        const rightPct = ((1 - (w.x + w.w) / cal.refW) * cal.scaleX) * 100 + 3;
+        const widthPct = (w.w / cal.refW) * cal.scaleX * 100;
+        const topPct = (cal.pageTopY + (w.y / cal.refH) * yRange) * cal.scaleY * 100 + (cal.padTop + cal.shiftY) * 100;
+        const heightPct = (w.h / cal.refH) * yRange * cal.scaleY * 100;
+        mask.style.right = rightPct + '%';
+        mask.style.width = widthPct + '%';
+        mask.style.top = topPct + '%';
+        mask.style.height = heightPct + '%';
+        mask.dataset.surah = w.surah;
+        mask.dataset.ayah = w.ayah;
+        mask.dataset.wordIndex = w.wordIndex;
+        container.appendChild(mask);
+        const ayahKey = `${w.surah}_${w.ayah}`;
+        if (!_tp.masksByAyah[ayahKey]) _tp.masksByAyah[ayahKey] = [];
+        _tp.masksByAyah[ayahKey].push(mask);
+      });
+    };
+    maskImg.onload = renderMasks;
+    if (maskImg.complete) renderMasks();
+  }
+
+  function _tpRevealAyahMasks(surah, ayah) {
+    const key = `${surah}_${ayah}`;
+    const masks = _tp.masksByAyah[key];
+    if (!masks) return;
+    masks.forEach((m, i) => {
+      if (m.classList.contains('revealed')) return;
+      setTimeout(() => {
+        m.classList.add('revealed');
+        _tp.revealedMasks.add(m);
+      }, i * 80);
+    });
+  }
+
+  function _tpFlashErrorMask(surah, ayah) {
+    const key = `${surah}_${ayah}`;
+    const masks = _tp.masksByAyah[key];
+    if (!masks || masks.length === 0) return;
+    const firstUnrevealed = masks.find(m => !m.classList.contains('revealed'));
+    if (firstUnrevealed) {
+      firstUnrevealed.classList.add('flash-error');
+      setTimeout(() => firstUnrevealed.classList.remove('flash-error'), 600);
+    }
+  }
+
+  function _tpUpdateErrorPill() {
+    document.getElementById('tpErrorPill').textContent = 'أخطاء ' + _tpArabicNum(_tp.errors);
+    document.getElementById('tpErrorBadge').textContent = _tpArabicNum(_tp.errors) + ' أخطاء';
   }
 
   function _tpSelectAyah(idx) {
@@ -6163,29 +6288,20 @@ function getVariantHighlightCal() {
     document.getElementById('tpLiveStrip').classList.remove('active');
     if (!result || !result.surah) {
       showCustomToast('لم يُتعرَّف على الآية — حاول مجدداً');
-      _tp.errors++; _tpUpdateErrors(); return;
+      _tp.errors++; _tpUpdateErrorPill(); return;
     }
     const matchIdx = _tp.ayahs.findIndex(a => a.surah === result.surah && a.ayah === result.ayah);
     if (matchIdx < 0) {
       showCustomToast((result.surahName || 'سورة') + ' — الآية ' + result.ayah + ' (ليست في هذه الصفحة)');
-      _tp.errors++; _tpUpdateErrors(); return;
+      _tp.errors++; _tpUpdateErrorPill(); return;
     }
-    const el = document.getElementById('tp-a-' + matchIdx);
     const isCorrect = _tp.expectedIdx === null || matchIdx === _tp.expectedIdx;
     _tp.revealed.add(matchIdx);
-    el.classList.remove('current-expected', 'selected-target');
-    el.classList.add('revealed', isCorrect ? 'correct' : 'error', isCorrect ? 'tp-flash-correct' : 'tp-flash-error');
-    setTimeout(() => el.classList.remove('tp-flash-correct', 'tp-flash-error'), 1200);
-    if (!isCorrect) { _tp.errors++; _tpUpdateErrors(); }
-    const words = el.querySelectorAll('.tp-word');
-    words.forEach((w, i) => {
-      w.style.opacity = '0';
-      w.style.animation = 'tp-word-in 0.2s ease ' + (i * 0.06) + 's forwards';
-    });
+    if (!isCorrect) { _tp.errors++; _tpUpdateErrorPill(); _tpFlashErrorMask(result.surah, result.ayah); }
+    else { _tpRevealAyahMasks(result.surah, result.ayah); }
     const a = _tp.ayahs[matchIdx];
     showCustomToast((isCorrect ? '✓ ' : '✗ ') + a.surahName + ' — الآية ' + a.ayah);
     _tpSetExpected(matchIdx + 1 < _tp.ayahs.length ? matchIdx + 1 : null);
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function _aiSetProcessing() { _tarteelProcessing = true; document.getElementById('tpMicBtn').className = 'tp-mic-btn processing'; }
@@ -6205,13 +6321,13 @@ function getVariantHighlightCal() {
     showCustomToast(msg || 'خطأ في التسجيل');
   }
 
-  function _tpUpdateErrors() { document.getElementById('tpErrorBadge').textContent = _tpArabicNum(_tp.errors) + ' أخطاء'; }
+  function _tpUpdateErrors() { _tpUpdateErrorPill(); }
   function tpPrev() { const c = _tp.expectedIdx !== null ? _tp.expectedIdx : _tp.ayahs.length; _tpSetExpected(Math.max(0, c-1)); }
   function tpSkipBack() { const c = _tp.expectedIdx !== null ? _tp.expectedIdx : _tp.ayahs.length; _tpSetExpected(Math.max(0, c-3)); }
   function tpToggleText() {
-    _tp.showText = !_tp.showText;
-    document.getElementById('tpEyeBtn').classList.toggle('active', _tp.showText);
-    document.querySelectorAll('.tp-ayah:not(.revealed) .tp-ayah-text').forEach(el => el.classList.toggle('show', _tp.showText));
+    _tp.peekMode = !_tp.peekMode;
+    document.getElementById('tpEyeBtn').classList.toggle('active', _tp.peekMode);
+    document.querySelectorAll('.tasmee-mask:not(.revealed)').forEach(m => m.classList.toggle('peek-mode', _tp.peekMode));
   }
 
   function closeTasmeePro() {
@@ -6221,6 +6337,10 @@ function getVariantHighlightCal() {
     if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
     if (_tpAudioCtx) { _tpAudioCtx.close().catch(()=>{}); _tpAudioCtx = null; }
     _tpAllSamples = [];
+    _tp.masksByAyah = {};
+    _tp.revealedMasks = new Set();
+    const container = document.getElementById('tpImageContainer');
+    if (container) container.innerHTML = '';
     document.getElementById('tpLiveStrip').classList.remove('active');
     document.getElementById('tasmeeProPanel').style.display = 'none';
     document.body.style.overflow = '';
