@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="splash.png" alt="Zad Al-Muslim Splash" width="100%" style="border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+<img src="images/featured image.png" alt="Zad Al-Muslim — زاد المسلم" width="100%">
 
 <br>
 
@@ -16,7 +16,7 @@
 
 <br>
 
-A modern, lightweight, ad-free Progressive Web App designed to be the perfect spiritual companion for Muslims.
+A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual companion.
 
 <br>
 
@@ -28,15 +28,19 @@ A modern, lightweight, ad-free Progressive Web App designed to be the perfect sp
 
 <div align="center">
 
-| Feature | Description |
-|:---:|:---|
-| 📖 **Holy Quran** | Beautiful image-based mushaf with 5 variants, word-level highlighting, and offline caching |
-| 🎧 **Audio Player** | Multi-reciter player with background audio, media session, and favorites |
-| 📿 **Smart Masbaha** | Digital counter with haptic feedback, daily targets, and OLED power-saving mode |
-| 📻 **Live Radio** | 24/7 Quran radio broadcasts via HLS streaming |
-| 🤲 **Azkar** | Morning, evening, and Ruqyah supplications with interactive counters |
-| 🎨 **Theme System** | Dark Glass, Light Glass, and Plain Dark themes |
-| 📱 **PWA** | Installable on iOS and Android — works offline |
+| | Feature | Description |
+|:---:|:---|:---|
+| 📖 | ** تصفّح المصحف** | Interactive Quran with 5 mushaf variants, word-level ayah highlighting, search, bookmarks, and offline caching |
+| 🎧 | ** الاستماع للقرآن** | Multi-reciter audio player with background playback, media session, and favorites |
+| 📿 | **المسبحة** | Smart digital counter with haptic feedback, daily targets, lifetime stats, and OLED power-saving mode |
+| 📻 | **إذاعة القرآن** | 24/7 live Quran radio broadcasts via HLS streaming |
+| 🤲 | **أذكار الصباح والمساء** | Morning & evening supplications with interactive counters |
+| 🌙 | **أذكار النوم** | Bedtime adhkar with read-and-count workflow |
+| 📿 | **حصن المسلم** | Complete Hisn Al-Muslim — all daily and occasion-based supplications |
+| 🕋 | **الرقية الشرعية** | Prophetic Ruqyah supplications |
+| 📚 | **الأربعين النووية** | Imam An-Nawawi's 40 Hadith collection |
+| 🎨 | **واجهة زجاجية** | 3-mode theme system (Dark Glass, Light Glass, Plain Dark) with smooth animations |
+| 📱 | **تطبيق متكامل** | Installable PWA — works offline on iOS and Android |
 
 </div>
 
@@ -48,10 +52,10 @@ A modern, lightweight, ad-free Progressive Web App designed to be the perfect sp
 
 | Feature | Description |
 |:---:|:---|
-| 📐 **Fit-Width Mode** | Full-width page view with vertical scrolling |
-| 📄 **Dual-Page Mode** | Book-like two-page spread like a real Mushaf |
+| 📐 **Fit-Width** | Full-width mushaf page view with vertical scroll |
+| 📄 **Dual-Page** | Book-like two-page spread like a real Mushaf |
 | ⬅️➡️ **Nav Buttons** | Edge navigation buttons for mouse/trackpad |
-| ⌨️ **Keyboard Nav** | Arrow keys to navigate pages |
+| ⌨️ **Keyboard** | Arrow keys to navigate pages |
 
 </div>
 
@@ -59,11 +63,13 @@ A modern, lightweight, ad-free Progressive Web App designed to be the perfect sp
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML5, Vanilla JavaScript, CSS3 (Custom Glassmorphism)
-- **Audio:** HLS.js for live radio, direct MP3 streaming
-- **Database:** SQLite via sql.js for ayah-level highlighting coordinates
-- **Storage:** localStorage for settings, bookmarks, and statistics
-- **PWA:** Service Workers + Web App Manifest for offline support
+| Layer | Technology |
+|---|---|
+| **Frontend** | HTML5, Vanilla JavaScript, CSS3 (Glassmorphism) |
+| **Audio** | HLS.js for live radio, MP3 streaming, Media Session API |
+| **Database** | SQLite via sql.js for ayah-level highlighting coordinates |
+| **Storage** | localStorage for settings, bookmarks, and statistics |
+| **PWA** | Service Workers + Web App Manifest for offline support |
 
 ---
 
@@ -77,15 +83,32 @@ cd Tasbee7
 
 ---
 
-## 📁 Quran Versions
+## 📁 Project Structure
 
-| File | Description |
-|---|---|
-| `quran.html` | Full-featured desktop + mobile (primary) |
-| `quran-V2.html` | Feature-complete build |
-| `quran-V3.html` | Variant build |
-| `quran-V4.html` | Latest iteration |
-| `quran-V4-2.html` | Experimental build |
+```
+Tasbee7/
+├── index.html              # Main entry — app home
+├── quran.html              # Quran reader (primary)
+├── css/
+│   ├── style.css           # Global styles
+│   └── _masbaha.css        # Masbaha styles
+├── js/
+│   ├── quran-common.js     # Shared Quran logic
+│   ├── quran-app.js        # Quran app logic
+│   ├── tasmee-engine.js    # Tasmee (recitation tracking) engine
+│   ├── tasmee-matcher.js   # Speech-to-text matching
+│   └── tasmee-store.js     # Tasmee data persistence
+├── images/                 # App icons and assets
+├── json/
+│   └── medina2_coords.json # Ayah highlight coordinates
+├── db/
+│   ├── quranpages.sqlite   # Ayah bounding boxes database
+│   ├── tafsir-saadi.db     # Saadi tafsir
+│   └── tafsir-baghawi.db   # Baghawi tafsir
+├── manifest.json           # PWA manifest
+├── sw.js                   # Service worker
+└── splash.png              # App splash screen
+```
 
 ---
 
