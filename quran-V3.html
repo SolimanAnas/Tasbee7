@@ -3588,6 +3588,9 @@
       }
     }
 
+    /* Per-page Y offsets for medina2 coord misalignment (pages with surah headers) */
+    const MEDINA_PAGE_Y_OFFSETS = { 1: -63, 2: -65, 50: -38 };
+
     function getMedinaCoordsForPage(pageNumber) {
       if (!db || !dbReady || !medinaCoordsByAyah) return [];
       const query = `SELECT DISTINCT soraid, ayaid FROM ayarects WHERE page = ${pageNumber} ORDER BY soraid, ayaid`;
@@ -3601,6 +3604,7 @@
         stmt.free();
       } catch(e) { return []; }
       const rects = [];
+      const yOff = MEDINA_PAGE_Y_OFFSETS[pageNumber] || 0;
       ayahs.forEach(({surah, ayah}) => {
         const key = `${surah}_${ayah}`;
         const segments = medinaCoordsByAyah[key];
@@ -3618,7 +3622,7 @@
           let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
           line.forEach(s => {
             minX = Math.min(minX, s.left); maxX = Math.max(maxX, s.left + s.width);
-            minY = Math.min(minY, s.top); maxY = Math.max(maxY, s.top + s.height);
+            minY = Math.min(minY, s.top + yOff); maxY = Math.max(maxY, s.top + s.height + yOff);
           });
           rects.push({ surah, ayah, x: minX, y: minY, w: maxX - minX, h: maxY - minY });
         });
