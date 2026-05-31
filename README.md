@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/featured image.png" alt="Zad Al-Muslim — زاد المسلم" width="100%">
+<img src="images/featured.png" alt="Zad Al-Muslim — زاد المسلم" width="100%">
 
 <br>
 
@@ -12,7 +12,7 @@
 
 <br>
 
-### <sub>وَتَذَكَّرُوا فَإِنَّ الذِّكْرَةَ تَنْفَعُ الْمُؤْمِنِينَ</sub>
+### <sub>"وَتَزَوَّدُوا فَإِنَّ خَيْرَ الزَّادِ التَّقْوَى"</sub>
 
 <br>
 
@@ -30,8 +30,8 @@ A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual
 
 | | Feature | Description |
 |:---:|:---|:---|
-| 📖 | ** تصفّح المصحف** | Interactive Quran with 5 mushaf variants, word-level ayah highlighting, search, bookmarks, and offline caching |
-| 🎧 | ** الاستماع للقرآن** | Multi-reciter audio player with background playback, media session, and favorites |
+| 📖 | **تصفّح المصحف** | Interactive Quran with 5 mushaf variants, word-level ayah highlighting, search, bookmarks, and offline caching |
+| 🎧 | **الاستماع للقرآن** | Multi-reciter audio player with background playback, media session, and favorites |
 | 📿 | **المسبحة** | Smart digital counter with haptic feedback, daily targets, lifetime stats, and OLED power-saving mode |
 | 📻 | **إذاعة القرآن** | 24/7 live Quran radio broadcasts via HLS streaming |
 | 🤲 | **أذكار الصباح والمساء** | Morning & evening supplications with interactive counters |
