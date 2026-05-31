@@ -1917,39 +1917,61 @@
     font-family: 'Tajawal', sans-serif;
     min-width: 60px; text-align: center;
   }
+  .tp-rec-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.8rem; color: var(--text-secondary);
+    font-family: 'Tajawal', sans-serif; min-width: 64px; justify-content: flex-end;
+  }
+  .tp-rec-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-hint); flex-shrink: 0;
+  }
+  .tp-rec-dot.recording { background: #e74c3c; animation: pulse-dot 0.8s infinite; }
 
   /* image container for masking mode */
   .tp-image-container {
-    flex: 1; position: relative; overflow: hidden;
+    flex: 1; position: relative; overflow: auto;
     display: flex; align-items: center; justify-content: center;
+    padding: 8px 8px calc(96px + env(safe-area-inset-bottom));
+    direction: ltr;
   }
-  .tp-image-container img {
-    max-width: 100%; max-height: 100%; object-fit: contain;
+  /* inline-block wrapper hugs the rendered image so masks (positioned in %)
+     align to the image box itself, never the letter-boxed container */
+  .tp-image-wrap {
+    position: relative; display: inline-block; line-height: 0;
+    margin: auto;
+  }
+  .tp-image-wrap img {
+    display: block; width: auto; height: auto;
+    max-width: 100%;
+    max-height: calc(100dvh - 150px);
     user-select: none; -webkit-user-select: none;
   }
 
   /* word-level mask overlays */
   .tasmee-mask {
     position: absolute;
-    background-color: var(--bg-page);
-    border-radius: 3px;
+    background-color: var(--m-paper, var(--tp-paper, #FBF7EC));
+    border-radius: 1.5px;
     z-index: 10;
-    pointer-events: none;
-    will-change: opacity, background-color;
-    transition: opacity 0.25s ease, background-color 0.15s ease;
+    cursor: pointer;
+    will-change: opacity;
+    transition: opacity 0.3s ease, box-shadow 0.2s ease;
   }
   .tasmee-mask.revealed {
     opacity: 0 !important;
-    background-color: transparent !important;
     pointer-events: none;
   }
   .tasmee-mask.peek-mode {
-    opacity: 0.25 !important;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    opacity: 0.12 !important;
+  }
+  /* the ayah we expect next: a soft underline-style tint, not a heavy box */
+  .tasmee-mask.expected {
+    box-shadow: inset 0 -2px 0 0 var(--accent);
   }
   .tasmee-mask.flash-error {
-    background-color: rgba(231, 76, 60, 0.4) !important;
+    background-color: rgba(231, 76, 60, 0.45) !important;
+    box-shadow: inset 0 0 0 2px rgba(231, 76, 60, 0.65);
   }
 
   /* bottom controls bar */
@@ -5614,11 +5636,17 @@ function getVariantHighlightCal() {
         </svg>
       </button>
       <span class="tp-page-label" id="tpPageLabel">صفحة ١</span>
-      <span class="tp-error-badge" id="tpErrorBadge">٠ أخطاء</span>
+      <span class="tp-rec-indicator">
+        <span class="tp-rec-dot" id="tpRecDot"></span>
+        <span id="tpRecTimer">00:00</span>
+      </span>
     </div>
 
     <!-- Image container with word masks -->
     <div class="tp-image-container" id="tpImageContainer"></div>
+
+    <!-- Live transcript strip (shown during recording) -->
+    <div class="tp-live-strip" id="tpLiveStrip"></div>
 
     <!-- Bottom bar -->
     <div class="tp-bottom-bar">
@@ -5656,7 +5684,7 @@ function getVariantHighlightCal() {
     </button>
 
     <!-- Floating stop button -->
-    <button class="tp-stop-btn" id="tpStopBtn" onclick="closeTasmeePro()">
+    <button class="tp-stop-btn" id="tpStopTasmeeBtn" onclick="closeTasmeePro()">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
       </svg>
@@ -5961,7 +5989,8 @@ function getVariantHighlightCal() {
     masksByAyah: {},    // {surah_ayah: [maskDiv, ...]} — word-level masks
     revealedMasks: new Set(), // mask divs that have been revealed
     peekMode: false,
-    maskContainer: null,
+    maskWrap: null,
+    maskRO: null,       // ResizeObserver for the image wrapper
   };
 
   function _tpArabicNum(n) {
@@ -5996,7 +6025,8 @@ function getVariantHighlightCal() {
     _tp.peekMode = false;
 
     document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(currentPage)}`;
-    document.getElementById('tpErrorBadge').textContent = '٠ أخطاء';
+    document.getElementById('tpRecTimer').textContent = '00:00';
+    document.getElementById('tpRecDot').className = 'tp-rec-dot';
     document.getElementById('tpErrorPill').textContent = 'أخطاء ٠';
 
     const mb = document.getElementById('tpMicBtn');
@@ -6031,23 +6061,34 @@ function getVariantHighlightCal() {
     const sx = cal.refW / LEGACY_REF_W;
     const sy = cal.refH / LEGACY_REF_H;
     words.forEach(r => { r.x *= sx; r.y *= sy; r.w *= sx; r.h *= sy; });
-    // Detect markers: last word of each ayah that is roughly square and small
-    const ayahGroups = {};
+    return _tpTagMarkers(words);
+  }
+
+  // Geometric end-of-ayah marker detection. In RTL the verse circle sits at the
+  // END of the ayah → the left-most box on the ayah's bottom-most line. Only tag
+  // it when it is roughly square (markers are circles; words are wider than tall),
+  // so a real last word is never left unmasked.
+  function _tpTagMarkers(words) {
+    const groups = {};
     words.forEach(w => {
+      w.isMarker = false;
       const key = `${w.surah}_${w.ayah}`;
-      if (!ayahGroups[key]) ayahGroups[key] = [];
-      ayahGroups[key].push(w);
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(w);
     });
-    for (const key in ayahGroups) {
-      const group = ayahGroups[key];
-      if (group.length === 0) continue;
-      const last = group[group.length - 1];
-      const area = last.w * last.h;
-      const ratio = last.w / last.h;
-      last.isMarker = (ratio > 0.6 && ratio < 1.6 && area < 3000);
-      last.wordIndex = group.length - 1;
-      group.forEach((w, i) => { if (w !== last) { w.wordIndex = i; w.isMarker = false; } });
-    }
+    Object.keys(groups).forEach(key => {
+      const list = groups[key];
+      let maxY = -Infinity;
+      list.forEach(w => { if (w.y > maxY) maxY = w.y; });
+      // boxes within ~one line-height of the bottom-most box form the last line
+      const bottomLine = list.filter(w => (maxY - w.y) <= w.h * 0.9);
+      let cand = null;
+      bottomLine.forEach(w => { if (!cand || w.x < cand.x) cand = w; });
+      if (cand) {
+        const ratio = cand.w / cand.h;
+        if (ratio <= 1.5) cand.isMarker = true;
+      }
+    });
     return words;
   }
 
@@ -6068,19 +6109,11 @@ function getVariantHighlightCal() {
       const key = `${surah}_${ayah}`;
       const segments = medinaCoordsByAyah[key];
       if (!segments || segments.length === 0) return;
-      segments.sort((a, b) => a.top - b.top);
       segments.forEach((s, i) => {
         words.push({ surah, ayah, x: s.left, y: s.top, w: s.width, h: s.height, wordIndex: i });
       });
-      if (words.length > 0) {
-        const last = words[words.length - 1];
-        const area = last.w * last.h;
-        const ratio = last.w / last.h;
-        last.isMarker = (ratio > 0.6 && ratio < 1.6 && area < 2000);
-        words.slice(0, -1).forEach(w => { w.isMarker = false; });
-      }
     });
-    return words;
+    return _tpTagMarkers(words);
   }
 
   function _tpGetWordCoords(pageNumber) {
@@ -6091,65 +6124,128 @@ function getVariantHighlightCal() {
     return getWordLevelLegacyCoords(pageNumber);
   }
 
+  // Paper colour tuned per mushaf so masks blend into the page background.
+  const _TP_PAPER = {
+    'mushaf-colored':   '#FAF5E9',
+    'mushaf-madina1441':'#FBFAF5',
+    'mushaf-tajweed':   '#FAF6EF',
+    'mushaf-borderd':   '#FFFFFF',
+    'mushaf-green':     '#EEF2E6'
+  };
+
   function _tpRenderImageMasks(pageNumber) {
     const container = document.getElementById('tpImageContainer');
     container.innerHTML = '';
+    container.style.setProperty('--tp-paper', _TP_PAPER[currentMushafVariant] || '#FBF7EC');
     const img = document.getElementById('pageImg');
     const cal = getVariantHighlightCal();
-    // Clone the page image
+
+    // Wrapper hugs the image so percentage-positioned masks align to it
+    const wrap = document.createElement('div');
+    wrap.className = 'tp-image-wrap';
     const maskImg = document.createElement('img');
     maskImg.src = img.src;
-    maskImg.style.maxWidth = '100%';
-    maskImg.style.maxHeight = '100%';
-    maskImg.style.objectFit = 'contain';
     maskImg.draggable = false;
-    container.appendChild(maskImg);
-    _tp.maskContainer = container;
-    // Get word-level coords
+    maskImg.alt = '';
+    wrap.appendChild(maskImg);
+    container.appendChild(wrap);
+    _tp.maskWrap = wrap;
+
     const words = _tpGetWordCoords(pageNumber);
     if (!words || words.length === 0) return;
-    // Wait for image to load then render masks
+
     const renderMasks = () => {
-      const imgW = maskImg.offsetWidth;
-      const imgH = maskImg.offsetHeight;
-      if (!imgW || !imgH) return;
+      // paper colour tuned per mushaf so masks blend into the page background
+      container.style.setProperty('--tp-paper', _TP_PAPER[currentMushafVariant] || '#FAF5E9');
+      // clear any previously drawn masks (e.g. on resize re-render)
+      wrap.querySelectorAll('.tasmee-mask').forEach(m => m.remove());
+      _tp.masksByAyah = {};
       const yRange = cal.pageBotY - cal.pageTopY;
+      // inflate masks to swallow the gaps between words on a line (so the page
+      // reads as blank) and a little vertically to cover diacritics. The Madina
+      // family uses wide line-segments, so it can take more horizontal bleed to
+      // reach the line edges; the colored mushaf uses tight word-boxes near the
+      // verse markers, so it gets less to avoid covering them.
+      const isMedina = currentMushafVariant !== 'mushaf-colored';
+      const PADX = isMedina ? 2.8 : 1.2;
+      const PADY = isMedina ? 1.0 : 0.6; // percent
       words.forEach(w => {
         if (w.isMarker) return;
         const mask = document.createElement('div');
         mask.className = 'tasmee-mask';
-        const rightPct = ((1 - (w.x + w.w) / cal.refW) * cal.scaleX) * 100 + 3;
-        const widthPct = (w.w / cal.refW) * cal.scaleX * 100;
-        const topPct = (cal.pageTopY + (w.y / cal.refH) * yRange) * cal.scaleY * 100 + (cal.padTop + cal.shiftY) * 100;
-        const heightPct = (w.h / cal.refH) * yRange * cal.scaleY * 100;
-        mask.style.right = rightPct + '%';
-        mask.style.width = widthPct + '%';
-        mask.style.top = topPct + '%';
+        // identical formula to the calibrated drawAyahHighlights() overlay
+        let leftPct   = (w.x / cal.refW) * cal.scaleX * 100 + HL_PAD_X * 100 + cal.shiftX * 100;
+        let widthPct  = (w.w / cal.refW) * cal.scaleX * 100;
+        let topPct    = (cal.pageTopY + (w.y / cal.refH) * yRange) * cal.scaleY * 100 + (cal.padTop + cal.shiftY) * 100;
+        let heightPct = (w.h / cal.refH) * yRange * cal.scaleY * 100;
+        leftPct -= PADX; widthPct += PADX * 2; topPct -= PADY; heightPct += PADY * 2;
+        mask.style.left   = leftPct + '%';
+        mask.style.width  = widthPct + '%';
+        mask.style.top    = topPct + '%';
         mask.style.height = heightPct + '%';
         mask.dataset.surah = w.surah;
         mask.dataset.ayah = w.ayah;
         mask.dataset.wordIndex = w.wordIndex;
-        container.appendChild(mask);
+        mask.onclick = () => _tpSelectByAyah(w.surah, w.ayah);
+        wrap.appendChild(mask);
         const ayahKey = `${w.surah}_${w.ayah}`;
         if (!_tp.masksByAyah[ayahKey]) _tp.masksByAyah[ayahKey] = [];
         _tp.masksByAyah[ayahKey].push(mask);
       });
+      // re-apply state after a resize re-render
+      _tp.revealed.forEach(idx => {
+        const a = _tp.ayahs[idx];
+        if (a) (_tp.masksByAyah[`${a.surah}_${a.ayah}`] || []).forEach(m => m.classList.add('revealed'));
+      });
+      if (_tp.expectedIdx !== null) _tpSetExpected(_tp.expectedIdx, true);
+      if (_tp.peekMode) document.querySelectorAll('.tasmee-mask:not(.revealed)').forEach(m => m.classList.add('peek-mode'));
     };
-    maskImg.onload = renderMasks;
-    if (maskImg.complete) renderMasks();
+
+    if (maskImg.complete && maskImg.naturalWidth) renderMasks();
+    else maskImg.onload = renderMasks;
+
+    // recompute on rotation / viewport change (percentages already scale, but a
+    // re-render keeps things crisp and re-applies session state)
+    if (_tp.maskRO) _tp.maskRO.disconnect();
+    _tp.maskRO = new ResizeObserver(() => { if (maskImg.naturalWidth) renderMasks(); });
+    _tp.maskRO.observe(wrap);
   }
 
-  function _tpRevealAyahMasks(surah, ayah) {
+  function _tpRevealAyahMasks(surah, ayah, stagger) {
     const key = `${surah}_${ayah}`;
     const masks = _tp.masksByAyah[key];
     if (!masks) return;
     masks.forEach((m, i) => {
+      m.classList.remove('expected', 'peek-mode', 'flash-error');
       if (m.classList.contains('revealed')) return;
+      const delay = stagger === false ? 0 : i * 70;
       setTimeout(() => {
         m.classList.add('revealed');
         _tp.revealedMasks.add(m);
-      }, i * 80);
+      }, delay);
     });
+  }
+
+  // Reveal the recited ayah AND every earlier ayah on the page that is still
+  // hidden, so the page fills in top-to-bottom like the reference Tarteel app
+  // (the current ayah and all previous ayat stay visible).
+  function _tpRevealUpTo(matchIdx) {
+    for (let i = 0; i <= matchIdx; i++) {
+      if (_tp.revealed.has(i)) continue;
+      _tp.revealed.add(i);
+      const a = _tp.ayahs[i];
+      // animate only the just-recited ayah; backfill earlier gaps instantly
+      if (a) _tpRevealAyahMasks(a.surah, a.ayah, i === matchIdx);
+    }
+  }
+
+  // tap a word mask to set it as the expected next ayah
+  function _tpSelectByAyah(surah, ayah) {
+    const idx = _tp.ayahs.findIndex(a => a.surah === surah && a.ayah === ayah);
+    if (idx < 0) return;
+    _tpSetExpected(idx);
+    const a = _tp.ayahs[idx];
+    showCustomToast('الهدف: ' + (a.surahName || 'سورة') + ' — الآية ' + _tpArabicNum(a.ayah));
   }
 
   function _tpFlashErrorMask(surah, ayah) {
@@ -6165,25 +6261,19 @@ function getVariantHighlightCal() {
 
   function _tpUpdateErrorPill() {
     document.getElementById('tpErrorPill').textContent = 'أخطاء ' + _tpArabicNum(_tp.errors);
-    document.getElementById('tpErrorBadge').textContent = _tpArabicNum(_tp.errors) + ' أخطاء';
   }
 
-  function _tpSelectAyah(idx) {
-    document.querySelectorAll('.tp-ayah.selected-target').forEach(el => el.classList.remove('selected-target'));
+  // Mark which ayah we expect to hear next by outlining its (unrevealed) masks.
+  // `silent` skips scrolling — used during live streaming / re-render.
+  function _tpSetExpected(idx, silent) {
+    document.querySelectorAll('.tasmee-mask.expected').forEach(m => m.classList.remove('expected'));
     _tp.expectedIdx = idx;
-    const el = document.getElementById('tp-a-' + idx);
-    if (el) { el.classList.add('selected-target', 'current-expected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    showCustomToast('اختيرت: ' + _tp.ayahs[idx].surahName + ' — الآية ' + _tp.ayahs[idx].ayah);
-  }
-
-  function _tpSetExpected(idx) {
-    document.querySelectorAll('.tp-ayah.current-expected, .tp-ayah.selected-target')
-      .forEach(el => el.classList.remove('current-expected', 'selected-target'));
-    _tp.expectedIdx = idx;
-    if (idx !== null && idx < _tp.ayahs.length) {
-      const el = document.getElementById('tp-a-' + idx);
-      if (el) { el.classList.add('current-expected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    }
+    if (idx === null || idx < 0 || idx >= _tp.ayahs.length) return;
+    const a = _tp.ayahs[idx];
+    const masks = _tp.masksByAyah[`${a.surah}_${a.ayah}`];
+    if (!masks || !masks.length) return;
+    masks.forEach(m => { if (!m.classList.contains('revealed')) m.classList.add('expected'); });
+    if (!silent) masks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   let _tpAudioCtx = null;
@@ -6273,11 +6363,7 @@ function getVariantHighlightCal() {
     });
     if (data.match && data.match.score > 0.55) {
       const idx = _tp.ayahs.findIndex(a => a.surah === data.match.surah && a.ayah === data.match.ayah);
-      if (idx >= 0 && !_tp.revealed.has(idx)) {
-        document.querySelectorAll('.tp-ayah.current-expected').forEach(el => el.classList.remove('current-expected'));
-        const el = document.getElementById('tp-a-' + idx);
-        if (el) el.classList.add('current-expected');
-      }
+      if (idx >= 0 && !_tp.revealed.has(idx)) _tpSetExpected(idx, true);
     }
   }
 
@@ -6285,6 +6371,7 @@ function getVariantHighlightCal() {
     _tarteelProcessing = false;
     document.getElementById('tpMicBtn').className = 'tp-mic-btn';
     document.getElementById('tpRecTimer').textContent = '00:00';
+    document.getElementById('tpRecDot').className = 'tp-rec-dot';
     document.getElementById('tpLiveStrip').classList.remove('active');
     if (!result || !result.surah) {
       showCustomToast('لم يُتعرَّف على الآية — حاول مجدداً');
@@ -6293,14 +6380,24 @@ function getVariantHighlightCal() {
     const matchIdx = _tp.ayahs.findIndex(a => a.surah === result.surah && a.ayah === result.ayah);
     if (matchIdx < 0) {
       showCustomToast((result.surahName || 'سورة') + ' — الآية ' + result.ayah + ' (ليست في هذه الصفحة)');
-      _tp.errors++; _tpUpdateErrorPill(); return;
+      _tp.errors++; _tpUpdateErrorPill();
+      if (_tp.expectedIdx !== null) {
+        const ex = _tp.ayahs[_tp.expectedIdx];
+        if (ex) _tpFlashErrorMask(ex.surah, ex.ayah);
+      }
+      return;
     }
     const isCorrect = _tp.expectedIdx === null || matchIdx === _tp.expectedIdx;
-    _tp.revealed.add(matchIdx);
-    if (!isCorrect) { _tp.errors++; _tpUpdateErrorPill(); _tpFlashErrorMask(result.surah, result.ayah); }
-    else { _tpRevealAyahMasks(result.surah, result.ayah); }
+    if (!isCorrect) {
+      // wrong/skipped ayah: flag the ayah we were waiting for, count an error
+      const ex = _tp.ayahs[_tp.expectedIdx];
+      if (ex) _tpFlashErrorMask(ex.surah, ex.ayah);
+      _tp.errors++; _tpUpdateErrorPill();
+    }
+    // reveal the recited ayah and backfill any earlier hidden ayat on the page
+    _tpRevealUpTo(matchIdx);
     const a = _tp.ayahs[matchIdx];
-    showCustomToast((isCorrect ? '✓ ' : '✗ ') + a.surahName + ' — الآية ' + a.ayah);
+    showCustomToast((isCorrect ? '✓ ' : '✗ ') + (a.surahName || 'سورة') + ' — الآية ' + _tpArabicNum(a.ayah));
     _tpSetExpected(matchIdx + 1 < _tp.ayahs.length ? matchIdx + 1 : null);
   }
 
@@ -6337,8 +6434,11 @@ function getVariantHighlightCal() {
     if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
     if (_tpAudioCtx) { _tpAudioCtx.close().catch(()=>{}); _tpAudioCtx = null; }
     _tpAllSamples = [];
+    if (_tp.maskRO) { _tp.maskRO.disconnect(); _tp.maskRO = null; }
     _tp.masksByAyah = {};
     _tp.revealedMasks = new Set();
+    _tp.expectedIdx = null;
+    _tp.peekMode = false;
     const container = document.getElementById('tpImageContainer');
     if (container) container.innerHTML = '';
     document.getElementById('tpLiveStrip').classList.remove('active');
