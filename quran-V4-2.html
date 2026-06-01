@@ -27,6 +27,13 @@
     font-weight: normal;
     font-style: normal;
   }
+  /* Uthmani font — renders Arabic-Indic ayah numbers as the ornate end-marker glyph */
+  @font-face {
+    font-family: 'MadinahFont';
+    src: url('fonts/uthmani-colored.ttf') format('opentype'),
+         url('fonts/UthmanicHafs_V20.ttf') format('truetype');
+    font-weight: normal; font-style: normal; font-display: swap;
+  }
 
   /* ========== DESIGN TOKENS ========== */
   :root {
@@ -1951,10 +1958,11 @@
     user-select: none; -webkit-user-select: none;
   }
 
-  /* word-level mask overlays */
+  /* word-level mask overlays — coloured with the THEME page background so the
+     blank (un-recited) area blends with the panel/margins on any colour theme */
   .tasmee-mask {
     position: absolute;
-    background-color: var(--m-paper, var(--tp-paper, #FBF7EC));
+    background-color: var(--bg-page);
     border-radius: 1.5px;
     z-index: 10;
     cursor: pointer;
@@ -1976,6 +1984,15 @@
     background-color: rgba(231, 76, 60, 0.45) !important;
     box-shadow: inset 0 0 0 2px rgba(231, 76, 60, 0.65);
   }
+  /* crisp CSS ayah-end marker drawn over the clean fill of an un-recited ayah */
+  .tp-ayah-num {
+    position: absolute; z-index: 11; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'MadinahFont', 'Amiri', serif;
+    color: var(--gold); line-height: 1; overflow: visible;
+    transition: opacity 0.25s ease;
+  }
+  .tp-ayah-num.revealed { opacity: 0; }
 
   /* bottom controls bar — single row: errors · nav · record */
   .tp-bottom-bar {
@@ -2532,6 +2549,12 @@
           </svg>
         </button>
       </div>
+      <button class="search-voice-btn" onclick="voiceSearch()" title="بحث صوتي — اتلُ آية"
+              style="flex-shrink:0;width:46px;height:46px;border-radius:13px;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-inline-start:8px">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </button>
     </div>
     <div class="search-results-container" id="searchResults">
       <div class="search-hint">
@@ -3055,7 +3078,7 @@
         <div class="tasmee-setup-row">
           <span>إخفاء النص — اختبار الحفظ</span>
           <label class="toggle-switch">
-            <input type="checkbox" id="tasmeeHideText">
+            <input type="checkbox" id="tasmeeHideText" checked>
             <span class="slider"></span>
           </label>
         </div>
@@ -3111,6 +3134,39 @@
         <button style="flex:1;padding:12px;background:var(--accent);color:white;border:none;border-radius:12px;font-weight:bold;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.95rem;" onclick="retryTasmeeSession()">إعادة التسميع</button>
         <button style="flex:1;padding:12px;background:rgba(128,128,128,0.15);color:var(--text-primary);border:none;border-radius:12px;font-weight:bold;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.95rem;" onclick="closeModal('tasmeeResultsModal')">إغلاق</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== TASMEE STATS DASHBOARD (F6) ===== -->
+  <div class="modal-overlay" id="tasmeeStatsModal" onclick="handleOverlayClick(event,'tasmeeStatsModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">إحصائيات التسميع</div>
+        <button class="close-btn" onclick="closeModal('tasmeeStatsModal')">✕</button>
+      </div>
+      <div id="tasmeeStatsBody" style="overflow-y:auto;padding:4px 4px 14px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== TASMEE SESSION SUMMARY — Teacher mode (F13) ===== -->
+  <div class="modal-overlay" id="tasmeeSummaryModal" onclick="handleOverlayClick(event,'tasmeeSummaryModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">ملخص الجلسة</div>
+        <button class="close-btn" onclick="closeModal('tasmeeSummaryModal')">✕</button>
+      </div>
+      <div id="tasmeeSummaryBody" style="overflow-y:auto;padding:4px 4px 14px;max-height:72vh;"></div>
+    </div>
+  </div>
+
+  <!-- ===== TASMEE MEMORIZATION HEATMAP (F8) ===== -->
+  <div class="modal-overlay" id="tasmeeHeatmapModal" onclick="handleOverlayClick(event,'tasmeeHeatmapModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">خريطة الحفظ</div>
+        <button class="close-btn" onclick="closeModal('tasmeeHeatmapModal')">✕</button>
+      </div>
+      <div id="tasmeeHeatmapBody" style="overflow-y:auto;padding:4px 4px 14px;max-height:70vh;"></div>
     </div>
   </div>
 
@@ -3173,6 +3229,25 @@
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </span>
+        </div>
+
+        <!-- Tasmee: show word strip toggle (default hidden) -->
+        <div class="setting-row">
+          <div class="setting-label">
+            <span class="row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">إظهار النص أثناء التسميع</div>
+              <div class="label-sub">شريط الكلمات الملوّن أسفل الشاشة</div>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="setTasmeeStrip" onchange="setTasmeeStripPref(this.checked)">
+            <span class="slider"></span>
+          </label>
         </div>
 
         <!-- Bookmarks -->
@@ -4759,6 +4834,8 @@ function getVariantHighlightCal() {
       const label = document.getElementById('colorThemeLabel');
       if (label) label.textContent = THEME_NAMES[theme] || 'ذهبي';
       document.querySelectorAll('.theme-swatch').forEach(el => el.classList.toggle('active', el.dataset.theme === theme));
+      const stripToggle = document.getElementById('setTasmeeStrip');
+      if (stripToggle) stripToggle.checked = (localStorage.getItem('tasmee_show_strip') === '1');
       document.getElementById('settingsModal').classList.add('active');
       if (typeof tarteelUpdateSettingsRow === 'function') tarteelUpdateSettingsRow();
     }
@@ -5460,7 +5537,7 @@ function getVariantHighlightCal() {
         showCustomToast('وضع التسميع غير مدعوم على هذا المتصفح — جرب Chrome أو Edge');
         return;
       }
-      document.getElementById('tasmeeHideText').checked = localStorage.getItem('tasmee_hide_text') === '1';
+      document.getElementById('tasmeeHideText').checked = localStorage.getItem('tasmee_hide_text') !== '0'; // default ON (memorisation test)
       document.getElementById('tasmeeShowAyahEnd').checked = localStorage.getItem('tasmee_show_ayah_end') !== '0';
       document.getElementById('tasmeeAutoFlip').checked = localStorage.getItem('tasmee_auto_flip') !== '0';
       document.getElementById('tasmeeAudioFeedback').checked = localStorage.getItem('tasmee_audio_feedback') !== '0';
@@ -5708,6 +5785,14 @@ function getVariantHighlightCal() {
             تسميع الصفحة الحالية
           </button>
         </div>
+        <div class="tarteel-btn-row" style="margin-top:8px">
+          <button class="tarteel-action-btn secondary" onclick="openTasmeeStats()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            إحصائياتي
+          </button>
+        </div>
       </div>
 
       <!-- ── Tasmee' Pro Session ── -->
@@ -5838,6 +5923,7 @@ function getVariantHighlightCal() {
   // ── Tarteel integration ───────────────────────────────────────────────────
   let _tarteelWorker = null;
   let _tarteelReady = false;
+  let _tarteelInitSent = false;  // guards against posting 'init' to the worker twice
   let _tarteelRecording = false;
   let _tarteelProcessing = false;
   let _tarteelResult = null;
@@ -5890,6 +5976,7 @@ function getVariantHighlightCal() {
   function tarteelDownload() {
     document.getElementById('tarteelDownloadBtn').disabled = true;
     document.getElementById('tarteelProgressBar').style.display = 'block';
+    _tarteelInitSent = true;
     _tarteelWorker.postMessage({ type: 'init' });
   }
 
@@ -6152,7 +6239,7 @@ function getVariantHighlightCal() {
       const res = await fetch('data/quran.json');
       const arr = await res.json();
       _tpQuranText = new Map();
-      arr.forEach(v => _tpQuranText.set(v.surah + ':' + v.ayah, { text: v.text_uthmani, name: v.surah_name }));
+      arr.forEach(v => _tpQuranText.set(v.surah + ':' + v.ayah, { text: v.text_uthmani, clean: v.text_clean, name: v.surah_name }));
     } catch (e) { _tpQuranText = new Map(); }
     return _tpQuranText;
   }
@@ -6177,7 +6264,7 @@ function getVariantHighlightCal() {
     if (list.length && txt.size) {
       const mapped = list.map(({ surah, ayah }) => {
         const t = txt.get(surah + ':' + ayah);
-        return { surah, ayah, text: t ? t.text : '', surahName: t ? t.name : ('سورة ' + surah) };
+        return { surah, ayah, text: t ? t.text : '', textClean: t ? t.clean : '', surahName: t ? t.name : ('سورة ' + surah) };
       });
       if (mapped.some(a => a.text)) return mapped;
     }
@@ -6235,9 +6322,11 @@ function getVariantHighlightCal() {
     _tp.peekMode = false;
     _tp.recording = false;
     _tp.masksByAyah = {};
+    _tp.markersByAyah = {};
     _tp.revealedMasks = new Set();
     _tp.lastFollowIdx = -1; _tp.lastFollowPage = -1;
     _tp.followLocked = false; _tp.followNum = 0;
+    _tpResetSession();
     _tpBuildMatcher();
     _tpResetPanelChrome(page);
     _tpRenderImageMasks(page);
@@ -6261,6 +6350,7 @@ function getVariantHighlightCal() {
       _tp.revealed = new Set();
       _tp.expectedIdx = null;
       _tp.masksByAyah = {};
+      _tp.markersByAyah = {};
       _tp.revealedMasks = new Set();
       _tpBuildMatcher();
       document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(page)}`;
@@ -6278,11 +6368,39 @@ function getVariantHighlightCal() {
     await _tpOpenPanel(currentPage);
   }
 
+  // Ensure the offline recognition model is ready. If it was already downloaded
+  // (cached) we initialise the worker silently and wait — so the download sheet
+  // only appears the FIRST time, not every time the Tasmee button is hit.
+  async function _tpEnsureModelReady() {
+    if (_tarteelReady) return true;
+    let cached = false;
+    try {
+      const c = await caches.open(_TARTEEL_CACHE_NAME);
+      cached = !!(await c.match(_TARTEEL_MODEL_URL));
+    } catch (e) {}
+    if (!cached) return false;                 // first time → caller opens the download sheet
+    if (!_tarteelWorker) _tarteelInitWorker();
+    if (!_tarteelInitSent) {
+      _tarteelInitSent = true;
+      showCustomToast('جاري تجهيز نموذج التسميع…');
+      _tarteelWorker.postMessage({ type: 'init' });
+    }
+    return await new Promise(resolve => {
+      const t0 = Date.now();
+      (function poll() {
+        if (_tarteelReady) return resolve(true);
+        if (Date.now() - t0 > 45000) return resolve(false);
+        setTimeout(poll, 200);
+      })();
+    });
+  }
+
   // Header-mic entry: open the panel and start listening. Recognition will
   // auto-jump to the recited ayah's page and follow along (reveal previous,
   // keep the current ayah and what follows hidden).
   async function startTasmeeFollow() {
-    if (!_tarteelReady) {
+    const ready = await _tpEnsureModelReady();
+    if (!ready) {
       showCustomToast('يجب تحميل نموذج التسميع أولاً');
       if (typeof openTarteelSheet === 'function') openTarteelSheet();
       return;
@@ -6306,7 +6424,7 @@ function getVariantHighlightCal() {
       onExtra: (w) => { _tp.extraWords.push(w); if (_tp.session) _tp.session.extras.push(w); },
       onAyahComplete: (surah, ayah, stats) => _tpRecordAyah(m, surah, ayah, stats)
     });
-    m.buildFromAyahs((_tp.ayahs || []).map(a => ({ surah: a.surah, ayah: a.ayah, text: a.text })));
+    m.buildFromAyahs((_tp.ayahs || []).map(a => ({ surah: a.surah, ayah: a.ayah, text: a.text, textClean: a.textClean })));
     _tp.matcher = m;
   }
 
@@ -6329,30 +6447,288 @@ function getVariantHighlightCal() {
   }
 
   // Persist the finished session to IndexedDB (no audio is ever stored).
+  // Returns a summary object for the teacher-mode report, or null if nothing recited.
   async function _tpPersistSession() {
     const sess = _tp.session;
     _tp.session = null;
-    if (!sess || !sess.ayahStats.length) return;
-    if (typeof TasmeeStore === 'undefined' || !TasmeeStore.available()) return;
+    if (!sess || !sess.ayahStats.length) return null;
     let correct = 0, fuzzy = 0, missed = 0, total = 0;
     sess.ayahStats.forEach(s => { correct += s.correct; fuzzy += s.fuzzy; missed += s.missed; total += s.total; });
     const accuracy = total ? ((correct + fuzzy) / total) * 100 : 0;
     const first = sess.ayahStats[0], last = sess.ayahStats[sess.ayahStats.length - 1];
     const durationSec = Math.round((Date.now() - sess.startTs) / 1000);
     const mistakesArr = sess.mistakes.concat(sess.extras.map(w => ({ surah: null, ayah: null, word: w, type: 'extra' })));
+    if (typeof TasmeeStore !== 'undefined' && TasmeeStore.available()) {
+      try {
+        await TasmeeStore.addSession({
+          surah: first.surah, fromAyah: first.ayah, toSurah: last.surah, toAyah: last.ayah,
+          correct, fuzzy, missed, total, accuracy, mistakes: mistakesArr.length, durationSec
+        });
+        await TasmeeStore.addMistakes(mistakesArr);
+        if (typeof _tpUpdateRevisions === 'function') await _tpUpdateRevisions(sess.ayahStats); // M3
+      } catch (e) { console.warn('Tasmee session persist failed:', e); }
+    }
+    return { accuracy, correct, fuzzy, missed, total, durationSec, ayahs: sess.ayahStats, mistakes: mistakesArr };
+  }
+
+  // ── stats dashboard (F6) ──────────────────────────────────────────────────
+  async function openTasmeeStats() {
+    const body = document.getElementById('tasmeeStatsBody');
+    body.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-secondary);font-family:Tajawal,sans-serif">جارٍ التحميل…</div>';
+    document.getElementById('tasmeeStatsModal').classList.add('active');
+    if (typeof closeTarteelSheet === 'function') closeTarteelSheet();
     try {
-      await TasmeeStore.addSession({
-        surah: first.surah, fromAyah: first.ayah, toSurah: last.surah, toAyah: last.ayah,
-        correct, fuzzy, missed, total, accuracy, mistakes: mistakesArr.length, durationSec
-      });
-      await TasmeeStore.addMistakes(mistakesArr);
-      if (typeof _tpUpdateRevisions === 'function') _tpUpdateRevisions(sess.ayahStats); // M3 hook
-    } catch (e) { console.warn('Tasmee session persist failed:', e); }
+      const agg = await TasmeeStore.aggregate();
+      let dueCount = 0;
+      try { dueCount = (await TasmeeStore.getDueRevisions(Date.now())).length; } catch (e) {}
+      body.innerHTML = _tpRenderStats(agg, dueCount);
+    } catch (e) {
+      body.innerHTML = '<div style="padding:30px;text-align:center;color:var(--danger);font-family:Tajawal,sans-serif">تعذّر تحميل الإحصائيات</div>';
+    }
+  }
+
+  function _tpRenderStats(a, dueCount) {
+    const num = n => String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    if (!a || !a.totalSessions) {
+      return '<div style="padding:40px 22px;text-align:center;color:var(--text-secondary);font-family:Tajawal,sans-serif;line-height:1.9">لا توجد جلسات تسميع بعد.<br>ابدأ التسميع لتظهر إحصائياتك هنا.</div>';
+    }
+    const mins = Math.round(a.totalTimeSec / 60);
+    const timeStr = mins >= 60 ? num(Math.floor(mins / 60)) + ' س ' + num(mins % 60) + ' د' : num(mins) + ' د';
+    const card = (val, label, color) => `<div style="flex:1;min-width:0;background:var(--bg-surface);border-radius:14px;padding:12px 6px;text-align:center">
+        <div style="font-size:1.4rem;font-weight:800;color:${color || 'var(--accent)'};font-family:Tajawal,sans-serif">${val}</div>
+        <div style="font-size:0.7rem;color:var(--text-secondary);font-family:Tajawal,sans-serif;margin-top:2px">${label}</div></div>`;
+    const maxW = Math.max(1, ...a.weekly.map(w => w.count));
+    const dayName = ['أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+    const bars = a.weekly.map(w => {
+      const dt = new Date(w.day);
+      const h = Math.round((w.count / maxW) * 58);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-size:0.62rem;color:var(--text-hint)">${w.count ? num(w.count) : ''}</div>
+        <div style="width:62%;height:${Math.max(3, h)}px;background:${w.count ? 'var(--accent)' : 'var(--bg-surface-hover)'};border-radius:4px;transition:height .3s"></div>
+        <div style="font-size:0.6rem;color:var(--text-secondary);font-family:Tajawal,sans-serif">${dayName[dt.getDay()]}</div></div>`;
+    }).join('');
+    const chips = a.weakWords.length
+      ? a.weakWords.map(w => `<span style="display:inline-block;background:var(--danger-light);color:var(--danger);border-radius:20px;padding:4px 12px;margin:3px;font-family:Amiri,serif;font-size:1rem">${w.word} <span style="font-size:0.7rem;opacity:0.7">×${num(w.count)}</span></span>`).join('')
+      : '<span style="color:var(--text-hint);font-size:0.85rem;font-family:Tajawal,sans-serif">لا أخطاء متكررة 👍</span>';
+    const dueBanner = (dueCount > 0)
+      ? `<div onclick="startRevisionSession()" style="margin:10px 8px 4px;padding:12px 14px;border-radius:14px;background:var(--accent-light);display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+           <span style="font-family:Tajawal,sans-serif;font-weight:700;color:var(--accent)">${num(dueCount)} آية للمراجعة اليوم</span>
+           <span style="font-family:Tajawal,sans-serif;font-size:0.8rem;background:var(--accent);color:#fff;padding:6px 14px;border-radius:20px">ابدأ المراجعة ›</span>
+         </div>` : '';
+    return `
+      ${dueBanner}
+      <div style="display:flex;gap:8px;padding:8px 8px">
+        ${card(num(Math.round(a.avgAccuracy)) + '٪', 'الدقة', 'var(--accent)')}
+        ${card(num(a.totalSessions), 'جلسة')}
+        ${card(timeStr, 'الوقت')}
+        ${card(num(a.streak), 'يوم متتابع', '#e67e22')}
+      </div>
+      <div style="padding:14px 12px 4px;font-family:Tajawal,sans-serif;font-size:0.8rem;color:var(--text-secondary)">آخر ٧ أيام</div>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:88px;padding:0 12px">${bars}</div>
+      <div style="padding:16px 12px 6px;font-family:Tajawal,sans-serif;font-size:0.8rem;color:var(--text-secondary)">الكلمات الأكثر خطأً</div>
+      <div style="padding:0 8px;direction:rtl">${chips}</div>
+      <div style="padding:16px 10px 4px">
+        <button onclick="openTasmeeHeatmap()" style="width:100%;padding:12px;border:none;border-radius:14px;background:var(--bg-surface);color:var(--text-primary);font-family:Tajawal,sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <span style="display:inline-flex;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:#27ae60"></span><span style="width:9px;height:9px;border-radius:2px;background:#f1c40f"></span><span style="width:9px;height:9px;border-radius:2px;background:#e74c3c"></span></span>
+          خريطة الحفظ
+        </button>
+      </div>`;
+  }
+
+  // ── spaced-repetition revision planner (F9) ───────────────────────────────
+  const _TP_REVISION_DAYS = [1, 3, 7, 14, 30];
+  async function _tpUpdateRevisions(ayahStats) {
+    if (typeof TasmeeStore === 'undefined' || !TasmeeStore.available()) return;
+    const now = Date.now();
+    for (const s of ayahStats) {
+      const key = s.surah + ':' + s.ayah;
+      let rec = null;
+      try { rec = await TasmeeStore.getRevision(key); } catch (e) {}
+      if (!rec) rec = { key, surah: s.surah, ayah: s.ayah, level: 0, lapses: 0 };
+      const acc = s.pct;
+      if (acc >= 85) rec.level = Math.min((rec.level || 0) + 1, _TP_REVISION_DAYS.length - 1);   // strong → longer interval
+      else if (acc < 60) { rec.level = Math.max(0, (rec.level || 0) - 1); rec.lapses = (rec.lapses || 0) + 1; } // weak → resurface sooner
+      rec.accuracy = Math.round(acc);
+      rec.lastReviewed = now;
+      rec.dueDate = now + _TP_REVISION_DAYS[rec.level] * 86400000;
+      try { await TasmeeStore.putRevision(rec); } catch (e) {}
+    }
+  }
+
+  // mastery bucket for the heatmap
+  function _tpMastery(rec) {
+    const acc = rec.accuracy != null ? rec.accuracy : 0;
+    if (acc < 60 || (rec.lapses || 0) >= 2) return 'weak';
+    if ((rec.level || 0) >= 3 && acc >= 85) return 'strong';
+    if (acc >= 85) return 'strong';
+    return 'review';
+  }
+  const _TP_MASTERY_COLOR = { strong: '#27ae60', review: '#f1c40f', weak: '#e74c3c' };
+
+  // ── memorization heatmap (F8) ─────────────────────────────────────────────
+  async function openTasmeeHeatmap() {
+    const body = document.getElementById('tasmeeHeatmapBody');
+    body.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-secondary);font-family:Tajawal,sans-serif">جارٍ التحميل…</div>';
+    document.getElementById('tasmeeHeatmapModal').classList.add('active');
+    try {
+      const revs = await TasmeeStore.getAllRevisions();
+      body.innerHTML = _tpRenderHeatmap(revs);
+    } catch (e) {
+      body.innerHTML = '<div style="padding:30px;text-align:center;color:var(--danger);font-family:Tajawal,sans-serif">تعذّر تحميل الخريطة</div>';
+    }
+  }
+
+  function _tpSurahName(n) {
+    if (typeof SURAH_MAP !== 'undefined' && SURAH_MAP.length) {
+      const e = SURAH_MAP.find(s => s.number === n);
+      if (e) return e.name;
+    }
+    return 'سورة ' + n;
+  }
+
+  function _tpRenderHeatmap(revs) {
+    const num = n => String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    if (!revs || !revs.length) {
+      return '<div style="padding:40px 22px;text-align:center;color:var(--text-secondary);font-family:Tajawal,sans-serif;line-height:1.9">لا توجد بيانات حفظ بعد.<br>سمِّع آيات لتظهر خريطة حفظك هنا.</div>';
+    }
+    const bySurah = {};
+    revs.forEach(r => { (bySurah[r.surah] = bySurah[r.surah] || []).push(r); });
+    const surahs = Object.keys(bySurah).map(Number).sort((a, b) => a - b);
+    const legend = `<div style="display:flex;gap:14px;justify-content:center;padding:6px 0 12px;font-family:Tajawal,sans-serif;font-size:0.72rem;color:var(--text-secondary)">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#27ae60;vertical-align:middle"></span> متقن</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#f1c40f;vertical-align:middle"></span> يحتاج مراجعة</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#e74c3c;vertical-align:middle"></span> ضعيف</span></div>`;
+    const sections = surahs.map(sn => {
+      const list = bySurah[sn].slice().sort((a, b) => a.ayah - b.ayah);
+      const counts = { strong: 0, review: 0, weak: 0 };
+      list.forEach(r => counts[_tpMastery(r)]++);
+      const overall = counts.weak ? 'weak' : (counts.review ? 'review' : 'strong');
+      const cells = list.map(r => {
+        const mk = _tpMastery(r);
+        return `<span title="${_tpSurahName(sn)} ${r.ayah} • ${r.accuracy}%" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin:2px;border-radius:6px;background:${_TP_MASTERY_COLOR[mk]};color:#fff;font-size:0.7rem;font-family:Tajawal,sans-serif">${num(r.ayah)}</span>`;
+      }).join('');
+      return `<div style="margin:6px 4px 10px">
+          <div style="display:flex;align-items:center;gap:8px;padding:4px 6px">
+            <span style="width:10px;height:10px;border-radius:50%;background:${_TP_MASTERY_COLOR[overall]}"></span>
+            <span style="font-family:Tajawal,sans-serif;font-weight:700;font-size:0.92rem">${_tpSurahName(sn)}</span>
+            <span style="font-family:Tajawal,sans-serif;font-size:0.72rem;color:var(--text-secondary)">${num(list.length)} آية</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;direction:rtl;padding:0 4px">${cells}</div>
+        </div>`;
+    }).join('');
+    return legend + sections;
+  }
+
+  // ── due-today review session (F9) ─────────────────────────────────────────
+  async function startRevisionSession() {
+    let due = [];
+    try { due = await TasmeeStore.getDueRevisions(Date.now()); } catch (e) {}
+    if (!due.length) { showCustomToast('لا توجد آيات للمراجعة اليوم 👍'); return; }
+    if (!_tarteelReady) { showCustomToast('حمّل نموذج التسميع أولاً'); if (typeof openTarteelSheet === 'function') openTarteelSheet(); return; }
+    closeModal('tasmeeStatsModal');
+    const first = due[0];
+    const page = _tpLookupPage(first.surah, first.ayah) || currentPage;
+    if (page !== currentPage) { goToPage(page); await new Promise(r => setTimeout(r, 300)); }
+    _tpFollowMode = true;
+    await _tpOpenPanel(page);
+    showCustomToast('مراجعة ' + due.length + ' آية — ابدأ التلاوة من ' + _tpSurahName(first.surah) + ' ' + _tpArabicNum(first.ayah));
+    if (!_tp.recording) tpToggleRecord();
+  }
+
+  // ── voice search (F16): recite an ayah → recogniser identifies it → navigate ──
+  function voiceSearch() {
+    if (typeof toggleSearchOverlay === 'function') toggleSearchOverlay('close');
+    setTimeout(() => {
+      if (typeof openTarteelSheet === 'function') openTarteelSheet();
+      showCustomToast('اتلُ آية وسيتم البحث عنها والانتقال إليها');
+    }, 220);
+  }
+
+  // ── teacher-mode session summary (F13) ────────────────────────────────────
+  function _tpShowSessionSummary(summary) {
+    const body = document.getElementById('tasmeeSummaryBody');
+    if (!body) return;
+    body.innerHTML = _tpRenderSummary(summary);
+    document.getElementById('tasmeeSummaryModal').classList.add('active');
+  }
+
+  function _tpRenderSummary(s) {
+    const num = n => String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    const pct = Math.round(s.accuracy);
+    const emoji = pct >= 95 ? '🌟' : pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
+    const ring = pct >= 80 ? 'var(--accent)' : pct >= 60 ? '#e67e22' : 'var(--danger)';
+    const mins = Math.floor(s.durationSec / 60), secs = s.durationSec % 60;
+    const dur = num(mins) + ':' + String(secs).padStart(2, '0').replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+    const stat = (v, l, c) => `<div style="flex:1"><div style="font-size:1.2rem;font-weight:800;color:${c};font-family:Tajawal,sans-serif">${num(v)}</div><div style="font-size:0.7rem;color:var(--text-secondary);font-family:Tajawal,sans-serif">${l}</div></div>`;
+
+    // mistakes grouped by ayah
+    const byAyah = {};
+    s.mistakes.forEach(m => {
+      const k = (m.surah != null) ? (m.surah + ':' + m.ayah) : 'extra';
+      (byAyah[k] = byAyah[k] || []).push(m);
+    });
+    const mistakeRows = Object.keys(byAyah).filter(k => k !== 'extra').map(k => {
+      const [su, ay] = k.split(':').map(Number);
+      const words = byAyah[k].map(m => `<span style="color:${m.type === 'missing' ? 'var(--danger)' : '#d4a017'};font-family:Amiri,serif">${m.word}</span>`).join('، ');
+      return `<div style="padding:6px 4px;border-bottom:1px solid var(--glass-border);font-size:0.9rem;direction:rtl">
+          <span style="font-family:Tajawal,sans-serif;font-weight:700;font-size:0.8rem;color:var(--text-secondary)">${_tpSurahName(su)} ${num(ay)}: </span>${words}</div>`;
+    }).join('');
+    const extras = (byAyah['extra'] || []);
+    const extrasRow = extras.length ? `<div style="padding:6px 4px;font-size:0.85rem;direction:rtl"><span style="font-family:Tajawal,sans-serif;font-weight:700;font-size:0.8rem;color:var(--text-secondary)">كلمات زائدة: </span>${extras.map(m => `<span style="font-family:Amiri,serif;color:#8e44ad">${m.word}</span>`).join('، ')}</div>` : '';
+
+    // recommendation from this session's weak ayat
+    const weak = s.ayahs.filter(a => a.pct < 85);
+    let rec;
+    if (!weak.length) rec = 'أداء ممتاز! 🌟 واصل على هذا المستوى.';
+    else {
+      const list = weak.slice(0, 4).map(a => _tpSurahName(a.surah) + ' ' + num(a.ayah)).join('، ');
+      rec = 'راجع غداً: ' + list + (weak.length > 4 ? ' وغيرها' : '');
+    }
+
+    const mistakesBlock = (mistakeRows || extrasRow)
+      ? `<div style="padding:14px 10px 4px;font-family:Tajawal,sans-serif;font-size:0.8rem;color:var(--text-secondary)">الأخطاء</div>
+         <div style="padding:0 8px">${mistakeRows}${extrasRow}</div>`
+      : '<div style="padding:14px 10px;text-align:center;color:var(--accent);font-family:Tajawal,sans-serif">لا أخطاء — أحسنت! 👏</div>';
+
+    return `
+      <div style="text-align:center;padding:14px 0 6px">
+        <div style="width:108px;height:108px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(${ring} ${pct}%, var(--bg-surface) 0)">
+          <div style="width:84px;height:84px;border-radius:50%;background:var(--glass-bg);display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:1.6rem;font-weight:800;color:${ring};font-family:Tajawal,sans-serif">${num(pct)}٪</div>
+            <div style="font-size:0.7rem;color:var(--text-secondary);font-family:Tajawal,sans-serif">${emoji} الدقة</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;text-align:center;gap:6px;padding:6px 14px">
+        ${stat(s.correct, 'صحيح', 'var(--accent)')}
+        ${stat(s.fuzzy, 'قريب', '#d4a017')}
+        ${stat(s.missed, 'مفقود', 'var(--danger)')}
+        ${stat(s.ayahs.length, 'آية', 'var(--text-secondary)')}
+        ${stat(dur, 'الزمن', 'var(--text-secondary)')}
+      </div>
+      ${mistakesBlock}
+      <div style="margin:14px 10px 6px;padding:12px 14px;border-radius:14px;background:var(--accent-light);font-family:Tajawal,sans-serif;font-size:0.9rem;color:var(--text-primary);line-height:1.7;direction:rtl">
+        <span style="font-weight:800;color:var(--accent)">التوصية: </span>${rec}
+      </div>
+      <div style="display:flex;gap:10px;padding:8px 10px">
+        ${weak.length ? `<button onclick="closeModal('tasmeeSummaryModal');startRevisionSession()" style="flex:1;padding:12px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-family:Tajawal,sans-serif;font-weight:700;cursor:pointer">مراجعة الضعيف</button>` : ''}
+        <button onclick="closeModal('tasmeeSummaryModal')" style="flex:1;padding:12px;border:none;border-radius:12px;background:var(--bg-surface);color:var(--text-primary);font-family:Tajawal,sans-serif;font-weight:700;cursor:pointer">إغلاق</button>
+      </div>`;
   }
 
   // Render the word-status strip for one ayah (gray words, coloured as recited).
+  // Word strip is opt-in (default hidden) — toggled from Settings.
+  function _tpStripEnabled() { return localStorage.getItem('tasmee_show_strip') === '1'; }
+  function setTasmeeStripPref(on) {
+    localStorage.setItem('tasmee_show_strip', on ? '1' : '0');
+    const s = document.getElementById('tpLiveStrip');
+    if (s && !on) s.classList.remove('active');
+  }
+
   function _tpShowAyahStrip(surah, ayah) {
     const m = _tp.matcher; if (!m) return;
+    if (!_tpStripEnabled()) return;   // word strip hidden unless enabled in Settings
     const key = surah + ':' + ayah;
     if (_tp.stripKey === key) return;
     _tp.stripKey = key;
@@ -6542,6 +6918,33 @@ function getVariantHighlightCal() {
     'mushaf-green':     '#EEF2E6'
   };
 
+  // Merge a page's word boxes into one rect per ayah PER LINE (no inter-word
+  // gaps) so the upcoming ayat can be covered with clean fills instead of ragged
+  // per-word masks. Includes marker boxes so the image's own marker is covered too.
+  function _tpMergeAyahLines(words) {
+    const byAyah = {};
+    words.forEach(w => { (byAyah[w.surah + ':' + w.ayah] = byAyah[w.surah + ':' + w.ayah] || []).push(w); });
+    const rects = [];
+    Object.keys(byAyah).forEach(k => {
+      const list = byAyah[k].slice().sort((a, b) => a.y - b.y);
+      let line = [];
+      const flush = () => {
+        if (!line.length) return;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        line.forEach(w => { minX = Math.min(minX, w.x); maxX = Math.max(maxX, w.x + w.w); minY = Math.min(minY, w.y); maxY = Math.max(maxY, w.y + w.h); });
+        rects.push({ surah: line[0].surah, ayah: line[0].ayah, x: minX, y: minY, w: maxX - minX, h: maxY - minY });
+        line = [];
+      };
+      list.forEach(w => {
+        if (!line.length) line.push(w);
+        else if (Math.abs(w.y - line[line.length - 1].y) < w.h * 0.6) line.push(w);
+        else { flush(); line.push(w); }
+      });
+      flush();
+    });
+    return rects;
+  }
+
   function _tpRenderImageMasks(pageNumber) {
     const container = document.getElementById('tpImageContainer');
     container.innerHTML = '';
@@ -6564,47 +6967,67 @@ function getVariantHighlightCal() {
     if (!words || words.length === 0) return;
 
     const renderMasks = () => {
-      // paper colour tuned per mushaf so masks blend into the page background
       container.style.setProperty('--tp-paper', _TP_PAPER[currentMushafVariant] || '#FAF5E9');
-      // clear any previously drawn masks (e.g. on resize re-render)
-      wrap.querySelectorAll('.tasmee-mask').forEach(m => m.remove());
+      wrap.querySelectorAll('.tasmee-mask, .tp-ayah-num').forEach(m => m.remove());
       _tp.masksByAyah = {};
+      _tp.markersByAyah = {};
       const yRange = cal.pageBotY - cal.pageTopY;
-      // inflate masks to swallow the gaps between words on a line (so the page
-      // reads as blank) and a little vertically to cover diacritics. The Madina
-      // family uses wide line-segments, so it can take more horizontal bleed to
-      // reach the line edges; the colored mushaf uses tight word-boxes near the
-      // verse markers, so it gets less to avoid covering them.
-      const isMedina = currentMushafVariant !== 'mushaf-colored';
-      const PADX = isMedina ? 2.8 : 1.2;
-      const PADY = isMedina ? 1.0 : 0.6; // percent
-      words.forEach(w => {
-        if (w.isMarker) return;
+      const wrapH = wrap.offsetHeight || 0;
+      // Madina-1441 & Tajweed scans are wider than their calibration, so the
+      // line ends fall short — give them more lateral bleed to cover the edges.
+      const PADX = currentMushafVariant === 'mushaf-tajweed' ? 5.5
+                 : currentMushafVariant === 'mushaf-madina1441' ? 4.0
+                 : 1.0;
+      const PADY = 0.8; // small bleed; line-merge already removed gaps
+      const posPct = (x, y, w, h) => ({
+        left:   (x / cal.refW) * cal.scaleX * 100 + HL_PAD_X * 100 + cal.shiftX * 100,
+        width:  (w / cal.refW) * cal.scaleX * 100,
+        top:    (cal.pageTopY + (y / cal.refH) * yRange) * cal.scaleY * 100 + (cal.padTop + cal.shiftY) * 100,
+        height: (h / cal.refH) * yRange * cal.scaleY * 100
+      });
+
+      // 1) clean per-ayah-per-line fills (cover words AND the image marker)
+      const lines = _tpMergeAyahLines(words);
+      lines.forEach(r => {
+        const p = posPct(r.x, r.y, r.w, r.h);
         const mask = document.createElement('div');
         mask.className = 'tasmee-mask';
-        // identical formula to the calibrated drawAyahHighlights() overlay
-        let leftPct   = (w.x / cal.refW) * cal.scaleX * 100 + HL_PAD_X * 100 + cal.shiftX * 100;
-        let widthPct  = (w.w / cal.refW) * cal.scaleX * 100;
-        let topPct    = (cal.pageTopY + (w.y / cal.refH) * yRange) * cal.scaleY * 100 + (cal.padTop + cal.shiftY) * 100;
-        let heightPct = (w.h / cal.refH) * yRange * cal.scaleY * 100;
-        leftPct -= PADX; widthPct += PADX * 2; topPct -= PADY; heightPct += PADY * 2;
-        mask.style.left   = leftPct + '%';
-        mask.style.width  = widthPct + '%';
-        mask.style.top    = topPct + '%';
-        mask.style.height = heightPct + '%';
-        mask.dataset.surah = w.surah;
-        mask.dataset.ayah = w.ayah;
-        mask.dataset.wordIndex = w.wordIndex;
-        mask.onclick = () => _tpSelectByAyah(w.surah, w.ayah);
+        mask.style.left = (p.left - PADX) + '%';
+        mask.style.width = (p.width + PADX * 2) + '%';
+        mask.style.top = (p.top - PADY) + '%';
+        mask.style.height = (p.height + PADY * 2) + '%';
+        mask.dataset.surah = r.surah; mask.dataset.ayah = r.ayah;
+        mask.onclick = () => _tpSelectByAyah(r.surah, r.ayah);
         wrap.appendChild(mask);
-        const ayahKey = `${w.surah}_${w.ayah}`;
-        if (!_tp.masksByAyah[ayahKey]) _tp.masksByAyah[ayahKey] = [];
-        _tp.masksByAyah[ayahKey].push(mask);
+        const key = `${r.surah}_${r.ayah}`;
+        (_tp.masksByAyah[key] = _tp.masksByAyah[key] || []).push(mask);
       });
-      // re-apply state after a resize re-render
+
+      // 2) crisp CSS ayah-end marker per ayah (uthmani font glyph), at the end
+      //    (left-most x in RTL) of the ayah's bottom-most line
+      const bottom = {};
+      lines.forEach(r => { const k = `${r.surah}_${r.ayah}`; if (!bottom[k] || r.y > bottom[k].y) bottom[k] = r; });
+      Object.keys(bottom).forEach(k => {
+        const r = bottom[k];
+        const p = posPct(r.x, r.y, r.w, r.h);
+        const el = document.createElement('div');
+        el.className = 'tp-ayah-num';
+        el.style.left = p.left + '%';                 // RTL line end
+        el.style.top = (p.top + p.height / 2) + '%';
+        el.style.transform = 'translate(-50%, -50%)';
+        el.style.fontSize = Math.max(11, (p.height / 100) * wrapH * 1.0) + 'px';
+        el.textContent = _tpArabicNum(r.ayah);
+        wrap.appendChild(el);
+        _tp.markersByAyah[k] = el;
+      });
+
+      // 3) re-apply session state after a (re-)render
       _tp.revealed.forEach(idx => {
         const a = _tp.ayahs[idx];
-        if (a) (_tp.masksByAyah[`${a.surah}_${a.ayah}`] || []).forEach(m => m.classList.add('revealed'));
+        if (!a) return;
+        const key = `${a.surah}_${a.ayah}`;
+        (_tp.masksByAyah[key] || []).forEach(m => m.classList.add('revealed'));
+        if (_tp.markersByAyah[key]) _tp.markersByAyah[key].classList.add('revealed');
       });
       if (_tp.expectedIdx !== null) _tpSetExpected(_tp.expectedIdx, true);
       if (_tp.peekMode) document.querySelectorAll('.tasmee-mask:not(.revealed)').forEach(m => m.classList.add('peek-mode'));
@@ -6623,6 +7046,8 @@ function getVariantHighlightCal() {
   function _tpRevealAyahMasks(surah, ayah, stagger) {
     const key = `${surah}_${ayah}`;
     const masks = _tp.masksByAyah[key];
+    const marker = _tp.markersByAyah && _tp.markersByAyah[key];
+    if (marker) marker.classList.add('revealed'); // hide CSS marker → image's own marker shows
     if (!masks) return;
     masks.forEach((m, i) => {
       m.classList.remove('expected', 'peek-mode', 'flash-error');
@@ -6758,9 +7183,11 @@ function getVariantHighlightCal() {
           }
           _tarteelWorker.postMessage({ type: 'stream', audio: merged });
         }, 1800);
-        document.getElementById('tpLiveStrip').classList.add('active');
-        document.getElementById('tpLiveStrip').innerHTML =
-          '<span class="tp-live-word" style="opacity:0.6;animation:none">جاري الاستماع...</span>';
+        if (_tpStripEnabled()) {
+          document.getElementById('tpLiveStrip').classList.add('active');
+          document.getElementById('tpLiveStrip').innerHTML =
+            '<span class="tp-live-word" style="opacity:0.6;animation:none">جاري الاستماع...</span>';
+        }
         document.getElementById('tpMicBtn').className = 'tp-mic-btn recording';
         document.getElementById('tpMicIcon').style.display = 'none';
         document.getElementById('tpStopIcon').style.display = '';
@@ -6829,6 +7256,8 @@ function getVariantHighlightCal() {
 
   function closeTasmeePro() {
     _tarteelTasmeeMode = false; _tp.recording = false; _tpFollowMode = false;
+    // save session (F6/F7), then show the teacher-mode summary (F13)
+    _tpPersistSession().then(summary => { if (summary) _tpShowSessionSummary(summary); });
     clearInterval(_tp.timerInterval); clearInterval(_tpStreamTimer);
     if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
     if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
@@ -6836,6 +7265,7 @@ function getVariantHighlightCal() {
     _tpAllSamples = [];
     if (_tp.maskRO) { _tp.maskRO.disconnect(); _tp.maskRO = null; }
     _tp.masksByAyah = {};
+    _tp.markersByAyah = {};
     _tp.revealedMasks = new Set();
     _tp.expectedIdx = null;
     _tp.peekMode = false;

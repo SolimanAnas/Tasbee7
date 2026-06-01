@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v13"; // skip .onnx in SW, model fallback
+const CACHE_NAME = "zad-muslim-v22"; // v22: tasmee masks use theme --bg-page so they match the colour theme
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -34,6 +34,11 @@ const STATIC_ASSETS = [
   "./js/plugins/local-notifications.js",
   "./js/quran-common.js",
   "./js/tasmee-engine.js",
+  "./js/tasmee-matcher.js",
+  "./js/tasmee-store.js",
+
+  // ===== Offline Quran text (word-by-word Tasmee) =====
+  "./data/quran.json",
 
   // ===== Fonts =====
   "./fonts/Tajawal.ttf",
