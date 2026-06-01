@@ -3621,7 +3621,7 @@
     }
 
     // ========== PAGE TRANSITION ==========
-    function syncDesktopNavBtns() {
+    function updateDesktopNavButtons() {
       const prev = document.getElementById('desktopPrevBtn');
       const next = document.getElementById('desktopNextBtn');
       const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
@@ -3703,9 +3703,10 @@
 
     window.goToPage = function (page) {
         page = Math.max(1, Math.min(604, page));
+        if (dualPage && window.innerWidth >= 700 && page % 2 === 0 && page > 1) page--;
         currentPage = page;
         updateContent();
-        syncDesktopNavBtns();
+        updateDesktopNavButtons();
     };
 
     function updateContent() {
@@ -5124,10 +5125,10 @@ function getVariantHighlightCal() {
         initMedinaCoords()
       ]).then(() => {
         updateContent();
-        syncDesktopNavBtns();
+        updateDesktopNavButtons();
       }).catch(() => {
         updateContent();
-        syncDesktopNavBtns();
+        updateDesktopNavButtons();
       });
 
       // Sync overlay size with image on any layout/viewport change
