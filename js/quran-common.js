@@ -627,7 +627,7 @@ async function cacheAllPages() {
       const page = i.toString().padStart(3, '0');
       const url = typeof getImagePath === 'function'
         ? getImagePath(currentMushafVariant || 'mushaf-colored', page, v.ext)
-        : `mushaf pages/madina-1421/${page}.webp`;
+        : `mushaf/madina-1421/${page}.webp`;
       await cache.add(url);
       loaded++;
     } catch (err) {
