@@ -3329,7 +3329,7 @@
           view = new Uint8Array(binaryStr.length);
           for (let i = 0; i < binaryStr.length; i++) view[i] = binaryStr.charCodeAt(i);
         } else {
-          const response = await fetch('quranpages.sqlite');
+          const response = await fetch('data/quranpages.sqlite');
           if(!response.ok) throw new Error("Main DB not found");
           const buffer = await response.arrayBuffer();
           view = new Uint8Array(buffer);
@@ -3364,7 +3364,7 @@
         if (window.__MEDINA2_COORDS__) {
           data = window.__MEDINA2_COORDS__;
         } else {
-          const res = await fetch('json/medina2_coords.json');
+          const res = await fetch('coords/medina2_coords.json');
           data = await res.json();
         }
         medinaCoordsByAyah = {};
@@ -4439,11 +4439,11 @@ function getVariantHighlightCal() {
       return MUSHAF_VARIANTS.find(v => v.id === variantId) || MUSHAF_VARIANTS[0];
     }
     function getImagePath(variantId, page, ext) {
-      const dir = variantId === 'mushaf-green' ? 'mushaf pages/madina-green'
-                : variantId === 'mushaf-borderd' ? 'mushaf-2'
-                : variantId === 'mushaf-tajweed' ? 'mushaf pages/tajweed'
-                : variantId === 'mushaf-colored' ? 'mushaf pages/madina-1421'
-                : 'mushaf pages/mushaf-madina-1441';
+      const dir = variantId === 'mushaf-green' ? 'mushaf/madina-green'
+                : variantId === 'mushaf-borderd' ? 'mushaf/mushaf-2'
+                : variantId === 'mushaf-tajweed' ? 'mushaf/tajweed'
+                : variantId === 'mushaf-colored' ? 'mushaf/madina-1421'
+                : 'mushaf/mushaf-madina-1441';
       return `${dir}/${page}.${ext}`;
     }
 
