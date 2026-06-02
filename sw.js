@@ -1,9 +1,10 @@
-const CACHE_NAME = "zad-muslim-v22"; // v22: tasmee masks use theme --bg-page so they match the colour theme
+const CACHE_NAME = "zad-muslim-v23"; // v23: manifest scope/start_url made relative (./) so start_url stays within scope on any host path
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
   "./",
   "./index.html",
+  "./404.html",
   "./pages/quran.html",
   "./pages/quran-text.html",
   "./pages/audio.html",
