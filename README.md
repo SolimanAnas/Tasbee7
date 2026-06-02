@@ -122,6 +122,5 @@ Live App: [zad-al-muslim.vercel.app](https://solimananas.github.io/Tasbee7)
 
 <div align="center">
 
-*وَتَزَكَّوْا*
-
+### <sub>"وَتَزَوَّدُوا فَإِنَّ خَيْرَ الزَّادِ التَّقْوَى"</sub>
 </div>
