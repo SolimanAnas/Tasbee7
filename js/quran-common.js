@@ -345,16 +345,20 @@ function disableNativeLongPress() {
 //  CONTEXT MENU
 // ============================================================
 function openContextMenu() {
+  const infoEl = document.getElementById('contextInfo');
+  if (!infoEl) return; // image-based quran pages use their own context menu
+
   const surah = getCurrentSurah();
   const juz   = getCurrentJuz();
 
-  document.getElementById('contextInfo').innerHTML =
+  infoEl.innerHTML =
     `<strong>صفحة ${currentPage}</strong><br>` +
     (surah ? `سورة ${surah.name}` : '') +
     (juz   ? ` | الجزء ${juz.number}` : '');
 
   const isBookmarked = bookmarks.has(currentPage);
   const btn = document.getElementById('contextBookmarkBtn');
+  if (!btn) return;
   btn.textContent = isBookmarked ? '★ إزالة من المفضلة' : '☆ إضافة للمفضلة';
   btn.style.color = isBookmarked ? '#f5b342' : '';
 
@@ -627,7 +631,7 @@ async function cacheAllPages() {
       const page = i.toString().padStart(3, '0');
       const url = typeof getImagePath === 'function'
         ? getImagePath(currentMushafVariant || 'mushaf-colored', page, v.ext)
-        : `mushaf/madina-1421/${page}.webp`;
+        : `mushaf pages/madina-1421/${page}.webp`;
       await cache.add(url);
       loaded++;
     } catch (err) {
@@ -667,4 +671,68 @@ function commonInit() {
 
   // preload adjacent if needed
   preloadAdjacentPages();
+}
+
+// ============================================================
+//  LOCAL TAFSIR DATABASES (offline SQLite)
+// ============================================================
+const TAFSIR_BOOKS = [
+  { key: 'saadi',     file: 'tafsir-saadi.db',     table: 'AS', name: 'تفسير السعدي' },
+  { key: 'baghawi',   file: 'tafsir-baghawi.db',   table: 'Ba', name: 'تفسير البغوي' },
+  { key: 'qortobi',   file: 'tafsir-qortobi.db',   table: 'AQ', name: 'تفسير القرطبي' },
+  { key: 'ibn-kathir',file: 'tafsir-ibn-kathir.db',table: 'IK', name: 'تفسير ابن كثير' },
+];
+
+var tafsirDBCache = {};
+var tafsirSelectedDB = localStorage.getItem('tafsirSelectedBook') || 'saadi';
+
+async function loadTafsirDB(bookKey) {
+  if (tafsirDBCache[bookKey]) return tafsirDBCache[bookKey];
+  const book = TAFSIR_BOOKS.find(b => b.key === bookKey);
+  if (!book) return null;
+  try {
+    const resp = await fetch(`../db/${book.file}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const buffer = await resp.arrayBuffer();
+    const view = new Uint8Array(buffer);
+    if (!window.SQL) return null;
+    const db = new window.SQL.Database(view);
+    tafsirDBCache[bookKey] = db;
+    return db;
+  } catch(e) {
+    console.error('Failed to load tafsir DB:', book.file, e);
+    return null;
+  }
+}
+
+async function getTafsirText(bookKey, surah, ayah) {
+  const db = await loadTafsirDB(bookKey);
+  if (!db) return null;
+  const book = TAFSIR_BOOKS.find(b => b.key === bookKey);
+  if (!book) return null;
+  try {
+    const stmt = db.prepare(`SELECT Tafsir FROM "${book.table}" WHERE SURA_num = ? AND AYA_num = ?`);
+    stmt.bind([surah, ayah]);
+    if (stmt.step()) {
+      const row = stmt.getAsObject();
+      stmt.free();
+      return row.Tafsir;
+    }
+    stmt.free();
+    return null;
+  } catch(e) {
+    console.error('DB query error:', e);
+    return null;
+  }
+}
+
+function tafsirDropdownHTML(selected) {
+  let html = '<div class="tafsir-book-bar" style="margin-bottom:14px; display:flex; align-items:center; gap:8px;">';
+  html += '<span style="font-size:0.82rem; font-weight:600; color:var(--text-secondary); white-space:nowrap;">اختر التفسير:</span>';
+  html += '<select id="tafsirBookSelect" onchange="changeTafsir()" style="flex:1; padding:8px 10px; border-radius:10px; border:1px solid var(--glass-border); background:var(--bg-surface); color:var(--text-primary); font-family:inherit; font-size:0.9rem; font-weight:500;">';
+  for (const book of TAFSIR_BOOKS) {
+    html += `<option value="${book.key}"${book.key === selected ? ' selected' : ''}>${book.name}</option>`;
+  }
+  html += '</select></div>';
+  return html;
 }

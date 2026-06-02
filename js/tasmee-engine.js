@@ -236,6 +236,7 @@ class TasmeeEngine {
       const stopMarkRe = /(&nbsp;<span class="stop-mark">[^<]*<\/span>|<span class="stop-mark">[^<]*<\/span>)/g;
       const parts = raw.split(stopMarkRe);
 
+      const endingStartIdx = Math.max(0, tokens.length - 2);
       let wordCounter = 0;
       let newHtml = '';
       parts.forEach(part => {
@@ -253,7 +254,8 @@ class TasmeeEngine {
           const tok = tokens[wordCounter];
           if (tok) {
             const hiddenClass = hideText ? ' q-word--hidden' : '';
-            newHtml += `<span class="q-word${hiddenClass}" id="${tok.spanId}">${chunk}</span>`;
+            const endingClass = wordCounter >= endingStartIdx ? ' q-word--ayah-ending' : '';
+            newHtml += `<span class="q-word${hiddenClass}${endingClass}" id="${tok.spanId}">${chunk}</span>`;
             wordCounter++;
           } else {
             newHtml += chunk;

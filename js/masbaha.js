@@ -257,7 +257,7 @@ function checkReminderTime() {
     const [hours, minutes] = savedTime.split(':');
     if(now.getHours() == hours && now.getMinutes() == minutes) {
         if(Notification.permission === "granted") {
-            new Notification("تذكير المسبحة", { body: "حان وقت وردك اليومي", icon: "icon.png" });
+            new Notification("تذكير المسبحة", { body: "حان وقت وردك اليومي", icon: "../icons/icon-192.png" });
         }
         showToast("🔔 حان وقت ذكر الله");
     }
@@ -271,7 +271,7 @@ function showToast(msg) {
 
 // --- Home function ---
 function goHome() {
-    window.location.href = "index.html";
+    window.location.href = "../index.html";
 }
 
 // --- Confetti ---

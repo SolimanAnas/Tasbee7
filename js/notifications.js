@@ -96,7 +96,9 @@ const NotificationSystem = {
         this.swRegistration = registrations[0];
       } else {
         // Register only if no SW exists yet (e.g., notifications.html opened directly)
-        this.swRegistration = await navigator.serviceWorker.register('sw.js');
+        this.swRegistration = await navigator.serviceWorker.register(
+          new URL('../sw.js', window.location.href).href
+        );
       }
 
       // Wait for SW to be active and controlling
@@ -457,9 +459,9 @@ const NotificationSystem = {
       this.showNotification('🌅 أذكار الصباح', {
         body: 'اللهم بك أصبحنا — ابدأ يومك بالأذكار',
         tag: 'azkar-morning',
-        data: { url: './azkar.html?type=morning', type: 'azkar' }
+        data: { url: './pages/azkar.html?type=morning', type: 'azkar' }
       });
-      this.tryPushNotify('azkar-morning', '🌅 أذكار الصباح', 'اللهم بك أصبحنا — ابدأ يومك بالأذكار', { url: './azkar.html?type=morning' });
+      this.tryPushNotify('azkar-morning', '🌅 أذكار الصباح', 'اللهم بك أصبحنا — ابدأ يومك بالأذكار', { url: './pages/azkar.html?type=morning' });
       this.markTriggered('azkar-morning');
     }
 
@@ -468,9 +470,9 @@ const NotificationSystem = {
       this.showNotification('🌙 أذكار المساء', {
         body: 'اللهم بك أمسينا — اختتم يومك بالأذكار',
         tag: 'azkar-evening',
-        data: { url: './azkar.html?type=night', type: 'azkar' }
+        data: { url: './pages/azkar.html?type=night', type: 'azkar' }
       });
-      this.tryPushNotify('azkar-evening', '🌙 أذكار المساء', 'اللهم بك أمسينا — اختتم يومك بالأذكار', { url: './azkar.html?type=night' });
+      this.tryPushNotify('azkar-evening', '🌙 أذكار المساء', 'اللهم بك أمسينا — اختتم يومك بالأذكار', { url: './pages/azkar.html?type=night' });
       this.markTriggered('azkar-evening');
     }
 
@@ -481,9 +483,9 @@ const NotificationSystem = {
       this.showNotification('🕋 يوم الجمعة المبارك', {
         body: 'لا تنسَ قراءة سورة الكهف اليوم',
         tag: 'friday-kahf',
-        data: { url: './quran.html?surah=18', type: 'kahf' }
+        data: { url: './pages/quran.html?surah=18', type: 'kahf' }
       });
-      this.tryPushNotify('friday-kahf', '🕋 يوم الجمعة المبارك', 'لا تنسَ قراءة سورة الكهف اليوم', { url: './quran.html?surah=18' });
+      this.tryPushNotify('friday-kahf', '🕋 يوم الجمعة المبارك', 'لا تنسَ قراءة سورة الكهف اليوم', { url: './pages/quran.html?surah=18' });
       this.markTriggered('friday-kahf');
     }
 

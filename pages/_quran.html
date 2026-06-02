@@ -4,19 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>المصحف الشريف - النسخة المتطورة V3</title>
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#FAF6EE">
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-  <script src="js/quranpages.data.js"></script>
-  <script src="js/medina2.data.js"></script>
+  <script src="../js/quranpages.data.js"></script>
+  <script src="../js/medina2.data.js"></script>
 
   <style>
   @font-face {
     font-family: 'ScheherazadeLocal';
-    src: url('fonts/Scheherazade.ttf') format('truetype');
+    src: url('../fonts/Scheherazade.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
@@ -758,7 +758,7 @@
   .label-box::before {
     content: '';
     position: absolute; inset: -4px -8px;
-    background: url('img/text-container.png') no-repeat center/100% 100%;
+    background: url('../img/text-container.png') no-repeat center/100% 100%;
     opacity: 0.5;
     pointer-events: none;
     z-index: -1;
@@ -1932,33 +1932,19 @@
       </div>
     </div>
 
-    <div class="reciter-wrapper" style="flex-shrink:0;">
-      <select id="tafsirSelect" class="reciter-selector" onchange="changeTafsir()">
-        <option value="ar.muyassar">التفسير الميسر</option>
-        <option value="ar.jalalayn">تفسير الجلالين</option>
-        <option value="ar.qurtubi">تفسير القرطبي</option>
-        <option value="ar.tabari">تفسير الطبري</option>
-      </select>
-      <span class="select-chevron">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </span>
-    </div>
-
     <div id="tafsirContent" class="tafsir-content" style="flex:1; overflow-y:auto; touch-action:pan-y;">اختر آية أولاً...</div>
 
     <div class="tafsir-nav-row" style="flex-shrink:0;">
       <button class="tafsir-nav-btn" onclick="prevTafsirAyah()">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="9 18 15 12 9 6"/>
         </svg>
         السابق
       </button>
       <button class="tafsir-nav-btn" onclick="nextTafsirAyah()">
         التالي
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <polyline points="9 18 15 12 9 6"/>
+          <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
     </div>
@@ -2225,7 +2211,7 @@
     </div>
   </div>
 
-  <script src="js/quran-common.js"></script>
+  <script src="../js/quran-common.js"></script>
 
   <script>
     // --- Daily Tracking Function for Stats (Quran Pages/Juz) ---
@@ -2272,7 +2258,7 @@
           view = new Uint8Array(binaryStr.length);
           for (let i = 0; i < binaryStr.length; i++) view[i] = binaryStr.charCodeAt(i);
         } else {
-          const response = await fetch('data/quranpages.sqlite');
+          const response = await fetch('../db/quranpages.sqlite');
           if(!response.ok) throw new Error("Main DB not found");
           const buffer = await response.arrayBuffer();
           view = new Uint8Array(buffer);
@@ -2307,7 +2293,7 @@
         if (window.__MEDINA2_COORDS__) {
           data = window.__MEDINA2_COORDS__;
         } else {
-          const res = await fetch('coords/medina2_coords.json');
+          const res = await fetch('../json/medina2_coords.json');
           data = await res.json();
         }
         medinaCoordsByAyah = {};
@@ -2519,8 +2505,8 @@
     tafsirModalEl.addEventListener('touchstart', e => { tafsirTouchStartX = e.changedTouches[0].screenX; }, {passive: true});
     tafsirModalEl.addEventListener('touchend', e => {
       const diff = e.changedTouches[0].screenX - tafsirTouchStartX;
-      if (diff > 60) prevTafsirAyah();
-      else if (diff < -60) nextTafsirAyah();
+      if (diff > 60) nextTafsirAyah();
+      else if (diff < -60) prevTafsirAyah();
     }, {passive: true});
 
     function closeTafsirModal() {
@@ -2533,20 +2519,23 @@
       if(!windowCurrentAyahGlobal) { showCustomToast("الرجاء تحديد آية أولاً"); return; }
       const { surah, ayah } = windowCurrentAyahGlobal;
       const contentDiv = document.getElementById('tafsirContent');
-      const selectedTafsir = document.getElementById('tafsirSelect').value;
       document.getElementById('tafsirModal').classList.add('visible');
       document.getElementById('tafsirSheetBackdrop').classList.add('visible');
-      contentDiv.innerHTML = '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
       try {
-        const [ayaTextRes, tafRes] = await Promise.all([
+        tafsirSelectedDB = document.getElementById('tafsirBookSelect')?.value || tafsirSelectedDB;
+        localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
+        contentDiv.innerHTML = typeof tafsirDropdownHTML === 'function'
+          ? tafsirDropdownHTML(tafsirSelectedDB) + '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>'
+          : '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
+        const [ayaTextRes, tafText] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`),
-          fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/${selectedTafsir}`)
+          getTafsirText(tafsirSelectedDB, surah, ayah)
         ]);
         const ayaData = await ayaTextRes.json();
-        const tafData = await tafRes.json();
         const ayahText = (ayaData.code === 200) ? ayaData.data.text : '';
-        const tafsirText = (tafData.code === 200) ? tafData.data.text : 'لم يتم العثور على تفسير لهذه الآية.';
-        let html = `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
+        const tafsirText = tafText || 'لم يتم العثور على تفسير لهذه الآية.';
+        let html = typeof tafsirDropdownHTML === 'function' ? tafsirDropdownHTML(tafsirSelectedDB) : '';
+        html += `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
         html += `<div class="imlaei-text">﴿ ${ayahText} ﴾</div>`;
         html += `<div style="text-align:justify; font-size:1.1rem; line-height:2; border-top:1px dashed var(--glass-border); padding-top:16px;">${tafsirText.replace(/\n/g, '<br>')}</div>`;
         contentDiv.innerHTML = html;
@@ -2558,6 +2547,11 @@
     }
 
     async function changeTafsir() {
+       const sel = document.getElementById('tafsirBookSelect');
+       if (sel) {
+         tafsirSelectedDB = sel.value;
+         localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
+       }
        if (document.getElementById('tafsirModal').classList.contains('visible') && windowCurrentAyahGlobal) {
            await contextShowTafsir(true);
        }
@@ -3147,11 +3141,11 @@ function getVariantHighlightCal() {
       return MUSHAF_VARIANTS.find(v => v.id === variantId) || MUSHAF_VARIANTS[0];
     }
     function getImagePath(variantId, page, ext) {
-      const dir = variantId === 'mushaf-green' ? 'mushaf/madina-green'
-                : variantId === 'mushaf-borderd' ? 'mushaf/mushaf-2'
-                : variantId === 'mushaf-tajweed' ? 'mushaf/tajweed'
-                : variantId === 'mushaf-colored' ? 'mushaf/madina-1421'
-                : 'mushaf/mushaf-madina-1441';
+      const dir = variantId === 'mushaf-green' ? '../mushaf pages/madina-green'
+                : variantId === 'mushaf-borderd' ? '../mushaf-2'
+                : variantId === 'mushaf-tajweed' ? '../mushaf pages/tajweed'
+                : variantId === 'mushaf-colored' ? '../mushaf pages/madina-1421'
+                : '../mushaf pages/mushaf-madina-1441';
       return `${dir}/${page}.${ext}`;
     }
 
@@ -3178,7 +3172,7 @@ function getVariantHighlightCal() {
         thumb.className = 'mushaf-card-thumb';
         const img = document.createElement('img');
         const thumbPage = v.id === 'mushaf-tajweed' ? '003' : '001';
-        img.src = v.id === 'mushaf-text' ? 'img/txt.png' : getImagePath(v.id, thumbPage, v.ext);
+        img.src = v.id === 'mushaf-text' ? '../img/txt.png' : getImagePath(v.id, thumbPage, v.ext);
         img.alt = v.nameAr;
         img.loading = 'lazy';
         img.onerror = function() { this.style.display = 'none'; };
@@ -3680,8 +3674,8 @@ function getVariantHighlightCal() {
       setupSheetDragClose(expandedSheet);
     };
 
-    function goHome() { window.location.href = 'index.html'; }
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
+    function goHome() { window.location.href = '../index.html'; }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js').catch(console.warn);
   </script>
 </body>
 </html>

@@ -4,26 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>المصحف الشريف - النسخة المتطورة V3</title>
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#FAF6EE">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-  <script src="js/quranpages.data.js"></script>
-  <script src="js/medina2.data.js"></script>
+  <script src="../js/quranpages.data.js"></script>
+  <script src="../js/medina2.data.js"></script>
 
   <style>
   @font-face {
-    font-family: 'Amiri';
-    src: url('fonts/Amiri.ttf') format('truetype');
-    font-weight: 400 700;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
     font-family: 'ScheherazadeLocal';
-    src: url('fonts/Scheherazade.ttf') format('truetype');
+    src: url('../fonts/Scheherazade.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
@@ -368,11 +361,6 @@
   }
   .offline-btn:active { opacity: 0.85; transform: scale(0.98); }
   .offline-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .offline-btn-danger {
-    background: var(--danger);
-    box-shadow: 0 4px 16px var(--danger-light);
-    margin-top: 6px;
-  }
 
   /* Selector scroll */
   .selector-scroll {
@@ -770,7 +758,7 @@
   .label-box::before {
     content: '';
     position: absolute; inset: -4px -8px;
-    background: url('img/text-container.png') no-repeat center/100% 100%;
+    background: url('../img/text-container.png') no-repeat center/100% 100%;
     opacity: 0.5;
     pointer-events: none;
     z-index: -1;
@@ -783,7 +771,7 @@
   .label-bottom    { bottom: calc(29px + env(safe-area-inset-bottom, 0)); left: 50%; transform: translateX(-50%); }
   /* per-variant fine-tuning for top labels */
   body[data-variant="mushaf-colored"] .label-top-left,
-  body[data-variant="mushaf-colored"] .label-top-right { top: 20px; }
+  body[data-variant="mushaf-colored"] .label-top-right { top: 23px; }
   body[data-variant="mushaf-tajweed"] .label-top-left,
   body[data-variant="mushaf-tajweed"] .label-top-right { top: 30px; }
   body[data-variant="mushaf-borderd"] .label-top-left  { top: 40px; left: 70px; }
@@ -791,7 +779,7 @@
   body[data-variant="mushaf-green"] .label-top-left   { top: 40px; left: 70px; }
   body[data-variant="mushaf-green"] .label-top-right  { top: 40px; right: 70px; }
   body[data-variant="mushaf-madina1441"] .label-top-left,
-  body[data-variant="mushaf-madina1441"] .label-top-right { top: 20px; }
+  body[data-variant="mushaf-madina1441"] .label-top-right { top: 23px; }
 
   /* per-variant background themes */
   body[data-variant="mushaf-tajweed"] {
@@ -1045,85 +1033,29 @@
     flex-shrink: 0; display: flex;
   }
 
-  /* Reciter selector — native hidden, custom UI takes over */
+  /* Reciter selector */
   .reciter-wrapper { position: relative; margin-bottom: 18px; }
-  #expandedReciterSelect { display: none; }
-  .reciter-selector { display: none; }
-  .reciter-wrapper .select-chevron { display: none; }
+  .reciter-selector {
+    width: 100%; padding: 12px 42px 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface);
+    border: 1.5px solid var(--glass-border);
+    color: var(--text-primary);
+    font-family: inherit; font-size: 0.95rem; font-weight: 600;
+    outline: none; appearance: none;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .reciter-selector:focus {
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
   .select-chevron {
     position: absolute; left: 14px; top: 50%;
     transform: translateY(-50%);
     pointer-events: none; color: var(--text-hint);
     display: flex; align-items: center;
   }
-
-  .reciter-trigger {
-    display: flex; align-items: center; gap: 12px;
-    width: 100%; padding: 11px 14px; border: none;
-    background: var(--bg-surface);
-    border: 1.5px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    cursor: pointer; text-align: right;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
-  }
-  .reciter-trigger:hover { background: var(--bg-surface-hover); border-color: var(--accent-border); }
-  .reciter-wrapper.rp-open .reciter-trigger {
-    border-color: var(--accent-border);
-    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
-    background: var(--bg-surface-hover);
-  }
-  .reciter-trigger-icon {
-    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-    background: var(--accent-light);
-    display: flex; align-items: center; justify-content: center; color: var(--accent);
-  }
-  .reciter-trigger-body { flex: 1; min-width: 0; }
-  .reciter-trigger-lbl {
-    font-family: 'Tajawal', sans-serif; font-size: 0.66rem;
-    color: var(--text-hint); margin-bottom: 2px; display: block;
-  }
-  .reciter-trigger-name {
-    font-family: 'Amiri', serif; font-size: 1.02rem; font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
-  }
-  .reciter-trigger-arrow {
-    color: var(--text-hint); flex-shrink: 0;
-    transition: transform var(--transition-fast);
-  }
-  .reciter-wrapper.rp-open .reciter-trigger-arrow { transform: rotate(180deg); }
-
-  .reciter-picker {
-    display: none;
-    background: var(--glass-bg);
-    border: 1.5px solid var(--accent-border); border-top: none;
-    border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md);
-    overflow: hidden; max-height: 240px; overflow-y: auto;
-    scrollbar-width: thin; scrollbar-color: var(--accent-border) transparent;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  }
-  .reciter-wrapper.rp-open .reciter-picker { display: block; }
-  .rp-group-lbl {
-    padding: 5px 14px; font-size: 0.68rem; font-weight: 700;
-    color: var(--text-hint); letter-spacing: 0.05em;
-    background: var(--bg-surface); border-bottom: 1px solid var(--glass-border);
-  }
-  .rp-item {
-    display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer;
-    border-bottom: 1px solid var(--glass-border);
-    transition: background var(--transition-fast);
-  }
-  .rp-item:last-child { border-bottom: none; }
-  .rp-item:hover { background: var(--bg-surface-hover); }
-  .rp-item.rp-active { background: var(--accent-light); }
-  .rp-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-    border: 2px solid var(--glass-border); background: transparent;
-    transition: all 0.15s;
-  }
-  .rp-item.rp-active .rp-dot { background: var(--accent); border-color: var(--accent); }
-  .rp-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--text-primary); flex: 1; }
-  .rp-item.rp-active .rp-name { color: var(--accent); font-weight: 700; }
 
   /* Audio controls */
   .controls-row {
@@ -1426,14 +1358,6 @@
   }
   .zoom-hint-dismiss:hover  { opacity: 0.88; }
   .zoom-hint-dismiss:active { transform: scale(0.95); }
-  .zoom-hint-no-show {
-    display: block; width: 100%; margin-top: 10px;
-    background: none; border: none; padding: 6px;
-    font-family: 'Tajawal', sans-serif; font-size: 0.8rem;
-    color: var(--text-secondary); cursor: pointer;
-    transition: color 0.2s;
-  }
-  .zoom-hint-no-show:hover { color: var(--text-primary); }
 
   /* ========== PAGE PICKER ========== */
   .picker-container { position: relative; height: 240px; overflow: hidden; }
@@ -1531,984 +1455,6 @@
     .mushaf-grid { grid-template-columns: repeat(3, 1fr); }
     .mushaf-card:first-child { grid-column: auto; }
   }
-
-  /* ========== TASMEE' ========== */
-  .q-word { display:inline; border-radius:4px; padding:1px 2px; transition:background 0.25s ease,color 0.25s ease; }
-  .q-word--active  { background:rgba(184,136,12,0.3); color:var(--gold); }
-  .q-word--correct { background:rgba(26,112,64,0.2); color:var(--accent); font-weight:bold; }
-  .q-word--fuzzy   { background:rgba(255,165,0,0.25); color:#C07000; }
-  .q-word--missed  { background:rgba(217,64,64,0.18); color:var(--danger); text-decoration:line-through; }
-  .q-word--hidden  { color:transparent !important; background:rgba(128,128,128,0.15); border-radius:4px; }
-
-  .tasmee-text-panel {
-    position:fixed; inset:0;
-    background:var(--glass-bg); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
-    z-index:800;
-    transform:translateY(100%);
-    transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);
-    display:flex; flex-direction:column;
-    direction:rtl;
-  }
-  .tasmee-text-panel.active { transform:translateY(0); }
-  .tasmee-text-panel-header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
-    border-bottom:1px solid var(--glass-border);
-    flex-shrink:0;
-  }
-  .tasmee-text-panel-title {
-    font-family:'Tajawal',sans-serif; font-size:1rem; font-weight:700;
-    color:var(--text-primary); display:flex; align-items:center; gap:8px;
-  }
-  .tasmee-text-panel-scroll {
-    flex:1; overflow-y:auto;
-    padding:16px 16px calc(80px + env(safe-area-inset-bottom));
-    font-family:'ScheherazadeLocal',serif;
-    font-size:1.35rem;
-    line-height:2.2;
-    text-align:justify;
-  }
-  .tasmee-text-panel-handle { display:none; }
-
-  .tasmee-active-bar {
-    position:fixed; bottom:calc(20px + env(safe-area-inset-bottom));
-    left:15px; right:15px; max-width:500px; margin:0 auto;
-    background:var(--glass-bg); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px);
-    border:1px solid rgba(217,64,64,0.4); border-radius:20px;
-    padding:10px 16px; display:none; align-items:center;
-    justify-content:space-between; gap:10px; z-index:901;
-    box-shadow:0 4px 20px rgba(217,64,64,0.15);
-  }
-  .tasmee-active-bar.active { display:flex; }
-  .tasmee-mic-indicator { width:12px; height:12px; border-radius:50%; background:var(--danger); flex-shrink:0; animation:tasmeePulse 1.2s ease-in-out infinite; }
-  .tasmee-mic-indicator.paused { animation:none; background:var(--text-hint); }
-  @keyframes tasmeePulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.55;} }
-  .tasmee-progress-text { flex:1; font-size:0.9rem; font-weight:bold; color:var(--text-primary); text-align:center; font-family:'Tajawal',sans-serif; }
-
-  .tasmee-score-ring { display:flex; flex-direction:column; align-items:center; padding:12px 0 16px; }
-  .tasmee-score-number { font-size:3rem; font-weight:800; color:var(--accent); line-height:1; font-family:'Amiri',serif; }
-  .tasmee-score-label { font-size:0.85rem; color:var(--text-secondary); margin-top:6px; font-family:'Tajawal',sans-serif; }
-  .tasmee-stat-row { display:flex; justify-content:space-around; padding:12px 0; border-top:1px solid var(--glass-border); margin-top:6px; }
-  .tasmee-stat { text-align:center; }
-  .tasmee-stat-val { font-size:1.4rem; font-weight:700; font-family:'Amiri',serif; }
-  .tasmee-stat-lbl { font-size:0.75rem; color:var(--text-secondary); font-family:'Tajawal',sans-serif; margin-top:2px; }
-  .tasmee-missed-list { max-height:140px; overflow-y:auto; background:rgba(217,64,64,0.06); border:1px solid rgba(217,64,64,0.2); border-radius:12px; padding:10px 14px; margin-top:8px; font-size:1.15rem; line-height:2; text-align:right; direction:rtl; color:var(--danger); word-break:break-word; font-family:'Amiri',serif; }
-
-  .tasmee-setup-content { padding:10px 0; }
-  .tasmee-setup-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--glass-border); font-family:'Tajawal',sans-serif; }
-  .tasmee-setup-row:last-of-type { border-bottom:none; }
-  .tasmee-start-btn { width:100%; padding:14px; margin-top:14px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:bold; font-family:'Tajawal',sans-serif; cursor:pointer; font-size:1rem; transition:0.2s; display:flex; justify-content:center; align-items:center; gap:8px; }
-  .tasmee-start-btn:active { transform:scale(0.96); opacity:0.9; }
-  .tasmee-end-btn { background:rgba(217,64,64,0.12); color:var(--danger); border:none; border-radius:10px; padding:8px 14px; font-family:'Tajawal',sans-serif; font-weight:bold; cursor:pointer; font-size:0.85rem; }
-  .tasmee-pause-btn { background:rgba(128,128,128,0.12); color:var(--text-primary); border:none; border-radius:10px; padding:8px 14px; font-family:'Tajawal',sans-serif; cursor:pointer; font-size:0.9rem; }
-
-  /* ===== HOW TO USE SHEET ===== */
-  .how-to-use-sheet {
-    position: fixed; inset: 0;
-    background: var(--glass-bg);
-    backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
-    z-index: 1200;
-    transform: translateX(-100%);
-    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
-    display: flex; flex-direction: column;
-    direction: rtl;
-  }
-  .how-to-use-sheet.visible { transform: translateX(0); }
-
-  .htu-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: calc(env(safe-area-inset-top) + 14px) 20px 14px;
-    border-bottom: 1px solid var(--glass-border);
-    flex-shrink: 0;
-  }
-  .htu-header-title {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'Tajawal', sans-serif; font-size: 1.1rem; font-weight: 700;
-    color: var(--text-primary);
-  }
-  .htu-header-icon {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: rgba(138,90,220,0.14); color: #8A5ADC;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .htu-close {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: rgba(128,128,128,0.1); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-primary); transition: background 0.2s;
-  }
-  .htu-close:hover { background: rgba(128,128,128,0.2); }
-
-  .htu-body {
-    flex: 1; overflow-y: auto;
-    padding: 12px 16px calc(24px + env(safe-area-inset-bottom));
-  }
-  .htu-card {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 16px 4px;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  .htu-card-icon {
-    width: 44px; height: 44px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .htu-card-body { flex: 1; }
-  .htu-card-title {
-    font-family: 'Tajawal', sans-serif; font-size: 0.95rem; font-weight: 700;
-    color: var(--text-primary); margin-bottom: 4px;
-  }
-  .htu-card-desc {
-    font-family: 'Tajawal', sans-serif; font-size: 0.82rem; line-height: 1.75;
-    color: var(--text-secondary);
-  }
-
-  /* ===== V2: LARGE-SCREEN FIXES (min-width: 700px) ===== */
-  @media (min-width: 700px) {
-    /* Bug 1 — fill exactly the viewport below the fixed header */
-    main#swipeArea {
-      position: fixed;
-      top: calc(var(--header-h) + env(safe-area-inset-top) + 2px);
-      left: 0; right: 0; bottom: 0;
-      padding-top: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* Bug 1+2 — center the mushaf; flex-child fills remaining height */
-    .page-frame {
-      flex: 1 1 0;
-      min-height: 0;
-      display: flex !important;
-      align-items: flex-start !important;
-      justify-content: center !important;
-      overflow: hidden;
-      padding-bottom: 0 !important;
-    }
-
-    /* Bug 2 — container shrinks to image width; no longer full-viewport */
-    .mushaf-container {
-      display: block !important;
-      width: fit-content !important;
-      height: auto !important;
-      margin: 0 !important;
-      transform-origin: top center;
-    }
-
-    /* Bug 1 — image constrained to available height, width follows aspect ratio */
-    .mushaf-img {
-      width: auto !important;
-      max-width: 90vw !important;
-      max-height: none;
-      height: auto !important;
-    }
-
-    /* Bug 3 — bordered/green need positive top margin to show ornamental frame */
-    body[data-variant="mushaf-borderd"] .mushaf-container,
-    body[data-variant="mushaf-green"]   .mushaf-container {
-      margin-top: 12px !important;
-    }
-
-    #mushafContainer2:not(.dual-active) {
-      display: none !important;
-    }
-  }
-
-  /* ===== DESKTOP PAGE NAV BUTTONS (non-touch only) ===== */
-  .desktop-page-nav { display: none; }
-
-  @media (min-width: 700px) and (hover: hover) and (pointer: fine) {
-    .desktop-page-nav {
-      display: flex;
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 50;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 80px;
-      background: rgba(26, 112, 64, 0.82);
-      border: none;
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
-      cursor: pointer;
-      color: #fff;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.22);
-      transition: background var(--transition-fast), transform var(--transition-fast),
-                  box-shadow var(--transition-fast);
-    }
-    .desktop-page-nav:hover {
-      background: rgba(26, 112, 64, 1);
-      box-shadow: 0 6px 24px rgba(0,0,0,0.30);
-    }
-    .desktop-page-nav:active { transform: translateY(-50%) scale(0.93); }
-    .desktop-page-nav svg { display: block; pointer-events: none; }
-    .desktop-page-nav.disabled { opacity: 0.18; pointer-events: none; }
-    .desktop-nav-prev { right: 0; border-radius: var(--radius-md) 0 0 var(--radius-md); }
-    .desktop-nav-next { left: 0; border-radius: 0 var(--radius-md) var(--radius-md) 0; }
-  }
-
-  /* ===== TARTEEL SHEET ===== */
-  .bottom-sheet {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--glass-bg);
-    backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
-    border-top-left-radius: var(--sheet-radius);
-    border-top-right-radius: var(--sheet-radius);
-    padding: 12px 20px calc(20px + env(safe-area-inset-bottom));
-    z-index: 1001;
-    transform: translateY(100%);
-    transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
-    max-height: 88vh; overflow-y: auto;
-    box-shadow: 0 -8px 40px rgba(0,0,0,0.22);
-    border-top: 1px solid var(--glass-border);
-    will-change: transform;
-  }
-  .bottom-sheet.visible { transform: translateY(0); }
-  #tarteelSheet { direction: rtl; }
-  #tarteelSheet .tarteel-title {
-    font-size: 1rem; font-weight: 700; color: var(--text-primary);
-    text-align: center; margin-bottom: 4px;
-  }
-  #tarteelSheet .tarteel-subtitle {
-    font-size: 0.78rem; color: var(--text-secondary);
-    text-align: center; margin-bottom: 18px; line-height: 1.6;
-  }
-  .tarteel-status-row {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg-surface); border-radius: var(--radius-md);
-    padding: 12px 16px; margin-bottom: 16px;
-    border: 1px solid var(--glass-border);
-  }
-  .tarteel-status-dot {
-    width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
-    background: var(--text-hint);
-  }
-  .tarteel-status-dot.ready { background: #27ae60; }
-  .tarteel-status-dot.loading { background: var(--gold); animation: pulse-dot 1s infinite; }
-  .tarteel-status-dot.recording { background: var(--danger); animation: pulse-dot 0.6s infinite; }
-  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .tarteel-status-text { font-size: 0.84rem; color: var(--text-secondary); flex: 1; }
-  .tarteel-progress-bar {
-    height: 4px; border-radius: 2px; background: var(--accent-light);
-    margin-top: 8px; overflow: hidden;
-  }
-  .tarteel-progress-fill {
-    height: 100%; background: var(--accent);
-    border-radius: 2px; transition: width 0.3s ease;
-  }
-  .tarteel-btn-row {
-    display: flex; gap: 10px; margin-bottom: 14px;
-  }
-  .tarteel-action-btn {
-    flex: 1; padding: 13px; border-radius: var(--radius-md); border: none;
-    font-family: 'Tajawal', sans-serif; font-size: 0.9rem; font-weight: 600;
-    cursor: pointer; transition: all var(--transition-fast);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .tarteel-action-btn.primary {
-    background: var(--accent); color: #fff;
-  }
-  .tarteel-action-btn.primary:hover { filter: brightness(1.1); }
-  .tarteel-action-btn.primary:disabled { opacity: 0.45; cursor: not-allowed; }
-  .tarteel-action-btn.secondary {
-    background: var(--bg-surface); color: var(--text-primary);
-    border: 1px solid var(--glass-border);
-  }
-  .tarteel-action-btn.danger { background: var(--danger); color: #fff; }
-  .tarteel-action-btn.danger:hover { filter: brightness(1.1); }
-  .tarteel-record-wrap {
-    display: flex; flex-direction: column; align-items: center; margin-bottom: 16px;
-  }
-  .tarteel-record-circle {
-    width: 72px; height: 72px; border-radius: 50%;
-    background: var(--danger); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all var(--transition-fast); position: relative;
-    box-shadow: 0 4px 18px rgba(217,64,64,0.35);
-  }
-  .tarteel-record-circle.recording {
-    animation: record-pulse 1.2s ease-in-out infinite;
-  }
-  @keyframes record-pulse {
-    0%,100% { box-shadow: 0 4px 18px rgba(217,64,64,0.35); transform: scale(1); }
-    50%      { box-shadow: 0 4px 36px rgba(217,64,64,0.6); transform: scale(1.05); }
-  }
-  .tarteel-record-circle.processing {
-    background: var(--gold); animation: none;
-    box-shadow: 0 4px 18px rgba(184,136,12,0.35);
-  }
-  .tarteel-record-label {
-    margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);
-  }
-  .tarteel-result-card {
-    background: var(--bg-surface); border-radius: var(--radius-md);
-    padding: 16px; border: 1px solid var(--accent-border);
-    margin-bottom: 14px; display: none;
-  }
-  .tarteel-result-card.visible { display: block; }
-  .tarteel-result-surah {
-    font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-bottom: 4px;
-  }
-  .tarteel-result-text {
-    font-family: 'Amiri', serif; font-size: 1.1rem; line-height: 1.8;
-    color: var(--text-primary); margin-bottom: 8px;
-    direction: rtl; text-align: right;
-  }
-  .tarteel-result-meta {
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .tarteel-confidence {
-    font-size: 0.75rem; color: var(--text-hint);
-    background: var(--accent-light); padding: 3px 9px; border-radius: 20px;
-  }
-  #tarteelMicBtn.active { color: var(--danger); }
-
-  /* ── Tasmee' Pro session ── */
-  .tasmee-session-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .tasmee-session-badge { font-size:0.78rem; font-weight:700; color:var(--accent); background:var(--accent-light); padding:4px 12px; border-radius:20px; }
-  .tasmee-ayah-card { background:var(--bg-surface); border-radius:var(--radius-md); padding:16px; margin-bottom:14px; border:1px solid var(--glass-border); text-align:center; }
-  .tasmee-ayah-text { font-family:'Amiri',serif; font-size:1.2rem; line-height:2; color:var(--text-primary); direction:rtl; }
-  .tasmee-ayah-text.hidden { filter:blur(6px); user-select:none; pointer-events:none; }
-  .tasmee-ayah-ref { font-size:0.75rem; color:var(--text-hint); margin-top:6px; }
-  .tasmee-feedback { border-radius:var(--radius-md); padding:14px; margin-bottom:12px; text-align:center; display:none; }
-  .tasmee-feedback.correct { background:rgba(39,174,96,0.12); border:1px solid rgba(39,174,96,0.3); }
-  .tasmee-feedback.wrong { background:var(--danger-light); border:1px solid rgba(217,64,64,0.2); }
-  .tasmee-feedback-emoji { font-size:1.8rem; line-height:1; margin-bottom:4px; }
-  .tasmee-feedback-title { font-size:0.9rem; font-weight:700; margin-bottom:4px; }
-  .tasmee-feedback-detail { font-size:0.78rem; color:var(--text-secondary); white-space:pre-line; line-height:1.6; }
-  .tasmee-summary { background:var(--bg-surface); border-radius:var(--radius-md); padding:24px 16px; text-align:center; border:1px solid var(--glass-border); margin-bottom:14px; }
-  .tasmee-summary-num { font-size:3rem; font-weight:800; color:var(--accent); line-height:1; }
-  .tasmee-summary-label { font-size:0.85rem; color:var(--text-secondary); margin-top:6px; }
-
-  @keyframes tp-word-in {
-    from { opacity:0; transform:translateY(3px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-
-  /* ════ Tasmee' Pro — full-screen panel ════ */
-  #tasmeeProPanel {
-    position: fixed; inset: 0; z-index: 1300;
-    background: var(--bg-page);
-    display: flex; flex-direction: column;
-    overflow: hidden;
-  }
-  .tp-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
-    flex-shrink: 0;
-  }
-  .tp-close-btn {
-    background: var(--bg-surface); border: none; cursor: pointer;
-    width: 34px; height: 34px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-secondary); transition: background var(--transition-fast);
-  }
-  .tp-close-btn:hover { background: var(--bg-surface-hover); }
-  .tp-page-label {
-    font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);
-    font-family: 'Tajawal', sans-serif;
-  }
-  .tp-error-badge {
-    font-size: 0.78rem; font-weight: 700;
-    background: var(--danger-light); color: var(--danger);
-    padding: 3px 10px; border-radius: 20px;
-    font-family: 'Tajawal', sans-serif;
-    min-width: 60px; text-align: center;
-  }
-
-  /* scrollable ayah area */
-  .tp-content {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding: 20px 20px 140px;
-    direction: rtl; text-align: right;
-    font-family: 'Amiri', serif;
-  }
-  .tp-ayah {
-    display: inline;
-    font-size: 1.35rem; line-height: 2.4;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
-  }
-  .tp-ayah-text {
-    color: transparent;
-    transition: color 0.4s ease, filter 0.4s ease;
-  }
-  .tp-ayah-text.show { color: rgba(128,100,60,0.35); }
-  .tp-ayah.revealed .tp-ayah-text,
-  .tp-ayah.revealed .tp-ayah-text.show { color: var(--text-primary); }
-  .tp-ayah.correct .tp-ayah-text { color: var(--text-primary); }
-  .tp-ayah.error .tp-ayah-text { color: var(--danger); }
-  .tp-ayah-marker {
-    display: inline-block;
-    font-size: 1rem; color: var(--accent);
-    margin: 0 3px;
-    font-family: 'Tajawal', sans-serif;
-  }
-  .tp-ayah.current-expected .tp-ayah-marker {
-    background: var(--accent-light); border-radius: 50%;
-    padding: 0 4px;
-  }
-  .tp-surah-name {
-    display: block; width: 100%; text-align: center;
-    font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
-    color: var(--text-secondary); font-weight: 600;
-    padding: 8px 0 4px; margin: 8px 0;
-    border-top: 1px solid var(--glass-border);
-    border-bottom: 1px solid var(--glass-border);
-  }
-
-  /* bottom controls bar */
-  .tp-bottom-bar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--glass-border);
-    display: flex; align-items: center; justify-content: space-between;
-    z-index: 1301;
-  }
-  .tp-rec-indicator {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.8rem; color: var(--text-secondary);
-    font-family: 'Tajawal', sans-serif; min-width: 60px;
-  }
-  .tp-rec-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--text-hint); flex-shrink: 0;
-  }
-  .tp-rec-dot.recording { background: #e74c3c; animation: pulse-dot 0.8s infinite; }
-  .tp-action-btns { display: flex; align-items: center; gap: 4px; }
-  .tp-icon-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--bg-surface); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-secondary); font-size: 0.85rem;
-    transition: background var(--transition-fast), color var(--transition-fast);
-    font-family: 'Tajawal', sans-serif;
-  }
-  .tp-icon-btn:hover { background: var(--bg-surface-hover); }
-  .tp-icon-btn.active { color: var(--accent); background: var(--accent-light); }
-
-  /* floating mic button */
-  .tp-mic-btn {
-    position: fixed; bottom: calc(18px + env(safe-area-inset-bottom));
-    right: 18px; z-index: 1302;
-    width: 64px; height: 64px; border-radius: 50%; border: none;
-    background: #27ae60; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(39,174,96,0.45);
-    transition: all var(--transition-fast);
-  }
-  .tp-mic-btn.recording {
-    background: #e74c3c;
-    box-shadow: 0 4px 20px rgba(231,76,60,0.45);
-    animation: record-pulse 1s ease-in-out infinite;
-  }
-  .tp-mic-btn.processing {
-    background: var(--gold);
-    box-shadow: 0 4px 20px rgba(184,136,12,0.4);
-    animation: none;
-  }
-
-  /* result flash overlay on ayah */
-  @keyframes tp-flash-correct {
-    0% { background: rgba(39,174,96,0.25); }
-    100% { background: transparent; }
-  }
-  @keyframes tp-flash-error {
-    0% { background: rgba(231,76,60,0.2); }
-    100% { background: transparent; }
-  }
-  .tp-flash-correct { animation: tp-flash-correct 1s ease-out; }
-  .tp-flash-error   { animation: tp-flash-error 1s ease-out; }
-
-  /* live transcript strip */
-  .tp-live-strip {
-    position: fixed; bottom: calc(64px + env(safe-area-inset-bottom) + 10px);
-    left: 0; right: 0; z-index: 1302;
-    padding: 8px 20px;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    min-height: 38px; display: none;
-    flex-wrap: wrap; gap: 4px; justify-content: center;
-    direction: rtl;
-  }
-  .tp-live-strip.active { display: flex; }
-  .tp-live-word {
-    font-family: 'Amiri', serif; font-size: 1.05rem; color: #fff;
-    opacity: 0; animation: tp-word-in 0.25s ease forwards;
-  }
-  .tp-live-word.matched { color: #2ecc71; font-weight: 700; }
-
-  /* clickable ayah marker */
-  .tp-ayah-marker { cursor: pointer; border-radius: 50%; padding: 0 4px; }
-  .tp-ayah-marker:hover { background: var(--accent-light); }
-  .tp-ayah.selected-target .tp-ayah-marker {
-    background: var(--accent); color: #fff;
-  }
-
-  /* ── Audio expanded sheet — large screen ── */
-  @media (min-width: 700px) {
-    .audio-expanded-sheet {
-      top: calc(var(--header-h) + env(safe-area-inset-top));
-      max-height: calc(100vh - var(--header-h) - env(safe-area-inset-top));
-      height:     calc(100vh - var(--header-h) - env(safe-area-inset-top));
-      border-radius: 0; overflow-y: auto;
-      display: flex; flex-direction: column;
-    }
-    .audio-expanded-sheet .sheet-drag-handle { display: none; }
-    .audio-expanded-sheet .expanded-header,
-    .audio-expanded-sheet .reciter-wrapper,
-    .audio-expanded-sheet .controls-row,
-    .audio-expanded-sheet .repeat-options {
-      max-width: 620px; width: 100%;
-      margin-left: auto; margin-right: auto;
-    }
-    .audio-expanded-sheet .repeat-options { flex: 1; }
-    header#appHeader { transform: none !important; }
-  }
-
-  /* ===== FIT-WIDTH MODE (desktop only) ===== */
-  @media (min-width: 700px) {
-    body.fit-width main#swipeArea {
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-    }
-    body.fit-width .page-frame {
-      overflow: visible !important;
-      height: auto !important;
-      min-height: 100%;
-    }
-    body.fit-width .mushaf-container {
-      width: 100% !important;
-      transform: none !important;
-      margin: 0 !important;
-    }
-    body.fit-width .mushaf-img {
-      width: 100% !important;
-      max-width: 100% !important;
-      max-height: none !important;
-      height: auto !important;
-    }
-    body.fit-width .highlight-overlay {
-      position: relative !important;
-    }
-    body.fit-width .desktop-page-nav {
-      display: none !important;
-    }
-  }
-
-  /* ===== DUAL-PAGE MODE (desktop only) ===== */
-  @media (min-width: 700px) {
-    body.dual-page main#swipeArea {
-      overflow: hidden !important;
-    }
-    body.dual-page .page-frame {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: stretch !important;
-      justify-content: center !important;
-      gap: 0;
-      overflow: hidden !important;
-      height: 100%;
-      padding: 0 12px;
-    }
-    body.dual-page .mushaf-container {
-      flex: 1 1 0 !important;
-      min-width: 0;
-      max-width: 46vw;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: flex-start !important;
-      width: auto !important;
-      transform: none !important;
-      padding-bottom: 0;
-      overflow: hidden;
-    }
-    body.dual-page .mushaf-img {
-      flex: 1 1 0;
-      min-height: 0;
-      width: 100% !important;
-      max-width: 100% !important;
-      max-height: calc(100% - 32px) !important;
-      height: auto !important;
-      object-fit: contain;
-    }
-    body.dual-page .dual-page-label {
-      display: flex !important;
-      align-items: center; justify-content: center;
-      flex-shrink: 0;
-      height: 28px;
-      padding: 0 18px;
-      font-family: 'ThuluthFont', 'Amiri', serif;
-      font-size: 0.78rem;
-      color: rgba(139, 105, 40, 0.70);
-      background: linear-gradient(to right, transparent 0%, rgba(139, 105, 40, 0.04) 30%, rgba(139, 105, 40, 0.04) 70%, transparent 100%);
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-    }
-    body.dual-page .dual-page-separator {
-      flex-shrink: 0;
-      width: 28px;
-      align-self: stretch;
-      position: relative;
-    }
-    body.dual-page .dual-page-separator::before {
-      content: '';
-      position: absolute;
-      top: 3%; bottom: 3%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 1.5px;
-      background: linear-gradient(to bottom, transparent 0%, rgba(139, 105, 40, 0.06) 4%, rgba(139, 105, 40, 0.20) 12%, rgba(139, 105, 40, 0.38) 30%, rgba(139, 105, 40, 0.45) 50%, rgba(139, 105, 40, 0.38) 70%, rgba(139, 105, 40, 0.20) 88%, rgba(139, 105, 40, 0.06) 96%, transparent 100%);
-      box-shadow: 0 0 4px rgba(139, 105, 40, 0.10);
-    }
-    body.dual-page .dual-page-separator::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) rotate(45deg);
-      width: 8px; height: 8px;
-      background: linear-gradient(135deg, rgba(139, 105, 40, 0.35), rgba(139, 105, 40, 0.18));
-      border: 1px solid rgba(139, 105, 40, 0.25);
-      border-radius: 1.5px;
-      box-shadow: 0 0 6px rgba(139, 105, 40, 0.12);
-    }
-    body.dual-page .label-bottom {
-      display: none !important;
-    }
-    body.dual-page .mushaf-border-top,
-    body.dual-page .mushaf-border-bottom {
-      display: none !important;
-    }
-  }
-
-  .icon-btn.mode-active {
-    color: var(--accent) !important;
-    background: rgba(26, 112, 64, 0.12) !important;
-  }
-
-  /* ===== MUSHAF DOWNLOAD MODAL ===== */
-  #dlModal {
-    position: fixed; inset: 0; z-index: 9998;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-    background: radial-gradient(ellipse 90% 85% at 50% 38%,
-      rgba(72,44,8,0.91) 0%, rgba(11,6,1,0.97) 100%);
-    backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1);
-  }
-  #dlModal.active { opacity: 1; pointer-events: all; }
-
-  .dl-sheet {
-    position: relative;
-    background: linear-gradient(158deg, #FFFAEF 0%, #FFF4D8 100%);
-    border: 1px solid rgba(184,136,12,0.36);
-    border-radius: 26px;
-    box-shadow:
-      0 50px 120px rgba(0,0,0,0.58),
-      0 0 0 1px rgba(255,228,110,0.12) inset;
-    width: min(780px, 100%);
-    max-height: 90vh;
-    overflow-y: auto; overflow-x: hidden;
-    scrollbar-width: none;
-    transform: translateY(22px) scale(0.97);
-    transition: transform 0.55s cubic-bezier(0.22,1,0.36,1);
-  }
-  .dl-sheet::-webkit-scrollbar { display: none; }
-  #dlModal.active .dl-sheet { transform: translateY(0) scale(1); }
-
-  /* Gold top line */
-  .dl-sheet::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg,
-      transparent 0%, #B8880C 18%, #F5D060 50%, #B8880C 82%, transparent 100%);
-    border-radius: 26px 26px 0 0;
-  }
-
-  .dl-header {
-    padding: 30px 28px 14px; text-align: center;
-  }
-  .dl-icon {
-    width: 58px; height: 58px; margin: 0 auto 14px;
-    background: linear-gradient(140deg, #A97808 0%, #E8B84B 55%, #C99A1A 100%);
-    border-radius: 17px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 7px 22px rgba(184,136,12,0.40), 0 1px 0 rgba(255,228,110,0.5) inset;
-  }
-  .dl-title {
-    font-family: 'Amiri', serif;
-    font-size: 1.45rem; font-weight: 700;
-    color: #1A0E02; margin: 0 0 7px; line-height: 1.35;
-  }
-  .dl-subtitle {
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.86rem; color: #785428; margin: 0; line-height: 1.7;
-  }
-
-  .dl-divider {
-    display: flex; align-items: center; gap: 10px;
-    padding: 0 28px; margin: 14px 0 10px;
-  }
-  .dl-div-line {
-    flex: 1; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(184,136,12,0.24), transparent);
-  }
-  .dl-div-gem {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: rgba(184,136,12,0.42);
-  }
-
-  /* Variant cards — horizontal RTL scroll row */
-  .dl-variants {
-    display: flex; flex-direction: row; gap: 12px;
-    padding: 4px 20px 10px;
-    overflow-x: auto; overflow-y: visible;
-    direction: rtl;               /* start from right, scroll left */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(184,136,12,0.45) rgba(184,136,12,0.10);
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-  }
-  .dl-variants::-webkit-scrollbar { height: 5px; }
-  .dl-variants::-webkit-scrollbar-track { background: rgba(184,136,12,0.10); border-radius: 3px; }
-  .dl-variants::-webkit-scrollbar-thumb { background: rgba(184,136,12,0.45); border-radius: 3px; }
-  .dl-variants::-webkit-scrollbar-thumb:hover { background: rgba(184,136,12,0.70); }
-  /* cards inside must be ltr so text/images render correctly */
-  .dl-vcard { direction: ltr; }
-
-  /* Settings hint */
-  .dl-settings-hint {
-    display: flex; align-items: center; justify-content: center; gap: 5px;
-    padding: 6px 20px 4px;
-    font-family: 'Tajawal', sans-serif; font-size: 0.78rem;
-    color: #A89060; text-align: center; line-height: 1.5;
-  }
-
-  .dl-vcard {
-    flex: 0 0 140px;
-    display: flex; flex-direction: column;
-    background: rgba(255,255,255,0.55);
-    border: 2px solid rgba(184,136,12,0.14);
-    border-radius: 14px; cursor: pointer; overflow: hidden;
-    scroll-snap-align: start;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    -webkit-user-select: none; user-select: none;
-  }
-  .dl-vcard:hover {
-    border-color: rgba(184,136,12,0.38);
-    box-shadow: 0 6px 18px rgba(184,136,12,0.14);
-    transform: translateY(-2px);
-  }
-  .dl-vcard.dl-selected {
-    border-color: #B8880C;
-    box-shadow: 0 0 0 3px rgba(184,136,12,0.18), 0 6px 20px rgba(184,136,12,0.18);
-  }
-
-  /* Big thumbnail */
-  .dl-thumb {
-    width: 100%; height: 185px; position: relative; overflow: hidden;
-    background: rgba(184,136,12,0.06);
-    flex-shrink: 0;
-  }
-  .dl-thumb img {
-    width: 100%; height: 100%; object-fit: contain; display: block;
-  }
-  /* Selected overlay with checkmark */
-  .dl-thumb-ov {
-    position: absolute; inset: 0;
-    background: rgba(184,136,12,0.18);
-    display: flex; align-items: flex-end; justify-content: flex-end;
-    padding: 8px; opacity: 0;
-    transition: opacity 0.18s;
-  }
-  .dl-vcard.dl-selected .dl-thumb-ov { opacity: 1; }
-  .dl-chk {
-    width: 24px; height: 24px;
-    background: #B8880C; border-radius: 7px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    transform: scale(0.7);
-    transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
-  }
-  .dl-vcard.dl-selected .dl-chk { transform: scale(1); }
-
-  /* Card body */
-  .dl-vbody {
-    padding: 9px 10px 11px;
-    background: rgba(255,255,255,0.7);
-  }
-  .dl-vname {
-    font-family: 'Amiri', serif; font-size: 0.92rem; font-weight: 700;
-    color: #1A0E02; margin: 0 0 3px; line-height: 1.3;
-    text-align: center;
-  }
-  .dl-vsize {
-    font-size: 0.67rem; color: #A89060;
-    display: flex; align-items: center; justify-content: center; gap: 3px;
-  }
-
-  /* Footer */
-  .dl-footer {
-    padding: 16px 18px 24px;
-    display: flex; gap: 10px; flex-direction: row-reverse; align-items: center;
-  }
-  .dl-btn-go {
-    flex: 1; padding: 13px 20px;
-    background: linear-gradient(135deg, #8F5E06 0%, #C9952E 50%, #A97808 100%);
-    color: #FFF8E8; border: none; border-radius: 13px;
-    font-family: 'Tajawal', sans-serif; font-size: 0.98rem; font-weight: 700;
-    cursor: pointer; letter-spacing: 0.02em;
-    box-shadow: 0 5px 18px rgba(184,136,12,0.34);
-    transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
-  }
-  .dl-btn-go:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(184,136,12,0.44); }
-  .dl-btn-go:disabled { opacity: 0.36; cursor: default; }
-  .dl-btn-skip {
-    padding: 13px 17px;
-    background: transparent;
-    border: 1.5px solid rgba(184,136,12,0.22);
-    border-radius: 13px;
-    font-family: 'Tajawal', sans-serif; font-size: 0.88rem; color: #785428;
-    cursor: pointer; transition: background 0.18s, border-color 0.18s;
-  }
-  .dl-btn-skip:hover { background: rgba(184,136,12,0.07); border-color: rgba(184,136,12,0.35); }
-
-  /* Progress */
-  .dl-progress { padding: 20px 28px 28px; text-align: center; }
-  .dl-ring-wrap { position: relative; width: 110px; height: 110px; margin: 0 auto 16px; }
-  .dl-ring-svg { transform: rotate(-90deg); }
-  .dl-ring-bg { fill: none; stroke: rgba(184,136,12,0.12); stroke-width: 9; }
-  .dl-ring-fill {
-    fill: none; stroke: url(#dlGrad); stroke-width: 9;
-    stroke-linecap: round;
-    stroke-dasharray: 307.88;
-    stroke-dashoffset: 307.88;
-    transition: stroke-dashoffset 0.45s cubic-bezier(0.22,1,0.36,1);
-  }
-  .dl-ring-center {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-  }
-  .dl-ring-pct {
-    font-family: 'Amiri', serif; font-size: 1.55rem; font-weight: 700;
-    color: #1A0E02; line-height: 1;
-  }
-  .dl-ring-sub { font-size: 0.68rem; color: #A89060; margin-top: 3px; }
-
-  .dl-prog-name {
-    font-family: 'Amiri', serif; font-size: 1.05rem; font-weight: 700;
-    color: #1A0E02; margin-bottom: 4px;
-  }
-  .dl-prog-pages {
-    font-family: 'Tajawal', sans-serif; font-size: 0.8rem; color: #785428; margin-bottom: 14px;
-  }
-  .dl-bar { height: 5px; background: rgba(184,136,12,0.12); border-radius: 3px; overflow: hidden; }
-  .dl-bar-fill {
-    height: 100%; border-radius: 3px; width: 0%;
-    background: linear-gradient(90deg, #8F5E06, #F5D060, #8F5E06);
-    background-size: 200% 100%;
-    transition: width 0.4s ease;
-    animation: dlShimmer 2.4s linear infinite;
-  }
-  @keyframes dlShimmer { to { background-position: -200% 0; } }
-  .dl-status { font-size: 0.76rem; color: #A89060; margin-top: 10px; min-height: 18px; }
-
-  /* Done */
-  .dl-done { padding: 28px 28px 32px; text-align: center; }
-  .dl-done-ring {
-    width: 66px; height: 66px; margin: 0 auto 16px;
-    background: linear-gradient(135deg, #1A7040, #2EAA60);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 26px rgba(26,112,64,0.38);
-    animation: dlPopIn 0.48s cubic-bezier(0.22,1,0.36,1) both;
-  }
-  @keyframes dlPopIn { from { transform: scale(0.45); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .dl-done-title {
-    font-family: 'Amiri', serif; font-size: 1.38rem; font-weight: 700;
-    color: #1A7040; margin: 0 0 8px;
-  }
-  .dl-done-sub {
-    font-family: 'Tajawal', sans-serif; font-size: 0.86rem; color: #785428;
-    margin: 0 0 22px; line-height: 1.65;
-  }
-  .dl-done-btn {
-    padding: 13px 38px;
-    background: linear-gradient(135deg, #1A7040, #2EAA60);
-    color: white; border: none; border-radius: 13px;
-    font-family: 'Tajawal', sans-serif; font-size: 0.98rem; font-weight: 700;
-    cursor: pointer; box-shadow: 0 5px 18px rgba(26,112,64,0.34);
-    transition: transform 0.18s, box-shadow 0.18s;
-  }
-  .dl-done-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,112,64,0.44); }
-
-  /* ===== MINIMIZED DOWNLOAD PILL ===== */
-  #dlMiniPill {
-    position: fixed; bottom: 22px; left: 18px; z-index: 9997;
-    display: none; align-items: center; gap: 10px;
-    background: linear-gradient(140deg, #FFF9EC 0%, #FFF3D5 100%);
-    border: 1.5px solid rgba(184,136,12,0.42); border-radius: 18px;
-    padding: 9px 12px 9px 9px; box-shadow: 0 6px 22px rgba(0,0,0,0.18);
-    cursor: pointer; min-width: 170px; transition: transform 0.2s, box-shadow 0.2s;
-    animation: dlPillGlow 2.8s ease-in-out infinite;
-  }
-  #dlMiniPill.active { display: flex; }
-  #dlMiniPill:hover { transform: translateY(-2px); }
-  @keyframes dlPillGlow {
-    0%,100% { box-shadow: 0 6px 22px rgba(0,0,0,0.18), 0 0 0 0 rgba(184,136,12,0.15); }
-    50%      { box-shadow: 0 6px 22px rgba(0,0,0,0.18), 0 0 0 5px rgba(184,136,12,0.10); }
-  }
-  .dl-mini-ring { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
-  .dl-mini-ring svg { transform: rotate(-90deg); display: block; }
-  .dl-mini-ring-bg   { fill: none; stroke: rgba(184,136,12,0.13); stroke-width: 4; }
-  .dl-mini-ring-fill {
-    fill: none; stroke: #B8880C; stroke-width: 4; stroke-linecap: round;
-    stroke-dasharray: 94.25; stroke-dashoffset: 94.25;
-    transition: stroke-dashoffset 0.42s cubic-bezier(0.22,1,0.36,1);
-  }
-  .dl-mini-info { flex: 1; min-width: 0; }
-  .dl-mini-pct { font-family: 'Amiri', serif; font-size: 1rem; font-weight: 700; color: #1A0E02; line-height: 1; }
-  .dl-mini-label { font-family: 'Tajawal', sans-serif; font-size: 0.7rem; color: #A89060; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
-  .dl-mini-restore { width: 24px; height: 24px; border-radius: 7px; border: none; flex-shrink: 0; background: rgba(184,136,12,0.13); color: #A87808; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; }
-  .dl-mini-restore:hover { background: rgba(184,136,12,0.28); }
-
-  /* ===== DOWNLOAD COMPLETION TOAST ===== */
-  #dlCompleteToast {
-    position: fixed; bottom: 78px; left: 50%;
-    transform: translateX(-50%) translateY(130px);
-    z-index: 9996; opacity: 0; pointer-events: none; display: flex; flex-direction: column;
-    background: linear-gradient(150deg, #F4FFF8 0%, #EDFAF3 100%);
-    border: 1.5px solid rgba(26,112,64,0.28); border-left: 4px solid #1A7040;
-    border-radius: 16px; overflow: hidden; min-width: 270px; max-width: 340px;
-    box-shadow: 0 10px 36px rgba(0,0,0,0.16); transition: transform 0.48s cubic-bezier(0.22,1,0.36,1), opacity 0.38s ease;
-  }
-  #dlCompleteToast.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
-  .dl-toast-inner { display: flex; align-items: center; gap: 13px; padding: 14px 14px 14px 16px; }
-  .dl-toast-icon { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; background: linear-gradient(135deg, #1A7040, #28A858); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(26,112,64,0.32); }
-  .dl-toast-body { flex: 1; min-width: 0; }
-  .dl-toast-title { font-family: 'Amiri', serif; font-size: 1rem; font-weight: 700; color: #145430; margin: 0 0 3px; }
-  .dl-toast-sub { font-family: 'Tajawal', sans-serif; font-size: 0.76rem; color: #3A7A55; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .dl-toast-x { width: 26px; height: 26px; border-radius: 7px; border: none; flex-shrink: 0; background: rgba(26,112,64,0.10); color: #1A7040; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; align-self: flex-start; }
-  .dl-toast-x:hover { background: rgba(26,112,64,0.22); }
-  .dl-toast-bar { height: 3px; background: rgba(26,112,64,0.10); }
-  .dl-toast-bar-fill { height: 100%; width: 100%; background: #1A7040; animation: dlToastCountdown 5.2s linear forwards; }
-  @keyframes dlToastCountdown { to { width: 0%; } }
-
-  /* Progress header with minimize */
-  .dl-progress-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 0; }
-  .dl-progress-title { font-family: 'Tajawal', sans-serif; font-size: 0.82rem; color: #A89060; font-weight: 500; }
-  .dl-minimize-btn { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border: 1.5px solid rgba(184,136,12,0.25); border-radius: 8px; background: rgba(184,136,12,0.06); font-family: 'Tajawal', sans-serif; font-size: 0.75rem; color: #785428; cursor: pointer; transition: background 0.18s; }
-  .dl-minimize-btn:hover { background: rgba(184,136,12,0.14); }
-
   </style>
 </head>
 <body>
@@ -2543,24 +1489,6 @@
       <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-        </svg>
-      </button>
-<button class="icon-btn" id="tarteelMicBtn" onclick="openTarteelSheet()" title="تعرف على الآية">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-          <line x1="12" y1="19" x2="12" y2="22"/>
-        </svg>
-      </button>
-      <button class="icon-btn" id="fitWidthBtn" onclick="toggleFitWidth()" title="عرض بالعرض الكامل" style="display:none">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-        </svg>
-      </button>
-      <button class="icon-btn" id="dualPageBtn" onclick="toggleDualPage()" title="صفحتان كالمصحف" style="display:none">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/>
         </svg>
       </button>
       <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
@@ -2631,31 +1559,9 @@
       <div id="mushafContainer" class="mushaf-container">
         <img id="pageImg" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
         <div id="highlightOverlay" class="highlight-overlay"></div>
-        <div class="dual-page-label" id="dualPageLabel1" style="display:none"></div>
-      </div>
-      <div class="dual-page-separator" id="dualPageSep" style="display:none"></div>
-      <div id="mushafContainer2" class="mushaf-container" style="display:none">
-        <img id="pageImg2" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
-        <div class="dual-page-label" id="dualPageLabel2" style="display:none"></div>
       </div>
     </div>
   </main>
-
-  <!-- Desktop-only page navigation (hidden on touch screens via CSS) -->
-  <button class="desktop-page-nav desktop-nav-prev" id="desktopPrevBtn"
-          title="الصفحة السابقة" onclick="desktopNavPrev()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="9 18 15 12 9 6"/>
-    </svg>
-  </button>
-  <button class="desktop-page-nav desktop-nav-next" id="desktopNextBtn"
-          title="الصفحة التالية" onclick="desktopNavNext()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="15 18 9 12 15 6"/>
-    </svg>
-  </button>
 
   <div id="customToast" class="custom-toast"></div>
   <div id="zoomHint" class="zoom-hint" onclick="dismissZoomHint()">
@@ -2695,7 +1601,6 @@
       <div class="zoom-hint-title">تكبير الصفحة وتصغيرها</div>
       <div class="zoom-hint-body">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير</div>
       <button class="zoom-hint-dismiss" onclick="dismissZoomHint()">فهمت</button>
-      <button class="zoom-hint-no-show" onclick="dismissZoomHintForever()">لا تُظهر مجدداً</button>
     </div>
   </div>
 
@@ -2766,25 +1671,6 @@
     </div>
 
     <div class="reciter-wrapper">
-      <button class="reciter-trigger" onclick="toggleReciterPicker()">
-        <div class="reciter-trigger-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
-        </div>
-        <div class="reciter-trigger-body">
-          <span class="reciter-trigger-lbl">القارئ الحالي</span>
-          <span class="reciter-trigger-name" id="reciterTriggerName">…</span>
-        </div>
-        <div class="reciter-trigger-arrow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-      </button>
-      <div class="reciter-picker" id="reciterPickerEl"></div>
       <select id="expandedReciterSelect" class="reciter-selector">
         <option value="ar.husary"              data-short="الحصري">محمود خليل الحصري</option>
         <option value="ar.abdulbasitmurattal"  data-short="عبد الباسط">عبد الباسط عبد الصمد</option>
@@ -2912,9 +1798,6 @@
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
         </button>
-        <button class="sheet-icon-btn" onclick="closeContextMenu(); openTasmeeSetup()" title="التسميع">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        </button>
         <button class="sheet-icon-btn" onclick="closeContextMenu(); openSettingsModal()" title="الإعدادات">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
@@ -2955,12 +1838,6 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         </span>
         استماع للآية المحددة
-      </button>
-      <button class="action-btn" id="contextTasmeeBtn" onclick="closeContextMenu(); openTasmeeSetup()" style="display:none;">
-        <span class="btn-icon">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        </span>
-        تسميع من هذه الآية
       </button>
       <button class="action-btn" id="contextTafsirBtn" onclick="contextShowTafsir()" style="display:none;">
         <span class="btn-icon">
@@ -3055,136 +1932,21 @@
       </div>
     </div>
 
-    <div class="reciter-wrapper" style="flex-shrink:0;">
-      <select id="tafsirSelect" class="reciter-selector" onchange="changeTafsir()">
-        <option value="ar.muyassar">التفسير الميسر</option>
-        <option value="ar.jalalayn">تفسير الجلالين</option>
-        <option value="ar.qurtubi">تفسير القرطبي</option>
-        <option value="ar.tabari">تفسير الطبري</option>
-      </select>
-      <span class="select-chevron">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </span>
-    </div>
-
     <div id="tafsirContent" class="tafsir-content" style="flex:1; overflow-y:auto; touch-action:pan-y;">اختر آية أولاً...</div>
 
     <div class="tafsir-nav-row" style="flex-shrink:0;">
       <button class="tafsir-nav-btn" onclick="prevTafsirAyah()">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="9 18 15 12 9 6"/>
         </svg>
         السابق
       </button>
       <button class="tafsir-nav-btn" onclick="nextTafsirAyah()">
         التالي
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <polyline points="9 18 15 12 9 6"/>
+          <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
-    </div>
-  </div>
-
-  <!-- ===== TASMEE' TEXT PANEL ===== -->
-  <div class="tasmee-text-panel" id="tasmeeTextPanel">
-    <div class="tasmee-text-panel-header">
-      <div class="tasmee-text-panel-title">
-        <div class="tasmee-mic-indicator" id="tasmeePanelMicDot" style="width:10px;height:10px;flex-shrink:0;"></div>
-        التسميع
-      </div>
-      <button onclick="endTasmeeSession()" style="background:rgba(217,64,64,0.1);color:var(--danger);border:none;border-radius:8px;padding:6px 14px;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;">إنهاء</button>
-    </div>
-    <div class="tasmee-text-panel-scroll" id="tasmeeTextContent"></div>
-  </div>
-
-  <!-- ===== TASMEE' SETUP SHEET ===== -->
-  <div class="sheet-backdrop" id="tasmeeSheetBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1099;" onclick="closeTasmeeSetup()"></div>
-  <div class="audio-expanded-sheet" id="tasmeeSetupSheet" style="z-index:1100;max-height:100dvh;height:100dvh;border-radius:0;border-top:none;top:0;">
-    <div class="expanded-header" style="padding-top:calc(env(safe-area-inset-top) + 12px);">
-      <div class="sheet-title">
-        <div class="sheet-title-icon">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-        </div>
-        وضع التسميع
-      </div>
-      <button class="close-sheet" onclick="closeTasmeeSetup()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-
-    <div class="tasmee-setup-content" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
-      <!-- Hero -->
-      <div style="display:flex;flex-direction:column;align-items:center;padding:16px 16px 12px;gap:8px;flex-shrink:0;">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(26,112,64,0.1);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        </div>
-        <p style="font-size:0.82rem;color:var(--text-secondary);text-align:center;margin:0;font-family:'Tajawal',sans-serif;line-height:1.5;">
-          تلاوة من الحفظ — يستمع التطبيق ويُصحّح الكلمات في الوقت الفعلي
-        </p>
-      </div>
-      <!-- Rows (scrollable) -->
-      <div style="flex:1;overflow-y:auto;">
-        <div class="tasmee-setup-row">
-          <span>إخفاء النص — اختبار الحفظ</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="tasmeeHideText">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="tasmee-setup-row">
-          <span>إظهار نهاية الآية ﴿٧﴾</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="tasmeeShowAyahEnd" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="tasmee-setup-row">
-          <span>الانتقال التلقائي للصفحة التالية</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="tasmeeAutoFlip" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="tasmee-setup-row" style="border-bottom:none;">
-          <span>صوت التنبيه عند الإجابة</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="tasmeeAudioFeedback" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-      <!-- Start button -->
-      <div style="padding:12px 16px calc(12px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid var(--glass-border);">
-        <button class="tasmee-start-btn" id="startTasmeeBtn" onclick="startTasmeeSession()" style="width:100%;padding:14px;font-size:1.05rem;">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          ابدأ التسميع
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TASMEE' ACTIVE BAR ===== -->
-  <div class="tasmee-active-bar" id="tasmeeActiveBar">
-    <div class="tasmee-mic-indicator" id="tasmeeMicIndicator"></div>
-    <div class="tasmee-progress-text" id="tasmeeProgressText">٠ / ٠ كلمة</div>
-    <button class="tasmee-pause-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()">⏸</button>
-    <button class="tasmee-end-btn" onclick="endTasmeeSession()">إنهاء</button>
-  </div>
-
-  <!-- ===== TASMEE' RESULTS MODAL ===== -->
-  <div class="modal-overlay" id="tasmeeResultsModal" onclick="handleOverlayClick(event,'tasmeeResultsModal')">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">نتيجة التسميع</div>
-        <button class="close-btn" onclick="closeModal('tasmeeResultsModal')">✕</button>
-      </div>
-      <div id="tasmeeResultsBody"></div>
-      <div style="display:flex;gap:10px;margin-top:14px;">
-        <button style="flex:1;padding:12px;background:var(--accent);color:white;border:none;border-radius:12px;font-weight:bold;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.95rem;" onclick="retryTasmeeSession()">إعادة التسميع</button>
-        <button style="flex:1;padding:12px;background:rgba(128,128,128,0.15);color:var(--text-primary);border:none;border-radius:12px;font-weight:bold;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.95rem;" onclick="closeModal('tasmeeResultsModal')">إغلاق</button>
-      </div>
     </div>
   </div>
 
@@ -3296,50 +2058,6 @@
           </div>
         </div>
 
-        <!-- How to use -->
-        <div class="setting-row clickable" onclick="closeModal('settingsModal'); openHowToUse();">
-          <div class="setting-label">
-            <span class="row-icon" style="background:rgba(138,90,220,0.12);color:#8A5ADC;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </span>
-            <div class="label-text">
-              <div class="label-main">كيفية الاستخدام</div>
-              <div class="label-sub">دليل الميزات والتنقل</div>
-            </div>
-          </div>
-          <span class="row-chevron">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </span>
-        </div>
-
-        <!-- Tarteel engine download -->
-        <div class="setting-row clickable" id="tarteelEngineRow" onclick="tarteelSettingsAction()">
-          <div class="setting-label">
-            <span class="row-icon accent">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                <line x1="12" y1="19" x2="12" y2="22"/>
-              </svg>
-            </span>
-            <div class="label-text">
-              <div class="label-main">نموذج التعرف على الآيات</div>
-              <div class="label-sub" id="tarteelEngineStatus">جاري التحقق...</div>
-            </div>
-          </div>
-          <span class="row-chevron" id="tarteelEngineChevron">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </span>
-        </div>
-
         <!-- Download -->
         <button class="offline-btn" id="offlineDownloadBtn" onclick="cacheAllPages()">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -3349,144 +2067,6 @@
           </svg>
           تحميل جميع الصفحات للقراءة بدون إنترنت
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== HOW TO USE SHEET ===== -->
-  <div class="sheet-backdrop" id="howToUseBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1199;" onclick="closeHowToUse()"></div>
-  <div id="howToUseSheet" class="how-to-use-sheet">
-    <div class="htu-header">
-      <div class="htu-header-title">
-        <div class="htu-header-icon">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
-        </div>
-        كيفية الاستخدام
-      </div>
-      <button class="htu-close" onclick="closeHowToUse()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-
-    <div class="htu-body">
-      <!-- Navigation -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(var(--accent-rgb,26,112,64),0.12);color:var(--accent);">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M9 18l6-6-6-6"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">التنقل بين الصفحات</div>
-          <div class="htu-card-desc">اسحب يميناً للصفحة التالية، أو يساراً للصفحة السابقة. يمكنك أيضاً استخدام سهمي التنقل في الشاشة.</div>
-        </div>
-      </div>
-
-      <!-- Zoom -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(var(--accent-rgb,26,112,64),0.12);color:var(--accent);">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            <line x1="11" y1="8" x2="11" y2="14"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">التكبير والتصغير</div>
-          <div class="htu-card-desc">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير. انقر مرتين لإعادة الحجم الافتراضي.</div>
-        </div>
-      </div>
-
-      <!-- Audio -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(168,106,0,0.12);color:#A86A00;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">الاستماع للقرآن</div>
-          <div class="htu-card-desc">اضغط على أيقونة الصوت في الشريط العلوي لفتح مشغل الصوت. اختر القارئ والسورة والآية، واستمع بصوت عالٍ.</div>
-        </div>
-      </div>
-
-      <!-- Context menu -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(0,106,168,0.12);color:#006AA8;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">قائمة الإجراءات</div>
-          <div class="htu-card-desc">اضغط على أيقونة النقاط الثلاث (⋮) في أسفل الشاشة لفتح قائمة الإجراءات — الانتقال إلى آية أو جزء أو سورة، التفسير، والإعدادات.</div>
-        </div>
-      </div>
-
-      <!-- Search -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(168,0,106,0.12);color:#A8006A;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">البحث في القرآن</div>
-          <div class="htu-card-desc">اضغط على أيقونة البحث للبحث في كامل نص القرآن الكريم. ستُنقل مباشرةً إلى الصفحة التي تحتوي على الآية.</div>
-        </div>
-      </div>
-
-      <!-- Tasmee -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(217,64,64,0.12);color:#D94040;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">وضع التسميع</div>
-          <div class="htu-card-desc">اضغط على أيقونة الميكروفون لتفعيل التسميع. يستمع التطبيق إلى تلاوتك ويُصحّح كل كلمة في الوقت الفعلي مع تقرير نهائي بنسبة الصواب.</div>
-        </div>
-      </div>
-
-      <!-- Bookmarks -->
-      <div class="htu-card">
-        <div class="htu-card-icon" style="background:rgba(168,130,0,0.12);color:#A88200;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">المفضلة والعلامات</div>
-          <div class="htu-card-desc">اضغط على أيقونة الإشارة المرجعية لحفظ صفحتك الحالية. يمكنك الوصول إلى المحفوظات من الإعدادات.</div>
-        </div>
-      </div>
-
-      <!-- Offline -->
-      <div class="htu-card" style="border-bottom:none;">
-        <div class="htu-card-icon" style="background:rgba(50,130,200,0.12);color:#3282C8;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-        </div>
-        <div class="htu-card-body">
-          <div class="htu-card-title">القراءة بدون إنترنت</div>
-          <div class="htu-card-desc">من الإعدادات اضغط "تحميل جميع الصفحات" لتخزين القرآن كاملاً على جهازك والقراءة دون اتصال بالإنترنت.</div>
-        </div>
       </div>
     </div>
   </div>
@@ -3631,7 +2211,7 @@
     </div>
   </div>
 
-  <script src="js/quran-common.js"></script>
+  <script src="../js/quran-common.js"></script>
 
   <script>
     // --- Daily Tracking Function for Stats (Quran Pages/Juz) ---
@@ -3678,7 +2258,7 @@
           view = new Uint8Array(binaryStr.length);
           for (let i = 0; i < binaryStr.length; i++) view[i] = binaryStr.charCodeAt(i);
         } else {
-          const response = await fetch('data/quranpages.sqlite');
+          const response = await fetch('../db/quranpages.sqlite');
           if(!response.ok) throw new Error("Main DB not found");
           const buffer = await response.arrayBuffer();
           view = new Uint8Array(buffer);
@@ -3713,7 +2293,7 @@
         if (window.__MEDINA2_COORDS__) {
           data = window.__MEDINA2_COORDS__;
         } else {
-          const res = await fetch('coords/medina2_coords.json');
+          const res = await fetch('../json/medina2_coords.json');
           data = await res.json();
         }
         medinaCoordsByAyah = {};
@@ -3925,8 +2505,8 @@
     tafsirModalEl.addEventListener('touchstart', e => { tafsirTouchStartX = e.changedTouches[0].screenX; }, {passive: true});
     tafsirModalEl.addEventListener('touchend', e => {
       const diff = e.changedTouches[0].screenX - tafsirTouchStartX;
-      if (diff > 60) prevTafsirAyah();
-      else if (diff < -60) nextTafsirAyah();
+      if (diff > 60) nextTafsirAyah();
+      else if (diff < -60) prevTafsirAyah();
     }, {passive: true});
 
     function closeTafsirModal() {
@@ -3939,20 +2519,23 @@
       if(!windowCurrentAyahGlobal) { showCustomToast("الرجاء تحديد آية أولاً"); return; }
       const { surah, ayah } = windowCurrentAyahGlobal;
       const contentDiv = document.getElementById('tafsirContent');
-      const selectedTafsir = document.getElementById('tafsirSelect').value;
       document.getElementById('tafsirModal').classList.add('visible');
       document.getElementById('tafsirSheetBackdrop').classList.add('visible');
-      contentDiv.innerHTML = '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
       try {
-        const [ayaTextRes, tafRes] = await Promise.all([
+        tafsirSelectedDB = document.getElementById('tafsirBookSelect')?.value || tafsirSelectedDB;
+        localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
+        contentDiv.innerHTML = typeof tafsirDropdownHTML === 'function'
+          ? tafsirDropdownHTML(tafsirSelectedDB) + '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>'
+          : '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
+        const [ayaTextRes, tafText] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`),
-          fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/${selectedTafsir}`)
+          getTafsirText(tafsirSelectedDB, surah, ayah)
         ]);
         const ayaData = await ayaTextRes.json();
-        const tafData = await tafRes.json();
         const ayahText = (ayaData.code === 200) ? ayaData.data.text : '';
-        const tafsirText = (tafData.code === 200) ? tafData.data.text : 'لم يتم العثور على تفسير لهذه الآية.';
-        let html = `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
+        const tafsirText = tafText || 'لم يتم العثور على تفسير لهذه الآية.';
+        let html = typeof tafsirDropdownHTML === 'function' ? tafsirDropdownHTML(tafsirSelectedDB) : '';
+        html += `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
         html += `<div class="imlaei-text">﴿ ${ayahText} ﴾</div>`;
         html += `<div style="text-align:justify; font-size:1.1rem; line-height:2; border-top:1px dashed var(--glass-border); padding-top:16px;">${tafsirText.replace(/\n/g, '<br>')}</div>`;
         contentDiv.innerHTML = html;
@@ -3964,6 +2547,11 @@
     }
 
     async function changeTafsir() {
+       const sel = document.getElementById('tafsirBookSelect');
+       if (sel) {
+         tafsirSelectedDB = sel.value;
+         localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
+       }
        if (document.getElementById('tafsirModal').classList.contains('visible') && windowCurrentAyahGlobal) {
            await contextShowTafsir(true);
        }
@@ -3971,10 +2559,10 @@
 
     // ========== PAGE TRANSITION ==========
     window.goToPage = function (page) {
-        page = Math.max(1, Math.min(604, page));
-        currentPage = page;
-        updateContent();
-        updateDesktopNavButtons();
+        if (page >= 1 && page <= 604) {
+            currentPage = page;
+            updateContent();
+        }
     };
 
     function updateContent() {
@@ -3984,73 +2572,16 @@
       const cal = getVariantHighlightCal();
       const container = document.getElementById('mushafContainer');
       img.style.opacity = '0';
-      const _ov = document.getElementById('highlightOverlay');
-      _ov.innerHTML = '';
-      _ov.style.width  = '';
-      _ov.style.height = '';
+      document.getElementById('highlightOverlay').innerHTML = '';
       img.src = getImagePath(currentMushafVariant, formattedPage, v.ext);
       let sx = cal.imgScaleX, sy = cal.imgScaleY;
       if (currentMushafVariant === 'mushaf-borderd' || currentMushafVariant === 'mushaf-green') {
         sx = borderZoomState ? 1.0 : 1.2;
         sy = borderZoomState ? 1.3 : 1.4;
       }
-      /* ── Second page for dual-page mode ── */
-      const container2 = document.getElementById('mushafContainer2');
-      const img2 = document.getElementById('pageImg2');
-      const sep = document.getElementById('dualPageSep');
-      const label1 = document.getElementById('dualPageLabel1');
-      const label2 = document.getElementById('dualPageLabel2');
-      const isDual = dualPage && window.innerWidth >= 700;
-      const isFitW = fitWidth && window.innerWidth >= 700;
-
-      if (isDual) {
-        container.style.transform = 'none';
-        img.style.maxHeight = '';
-        img.style.width = '';
-        const nextPage = Math.min(currentPage + 1, 604);
-        const showSecond = nextPage !== currentPage;
-        if (container2) container2.classList.toggle('dual-active', showSecond);
-        if (sep) sep.style.display = showSecond ? '' : 'none';
-        if (label1) { label1.style.display = ''; label1.textContent = currentPage; }
-        if (label2) {
-          if (showSecond) { label2.style.display = ''; label2.textContent = nextPage; }
-          else { label2.style.display = 'none'; }
-        }
-        const formattedNext = nextPage.toString().padStart(3, '0');
-        img2.style.opacity = '0';
-        img2.src = getImagePath(currentMushafVariant, formattedNext, v.ext);
-        img2.onload = () => { img2.style.opacity = '1'; };
-        img2.onerror = () => { img2.style.opacity = '1'; };
-        img2.style.maxHeight = '';
-        img2.style.width = '';
-        if (container2) container2.style.transform = 'none';
-      } else {
-        if (container2) container2.classList.remove('dual-active');
-        if (sep) sep.style.display = 'none';
-        if (label1) label1.style.display = 'none';
-        if (label2) label2.style.display = 'none';
-      }
-
-      if (!isDual && isFitW) {
-        container.style.transform = 'none';
-        img.style.maxHeight = '';
-        img.style.width = '';
-      } else if (!isDual && window.innerWidth >= 700) {
-        container.style.transform = `scale(${sx}, ${sy})`;
-        const headerEl = document.getElementById('appHeader');
-        const availH = window.innerHeight - (headerEl ? headerEl.offsetHeight : 44) - 90;
-        img.style.maxHeight = Math.floor(availH / sy) + 'px';
-        img.style.width = 'auto';
-      } else if (!isDual) {
-        container.style.transform = `scale(${sx}, ${sy}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
-        img.style.maxHeight = '';
-        img.style.width = '';
-      }
+      container.style.transform = `scale(${sx}, ${sy}) translate(${cal.imgshiftX * 100}%, ${cal.imgshiftY * 100}%)`;
       img.onload = () => {
         img.style.opacity = '1';
-        const overlay = document.getElementById('highlightOverlay');
-        overlay.style.width  = img.offsetWidth  + 'px';
-        overlay.style.height = img.offsetHeight + 'px';
         loadAyahHighlights(currentPage);
         if (windowCurrentAyahGlobal && isPlaying) {
           highlightAyah(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
@@ -4099,51 +2630,51 @@ function getVariantHighlightCal() {
         case 'mushaf-madina1441':
           return {
            refW: 415, refH: 650,
-            scaleX: 1.069968, scaleY: 0.949994,
+            scaleX: 1.12, scaleY: 0.90,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.139991, shiftY: 0.015000,
-            imgScaleX: 1.03, imgScaleY: 1.09,
-            imgshiftX: 0.0, imgshiftY: -0.060
+            shiftX: -0.165, shiftY: 0.03,
+            imgScaleX: 1.01, imgScaleY: 1.1,
+            imgshiftX: 0.0, imgshiftY: -0.065
           };
         case 'mushaf-tajweed':
           return {
             refW: 415, refH: 650,
-            scaleX: 1.049968, scaleY: 0.919878,
+            scaleX: 1.12, scaleY: 0.90,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.129993, shiftY: 0.029069,
-            imgScaleX: 1.02, imgScaleY: 1.1,
+            shiftX: -0.165, shiftY: 0.03,
+            imgScaleX: 1.01, imgScaleY: 1.1,
             imgshiftX: 0.0, imgshiftY: -0.065
           };
         case 'mushaf-borderd':
           return {
             refW: 415, refH: 650,
-             scaleX: 0.959980, scaleY: 1.001,
+            scaleX: 0.96, scaleY: 0.72,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.0, pageBotY: 1.00,
-            shiftX: -0.089997, shiftY: -0.013969,
+            shiftX: -0.09, shiftY: -0.014,
             imgScaleX: 1.2, imgScaleY: 1.4,
             imgshiftX: 0.0, imgshiftY: -0.005
           };
         case 'mushaf-green':
           return {
             refW: 415, refH: 650,
-             scaleX: 0.979976, scaleY: 0.890,
+            scaleX: 0.99, scaleY: 0.755,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.0, pageBotY: 1.00,
-            shiftX: -0.089997, shiftY: 0.045083,
-            imgScaleX: 1.2, imgScaleY: 1.3,
+            shiftX: -0.095, shiftY: 0.035,
+            imgScaleX: 1.2, imgScaleY: 1.4,
             imgshiftX: 0.0, imgshiftY: -0.055
           };
         case 'mushaf-colored':
         default:
           return {
             refW: 1024, refH: 1636,
-             scaleX: 1.089985, scaleY: 1.00,
+            scaleX: 1.09, scaleY: 0.78,
             padTop: 0.00, padBot: 0.00,
             pageTopY: 0.00, pageBotY: 1.00,
-            shiftX: -0.070002, shiftY: 0.001038,
+            shiftX: -0.07, shiftY: 0.001,
             imgScaleX: 0.99, imgScaleY: 1.15,
             imgshiftX: 0.0, imgshiftY: 0.010
           };
@@ -4181,7 +2712,15 @@ function getVariantHighlightCal() {
           if (clickCount === 1) {
             singleClickTimer = setTimeout(() => {
               clickCount = 0;
-              toggleHeaderUI();
+              const header = document.getElementById('appHeader');
+              const miniPlayer = document.getElementById('audioMiniPlayer');
+              header.classList.toggle('hidden-ui');
+              miniPlayer.classList.add('hidden-ui');
+              miniPlayer.classList.remove('visible');
+              if (!isPlaying) {
+                document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
+                windowCurrentAyahGlobal = null;
+              }
             }, 300);
           } else if (clickCount === 2) {
             clearTimeout(singleClickTimer);
@@ -4216,7 +2755,15 @@ function getVariantHighlightCal() {
 
     document.getElementById('mushafContainer').addEventListener('click', (e) => {
       if(e.target.id === 'pageImg' || e.target.id === 'highlightOverlay') {
-        toggleHeaderUI();
+        const header = document.getElementById('appHeader');
+        const miniPlayer = document.getElementById('audioMiniPlayer');
+        header.classList.toggle('hidden-ui');
+        miniPlayer.classList.add('hidden-ui');
+        miniPlayer.classList.remove('visible');
+        if (!isPlaying) {
+          document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
+          windowCurrentAyahGlobal = null;
+        }
       }
     });
 
@@ -4272,61 +2819,12 @@ function getVariantHighlightCal() {
               currentReciter = expandedReciterSelect.options[0].value;
           }
           expandedReciterSelect.value = currentReciter;
-          if(expandedReciterSelect.selectedIndex >= 0) {
+          if(miniReciterName && expandedReciterSelect.selectedIndex >= 0) {
               const opt = expandedReciterSelect.options[expandedReciterSelect.selectedIndex];
-              if(miniReciterName) miniReciterName.textContent = opt.dataset.short || opt.text;
-              const tn = document.getElementById('reciterTriggerName');
-              if(tn) tn.textContent = opt.text;
+              miniReciterName.textContent = opt.dataset.short || opt.text;
           }
       }
       localStorage.setItem('quranReciter', currentReciter);
-    }
-
-    function toggleReciterPicker() {
-      const wrap = document.querySelector('.reciter-wrapper');
-      if (!wrap) return;
-      const opening = !wrap.classList.contains('rp-open');
-      wrap.classList.toggle('rp-open', opening);
-      if (opening) {
-        buildReciterPicker();
-        setTimeout(() => {
-          document.addEventListener('click', closeReciterPickerOutside, { once: true });
-        }, 0);
-      }
-    }
-    function closeReciterPickerOutside(e) {
-      if (!e.target.closest('.reciter-wrapper')) {
-        document.querySelector('.reciter-wrapper')?.classList.remove('rp-open');
-      }
-    }
-    function buildReciterPicker() {
-      const panel = document.getElementById('reciterPickerEl');
-      if (!panel) return;
-      panel.innerHTML = '';
-      const sel = document.getElementById('expandedReciterSelect');
-      [...sel.children].forEach(child => {
-        if (child.tagName === 'OPTGROUP') {
-          const lbl = document.createElement('div');
-          lbl.className = 'rp-group-lbl';
-          lbl.textContent = child.label;
-          panel.appendChild(lbl);
-          [...child.children].forEach(opt => panel.appendChild(makeRpItem(opt, sel)));
-        } else if (child.tagName === 'OPTION') {
-          panel.appendChild(makeRpItem(child, sel));
-        }
-      });
-    }
-    function makeRpItem(opt, sel) {
-      const item = document.createElement('div');
-      item.className = 'rp-item' + (opt.value === sel.value ? ' rp-active' : '');
-      item.innerHTML = `<div class="rp-dot"></div><div class="rp-name">${opt.text}</div>`;
-      item.onclick = (e) => {
-        e.stopPropagation();
-        sel.value = opt.value;
-        sel.dispatchEvent(new Event('change'));
-        document.querySelector('.reciter-wrapper')?.classList.remove('rp-open');
-      };
-      return item;
     }
 
     async function fetchAudioData(surah, ayah) {
@@ -4391,23 +2889,6 @@ function getVariantHighlightCal() {
       isPlaying = true; updatePlayButtons(true);
       highlightAyah(item.surah, item.ayah);
       preloadNext();
-      if ('mediaSession' in navigator) {
-        const surahName = document.getElementById('surahLabel')?.textContent || `سورة ${item.surah}`;
-        const recOpt = expandedReciterSelect.options[expandedReciterSelect.selectedIndex];
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title:  `${surahName} — الآية ${item.ayah}`,
-          artist: recOpt ? recOpt.text : '',
-          album:  'المصحف الشريف',
-          artwork: [
-            { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
-          ]
-        });
-        navigator.mediaSession.setActionHandler('play',          () => { audioPlayer.play(); isPlaying = true;  updatePlayButtons(true); });
-        navigator.mediaSession.setActionHandler('pause',         () => { audioPlayer.pause(); isPlaying = false; updatePlayButtons(false); });
-        navigator.mediaSession.setActionHandler('nexttrack',     () => nextAyah());
-        navigator.mediaSession.setActionHandler('previoustrack', () => prevAyah());
-      }
     }
 
     async function nextAyah() {
@@ -4489,117 +2970,7 @@ function getVariantHighlightCal() {
 
     speedSelect.onchange = () => { if(audioPlayer) audioPlayer.playbackRate = parseFloat(speedSelect.value); };
 
-    // ── Desktop page nav ──
-    function updateDesktopNavButtons() {
-      const prev = document.getElementById('desktopPrevBtn');
-      const next = document.getElementById('desktopNextBtn');
-      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
-      if (prev) prev.classList.toggle('disabled', currentPage <= 1);
-      if (next) next.classList.toggle('disabled', currentPage >= 604);
-    }
-    window.desktopNavPrev = function() {
-      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
-      if (currentPage > 1) goToPage(currentPage - step);
-    };
-    window.desktopNavNext = function() {
-      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
-      if (currentPage < 604) goToPage(currentPage + step);
-    };
-
-    /* ── Fit-width & dual-page modes (desktop only) ── */
-    let fitWidth = localStorage.getItem('quranFitWidth') === '1';
-    let dualPage = localStorage.getItem('quranDualPage') === '1';
-
-    /* ── Fit-width toggle ── */
-    window.toggleFitWidth = function() {
-      if (window.innerWidth < 700) return;
-      fitWidth = !fitWidth;
-      dualPage = false;
-      localStorage.setItem('quranFitWidth', fitWidth ? '1' : '0');
-      localStorage.setItem('quranDualPage', '0');
-      document.body.classList.toggle('fit-width', fitWidth);
-      document.body.classList.remove('dual-page');
-      document.getElementById('fitWidthBtn')?.classList.toggle('mode-active', fitWidth);
-      document.getElementById('dualPageBtn')?.classList.remove('mode-active');
-      updateContent();
-    };
-
-    /* ── Dual-page toggle ── */
-    window.toggleDualPage = function() {
-      if (window.innerWidth < 700) return;
-      dualPage = !dualPage;
-      fitWidth = false;
-      localStorage.setItem('quranDualPage', dualPage ? '1' : '0');
-      localStorage.setItem('quranFitWidth', '0');
-      document.body.classList.toggle('dual-page', dualPage);
-      document.body.classList.remove('fit-width');
-      document.getElementById('dualPageBtn')?.classList.toggle('mode-active', dualPage);
-      document.getElementById('fitWidthBtn')?.classList.remove('mode-active');
-      if (dualPage && currentPage % 2 === 0 && currentPage > 1) currentPage--;
-      updateContent();
-    };
-
-    /* ── Show mode buttons on desktop ── */
-    function initDesktopModes() {
-      if (window.innerWidth >= 700) {
-        const fb = document.getElementById('fitWidthBtn');
-        const db = document.getElementById('dualPageBtn');
-        if (fb) { fb.style.display = ''; fb.classList.toggle('mode-active', fitWidth); }
-        if (db) { db.style.display = ''; db.classList.toggle('mode-active', dualPage); }
-      }
-      document.body.classList.toggle('fit-width', fitWidth && window.innerWidth >= 700);
-      document.body.classList.toggle('dual-page', dualPage && window.innerWidth >= 700);
-    }
-    initDesktopModes();
-    window.addEventListener('resize', initDesktopModes);
-
-    // ── Sync audio player width to mushaf image ──
-    function syncPlayerWidth() {
-      const player = document.getElementById('audioMiniPlayer');
-      if (!player) return;
-      if (window.innerWidth < 700) { player.style.left = ''; player.style.right = ''; return; }
-      const img = document.getElementById('pageImg');
-      if (!img || !img.offsetWidth) return;
-      const rect = img.getBoundingClientRect();
-      const pad = 4;
-      player.style.left  = Math.max(8, Math.round(rect.left  + pad)) + 'px';
-      player.style.right = Math.max(8, Math.round(window.innerWidth - rect.right + pad)) + 'px';
-    }
-
-    // ── Header/UI show-hide ────────────────────────────────────────────────────
-    let _headerHidden     = false;
-    let _headerToggleLock = false;
-    let _headerLastShown  = Date.now();
-
-    function setHeaderVisible(show) {
-      if (window.innerWidth >= 700) return; // pinned on desktop via CSS
-      if (_headerHidden === !show) return;
-      if (!show && Date.now() - _headerLastShown < 1500) return;
-      if (show) _headerLastShown = Date.now();
-      _headerHidden = !show;
-      const header = document.getElementById('appHeader');
-      header.classList.toggle('hidden-ui', !show);
-      if (!show) {
-        miniPlayer.classList.add('hidden-ui');
-        miniPlayer.classList.remove('visible');
-        if (!isPlaying) {
-          document.querySelectorAll('.ayah-highlight').forEach(el => el.classList.remove('active', 'playing-highlight'));
-          windowCurrentAyahGlobal = null;
-        }
-      }
-    }
-
-    function toggleHeaderUI() {
-      if (window.innerWidth >= 700) return;
-      if (_headerToggleLock) return;
-      _headerToggleLock = true;
-      setTimeout(() => { _headerToggleLock = false; }, 420);
-      setHeaderVisible(_headerHidden);
-    }
-    // ──────────────────────────────────────────────────────────────────────────
-
     function showMiniPlayerForAyah(surah, ayah, autoplay = false) {
-      setHeaderVisible(true); // ensure header is visible when mini-player appears
       miniPlayer.classList.remove('hidden-ui');
       miniPlayer.classList.add('visible');
       rangeFromInput.value = ayah; rangeToInput.value = ''; currentRangeRepeat = 0;
@@ -4643,7 +3014,7 @@ function getVariantHighlightCal() {
         tafsirModal: 'tafsirSheetBackdrop'
       };
       const onStart = (e) => {
-        if (e.target.closest('.reciter-selector') || e.target.closest('.reciter-trigger') || e.target.closest('.reciter-picker') || e.target.closest('input') || e.target.closest('button')) return;
+        if (e.target.closest('.reciter-selector') || e.target.closest('input') || e.target.closest('button')) return;
         touchStartY = e.touches[0].clientY;
         touchCurrentY = touchStartY;
         isDragging = true;
@@ -4679,7 +3050,6 @@ function getVariantHighlightCal() {
       document.getElementById('contextPlayBtn').style.display = 'flex';
       document.getElementById('contextCopyBtn').style.display = 'flex';
       document.getElementById('contextTafsirBtn').style.display = 'flex';
-      document.getElementById('contextTasmeeBtn').style.display = 'flex';
       updateContextMushafLabel();
       contextSheet.classList.add('visible');
       document.getElementById('contextSheetBackdrop').classList.add('visible');
@@ -4689,7 +3059,6 @@ function getVariantHighlightCal() {
         document.getElementById('contextPlayBtn').style.display = 'none';
         document.getElementById('contextCopyBtn').style.display = 'none';
         document.getElementById('contextTafsirBtn').style.display = 'none';
-        document.getElementById('contextTasmeeBtn').style.display = 'none';
         updateContextMushafLabel();
         contextSheet.classList.add('visible');
         document.getElementById('contextSheetBackdrop').classList.add('visible');
@@ -4772,11 +3141,11 @@ function getVariantHighlightCal() {
       return MUSHAF_VARIANTS.find(v => v.id === variantId) || MUSHAF_VARIANTS[0];
     }
     function getImagePath(variantId, page, ext) {
-      const dir = variantId === 'mushaf-green' ? 'mushaf/madina-green'
-                : variantId === 'mushaf-borderd' ? 'mushaf/mushaf-2'
-                : variantId === 'mushaf-tajweed' ? 'mushaf/tajweed'
-                : variantId === 'mushaf-colored' ? 'mushaf/madina-1421'
-                : 'mushaf/mushaf-madina-1441';
+      const dir = variantId === 'mushaf-green' ? '../mushaf pages/madina-green'
+                : variantId === 'mushaf-borderd' ? '../mushaf-2'
+                : variantId === 'mushaf-tajweed' ? '../mushaf pages/tajweed'
+                : variantId === 'mushaf-colored' ? '../mushaf pages/madina-1421'
+                : '../mushaf pages/mushaf-madina-1441';
       return `${dir}/${page}.${ext}`;
     }
 
@@ -4803,7 +3172,7 @@ function getVariantHighlightCal() {
         thumb.className = 'mushaf-card-thumb';
         const img = document.createElement('img');
         const thumbPage = v.id === 'mushaf-tajweed' ? '003' : '001';
-        img.src = v.id === 'mushaf-text' ? 'img/txt.png' : getImagePath(v.id, thumbPage, v.ext);
+        img.src = v.id === 'mushaf-text' ? '../img/txt.png' : getImagePath(v.id, thumbPage, v.ext);
         img.alt = v.nameAr;
         img.loading = 'lazy';
         img.onerror = function() { this.style.display = 'none'; };
@@ -4847,19 +3216,9 @@ function getVariantHighlightCal() {
       if (label) label.textContent = THEME_NAMES[theme] || 'ذهبي';
       document.querySelectorAll('.theme-swatch').forEach(el => el.classList.toggle('active', el.dataset.theme === theme));
       document.getElementById('settingsModal').classList.add('active');
-      if (typeof tarteelUpdateSettingsRow === 'function') tarteelUpdateSettingsRow();
     }
     function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
     function handleOverlayClick(event, modalId) { if (event.target === document.getElementById(modalId)) closeModal(modalId); }
-
-    function openHowToUse() {
-      document.getElementById('howToUseBackdrop').style.display = 'block';
-      requestAnimationFrame(() => document.getElementById('howToUseSheet').classList.add('visible'));
-    }
-    function closeHowToUse() {
-      document.getElementById('howToUseSheet').classList.remove('visible');
-      setTimeout(() => { document.getElementById('howToUseBackdrop').style.display = 'none'; }, 420);
-    }
 
     function updatePageLabels() {
       const juzLabel = document.getElementById('juzLabel');
@@ -4873,22 +3232,10 @@ function getVariantHighlightCal() {
       if (typeof getCurrentSurah === 'function') { const s = getCurrentSurah(); if(s) sName = s.name; }
       if (juzLabel && jName) juzLabel.textContent = jName;
       if (surahLabel && sName) surahLabel.textContent = sName;
-      if (pageLabel) {
-        if (dualPage && window.innerWidth >= 700 && currentPage < 604) {
-          pageLabel.textContent = `${currentPage}-${currentPage + 1}`;
-        } else {
-          pageLabel.textContent = currentPage;
-        }
-      }
+      if (pageLabel) pageLabel.textContent = currentPage;
       if (topJuzName && jName) topJuzName.textContent = jName;
       if (topSurahName && sName) topSurahName.textContent = sName;
-      if (topPageName) {
-        if (dualPage && window.innerWidth >= 700 && currentPage < 604) {
-          topPageName.textContent = `صفحة ${currentPage}-${currentPage + 1}`;
-        } else {
-          topPageName.textContent = `صفحة ${currentPage}`;
-        }
-      }
+      if (topPageName) topPageName.textContent = `صفحة ${currentPage}`;
     }
 
     function toggleSearchOverlay(action = 'toggle') {
@@ -5223,12 +3570,7 @@ function getVariantHighlightCal() {
       hint.classList.add('hiding');
       clearTimeout(zoomHintTimeout);
     }
-    function dismissZoomHintForever() {
-      localStorage.setItem('zoom_hint_dismissed', '1');
-      dismissZoomHint();
-    }
     function showZoomHint() {
-      if (localStorage.getItem('zoom_hint_dismissed') === '1') return;
       const hint = document.getElementById('zoomHint');
       if (!hint) return;
       hint.classList.remove('hiding');
@@ -5240,202 +3582,21 @@ function getVariantHighlightCal() {
       }, 5000);
     }
 
-    // ========== DOWNLOAD MODAL ==========
-    const DL_KEY   = 'quranV3DlDone';
-    const DL_CACHE = 'quran-mushaf-images-v1';
-    const DL_SIZES = {
-      'mushaf-colored':    '~65 ميجابايت',
-      'mushaf-madina1441': '~70 ميجابايت',
-      'mushaf-tajweed':    '~75 ميجابايت',
-      'mushaf-borderd':    '~120 ميجابايت',
-      'mushaf-green':      '~65 ميجابايت',
-    };
-    let dlSelected  = new Set(['mushaf-colored']);
-    let dlRunning   = false;
-
-    function dlInit() {
-      if (localStorage.getItem(DL_KEY)) return;
-      dlBuildCards();
-      setTimeout(() => document.getElementById('dlModal')?.classList.add('active'), 800);
-    }
-
-    function dlBuildCards() {
-      const wrap = document.getElementById('dlVariants');
-      if (!wrap) return;
-      wrap.innerHTML = '';
-      MUSHAF_VARIANTS.filter(v => v.ext).forEach(v => {
-        const sel  = dlSelected.has(v.id);
-        const thumb = v.id === 'mushaf-tajweed' ? '003' : '001';
-        const src   = getImagePath(v.id, thumb, v.ext);
-        const div   = document.createElement('div');
-        div.className = 'dl-vcard' + (sel ? ' dl-selected' : '');
-        div.dataset.vid = v.id;
-        div.innerHTML = `
-          <div class="dl-thumb">
-            <img src="${src}" alt="${v.nameAr}" loading="eager" onerror="this.style.opacity=0">
-            <div class="dl-thumb-ov">
-              <div class="dl-chk">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </div>
-            </div>
-          </div>
-          <div class="dl-vbody">
-            <div class="dl-vname">${v.nameAr}</div>
-            <div class="dl-vsize">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              ${DL_SIZES[v.id] || '~70 ميجابايت'}
-            </div>
-          </div>`;
-        div.onclick = () => {
-          if (dlSelected.has(v.id)) dlSelected.delete(v.id);
-          else                       dlSelected.add(v.id);
-          div.classList.toggle('dl-selected', dlSelected.has(v.id));
-          document.getElementById('dlGoBtn').disabled = (dlSelected.size === 0);
-        };
-        wrap.appendChild(div);
-      });
-    }
-
-    function dlSkip() {
-      document.getElementById('dlModal')?.classList.remove('active');
-      localStorage.setItem(DL_KEY, '1');
-    }
-    function dlClose() {
-      document.getElementById('dlModal')?.classList.remove('active');
-    }
-
-    // ── Minimize / restore ──
-    function dlMinimize() {
-      document.getElementById('dlModal').classList.remove('active');
-      document.getElementById('dlMiniPill').classList.add('active');
-    }
-    function dlRestore() {
-      document.getElementById('dlMiniPill').classList.remove('active');
-      document.getElementById('dlModal').classList.add('active');
-    }
-    function dlSyncMiniPill(pct, variantName) {
-      const fill = document.getElementById('dlMiniRingFill');
-      if (fill) fill.style.strokeDashoffset = (94.25 * (1 - pct / 100)).toFixed(2);
-      const pctEl = document.getElementById('dlMiniPct');
-      if (pctEl) pctEl.textContent = pct + '%';
-      const lbl = document.getElementById('dlMiniLabel');
-      if (lbl) lbl.textContent = variantName;
-    }
-    let _dlToastTimer = null;
-    function showDlCompleteToast(variantNames) {
-      document.getElementById('dlMiniPill').classList.remove('active');
-      const sub = document.getElementById('dlToastSub');
-      if (sub) sub.textContent = variantNames.join(' · ');
-      const bar = document.getElementById('dlToastBarFill');
-      if (bar) { bar.style.animation = 'none'; bar.offsetWidth; bar.style.animation = ''; }
-      document.getElementById('dlCompleteToast').classList.add('show');
-      clearTimeout(_dlToastTimer);
-      _dlToastTimer = setTimeout(hideDlCompleteToast, 5500);
-    }
-    function hideDlCompleteToast() {
-      document.getElementById('dlCompleteToast')?.classList.remove('show');
-    }
-
-    function dlOpenFromSettings() {
-      closeModal('settingsModal');
-      // Reset modal to selection view
-      document.getElementById('dlSelectSection').style.display   = 'block';
-      document.getElementById('dlProgressSection').style.display = 'none';
-      document.getElementById('dlDoneSection').style.display     = 'none';
-      // Pre-select current variant
-      dlSelected = new Set([currentMushafVariant]);
-      dlBuildCards();
-      document.getElementById('dlModal')?.classList.add('active');
-    }
-
-    async function dlStart() {
-      if (dlRunning || dlSelected.size === 0) return;
-      dlRunning = true;
-      document.getElementById('dlSelectSection').style.display  = 'none';
-      document.getElementById('dlProgressSection').style.display = 'block';
-
-      const variants   = [...dlSelected];
-      const totalPages = variants.length * 604;
-      let   done       = 0;
-      const BATCH      = 6;
-      let   cache      = null;
-      try { cache = 'caches' in window ? await caches.open(DL_CACHE) : null; } catch {}
-
-      for (const vid of variants) {
-        const v = MUSHAF_VARIANTS.find(m => m.id === vid);
-        if (!v?.ext) continue;
-        document.getElementById('dlProgName').textContent = v.nameAr;
-
-        for (let p = 1; p <= 604; p += BATCH) {
-          const batch = [];
-          for (let i = p; i < Math.min(p + BATCH, 605); i++) {
-            const pad  = i.toString().padStart(3, '0');
-            const path = getImagePath(vid, pad, v.ext);
-            batch.push(
-              fetch(path).then(r => { if (r.ok && cache) cache.put(path, r); }).catch(() => {})
-            );
-          }
-          await Promise.all(batch);
-          done += batch.length;
-          const pct = Math.round((done / totalPages) * 100);
-          const pageNum = Math.min(p + BATCH - 1, 604);
-          document.getElementById('dlPct').textContent      = pct + '%';
-          document.getElementById('dlBarFill').style.width  = pct + '%';
-          document.getElementById('dlProgPages').textContent = `صفحة ${pageNum} من ٦٠٤`;
-          document.getElementById('dlStatusMsg').textContent = `جاري التحميل…  ${done} / ${totalPages}`;
-          document.getElementById('dlRingFill').style.strokeDashoffset =
-            (307.88 * (1 - pct / 100)).toFixed(2);
-          dlSyncMiniPill(pct, v.nameAr);
-        }
-      }
-
-      dlRunning = false;
-      localStorage.setItem(DL_KEY, '1');
-
-      // Switch to a downloaded variant: keep current if it was downloaded, else use first downloaded
-      const downloadedList = variants;
-      const targetVariant  = downloadedList.includes(currentMushafVariant)
-                             ? currentMushafVariant
-                             : downloadedList[0];
-      if (targetVariant && targetVariant !== currentMushafVariant) {
-        setMushafVariant(targetVariant);
-      }
-
-      document.getElementById('dlProgressSection').style.display = 'none';
-      document.getElementById('dlDoneSection').style.display     = 'block';
-      document.getElementById('dlModal').classList.remove('active');
-      showDlCompleteToast(variants.map(vid => {
-        const v = MUSHAF_VARIANTS.find(m => m.id === vid);
-        return v ? v.nameAr : vid;
-      }));
-    }
-
     // ========== SWIPE LOGIC ==========
     let pageSwipeStartX = 0;
     document.addEventListener('touchstart', e => {
-      if (fitWidth && window.innerWidth >= 700) return;
       if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
       pageSwipeStartX = e.changedTouches[0].screenX;
     }, {passive: true});
     document.addEventListener('touchend', e => {
-      if (fitWidth && window.innerWidth >= 700) return;
       if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
       const touchEndX = e.changedTouches[0].screenX;
       const diff = touchEndX - pageSwipeStartX;
-      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
       if (Math.abs(diff) > 80) {
-        if (diff > 0) { if (currentPage < 604) { goToPage(currentPage + step); } }
-        else { if (currentPage > 1) { goToPage(currentPage - step); } }
+        if (diff > 0) { if (currentPage < 604) { goToPage(currentPage + 1); } }
+        else { if (currentPage > 1) { goToPage(currentPage - 1); } }
       }
     }, {passive: true});
-
-    // ========== KEYBOARD NAV (desktop) ==========
-    document.addEventListener('keydown', e => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); goToPage(currentPage - step); }
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); goToPage(currentPage + step); }
-    });
 
     // ========== WINDOW INITIALIZATION ==========
     window.onload = function () {
@@ -5500,26 +3661,8 @@ function getVariantHighlightCal() {
         updateContent();
       });
 
-      // Sync overlay size with image on any layout/viewport change
-      const syncOverlay = () => {
-        const img = document.getElementById('pageImg');
-        const overlay = document.getElementById('highlightOverlay');
-        if (img && overlay && img.offsetHeight > 0) {
-          overlay.style.width  = img.offsetWidth  + 'px';
-          overlay.style.height = img.offsetHeight + 'px';
-        }
-        syncPlayerWidth();
-      };
-      const ro = new ResizeObserver(syncOverlay);
-      const imgEl = document.getElementById('pageImg');
-      if (imgEl) ro.observe(imgEl);
-      window.addEventListener('resize', syncOverlay);
-      document.addEventListener('orientationchange', () => setTimeout(syncOverlay, 300));
-
       expandedReciterSelect.value = currentReciter;
       updateReciterUI();
-      updateDesktopNavButtons();
-      dlInit();
 
       // Backdrop click closes sheets
       document.getElementById('contextSheetBackdrop').addEventListener('click', closeContextMenu);
@@ -5531,1087 +3674,8 @@ function getVariantHighlightCal() {
       setupSheetDragClose(expandedSheet);
     };
 
-    function goHome() { window.location.href = 'index.html'; }
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
-
-    // ============================================================
-    //  TASMEE' CONTROLLER (quran.html — mushaf image mode)
-    // ============================================================
-    let tasmeeEngine = null;
-    let tasmeeLastPage = null;
-    let tasmeeCurrentAyahHighlight = -1;
-
-    function openTasmeeSetup() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRec) {
-        showCustomToast('وضع التسميع غير مدعوم على هذا المتصفح — جرب Chrome أو Edge');
-        return;
-      }
-      document.getElementById('tasmeeHideText').checked = localStorage.getItem('tasmee_hide_text') === '1';
-      document.getElementById('tasmeeShowAyahEnd').checked = localStorage.getItem('tasmee_show_ayah_end') !== '0';
-      document.getElementById('tasmeeAutoFlip').checked = localStorage.getItem('tasmee_auto_flip') !== '0';
-      document.getElementById('tasmeeAudioFeedback').checked = localStorage.getItem('tasmee_audio_feedback') !== '0';
-      document.getElementById('tasmeeSheetBackdrop').style.display = 'block';
-      document.getElementById('tasmeeSetupSheet').classList.add('visible');
-    }
-
-    function closeTasmeeSetup() {
-      document.getElementById('tasmeeSheetBackdrop').style.display = 'none';
-      document.getElementById('tasmeeSetupSheet').classList.remove('visible');
-    }
-
-    async function fetchTasmeeTextForPage(page) {
-      const cacheKey = `tasmee_text_v1_${page}`;
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) return JSON.parse(cached);
-      const res = await fetch(`https://api.alquran.cloud/v1/page/${page}/quran-uthmani`);
-      const data = await res.json();
-      if (!data || data.code !== 200) throw new Error('فشل تحميل نص الصفحة');
-      const ayahData = data.data.ayahs.map(a => ({
-        number: a.number,
-        numberInSurah: a.numberInSurah,
-        surahName: a.surah.name,
-        text: a.text
-      }));
-      sessionStorage.setItem(cacheKey, JSON.stringify(ayahData));
-      return ayahData;
-    }
-
-    function renderTasmeeTextPanel(ayahData, showAyahEnd) {
-      const container = document.getElementById('tasmeeTextContent');
-      if (!container) return;
-      let html = '';
-      ayahData.forEach((a, i) => {
-        const numAr = a.numberInSurah.toLocaleString('ar-EG');
-        html += `<span class="ayah-text" data-tasmee-ayah="${i}">${a.text}</span>`;
-        html += `<span class="tasmee-ayah-end" style="color:var(--accent);font-size:0.85em;margin:0 4px;${showAyahEnd ? '' : 'visibility:hidden;'}">﴿${numAr}﴾</span> `;
-      });
-      container.innerHTML = html;
-    }
-
-    function _tasmeeHighlightPanelAyah(ayahIdx) {
-      if (tasmeeCurrentAyahHighlight === ayahIdx) return;
-      if (tasmeeCurrentAyahHighlight >= 0) {
-        const prev = document.querySelector(`#tasmeeTextContent .ayah-text[data-tasmee-ayah="${tasmeeCurrentAyahHighlight}"]`);
-        if (prev) prev.style.background = '';
-      }
-      tasmeeCurrentAyahHighlight = ayahIdx;
-      if (ayahIdx >= 0) {
-        const curr = document.querySelector(`#tasmeeTextContent .ayah-text[data-tasmee-ayah="${ayahIdx}"]`);
-        if (curr) {
-          curr.style.background = 'rgba(16,185,129,0.12)';
-          curr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }
-    }
-
-    function _tasmeeStartWithData(ayahData, hideText, audioFb, autoFlip) {
-      if (autoFlip === undefined) autoFlip = localStorage.getItem('tasmee_auto_flip') !== '0';
-      const showAyahEnd = localStorage.getItem('tasmee_show_ayah_end') !== '0';
-      const btn = document.getElementById('tasmeeBtn');
-      tasmeeCurrentAyahHighlight = -1;
-      tasmeeEngine = new TasmeeEngine({
-        audioFeedback: audioFb,
-        onWordMatch: (_idx, _state, progress) => {
-          const el = document.getElementById('tasmeeProgressText');
-          if (el) el.textContent = `${progress.done} / ${progress.total} كلمة`;
-          if (progress.currentAyahIdx >= 0) _tasmeeHighlightPanelAyah(progress.currentAyahIdx);
-        },
-        onSessionEnd: (summary) => {
-          document.getElementById('tasmeeActiveBar').classList.remove('active');
-          document.getElementById('tasmeeTextPanel').classList.remove('active');
-          _tasmeeHighlightPanelAyah(-1);
-          if (btn) btn.disabled = false;
-          const engRef = tasmeeEngine;
-          tasmeeEngine = null;
-          // Auto-advance to next page when the whole page is completed
-          if (summary.completed && autoFlip && currentPage < 604) {
-            const nextPage = currentPage + 1;
-            if (btn) btn.disabled = true;
-            navigateTo(nextPage, 'next');
-            showCustomToast('انتهت الصفحة! جاري الانتقال للصفحة التالية...');
-            fetchTasmeeTextForPage(nextPage).then(newData => {
-              renderTasmeeTextPanel(newData, showAyahEnd);
-              document.getElementById('tasmeeTextPanel').classList.add('active');
-              _tasmeeStartWithData(newData, hideText, audioFb, autoFlip);
-            }).catch(() => { if (btn) btn.disabled = false; });
-            return;
-          }
-          engRef._showResultModal(summary);
-        }
-      });
-      tasmeeEngine.startSession(ayahData, { hideText })
-        .then(() => {
-          document.getElementById('tasmeeProgressText').textContent = `٠ / ${tasmeeEngine._wordTokens.length} كلمة`;
-          document.getElementById('tasmeeMicIndicator').classList.remove('paused');
-          document.getElementById('tasmeePauseBtn').textContent = '⏸';
-          document.getElementById('tasmeeActiveBar').classList.add('active');
-        })
-        .catch(err => {
-          if (btn) btn.disabled = false;
-          document.getElementById('tasmeeTextPanel').classList.remove('active');
-          tasmeeEngine = null;
-          showCustomToast('تعذر الوصول للميكروفون: ' + (err.message || err));
-        });
-    }
-
-    async function startTasmeeSession() {
-      closeTasmeeSetup();
-      stopAudio();
-
-      const hideText = document.getElementById('tasmeeHideText').checked;
-      const showAyahEnd = document.getElementById('tasmeeShowAyahEnd').checked;
-      const audioFlip = document.getElementById('tasmeeAutoFlip').checked;
-      const audioFb = document.getElementById('tasmeeAudioFeedback').checked;
-      localStorage.setItem('tasmee_hide_text', hideText ? '1' : '0');
-      localStorage.setItem('tasmee_show_ayah_end', showAyahEnd ? '1' : '0');
-      localStorage.setItem('tasmee_auto_flip', audioFlip ? '1' : '0');
-      localStorage.setItem('tasmee_audio_feedback', audioFb ? '1' : '0');
-
-      const btn = document.getElementById('tasmeeBtn');
-      if (btn) btn.disabled = true;
-
-      let ayahData;
-      try {
-        ayahData = await fetchTasmeeTextForPage(currentPage);
-      } catch (e) {
-        if (btn) btn.disabled = false;
-        showCustomToast('تعذر تحميل النص: ' + e.message);
-        return;
-      }
-
-      tasmeeLastPage = currentPage;
-      renderTasmeeTextPanel(ayahData, showAyahEnd);
-      document.getElementById('tasmeeTextPanel').classList.add('active');
-      _tasmeeStartWithData(ayahData, hideText, audioFb, audioFlip);
-    }
-
-    function pauseOrResumeTasmee() {
-      if (!tasmeeEngine) return;
-      if (tasmeeEngine.isPaused) {
-        tasmeeEngine.resumeSession();
-        document.getElementById('tasmeePauseBtn').textContent = '⏸';
-      } else {
-        tasmeeEngine.pauseSession();
-        document.getElementById('tasmeePauseBtn').textContent = '▶';
-      }
-    }
-
-    function endTasmeeSession() {
-      if (!tasmeeEngine) return;
-      tasmeeEngine.endSession();
-    }
-
-    function retryTasmeeSession() {
-      closeModal('tasmeeResultsModal');
-      if (tasmeeLastPage !== null) openTasmeeSetup();
-    }
-
-    // End Tasmee' on manual page navigation (not auto-advance)
-    const _origNavigateTo = navigateTo;
-    navigateTo = function(newPage, dir) {
-      if (tasmeeEngine && tasmeeEngine.isActive) {
-        tasmeeEngine.endSession();
-      }
-      _origNavigateTo(newPage, dir);
-    };
-
+    function goHome() { window.location.href = '../index.html'; }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js').catch(console.warn);
   </script>
-  <script src="js/tasmee-engine.js"></script>
-
-  <!-- ===== TARTEEL SHEET ===== -->
-  <div class="bottom-sheet" id="tarteelSheet">
-    <div class="sheet-drag-handle"></div>
-    <div style="padding:0 4px 20px">
-
-      <div class="tarteel-title">التعرف على الآية</div>
-      <div class="tarteel-subtitle">اتلُ آية ونتعرف عليها بدون إنترنت</div>
-
-      <!-- Status row -->
-      <div class="tarteel-status-row" id="tarteelStatusRow">
-        <div class="tarteel-status-dot" id="tarteelDot"></div>
-        <div style="flex:1">
-          <div class="tarteel-status-text" id="tarteelStatusText">لم يتم تحميل النموذج بعد</div>
-          <div class="tarteel-progress-bar" id="tarteelProgressBar" style="display:none">
-            <div class="tarteel-progress-fill" id="tarteelProgressFill" style="width:0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Download button (shown when not loaded) -->
-      <div class="tarteel-btn-row" id="tarteelDownloadRow">
-        <button class="tarteel-action-btn primary" id="tarteelDownloadBtn" onclick="tarteelDownload()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          تحميل النموذج
-        </button>
-      </div>
-
-      <!-- Record area (shown when model ready) -->
-      <div id="tarteelRecordArea" style="display:none">
-        <div class="tarteel-record-wrap">
-          <button class="tarteel-record-circle" id="tarteelRecordCircle" onclick="tarteelToggleRecord()">
-            <svg id="tarteelMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-            </svg>
-            <svg id="tarteelStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
-              <rect x="3" y="3" width="18" height="18" rx="3"/>
-            </svg>
-          </button>
-          <div class="tarteel-record-label" id="tarteelRecordLabel">اضغط للتسجيل</div>
-        </div>
-
-        <!-- Result card -->
-        <div class="tarteel-result-card" id="tarteelResultCard">
-          <div class="tarteel-result-surah" id="tarteelResultSurah"></div>
-          <div class="tarteel-result-text" id="tarteelResultText"></div>
-          <div class="tarteel-result-meta">
-            <div class="tarteel-confidence" id="tarteelConfidence"></div>
-            <button class="tarteel-action-btn primary" style="flex:0;padding:8px 18px;font-size:0.82rem" onclick="tarteelNavigate()">
-              الانتقال للآية
-            </button>
-          </div>
-        </div>
-
-        <div class="tarteel-btn-row" id="tarteelRetryRow" style="display:none">
-          <button class="tarteel-action-btn secondary" onclick="tarteelReset()">محاولة أخرى</button>
-        </div>
-
-        <!-- Tasmee' Pro entry button (shown when model ready) -->
-        <div class="tarteel-btn-row" id="tarteelStartTasmeeRow" style="display:none;margin-top:2px">
-          <button class="tarteel-action-btn secondary" onclick="startAITasmee()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-            </svg>
-            تسميع الصفحة الحالية
-          </button>
-        </div>
-      </div>
-
-      <!-- ── Tasmee' Pro Session ── -->
-      <div id="tarteelTasmeeSession" style="display:none">
-
-        <div class="tasmee-session-header">
-          <div class="tarteel-title" style="margin:0;font-size:0.95rem">التسميع الذكي</div>
-          <span class="tasmee-session-badge" id="tarteelTasmeeScore">٠ / ٠</span>
-        </div>
-
-        <!-- Current ayah display -->
-        <div class="tasmee-ayah-card" id="tarteelAyahCard">
-          <div class="tasmee-ayah-text" id="tarteelAyahText"></div>
-          <div class="tasmee-ayah-ref" id="tarteelAyahRef"></div>
-        </div>
-
-        <!-- Session record button -->
-        <div class="tarteel-record-wrap" id="tarteelSessionRecordWrap">
-          <button class="tarteel-record-circle" id="tarteelSessionRecordCircle" onclick="aiTasmeeToggleRecord()">
-            <svg id="tarteelSessionMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-            </svg>
-            <svg id="tarteelSessionStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
-              <rect x="3" y="3" width="18" height="18" rx="3"/>
-            </svg>
-          </button>
-          <div class="tarteel-record-label" id="tarteelSessionRecordLabel">اضغط للتلاوة</div>
-        </div>
-
-        <!-- Feedback -->
-        <div class="tasmee-feedback" id="tarteelTasmeeFeedback">
-          <div class="tasmee-feedback-emoji" id="tarteelFeedbackEmoji"></div>
-          <div class="tasmee-feedback-title" id="tarteelFeedbackTitle"></div>
-          <div class="tasmee-feedback-detail" id="tarteelFeedbackDetail"></div>
-        </div>
-
-        <!-- Next / Retry -->
-        <div class="tarteel-btn-row" id="tarteelTasmeeControls" style="display:none">
-          <button class="tarteel-action-btn secondary" onclick="aiTasmeeRetry()">إعادة</button>
-          <button class="tarteel-action-btn primary" id="tarteelTasmeeNextBtn" onclick="aiTasmeeNext()">التالية ›</button>
-        </div>
-
-        <!-- Summary (shown at end) -->
-        <div class="tasmee-summary" id="tarteelTasmeeSummary" style="display:none">
-          <div class="tasmee-summary-num" id="tarteelSummaryNum"></div>
-          <div class="tasmee-summary-label" id="tarteelSummaryLabel"></div>
-        </div>
-        <div class="tarteel-btn-row" id="tarteelSummaryActions" style="display:none">
-          <button class="tarteel-action-btn secondary" onclick="endAITasmee()">إغلاق</button>
-          <button class="tarteel-action-btn primary" onclick="restartAITasmee()">مجدداً</button>
-        </div>
-
-        <!-- End session -->
-        <div class="tarteel-btn-row" id="tarteelTasmeeEndRow" style="margin-top:4px">
-          <button class="tarteel-action-btn secondary" style="font-size:0.8rem;color:var(--text-hint)" onclick="endAITasmee()">إنهاء التسميع</button>
-        </div>
-      </div>
-
-      <!-- Close -->
-      <div class="tarteel-btn-row" style="margin-top:4px">
-        <button class="tarteel-action-btn secondary" onclick="closeTarteelSheet()">إغلاق</button>
-      </div>
-    </div>
-  </div>
-  <div class="sheet-backdrop" id="tarteelBackdrop" onclick="closeTarteelSheet()"></div>
-
-  <!-- ════ Tasmee' Pro full-screen panel ════ -->
-  <div id="tasmeeProPanel" style="display:none">
-
-    <!-- Header -->
-    <div class="tp-header">
-      <button class="tp-close-btn" onclick="closeTasmeePro()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-      <span class="tp-page-label" id="tpPageLabel">صفحة ١</span>
-      <span class="tp-error-badge" id="tpErrorBadge">٠ أخطاء</span>
-    </div>
-
-    <!-- Ayah text area -->
-    <div class="tp-content" id="tpContent"></div>
-
-    <!-- Live transcript strip (shown during recording) -->
-    <div class="tp-live-strip" id="tpLiveStrip"></div>
-
-    <!-- Bottom bar -->
-    <div class="tp-bottom-bar">
-      <div class="tp-rec-indicator">
-        <span class="tp-rec-dot" id="tpRecDot"></span>
-        <span id="tpRecTimer">00:00</span>
-      </div>
-      <div class="tp-action-btns">
-        <button class="tp-icon-btn" id="tpEyeBtn" onclick="tpToggleText()" title="إظهار/إخفاء">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
-        <button class="tp-icon-btn" onclick="tpPrev()" title="السابق">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <button class="tp-icon-btn" onclick="tpSkipBack()" title="رجوع آيتين">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <polyline points="19 18 13 12 19 6"/><polyline points="11 18 5 12 11 6"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Floating mic button -->
-    <button class="tp-mic-btn" id="tpMicBtn" onclick="tpToggleRecord()">
-      <svg id="tpMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-        <line x1="12" y1="19" x2="12" y2="22"/>
-      </svg>
-      <svg id="tpStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
-        <rect x="3" y="3" width="18" height="18" rx="3"/>
-      </svg>
-    </button>
-  </div>
-
-  <script>
-  // ── Tarteel integration ───────────────────────────────────────────────────
-  let _tarteelWorker = null;
-  let _tarteelReady = false;
-  let _tarteelRecording = false;
-  let _tarteelProcessing = false;
-  let _tarteelResult = null;
-  let _tarteelStream = null;
-  let _tarteelRecorder = null;
-
-  function openTarteelSheet() {
-    document.getElementById('tarteelSheet').classList.add('visible');
-    document.getElementById('tarteelBackdrop').classList.add('visible');
-    if (!_tarteelWorker) _tarteelInitWorker();
-  }
-
-  function closeTarteelSheet() {
-    document.getElementById('tarteelSheet').classList.remove('visible');
-    document.getElementById('tarteelBackdrop').classList.remove('visible');
-    if (_tarteelRecording) _tarteelStopCapture();
-  }
-
-  function _tarteelInitWorker() {
-    _tarteelWorker = new Worker('js/tarteel-worker.js', { type: 'module' });
-    _tarteelWorker.onmessage = _tarteelOnMsg;
-    _tarteelWorker.onerror = e => {
-      e.preventDefault();
-      const msg = e.message || (e.error && e.error.message) || ('سطر ' + e.lineno + ' في ' + e.filename);
-      _tarteelShowError(msg);
-    };
-  }
-
-  function _tarteelOnMsg(e) {
-    const { type, progress, status, result, message } = e.data;
-    if (type === 'loading') _tarteelSetLoading(progress, status);
-    else if (type === 'ready') _tarteelSetReady();
-    else if (type === 'processing') {
-      if (_tarteelTasmeeMode) _aiSetProcessing();
-      else _tarteelSetProcessing();
-    }
-    else if (type === 'result') {
-      if (_tarteelTasmeeMode) { _tarteelTasmeeMode = false; _aiHandleResult(result); }
-      else _tarteelShowResult(result);
-    }
-    else if (type === 'stream_result') {
-      if (typeof _tpHandleStreamResult === 'function') _tpHandleStreamResult(e.data);
-    }
-    else if (type === 'error') {
-      if (_tarteelTasmeeMode) { _tarteelTasmeeMode = false; _tpShowError(message); }
-      else _tarteelShowError(message);
-    }
-  }
-
-  function tarteelDownload() {
-    document.getElementById('tarteelDownloadBtn').disabled = true;
-    document.getElementById('tarteelProgressBar').style.display = 'block';
-    _tarteelWorker.postMessage({ type: 'init' });
-  }
-
-  function _tarteelSetLoading(pct, status) {
-    const dot = document.getElementById('tarteelDot');
-    dot.className = 'tarteel-status-dot loading';
-    document.getElementById('tarteelStatusText').textContent = status || 'جاري التحميل...';
-    document.getElementById('tarteelProgressBar').style.display = 'block';
-    document.getElementById('tarteelProgressFill').style.width = pct + '%';
-  }
-
-  function _tarteelSetReady() {
-    document.getElementById('tarteelDot').className = 'tarteel-status-dot ready';
-    document.getElementById('tarteelStatusText').textContent = 'النموذج جاهز';
-    document.getElementById('tarteelProgressBar').style.display = 'none';
-    document.getElementById('tarteelDownloadRow').style.display = 'none';
-    document.getElementById('tarteelRecordArea').style.display = 'block';
-    document.getElementById('tarteelStartTasmeeRow').style.display = 'flex';
-    _tarteelReady = true;
-  }
-
-  function _tarteelSetProcessing() {
-    _tarteelProcessing = true;
-    document.getElementById('tarteelDot').className = 'tarteel-status-dot loading';
-    document.getElementById('tarteelStatusText').textContent = 'جاري التحليل...';
-    document.getElementById('tarteelRecordCircle').classList.add('processing');
-    document.getElementById('tarteelRecordLabel').textContent = 'جاري المعالجة...';
-    document.getElementById('tarteelRecordCircle').disabled = true;
-  }
-
-  function _tarteelShowResult(result) {
-    _tarteelProcessing = false;
-    _tarteelResult = result;
-
-    document.getElementById('tarteelDot').className = 'tarteel-status-dot ready';
-    document.getElementById('tarteelStatusText').textContent = 'النموذج جاهز';
-    document.getElementById('tarteelRecordCircle').classList.remove('processing');
-    document.getElementById('tarteelRecordCircle').disabled = false;
-    document.getElementById('tarteelRecordLabel').textContent = 'اضغط للتسجيل';
-
-    if (result && result.surah) {
-      const surahEntry = typeof SURAH_MAP !== 'undefined'
-        ? SURAH_MAP.find(s => s.number === result.surah) : null;
-      const surahName = result.surahName || (surahEntry ? surahEntry.name : 'سورة ' + result.surah);
-      document.getElementById('tarteelResultSurah').textContent =
-        surahName + ' — الآية ' + result.ayah;
-      document.getElementById('tarteelResultText').textContent = result.text || '';
-      const pct = Math.round((result.score || 0) * 100);
-      document.getElementById('tarteelConfidence').textContent = 'دقة: ' + pct + '%';
-      document.getElementById('tarteelResultCard').classList.add('visible');
-    } else {
-      document.getElementById('tarteelResultSurah').textContent = 'لم يتم التعرف على الآية';
-      document.getElementById('tarteelResultText').textContent = result?.transcript || '';
-      document.getElementById('tarteelConfidence').textContent = '';
-      document.getElementById('tarteelResultCard').classList.add('visible');
-    }
-    document.getElementById('tarteelRetryRow').style.display = 'flex';
-  }
-
-  function _tarteelShowError(msg) {
-    _tarteelProcessing = false;
-    _tarteelRecording = false;
-    document.getElementById('tarteelDot').className = 'tarteel-status-dot';
-    document.getElementById('tarteelStatusText').textContent = 'خطأ: ' + (msg || 'غير معروف');
-    document.getElementById('tarteelRecordCircle').classList.remove('processing', 'recording');
-    document.getElementById('tarteelRecordCircle').disabled = false;
-    document.getElementById('tarteelMicIcon').style.display = '';
-    document.getElementById('tarteelStopIcon').style.display = 'none';
-    document.getElementById('tarteelRecordLabel').textContent = 'اضغط للتسجيل';
-    if (_tarteelStream) { _tarteelStream.getTracks().forEach(t => t.stop()); _tarteelStream = null; }
-    if (_tarteelRecorder && _tarteelRecorder.state !== 'inactive') { _tarteelRecorder.stop(); }
-    _tarteelRecorder = null;
-    if (!_tarteelReady) {
-      document.getElementById('tarteelDownloadBtn').disabled = false;
-    }
-  }
-
-  async function tarteelToggleRecord() {
-    if (!_tarteelReady || _tarteelProcessing) return;
-    if (_tarteelRecording) {
-      _tarteelStopCapture();
-    } else {
-      await _tarteelStartCapture();
-    }
-  }
-
-  async function _tarteelStartCapture() {
-    try {
-      _tarteelStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      const chunks = [];
-      const preferredTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
-      const mimeType = preferredTypes.find(t => MediaRecorder.isTypeSupported(t)) || '';
-      _tarteelRecorder = mimeType
-        ? new MediaRecorder(_tarteelStream, { mimeType })
-        : new MediaRecorder(_tarteelStream);
-      const recorderRef = _tarteelRecorder;
-      _tarteelRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-      _tarteelRecorder.onstop = async () => {
-        _tarteelStream.getTracks().forEach(t => t.stop());
-        _tarteelStream = null;
-        if (chunks.length === 0) return;
-        try {
-          const blobType = recorderRef.mimeType || mimeType || 'audio/webm';
-          const blob = new Blob(chunks, { type: blobType });
-          const arrayBuf = await blob.arrayBuffer();
-          const decoded = await new AudioContext().decodeAudioData(arrayBuf);
-          // Resample to 16 kHz using OfflineAudioContext
-          const offline = new OfflineAudioContext(1, Math.ceil(decoded.duration * 16000), 16000);
-          const src = offline.createBufferSource();
-          src.buffer = decoded;
-          src.connect(offline.destination);
-          src.start(0);
-          const resampled = await offline.startRendering();
-          const audio = new Float32Array(resampled.getChannelData(0));
-          _tarteelWorker.postMessage({ type: 'recognize', audio }, [audio.buffer]);
-        } catch (err) {
-          _tarteelShowError('خطأ في معالجة الصوت: ' + err.message);
-        }
-      };
-      _tarteelRecorder.start();
-
-      _tarteelRecording = true;
-      document.getElementById('tarteelRecordCircle').classList.add('recording');
-      document.getElementById('tarteelMicIcon').style.display = 'none';
-      document.getElementById('tarteelStopIcon').style.display = '';
-      document.getElementById('tarteelRecordLabel').textContent = 'جاري التسجيل... اضغط للإيقاف';
-      document.getElementById('tarteelDot').className = 'tarteel-status-dot recording';
-      document.getElementById('tarteelStatusText').textContent = 'جاري التسجيل...';
-      document.getElementById('tarteelResultCard').classList.remove('visible');
-      document.getElementById('tarteelRetryRow').style.display = 'none';
-    } catch (err) {
-      _tarteelShowError('تعذر الوصول للميكروفون: ' + err.message);
-    }
-  }
-
-  function _tarteelStopCapture() {
-    _tarteelRecording = false;
-    document.getElementById('tarteelRecordCircle').classList.remove('recording');
-    document.getElementById('tarteelMicIcon').style.display = '';
-    document.getElementById('tarteelStopIcon').style.display = 'none';
-    document.getElementById('tarteelRecordLabel').textContent = 'اضغط للتسجيل';
-    if (_tarteelRecorder && _tarteelRecorder.state !== 'inactive') {
-      _tarteelRecorder.stop(); // triggers onstop → decodes → sends to worker
-    }
-    _tarteelRecorder = null;
-  }
-
-  function tarteelReset() {
-    document.getElementById('tarteelResultCard').classList.remove('visible');
-    document.getElementById('tarteelRetryRow').style.display = 'none';
-    _tarteelResult = null;
-  }
-
-  function tarteelNavigate() {
-    if (!_tarteelResult || !_tarteelResult.surah) return;
-    const surahNum = _tarteelResult.surah;
-    const surahEntry = typeof SURAH_MAP !== 'undefined'
-      ? SURAH_MAP.find(s => s.number === surahNum) : null;
-    if (surahEntry && typeof goToPage === 'function') {
-      closeTarteelSheet();
-      setTimeout(() => goToPage(surahEntry.page), 400);
-    }
-  }
-
-  // ── Settings row: check model cache status and update label ──────────────
-  const _TARTEEL_MODEL_URL = './models/fastconformer_ar_ctc_q8.onnx';
-  const _TARTEEL_CACHE_NAME = 'tarteel-model-v1';
-
-  async function tarteelUpdateSettingsRow() {
-    const statusEl = document.getElementById('tarteelEngineStatus');
-    const chevronEl = document.getElementById('tarteelEngineChevron');
-    if (!statusEl) return;
-    try {
-      const cache = await caches.open(_TARTEEL_CACHE_NAME);
-      const cached = await cache.match(_TARTEEL_MODEL_URL);
-      if (cached) {
-        statusEl.textContent = 'جاهز — النموذج مدمج في التطبيق';
-        statusEl.style.color = 'var(--accent)';
-        chevronEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
-      } else {
-        statusEl.textContent = 'جاهز — اضغط للإعداد';
-        statusEl.style.color = '';
-        chevronEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
-      }
-    } catch (e) {
-      statusEl.textContent = 'اضغط للإعداد';
-    }
-  }
-
-  function tarteelSettingsAction() {
-    closeModal('settingsModal');
-    setTimeout(() => openTarteelSheet(), 250);
-  }
-
-  // Update status label on page load
-  tarteelUpdateSettingsRow();
-
-  // ════════════════════════════════════════════════════════════════════
-  //  Tasmee' Pro — full-screen immersive memorisation mode
-  // ════════════════════════════════════════════════════════════════════
-  let _tarteelTasmeeMode = false;
-
-  // ── shared audio capture helper ───────────────────────────────────────
-  async function _doCapture(onAudio, onError) {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
-    const mime = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
-    const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-    const chunks = [];
-    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    rec.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
-      if (!chunks.length) return;
-      try {
-        const buf = await new Blob(chunks, { type: rec.mimeType || mime }).arrayBuffer();
-        const decoded = await new AudioContext().decodeAudioData(buf);
-        const off = new OfflineAudioContext(1, Math.ceil(decoded.duration * 16000), 16000);
-        const src = off.createBufferSource();
-        src.buffer = decoded; src.connect(off.destination); src.start(0);
-        const rendered = await off.startRendering();
-        onAudio(new Float32Array(rendered.getChannelData(0)));
-      } catch (err) { onError && onError(err.message); }
-    };
-    rec.start();
-    return { stream, rec };
-  }
-
-  // ── Tasmee' Pro state ─────────────────────────────────────────────────
-  let _tp = {
-    ayahs: [],          // [{surah, ayah, text, surahName}, ...]
-    revealed: new Set(), // indices of revealed ayahs
-    errors: 0,
-    expectedIdx: null,  // null = free (first recitation), number = expected next
-    showText: false,
-    recording: false,
-    stream: null,
-    recorder: null,
-    timerInterval: null,
-    timerStart: 0,
-  };
-
-  function _tpArabicNum(n) {
-    return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-  }
-
-  // ── open full-screen panel ────────────────────────────────────────────
-  async function startAITasmee() {
-    if (!_tarteelReady) return;
-    // close the Tarteel sheet first, then open full-screen panel
-    closeTarteelSheet();
-
-    showCustomToast('جاري تحميل آيات الصفحة...');
-    let ayahs;
-    try {
-      const r = await fetch(`https://api.alquran.cloud/v1/page/${currentPage}/ar.uthmani`);
-      const d = await r.json();
-      // Group by surah for section headers
-      ayahs = d.data.ayahs.map(a => ({
-        surah: a.surah.number, ayah: a.numberInSurah,
-        text: a.text, surahName: a.surah.name
-      }));
-    } catch (_) {
-      showCustomToast('تعذر تحميل آيات الصفحة'); return;
-    }
-
-    // Reset state
-    _tp.ayahs = ayahs;
-    _tp.revealed = new Set();
-    _tp.errors = 0;
-    _tp.expectedIdx = null;
-    _tp.showText = false;
-    _tp.recording = false;
-
-    // Render ayahs
-    _tpRenderAyahs();
-
-    // Update header
-    document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(currentPage)}`;
-    document.getElementById('tpErrorBadge').textContent = '٠ أخطاء';
-
-    // Reset mic button
-    const mb = document.getElementById('tpMicBtn');
-    mb.className = 'tp-mic-btn';
-    document.getElementById('tpMicIcon').style.display = '';
-    document.getElementById('tpStopIcon').style.display = 'none';
-
-    // Reset eye button
-    document.getElementById('tpEyeBtn').classList.remove('active');
-
-    // Show panel
-    document.getElementById('tasmeeProPanel').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function _tpRenderAyahs() {
-    const container = document.getElementById('tpContent');
-    container.innerHTML = '';
-    let lastSurah = null;
-    _tp.ayahs.forEach((a, i) => {
-      if (a.surah !== lastSurah) {
-        const div = document.createElement('div');
-        div.className = 'tp-surah-name';
-        div.textContent = a.surahName;
-        container.appendChild(div);
-        lastSurah = a.surah;
-      }
-      const span = document.createElement('span');
-      span.className = 'tp-ayah';
-      span.id = 'tp-a-' + i;
-      span.dataset.idx = i;
-      const textSpan = document.createElement('span');
-      textSpan.className = 'tp-ayah-text';
-      a.text.split(' ').forEach(w => {
-        const ws = document.createElement('span');
-        ws.className = 'tp-word';
-        ws.textContent = w + ' ';
-        textSpan.appendChild(ws);
-      });
-      const markerSpan = document.createElement('span');
-      markerSpan.className = 'tp-ayah-marker';
-      markerSpan.textContent = ' ﴾' + _tpArabicNum(a.ayah) + '﴿ ';
-      markerSpan.onclick = (e) => { e.stopPropagation(); _tpSelectAyah(i); };
-      span.appendChild(textSpan);
-      span.appendChild(markerSpan);
-      container.appendChild(span);
-    });
-  }
-
-  function _tpSelectAyah(idx) {
-    document.querySelectorAll('.tp-ayah.selected-target').forEach(el => el.classList.remove('selected-target'));
-    _tp.expectedIdx = idx;
-    const el = document.getElementById('tp-a-' + idx);
-    if (el) { el.classList.add('selected-target', 'current-expected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    showCustomToast('اختيرت: ' + _tp.ayahs[idx].surahName + ' — الآية ' + _tp.ayahs[idx].ayah);
-  }
-
-  function _tpSetExpected(idx) {
-    document.querySelectorAll('.tp-ayah.current-expected, .tp-ayah.selected-target')
-      .forEach(el => el.classList.remove('current-expected', 'selected-target'));
-    _tp.expectedIdx = idx;
-    if (idx !== null && idx < _tp.ayahs.length) {
-      const el = document.getElementById('tp-a-' + idx);
-      if (el) { el.classList.add('current-expected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    }
-  }
-
-  let _tpAudioCtx = null;
-  let _tpScriptProc = null;
-  let _tpAllSamples = [];
-  let _tpStreamTimer = null;
-
-  async function tpToggleRecord() {
-    if (!_tarteelReady) return;
-    if (_tp.recording) {
-      _tp.recording = false;
-      clearInterval(_tp.timerInterval);
-      clearInterval(_tpStreamTimer);
-      document.getElementById('tpLiveStrip').classList.remove('active');
-      if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
-      if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
-      if (_tpAudioCtx) { _tpAudioCtx.close().catch(()=>{}); _tpAudioCtx = null; }
-      if (_tpAllSamples.length > 0) {
-        const total = _tpAllSamples.reduce((s,c) => s + c.length, 0);
-        const merged = new Float32Array(total);
-        let pos = 0;
-        _tpAllSamples.forEach(c => { merged.set(c, pos); pos += c.length; });
-        _tpAllSamples = [];
-        _tarteelTasmeeMode = true;
-        document.getElementById('tpMicBtn').className = 'tp-mic-btn processing';
-        document.getElementById('tpMicIcon').style.display = '';
-        document.getElementById('tpStopIcon').style.display = 'none';
-        document.getElementById('tpRecDot').className = 'tp-rec-dot';
-        _tarteelWorker.postMessage({ type: 'recognize', audio: merged }, [merged.buffer]);
-      } else {
-        document.getElementById('tpMicBtn').className = 'tp-mic-btn';
-        document.getElementById('tpMicIcon').style.display = '';
-        document.getElementById('tpStopIcon').style.display = 'none';
-        document.getElementById('tpRecDot').className = 'tp-rec-dot';
-        document.getElementById('tpRecTimer').textContent = '00:00';
-      }
-    } else {
-      try {
-        _tp.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        _tpAudioCtx = new AudioContext({ sampleRate: 16000 });
-        const src = _tpAudioCtx.createMediaStreamSource(_tp.stream);
-        _tpScriptProc = _tpAudioCtx.createScriptProcessor(4096, 1, 1);
-        _tpAllSamples = [];
-        _tpScriptProc.onaudioprocess = ev => {
-          if (!_tp.recording) return;
-          _tpAllSamples.push(new Float32Array(ev.inputBuffer.getChannelData(0)));
-        };
-        src.connect(_tpScriptProc);
-        _tpScriptProc.connect(_tpAudioCtx.destination);
-        _tp.recording = true;
-        _tp.timerStart = Date.now();
-        _tp.timerInterval = setInterval(() => {
-          const s = Math.floor((Date.now() - _tp.timerStart) / 1000);
-          document.getElementById('tpRecTimer').textContent =
-            String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
-        }, 1000);
-        _tpStreamTimer = setInterval(() => {
-          if (!_tp.recording || _tpAllSamples.length === 0) return;
-          const total = _tpAllSamples.reduce((s,c) => s+c.length, 0);
-          if (total < 16000 * 1.2) return;
-          const merged = new Float32Array(total);
-          let pos = 0;
-          _tpAllSamples.forEach(c => { merged.set(c, pos); pos += c.length; });
-          _tarteelWorker.postMessage({ type: 'stream', audio: merged.slice() });
-        }, 1800);
-        document.getElementById('tpLiveStrip').classList.add('active');
-        document.getElementById('tpLiveStrip').innerHTML =
-          '<span class="tp-live-word" style="opacity:0.6;animation:none">جاري الاستماع...</span>';
-        document.getElementById('tpMicBtn').className = 'tp-mic-btn recording';
-        document.getElementById('tpMicIcon').style.display = 'none';
-        document.getElementById('tpStopIcon').style.display = '';
-        document.getElementById('tpRecDot').className = 'tp-rec-dot recording';
-      } catch (err) { _tpShowError(err.message); }
-    }
-  }
-
-  function _tpHandleStreamResult(data) {
-    if (!data.transcript) return;
-    const strip = document.getElementById('tpLiveStrip');
-    strip.innerHTML = '';
-    data.transcript.split(' ').forEach((w, i) => {
-      const sp = document.createElement('span');
-      sp.className = 'tp-live-word';
-      sp.textContent = w;
-      sp.style.animationDelay = (i * 0.04) + 's';
-      strip.appendChild(sp);
-    });
-    if (data.match && data.match.score > 0.55) {
-      const idx = _tp.ayahs.findIndex(a => a.surah === data.match.surah && a.ayah === data.match.ayah);
-      if (idx >= 0 && !_tp.revealed.has(idx)) {
-        document.querySelectorAll('.tp-ayah.current-expected').forEach(el => el.classList.remove('current-expected'));
-        const el = document.getElementById('tp-a-' + idx);
-        if (el) el.classList.add('current-expected');
-      }
-    }
-  }
-
-  function _aiHandleResult(result) {
-    _tarteelProcessing = false;
-    document.getElementById('tpMicBtn').className = 'tp-mic-btn';
-    document.getElementById('tpRecTimer').textContent = '00:00';
-    document.getElementById('tpLiveStrip').classList.remove('active');
-    if (!result || !result.surah) {
-      showCustomToast('لم يُتعرَّف على الآية — حاول مجدداً');
-      _tp.errors++; _tpUpdateErrors(); return;
-    }
-    const matchIdx = _tp.ayahs.findIndex(a => a.surah === result.surah && a.ayah === result.ayah);
-    if (matchIdx < 0) {
-      showCustomToast((result.surahName || 'سورة') + ' — الآية ' + result.ayah + ' (ليست في هذه الصفحة)');
-      _tp.errors++; _tpUpdateErrors(); return;
-    }
-    const el = document.getElementById('tp-a-' + matchIdx);
-    const isCorrect = _tp.expectedIdx === null || matchIdx === _tp.expectedIdx;
-    _tp.revealed.add(matchIdx);
-    el.classList.remove('current-expected', 'selected-target');
-    el.classList.add('revealed', isCorrect ? 'correct' : 'error', isCorrect ? 'tp-flash-correct' : 'tp-flash-error');
-    setTimeout(() => el.classList.remove('tp-flash-correct', 'tp-flash-error'), 1200);
-    if (!isCorrect) { _tp.errors++; _tpUpdateErrors(); }
-    const words = el.querySelectorAll('.tp-word');
-    words.forEach((w, i) => {
-      w.style.opacity = '0';
-      w.style.animation = 'tp-word-in 0.2s ease ' + (i * 0.06) + 's forwards';
-    });
-    const a = _tp.ayahs[matchIdx];
-    showCustomToast((isCorrect ? '✓ ' : '✗ ') + a.surahName + ' — الآية ' + a.ayah);
-    _tpSetExpected(matchIdx + 1 < _tp.ayahs.length ? matchIdx + 1 : null);
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  function _aiSetProcessing() { _tarteelProcessing = true; document.getElementById('tpMicBtn').className = 'tp-mic-btn processing'; }
-
-  function _tpShowError(msg) {
-    _tarteelProcessing = false; _tp.recording = false;
-    clearInterval(_tp.timerInterval); clearInterval(_tpStreamTimer);
-    if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
-    if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
-    if (_tpAudioCtx) { _tpAudioCtx.close().catch(()=>{}); _tpAudioCtx = null; }
-    document.getElementById('tpMicBtn').className = 'tp-mic-btn';
-    document.getElementById('tpMicIcon').style.display = '';
-    document.getElementById('tpStopIcon').style.display = 'none';
-    document.getElementById('tpRecDot').className = 'tp-rec-dot';
-    document.getElementById('tpRecTimer').textContent = '00:00';
-    document.getElementById('tpLiveStrip').classList.remove('active');
-    showCustomToast(msg || 'خطأ في التسجيل');
-  }
-
-  function _tpUpdateErrors() { document.getElementById('tpErrorBadge').textContent = _tpArabicNum(_tp.errors) + ' أخطاء'; }
-  function tpPrev() { const c = _tp.expectedIdx !== null ? _tp.expectedIdx : _tp.ayahs.length; _tpSetExpected(Math.max(0, c-1)); }
-  function tpSkipBack() { const c = _tp.expectedIdx !== null ? _tp.expectedIdx : _tp.ayahs.length; _tpSetExpected(Math.max(0, c-3)); }
-  function tpToggleText() {
-    _tp.showText = !_tp.showText;
-    document.getElementById('tpEyeBtn').classList.toggle('active', _tp.showText);
-    document.querySelectorAll('.tp-ayah:not(.revealed) .tp-ayah-text').forEach(el => el.classList.toggle('show', _tp.showText));
-  }
-
-  function closeTasmeePro() {
-    _tarteelTasmeeMode = false; _tp.recording = false;
-    clearInterval(_tp.timerInterval); clearInterval(_tpStreamTimer);
-    if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
-    if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
-    if (_tpAudioCtx) { _tpAudioCtx.close().catch(()=>{}); _tpAudioCtx = null; }
-    _tpAllSamples = [];
-    document.getElementById('tpLiveStrip').classList.remove('active');
-    document.getElementById('tasmeeProPanel').style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  </script>
-
-  <!-- ===== MUSHAF DOWNLOAD MODAL ===== -->
-  <div id="dlModal">
-    <div class="dl-sheet">
-
-      <!-- Header -->
-      <div class="dl-header">
-        <div class="dl-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-          </svg>
-        </div>
-        <h2 class="dl-title">حفظ المصحف الشريف</h2>
-        <p class="dl-subtitle">اختر نسخة المصحف لحفظها على جهازك<br>للاستخدام دون الحاجة إلى اتصال بالإنترنت</p>
-      </div>
-
-      <div class="dl-divider">
-        <div class="dl-div-line"></div><div class="dl-div-gem"></div><div class="dl-div-line"></div>
-      </div>
-
-      <!-- Selection section -->
-      <div id="dlSelectSection">
-        <div id="dlVariants" class="dl-variants"></div>
-        <div class="dl-settings-hint">
-          يمكنك دائماً تحميل نسخة المصحف من الإعدادات ⚙️
-        </div>
-        <div class="dl-footer">
-          <button class="dl-btn-go" id="dlGoBtn" onclick="dlStart()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-left:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            تحميل المحدد
-          </button>
-          <button class="dl-btn-skip" onclick="dlSkip()">لاحقاً</button>
-        </div>
-      </div>
-
-      <!-- Progress section -->
-      <div id="dlProgressSection" style="display:none">
-        <div class="dl-progress-header">
-          <span class="dl-progress-title">جاري التحميل…</span>
-          <button class="dl-minimize-btn" onclick="dlMinimize()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            تصغير
-          </button>
-        </div>
-        <div class="dl-progress">
-        <div class="dl-ring-wrap">
-          <svg class="dl-ring-svg" width="110" height="110" viewBox="0 0 110 110">
-            <defs>
-              <linearGradient id="dlGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#8F5E06"/>
-                <stop offset="50%"  stop-color="#F5D060"/>
-                <stop offset="100%" stop-color="#8F5E06"/>
-              </linearGradient>
-            </defs>
-            <circle class="dl-ring-bg"   cx="55" cy="55" r="49"/>
-            <circle class="dl-ring-fill" cx="55" cy="55" r="49" id="dlRingFill"/>
-          </svg>
-          <div class="dl-ring-center">
-            <div class="dl-ring-pct" id="dlPct">0%</div>
-            <div class="dl-ring-sub">مكتمل</div>
-          </div>
-        </div>
-        <div class="dl-prog-name"  id="dlProgName"></div>
-        <div class="dl-prog-pages" id="dlProgPages">جاري التحضير…</div>
-        <div class="dl-bar"><div class="dl-bar-fill" id="dlBarFill"></div></div>
-        <div class="dl-status"     id="dlStatusMsg"></div>
-      </div>
-      </div><!-- /dlProgressSection inner -->
-
-      <!-- Done section -->
-      <div id="dlDoneSection" class="dl-done" style="display:none">
-        <div class="dl-done-ring">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <div class="dl-done-title">تمّ الحفظ بنجاح!</div>
-        <div class="dl-done-sub">يمكنك الآن تصفّح المصحف الشريف<br>دون اتصال بالإنترنت</div>
-        <button class="dl-done-btn" onclick="dlClose()">ابدأ القراءة</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ===== DOWNLOAD MINIMIZED PILL ===== -->
-  <div id="dlMiniPill" onclick="dlRestore()" title="فتح نافذة التحميل">
-    <div class="dl-mini-ring">
-      <svg width="36" height="36" viewBox="0 0 36 36">
-        <circle class="dl-mini-ring-bg"   cx="18" cy="18" r="15"/>
-        <circle class="dl-mini-ring-fill" cx="18" cy="18" r="15" id="dlMiniRingFill"/>
-      </svg>
-    </div>
-    <div class="dl-mini-info">
-      <div class="dl-mini-pct"   id="dlMiniPct">0%</div>
-      <div class="dl-mini-label" id="dlMiniLabel">جاري التحميل…</div>
-    </div>
-    <button class="dl-mini-restore" onclick="event.stopPropagation(); dlRestore()" title="استعادة">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-        <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- ===== DOWNLOAD COMPLETION TOAST ===== -->
-  <div id="dlCompleteToast">
-    <div class="dl-toast-inner">
-      <div class="dl-toast-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      </div>
-      <div class="dl-toast-body">
-        <div class="dl-toast-title">تمّ حفظ المصحف بنجاح ✓</div>
-        <div class="dl-toast-sub" id="dlToastSub"></div>
-      </div>
-      <button class="dl-toast-x" onclick="hideDlCompleteToast()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="dl-toast-bar"><div class="dl-toast-bar-fill" id="dlToastBarFill"></div></div>
-  </div>
-
 </body>
 </html>

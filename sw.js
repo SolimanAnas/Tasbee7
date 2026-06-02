@@ -4,19 +4,19 @@ const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
   "./",
   "./index.html",
-  "./quran.html",
-  "./quran-text.html",
-  "./audio.html",
-  "./radio.html",
-  "./azkar.html",
-  "./masbaha.html",
-  "./hisn.html",
-  "./duaa.html",
-  "./hadith.html",
-  "./qibla.html",
-  "./notifications.html",
-  "./howto.html",
-  "./about.html",
+  "./pages/quran.html",
+  "./pages/quran-text.html",
+  "./pages/audio.html",
+  "./pages/radio.html",
+  "./pages/azkar.html",
+  "./pages/masbaha.html",
+  "./pages/hisn.html",
+  "./pages/duaa.html",
+  "./pages/hadith.html",
+  "./pages/qibla.html",
+  "./pages/notifications.html",
+  "./pages/howto.html",
+  "./pages/about.html",
 
   // ===== Config =====
   "./manifest.json",
@@ -97,12 +97,12 @@ const STATIC_ASSETS = [
 ];
 
 const DEEP_LINKS = {
-  prayer: "./quran.html",
-  azkar: "./azkar.html",
-  kahf: "./quran.html?surah=18",
-  masbaha: "./masbaha.html",
-  hisn: "./hisn.html",
-  radio: "./radio.html",
+  prayer: "./pages/quran.html",
+  azkar: "./pages/azkar.html",
+  kahf: "./pages/quran.html?surah=18",
+  masbaha: "./pages/masbaha.html",
+  hisn: "./pages/hisn.html",
+  radio: "./pages/radio.html",
   default: "./index.html"
 };
 

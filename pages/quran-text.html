@@ -4,19 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>المصحف الشريف - نص متقدم</title>
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#f5f0e6">
   
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
   
   <style>
     /* ========== الخطوط المحلية ========== */
     @font-face {
       font-family: 'MadinahFont';
-      src: url('fonts/uthmani-colored.ttf') format('opentype'),
-           url('fonts/UthmanicHafs_V20.ttf') format('truetype');
+      src: url('../fonts/uthmani-colored.ttf') format('opentype'),
+           url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
@@ -24,7 +24,7 @@
 
     @font-face {
       font-family: 'AmiriFont';
-      src: url('fonts/Amiri.ttf') format('truetype');
+      src: url('../fonts/Amiri.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
@@ -32,7 +32,7 @@
 
     @font-face {
       font-family: 'UrduFont';
-      src: url('fonts/almushaf.ttf') format('truetype');
+      src: url('../fonts/almushaf.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
@@ -40,7 +40,7 @@
 
     @font-face {
       font-family: 'ScheherazadeFont';
-      src: url('fonts/Scheherazade.ttf') format('truetype');
+      src: url('../fonts/Scheherazade.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
@@ -49,7 +49,7 @@
     /* ========== خط الثلث للواجهات ========== */
     @font-face {
       font-family: 'ThuluthFont';
-      src: url('fonts/Amiri.ttf') format('truetype');
+      src: url('../fonts/Amiri.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
@@ -311,7 +311,7 @@
         left: 0;
         right: 0;
         height: 20px;
-        background: url('img/frame.png') repeat-x top, linear-gradient(#f5f0e6, #f5f0e6);
+        background: url('../img/frame.png') repeat-x top, linear-gradient(#f5f0e6, #f5f0e6);
         background-size: auto 100%, 100% 30px;
         background-repeat: repeat-x, no-repeat;
         z-index: 10;
@@ -324,7 +324,7 @@
       left: 0;
       right: 0;
       height: 20px;
-      background: url('img/frame.png') repeat-x top;
+      background: url('../img/frame.png') repeat-x top;
       background-size: auto 100%;
       transform: rotate(180deg);
       z-index: 5;
@@ -341,7 +341,7 @@
     /* Labels styling */
     .label-box {
       position: absolute;
-      background-image: url('img/text-container_txt.png');
+      background-image: url('../img/text-container_txt.png');
       background-repeat: no-repeat;
       background-position: center;
       background-size: 100% 100%;
@@ -674,7 +674,7 @@
   <div class="context-menu" id="contextMenu" style="display:none;"><div class="context-handle"></div><div class="context-info" id="contextInfo"></div><div class="context-buttons"><button class="context-btn primary" id="contextBookmarkBtn" onclick="contextToggleBookmark()">☆ إضافة للمفضلة</button></div></div>
   <div id="contextOverlay" style="display:none;position:fixed;inset:0;z-index:199;" onclick="closeContextMenu()"></div>
 
-  <script src="js/quran-common.js"></script>
+  <script src="../js/quran-common.js"></script>
 
   <script>
     let fontSize = 40; 
@@ -1148,12 +1148,12 @@
                     htmlContent += `
                     <div class="surah-separator">
                         <div class="surah-header-container">
-                            <img src="img/Sura_border.svg" class="surah-frame-img" alt="">
+                            <img src="../img/Sura_border.svg" class="surah-frame-img" alt="">
                             <div class="surah-title-text">سُورَةُ ${cleanSurahName}</div>
                         </div>
                         <div class="surah-meta">${metaText} • آياتها ${a.surah.numberOfAyahs}</div>
                     </div>`;
-                    if (a.surah.number !== 1 && a.surah.number !== 9) { htmlContent += `<div class="basmalah-container"><img class="basmalah-svg" src="img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
+                    if (a.surah.number !== 1 && a.surah.number !== 9) { htmlContent += `<div class="basmalah-container"><img class="basmalah-svg" src="../img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
                 }
                 currentPageAyahsData.push({ number: a.number, numberInSurah: a.numberInSurah, surahName: a.surah.name, text: text });
                 htmlContent += `<span class="ayah-wrapper" id="ayah-wrapper-${i}" data-index="${i}">
@@ -1204,8 +1204,8 @@
                         if (a.numberInSurah === 1) {
                             let n = a.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim(); 
                             let rt = a.surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية';
-                            html += `<div class="surah-separator"><div class="surah-header-container"><img src="img/Sura_border.svg" class="surah-frame-img" alt=""><div class="surah-title-text">سُورَةُ ${n}</div></div><div class="surah-meta">${rt} • آياتها ${a.surah.numberOfAyahs}</div></div>`;
-                            if (a.surah.number !== 1 && a.surah.number !== 9) { html += `<div class="basmalah-container"><img class="basmalah-svg" src="img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
+                            html += `<div class="surah-separator"><div class="surah-header-container"><img src="../img/Sura_border.svg" class="surah-frame-img" alt=""><div class="surah-title-text">سُورَةُ ${n}</div></div><div class="surah-meta">${rt} • آياتها ${a.surah.numberOfAyahs}</div></div>`;
+                            if (a.surah.number !== 1 && a.surah.number !== 9) { html += `<div class="basmalah-container"><img class="basmalah-svg" src="../img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
                         }
                         html += `<span class="ayah-wrapper" id="ayah-wrapper-${i}" data-index="${i}"><span class="ayah-text">${t}</span> <span class="ayah-number">${a.numberInSurah.toLocaleString('ar-EG')}</span></span> `;
                     });
@@ -1349,7 +1349,7 @@
       setupScrollListener();
     };
 
-    function goHome() { window.location.href = 'index.html'; }
+    function goHome() { window.location.href = '../index.html'; }
 
     // ============================================================
     //  TASMEE' CONTROLLER
@@ -1581,6 +1581,6 @@
         });
     }
   </script>
-  <script src="js/tasmee-engine.js"></script>
+  <script src="../js/tasmee-engine.js"></script>
 </body>
 </html>

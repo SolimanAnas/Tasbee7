@@ -4,26 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>المصحف الشريف - النسخة المتطورة V3</title>
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#FAF6EE">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-  <script src="js/quranpages.data.js"></script>
-  <script src="js/medina2.data.js"></script>
+  <script src="../js/quranpages.data.js"></script>
+  <script src="../js/medina2.data.js"></script>
 
   <style>
   @font-face {
     font-family: 'Amiri';
-    src: url('fonts/Amiri.ttf') format('truetype');
+    src: url('../fonts/Amiri.ttf') format('truetype');
     font-weight: 400 700;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
     font-family: 'ScheherazadeLocal';
-    src: url('fonts/Scheherazade.ttf') format('truetype');
+    src: url('../fonts/Scheherazade.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
@@ -770,7 +770,7 @@
   .label-box::before {
     content: '';
     position: absolute; inset: -4px -8px;
-    background: url('img/text-container.png') no-repeat center/100% 100%;
+    background: url('../img/text-container.png') no-repeat center/100% 100%;
     opacity: 0.5;
     pointer-events: none;
     z-index: -1;
@@ -1594,21 +1594,56 @@
     text-align:justify;
   }
   .tasmee-text-panel-handle { display:none; }
+  .tasmee-text-panel-scroll .q-word--ayah-ending { display:none; }
+  .tasmee-text-panel-scroll.show-ayah-end .q-word--ayah-ending { display:inline; }
+  .tasmee-text-panel-scroll.show-hidden .q-word--hidden {
+    color:var(--text-primary) !important;
+    background:transparent !important;
+  }
+  .tasmee-text-panel-scroll.show-hidden .q-word--hidden.q-word--missed {
+    color:var(--danger) !important;
+    text-decoration:line-through;
+  }
 
   .tasmee-active-bar {
     position:fixed; bottom:calc(20px + env(safe-area-inset-bottom));
     left:15px; right:15px; max-width:500px; margin:0 auto;
     background:var(--glass-bg); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px);
     border:1px solid rgba(217,64,64,0.4); border-radius:20px;
-    padding:10px 16px; display:none; align-items:center;
-    justify-content:space-between; gap:10px; z-index:901;
+    padding:10px 12px; display:none; align-items:center;
+    gap:8px; z-index:901;
     box-shadow:0 4px 20px rgba(217,64,64,0.15);
   }
   .tasmee-active-bar.active { display:flex; }
   .tasmee-mic-indicator { width:12px; height:12px; border-radius:50%; background:var(--danger); flex-shrink:0; animation:tasmeePulse 1.2s ease-in-out infinite; }
   .tasmee-mic-indicator.paused { animation:none; background:var(--text-hint); }
   @keyframes tasmeePulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.55;} }
-  .tasmee-progress-text { flex:1; font-size:0.9rem; font-weight:bold; color:var(--text-primary); text-align:center; font-family:'Tajawal',sans-serif; }
+  .tasmee-progress-text { flex:1; font-size:0.9rem; font-weight:bold; color:var(--text-primary); text-align:center; font-family:'Tajawal',sans-serif; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tasmee-pause-btn {
+    background:rgba(128,128,128,0.1); color:var(--text-primary);
+    border:none; border-radius:10px; padding:0;
+    width:36px; height:36px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s ease; flex-shrink:0;
+  }
+  .tasmee-pause-btn:active { transform:scale(0.88); background:rgba(128,128,128,0.18); }
+  .tasmee-end-btn {
+    background:rgba(217,64,64,0.12); color:var(--danger);
+    border:none; border-radius:10px; padding:8px 14px;
+    font-family:'Tajawal',sans-serif; font-weight:700; cursor:pointer;
+    font-size:0.85rem; transition:all 0.2s ease; flex-shrink:0; line-height:1;
+  }
+  .tasmee-end-btn:active { transform:scale(0.96); background:rgba(217,64,64,0.2); }
+  .tasmee-eye-btn {
+    width:36px; height:36px; border-radius:50%; border:none;
+    background:rgba(128,128,128,0.08); color:var(--text-hint); cursor:pointer;
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    transition:all 0.25s ease; padding:0; margin-left:auto;
+  }
+  .tasmee-eye-btn:active { transform:scale(0.88); }
+  .tasmee-eye-btn.active { background:rgba(26,112,64,0.12); color:var(--accent); }
+  .tasmee-eye-btn svg { width:20px; height:20px; }
+  .tasmee-bar-divider { width:1px; height:28px; background:var(--glass-border); flex-shrink:0; }
 
   .tasmee-score-ring { display:flex; flex-direction:column; align-items:center; padding:12px 0 16px; }
   .tasmee-score-number { font-size:3rem; font-weight:800; color:var(--accent); line-height:1; font-family:'Amiri',serif; }
@@ -1622,7 +1657,7 @@
   .tasmee-setup-content { padding:10px 0; }
   .tasmee-setup-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--glass-border); font-family:'Tajawal',sans-serif; }
   .tasmee-setup-row:last-of-type { border-bottom:none; }
-  .tasmee-start-btn { width:100%; padding:14px; margin-top:14px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:bold; font-family:'Tajawal',sans-serif; cursor:pointer; font-size:1rem; transition:0.2s; display:flex; justify-content:center; align-items:center; gap:8px; }
+  .tasmee-start-btn { width:100%; padding:14px; margin-top:14px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:bold; font-family:'Tajawal',sans-serif; cursor:pointer; font-size:1rem; transition:0.2s; display:flex; justify-content:center; align-items:center; gap:8px; transform:translateY(-100px); }
   .tasmee-start-btn:active { transform:scale(0.96); opacity:0.9; }
   .tasmee-end-btn { background:rgba(217,64,64,0.12); color:var(--danger); border:none; border-radius:10px; padding:8px 14px; font-family:'Tajawal',sans-serif; font-weight:bold; cursor:pointer; font-size:0.85rem; }
   .tasmee-pause-btn { background:rgba(128,128,128,0.12); color:var(--text-primary); border:none; border-radius:10px; padding:8px 14px; font-family:'Tajawal',sans-serif; cursor:pointer; font-size:0.9rem; }
@@ -2728,33 +2763,19 @@
       </div>
     </div>
 
-    <div class="reciter-wrapper" style="flex-shrink:0;">
-      <select id="tafsirSelect" class="reciter-selector" onchange="changeTafsir()">
-        <option value="ar.muyassar">التفسير الميسر</option>
-        <option value="ar.jalalayn">تفسير الجلالين</option>
-        <option value="ar.qurtubi">تفسير القرطبي</option>
-        <option value="ar.tabari">تفسير الطبري</option>
-      </select>
-      <span class="select-chevron">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </span>
-    </div>
-
     <div id="tafsirContent" class="tafsir-content" style="flex:1; overflow-y:auto; touch-action:pan-y;">اختر آية أولاً...</div>
 
     <div class="tafsir-nav-row" style="flex-shrink:0;">
       <button class="tafsir-nav-btn" onclick="prevTafsirAyah()">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <polyline points="15 18 9 12 15 6"/>
+          <polyline points="9 18 15 12 9 6"/>
         </svg>
         السابق
       </button>
       <button class="tafsir-nav-btn" onclick="nextTafsirAyah()">
         التالي
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <polyline points="9 18 15 12 9 6"/>
+          <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
     </div>
@@ -2807,9 +2828,9 @@
           </label>
         </div>
         <div class="tasmee-setup-row">
-          <span>إظهار نهاية الآية ﴿٧﴾</span>
+          <span>إظهار نهاية الآيات</span>
           <label class="toggle-switch">
-            <input type="checkbox" id="tasmeeShowAyahEnd" checked>
+            <input type="checkbox" id="tasmeeShowAyahEnd">
             <span class="slider"></span>
           </label>
         </div>
@@ -2842,7 +2863,19 @@
   <div class="tasmee-active-bar" id="tasmeeActiveBar">
     <div class="tasmee-mic-indicator" id="tasmeeMicIndicator"></div>
     <div class="tasmee-progress-text" id="tasmeeProgressText">٠ / ٠ كلمة</div>
-    <button class="tasmee-pause-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()">⏸</button>
+    <button class="tasmee-eye-btn" id="tasmeeEyeBtn" onclick="tasmeeToggleText()" title="إظهار/إخفاء النص">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    </button>
+    <div class="tasmee-bar-divider"></div>
+    <button class="tasmee-pause-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+        <rect x="6" y="4" width="4" height="16" rx="1"/>
+        <rect x="14" y="4" width="4" height="16" rx="1"/>
+      </svg>
+    </button>
     <button class="tasmee-end-btn" onclick="endTasmeeSession()">إنهاء</button>
   </div>
 
@@ -3282,7 +3315,7 @@
     </div>
   </div>
 
-  <script src="js/quran-common.js"></script>
+  <script src="../js/quran-common.js"></script>
 
   <script>
     // --- Daily Tracking Function for Stats (Quran Pages/Juz) ---
@@ -3329,7 +3362,7 @@
           view = new Uint8Array(binaryStr.length);
           for (let i = 0; i < binaryStr.length; i++) view[i] = binaryStr.charCodeAt(i);
         } else {
-          const response = await fetch('data/quranpages.sqlite');
+          const response = await fetch('../db/quranpages.sqlite');
           if(!response.ok) throw new Error("Main DB not found");
           const buffer = await response.arrayBuffer();
           view = new Uint8Array(buffer);
@@ -3364,7 +3397,7 @@
         if (window.__MEDINA2_COORDS__) {
           data = window.__MEDINA2_COORDS__;
         } else {
-          const res = await fetch('coords/medina2_coords.json');
+          const res = await fetch('../json/medina2_coords.json');
           data = await res.json();
         }
         medinaCoordsByAyah = {};
@@ -3576,8 +3609,8 @@
     tafsirModalEl.addEventListener('touchstart', e => { tafsirTouchStartX = e.changedTouches[0].screenX; }, {passive: true});
     tafsirModalEl.addEventListener('touchend', e => {
       const diff = e.changedTouches[0].screenX - tafsirTouchStartX;
-      if (diff > 60) prevTafsirAyah();
-      else if (diff < -60) nextTafsirAyah();
+      if (diff > 60) nextTafsirAyah();
+      else if (diff < -60) prevTafsirAyah();
     }, {passive: true});
 
     function closeTafsirModal() {
@@ -3590,20 +3623,23 @@
       if(!windowCurrentAyahGlobal) { showCustomToast("الرجاء تحديد آية أولاً"); return; }
       const { surah, ayah } = windowCurrentAyahGlobal;
       const contentDiv = document.getElementById('tafsirContent');
-      const selectedTafsir = document.getElementById('tafsirSelect').value;
       document.getElementById('tafsirModal').classList.add('visible');
       document.getElementById('tafsirSheetBackdrop').classList.add('visible');
-      contentDiv.innerHTML = '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
       try {
-        const [ayaTextRes, tafRes] = await Promise.all([
+        tafsirSelectedDB = document.getElementById('tafsirBookSelect')?.value || tafsirSelectedDB;
+        localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
+        contentDiv.innerHTML = typeof tafsirDropdownHTML === 'function'
+          ? tafsirDropdownHTML(tafsirSelectedDB) + '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>'
+          : '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
+        const [ayaTextRes, tafText] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`),
-          fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/${selectedTafsir}`)
+          getTafsirText(tafsirSelectedDB, surah, ayah)
         ]);
         const ayaData = await ayaTextRes.json();
-        const tafData = await tafRes.json();
         const ayahText = (ayaData.code === 200) ? ayaData.data.text : '';
-        const tafsirText = (tafData.code === 200) ? tafData.data.text : 'لم يتم العثور على تفسير لهذه الآية.';
-        let html = `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
+        const tafsirText = tafText || 'لم يتم العثور على تفسير لهذه الآية.';
+        let html = typeof tafsirDropdownHTML === 'function' ? tafsirDropdownHTML(tafsirSelectedDB) : '';
+        html += `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
         html += `<div class="imlaei-text">﴿ ${ayahText} ﴾</div>`;
         html += `<div style="text-align:justify; font-size:1.1rem; line-height:2; border-top:1px dashed var(--glass-border); padding-top:16px;">${tafsirText.replace(/\n/g, '<br>')}</div>`;
         contentDiv.innerHTML = html;
@@ -3615,6 +3651,11 @@
     }
 
     async function changeTafsir() {
+       const sel = document.getElementById('tafsirBookSelect');
+       if (sel) {
+         tafsirSelectedDB = sel.value;
+         localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
+       }
        if (document.getElementById('tafsirModal').classList.contains('visible') && windowCurrentAyahGlobal) {
            await contextShowTafsir(true);
        }
@@ -4141,8 +4182,8 @@ function getVariantHighlightCal() {
           artist: recOpt ? recOpt.text : '',
           album:  'المصحف الشريف',
           artwork: [
-            { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+            { src: '../icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: '../icons/icon_512.png', sizes: '512x512', type: 'image/png' }
           ]
         });
         navigator.mediaSession.setActionHandler('play',          () => { audioPlayer.play(); isPlaying = true;  updatePlayButtons(true); });
@@ -4439,11 +4480,11 @@ function getVariantHighlightCal() {
       return MUSHAF_VARIANTS.find(v => v.id === variantId) || MUSHAF_VARIANTS[0];
     }
     function getImagePath(variantId, page, ext) {
-      const dir = variantId === 'mushaf-green' ? 'mushaf/madina-green'
-                : variantId === 'mushaf-borderd' ? 'mushaf/mushaf-2'
-                : variantId === 'mushaf-tajweed' ? 'mushaf/tajweed'
-                : variantId === 'mushaf-colored' ? 'mushaf/madina-1421'
-                : 'mushaf/mushaf-madina-1441';
+      const dir = variantId === 'mushaf-green' ? '../mushaf pages/madina-green'
+                : variantId === 'mushaf-borderd' ? '../mushaf-2'
+                : variantId === 'mushaf-tajweed' ? '../mushaf pages/tajweed'
+                : variantId === 'mushaf-colored' ? '../mushaf pages/madina-1421'
+                : '../mushaf pages/mushaf-madina-1441';
       return `${dir}/${page}.${ext}`;
     }
 
@@ -4470,7 +4511,7 @@ function getVariantHighlightCal() {
         thumb.className = 'mushaf-card-thumb';
         const img = document.createElement('img');
         const thumbPage = v.id === 'mushaf-tajweed' ? '003' : '001';
-        img.src = v.id === 'mushaf-text' ? 'img/txt.png' : getImagePath(v.id, thumbPage, v.ext);
+        img.src = v.id === 'mushaf-text' ? '../img/txt.png' : getImagePath(v.id, thumbPage, v.ext);
         img.alt = v.nameAr;
         img.loading = 'lazy';
         img.onerror = function() { this.style.display = 'none'; };
@@ -5162,8 +5203,8 @@ function getVariantHighlightCal() {
       dlInit();
     };
 
-    function goHome() { window.location.href = 'index.html'; }
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.warn);
+    function goHome() { window.location.href = '../index.html'; }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js').catch(console.warn);
 
     // ============================================================
     //  TASMEE' CONTROLLER (quran.html — mushaf image mode)
@@ -5179,7 +5220,7 @@ function getVariantHighlightCal() {
         return;
       }
       document.getElementById('tasmeeHideText').checked = localStorage.getItem('tasmee_hide_text') === '1';
-      document.getElementById('tasmeeShowAyahEnd').checked = localStorage.getItem('tasmee_show_ayah_end') !== '0';
+      document.getElementById('tasmeeShowAyahEnd').checked = localStorage.getItem('tasmee_show_ayah_end') === '1';
       document.getElementById('tasmeeAutoFlip').checked = localStorage.getItem('tasmee_auto_flip') !== '0';
       document.getElementById('tasmeeAudioFeedback').checked = localStorage.getItem('tasmee_audio_feedback') !== '0';
       document.getElementById('tasmeeSheetBackdrop').style.display = 'block';
@@ -5208,14 +5249,14 @@ function getVariantHighlightCal() {
       return ayahData;
     }
 
-    function renderTasmeeTextPanel(ayahData, showAyahEnd) {
+    function renderTasmeeTextPanel(ayahData) {
       const container = document.getElementById('tasmeeTextContent');
       if (!container) return;
       let html = '';
       ayahData.forEach((a, i) => {
         const numAr = a.numberInSurah.toLocaleString('ar-EG');
         html += `<span class="ayah-text" data-tasmee-ayah="${i}">${a.text}</span>`;
-        html += `<span class="tasmee-ayah-end" style="color:var(--accent);font-size:0.85em;margin:0 4px;${showAyahEnd ? '' : 'visibility:hidden;'}">﴿${numAr}﴾</span> `;
+        html += `<span class="tasmee-ayah-end" style="color:var(--accent);font-size:0.85em;margin:0 4px;">﴿${numAr}﴾</span> `;
       });
       container.innerHTML = html;
     }
@@ -5238,7 +5279,9 @@ function getVariantHighlightCal() {
 
     function _tasmeeStartWithData(ayahData, hideText, audioFb, autoFlip) {
       if (autoFlip === undefined) autoFlip = localStorage.getItem('tasmee_auto_flip') !== '0';
-      const showAyahEnd = localStorage.getItem('tasmee_show_ayah_end') !== '0';
+      const showAyahEnd = localStorage.getItem('tasmee_show_ayah_end') === '1';
+      const contentEl = document.getElementById('tasmeeTextContent');
+      if (contentEl) contentEl.classList.toggle('show-ayah-end', showAyahEnd);
       const btn = document.getElementById('tasmeeBtn');
       tasmeeCurrentAyahHighlight = -1;
       tasmeeEngine = new TasmeeEngine({
@@ -5262,7 +5305,7 @@ function getVariantHighlightCal() {
             navigateTo(nextPage, 'next');
             showCustomToast('انتهت الصفحة! جاري الانتقال للصفحة التالية...');
             fetchTasmeeTextForPage(nextPage).then(newData => {
-              renderTasmeeTextPanel(newData, showAyahEnd);
+              renderTasmeeTextPanel(newData);
               document.getElementById('tasmeeTextPanel').classList.add('active');
               _tasmeeStartWithData(newData, hideText, audioFb, autoFlip);
             }).catch(() => { if (btn) btn.disabled = false; });
@@ -5275,7 +5318,7 @@ function getVariantHighlightCal() {
         .then(() => {
           document.getElementById('tasmeeProgressText').textContent = `٠ / ${tasmeeEngine._wordTokens.length} كلمة`;
           document.getElementById('tasmeeMicIndicator').classList.remove('paused');
-          document.getElementById('tasmeePauseBtn').textContent = '⏸';
+          document.getElementById('tasmeePauseBtn').innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
           document.getElementById('tasmeeActiveBar').classList.add('active');
         })
         .catch(err => {
@@ -5312,25 +5355,37 @@ function getVariantHighlightCal() {
       }
 
       tasmeeLastPage = currentPage;
-      renderTasmeeTextPanel(ayahData, showAyahEnd);
+      renderTasmeeTextPanel(ayahData);
       document.getElementById('tasmeeTextPanel').classList.add('active');
       _tasmeeStartWithData(ayahData, hideText, audioFb, audioFlip);
     }
 
     function pauseOrResumeTasmee() {
       if (!tasmeeEngine) return;
+      const btn = document.getElementById('tasmeePauseBtn');
       if (tasmeeEngine.isPaused) {
         tasmeeEngine.resumeSession();
-        document.getElementById('tasmeePauseBtn').textContent = '⏸';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
       } else {
         tasmeeEngine.pauseSession();
-        document.getElementById('tasmeePauseBtn').textContent = '▶';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="8,5 19,12 8,19"/></svg>';
       }
     }
 
     function endTasmeeSession() {
       if (!tasmeeEngine) return;
       tasmeeEngine.endSession();
+    }
+
+    function tasmeeToggleText() {
+      const panel = document.getElementById('tasmeeTextContent');
+      const btn = document.getElementById('tasmeeEyeBtn');
+      if (!panel || !btn) return;
+      const show = panel.classList.toggle('show-hidden');
+      btn.classList.toggle('active', show);
+      btn.innerHTML = show
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 
     function retryTasmeeSession() {
@@ -5348,7 +5403,7 @@ function getVariantHighlightCal() {
     };
 
   </script>
-  <script src="js/tasmee-engine.js"></script>
+  <script src="../js/tasmee-engine.js"></script>
 
   <!-- ===== MUSHAF DOWNLOAD MODAL ===== -->
   <div id="dlModal">
