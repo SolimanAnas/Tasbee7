@@ -357,6 +357,22 @@ input, textarea, select {
 .btn-secondary { background: var(--surface-raised); color: var(--on-surface); margin-top: 8px; }
 
 body.fade-out { opacity: 0; transition: opacity 0.2s; }
+
+/* ======================== EXIT CONFIRMATION ======================== */
+.exit-overlay { position: fixed; inset: 0; z-index: 10002; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: var(--spacing-md); opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+.exit-overlay.active { opacity: 1; pointer-events: all; }
+.exit-modal { background: var(--surface); border-radius: var(--radius-xl); width: 100%; max-width: 320px; padding: calc(var(--spacing-lg) + 8px); box-shadow: 0 24px 64px rgba(0,0,0,0.5); transform: scale(0.92) translateY(12px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15); text-align: center; }
+.exit-overlay.active .exit-modal { transform: scale(1) translateY(0); }
+.exit-icon-wrap { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--danger-container); display: flex; align-items: center; justify-content: center; animation: exitPulse 2s ease-in-out infinite; }
+.exit-icon-wrap svg { width: 28px; height: 28px; stroke: var(--danger); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes exitPulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0.2); } 50%{ box-shadow: 0 0 0 12px rgba(239,68,68,0); } }
+.exit-title { font-size: 1.2rem; font-weight: 700; color: var(--on-surface); margin-bottom: 6px; }
+.exit-sub { font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 24px; line-height: 1.6; }
+.exit-actions { display: flex; gap: 12px; }
+.exit-actions .btn { flex: 1; padding: 14px 0; border-radius: var(--radius-md); border: none; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.25s cubic-bezier(0.22,1,0.36,1); }
+.exit-actions .btn:active { transform: scale(0.95); }
+.exit-stay { background: var(--surface-raised); color: var(--on-surface); }
+.exit-leave { background: var(--danger); color: #fff; }
 </style>
 </head>
 <body>
@@ -870,6 +886,19 @@ window.addEventListener('load', () => {
   if(saved2) { calcMethod=saved2; const sel=document.getElementById('calcMethod'); if(sel) sel.value=calcMethod; }
 });
 
+// ======================== EXIT CONFIRMATION ========================
+let exitPending = false;
+function openExitModal() { exitPending = true; document.getElementById('exitOverlay').classList.add('active'); }
+function closeExitModal() { exitPending = false; document.getElementById('exitOverlay').classList.remove('active'); }
+function confirmExit() { exitPending = true; document.getElementById('exitOverlay').classList.remove('active'); window.removeEventListener('beforeunload', onBeforeUnload); window.location.assign('about:blank'); }
+function onBeforeUnload(e) { e.preventDefault(); e.returnValue = ''; }
+window.addEventListener('beforeunload', onBeforeUnload);
+// Back-button interception: push a dummy state so popstate fires on back press
+history.pushState({ exit: true }, '');
+window.addEventListener('popstate', (e) => {
+  if (!exitPending) { history.pushState({ exit: true }, ''); openExitModal(); }
+});
+
 // Service Worker: only for PWA asset caching — NOT for notifications in Capacitor.
 // Notifications are handled by @capacitor/local-notifications (js/notifications.js).
 if ('serviceWorker' in navigator) {
@@ -881,4 +910,21 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 </body>
+<div class="exit-overlay" id="exitOverlay" onclick="if(event.target===this) closeExitModal()">
+  <div class="exit-modal glass-panel">
+    <div class="exit-icon-wrap">
+      <svg viewBox="0 0 24 24">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </div>
+    <div class="exit-title">تأكيد الخروج</div>
+    <div class="exit-sub">هل تريد مغادرة التطبيق؟<br>سيتم إيقاف التلاوة والأذكار.</div>
+    <div class="exit-actions">
+      <button class="btn exit-stay" onclick="closeExitModal()">البقاء</button>
+      <button class="btn exit-leave" onclick="confirmExit()">مغادرة</button>
+    </div>
+  </div>
+</div>
 </html>
