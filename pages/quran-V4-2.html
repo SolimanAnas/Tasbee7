@@ -5467,23 +5467,48 @@ function getVariantHighlightCal() {
     }
 
     // ========== SWIPE LOGIC ==========
-    let pageSwipeStartX = 0;
-    document.addEventListener('touchstart', e => {
-      if (fitWidth && window.innerWidth >= 700) return;
-      if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
-      pageSwipeStartX = e.changedTouches[0].screenX;
-    }, {passive: true});
-    document.addEventListener('touchend', e => {
-      if (fitWidth && window.innerWidth >= 700) return;
-      if (e.target.closest('.modal-content') || e.target.closest('.audio-expanded-sheet') || e.target.closest('.audio-mini-player') || e.target.closest('input')) return;
-      const touchEndX = e.changedTouches[0].screenX;
-      const diff = touchEndX - pageSwipeStartX;
+    // Robust horizontal swipe: use clientX (screenX is unreliable in some Android
+    // browsers/webviews, giving diff~0 = no turn), fire as soon as the horizontal
+    // threshold is crossed during touchmove (so it still works when the browser ends
+    // the gesture with touchcancel), and ignore mostly-vertical moves so scrolling works.
+    let pageSwipeStartX = 0, pageSwipeStartY = 0, pageSwipeActive = false, pageSwipeFired = false;
+    function _pageSwipeBlocked(t) {
+      return !t || !t.closest || t.closest('.modal-content') || t.closest('.audio-expanded-sheet') ||
+             t.closest('.audio-mini-player') || t.closest('input');
+    }
+    function _pageSwipeGo(diff) {
       const step = (dualPage && window.innerWidth >= 700) ? 2 : 1;
-      if (Math.abs(diff) > 80) {
-        if (diff > 0) { if (currentPage < 604) { goToPage(currentPage + step); } }
-        else { if (currentPage > 1) { goToPage(currentPage - step); } }
+      if (diff > 0) { if (currentPage < 604) goToPage(currentPage + step); }
+      else { if (currentPage > 1) goToPage(currentPage - step); }
+    }
+    document.addEventListener('touchstart', e => {
+      pageSwipeActive = false; pageSwipeFired = false;
+      if (fitWidth && window.innerWidth >= 700) return;
+      if (_pageSwipeBlocked(e.target)) return;
+      const t = e.changedTouches[0];
+      pageSwipeStartX = t.clientX; pageSwipeStartY = t.clientY;
+      pageSwipeActive = true;
+    }, {passive: true});
+    document.addEventListener('touchmove', e => {
+      if (!pageSwipeActive || pageSwipeFired) return;
+      if (e.touches && e.touches.length > 1) { pageSwipeActive = false; return; } // pinch, not swipe
+      const t = e.changedTouches[0];
+      const dx = t.clientX - pageSwipeStartX, dy = t.clientY - pageSwipeStartY;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        pageSwipeFired = true;
+        _pageSwipeGo(dx);
       }
     }, {passive: true});
+    function _pageSwipeEnd(e) {
+      if (pageSwipeActive && !pageSwipeFired && e.changedTouches && e.changedTouches[0]) {
+        const dx = e.changedTouches[0].clientX - pageSwipeStartX;
+        const dy = e.changedTouches[0].clientY - pageSwipeStartY;
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.2) _pageSwipeGo(dx);
+      }
+      pageSwipeActive = false; pageSwipeFired = false;
+    }
+    document.addEventListener('touchend', _pageSwipeEnd, {passive: true});
+    document.addEventListener('touchcancel', _pageSwipeEnd, {passive: true});
 
     // ========== KEYBOARD NAV (desktop) ==========
     document.addEventListener('keydown', e => {

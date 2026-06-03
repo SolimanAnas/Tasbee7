@@ -28,10 +28,5 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start dev server
-        run: |
-          npx http-server . -p 8765 --cors -c-1 &
-          sleep 3
-
       - name: Run Playwright tests
         run: npx playwright test --shard=${{ matrix.shard }}/2
