@@ -4019,6 +4019,10 @@
     };
 
     function updateContent() {
+      // Dual-page (desktop): the RIGHT page is always odd and the LEFT even, so the
+      // spread reads like a real mushaf. Snap an even currentPage back to its odd
+      // partner so navigating/searching to an even page still keeps odd on the right.
+      if (dualPage && window.innerWidth >= 700 && currentPage % 2 === 0 && currentPage > 1) currentPage--;
       const formattedPage = currentPage.toString().padStart(3, '0');
       const img = document.getElementById('pageImg');
       const v = getVariantInfo(currentMushafVariant);
