@@ -23,6 +23,7 @@
   --accent-muted: #334155;
   --glass: rgba(30, 41, 59, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
+  --ambient: rgba(52, 211, 153, 0.12);   /* soft glow tint for depth */
   --zikr-size: 28px;
 }
 
@@ -36,6 +37,7 @@
   --accent-muted: #D1E7DD;
   --glass: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(0, 0, 0, 0.1);
+  --ambient: rgba(25, 135, 84, 0.08);
 }
 
 [data-theme="warm"] {
@@ -48,6 +50,7 @@
   --accent-muted: #E2D7C1;
   --glass: rgba(252, 246, 232, 0.85);
   --glass-border: rgba(74, 59, 50, 0.15);
+  --ambient: rgba(92, 107, 82, 0.12);
 }
 
 *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
@@ -63,42 +66,91 @@ body{
   overflow:hidden;
   position: relative;
   transition: background 0.3s ease, color 0.3s ease;
+  /* App-like feel: no accidental text highlighting / long-press callout */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
-/* --- Top Bar layout for the counter --- */
+/* Allow selecting/copying the translation text inside the modal */
+#englishText, #englishText * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Ambient glow for depth (frontend-design: atmosphere over flat color) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(120% 55% at 50% 0%, var(--ambient), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- Top Bar: cohesive header holding the upper icons --- */
 .top-bar {
   display: flex;
   justify-content: space-between;
-  align-items: center; 
-  padding: calc(46px + env(safe-area-inset-top)) 20px 8px; /* +30px upper padding for notched phones */
-  font-size: 22px;
+  align-items: center;
+  gap: 10px;
+  /* DEFAULT: moved up 30px (was 46px base). iOS notch override below. */
+  padding: calc(16px + env(safe-area-inset-top)) 16px 10px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+/* Restore the larger, notch-safe spacing only on iOS devices */
+body.is-ios .top-bar {
+  padding-top: calc(46px + env(safe-area-inset-top));
 }
 
 .top-bar-group {
   display: flex;
-  gap: 15px;
-  flex: 1; 
+  gap: 10px;
+  flex: 1;
+  align-items: center;
 }
 
 .top-bar-group.end {
   justify-content: flex-end;
 }
 
+/* Refined circular glass icon buttons (larger tap targets) */
 .icon-btn{
   cursor:pointer;
   user-select:none;
   position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border-radius: 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.icon-btn:active {
+  transform: scale(0.9);
+  background: var(--accent-muted);
 }
 
 /* Pulsing dot when audio is playing in background */
 .icon-btn.audio-playing::after {
   content: '';
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 9px;
-  height: 9px;
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--accent-main);
   box-shadow: 0 0 6px var(--accent-main);
@@ -117,11 +169,40 @@ body{
   color: var(--text-primary);
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  padding: 4px 16px;
-  border-radius: 20px; 
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 8px 18px;
+  border-radius: 22px;
   text-align: center;
   flex: 0 1 auto;
   white-space: nowrap;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+}
+
+/* --- Session progress bar (how far through the full set) --- */
+.session-progress {
+  position: relative;
+  z-index: 15;
+  width: 100%;
+  max-width: 700px;
+  height: 5px;
+  margin: 0 auto;
+  background: var(--accent-muted);
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.session-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,
+              color-mix(in srgb, var(--accent-main) 65%, transparent),
+              var(--accent-main));
+  border-radius: 999px;
+  box-shadow: 0 0 10px -1px var(--accent-main);
+  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Main Layout */
@@ -130,34 +211,37 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:flex-start;  
-  gap:12px;                    
-  padding: 0 20px 170px; 
-  overflow-y:auto;              
+  justify-content:flex-start;
+  gap:14px;
+  padding: 4px 20px 170px;
+  overflow-y:auto;
+  position: relative;
+  z-index: 1;
 }
 
 /* --- Zikr Container --- */
 .zikr-container {
   width: 100%;
   max-width: 700px;
-  min-height: 280px;            
-  height: 50vh;                 
-  max-height: 520px;            
-  flex-grow: 1;                 
+  min-height: 280px;
+  height: 50vh;
+  max-height: 520px;
+  flex-grow: 1;
   background: var(--glass);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  overflow: hidden; 
-  padding: 15px 0; 
-  display: flex;                
-  flex-direction: column;       
+  overflow: hidden;
+  padding: 15px 0;
+  display: flex;
+  flex-direction: column;
   text-align: center;
   cursor: pointer;
   user-select: none;
   transition: .3s ease;
-  margin-top: 0;                 
+  margin-top: 0;
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,0.25);
 }
 
 .zikr-container.fade-out{
@@ -173,13 +257,13 @@ body{
 .zikr-scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px; 
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
 }
 
 .zikr-scroll-area::-webkit-scrollbar {
-  width: 6px; 
+  width: 6px;
 }
 
 .zikr-scroll-area::-webkit-scrollbar-track {
@@ -197,7 +281,7 @@ body{
   line-height:2.3;
   white-space:pre-line;
   color: var(--text-primary);
-  margin: auto 0;               
+  margin: auto 0;
   width: 100%;
 }
 
@@ -207,7 +291,7 @@ body{
   width: min(42vw, 182px);     /* reduced by 30% from min(60vw, 260px) */
   height: min(42vw, 182px);
   margin: 0 auto;
-  flex-shrink: 0;               
+  flex-shrink: 0;
 }
 
 .progress-wrapper {
@@ -337,7 +421,7 @@ body.player-active .page-wrapper {
   cursor:pointer;
   font-size:16px;
   flex:0 1 auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: background 0.3s, color 0.3s;
 }
 
@@ -378,6 +462,8 @@ body.player-active .page-wrapper {
   padding:30px;
   transform:translateY(30px);
   transition:.3s ease;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .modal.active .modal-content{
@@ -400,7 +486,7 @@ body.player-active .page-wrapper {
 }
 
 .settings-row {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 .settings-row h3 {
   color: var(--accent-main);
@@ -410,6 +496,67 @@ body.player-active .page-wrapper {
 .theme-buttons {
   display: flex;
   gap: 15px;
+}
+
+.settings-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 8px 0 0;
+  line-height: 1.55;
+}
+
+/* --- Toggle switch --- */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+  direction: ltr; /* keep knob travel consistent regardless of page RTL */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-muted);
+  border-radius: 28px;
+  transition: background 0.25s ease;
+}
+
+.switch .slider::before {
+  content: '';
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.switch input:checked + .slider {
+  background: var(--accent-main);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(22px);
 }
 
 /* --- Floating Mini Audio Player (now child of .bottom-stack) --- */
@@ -594,19 +741,23 @@ body.player-active .page-wrapper {
 
 <div class="top-bar">
   <div class="top-bar-group">
-    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="icon-btn" onclick="goHome()" title="الرئيسية">🏠</div>
     <div class="icon-btn" id="soundBtn" title="تشغيل الصوت">🔊</div>
   </div>
-  
+
   <div class="zikr-index-counter" id="zikrIndexCounter"></div>
-  
+
   <div class="top-bar-group end">
-    <div class="icon-btn" onclick="openTranslation()">🌐</div>
-    <div class="icon-btn" onclick="openSettings()">⚙️</div>
+    <div class="icon-btn" onclick="openTranslation()" title="الترجمة">🌐</div>
+    <div class="icon-btn" onclick="openSettings()" title="الإعدادات">⚙️</div>
   </div>
 </div>
 
 <div class="page-wrapper">
+
+  <div class="session-progress" aria-hidden="true">
+    <div class="session-progress-fill" id="sessionProgressFill"></div>
+  </div>
 
   <div class="zikr-container fade-in" onclick="increment()">
     <div class="zikr-scroll-area">
@@ -620,13 +771,11 @@ body.player-active .page-wrapper {
         <circle class="bg-circle" cx="100" cy="100" r="90"/>
         <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
       </svg>
-                  <div class="counter-content">
+      <div class="counter-content">
         <span class="count-label">المتبقي</span>
         <span class="count-number" id="counter">0</span>
         <span class="count-total">من <span id="targetCount">0</span></span>
       </div>
-
-
     </div>
   </div>
 
@@ -661,7 +810,7 @@ body.player-active .page-wrapper {
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
     <div class="close" onclick="closeSettings()">✕</div>
-    
+
     <div class="settings-row">
       <h3>حجم الخط</h3>
       <input type="range" min="22" max="40" value="28" id="fontSizeSlider"
@@ -675,6 +824,18 @@ body.player-active .page-wrapper {
         <button class="btn" onclick="setTheme('warm')">دافئ</button>
         <button class="btn" onclick="setTheme('light')">فاتح</button>
       </div>
+    </div>
+
+    <div class="settings-row">
+      <h3>التنقل بين الأذكار</h3>
+      <label class="toggle-row">
+        <span>السحب يميناً/يساراً على البطاقة للتنقل</span>
+        <span class="switch">
+          <input type="checkbox" id="swipeNavToggle" onchange="toggleSwipeNav(this.checked)">
+          <span class="slider"></span>
+        </span>
+      </label>
+      <p class="settings-hint">معطّل افتراضياً لتجنّب تغيير الذِّكر بالخطأ أثناء تكبير النص. أزرار «التالي / السابق» في الأسفل تعمل دائماً.</p>
     </div>
 
     <div class="settings-row">
@@ -713,6 +874,10 @@ let touchStartX = 0;
 let touchEndX = 0;
 const fullCircle = 565.48;
 
+/* Swipe-to-navigate on the card — OFF by default (prevents accidental
+   next/previous while pinch-zooming). Toggle in Settings to enable. */
+let swipeNavEnabled = localStorage.getItem("zikrSwipeNav") === "true";
+
 const type = new URLSearchParams(window.location.search).get("type") || "morning";
 
 fetch("../assets/azkar.json")
@@ -726,7 +891,7 @@ fetch("../assets/azkar.json")
 function checkDailyResetAzkar() {
     const today = new Date().toDateString();
     const lastDate = localStorage.getItem("azkar_last_date");
-    
+
     if (lastDate !== today) {
         // يوم جديد: تصفير عداد "أذكار اليوم"
         localStorage.setItem("azkar_today", "0");
@@ -739,6 +904,7 @@ const swipeArea = document.querySelector(".zikr-container");
 let pinchInitialDistance = 0;
 let pinchInitialSize = 28;
 let isPinching = false;
+let multiTouchOccurred = false; // true if the current gesture ever used 2+ fingers
 const FONT_MIN = 22;
 const FONT_MAX = 40;
 
@@ -751,10 +917,12 @@ function getDistance(t1, t2) {
 swipeArea.addEventListener("touchstart", e => {
   if (e.touches.length === 2) {
     isPinching = true;
+    multiTouchOccurred = true; // mark gesture as multi-touch (zoom)
     pinchInitialDistance = getDistance(e.touches[0], e.touches[1]);
     const currentSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--zikr-size'));
     pinchInitialSize = isNaN(currentSize) ? 28 : currentSize;
   } else if (e.touches.length === 1) {
+    multiTouchOccurred = false; // fresh single-finger gesture
     touchStartX = e.changedTouches[0].screenX;
   }
 }, { passive: true });
@@ -792,12 +960,19 @@ swipeArea.addEventListener("touchcancel", () => {
 });
 
 function handleSwipe() {
+  if (!swipeNavEnabled) return;     // disabled by default
+  if (multiTouchOccurred) return;   // never navigate from a pinch/zoom gesture
   const diff = touchStartX - touchEndX;
   if (Math.abs(diff) < 50) return;
   diff > 0 ? prev() : next();
 }
 
-/* Load Zikr with fade */
+/* Settings: enable/disable swipe navigation */
+function toggleSwipeNav(enabled) {
+  swipeNavEnabled = enabled;
+  localStorage.setItem("zikrSwipeNav", enabled ? "true" : "false");
+}
+
 /* Load Zikr with fade */
 function loadZikr() {
   const container = document.querySelector(".zikr-container");
@@ -809,16 +984,17 @@ function loadZikr() {
     if(azkarData && azkarData[currentIndex]){
         document.getElementById("arabicText").innerText = azkarData[currentIndex].arabic;
         document.getElementById("englishText").innerText = azkarData[currentIndex].english;
-        
+
         const currentNum = currentIndex + 1;
         const totalNum = azkarData.length;
         document.getElementById("zikrIndexCounter").innerText = `${currentNum} من ${totalNum}`;
+        updateSessionProgress();
     }
     updateProgress();
-    
+
     // --- السطر الجديد لإعادة التمرير إلى الأعلى ---
     document.querySelector(".zikr-scroll-area").scrollTop = 0;
-    
+
     container.classList.remove("fade-out");
     container.classList.add("fade-in");
   }, 200);
@@ -829,14 +1005,22 @@ function updateProgress() {
   if(!azkarData) return;
   const target = azkarData[currentIndex].count;
   const remaining = target - currentCount;
-  
+
   // السطر الجديد لتحديث الرقم الإجمالي
-  document.getElementById("targetCount").innerText = target; 
-  
+  document.getElementById("targetCount").innerText = target;
+
   document.getElementById("counter").innerText = remaining;
   const percent = currentCount / target;
   const offset = fullCircle - (fullCircle * percent);
   document.getElementById("progressCircle").style.strokeDashoffset = offset;
+}
+
+/* Session progress: position within the full set (fills as you advance) */
+function updateSessionProgress() {
+  if (!azkarData || !azkarData.length) return;
+  const pct = ((currentIndex + 1) / azkarData.length) * 100;
+  const fill = document.getElementById('sessionProgressFill');
+  if (fill) fill.style.width = pct + '%';
 }
 
 
@@ -846,7 +1030,7 @@ function increment() {
   const target = azkarData[currentIndex].count;
   if (currentCount < target) {
     currentCount++;
-    
+
     // --- تحديث إحصائيات الأذكار لتعمل مع الصفحة الرئيسية ---
     checkDailyResetAzkar();
     let todayAzkar = parseInt(localStorage.getItem("azkar_today") || "0");
@@ -890,7 +1074,7 @@ function prev() {
 function toggleAuto() {
   autoMode = !autoMode;
   const autoBtn = document.getElementById("autoBtn");
-  
+
   if (autoMode) {
     autoBtn.classList.add("primary");
     autoLoop();
@@ -919,6 +1103,7 @@ function openSettings() {
   document.getElementById("settingsModal").classList.add("active");
   const savedSize = localStorage.getItem("zikrFontSize") || 28;
   document.getElementById("fontSizeSlider").value = savedSize;
+  document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
   updateAudioSourceUI();
 }
 
@@ -948,7 +1133,7 @@ function changeFontSize(size) {
 function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   localStorage.setItem("themeMode", mode);
-  
+
   const metaThemeColor = document.querySelector("meta[name=theme-color]");
   if(mode === 'light') metaThemeColor.setAttribute("content", "#F4F6F8");
   else if(mode === 'warm') metaThemeColor.setAttribute("content", "#F4ECD8");
@@ -1175,8 +1360,21 @@ function hidePlayerFromOptions() {
   });
 })();
 
+/* --- iOS / notched device detection (keeps larger top padding only there) --- */
+function detectIOS() {
+  const ua = navigator.userAgent || '';
+  const platform = navigator.platform || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+                /iP(hone|od|ad)/.test(platform) ||
+                // iPadOS 13+ reports as Mac, detect via touch support
+                (platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                (ua.includes('Mac') && 'ontouchend' in document);
+  if (isIOS) document.body.classList.add('is-ios');
+}
+
 /* Load saved preferences & Init */
 window.addEventListener("load", () => {
+  detectIOS(); // add .is-ios before paint settles so top padding is correct
   checkDailyResetAzkar(); // التأكد من التصفير اليومي عند فتح الصفحة
 
   const savedSize = localStorage.getItem("zikrFontSize");
@@ -1187,6 +1385,9 @@ window.addEventListener("load", () => {
 
   const savedTheme = localStorage.getItem("themeMode") || 'dark';
   setTheme(savedTheme);
+
+  // reflect saved swipe-nav preference in the settings toggle
+  document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
 });
 </script>
 
