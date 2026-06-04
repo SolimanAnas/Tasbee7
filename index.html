@@ -887,12 +887,15 @@ window.addEventListener('load', () => {
 });
 
 // ======================== EXIT CONFIRMATION ========================
+// Note: the native window "beforeunload" handler was removed. It triggered the
+// browser's "Leave site? / Changes you made may not be saved" dialog on EVERY
+// navigation, including opening any sub-page via go(). Exit confirmation for the
+// back button is handled entirely by the custom modal below (popstate-based).
 let exitPending = false;
 function openExitModal() { exitPending = true; document.getElementById('exitOverlay').classList.add('active'); }
 function closeExitModal() { exitPending = false; document.getElementById('exitOverlay').classList.remove('active'); }
-function confirmExit() { exitPending = true; document.getElementById('exitOverlay').classList.remove('active'); window.removeEventListener('beforeunload', onBeforeUnload); window.location.assign('about:blank'); }
-function onBeforeUnload(e) { e.preventDefault(); e.returnValue = ''; }
-window.addEventListener('beforeunload', onBeforeUnload);
+function confirmExit() { exitPending = true; document.getElementById('exitOverlay').classList.remove('active'); window.location.assign('about:blank'); }
+
 // Back-button interception: push a dummy state so popstate fires on back press
 history.pushState({ exit: true }, '');
 window.addEventListener('popstate', (e) => {
