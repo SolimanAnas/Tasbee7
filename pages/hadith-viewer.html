@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0e201b" id="metaThemeColor">
+  <title>قراءة الكتاب | زاد المسلم</title>
+  <style>
+    /* ========== الخطوط المحلية (تعمل دون اتصال) ========== */
+    @font-face{ font-family:'Scheherazade'; src:url('fonts/Scheherazade.ttf') format('truetype'); font-weight:normal; font-style:normal; font-display:swap; }
+    @font-face{ font-family:'Amiri'; src:url('fonts/Amiri.ttf') format('truetype'); font-weight:normal; font-style:normal; font-display:swap; }
+    @font-face{ font-family:'Amiri'; src:url('fonts/Amiri.ttf') format('truetype'); font-weight:bold; font-style:normal; font-display:swap; }
+
+    /* ========== الثيمات ========== */
+    :root{ --meta:#0e201b; }
+    [data-theme="light"]{
+      --bg:#fcf8ef; --bg2:#ece2cf; --card-bg:#fffdf7;
+      --text:#1c2b24; --text-muted:#5f6f67;
+      --accent:#0f7a52; --accent-deep:#0a5c3d; --accent-bg:rgba(15,122,82,.1);
+      --gold:#9a7b1f; --gold-soft:rgba(154,123,31,.16);
+      --border:rgba(154,123,31,.22);
+      --glass-bg:rgba(255,253,247,.85); --glass-border:rgba(154,123,31,.22);
+      --danger:#dc2626; --danger-soft:rgba(220,38,38,.1);
+      --card-shadow:0 8px 22px -12px rgba(90,70,20,.22);
+      --toast-bg:#0a5c3d; --toast-color:#fff; --pattern-opacity:.05;
+    }
+    [data-theme="sepia"]{
+      --bg:#f4ecd8; --bg2:#e3d4b3; --card-bg:#fcf7ea;
+      --text:#3c2a18; --text-muted:#7a6244;
+      --accent:#8a5a1c; --accent-deep:#6e4714; --accent-bg:rgba(138,90,28,.12);
+      --gold:#9a6b1f; --gold-soft:rgba(154,107,31,.18);
+      --border:rgba(122,84,24,.24);
+      --glass-bg:rgba(252,247,234,.85); --glass-border:rgba(122,84,24,.24);
+      --danger:#b4452b; --danger-soft:rgba(180,69,43,.12);
+      --card-shadow:0 8px 22px -12px rgba(90,60,20,.24);
+      --toast-bg:#6e4714; --toast-color:#fff; --pattern-opacity:.06;
+    }
+    [data-theme="dark"]{
+      --bg:#04100c; --bg2:#0e201b; --card-bg:rgba(255,255,255,.05);
+      --text:#eef4f1; --text-muted:#8ba298;
+      --accent:#10b981; --accent-deep:#34d399; --accent-bg:rgba(16,185,129,.15);
+      --gold:#e6c068; --gold-soft:rgba(230,192,104,.16);
+      --border:rgba(230,192,104,.16);
+      --glass-bg:rgba(14,32,27,.82); --glass-border:rgba(230,192,104,.16);
+      --danger:#f87171; --danger-soft:rgba(248,113,113,.16);
+      --card-shadow:0 16px 44px -18px rgba(0,0,0,.6);
+      --toast-bg:#059669; --toast-color:#fff; --pattern-opacity:.05;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+    body{
+      font-family:'Tajawal','Segoe UI', system-ui, sans-serif;
+      background:radial-gradient(125% 80% at 50% -10%, var(--bg2), var(--bg) 72%);
+      color:var(--text); transition:background .35s ease, color .35s ease;
+      line-height:1.6; overflow-x:hidden; min-height:100dvh;
+    }
+    /* زخرفة إسلامية خفيفة (رُبع الحزب) */
+    body::before{
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+      opacity:var(--pattern-opacity);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23c9a14a' stroke-width='1'%3E%3Crect x='21' y='21' width='22' height='22'/%3E%3Crect x='21' y='21' width='22' height='22' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");
+      background-size:64px 64px;
+    }
+    header, main, .bottom-nav, .scroll-top, .toast, .modal-overlay, #scroll-progress{ position:relative; z-index:1; }
+
+    #scroll-progress{
+      position:fixed; top:0; left:0; height:3px; width:0%; z-index:1001;
+      background:linear-gradient(90deg, var(--accent), var(--gold)); transition:width .1s ease;
+    }
+
+    /* ========== الشريط العلوي (هوية ثابتة خضراء/ذهبية) ========== */
+    header{
+      background:linear-gradient(135deg, #0e201b 0%, #0a3f2e 55%, #0e201b 100%);
+      color:#fff; padding:max(10px, env(safe-area-inset-top)) 14px 11px;
+      position:sticky; top:0; z-index:1000; box-shadow:0 4px 18px -8px rgba(0,0,0,.5);
+      border-bottom:1px solid rgba(230,192,104,.3);
+    }
+    .toolbar{ display:flex; gap:9px; align-items:center; max-width:800px; margin:0 auto; }
+    .home-btn, .action-btn{
+      background:rgba(255,255,255,.12); border:1px solid rgba(230,192,104,.22); border-radius:12px;
+      width:40px; height:40px; min-width:40px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:1.15rem; text-decoration:none; color:#fff; transition:transform .15s, background .2s;
+    }
+    .home-btn:active, .action-btn:active{ transform:scale(.9); }
+    .search-box{ flex:1; position:relative; }
+    .search-box input{
+      width:100%; padding:10px 16px; border-radius:12px; border:1px solid rgba(230,192,104,.25);
+      background:rgba(255,255,255,.95); color:#13241d; font-family:'Tajawal', sans-serif; font-size:.95rem; outline:none;
+      transition:box-shadow .2s;
+    }
+    .search-box input:focus{ box-shadow:0 0 0 3px rgba(230,192,104,.35); }
+    .search-box input:disabled{ opacity:.6; }
+
+    .theme-dock{ display:flex; gap:7px; }
+    .dot{
+      width:20px; height:20px; border-radius:50%; border:2px solid rgba(255,255,255,.45);
+      cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.25); transition:.15s;
+    }
+    .dot:active{ transform:scale(.9); }
+    .dot.active{ transform:scale(1.18); border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); }
+
+    main{ max-width:800px; margin:0 auto; padding:22px 15px 120px; }
+
+    .section-header{ text-align:center; margin-bottom:22px; }
+    #book-title{ font-size:1rem; color:var(--gold); font-weight:700; letter-spacing:.3px; margin-bottom:6px; }
+    .section-title{ font-size:1.7rem; color:var(--accent); font-family:'Amiri', serif; font-weight:bold; line-height:1.5; }
+    .section-header .ornament{ width:90px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:10px auto 0; position:relative; }
+    .section-header .ornament::after{ content:"۞"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:var(--gold); font-size:14px; background:var(--bg); padding:0 6px; }
+
+    .cards-container{ display:flex; flex-direction:column; gap:16px; }
+
+    .card{
+      background:var(--card-bg); border-radius:20px; padding:20px;
+      box-shadow:var(--card-shadow); border:1px solid var(--border);
+      transition:transform .15s ease, box-shadow .2s; position:relative; overflow:hidden;
+    }
+    .card.hadith-card::before{ content:""; position:absolute; top:0; bottom:0; right:0; width:4px; background:var(--accent); }
+    .card.hadith-card.warn::before{ background:var(--danger); }
+
+    .card-arabic{
+      font-family:'Amiri','Scheherazade', serif; font-size:1.85rem; line-height:2;
+      margin-bottom:15px; text-align:justify; color:var(--text); word-spacing:1px;
+    }
+
+    .card-ref{
+      font-size:.85rem; color:var(--text-muted); border-top:1px solid var(--border);
+      padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .card-ref b{ color:var(--text); }
+
+    .card-actions{ display:flex; gap:8px; align-items:center; }
+    .card-btn{
+      background:var(--glass-bg); border:1px solid var(--border); cursor:pointer; color:var(--text-muted);
+      transition:transform .1s, color .2s, background .2s; display:flex; align-items:center; justify-content:center;
+      width:34px; height:34px; border-radius:10px; font-size:1rem;
+    }
+    .card-btn:active{ transform:scale(.85); background:var(--accent-bg); }
+    .card-btn svg{ stroke:var(--gold); }
+    .card-btn.active{ color:var(--gold); border-color:var(--gold); background:var(--gold-soft); }
+
+    .badge-ok{ color:var(--accent); font-weight:bold; background:var(--accent-bg); padding:3px 9px; border-radius:7px; }
+    .badge-warn{ color:var(--danger); font-weight:bold; background:var(--danger-soft); padding:3px 9px; border-radius:7px; }
+
+    mark{ background:var(--gold-soft); color:var(--gold); padding:0 3px; border-radius:4px; font-weight:700; }
+
+    /* وضع القراءة */
+    body.reading-mode .card{ background:transparent; box-shadow:none; border:none; padding:22px 4px; border-bottom:1px solid var(--border); border-radius:0; }
+    body.reading-mode .card.hadith-card::before{ display:none; }
+    body.reading-mode .card-arabic{ font-size:2.05rem; line-height:2.3; }
+    body.reading-mode .card-ref{ font-size:.9rem; }
+
+    /* ========== الشريط السفلي ========== */
+    .bottom-nav{
+      position:fixed; bottom:max(18px, env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
+      background:var(--glass-bg); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
+      padding:7px 12px; border-radius:30px; display:flex; gap:8px; align-items:center;
+      box-shadow:0 10px 30px -10px rgba(0,0,0,.4); z-index:999; width:92%; max-width:450px; justify-content:space-between;
+    }
+    .nav-btn{ background:none; border:none; color:var(--text); font-size:1.6rem; cursor:pointer; padding:4px 10px; transition:transform .1s, color .2s; line-height:1; }
+    .nav-btn:active{ transform:scale(.85); color:var(--accent); }
+    .custom-select-btn{
+      flex:1; background:transparent; border:none; color:var(--text);
+      font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold;
+      text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; padding:5px;
+    }
+    .custom-select-btn::after{ content:" ▾"; color:var(--gold); font-size:.8rem; }
+
+    /* زر الأعلى */
+    .scroll-top{
+      position:fixed; bottom:96px; right:15px; background:var(--accent); color:#fff;
+      width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; cursor:pointer; box-shadow:0 6px 16px -4px rgba(0,0,0,.3);
+      z-index:998; opacity:0; transition:opacity .2s, transform .1s; pointer-events:none;
+    }
+    .scroll-top.visible{ opacity:1; pointer-events:auto; }
+    .scroll-top:active{ transform:scale(.9); }
+
+    /* التنبيه */
+    .toast{
+      position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--toast-bg);
+      color:var(--toast-color); padding:11px 26px; border-radius:40px; font-weight:bold; font-size:.9rem;
+      z-index:10000; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap;
+      box-shadow:0 8px 20px -6px rgba(0,0,0,.3);
+    }
+    .toast.show{ opacity:1; }
+
+    /* المودال (ورقة سفلية) */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(5px);
+      z-index:9999; opacity:0; pointer-events:none; transition:.3s; display:flex; align-items:flex-end; justify-content:center;
+    }
+    .modal-overlay.active{ opacity:1; pointer-events:all; }
+    .modal-content{
+      background:var(--bg); border:1px solid var(--border); border-bottom:none; border-radius:24px 24px 0 0;
+      width:100%; max-width:600px; max-height:78vh; display:flex; flex-direction:column;
+      transform:translateY(100%); transition:transform .32s cubic-bezier(.175,.885,.32,1.1);
+      box-shadow:0 -12px 40px rgba(0,0,0,.25); padding-bottom:env(safe-area-inset-bottom);
+    }
+    .modal-overlay.active .modal-content{ transform:translateY(0); }
+    .modal-content::before{ content:""; width:42px; height:4px; background:var(--border); border-radius:4px; margin:12px auto 0; }
+    .modal-header{
+      padding:16px 20px; text-align:center; border-bottom:1px solid var(--border);
+      font-weight:bold; font-size:1.15rem; position:relative; color:var(--text);
+    }
+    .close-modal{ position:absolute; left:15px; top:50%; transform:translateY(-50%); background:var(--card-bg); border:1px solid var(--border); color:var(--text-muted); width:32px; height:32px; border-radius:50%; font-size:.95rem; cursor:pointer; }
+    .modal-body{ overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .menu-item{
+      background:var(--card-bg); border:1px solid var(--border); border-radius:14px;
+      padding:15px; color:var(--text); font-size:1rem; cursor:pointer; transition:.18s;
+      display:flex; justify-content:space-between; align-items:center; font-weight:500; gap:10px;
+    }
+    .menu-item:active{ transform:scale(.98); }
+    .menu-item.active-item{ border-color:var(--accent); color:var(--accent); background:var(--accent-bg); }
+    .menu-item .count{ font-size:.8rem; color:var(--gold); font-weight:700; white-space:nowrap; }
+
+    .empty-note{ text-align:center; padding:40px 16px; color:var(--text-muted); }
+    .empty-note .icn{ font-size:32px; display:block; margin-bottom:10px; opacity:.6; }
+
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+  </style>
+</head>
+<body data-theme="light">
+
+<div id="scroll-progress"></div>
+
+<header>
+  <div class="toolbar">
+    <a href="index.html" class="home-btn" title="العودة للبحث">🏠</a>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="ابحث في هذا الكتاب...">
+    </div>
+    <div class="theme-dock">
+      <div class="dot" data-set="light" style="background:#fbf3df;" onclick="setTheme('light')"></div>
+      <div class="dot" data-set="sepia" style="background:#d9bf8a;" onclick="setTheme('sepia')"></div>
+      <div class="dot" data-set="dark" style="background:#0e201b;" onclick="setTheme('dark')"></div>
+    </div>
+    <button class="action-btn" id="readingModeBtn" title="وضع القراءة">📖</button>
+  </div>
+</header>
+
+<main>
+  <div class="section-header">
+    <h1 id="book-title">جاري التحميل...</h1>
+    <h2 id="main-title" class="section-title"></h2>
+    <div class="ornament"></div>
+  </div>
+  <div id="content-area">
+    <div style="text-align:center; padding:50px;">
+      <svg width="40" height="40" viewBox="0 0 24 24" style="animation:spin 1s linear infinite; stroke:var(--accent); fill:none; stroke-width:2;">
+          <circle cx="12" cy="12" r="10" opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path>
+      </svg>
+      <div style="margin-top:15px; color:var(--text-muted);">جاري التجهيز...</div>
+    </div>
+  </div>
+</main>
+
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-btn" onclick="nav('prev')" aria-label="السابق">‹</button>
+  <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()">اختر الباب</button>
+  <button class="nav-btn" onclick="nav('next')" aria-label="التالي">›</button>
+  <button class="action-btn" style="background:transparent; border-color:transparent; color:var(--text);" id="bookmarkListBtn" title="المحفوظات">☆</button>
+</nav>
+
+<div class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+<div id="toastMsg" class="toast"></div>
+
+<div class="modal-overlay" id="menuModal" onclick="if(event.target===this) closeMenu()">
+  <div class="modal-content">
+    <div class="modal-header">فهرس الأبواب<button class="close-modal" onclick="closeMenu()">✕</button></div>
+    <div class="modal-body" id="menuList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="bookmarkModal" onclick="if(event.target===this) closeBookmarkModal()">
+  <div class="modal-content">
+    <div class="modal-header">الأحاديث المحفوظة<button class="close-modal" onclick="closeBookmarkModal()">✕</button></div>
+    <div class="modal-body" id="bookmarkList"></div>
+  </div>
+</div>
+
+<script>
+  let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
+
+  // ================= الثيمات =================
+  function applyTheme() {
+    const t = localStorage.getItem('appTheme') || 'light';
+    document.body.setAttribute('data-theme', t);
+    document.querySelectorAll('.theme-dock .dot').forEach(d => d.classList.toggle('active', d.dataset.set === t));
+    setTimeout(() => {
+      const meta = getComputedStyle(document.body).getPropertyValue('--meta').trim() || '#0e201b';
+      document.getElementById('metaThemeColor').content = meta;
+    }, 30);
+  }
+  function setTheme(t) { localStorage.setItem('appTheme', t); applyTheme(); }
+
+  // ================= أدوات الواجهة =================
+  function showToast(msg, duration=2000) {
+    const toast = document.getElementById('toastMsg');
+    toast.textContent = msg; toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), duration);
+  }
+
+  // نسخ موثوق يعمل دون اتصال (file:// / Capacitor)
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => showToast('📋 تم النسخ بنجاح')).catch(() => fallbackCopy(text));
+    } else { fallbackCopy(text); }
+  }
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      const ok = document.execCommand('copy'); document.body.removeChild(ta);
+      showToast(ok ? '📋 تم النسخ بنجاح' : '❌ تعذّر النسخ');
+    } catch (e) { showToast('❌ تعذّر النسخ'); }
+  }
+
+  // ================= المحفوظات =================
+  function getBookmarkKey() { return 'hadith_bookmarks_' + App.bookId; }
+  function loadBookmarks() { try { App.bookmarks = JSON.parse(localStorage.getItem(getBookmarkKey())) || []; } catch(e){ App.bookmarks=[]; } }
+  function saveBookmarks() { localStorage.setItem(getBookmarkKey(), JSON.stringify(App.bookmarks)); }
+  function isBookmarked(s, i) { return App.bookmarks.some(b => b.sectionIdx === s && b.itemIdx === i); }
+  function toggleBookmark(s, i) {
+    if (isBookmarked(s, i)) {
+      App.bookmarks = App.bookmarks.filter(b => !(b.sectionIdx === s && b.itemIdx === i));
+      showToast('❌ تمت الإزالة من المحفوظات');
+    } else { App.bookmarks.push({ sectionIdx:s, itemIdx:i }); showToast('⭐ أُضيف إلى المحفوظات'); }
+    saveBookmarks(); render();
+  }
+
+  // ================= منطق أساسي =================
+  function getHadithGrade(bookId, grades) {
+    if (bookId === 'bukhari' || bookId === 'muslim') return { text:'صحيح', isOk:true };
+    if (!grades || grades.length === 0) return { text:'غير محدد', isOk:true };
+    const albani = grades.find(g => (g && g.name || '').toLowerCase().includes('albani'));
+    const raw = (((albani ? albani.grade : grades[0].grade) || '') + '').toLowerCase();
+    const isOk = !raw.includes('daif') && !raw.includes("da'if") && !raw.includes('mawdu');
+    let arGrade = raw || 'غير محدد';
+    if (raw.includes('sahih')) arGrade = 'صحيح';
+    else if (raw.includes('hasan')) arGrade = 'حسن';
+    else if (raw.includes('daif') || raw.includes("da'if")) arGrade = 'ضعيف';
+    else if (raw.includes('mawdu')) arGrade = 'موضوع';
+    return { text:arGrade, isOk };
+  }
+
+  const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
+  const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
+  function normalizeText(text) {
+    return (text || "").replace(TASHKEEL_REGEX, '').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');
+  }
+  function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function buildHighlightRegex(rawQuery) {
+    let clean = normalizeText(rawQuery), pattern = "";
+    for (let ch of clean) {
+      if (/[اأإآ]/.test(ch)) pattern += "[أإآا]";
+      else if (/[ةه]/.test(ch)) pattern += "[ةه]";
+      else if (/[ىي]/.test(ch)) pattern += "[ىي]";
+      else if (ch === ' ') pattern += "\\s+";
+      else pattern += escapeRegex(ch);
+      if (ch !== ' ') pattern += "[" + TASHKEEL_STR + "]*";
+    }
+    return new RegExp('(' + pattern + ')', 'g');
+  }
+
+  async function loadHadithData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    App.bookId = urlParams.get('book');
+    const targetSectionNum = urlParams.get('section');
+
+    // الشاشة الرئيسية للمكتبة (بدون كتاب محدد)
+    if (!App.bookId) {
+      document.getElementById('book-title').textContent = "المكتبة الحديثية";
+      document.getElementById('main-title').textContent = "اختر كتاباً للقراءة";
+      document.getElementById('bottomNav').style.display = 'none';
+      const si = document.getElementById('search-input');
+      si.disabled = true; si.placeholder = "اختر الكتاب أولاً...";
+
+      const advancedBtn = `
+        <button onclick="window.location.href='index.html'" style="width:100%; margin-bottom:18px; background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-radius:16px; padding:15px; font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:var(--card-shadow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="width:20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            البحث المتقدم في جميع الكتب
+        </button>`;
+      const AVAILABLE_BOOKS = [
+        { id:'bukhari', name:'صحيح البخاري' }, { id:'muslim', name:'صحيح مسلم' },
+        { id:'abudawud', name:'سنن أبي داود' }, { id:'tirmidhi', name:'جامع الترمذي' },
+        { id:'nasai', name:'سنن النسائي' }, { id:'ibnmajah', name:'سنن ابن ماجه' }
+      ];
+      const booksHtml = AVAILABLE_BOOKS.map(b => `
+        <a href="?book=${b.id}" class="card" style="text-align:center; display:block; text-decoration:none;">
+            <div style="font-size:1.55rem; font-weight:bold; color:var(--accent); padding:8px; font-family:'Amiri', serif;">${b.name}</div>
+            <div style="color:var(--text-muted); font-size:.9rem;">تصفح أبواب وأحاديث الكتاب</div>
+        </a>`).join('');
+      document.getElementById('content-area').innerHTML = `<div>${advancedBtn}<div class="cards-container">${booksHtml}</div></div>`;
+      return false;
+    }
+
+    try {
+      let translatedIndex = {};
+      try { const idxRes = await fetch('hadith/Index-translated.json'); if (idxRes.ok) translatedIndex = await idxRes.json(); } catch(e){}
+
+      App.bookName = translatedIndex[App.bookId] ? translatedIndex[App.bookId].name : App.bookId;
+      document.getElementById('book-title').textContent = App.bookName;
+
+      const bookRes = await fetch(`hadith/${App.bookId}.json`);
+      if (!bookRes.ok) throw new Error("ملف الكتاب غير موجود");
+      const bookJson = await bookRes.json();
+
+      const sectionsMap = {};
+      const metaSections = translatedIndex[App.bookId] ? translatedIndex[App.bookId].sections : (bookJson.metadata && bookJson.metadata.sections || {});
+      for (let key in metaSections) {
+        const title = metaSections[key];
+        if (typeof title === 'string' && title.trim() !== "") sectionsMap[key] = { title, sectionNumber:key, items:[] };
+      }
+      if (!sectionsMap["0"]) sectionsMap["0"] = { title:"مقدمة / أبواب أخرى", sectionNumber:"0", items:[] };
+
+      (bookJson.hadiths || []).forEach(h => {
+        const secNum = (h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0";
+        if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:`باب ${secNum}`, sectionNumber:secNum, items:[] };
+        const gradeInfo = getHadithGrade(App.bookId, h.grades);
+        sectionsMap[secNum].items.push({ ar:h.text, number:h.hadithnumber || h.arabicnumber, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
+      });
+
+      App.data = Object.values(sectionsMap).filter(sec => sec.items.length > 0);
+      App.data.sort((a,b) => {
+        const nA = parseInt(a.sectionNumber), nB = parseInt(b.sectionNumber);
+        if (nA === 0 && nB !== 0) return 1;
+        if (nB === 0 && nA !== 0) return -1;
+        return nA - nB;
+      });
+
+      if (targetSectionNum) {
+        const idx = App.data.findIndex(s => s.sectionNumber === targetSectionNum);
+        if (idx !== -1) App.currentIdx = idx;
+      }
+      return true;
+    } catch (err) {
+      document.getElementById('content-area').innerHTML = `<div class="empty-note"><span class="icn">❌</span>خطأ في تحميل الكتاب: ${err.message}<br>تأكد من وجود مجلد <b>hadith</b> وملفاته.</div>`;
+      return false;
+    }
+  }
+
+  function buildMenuAndSearchIndex() {
+    const menuList = document.getElementById('menuList');
+    menuList.innerHTML = ''; App.searchIndex = [];
+    App.data.forEach((sec, sIdx) => {
+      const btn = document.createElement('div');
+      btn.className = 'menu-item';
+      btn.innerHTML = `<span>${sec.title}</span><span class="count">${sec.items.length} حديث</span>`;
+      btn.onclick = () => selectSection(sIdx);
+      menuList.appendChild(btn);
+      sec.items.forEach((item, iIdx) => {
+        App.searchIndex.push({ sIdx, iIdx, title:sec.title, ar:item.ar, norm:normalizeText(item.ar), number:item.number, gradeText:item.gradeText, isOk:item.isOk });
+      });
+    });
+  }
+
+  function render() {
+    if (App.isSearchMode || App.data.length === 0) return;
+    const sec = App.data[App.currentIdx];
+    if (!sec) return;
+    document.getElementById('main-title').textContent = sec.title;
+    document.getElementById('customSelectBtn').textContent = sec.title;
+
+    const html = sec.items.map((item, i) => {
+      const badgeClass = item.isOk ? "badge-ok" : "badge-warn";
+      const textToCopy = encodeURIComponent(`${item.ar}\n\n[الكتاب: ${App.bookName} (${sec.title})\nرقم الحديث: ${item.number} | الحكم: ${item.gradeText}]`);
+      const saved = isBookmarked(App.currentIdx, i);
+      return `
+      <div class="card hadith-card ${item.isOk ? '' : 'warn'}" data-item="${i}">
+        <div class="card-arabic">${item.ar}</div>
+        <div class="card-ref">
+          <span>رقم: <b>${item.number}</b> &nbsp;<span class="${badgeClass}">${item.gradeText}</span></span>
+          <div class="card-actions">
+            <button class="card-btn" onclick="copyText(decodeURIComponent('${textToCopy}'))" title="نسخ الحديث">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+            <button class="card-btn ${saved ? 'active' : ''}" onclick="toggleBookmark(${App.currentIdx}, ${i})" title="حفظ الحديث">${saved ? '★' : '☆'}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
+    window.scrollTo(0, 0);
+  }
+
+  let searchDebounceTimer;
+  function handleSearch() {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      const rawInput = document.getElementById('search-input').value.trim();
+      const query = normalizeText(rawInput);
+      if (!query || query.length < 3) { if (App.isSearchMode) { App.isSearchMode = false; render(); } return; }
+
+      App.isSearchMode = true;
+      document.getElementById('customSelectBtn').textContent = "نتائج البحث";
+      const results = App.searchIndex.filter(x => x.norm.includes(query)).slice(0, 50);
+      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
+
+      if (results.length === 0) {
+        document.getElementById('content-area').innerHTML = '<div class="empty-note"><span class="icn">🔍</span>لا توجد نتائج مطابقة في هذا الكتاب.</div>';
+        return;
+      }
+      let hre; try { hre = buildHighlightRegex(rawInput); } catch(e) { hre = null; }
+      document.getElementById('content-area').innerHTML = `<div class="cards-container">` + results.map(r => {
+        let text = r.ar;
+        if (hre) { try { text = r.ar.replace(hre, '<mark>$1</mark>'); } catch(e){} }
+        const badgeClass = r.isOk ? "badge-ok" : "badge-warn";
+        return `
+        <div class="card hadith-card ${r.isOk ? '' : 'warn'}" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer;">
+          <div style="font-size:.85rem; color:var(--gold); font-weight:bold; margin-bottom:8px;">${r.title}</div>
+          <div class="card-arabic" style="font-size:1.45rem; margin-bottom:10px;">${text}</div>
+          <div class="card-ref"><span>رقم: <b>${r.number}</b> &nbsp;<span class="${badgeClass}">${r.gradeText}</span></span></div>
+        </div>`;
+      }).join('') + `</div>`;
+    }, 350);
+  }
+
+  function jumpTo(sIdx, iIdx) {
+    App.currentIdx = sIdx; App.isSearchMode = false;
+    document.getElementById('search-input').value = '';
+    render();
+    setTimeout(() => {
+      const el = document.querySelector(`.card[data-item="${iIdx}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior:'smooth', block:'center' });
+        el.style.transition = 'background-color .3s';
+        el.style.backgroundColor = 'var(--accent-bg)';
+        setTimeout(() => { el.style.backgroundColor = ''; }, 2000);
+      }
+    }, 300);
+  }
+
+  function selectSection(idx) { App.currentIdx = idx; App.isSearchMode = false; closeMenu(); document.getElementById('search-input').value = ''; render(); }
+  function nav(dir) {
+    if (dir === 'next' && App.currentIdx < App.data.length-1) App.currentIdx++;
+    if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
+    App.isSearchMode = false; render();
+  }
+
+  function openMenu() {
+    const items = document.querySelectorAll('#menuList .menu-item');
+    items.forEach((item, idx) => {
+      const active = (idx === App.currentIdx && !App.isSearchMode);
+      item.classList.toggle('active-item', active);
+      if (active) setTimeout(() => item.scrollIntoView({ block:'center' }), 10);
+    });
+    document.getElementById('menuModal').classList.add('active');
+  }
+  function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
+
+  function showBookmarks() {
+    const bmList = document.getElementById('bookmarkList');
+    bmList.innerHTML = '';
+    if (App.bookmarks.length === 0) {
+      bmList.innerHTML = '<div class="empty-note"><span class="icn">☆</span>لا توجد أحاديث محفوظة في هذا الكتاب بعد.</div>';
+    } else {
+      App.bookmarks.forEach((bm) => {
+        const sec = App.data[bm.sectionIdx];
+        if (sec && sec.items[bm.itemIdx]) {
+          const item = sec.items[bm.itemIdx];
+          const div = document.createElement('div');
+          div.className = 'menu-item'; div.style.flexDirection = 'column'; div.style.alignItems = 'flex-start';
+          div.innerHTML = `<div style="font-weight:bold;color:var(--gold);">${sec.title}</div>
+            <div style="font-size:1.15rem; margin-top:6px; font-family:'Amiri','Scheherazade',serif;">${item.ar.substring(0, 90)}…</div>
+            <div style="font-size:.8rem; color:var(--text-muted); margin-top:5px;">رقم: ${item.number}</div>`;
+          div.onclick = () => { closeBookmarkModal(); jumpTo(bm.sectionIdx, bm.itemIdx); };
+          bmList.appendChild(div);
+        }
+      });
+    }
+    document.getElementById('bookmarkModal').classList.add('active');
+  }
+  function closeBookmarkModal() { document.getElementById('bookmarkModal').classList.remove('active'); }
+
+  // ================= التمرير =================
+  let scrollTimer;
+  function getScrollKey() { return `hadith_scrollPos_${App.bookId}`; }
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTopBtn');
+    btn.classList.toggle('visible', window.scrollY > 300);
+    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    document.getElementById("scroll-progress").style.width = (height > 0 ? (winScroll / height) * 100 : 0) + "%";
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => { if (App.bookId && !App.isSearchMode) localStorage.setItem(getScrollKey(), window.scrollY); }, 500);
+  }, { passive:true });
+
+  function toggleReadingMode() {
+    document.body.classList.toggle('reading-mode');
+    localStorage.setItem('readingMode', document.body.classList.contains('reading-mode'));
+  }
+
+  async function init() {
+    applyTheme();
+    if (localStorage.getItem('readingMode') === 'true') document.body.classList.add('reading-mode');
+
+    const isBookLoaded = await loadHadithData();
+    if (isBookLoaded && App.data.length > 0) {
+      loadBookmarks();
+      buildMenuAndSearchIndex();
+      const lastSecKey = `hadith_lastSection_${App.bookId}`;
+      const urlParams = new URLSearchParams(window.location.search);
+      const lastSection = localStorage.getItem(lastSecKey);
+      if (!urlParams.get('section') && lastSection && !isNaN(parseInt(lastSection)) && parseInt(lastSection) < App.data.length) {
+        App.currentIdx = parseInt(lastSection);
+      }
+      render();
+      const savedPos = localStorage.getItem(getScrollKey());
+      if (savedPos) setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 150);
+
+      const origNav = nav, origSelect = selectSection;
+      window.nav = (dir) => { origNav(dir); localStorage.setItem(lastSecKey, App.currentIdx); };
+      window.selectSection = (idx) => { origSelect(idx); localStorage.setItem(lastSecKey, App.currentIdx); };
+    }
+
+    document.getElementById('search-input').addEventListener('input', handleSearch);
+    document.getElementById('readingModeBtn').addEventListener('click', toggleReadingMode);
+    document.getElementById('bookmarkListBtn').addEventListener('click', showBookmarks);
+  }
+
+  // تمرير اللمس: لا نتنقل إلا عند سحب أفقي واضح (يمنع التنقل العرضي أثناء التمرير الرأسي)
+  let touchX = 0, touchY = 0;
+  document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].screenX; touchY = e.changedTouches[0].screenY; }, { passive:true });
+  document.addEventListener('touchend', e => {
+    const dx = touchX - e.changedTouches[0].screenX;
+    const dy = touchY - e.changedTouches[0].screenY;
+    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.8 && !App.isSearchMode) {
+      dx > 0 ? nav('prev') : nav('next');
+    }
+  }, { passive:true });
+
+  init();
+</script>
+</body>
+</html>
