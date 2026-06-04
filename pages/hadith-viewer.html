@@ -7,9 +7,10 @@
   <title>قراءة الكتاب | زاد المسلم</title>
   <style>
     /* ========== الخطوط المحلية (تعمل دون اتصال) ========== */
-    @font-face{ font-family:'Scheherazade'; src:url('fonts/Scheherazade.ttf') format('truetype'); font-weight:normal; font-style:normal; font-display:swap; }
-    @font-face{ font-family:'Amiri'; src:url('fonts/Amiri.ttf') format('truetype'); font-weight:normal; font-style:normal; font-display:swap; }
-    @font-face{ font-family:'Amiri'; src:url('fonts/Amiri.ttf') format('truetype'); font-weight:bold; font-style:normal; font-display:swap; }
+    @font-face{ font-family:'Tajawal'; src:url('fonts/Tajawal.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
+    @font-face{ font-family:'Tajawal'; src:url('fonts/Tajawal.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
+    @font-face{ font-family:'Amiri'; src:url('fonts/Amiri.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
+    @font-face{ font-family:'Amiri'; src:url('fonts/Amiri.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
 
     /* ========== الثيمات ========== */
     :root{ --meta:#0e201b; }
@@ -119,7 +120,7 @@
     .card.hadith-card.warn::before{ background:var(--danger); }
 
     .card-arabic{
-      font-family:'Amiri','Scheherazade', serif; font-size:1.85rem; line-height:2;
+      font-family:'Amiri', serif; font-size:1.85rem; line-height:2;
       margin-bottom:15px; text-align:justify; color:var(--text); word-spacing:1px;
     }
 
@@ -141,6 +142,7 @@
 
     .badge-ok{ color:var(--accent); font-weight:bold; background:var(--accent-bg); padding:3px 9px; border-radius:7px; }
     .badge-warn{ color:var(--danger); font-weight:bold; background:var(--danger-soft); padding:3px 9px; border-radius:7px; }
+    .badge-neutral{ color:var(--text-muted); font-weight:bold; background:var(--border); padding:3px 9px; border-radius:7px; }
 
     mark{ background:var(--gold-soft); color:var(--gold); padding:0 3px; border-radius:4px; font-weight:700; }
 
@@ -217,6 +219,9 @@
     .empty-note{ text-align:center; padding:40px 16px; color:var(--text-muted); }
     .empty-note .icn{ font-size:32px; display:block; margin-bottom:10px; opacity:.6; }
 
+    .group-head{ display:flex; align-items:center; gap:12px; margin:26px 2px 14px; color:var(--gold); font-weight:800; font-size:1rem; letter-spacing:.3px; }
+    .group-head::before, .group-head::after{ content:""; flex:1; height:1px; background:var(--border); }
+
     @keyframes spin{ to{ transform:rotate(360deg); } }
   </style>
 </head>
@@ -281,6 +286,27 @@
 
 <script>
   let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
+
+  // مسار ملفات الكتب
+  const HADITH_PATH = 'assets/hadith/';
+  // الكتب الأساسية (صيغة الحديث المرقّم/المُدرّج)
+  const MAIN_BOOKS = [
+    { id:'bukhari', name:'صحيح البخاري' }, { id:'muslim', name:'صحيح مسلم' },
+    { id:'abudawud', name:'سنن أبي داود' }, { id:'tirmidhi', name:'جامع الترمذي' },
+    { id:'nasai', name:'سنن النسائي' }, { id:'ibnmajah', name:'سنن ابن ماجه' }
+  ];
+  // كتب أخرى (صيغة document_id/metadata/content)
+  const OTHER_BOOKS = [
+    { id:'riyad_assalihin', name:'رياض الصالحين' },
+    { id:'bulugh_almaram', name:'بلوغ المرام' },
+    { id:'mishkat_almasabih', name:'مشكاة المصابيح' },
+    { id:'aladab_almufrad', name:'الأدب المفرد' },
+    { id:'shamail_muhammadiyah', name:'الشمائل المحمدية' },
+    { id:'nawawi40', name:'الأربعون النووية' },
+    { id:'qudsi40', name:'الأربعون القدسية' }
+  ];
+  const BOOK_NAMES = {};
+  [...MAIN_BOOKS, ...OTHER_BOOKS].forEach(b => BOOK_NAMES[b.id] = b.name);
 
   // ================= الثيمات =================
   function applyTheme() {
@@ -379,49 +405,76 @@
       si.disabled = true; si.placeholder = "اختر الكتاب أولاً...";
 
       const advancedBtn = `
-        <button onclick="window.location.href='index.html'" style="width:100%; margin-bottom:18px; background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-radius:16px; padding:15px; font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:var(--card-shadow);">
+        <button onclick="window.location.href='hadith.html'" style="width:100%; margin-bottom:6px; background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-radius:16px; padding:15px; font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:var(--card-shadow);">
             <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="width:20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             البحث المتقدم في جميع الكتب
         </button>`;
-      const AVAILABLE_BOOKS = [
-        { id:'bukhari', name:'صحيح البخاري' }, { id:'muslim', name:'صحيح مسلم' },
-        { id:'abudawud', name:'سنن أبي داود' }, { id:'tirmidhi', name:'جامع الترمذي' },
-        { id:'nasai', name:'سنن النسائي' }, { id:'ibnmajah', name:'سنن ابن ماجه' }
-      ];
-      const booksHtml = AVAILABLE_BOOKS.map(b => `
+      const bookCard = b => `
         <a href="?book=${b.id}" class="card" style="text-align:center; display:block; text-decoration:none;">
-            <div style="font-size:1.55rem; font-weight:bold; color:var(--accent); padding:8px; font-family:'Amiri', serif;">${b.name}</div>
-            <div style="color:var(--text-muted); font-size:.9rem;">تصفح أبواب وأحاديث الكتاب</div>
-        </a>`).join('');
-      document.getElementById('content-area').innerHTML = `<div>${advancedBtn}<div class="cards-container">${booksHtml}</div></div>`;
+            <div style="font-size:1.5rem; font-weight:bold; color:var(--accent); padding:6px; font-family:'Amiri', serif;">${b.name}</div>
+            <div style="color:var(--text-muted); font-size:.88rem;">تصفح أبواب وأحاديث الكتاب</div>
+        </a>`;
+      const mainHtml = MAIN_BOOKS.map(bookCard).join('');
+      const otherHtml = OTHER_BOOKS.map(bookCard).join('');
+      document.getElementById('content-area').innerHTML = `
+        <div>
+          ${advancedBtn}
+          <div class="group-head">الكتب الأمّهات</div>
+          <div class="cards-container">${mainHtml}</div>
+          <div class="group-head">كتب أخرى</div>
+          <div class="cards-container">${otherHtml}</div>
+        </div>`;
       return false;
     }
 
     try {
       let translatedIndex = {};
-      try { const idxRes = await fetch('hadith/Index-translated.json'); if (idxRes.ok) translatedIndex = await idxRes.json(); } catch(e){}
+      try { const idxRes = await fetch(HADITH_PATH + 'Index-translated.json'); if (idxRes.ok) translatedIndex = await idxRes.json(); } catch(e){}
 
-      App.bookName = translatedIndex[App.bookId] ? translatedIndex[App.bookId].name : App.bookId;
-      document.getElementById('book-title').textContent = App.bookName;
-
-      const bookRes = await fetch(`hadith/${App.bookId}.json`);
+      const bookRes = await fetch(`${HADITH_PATH}${App.bookId}.json`);
       if (!bookRes.ok) throw new Error("ملف الكتاب غير موجود");
       const bookJson = await bookRes.json();
 
-      const sectionsMap = {};
-      const metaSections = translatedIndex[App.bookId] ? translatedIndex[App.bookId].sections : (bookJson.metadata && bookJson.metadata.sections || {});
-      for (let key in metaSections) {
-        const title = metaSections[key];
-        if (typeof title === 'string' && title.trim() !== "") sectionsMap[key] = { title, sectionNumber:key, items:[] };
-      }
-      if (!sectionsMap["0"]) sectionsMap["0"] = { title:"مقدمة / أبواب أخرى", sectionNumber:"0", items:[] };
+      // استخراج السجلات بصرف النظر عن الصيغة
+      const records = Array.isArray(bookJson) ? bookJson : (bookJson.hadiths || bookJson.data || bookJson.records || []);
+      const first = records[0] || {};
+      const isNewFormat = !!(first.content || (first.metadata && first.metadata.chapter_id !== undefined));
 
-      (bookJson.hadiths || []).forEach(h => {
-        const secNum = (h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0";
-        if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:`باب ${secNum}`, sectionNumber:secNum, items:[] };
-        const gradeInfo = getHadithGrade(App.bookId, h.grades);
-        sectionsMap[secNum].items.push({ ar:h.text, number:h.hadithnumber || h.arabicnumber, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
-      });
+      const sectionsMap = {};
+
+      if (isNewFormat) {
+        // صيغة: { metadata:{ book_title_ar, chapter_id, chapter_title_ar, hadith_number_in_book }, content:{ arabic_text } }
+        App.bookName = (first.metadata && first.metadata.book_title_ar) || BOOK_NAMES[App.bookId] || App.bookId;
+        records.forEach(rec => {
+          const md = rec.metadata || {}, ct = rec.content || {};
+          const secNum = (md.chapter_id !== undefined && md.chapter_id !== null) ? String(md.chapter_id) : "0";
+          const title = (md.chapter_title_ar && md.chapter_title_ar.trim()) ? md.chapter_title_ar.trim() : `باب ${secNum}`;
+          if (!sectionsMap[secNum]) sectionsMap[secNum] = { title, sectionNumber:secNum, items:[] };
+          const ar = ct.arabic_text || rec.text || "";
+          if (!ar) return;
+          sectionsMap[secNum].items.push({
+            ar, number: md.hadith_number_in_book || (sectionsMap[secNum].items.length + 1),
+            gradeText:'غير محدد', isOk:true
+          });
+        });
+      } else {
+        // الصيغة الأصلية: { hadiths:[{ text, hadithnumber, reference:{book}, grades }], metadata:{sections} }
+        App.bookName = (translatedIndex[App.bookId] && translatedIndex[App.bookId].name) || BOOK_NAMES[App.bookId] || App.bookId;
+        const metaSections = (translatedIndex[App.bookId] && translatedIndex[App.bookId].sections) || (bookJson.metadata && bookJson.metadata.sections) || {};
+        for (let key in metaSections) {
+          const title = metaSections[key];
+          if (typeof title === 'string' && title.trim() !== "") sectionsMap[key] = { title, sectionNumber:key, items:[] };
+        }
+        if (!sectionsMap["0"]) sectionsMap["0"] = { title:"مقدمة / أبواب أخرى", sectionNumber:"0", items:[] };
+        records.forEach(h => {
+          const secNum = (h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0";
+          if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:`باب ${secNum}`, sectionNumber:secNum, items:[] };
+          const gradeInfo = getHadithGrade(App.bookId, h.grades);
+          sectionsMap[secNum].items.push({ ar:h.text, number:h.hadithnumber || h.arabicnumber, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
+        });
+      }
+
+      document.getElementById('book-title').textContent = App.bookName;
 
       App.data = Object.values(sectionsMap).filter(sec => sec.items.length > 0);
       App.data.sort((a,b) => {
@@ -437,7 +490,7 @@
       }
       return true;
     } catch (err) {
-      document.getElementById('content-area').innerHTML = `<div class="empty-note"><span class="icn">❌</span>خطأ في تحميل الكتاب: ${err.message}<br>تأكد من وجود مجلد <b>hadith</b> وملفاته.</div>`;
+      document.getElementById('content-area').innerHTML = `<div class="empty-note"><span class="icn">❌</span>خطأ في تحميل الكتاب: ${err.message}<br>تأكد من وجود مجلد <b>assets/hadith</b> وملفاته.</div>`;
       return false;
     }
   }
@@ -465,7 +518,7 @@
     document.getElementById('customSelectBtn').textContent = sec.title;
 
     const html = sec.items.map((item, i) => {
-      const badgeClass = item.isOk ? "badge-ok" : "badge-warn";
+      const badgeClass = item.gradeText === 'غير محدد' ? "badge-neutral" : (item.isOk ? "badge-ok" : "badge-warn");
       const textToCopy = encodeURIComponent(`${item.ar}\n\n[الكتاب: ${App.bookName} (${sec.title})\nرقم الحديث: ${item.number} | الحكم: ${item.gradeText}]`);
       const saved = isBookmarked(App.currentIdx, i);
       return `
@@ -507,7 +560,7 @@
       document.getElementById('content-area').innerHTML = `<div class="cards-container">` + results.map(r => {
         let text = r.ar;
         if (hre) { try { text = r.ar.replace(hre, '<mark>$1</mark>'); } catch(e){} }
-        const badgeClass = r.isOk ? "badge-ok" : "badge-warn";
+        const badgeClass = r.gradeText === 'غير محدد' ? "badge-neutral" : (r.isOk ? "badge-ok" : "badge-warn");
         return `
         <div class="card hadith-card ${r.isOk ? '' : 'warn'}" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer;">
           <div style="font-size:.85rem; color:var(--gold); font-weight:bold; margin-bottom:8px;">${r.title}</div>
@@ -564,7 +617,7 @@
           const div = document.createElement('div');
           div.className = 'menu-item'; div.style.flexDirection = 'column'; div.style.alignItems = 'flex-start';
           div.innerHTML = `<div style="font-weight:bold;color:var(--gold);">${sec.title}</div>
-            <div style="font-size:1.15rem; margin-top:6px; font-family:'Amiri','Scheherazade',serif;">${item.ar.substring(0, 90)}…</div>
+            <div style="font-size:1.15rem; margin-top:6px; font-family:'Amiri', serif;">${item.ar.substring(0, 90)}…</div>
             <div style="font-size:.8rem; color:var(--text-muted); margin-top:5px;">رقم: ${item.number}</div>`;
           div.onclick = () => { closeBookmarkModal(); jumpTo(bm.sectionIdx, bm.itemIdx); };
           bmList.appendChild(div);
