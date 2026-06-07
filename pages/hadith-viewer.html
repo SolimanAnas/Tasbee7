@@ -467,10 +467,11 @@
         }
         if (!sectionsMap["0"]) sectionsMap["0"] = { title:"مقدمة / أبواب أخرى", sectionNumber:"0", items:[] };
         records.forEach(h => {
-          const secNum = (h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0";
+          const secNum = (h.chapterId !== undefined) ? h.chapterId.toString() : ((h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0");
           if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:`باب ${secNum}`, sectionNumber:secNum, items:[] };
           const gradeInfo = getHadithGrade(App.bookId, h.grades);
-          sectionsMap[secNum].items.push({ ar:h.text, number:h.hadithnumber || h.arabicnumber, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
+          const arText = h.text || h.arabic || "";
+          sectionsMap[secNum].items.push({ ar:arText, number:h.hadithnumber || h.arabicnumber || h.idInBook, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
         });
       }
 
