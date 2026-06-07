@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v23"; // v23: manifest scope/start_url made relative (./) so start_url stays within scope on any host path
+const CACHE_NAME = "zad-muslim-v24"; // v24: extracted quran-v4.css, app-main.js, ui-extras.js from quran.html monolith
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
 
   // ===== Styles =====
   "./css/style.css",
+  "./css/quran-v4.css",
 
   // ===== Core JS =====
   "./data/cities.js",
@@ -37,6 +38,10 @@ const STATIC_ASSETS = [
   "./js/tasmee-engine.js",
   "./js/tasmee-matcher.js",
   "./js/tasmee-store.js",
+
+  // ===== Extracted Quran modules =====
+  "./js/quran/app-main.js",
+  "./js/quran/ui-extras.js",
 
   // ===== Offline Quran text (word-by-word Tasmee) =====
   "./data/quran.json",
