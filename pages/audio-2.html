@@ -6,247 +6,255 @@
 <title>التكرار | زاد المسلم</title>
 <link rel="icon" href="../icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0a1a14; --bg2:#061210;
-  --surface:rgba(255,255,255,.04); --surface2:rgba(255,255,255,.07);
-  --border:rgba(16,185,129,.15); --border2:rgba(16,185,129,.28);
-  --text:#e8f5f0; --muted:#6b9a88; --accent:#10b981; --accent-deep:#059669;
-  --gold:#e6c068; --gold-soft:rgba(230,192,104,.12);
-  --danger:#ef4444; --danger-soft:rgba(239,68,68,.12);
-  --shadow:0 12px 40px -12px rgba(0,0,0,.5);
-  --radius:20px;
+  --bg-image: url('../images/Background-light.png');
+  --bg-surface: rgba(255, 255, 255, 0.45);
+  --text-primary: #0F172A; --text-secondary: #475569;
+  --accent-main: #10B981; --accent-muted: rgba(16, 185, 129, 0.15);
+  --glass: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --overlay: rgba(255, 255, 255, 0.2); --modal-overlay: rgba(0, 0, 0, 0.3);
+  --list-hover: rgba(0, 0, 0, 0.05); --gold: #9a7b1f; --gold-soft: rgba(154,123,31,.12);
 }
-[data-theme="light"] {
-  --bg:#f4f8f6; --bg2:#e8efe9;
-  --surface:rgba(255,255,255,.75); --surface2:rgba(255,255,255,.55);
-  --border:rgba(16,185,129,.18); --border2:rgba(16,185,129,.35);
-  --text:#0f2922; --muted:#5a7a6a; --accent:#0f7a52; --accent-deep:#0a5c3d;
-  --gold:#8a6b1c; --gold-soft:rgba(138,107,28,.1);
-  --shadow:0 12px 40px -12px rgba(60,50,20,.15);
+[data-theme="dark"] {
+  --bg-image: url('../images/Background-dark.png');
+  --bg-surface: rgba(15, 23, 42, 0.5);
+  --text-primary: #F8FAFC; --text-secondary: #CBD5E1;
+  --accent-main: #10B981; --accent-muted: rgba(255, 255, 255, 0.1);
+  --glass: rgba(30, 41, 59, 0.6); --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --overlay: rgba(15, 23, 42, 0.5); --modal-overlay: rgba(0, 0, 0, 0.7);
+  --list-hover: rgba(255, 255, 255, 0.05); --gold: #e6c068; --gold-soft: rgba(230,192,104,.15);
 }
 [data-theme="sepia"] {
-  --bg:#1a1610; --bg2:#12100c;
-  --surface:rgba(255,255,255,.05); --surface2:rgba(255,255,255,.08);
-  --border:rgba(200,160,80,.18); --border2:rgba(200,160,80,.3);
-  --text:#f0e8d8; --muted:#8a7a60; --accent:#c8a030; --accent-deep:#a88020;
-  --gold:#e6c068; --gold-soft:rgba(230,192,104,.12);
-  --shadow:0 12px 40px -12px rgba(0,0,0,.55);
+  --bg-image: url('../images/Background-light.png');
+  --bg-surface: rgba(244, 236, 216, 0.55);
+  --text-primary: #3c2a18; --text-secondary: #7a6244;
+  --accent-main: #8a5a1c; --accent-muted: rgba(138, 90, 28, 0.12);
+  --glass: rgba(252, 247, 234, 0.65); --glass-border: rgba(244, 236, 216, 0.7);
+  --glass-shadow: 0 8px 32px 0 rgba(90, 60, 20, 0.1);
+  --overlay: rgba(244, 236, 216, 0.2); --modal-overlay: rgba(0, 0, 0, 0.3);
+  --list-hover: rgba(122, 84, 24, 0.06); --gold: #9a6b1f; --gold-soft: rgba(154,107,31,.12);
 }
 
-*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-
-body{
-  font-family:'Tajawal',sans-serif; background:var(--bg);
-  color:var(--text); min-height:100dvh; overflow-x:hidden;
-  display:flex; justify-content:center;
-  padding:max(16px,env(safe-area-inset-top)) 16px max(100px,env(safe-area-inset-bottom));
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0; font-family: 'Tajawal', sans-serif;
+  background-color: var(--bg-surface); background-image: var(--bg-image);
+  background-size: cover; background-position: center; background-attachment: fixed;
+  color: var(--text-primary); display: flex; justify-content: center;
+  padding: calc(max(12px, env(safe-area-inset-top)) + 30px) 20px 100px;
+  min-height: 100dvh; transition: color 0.4s, background-image 0.4s;
 }
-body::before{
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 0%, rgba(16,185,129,.08), transparent),
-    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(230,192,104,.05), transparent);
-}
+body::before { content:''; position:fixed; inset:0; background:var(--overlay); z-index:-1; }
 
-.app{width:100%; max-width:480px; display:flex; flex-direction:column; gap:14px; position:relative; z-index:1;}
+.app { width:100%; max-width:480px; display:flex; flex-direction:column; gap:12px; }
 
 /* Header */
-.header{
+.header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:14px 16px; border-radius:var(--radius);
-  background:var(--surface); border:1px solid var(--border);
-  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-}
-.header-title{font-size:18px; font-weight:800;}
-.header-sub{font-size:11px; color:var(--accent); font-weight:700; letter-spacing:1px;}
-.icon-btn{
-  width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
-  background:var(--surface); color:var(--text); display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:.15s; font-size:18px;
-}
-.icon-btn:active{transform:scale(.9); background:var(--accent-deep); color:#fff;}
-
-/* Card */
-.card{
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:18px; display:flex; flex-direction:column; gap:10px;
+  background:var(--glass); border:1px solid var(--glass-border);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  box-shadow:var(--glass-shadow); border-radius:16px; padding:12px 16px;
 }
-.card-label{font-size:12px; font-weight:700; color:var(--accent); letter-spacing:.5px; margin-bottom:2px;}
+.header-title { font-weight:bold; font-size:18px; }
+.header-sub { font-size:11px; color:var(--accent-main); font-weight:700; letter-spacing:1px; }
+.icon-btn {
+  background:none; border:none; color:var(--text-primary); cursor:pointer;
+  padding:5px; display:flex; align-items:center; justify-content:center; transition:.2s;
+}
+.icon-btn:active { opacity:.7; transform:scale(.9); }
+
+/* Cards */
+.card {
+  background:var(--glass); border:1px solid var(--glass-border);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  box-shadow:var(--glass-shadow); border-radius:20px; padding:15px;
+  display:flex; flex-direction:column; gap:8px;
+}
+label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 /* Picker Button */
-.picker-btn{
-  width:100%; padding:14px 16px; border-radius:14px;
-  border:1px solid var(--border); background:var(--surface2);
-  color:var(--text); font-size:15px; font-family:inherit; font-weight:600;
-  cursor:pointer; display:flex; justify-content:space-between; align-items:center;
-  transition:.15s; text-align:right;
+.custom-select-btn {
+  padding:14px 16px; border-radius:12px; border:1px solid var(--glass-border);
+  background:var(--list-hover); color:var(--text-primary); font-size:15px;
+  font-family:inherit; cursor:pointer; display:flex; justify-content:space-between;
+  align-items:center; font-weight:500; transition:.3s;
 }
-.picker-btn:active{transform:scale(.98); border-color:var(--accent);}
-.picker-btn .arrow{font-size:11px; opacity:.5; transition:.2s;}
-.picker-btn.has-value{border-color:var(--accent); color:var(--accent);}
+.custom-select-btn:after { content:'▼'; font-size:12px; opacity:.6; }
+.custom-select-btn.has-value { border-color:var(--accent-main); color:var(--accent-main); }
 
 /* Range Row */
-.range-row{display:flex; gap:10px; align-items:center;}
-.range-row .picker-btn{flex:1;}
+.range-row { display:flex; gap:10px; }
+.range-row .custom-select-btn { flex:1; }
 
-/* Speed / Repeat Controls */
-.stepper{display:flex; align-items:center; gap:12px; justify-content:center;}
-.stepper-btn{
-  width:42px; height:42px; border-radius:50%; border:1px solid var(--border);
-  background:var(--surface2); color:var(--text); font-size:22px; font-weight:700;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition:.15s;
+/* Stepper */
+.stepper { display:flex; align-items:center; gap:20px; justify-content:center; }
+.stepper-btn {
+  width:44px; height:44px; border-radius:50%; background:var(--accent-muted);
+  border:1px solid var(--glass-border); color:var(--text-primary); font-size:22px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.2s;
 }
-.stepper-btn:active{transform:scale(.88); background:var(--accent-deep); color:#fff;}
-.stepper-value{
-  font-size:28px; font-weight:800; min-width:60px; text-align:center;
-  font-variant-numeric:tabular-nums; direction:ltr;
-}
-.stepper-label{font-size:12px; color:var(--muted); text-align:center; margin-top:-4px;}
+.stepper-btn:active { transform:scale(.88); background:var(--accent-main); color:#fff; }
+.stepper-val { font-size:28px; font-weight:800; min-width:50px; text-align:center; direction:ltr; font-variant-numeric:tabular-nums; }
+.stepper-lbl { font-size:12px; color:var(--text-secondary); text-align:center; margin-top:-4px; }
 
 /* Speed Presets */
-.speed-presets{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
-.speed-preset{
+.speed-grid { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; justify-content:center; }
+.speed-chip {
   padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700;
-  border:1px solid var(--border); background:var(--surface2); color:var(--muted);
-  cursor:pointer; transition:.15s;
+  background:var(--list-hover); border:1px solid var(--glass-border);
+  color:var(--text-secondary); cursor:pointer; transition:.2s;
 }
-.speed-preset:active{transform:scale(.92);}
-.speed-preset.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+.speed-chip:active { transform:scale(.92); }
+.speed-chip.active { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
 
-/* Play Button */
-.play-section{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:6px;}
-.play-btn{
-  width:72px; height:72px; border-radius:50%;
-  background:linear-gradient(135deg, var(--accent), var(--accent-deep));
-  color:#fff; border:none; display:flex; align-items:center; justify-content:center;
-  cursor:pointer; box-shadow:0 8px 30px rgba(16,185,129,.35);
-  transition:.2s; position:relative;
+/* Ayah Text Display */
+.ayah-display {
+  background:var(--glass); border:1px solid var(--gold-soft);
+  backdrop-filter:blur(16px); border-radius:20px; padding:20px;
+  text-align:center; min-height:80px; display:none;
+  box-shadow:var(--glass-shadow);
 }
-.play-btn:active{transform:scale(.92);}
-.play-btn svg{width:30px; height:30px; fill:currentColor;}
-.play-btn.playing{background:linear-gradient(135deg, var(--danger), #dc2626); box-shadow:0 8px 30px rgba(239,68,68,.35);}
+.ayah-display.visible { display:block; }
+.ayah-arabic {
+  font-family:'Amiri', serif; font-size:24px; line-height:2;
+  color:var(--text-primary); word-spacing:2px;
+}
+.ayah-ref {
+  font-size:12px; color:var(--gold); font-weight:700; margin-top:10px;
+  padding:4px 12px; border-radius:12px; background:var(--gold-soft); display:inline-block;
+}
+.ayah-loading { color:var(--text-secondary); font-size:14px; padding:20px; }
+
+/* Status */
+.status-bar {
+  text-align:center; padding:8px 16px; border-radius:30px;
+  background:var(--list-hover); border:1px solid var(--glass-border);
+  font-size:12px; font-weight:700; color:var(--text-secondary);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.status-bar.playing { background:var(--accent-muted); border-color:var(--accent-main); color:var(--accent-main); }
+.status-dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.status-bar.playing .status-dot { animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
 /* Progress */
-.progress-area{width:100%; display:none; flex-direction:column; gap:6px;}
-.progress-area.visible{display:flex;}
-.progress-track{
-  width:100%; height:6px; background:var(--surface2); border-radius:3px;
-  overflow:hidden; direction:ltr; position:relative; cursor:pointer;
-}
-.progress-fill{height:100%; background:var(--accent); border-radius:3px; transition:width .3s linear; width:0%;}
-.progress-info{display:flex; justify-content:space-between; font-size:11px; color:var(--muted); direction:ltr; font-variant-numeric:tabular-nums;}
+.progress-wrap { display:none; width:100%; }
+.progress-wrap.visible { display:block; }
+.progress-container { display:flex; align-items:center; gap:12px; width:100%; direction:ltr; }
+.time { font-size:12px; color:var(--text-secondary); width:45px; text-align:center; font-variant-numeric:tabular-nums; }
+.progress-bar { flex:1; height:6px; background:rgba(0,0,0,.15); border-radius:3px; position:relative; cursor:pointer; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent-main); border-radius:3px; width:0%; transition:width .2s; }
 
-/* Status Badge */
-.status-badge{
-  display:inline-flex; align-items:center; gap:6px; padding:6px 14px;
-  border-radius:20px; font-size:12px; font-weight:700;
-  background:var(--gold-soft); color:var(--gold); border:1px solid rgba(230,192,104,.2);
+/* Play Button */
+.play-area { display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:8px; }
+.play-pause-btn {
+  width:68px; height:68px; border-radius:50%; background:var(--accent-main); color:#fff; border:none;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  box-shadow:0 4px 15px rgba(16,185,129,.4); transition:transform .2s;
 }
-.status-badge.active{background:var(--accent-deep); color:#fff; border-color:var(--accent);}
-.status-badge .dot{width:6px; height:6px; border-radius:50%; background:currentColor; animation:pulse 1.5s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.play-pause-btn:active { transform:scale(.92); }
+.play-pause-btn svg { width:28px; height:28px; fill:currentColor; }
+.play-pause-btn.stop-mode { background:#ef4444; box-shadow:0 4px 15px rgba(239,68,68,.4); }
+
+/* Repeat Counter */
+.repeat-counter {
+  font-size:13px; font-weight:700; color:var(--gold);
+  background:var(--gold-soft); padding:6px 16px; border-radius:20px;
+  display:none; align-items:center; gap:6px;
+}
+.repeat-counter.visible { display:flex; }
 
 /* Toast */
-.toast{
+.toast {
   position:fixed; top:20px; left:50%; transform:translate(-50%,-100px);
-  background:var(--accent-deep); color:#fff; padding:12px 24px; border-radius:40px;
-  font-weight:700; font-size:14px; z-index:10000; transition:.4s cubic-bezier(.22,1,.36,1);
-  box-shadow:0 8px 24px rgba(0,0,0,.3); white-space:nowrap;
+  background:var(--accent-main); color:#fff; padding:12px 24px; border-radius:30px;
+  font-size:14px; font-weight:bold; z-index:100000; transition:.4s;
+  box-shadow:0 4px 15px rgba(0,0,0,.2);
 }
-.toast.show{transform:translate(-50%,0);}
+.toast.show { transform:translate(-50%,0); }
 
 /* Bottom Sheet */
-.sheet-overlay{
-  position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
-  z-index:9998; opacity:0; pointer-events:none; transition:.3s;
+.sheet-overlay {
+  position:fixed; inset:0; background:var(--modal-overlay);
+  backdrop-filter:blur(8px); z-index:9998; opacity:0; pointer-events:none; transition:.3s;
 }
-.sheet-overlay.active{opacity:1; pointer-events:all;}
-.sheet{
-  position:fixed; bottom:0; left:0; right:0; max-height:75vh;
-  background:var(--bg); border-top:1px solid var(--border);
-  border-radius:24px 24px 0 0; z-index:10000;
-  transform:translateY(100%); transition:.35s cubic-bezier(.22,1,.36,1);
-  display:flex; flex-direction:column; box-shadow:0 -10px 40px rgba(0,0,0,.3);
+.sheet-overlay.active { opacity:1; pointer-events:all; }
+.bottom-sheet {
+  position:fixed; bottom:0; left:0; right:0; max-height:85vh;
+  background:var(--glass); backdrop-filter:blur(35px); -webkit-backdrop-filter:blur(35px);
+  border-top:1px solid var(--glass-border); border-radius:30px 30px 0 0;
+  transform:translateY(100%); transition:transform .4s cubic-bezier(.2,.9,.4,1.1);
+  z-index:10000; display:flex; flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom,20px); box-shadow:0 -10px 40px rgba(0,0,0,.2);
 }
-.sheet.active{transform:translateY(0);}
-.sheet-grip{width:40px; height:4px; background:var(--border2); border-radius:4px; margin:10px auto 0;}
-.sheet-head{display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--border);}
-.sheet-head h3{font-size:16px; font-weight:800;}
-.sheet-close{
-  width:32px; height:32px; border-radius:50%; border:1px solid var(--border);
-  background:var(--surface); color:var(--text); font-size:14px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
+.bottom-sheet.active { transform:translateY(0); }
+.drag-handle { width:40px; height:5px; background:rgba(150,150,150,.4); border-radius:10px; margin:12px auto; flex-shrink:0; }
+.sheet-header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px 15px; border-bottom:1px solid var(--glass-border); flex-shrink:0; }
+.sheet-header h2 { font-size:1.4rem; margin:0; font-weight:800; }
+.sheet-content { padding:15px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; flex:1; }
+.sheet-search {
+  width:100%; padding:14px; border-radius:14px; border:1px solid var(--glass-border);
+  background:var(--list-hover); color:var(--text-primary); font-family:inherit;
+  font-size:15px; outline:none; transition:.2s; margin-bottom:5px;
 }
-.sheet-body{flex:1; overflow-y:auto; padding:12px 20px 24px; display:flex; flex-direction:column; gap:8px;}
-.sheet-search{
-  width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
-  background:var(--surface2); color:var(--text); font-family:inherit; font-size:14px;
-  outline:none; margin-bottom:4px;
+.sheet-search:focus { border-color:var(--accent-main); }
+.sheet-item {
+  padding:16px 15px; border-radius:16px; background:var(--list-hover);
+  border:1px solid var(--glass-border); color:var(--text-primary); font-size:16px;
+  font-weight:bold; cursor:pointer; transition:.2s; text-align:center;
 }
-.sheet-search:focus{border-color:var(--accent);}
-.sheet-item{
-  padding:14px; border-radius:14px; background:var(--surface2); border:1px solid var(--border);
-  color:var(--text); font-size:14px; font-weight:600; cursor:pointer; transition:.15s;
-  text-align:right;
-}
-.sheet-item:active{transform:scale(.97); background:var(--accent-deep); color:#fff;}
-.sheet-item.selected{border-color:var(--accent); background:rgba(16,185,129,.1); color:var(--accent);}
-.sheet-item .sub{font-size:11px; color:var(--muted); font-weight:400; margin-top:2px;}
+.sheet-item:active { transform:scale(.98); }
+.sheet-item.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); box-shadow:0 4px 15px rgba(16,185,129,.3); }
+.sheet-item .sub { font-size:11px; color:var(--text-secondary); font-weight:400; margin-top:2px; }
+.sheet-item.selected .sub { color:rgba(255,255,255,.8); }
 
-/* Ayah picker grid */
-.ayah-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px;}
-.ayah-cell{
-  padding:10px 4px; border-radius:10px; background:var(--surface2); border:1px solid var(--border);
-  color:var(--text); font-size:13px; font-weight:600; cursor:pointer; text-align:center; transition:.12s;
+/* Ayah Grid */
+.ayah-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.ayah-cell {
+  padding:10px 4px; border-radius:10px; background:var(--list-hover);
+  border:1px solid var(--glass-border); color:var(--text-primary); font-size:13px;
+  font-weight:600; cursor:pointer; text-align:center; transition:.15s;
 }
-.ayah-cell:active{transform:scale(.9);}
-.ayah-cell.selected{background:var(--accent); color:#fff; border-color:var(--accent);}
-.ayah-cell.in-range{background:rgba(16,185,129,.15); border-color:var(--accent);}
-
-/* Repeat counter display */
-.repeat-display{
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  padding:8px 16px; border-radius:12px; background:var(--gold-soft);
-  font-size:13px; font-weight:700; color:var(--gold); margin-top:4px;
-}
+.ayah-cell:active { transform:scale(.9); }
+.ayah-cell.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
+.ayah-cell.in-range { background:var(--accent-muted); border-color:var(--accent-main); }
 </style>
 </head>
 <body>
 
-<div id="toast"></div>
-
+<div class="toast" id="toast"></div>
 <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
 
 <!-- Reciter Sheet -->
-<div class="sheet" id="reciterSheet">
-  <div class="sheet-grip"></div>
-  <div class="sheet-head"><h3>اختر القارئ</h3><button class="sheet-close" onclick="closeSheet()">✕</button></div>
-  <div class="sheet-body" id="reciterList"></div>
+<div class="bottom-sheet" id="reciterSheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2>اختر القارئ</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-content" id="reciterList"></div>
 </div>
 
 <!-- Surah Sheet -->
-<div class="sheet" id="surahSheet">
-  <div class="sheet-grip"></div>
-  <div class="sheet-head"><h3>اختر السورة</h3><button class="sheet-close" onclick="closeSheet()">✕</button></div>
-  <div class="sheet-body">
+<div class="bottom-sheet" id="surahSheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2>اختر السورة</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-content">
     <input type="text" class="sheet-search" id="surahSearch" placeholder="ابحث عن سورة..." oninput="filterSurahs()">
     <div id="surahList"></div>
   </div>
 </div>
 
 <!-- Ayah Range Sheet -->
-<div class="sheet" id="ayahSheet">
-  <div class="sheet-grip"></div>
-  <div class="sheet-head"><h3>نطاق الآيات</h3><button class="sheet-close" onclick="closeSheet()">✕</button></div>
-  <div class="sheet-body">
-    <div class="card-label" style="margin-bottom:4px;">من آية</div>
+<div class="bottom-sheet" id="ayahSheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2>نطاق الآيات</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-content">
+    <label>من آية</label>
     <div class="ayah-grid" id="ayahFromGrid"></div>
     <div style="height:10px;"></div>
-    <div class="card-label" style="margin-bottom:4px;">إلى آية</div>
+    <label>إلى آية</label>
     <div class="ayah-grid" id="ayahToGrid"></div>
   </div>
 </div>
@@ -266,98 +274,95 @@ body::before{
 
   <!-- Reciter -->
   <div class="card">
-    <div class="card-label">القارئ</div>
-    <button class="picker-btn" id="reciterBtn" onclick="openSheet('reciter')">
-      <span>اختر القارئ...</span><span class="arrow">▾</span>
+    <label>القارئ</label>
+    <button class="custom-select-btn" id="reciterBtn" onclick="openSheet('reciter')">
+      <span>اختر القارئ...</span>
     </button>
   </div>
 
   <!-- Surah -->
   <div class="card">
-    <div class="card-label">السورة</div>
-    <button class="picker-btn" id="surahBtn" onclick="openSheet('surah')">
-      <span>اختر السورة...</span><span class="arrow">▾</span>
+    <label>السورة</label>
+    <button class="custom-select-btn" id="surahBtn" onclick="openSheet('surah')">
+      <span>اختر السورة...</span>
     </button>
   </div>
 
   <!-- Ayah Range -->
   <div class="card">
-    <div class="card-label">نطاق الآيات</div>
-    <button class="picker-btn" id="ayahBtn" onclick="openSheet('ayah')">
-      <span>اختر بداية ونهاية التلاوة...</span><span class="arrow">▾</span>
+    <label>نطاق الآيات</label>
+    <button class="custom-select-btn" id="ayahBtn" onclick="openSheet('ayah')">
+      <span>اختر بداية ونهاية التلاوة...</span>
     </button>
   </div>
 
-  <!-- Repeat Count -->
+  <!-- Repeat -->
   <div class="card">
-    <div class="card-label">عدد التكرار</div>
+    <label>عدد التكرار</label>
     <div class="stepper">
       <button class="stepper-btn" onclick="adjustRepeat(-1)">−</button>
-      <div>
-        <div class="stepper-value" id="repeatValue">3</div>
-        <div class="stepper-label">مرة</div>
-      </div>
+      <div><div class="stepper-val" id="repeatVal">3</div><div class="stepper-lbl">مرة</div></div>
       <button class="stepper-btn" onclick="adjustRepeat(1)">+</button>
     </div>
   </div>
 
   <!-- Speed -->
   <div class="card">
-    <div class="card-label">سرعة التلاوة</div>
+    <label>سرعة التلاوة</label>
     <div class="stepper">
       <button class="stepper-btn" onclick="adjustSpeed(-0.1)">−</button>
-      <div>
-        <div class="stepper-value" id="speedValue">1.0x</div>
-        <div class="stepper-label">سرعة</div>
-      </div>
+      <div><div class="stepper-val" id="speedVal">1.0x</div><div class="stepper-lbl">سرعة</div></div>
       <button class="stepper-btn" onclick="adjustSpeed(0.1)">+</button>
     </div>
-    <div class="speed-presets">
-      <button class="speed-preset" onclick="setSpeed(0.5)">0.5x</button>
-      <button class="speed-preset" onclick="setSpeed(0.75)">0.75x</button>
-      <button class="speed-preset active" onclick="setSpeed(1)">1x</button>
-      <button class="speed-preset" onclick="setSpeed(1.25)">1.25x</button>
-      <button class="speed-preset" onclick="setSpeed(1.5)">1.5x</button>
-      <button class="speed-preset" onclick="setSpeed(2)">2x</button>
+    <div class="speed-grid">
+      <button class="speed-chip" onclick="setSpeed(0.5)">0.5x</button>
+      <button class="speed-chip" onclick="setSpeed(0.75)">0.75x</button>
+      <button class="speed-chip active" onclick="setSpeed(1)">1x</button>
+      <button class="speed-chip" onclick="setSpeed(1.25)">1.25x</button>
+      <button class="speed-chip" onclick="setSpeed(1.5)">1.5x</button>
+      <button class="speed-chip" onclick="setSpeed(2)">2x</button>
     </div>
   </div>
 
   <!-- Status -->
-  <div style="text-align:center;">
-    <div class="status-badge" id="statusBadge">
-      <span class="dot"></span>
-      <span id="statusText">جاهز للتشغيل</span>
-    </div>
+  <div class="status-bar" id="statusBar">
+    <span class="status-dot"></span>
+    <span id="statusText">جاهز للتشغيل</span>
+  </div>
+
+  <!-- Ayah Text Display -->
+  <div class="ayah-display" id="ayahDisplay">
+    <div class="ayah-arabic" id="ayahText"></div>
+    <div class="ayah-ref" id="ayahRef"></div>
   </div>
 
   <!-- Progress -->
-  <div class="progress-area" id="progressArea">
-    <div class="progress-track" id="progressTrack" onclick="seekAudio(event)">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div class="progress-info">
-      <span id="currentTime">0:00</span>
-      <span id="duration">0:00</span>
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-container">
+      <span class="time" id="curTime">0:00</span>
+      <div class="progress-bar" id="progressBar" onclick="seek(event)">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="time" id="durTime">0:00</span>
     </div>
   </div>
 
   <!-- Play -->
-  <div class="play-section">
-    <button class="play-btn" id="playBtn" onclick="togglePlay()">
-      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      <svg id="stopIcon" viewBox="0 0 24 24" style="display:none;"><path d="M6 6h12v12H6z"/></svg>
-    </button>
-    <div class="repeat-display" id="repeatDisplay" style="display:none;">
+  <div class="play-area">
+    <div class="repeat-counter" id="repeatCounter">
       <span>التكرار:</span>
-      <span id="repeatCounter">1 / 3</span>
+      <span id="repeatText">1 / 3</span>
     </div>
+    <button class="play-pause-btn" id="playBtn" onclick="togglePlay()">
+      <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="iconStop" viewBox="0 0 24 24" style="display:none;"><path d="M6 6h12v12H6z"/></svg>
+    </button>
   </div>
 </div>
 
-<audio id="audioPlayer" preload="auto"></audio>
+<audio id="audio" preload="auto"></audio>
 
 <script>
-// ==================== DATA ====================
 const RECITERS = [
   { id:'arabassy', name:'عبد الباسط عبد الصمد', folder:'Abdul_Basit_Murattal_192kbps' },
   { id:'afasy', name:'مشاري العفاسي', folder:'Mishaari_Rashid_Afasy_128kbps' },
@@ -371,7 +376,6 @@ const RECITERS = [
   { id:'sudais', name:'عبد الرحمن السديس', folder:'Abdulrahman_Sudais_192kbps' },
   { id:'shatiri', name:'عبدالرحمن الشتري', folder:'Abdulrahman_As-Shatri_128kbps' },
   { id:'bukhatyr', name:'بندر بخاطر', folder:'Bander_Balila_192kbps' },
-  { id:'awlaki', name:'ムスリム (مشاري)' , folder:'Mishary_Rashid_Afasy_192kbps' },
 ];
 
 const SURAH_NAMES = [
@@ -386,246 +390,185 @@ const SURAH_NAMES = [
   'التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد',
   'الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات',
   'القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر',
-  'المسد','الإخلاص','الفلق','الناس'
+  'المسد','الإخلاص','ال.flink','الناس'
 ];
+SURAH_NAMES[113] = 'الفلق'; SURAH_NAMES[112] = 'الإخلاص'; SURAH_NAMES[114] = 'الناس';
 
-// ==================== STATE ====================
-let state = {
-  reciter: null,
-  surah: null,
-  ayahFrom: 1,
-  ayahTo: 1,
-  repeatCount: 3,
-  speed: 1,
-  currentRepeat: 0,
-  isPlaying: false,
-  currentAyah: 1
-};
+const AYAH_COUNTS=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,37,34,30,73,54,45,83,182,88,59,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60];
 
-const audio = document.getElementById('audioPlayer');
+let S = { reciter:null, surah:null, ayahFrom:1, ayahTo:1, repeat:3, speed:1, playing:false };
+let queue=[], qIdx=0;
+const audio = document.getElementById('audio');
 
-// ==================== THEME ====================
-const THEMES = ['dark','light','sepia'];
-let themeIdx = parseInt(localStorage.getItem('appThemeIdx'))||0;
-function applyTheme(){document.documentElement.setAttribute('data-theme',THEMES[themeIdx]);localStorage.setItem('appThemeIdx',themeIdx);}
-function cycleTheme(){themeIdx=(themeIdx+1)%THEMES.length;applyTheme();}
+// Theme
+const THEMES=['dark','light','sepia'];
+let tIdx=parseInt(localStorage.getItem('appThemeIdx'))||0;
+function applyTheme(){document.documentElement.setAttribute('data-theme',THEMES[tIdx]);localStorage.setItem('appThemeIdx',tIdx);}
+function cycleTheme(){tIdx=(tIdx+1)%THEMES.length;applyTheme();}
 applyTheme();
 
-// ==================== UTILS ====================
 function pad(n){return String(n).padStart(3,'0');}
 function fmtTime(s){const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0');}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.classList.remove('show'),2500);}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.classList.remove('show'),2500);}
+function normalize(t){return(t||'').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');}
 
-// ==================== SHEETS ====================
-let currentSheet = null;
+// Sheets
+let curSheet=null;
 function openSheet(type){
-  currentSheet = type;
+  curSheet=type;
   document.getElementById('sheetOverlay').classList.add('active');
+  document.getElementById(type+'Sheet').classList.add('active');
   if(type==='reciter') renderReciters();
   else if(type==='surah') renderSurahs();
   else if(type==='ayah') renderAyahs();
-  document.getElementById(type+'Sheet').classList.add('active');
 }
 function closeSheet(){
   document.getElementById('sheetOverlay').classList.remove('active');
-  if(currentSheet) document.getElementById(currentSheet+'Sheet').classList.remove('active');
-  currentSheet = null;
+  if(curSheet) document.getElementById(curSheet+'Sheet').classList.remove('active');
+  curSheet=null;
 }
 
-// ==================== RECITER ====================
+// Reciters
 function renderReciters(){
-  const list = document.getElementById('reciterList');
-  list.innerHTML = RECITERS.map(r => `
-    <div class="sheet-item ${state.reciter&&state.reciter.id===r.id?'selected':''}" onclick="selectReciter('${r.id}')">
-      ${r.name}
-    </div>`).join('');
+  document.getElementById('reciterList').innerHTML=RECITERS.map(r=>
+    `<div class="sheet-item ${S.reciter&&S.reciter.id===r.id?'selected':''}" onclick="pickReciter('${r.id}')">${r.name}</div>`
+  ).join('');
 }
-function selectReciter(id){
-  state.reciter = RECITERS.find(r=>r.id===id);
-  document.getElementById('reciterBtn').classList.add('has-value');
-  document.getElementById('reciterBtn').querySelector('span').textContent = state.reciter.name;
+function pickReciter(id){
+  S.reciter=RECITERS.find(r=>r.id===id);
+  const btn=document.getElementById('reciterBtn');
+  btn.classList.add('has-value');
+  btn.querySelector('span').textContent=S.reciter.name;
   closeSheet();
-  updatePlayBtn();
 }
 
-// ==================== SURAH ====================
-function renderSurahs(filter=''){
-  const list = document.getElementById('surahList');
-  const f = normalize(filter);
-  list.innerHTML = SURAH_NAMES
-    .map((n,i) => ({name:n, num:i+1}))
-    .filter(s => !f || normalize(s.name).includes(f))
-    .map(s => `
-      <div class="sheet-item ${state.surah===s.num?'selected':''}" onclick="selectSurah(${s.num})">
-        <span style="color:var(--accent);font-weight:800;margin-inline-start:8px;">${s.num}</span>
-        ${s.name}
-      </div>`).join('');
+// Surahs
+function renderSurahs(f=''){
+  const n=normalize(f);
+  document.getElementById('surahList').innerHTML=SURAH_NAMES
+    .map((nm,i)=>({nm,num:i+1})).filter(s=>!n||normalize(s.nm).includes(n))
+    .map(s=>`<div class="sheet-item ${S.surah===s.num?'selected':''}" onclick="pickSurah(${s.num})"><span style="color:var(--accent-main);font-weight:800;margin-inline-start:8px;">${s.num}</span>${s.nm}</div>`).join('');
 }
 function filterSurahs(){renderSurahs(document.getElementById('surahSearch').value);}
-function selectSurah(num){
-  state.surah = num;
-  state.ayahFrom = 1;
-  state.ayahTo = 1;
-  document.getElementById('surahBtn').classList.add('has-value');
-  document.getElementById('surahBtn').querySelector('span').textContent = SURAH_NAMES[num-1];
-  document.getElementById('ayahBtn').querySelector('span').textContent = 'اختر بداية ونهاية التلاوة...';
+function pickSurah(n){
+  S.surah=n; S.ayahFrom=1; S.ayahTo=1;
+  const btn=document.getElementById('surahBtn');
+  btn.classList.add('has-value');
+  btn.querySelector('span').textContent=SURAH_NAMES[n-1];
   document.getElementById('ayahBtn').classList.remove('has-value');
+  document.getElementById('ayahBtn').querySelector('span').textContent='اختر بداية ونهاية التلاوة...';
   closeSheet();
-  updatePlayBtn();
 }
 
-// ==================== AYAH RANGE ====================
-function getAyahCount(surah){
-  const counts = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,37,34,30,73,54,45,83,182,88,59,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60];
-  return counts[surah-1]||1;
-}
-
-let ayahSelectMode = 'from'; // 'from' or 'to'
+// Ayah Range
 function renderAyahs(){
-  if(!state.surah){showToast('اختر السورة أولاً');return;}
-  const count = getAyahCount(state.surah);
-  const fromGrid = document.getElementById('ayahFromGrid');
-  const toGrid = document.getElementById('ayahToGrid');
-  fromGrid.innerHTML = Array.from({length:count},(_, i)=>{
-    const n=i+1;
-    const sel = n===state.ayahFrom?'selected':(n>=state.ayahFrom&&n<=state.ayahTo?'in-range':'');
-    return `<div class="ayah-cell ${sel}" onclick="pickAyah('from',${n})">${n}</div>`;
-  }).join('');
-  toGrid.innerHTML = Array.from({length:count},(_, i)=>{
-    const n=i+1;
-    const sel = n===state.ayahTo?'selected':(n>=state.ayahFrom&&n<=state.ayahTo?'in-range':'');
-    return `<div class="ayah-cell ${sel}" onclick="pickAyah('to',${n})">${n}</div>`;
-  }).join('');
+  if(!S.surah){showToast('اختر السورة أولاً');return;}
+  const cnt=AYAH_COUNTS[S.surah-1]||1;
+  const mk=(arrId,pickFn)=>{
+    document.getElementById(arrId).innerHTML=Array.from({length:cnt},(_,i)=>{
+      const n=i+1; const sel=n===S.ayahFrom?'selected':(n>=S.ayahFrom&&n<=S.ayahTo?'in-range':'');
+      return `<div class="ayah-cell ${sel}" onclick="${pickFn}(${n})">${n}</div>`;
+    }).join('');
+  };
+  mk('ayahFromGrid','pickFrom');
+  mk('ayahToGrid','pickTo');
 }
-function pickAyah(type, num){
-  if(type==='from'){
-    state.ayahFrom = num;
-    if(state.ayahTo < num) state.ayahTo = num;
-  } else {
-    state.ayahTo = num;
-    if(state.ayahFrom > num) state.ayahFrom = num;
-  }
-  renderAyahs();
-  document.getElementById('ayahBtn').classList.add('has-value');
-  document.getElementById('ayahBtn').querySelector('span').textContent = `من آية ${state.ayahFrom} إلى آية ${state.ayahTo}`;
-  updatePlayBtn();
+function pickFrom(n){S.ayahFrom=n;if(S.ayahTo<n)S.ayahTo=n;renderAyahs();updateAyahBtn();}
+function pickTo(n){S.ayahTo=n;if(S.ayahFrom>n)S.ayahFrom=n;renderAyahs();updateAyahBtn();}
+function updateAyahBtn(){
+  const b=document.getElementById('ayahBtn');
+  b.classList.add('has-value');
+  b.querySelector('span').textContent=`من آية ${S.ayahFrom} إلى آية ${S.ayahTo}`;
 }
 
-// ==================== REPEAT / SPEED ====================
-function adjustRepeat(delta){
-  state.repeatCount = Math.max(1, Math.min(99, state.repeatCount + delta));
-  document.getElementById('repeatValue').textContent = state.repeatCount;
-}
-function adjustSpeed(delta){
-  state.speed = Math.max(0.5, Math.min(3, Math.round((state.speed + delta)*10)/10));
-  updateSpeedUI();
-}
-function setSpeed(v){
-  state.speed = v;
-  audio.playbackRate = v;
-  updateSpeedUI();
-}
+// Repeat / Speed
+function adjustRepeat(d){S.repeat=Math.max(1,Math.min(99,S.repeat+d));document.getElementById('repeatVal').textContent=S.repeat;}
+function adjustSpeed(d){S.speed=Math.max(0.5,Math.min(3,Math.round((S.speed+d)*10)/10));updateSpeedUI();}
+function setSpeed(v){S.speed=v;audio.playbackRate=v;updateSpeedUI();}
 function updateSpeedUI(){
-  document.getElementById('speedValue').textContent = state.speed.toFixed(1)+'x';
-  document.querySelectorAll('.speed-preset').forEach(b=>{
-    b.classList.toggle('active', parseFloat(b.textContent)===state.speed);
-  });
+  document.getElementById('speedVal').textContent=S.speed.toFixed(1)+'x';
+  document.querySelectorAll('.speed-chip').forEach(b=>b.classList.toggle('active',parseFloat(b.textContent)===S.speed));
 }
 
-// ==================== PLAY ====================
-function getAudioUrl(reciter, surah, ayah){
-  return `https://everyayah.com/data/${reciter.folder}/${pad(surah)}${pad(ayah)}.mp3`;
+// Ayah Text Cache & Fetch
+const ayahCache={};
+async function fetchAyahText(surah,ayah){
+  const key=surah+':'+ayah;
+  if(ayahCache[key]) return ayahCache[key];
+  try{
+    const r=await fetch(`https://api.quran.com/api/v4/verses/by_key/${surah}:${ayah}?language=ar&fields=text_uthmani`);
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    const text=d.verse&&d.verse.text_uthmani?d.verse.text_uthmani:'';
+    ayahCache[key]=text;
+    return text;
+  }catch(e){return'';}
+}
+async function showAyahText(surah,ayah){
+  const disp=document.getElementById('ayahDisplay');
+  const txt=document.getElementById('ayahText');
+  const ref=document.getElementById('ayahRef');
+  disp.classList.add('visible');
+  txt.innerHTML='<div class="ayah-loading">جاري تحميل الآية...</div>';
+  ref.textContent=`${SURAH_NAMES[surah-1]} - آية ${ayah}`;
+  const text=await fetchAyahText(surah,ayah);
+  txt.textContent=text||'';
 }
 
+// Queue
 function buildQueue(){
-  const queue = [];
-  for(let r=0; r<state.repeatCount; r++){
-    for(let a=state.ayahFrom; a<=state.ayahTo; a++){
-      queue.push({surah:state.surah, ayah:a, repeat:r+1});
-    }
-  }
-  return queue;
+  const q=[];
+  for(let r=0;r<S.repeat;r++) for(let a=S.ayahFrom;a<=S.ayahTo;a++) q.push({surah:S.surah,ayah:a,repeat:r+1});
+  return q;
 }
-
-let queue = [];
-let queueIdx = 0;
 
 function togglePlay(){
-  if(state.isPlaying){stopPlay();return;}
-  if(!state.reciter||!state.surah){showToast('اختر القارئ والسورة أولاً');return;}
-  state.isPlaying = true;
-  state.currentRepeat = 1;
-  queue = buildQueue();
-  queueIdx = 0;
-  playQueueItem();
+  if(S.playing){stopPlay();return;}
+  if(!S.reciter||!S.surah){showToast('اختر القارئ والسورة أولاً');return;}
+  S.playing=true; queue=buildQueue(); qIdx=0;
+  playItem();
+  document.getElementById('progressWrap').classList.add('visible');
+  document.getElementById('repeatCounter').classList.add('visible');
+  document.getElementById('statusBar').classList.add('playing');
+  document.getElementById('statusText').textContent='جاري التشغيل...';
   updatePlayBtn();
-  document.getElementById('progressArea').classList.add('visible');
-  document.getElementById('repeatDisplay').style.display='flex';
-  document.getElementById('statusBadge').classList.add('active');
-  document.getElementById('statusText').textContent = 'جاري التشغيل...';
 }
-
 function stopPlay(){
-  state.isPlaying = false;
-  audio.pause();
-  audio.src = '';
-  updatePlayBtn();
-  document.getElementById('progressArea').classList.remove('visible');
-  document.getElementById('repeatDisplay').style.display='none';
-  document.getElementById('statusBadge').classList.remove('active');
-  document.getElementById('statusText').textContent = 'جاهز للتشغيل';
+  S.playing=false; audio.pause(); audio.src='';
+  document.getElementById('progressWrap').classList.remove('visible');
+  document.getElementById('repeatCounter').classList.remove('visible');
+  document.getElementById('statusBar').classList.remove('playing');
+  document.getElementById('statusText').textContent='جاهز للتشغيل';
+  document.getElementById('ayahDisplay').classList.remove('visible');
   document.getElementById('progressFill').style.width='0%';
+  updatePlayBtn();
 }
-
-function playQueueItem(){
-  if(queueIdx >= queue.length){stopPlay();showToast('انتهت التلاوة');return;}
-  const item = queue[queueIdx];
-  state.currentAyah = item.ayah;
-  state.currentRepeat = item.repeat;
-  document.getElementById('repeatCounter').textContent = `${item.repeat} / ${state.repeatCount}`;
-  audio.src = getAudioUrl(state.reciter, item.surah, item.ayah);
-  audio.playbackRate = state.speed;
+function playItem(){
+  if(qIdx>=queue.length){stopPlay();showToast('انتهت التلاوة');return;}
+  const item=queue[qIdx];
+  document.getElementById('repeatText').textContent=item.repeat+' / '+S.repeat;
+  audio.src=`https://everyayah.com/data/${S.reciter.folder}/${pad(item.surah)}${pad(item.ayah)}.mp3`;
+  audio.playbackRate=S.speed;
   audio.play().catch(()=>{});
+  showAyahText(item.surah,item.ayah);
 }
-
-audio.onended = function(){
-  if(!state.isPlaying) return;
-  queueIdx++;
-  playQueueItem();
+audio.onended=function(){if(!S.playing)return;qIdx++;playItem();};
+audio.ontimeupdate=function(){
+  if(!audio.duration)return;
+  document.getElementById('progressFill').style.width=(audio.currentTime/audio.duration*100)+'%';
+  document.getElementById('curTime').textContent=fmtTime(audio.currentTime);
+  document.getElementById('durTime').textContent=fmtTime(audio.duration);
 };
-
-audio.ontimeupdate = function(){
-  if(!audio.duration) return;
-  const pct = (audio.currentTime / audio.duration) * 100;
-  document.getElementById('progressFill').style.width = pct+'%';
-  document.getElementById('currentTime').textContent = fmtTime(audio.currentTime);
-  document.getElementById('duration').textContent = fmtTime(audio.duration);
-};
-
-function seekAudio(e){
-  const rect = document.getElementById('progressTrack').getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  audio.currentTime = pct * audio.duration;
+function seek(e){
+  const r=document.getElementById('progressBar').getBoundingClientRect();
+  audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
 }
-
 function updatePlayBtn(){
-  const btn = document.getElementById('playBtn');
-  const playIcon = document.getElementById('playIcon');
-  const stopIcon = document.getElementById('stopIcon');
-  if(state.isPlaying){
-    btn.classList.add('playing');
-    playIcon.style.display='none';
-    stopIcon.style.display='block';
-  } else {
-    btn.classList.remove('playing');
-    playIcon.style.display='block';
-    stopIcon.style.display='none';
-  }
-}
-
-// ==================== NORMALIZE ====================
-function normalize(t){
-  return (t||'').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');
+  const b=document.getElementById('playBtn');
+  const p=document.getElementById('iconPlay');
+  const s=document.getElementById('iconStop');
+  if(S.playing){b.classList.add('stop-mode');p.style.display='none';s.style.display='block';}
+  else{b.classList.remove('stop-mode');p.style.display='block';s.style.display='none';}
 }
 </script>
 </body>
