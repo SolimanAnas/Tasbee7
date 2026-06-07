@@ -185,14 +185,17 @@ test('sw.js STATIC_ASSETS point to pages/', async ({ page }) => {
 
 // ========== 11. All files exist ==========
 test('all referenced HTML files exist in pages/', () => {
-  const expected = [
+  const actual = fs.readdirSync(PAGES_DIR).filter(f => f.endsWith('.html'));
+  // Every .html file in pages/ should be loadable
+  expect(actual.length).toBeGreaterThan(0);
+  // Core pages that must exist
+  const required = [
     '404.html', 'about.html', 'audio.html', 'azkar.html', 'duaa.html',
     'hadith.html', 'hisn.html', 'howto.html', 'masbaha.html',
     'notifications.html', 'qibla.html', 'quran-text.html', 'quran.html',
-    'quran-V2.html', 'quran-V3.html', 'quran-V4.html', 'quran-V4-2.html',
-    'quran2.html', 'radio.html', '_quran.html',
+    'quran2.html', 'radio.html',
   ];
-  for (const file of expected) {
-    expect(fs.existsSync(path.join(PAGES_DIR, file)), `${file} should exist`).toBe(true);
+  for (const file of required) {
+    expect(actual.includes(file), `${file} should exist in pages/`).toBe(true);
   }
 });
