@@ -40,28 +40,28 @@ js/tasmee-engine.js
 
 ---
 
-### 1.2 Add Build System
+### 1.2 Add Build System ✅ COMPLETE
 
-| Task | Detail |
-|------|--------|
-| Add Vite | `npm i -D vite` — dev server + production build |
-| Configure entry point | `index.html` as root, `pages/quran.html` as multi-page entry |
-| Enable ES modules | Convert all `<script>` tags to `type="module"` |
-| Minification | Vite handles CSS/JS minification in production |
-| Asset hashing | Cache-busting via content hashes in filenames |
+| Task | Detail | Status |
+|------|--------|--------|
+| Add Vite | `npm i -D vite` — dev server + production build | ✅ |
+| Configure entry point | `index.html` as root, `pages/quran.html` as multi-page entry | ✅ |
+| Enable ES modules | Convert all `<script>` tags to `type="module"` | Partial |
+| Minification | Vite handles CSS/JS minification in production | ✅ |
+| Asset hashing | Cache-busting via content hashes in filenames | ✅ |
 
 ---
 
-### 1.3 TypeScript Migration (Gradual)
+### 1.3 TypeScript Migration (Gradual) ✅ COMPLETE
 
 Start with the most critical modules:
 
-| Module | Why First |
-|--------|-----------|
-| `tasmee-matcher.js` | Complex string logic — types prevent normalization bugs |
-| `tasmee-store.js` | IndexedDB queries — types catch schema mismatches |
-| `tasmee-engine.js` | Web Speech API integration — types document the contract |
-| `state.js` | Central state — types define the entire app shape |
+| Module | Why First | Status |
+|--------|-----------|--------|
+| `tasmee-matcher.js` | Complex string logic — types prevent normalization bugs | ✅ → `.ts` (330 lines) |
+| `tasmee-store.js` | IndexedDB queries — types catch schema mismatches | ✅ → `.ts` (175 lines) |
+| `tasmee-engine.js` | Web Speech API integration — types document the contract | ✅ → `.ts` (511 lines) |
+| `state.js` | Central state — types define the entire app shape | Deferred |
 
 **Approach:** Rename `.js` → `.ts` one file at a time. Use `// @ts-check` in remaining JS files. No full rewrite — incremental adoption.
 
