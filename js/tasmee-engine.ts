@@ -1,7 +1,53 @@
 /* TasmeeEngine — Quran recitation assessment engine */
+
+interface WordToken {
+  idx: number;
+  raw: string;
+  norm: string;
+  ayahIdx: number;
+  wordIdxInAyah: number;
+  spanId: string;
+  state: 'pending' | 'active' | 'correct' | 'fuzzy' | 'missed';
+  variants: Set<string> | null;
+}
+
+interface EngineOptions {
+  onWordMatch?: (idx: number, state: string | undefined, info: { done: number; total: number; currentAyahIdx: number }) => void;
+  onSessionEnd?: (summary: ScoreSummary) => void;
+  audioFeedback?: boolean;
+}
+
+interface ScoreSummary {
+  correct: number;
+  fuzzy: number;
+  missed: number;
+  total: number;
+  pct: number;
+  completed?: boolean;
+}
+
+interface AyahData {
+  surah: number;
+  ayah: number;
+  text: string;
+}
+
 class TasmeeEngine {
-  constructor({ onWordMatch, onSessionEnd, audioFeedback = true } = {}) {
-    this._options = { onWordMatch, onSessionEnd, audioFeedback };
+  private _options: Required<EngineOptions>;
+  private _wordTokens: WordToken[];
+  private _expectedIdx: number;
+  private _snapshots: { el: HTMLElement; html: string }[];
+  private _recognition: any;
+  private _ended: boolean;
+  private _restartAttempts: number;
+  private _lastRestartTime: number;
+  private _audioCtx: AudioContext | null;
+  private _ayahOffset: number;
+  isPaused: boolean;
+  isActive: boolean;
+
+  constructor({ onWordMatch, onSessionEnd, audioFeedback = true }: EngineOptions = {}) {
+    this._options = { onWordMatch: onWordMatch || (() => {}), onSessionEnd: onSessionEnd || (() => {}), audioFeedback };
     this._wordTokens = [];
     this._expectedIdx = 0;
     this._snapshots = [];
@@ -10,14 +56,13 @@ class TasmeeEngine {
     this._restartAttempts = 0;
     this._lastRestartTime = 0;
     this._audioCtx = null;
+    this._ayahOffset = 0;
     this.isPaused = false;
     this.isActive = false;
   }
 
-  // ── Public API ──────────────────────────────────────────────────────────
-
-  async startSession(ayahDataArray, { hideText = false, ayahOffset = 0 } = {}) {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  async startSession(ayahDataArray: AyahData[], { hideText = false, ayahOffset = 0 } = {}): Promise<void> {
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRec) throw new Error('المتصفح لا يدعم التعرف على الكلام. استخدم Chrome أو Edge.');
 
     this._wordTokens = this._buildWordIndex(ayahDataArray);
@@ -29,8 +74,6 @@ class TasmeeEngine {
     this._restartAttempts = 0;
     this._ayahOffset = ayahOffset;
 
-    // Probe mic permission now (browser shows dialog here), then release the stream
-    // before SpeechRecognition takes over to avoid dual-capture conflicts.
     if (navigator.mediaDevices?.getUserMedia) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(t => t.stop());
@@ -45,14 +88,14 @@ class TasmeeEngine {
     this._recognition.interimResults = true;
     this._recognition.maxAlternatives = 3;
 
-    this._recognition.onresult = (e) => this._onSpeechResult(e);
-    this._recognition.onerror = (e) => {
+    this._recognition.onresult = (e: any) => this._onSpeechResult(e);
+    this._recognition.onerror = (e: any) => {
       if (e.error === 'no-speech' || e.error === 'aborted') return;
       if (e.error === 'not-allowed') {
         this._ended = true;
         this.isActive = false;
         this._restoreDom();
-        this._options.onSessionEnd?.(this._computeScore());
+        this._options.onSessionEnd(this._computeScore());
       }
     };
     this._recognition.onend = () => {
@@ -68,7 +111,7 @@ class TasmeeEngine {
         this._ended = true;
         this.isActive = false;
         this._restoreDom();
-        this._options.onSessionEnd?.(this._computeScore());
+        this._options.onSessionEnd(this._computeScore());
         return;
       }
       try { this._recognition.start(); } catch (_) {}
@@ -77,7 +120,7 @@ class TasmeeEngine {
     this._recognition.start();
   }
 
-  pauseSession() {
+  pauseSession(): void {
     if (!this.isActive || this.isPaused) return;
     this.isPaused = true;
     try { this._recognition.stop(); } catch (_) {}
@@ -85,7 +128,7 @@ class TasmeeEngine {
     if (dot) dot.classList.add('paused');
   }
 
-  resumeSession() {
+  resumeSession(): void {
     if (!this.isActive || !this.isPaused) return;
     this.isPaused = false;
     this._restartAttempts = 0;
@@ -94,7 +137,7 @@ class TasmeeEngine {
     if (dot) dot.classList.remove('paused');
   }
 
-  endSession() {
+  endSession(): void {
     if (this._ended) return;
     this._ended = true;
     this.isActive = false;
@@ -103,12 +146,10 @@ class TasmeeEngine {
     this._applyMissedUpTo(this._wordTokens.length - 1);
     const summary = this._computeScore();
     this._restoreDom();
-    this._options.onSessionEnd?.(summary);
+    this._options.onSessionEnd(summary);
   }
 
-  // ── Private ─────────────────────────────────────────────────────────────
-
-  _normArabic(str) {
+  private _normArabic(str: string): string {
     if (!str) return '';
     return str
       .replace(/[ً-ٟؐ-ؚۖ-ۜ۟-۪ۤۧۨ-ۭ]/g, '')
@@ -122,7 +163,7 @@ class TasmeeEngine {
       .trim();
   }
 
-  _tokenize(htmlStr) {
+  private _tokenize(htmlStr: string): string[] {
     if (!htmlStr) return [];
     const plain = htmlStr
       .replace(/<[^>]+>/g, ' ')
@@ -132,8 +173,8 @@ class TasmeeEngine {
     return plain.split(/\s+/).map(w => w.trim()).filter(w => w.length > 0);
   }
 
-  _buildWordIndex(ayahDataArray) {
-    const tokens = [];
+  private _buildWordIndex(ayahDataArray: AyahData[]): WordToken[] {
+    const tokens: WordToken[] = [];
     ayahDataArray.forEach((ayah, ayahIdx) => {
       const words = this._tokenize(ayah.text);
       words.forEach((raw, wordIdx) => {
@@ -151,74 +192,60 @@ class TasmeeEngine {
         });
       });
     });
-    // Compute tajweed variants after all tokens are built (needs next-token context)
     for (let i = 0; i < tokens.length; i++) {
       tokens[i].variants = this._getTajweedVariants(tokens[i].norm, tokens[i + 1]?.norm ?? '');
     }
     return tokens;
   }
 
-  // Returns a Set of accepted spoken forms for a token, accounting for tajweed rules.
-  _getTajweedVariants(norm, nextNorm) {
+  private _getTajweedVariants(norm: string, nextNorm: string): Set<string> {
     const variants = new Set([norm]);
     if (!norm) return variants;
     const last = norm[norm.length - 1];
     const nextFirst = nextNorm ? nextNorm[0] : '';
 
-    // إقلاب: ن → م before ب (speech recognition may transcribe as م)
     if (last === 'ن' && nextFirst === 'ب') {
       variants.add(norm.slice(0, -1) + 'م');
     }
-    // إدغام بغنة: ن merges/drops before ي،ن،م،و
     if (last === 'ن' && 'ينمو'.includes(nextFirst) && nextFirst) {
-      variants.add(norm.slice(0, -1)); // ن dropped
+      variants.add(norm.slice(0, -1));
     }
-    // إدغام بلا غنة: ن drops completely before ل،ر
     if (last === 'ن' && 'لر'.includes(nextFirst) && nextFirst) {
       variants.add(norm.slice(0, -1));
     }
-    // إخفاء: ن becomes nasal before ت،ث،ج،د،ذ،ز،س،ش،ص،ض،ط،ظ،ف،ق،ك
-    // ASR may hear it as dropped or partial; add variant without ن
     if (last === 'ن' && 'تثجدذزسشصضطظفقك'.includes(nextFirst) && nextFirst) {
       variants.add(norm.slice(0, -1));
     }
 
-    // Also handle tanwin on words: tanwin sounds like ن at end, normalization already strips
-    // but ASR may return without the nasal. No extra variant needed here since norm strips tashkeel.
-
-    variants.delete(''); // never allow empty string as valid match
+    variants.delete('');
     return variants;
   }
 
-  // Check if spokenNorm matches token.norm or any of its tajweed variants, or fuzzy-matches.
-  _isMatch(spokenNorm, token) {
+  private _isMatch(spokenNorm: string, token: WordToken): boolean {
     if (!spokenNorm || !token) return false;
     return spokenNorm === token.norm ||
            (token.variants && token.variants.has(spokenNorm)) ||
            this._fuzzyMatch(spokenNorm, token.norm);
   }
 
-  // Check if spokenNorm matches the إدغام fusion of tokens at idx and idx+1.
-  // Returns true if the single spoken word represents two Quranic words merged by idgham.
-  _matchMergedAt(spokenNorm, idx) {
+  private _matchMergedAt(spokenNorm: string, idx: number): boolean {
     if (idx + 1 >= this._wordTokens.length) return false;
     const a = this._wordTokens[idx].norm;
     const b = this._wordTokens[idx + 1].norm;
     if (!a || !b) return false;
     const lastA = a[a.length - 1];
     const firstB = b[0];
-    // إدغام: ن before ي،ن،م،و،ل،ر — ن drops and merges into next word
     if (lastA === 'ن' && 'ينمولر'.includes(firstB)) {
-      const merged = a.slice(0, -1) + b; // e.g. "من" + "يقول" → "ميقول"
+      const merged = a.slice(0, -1) + b;
       if (spokenNorm === merged || this._fuzzyMatch(spokenNorm, merged)) return true;
     }
     return false;
   }
 
-  _injectWordSpans(hideText) {
+  private _injectWordSpans(hideText: boolean): void {
     this._snapshots = [];
     const ayahTexts = document.querySelectorAll('.ayah-text');
-    const tokensByAyah = {};
+    const tokensByAyah: Record<number, WordToken[]> = {};
     this._wordTokens.forEach(t => {
       if (!tokensByAyah[t.ayahIdx]) tokensByAyah[t.ayahIdx] = [];
       tokensByAyah[t.ayahIdx].push(t);
@@ -227,12 +254,12 @@ class TasmeeEngine {
     ayahTexts.forEach((el, domIdx) => {
       const ayahIdx = domIdx - this._ayahOffset;
       if (ayahIdx >= 0 && tokensByAyah[ayahIdx] && tokensByAyah[ayahIdx].length > 0) {
-        this._snapshots.push({ el, html: el.innerHTML });
+        this._snapshots.push({ el: el as HTMLElement, html: (el as HTMLElement).innerHTML });
       }
       const tokens = tokensByAyah[ayahIdx];
       if (!tokens || tokens.length === 0) return;
 
-      const raw = el.innerHTML;
+      const raw = (el as HTMLElement).innerHTML;
       const stopMarkRe = /(&nbsp;<span class="stop-mark">[^<]*<\/span>|<span class="stop-mark">[^<]*<\/span>)/g;
       const parts = raw.split(stopMarkRe);
 
@@ -262,21 +289,21 @@ class TasmeeEngine {
           }
         });
       });
-      el.innerHTML = newHtml;
+      (el as HTMLElement).innerHTML = newHtml;
     });
   }
 
-  _restoreDom() {
+  private _restoreDom(): void {
     this._snapshots.forEach(({ el, html }) => {
       if (el && el.parentNode) el.innerHTML = html;
     });
     this._snapshots = [];
   }
 
-  _highlightWord(idx, state) {
+  private _highlightWord(idx: number, state: string): void {
     if (idx < 0 || idx >= this._wordTokens.length) return;
     const tok = this._wordTokens[idx];
-    tok.state = state;
+    tok.state = state as WordToken['state'];
     const span = document.getElementById(tok.spanId);
     if (!span) return;
     span.className = 'q-word';
@@ -284,7 +311,7 @@ class TasmeeEngine {
     if (state === 'correct' || state === 'fuzzy') span.classList.remove('q-word--hidden');
   }
 
-  _applyMissedUpTo(targetIdx) {
+  private _applyMissedUpTo(targetIdx: number): void {
     for (let i = this._expectedIdx; i <= targetIdx && i < this._wordTokens.length; i++) {
       if (this._wordTokens[i].state === 'pending' || this._wordTokens[i].state === 'active') {
         this._highlightWord(i, 'missed');
@@ -292,7 +319,7 @@ class TasmeeEngine {
     }
   }
 
-  _dryRunMatch(transcript) {
+  private _dryRunMatch(transcript: string): number {
     const spoken = this._tokenize(transcript).map(w => this._normArabic(w)).filter(w => w.length > 0);
     let idx = this._expectedIdx;
     let advances = 0;
@@ -320,7 +347,7 @@ class TasmeeEngine {
     return advances;
   }
 
-  _onSpeechResult(event) {
+  private _onSpeechResult(event: any): void {
     for (let i = event.resultIndex; i < event.results.length; i++) {
       if (!event.results[i].isFinal) continue;
       let bestTranscript = event.results[i][0].transcript;
@@ -334,7 +361,7 @@ class TasmeeEngine {
     }
   }
 
-  _matchWords(transcript) {
+  private _matchWords(transcript: string): void {
     const spoken = this._tokenize(transcript).map(w => this._normArabic(w)).filter(w => w.length > 0);
     for (const word of spoken) {
       if (this._expectedIdx >= this._wordTokens.length) {
@@ -345,24 +372,20 @@ class TasmeeEngine {
       let matched = false;
 
       if (word === exp.norm || (exp.variants && exp.variants.has(word))) {
-        // Exact match or tajweed variant → correct
         this._highlightWord(this._expectedIdx, 'correct');
         this._playTone(880, 80);
         this._expectedIdx++;
         matched = true;
       } else if (this._fuzzyMatch(word, exp.norm)) {
-        // Fuzzy match (Levenshtein ≤ 1)
         this._highlightWord(this._expectedIdx, 'fuzzy');
         this._expectedIdx++;
         matched = true;
       } else if (this._matchMergedAt(word, this._expectedIdx)) {
-        // إدغام fusion: single spoken word covers two Quranic words
         this._highlightWord(this._expectedIdx, 'correct');
         this._highlightWord(this._expectedIdx + 1, 'correct');
         this._expectedIdx += 2;
         matched = true;
       } else {
-        // Lookahead: match within next 3 tokens (handles skipped words)
         for (let ahead = 1; ahead <= 3 && (this._expectedIdx + ahead) < this._wordTokens.length; ahead++) {
           const aheadTok = this._wordTokens[this._expectedIdx + ahead];
           if (this._isMatch(word, aheadTok)) {
@@ -380,7 +403,7 @@ class TasmeeEngine {
 
       const matchedTok = this._wordTokens[this._expectedIdx - 1];
       const done = this._wordTokens.filter(t => t.state === 'correct' || t.state === 'fuzzy').length;
-      this._options.onWordMatch?.(this._expectedIdx - 1, matchedTok?.state, {
+      this._options.onWordMatch(this._expectedIdx - 1, matchedTok?.state, {
         done,
         total: this._wordTokens.length,
         currentAyahIdx: matchedTok?.ayahIdx ?? -1
@@ -397,7 +420,7 @@ class TasmeeEngine {
     }
   }
 
-  _finishSession() {
+  private _finishSession(): void {
     if (this._ended) return;
     this._ended = true;
     this.isActive = false;
@@ -406,10 +429,10 @@ class TasmeeEngine {
     summary.completed = true;
     this._restoreDom();
     if (summary.pct >= 95) this._playAscendingArpeggio();
-    this._options.onSessionEnd?.(summary);
+    this._options.onSessionEnd(summary);
   }
 
-  _fuzzyMatch(a, b) {
+  private _fuzzyMatch(a: string, b: string): boolean {
     if (Math.abs(a.length - b.length) > 2) return false;
     if (a === b) return true;
     const m = a.length, n = b.length;
@@ -426,7 +449,7 @@ class TasmeeEngine {
     return prev[n] <= 1;
   }
 
-  _computeScore() {
+  private _computeScore(): ScoreSummary {
     const correct = this._wordTokens.filter(t => t.state === 'correct').length;
     const fuzzy   = this._wordTokens.filter(t => t.state === 'fuzzy').length;
     const missed  = this._wordTokens.filter(t => t.state === 'missed').length;
@@ -435,7 +458,7 @@ class TasmeeEngine {
     return { correct, fuzzy, missed, total, pct };
   }
 
-  _showResultModal(summary) {
+  private _showResultModal(summary: ScoreSummary): void {
     const { correct, fuzzy, missed, total, pct } = summary;
     const pctRounded = Math.round(pct);
     const emoji = pct >= 95 ? '🌟' : pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
@@ -473,19 +496,19 @@ class TasmeeEngine {
         </div>
         ${missedHtml}`;
     }
-    if (typeof openModal === 'function') openModal('tasmeeResultsModal');
+    if (typeof (window as any).openModal === 'function') (window as any).openModal('tasmeeResultsModal');
   }
 
-  _getAudioCtx() {
+  private _getAudioCtx(): AudioContext | null {
     try {
       if (!this._audioCtx || this._audioCtx.state === 'closed') {
-        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this._audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
       return this._audioCtx;
     } catch (_) { return null; }
   }
 
-  _playTone(freq, duration) {
+  private _playTone(freq: number, duration: number): void {
     if (!this._options.audioFeedback) return;
     const ctx = this._getAudioCtx();
     if (!ctx) return;
@@ -503,7 +526,7 @@ class TasmeeEngine {
     } catch (_) {}
   }
 
-  _playAscendingArpeggio() {
+  private _playAscendingArpeggio(): void {
     [523, 659, 784, 1047].forEach((f, i) => {
       setTimeout(() => this._playTone(f, 120), i * 120);
     });

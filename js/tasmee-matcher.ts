@@ -15,30 +15,86 @@
  *   m.feedTranscript("الحمد لله رب");                 // call per recognition tick
  *   m.score();                                         // {correct,fuzzy,missed,total,pct}
  */
-(function (global) {
+(function (global: typeof globalThis) {
   'use strict';
 
-  const TASHKEEL_RE = /[ؐ-ًؚ-ٰٟۖ-ۜ۟-۪ۤۧۨ-ۭ]/g;
-  const ZEROWIDTH_RE = /[​‌‍﻿]/g; // incl. BOM that ships in data/quran.json
-  const NUM_MARK_RE = /[٠-٩۰-۹۝࣢]/g; // arabic-indic digits, end-of-ayah
-  const WAQF_RE = /[ۖ-ۭ]/g;  // Quranic small-high pause/annotation marks (ۖ ۗ ۚ ۛ …)
+  const TASHKEEL_RE = /[ؐ-ًؚ-ٰٟۖ-ۜ۟-۪ۤۧۨ-ۭ]/g;
+  const ZEROWIDTH_RE = /[​‌‍﻿]/g;
+  const NUM_MARK_RE = /[٠-٩۰-۹۝࣢]/g;
+  const WAQF_RE = /[ۖ-ۭ]/g;
+
+  type TokenState = 'pending' | 'active' | 'correct' | 'fuzzy' | 'missed';
+
+  interface Token {
+    idx: number;
+    surah: number;
+    ayah: number;
+    wordIdxInAyah: number;
+    raw: string;
+    norm: string;
+    altNorm: string | null;
+    state: TokenState;
+    variants: Set<string> | null;
+    isMarker?: boolean;
+    wordIndex?: number;
+  }
+
+  interface AyahData {
+    surah: number;
+    ayah: number;
+    text: string;
+    textClean?: string;
+  }
+
+  interface ScoreResult {
+    correct: number;
+    fuzzy: number;
+    missed: number;
+    total: number;
+    pct: number;
+  }
+
+  interface MistakeResult {
+    surah: number | null;
+    ayah: number | null;
+    word: string;
+    type: 'missing' | 'wrong' | 'extra';
+  }
+
+  interface AyahStats extends ScoreResult {
+    surah: number;
+    ayah: number;
+  }
+
+  interface MatcherCallbacks {
+    onWord?: (token: Token, state: TokenState) => void;
+    onExtra?: (normWord: string) => void;
+    onAyahComplete?: (surah: number, ayah: number, stats: AyahStats) => void;
+  }
 
   class TasmeeMatcher {
-    constructor({ onWord, onExtra, onAyahComplete } = {}) {
-      this.onWord = onWord;             // (token, state) when a word resolves
-      this.onExtra = onExtra;           // (normWord) inserted / extra word
-      this.onAyahComplete = onAyahComplete; // (surah, ayah, ayahStats)
+    private onWord: MatcherCallbacks['onWord'];
+    private onExtra: MatcherCallbacks['onExtra'];
+    private onAyahComplete: MatcherCallbacks['onAyahComplete'];
+    private _tokens: Token[];
+    private _expectedIdx: number;
+    private _extras: string[];
+    private _completedAyahs: Set<string>;
+
+    constructor({ onWord, onExtra, onAyahComplete }: MatcherCallbacks = {}) {
+      this.onWord = onWord;
+      this.onExtra = onExtra;
+      this.onAyahComplete = onAyahComplete;
       this._tokens = [];
       this._expectedIdx = 0;
       this._extras = [];
       this._completedAyahs = new Set();
     }
 
-    // ── normalisation (verbatim from TasmeeEngine._normArabic + BOM/number guards)
-    normArabic(str) {
+    normArabic(str: string): string {
       if (!str) return '';
       return str
-        .replace(/ٰ/g, 'ا')   // dagger/superscript alef → ا (e.g. ٱلْعَٰلَمِينَ)
+        .replace(/ٰ/g, 'ا')
         .replace(WAQF_RE, '')
         .replace(TASHKEEL_RE, '')
         .replace(ZEROWIDTH_RE, '')
@@ -52,41 +108,35 @@
         .trim();
     }
 
-    _tokenizeText(str) {
+    private _tokenizeText(str: string): string[] {
       if (!str) return [];
       return String(str)
         .replace(ZEROWIDTH_RE, ' ')
         .replace(NUM_MARK_RE, ' ')
-        .replace(WAQF_RE, '')    // strip waqf marks (standalone ones keep their spaces;
-                                 // in-word ones like هُدًۭى must NOT split the word)
+        .replace(WAQF_RE, '')
         .split(/\s+/)
         .map(w => w.trim())
         .filter(Boolean);
     }
 
-    // Accepted spoken forms for a token, accounting for tajweed rules between words.
-    _tajweedVariants(norm, nextNorm) {
+    private _tajweedVariants(norm: string, nextNorm: string): Set<string> {
       const variants = new Set([norm]);
       if (!norm) return variants;
       const last = norm[norm.length - 1];
       const nextFirst = nextNorm ? nextNorm[0] : '';
-      if (last === 'ن' && nextFirst === 'ب') variants.add(norm.slice(0, -1) + 'م');      // إقلاب
-      if (last === 'ن' && 'ينمو'.includes(nextFirst) && nextFirst) variants.add(norm.slice(0, -1)); // إدغام بغنة
-      if (last === 'ن' && 'لر'.includes(nextFirst) && nextFirst) variants.add(norm.slice(0, -1));   // إدغام بلا غنة
-      if (last === 'ن' && 'تثجدذزسشصضطظفقك'.includes(nextFirst) && nextFirst) variants.add(norm.slice(0, -1)); // إخفاء
+      if (last === 'ن' && nextFirst === 'ب') variants.add(norm.slice(0, -1) + 'م');
+      if (last === 'ن' && 'ينمو'.includes(nextFirst) && nextFirst) variants.add(norm.slice(0, -1));
+      if (last === 'ن' && 'لر'.includes(nextFirst) && nextFirst) variants.add(norm.slice(0, -1));
+      if (last === 'ن' && 'تثجدذزسشصضطظفقك'.includes(nextFirst) && nextFirst) variants.add(norm.slice(0, -1));
       variants.delete('');
       return variants;
     }
 
-    // ── build the expected-word index from ayah text (uthmani) ────────────────
-    // ayahDataArray: [{ surah, ayah, text }]  (text = uthmani string)
-    buildFromAyahs(ayahDataArray) {
-      const tokens = [];
+    buildFromAyahs(ayahDataArray: AyahData[]): Token[] {
+      const tokens: Token[] = [];
       (ayahDataArray || []).forEach(a => {
-        const words = this._tokenizeText(a.text);                 // uthmani (display)
+        const words = this._tokenizeText(a.text);
         const cleanWords = a.textClean ? this._tokenizeText(a.textClean) : null;
-        // the clean (ASR-style) spelling is an alternative accepted form, but only
-        // when the two tokenisations line up 1:1 after stripping waqf marks
         const aligned = cleanWords && cleanWords.length === words.length;
         words.forEach((raw, wordIdx) => {
           const norm = this.normArabic(raw);
@@ -96,22 +146,22 @@
             surah: a.surah, ayah: a.ayah,
             wordIdxInAyah: wordIdx,
             raw, norm,
-            altNorm: aligned ? this.normArabic(cleanWords[wordIdx]) : null,
-            state: 'pending',   // pending | active | correct | fuzzy | missed
+            altNorm: aligned ? this.normArabic(cleanWords![wordIdx]) : null,
+            state: 'pending',
             variants: null
           });
         });
       });
       for (let i = 0; i < tokens.length; i++) {
         const v = this._tajweedVariants(tokens[i].norm, tokens[i + 1] ? tokens[i + 1].norm : '');
-        if (tokens[i].altNorm && tokens[i].altNorm !== tokens[i].norm) v.add(tokens[i].altNorm);
+        if (tokens[i].altNorm && tokens[i].altNorm !== tokens[i].norm) v.add(tokens[i].altNorm!);
         tokens[i].variants = v;
       }
       this.setTokens(tokens);
       return tokens;
     }
 
-    setTokens(tokens) {
+    setTokens(tokens: Token[]): void {
       this._tokens = tokens || [];
       this._expectedIdx = 0;
       this._extras = [];
@@ -119,37 +169,34 @@
       if (this._tokens.length) this._setActive(0);
     }
 
-    reset() { this.setTokens(this._tokens.map(t => (t.state = 'pending', t.variants && t, t))); }
+    reset(): void { this.setTokens(this._tokens.map(t => (t.state = 'pending', t.variants && t, t))); }
 
-    get tokens() { return this._tokens; }
-    get position() { return this._expectedIdx; }
-    get extras() { return this._extras.slice(); }
+    get tokens(): Token[] { return this._tokens; }
+    get position(): number { return this._expectedIdx; }
+    get extras(): string[] { return this._extras.slice(); }
 
-    firstTokenIndexOfAyah(surah, ayah) {
+    firstTokenIndexOfAyah(surah: number, ayah: number): number {
       return this._tokens.findIndex(t => t.surah === surah && t.ayah === ayah);
     }
 
-    tokensOfAyah(surah, ayah) {
+    tokensOfAyah(surah: number, ayah: number): Token[] {
       return this._tokens.filter(t => t.surah === surah && t.ayah === ayah);
     }
 
-    // Move the pointer to an ayah's first word when navigation jumps there
-    // (forward-only, no "missed" marking — it's a context jump, not a skip).
-    seekToAyah(surah, ayah) {
+    seekToAyah(surah: number, ayah: number): number {
       const i = this.firstTokenIndexOfAyah(surah, ayah);
       if (i >= 0 && i > this._expectedIdx) { this._expectedIdx = i; this._setActive(i); }
       return i;
     }
 
-    // ── matching primitives (verbatim logic) ──────────────────────────────────
-    _isMatch(spokenNorm, token) {
+    private _isMatch(spokenNorm: string, token: Token): boolean {
       if (!spokenNorm || !token) return false;
       return spokenNorm === token.norm ||
         (token.variants && token.variants.has(spokenNorm)) ||
         this._fuzzy(spokenNorm, token.norm);
     }
 
-    _matchMergedAt(spokenNorm, idx) {
+    private _matchMergedAt(spokenNorm: string, idx: number): boolean {
       const T = this._tokens;
       if (idx + 1 >= T.length) return false;
       const a = T[idx].norm, b = T[idx + 1].norm;
@@ -162,7 +209,7 @@
       return false;
     }
 
-    _fuzzy(a, b) {
+    private _fuzzy(a: string, b: string): boolean {
       if (Math.abs(a.length - b.length) > 2) return false;
       if (a === b) return true;
       const m = a.length, n = b.length;
@@ -177,37 +224,33 @@
       return prev[n] <= 1;
     }
 
-    // ── state mutation + events ───────────────────────────────────────────────
-    _mark(idx, state) {
+    private _mark(idx: number, state: TokenState): void {
       const t = this._tokens[idx];
       if (!t || t.state === state) return;
-      // never downgrade a resolved word
       if ((t.state === 'correct' || t.state === 'fuzzy') && state === 'missed') return;
       t.state = state;
       if (this.onWord) this.onWord(t, state);
     }
 
-    _setActive(idx) {
+    private _setActive(idx: number): void {
       const t = this._tokens[idx];
       if (t && t.state === 'pending') { t.state = 'active'; if (this.onWord) this.onWord(t, 'active'); }
     }
 
-    _applyMissedUpTo(targetIdx) {
+    private _applyMissedUpTo(targetIdx: number): void {
       for (let i = this._expectedIdx; i <= targetIdx && i < this._tokens.length; i++) {
         const s = this._tokens[i].state;
         if (s === 'pending' || s === 'active') this._mark(i, 'missed');
       }
     }
 
-    _emitExtra(word) {
+    private _emitExtra(word: string): void {
       this._extras.push(word);
       if (this.onExtra) this.onExtra(word);
     }
 
-    // After every advance, emit onAyahComplete for any ayah whose words are all resolved.
-    _flushAyahCompletions() {
+    private _flushAyahCompletions(): void {
       const T = this._tokens;
-      // an ayah is complete once expectedIdx has passed its last token
       let i = 0;
       while (i < T.length) {
         const surah = T[i].surah, ayah = T[i].ayah;
@@ -218,7 +261,6 @@
         if (this._expectedIdx > lastIdx && !this._completedAyahs.has(key)) {
           this._completedAyahs.add(key);
           const stats = this._ayahStats(surah, ayah);
-          // skip ayahs we only seeked past (all words still pending — never recited)
           if ((stats.correct + stats.fuzzy + stats.missed) > 0 && this.onAyahComplete) {
             this.onAyahComplete(surah, ayah, stats);
           }
@@ -227,7 +269,7 @@
       }
     }
 
-    _ayahStats(surah, ayah) {
+    private _ayahStats(surah: number, ayah: number): AyahStats {
       let correct = 0, fuzzy = 0, missed = 0, total = 0;
       for (const t of this._tokens) {
         if (t.surah !== surah || t.ayah !== ayah) continue;
@@ -240,18 +282,12 @@
       return { surah, ayah, correct, fuzzy, missed, total, pct };
     }
 
-    // ── the streaming-safe feed ───────────────────────────────────────────────
-    feedTranscript(transcript) {
+    feedTranscript(transcript: string): void {
       const spoken = this._tokenizeText(transcript).map(w => this.normArabic(w)).filter(Boolean);
       if (!spoken.length) return;
       const T = this._tokens, N = T.length;
       if (this._expectedIdx >= N) return;
 
-      // 1) ANCHOR forward-only: find the first spoken word that lines up with an
-      //    expected token AT OR AFTER the current position (within a window). This
-      //    skips the overlap (already-recited words at the head of the window)
-      //    without re-counting them, and tolerates small skips. If nothing aligns
-      //    we wait for more audio rather than inventing "extra" words from noise.
       const FW = 8;
       const lo = this._expectedIdx;
       const hi = Math.min(N - 1, this._expectedIdx + FW);
@@ -261,12 +297,11 @@
           if (this._isMatch(spoken[s], T[e])) { aS = s; aE = e; break; }
         }
       }
-      if (aS < 0) return;                     // nothing aligns yet — no-op this tick
+      if (aS < 0) return;
       if (aE > this._expectedIdx) this._applyMissedUpTo(aE - 1);
-      this._expectedIdx = aE;                 // forward-only (aE >= expectedIdx)
+      this._expectedIdx = aE;
       const startS = aS;
 
-      // 2) CONSUME forward from the anchor
       for (let s = startS; s < spoken.length; s++) {
         if (this._expectedIdx >= N) break;
         const word = spoken[s];
@@ -281,7 +316,6 @@
           this._mark(this._expectedIdx + 1, 'correct');
           this._expectedIdx += 2;
         } else {
-          // lookahead: a missing/omitted word — match within next 3 tokens
           let found = false;
           for (let ahead = 1; ahead <= 3 && (this._expectedIdx + ahead) < N; ahead++) {
             const t = T[this._expectedIdx + ahead];
@@ -293,7 +327,7 @@
               found = true; break;
             }
           }
-          if (!found && word.length >= 2) this._emitExtra(word); // inserted / extra word
+          if (!found && word.length >= 2) this._emitExtra(word);
         }
       }
 
@@ -301,7 +335,7 @@
       this._flushAyahCompletions();
     }
 
-    score() {
+    score(): ScoreResult {
       let correct = 0, fuzzy = 0, missed = 0;
       const total = this._tokens.length;
       for (const t of this._tokens) {
@@ -313,9 +347,8 @@
       return { correct, fuzzy, missed, total, pct };
     }
 
-    // Mistakes for persistence (F7): missing + wrong(fuzzy) + extra words.
-    mistakes() {
-      const out = [];
+    mistakes(): MistakeResult[] {
+      const out: MistakeResult[] = [];
       for (const t of this._tokens) {
         if (t.state === 'missed') out.push({ surah: t.surah, ayah: t.ayah, word: t.raw, type: 'missing' });
         else if (t.state === 'fuzzy') out.push({ surah: t.surah, ayah: t.ayah, word: t.raw, type: 'wrong' });
@@ -325,6 +358,6 @@
     }
   }
 
-  global.TasmeeMatcher = TasmeeMatcher;
-  if (typeof module !== 'undefined' && module.exports) module.exports = TasmeeMatcher;
+  (global as any).TasmeeMatcher = TasmeeMatcher;
+  if (typeof module !== 'undefined' && (module as any).exports) (module as any).exports = TasmeeMatcher;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

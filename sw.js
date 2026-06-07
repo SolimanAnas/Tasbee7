@@ -35,9 +35,9 @@ const STATIC_ASSETS = [
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
   "./js/quran-common.js",
-  "./js/tasmee-engine.js",
-  "./js/tasmee-matcher.js",
-  "./js/tasmee-store.js",
+  "./js/tasmee-engine.ts",
+  "./js/tasmee-matcher.ts",
+  "./js/tasmee-store.ts",
 
   // ===== Extracted Quran modules =====
   "./js/quran/state.js",

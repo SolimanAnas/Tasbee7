@@ -8,20 +8,66 @@
  *
  * No audio is ever stored. Classic script → global `TasmeeStore` (+ CommonJS).
  */
-(function (global) {
+(function (global: typeof globalThis) {
   'use strict';
 
   const DB_NAME = 'tasmeePro';
   const DB_VER = 1;
-  let _dbPromise = null;
+  let _dbPromise: Promise<IDBDatabase> | null = null;
 
-  function _open() {
+  interface SessionRecord {
+    id?: number;
+    date: number;
+    surah?: number;
+    fromAyah?: number;
+    toAyah?: number;
+    correct?: number;
+    fuzzy?: number;
+    missed?: number;
+    total?: number;
+    accuracy?: number;
+    mistakes?: MistakeRecord[];
+    durationSec?: number;
+  }
+
+  interface MistakeRecord {
+    id?: number;
+    date?: number;
+    surah: number | null;
+    ayah: number | null;
+    word: string;
+    type: 'missing' | 'wrong' | 'extra';
+    key?: string | null;
+  }
+
+  interface RevisionRecord {
+    key: string;
+    surah: number;
+    ayah: number;
+    level: number;
+    dueDate: number;
+    ease: number;
+    lapses: number;
+    lastReviewed: number;
+  }
+
+  interface AggregateResult {
+    totalSessions: number;
+    totalTimeSec: number;
+    avgAccuracy: number;
+    streak: number;
+    weekly: { day: string; count: number }[];
+    weakWords: { word: string; count: number }[];
+    totalMistakes: number;
+  }
+
+  function _open(): Promise<IDBDatabase> {
     if (_dbPromise) return _dbPromise;
     _dbPromise = new Promise((resolve, reject) => {
       if (!global.indexedDB) { reject(new Error('IndexedDB unavailable')); return; }
       const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
+      req.onupgradeneeded = (e: IDBVersionChangeEvent) => {
+        const db = (e.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains('sessions')) {
           const s = db.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
           s.createIndex('date', 'date');
@@ -38,33 +84,33 @@
           r.createIndex('dueDate', 'dueDate');
         }
       };
-      req.onsuccess = (e) => resolve(e.target.result);
+      req.onsuccess = (e) => resolve((e.target as IDBOpenDBRequest).result);
       req.onerror = () => reject(req.error);
     });
     return _dbPromise;
   }
 
-  function _reqP(r) {
+  function _reqP<T>(r: IDBRequest<T>): Promise<T> {
     return new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
   }
-  async function _store(name, mode) {
+  async function _store(name: string, mode: IDBTransactionMode): Promise<IDBObjectStore> {
     const db = await _open();
     return db.transaction(name, mode).objectStore(name);
   }
-  function _dayKey(ts) {
+  function _dayKey(ts: number): string {
     const d = new Date(ts);
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
 
   const TasmeeStore = {
-    available() { return !!global.indexedDB; },
+    available(): boolean { return !!global.indexedDB; },
 
-    async addSession(rec) {
+    async addSession(rec: Omit<SessionRecord, 'date'>): Promise<number> {
       const os = await _store('sessions', 'readwrite');
       return _reqP(os.add(Object.assign({ date: Date.now() }, rec)));
     },
 
-    async addMistakes(arr) {
+    async addMistakes(arr: MistakeRecord[]): Promise<void> {
       if (!arr || !arr.length) return;
       const db = await _open();
       return new Promise((res, rej) => {
@@ -79,45 +125,40 @@
       });
     },
 
-    async getAllSessions() { return _reqP((await _store('sessions', 'readonly')).getAll()); },
-    async getAllMistakes() { return _reqP((await _store('mistakes', 'readonly')).getAll()); },
+    async getAllSessions(): Promise<SessionRecord[]> { return _reqP((await _store('sessions', 'readonly')).getAll()); },
+    async getAllMistakes(): Promise<MistakeRecord[]> { return _reqP((await _store('mistakes', 'readonly')).getAll()); },
 
-    // ── revisions (used by M3) ──────────────────────────────────────────────
-    async getRevision(key) { return _reqP((await _store('revisions', 'readonly')).get(key)); },
-    async putRevision(rec) { return _reqP((await _store('revisions', 'readwrite')).put(rec)); },
-    async getAllRevisions() { return _reqP((await _store('revisions', 'readonly')).getAll()); },
-    async getDueRevisions(now) {
+    async getRevision(key: string): Promise<RevisionRecord | undefined> { return _reqP((await _store('revisions', 'readonly')).get(key)); },
+    async putRevision(rec: RevisionRecord): Promise<void> { return _reqP((await _store('revisions', 'readwrite')).put(rec)); },
+    async getAllRevisions(): Promise<RevisionRecord[]> { return _reqP((await _store('revisions', 'readonly')).getAll()); },
+    async getDueRevisions(now?: number): Promise<RevisionRecord[]> {
       const all = await this.getAllRevisions();
       const t = now || Date.now();
       return all.filter(r => r.dueDate <= t).sort((a, b) => a.dueDate - b.dueDate);
     },
 
-    // ── dashboard aggregation (F6) ──────────────────────────────────────────
-    async aggregate() {
-      let sessions = [], mistakes = [];
+    async aggregate(): Promise<AggregateResult> {
+      let sessions: SessionRecord[] = [], mistakes: MistakeRecord[] = [];
       try { sessions = await this.getAllSessions(); } catch (_) {}
       try { mistakes = await this.getAllMistakes(); } catch (_) {}
 
       const totalSessions = sessions.length;
       const totalTimeSec = sessions.reduce((s, x) => s + (x.durationSec || 0), 0);
-      const accs = sessions.map(s => s.accuracy).filter(a => typeof a === 'number');
+      const accs = sessions.map(s => s.accuracy).filter((a): a is number => typeof a === 'number');
       const avgAccuracy = accs.length ? accs.reduce((a, b) => a + b, 0) / accs.length : 0;
 
-      // daily streak: consecutive days up to today with ≥1 session
       const days = new Set(sessions.map(s => _dayKey(s.date)));
       let streak = 0; const d = new Date();
       while (days.has(_dayKey(d.getTime()))) { streak++; d.setDate(d.getDate() - 1); }
 
-      // last 7 days session counts
-      const weekly = [];
+      const weekly: { day: string; count: number }[] = [];
       for (let i = 6; i >= 0; i--) {
         const dt = new Date(); dt.setDate(dt.getDate() - i);
         const k = _dayKey(dt.getTime());
         weekly.push({ day: k, count: sessions.filter(s => _dayKey(s.date) === k).length });
       }
 
-      // weak words: most-repeated mistakes
-      const freq = {};
+      const freq: Record<string, number> = {};
       mistakes.forEach(m => { if (m.word) freq[m.word] = (freq[m.word] || 0) + 1; });
       const weakWords = Object.keys(freq).map(w => ({ word: w, count: freq[w] }))
         .sort((a, b) => b.count - a.count).slice(0, 10);
@@ -125,8 +166,7 @@
       return { totalSessions, totalTimeSec, avgAccuracy, streak, weekly, weakWords, totalMistakes: mistakes.length };
     },
 
-    // testing / reset helper
-    async clearAll() {
+    async clearAll(): Promise<void> {
       const db = await _open();
       return new Promise((res, rej) => {
         const t = db.transaction(['sessions', 'mistakes', 'revisions'], 'readwrite');
@@ -139,6 +179,6 @@
     }
   };
 
-  global.TasmeeStore = TasmeeStore;
-  if (typeof module !== 'undefined' && module.exports) module.exports = TasmeeStore;
+  (global as any).TasmeeStore = TasmeeStore;
+  if (typeof module !== 'undefined' && (module as any).exports) (module as any).exports = TasmeeStore;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
