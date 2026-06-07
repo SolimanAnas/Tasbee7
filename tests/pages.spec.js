@@ -81,22 +81,21 @@ test('index.html navigation links point to pages/', async ({ page }) => {
   }
 });
 
-// ========== 4. Every pages/*.html has correct ../index.html ==========
+// ========== 4. Every pages/*.html has correct index.html navigation ==========
 for (const file of pageFiles) {
-  test(`${file} has correct ../index.html navigation`, async ({ page }) => {
+  test(`${file} has correct index.html navigation`, async ({ page }) => {
     await page.goto(`${BASE_URL}/pages/${file}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
 
     const brokenRefs = await page.evaluate(() => {
       const html = document.documentElement.innerHTML;
       const results = [];
-      const sq = html.match(/'index\.html'/g);
-      const dq = html.match(/"index\.html"/g);
-      if (sq) results.push(...sq.map(() => "'index.html'"));
-      if (dq) results.push(...dq.map(() => '"index.html"'));
+      // Find bare 'index.html' or "index.html" without a path prefix
+      const matches = html.match(/['"]index\.html['"]/g);
+      if (matches) results.push(...matches);
       return results;
     });
 
-    expect(brokenRefs, `${file}: found broken index.html refs (should be ../index.html): ${brokenRefs.join(', ')}`).toEqual([]);
+    expect(brokenRefs, `${file}: found bare index.html refs (should use /Tasbee7/index.html): ${brokenRefs.join(', ')}`).toEqual([]);
   });
 }
 
