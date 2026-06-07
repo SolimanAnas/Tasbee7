@@ -1,638 +1,783 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0e201b" id="metaThemeColor">
-  <title>قراءة الكتاب | زاد المسلم</title>
-  <style>
-    /* ========== الخطوط المحلية (تعمل دون اتصال) ========== */
-    @font-face{ font-family:'Scheherazade'; src:url('../fonts/Scheherazade.ttf') format('truetype'); font-weight:normal; font-style:normal; font-display:swap; }
-    @font-face{ font-family:'Amiri'; src:url('../fonts/Amiri.ttf') format('truetype'); font-weight:normal; font-style:normal; font-display:swap; }
-    @font-face{ font-family:'Amiri'; src:url('../fonts/Amiri.ttf') format('truetype'); font-weight:bold; font-style:normal; font-display:swap; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#04100c" id="metaThemeColor">
+<title>باحث الأحاديث | زاد المسلم</title>
 
-    /* ========== الثيمات ========== */
-    :root{ --meta:#0e201b; }
-    [data-theme="light"]{
-      --bg:#fcf8ef; --bg2:#ece2cf; --card-bg:#fffdf7;
-      --text:#1c2b24; --text-muted:#5f6f67;
-      --accent:#0f7a52; --accent-deep:#0a5c3d; --accent-bg:rgba(15,122,82,.1);
-      --gold:#9a7b1f; --gold-soft:rgba(154,123,31,.16);
-      --border:rgba(154,123,31,.22);
-      --glass-bg:rgba(255,253,247,.85); --glass-border:rgba(154,123,31,.22);
-      --danger:#dc2626; --danger-soft:rgba(220,38,38,.1);
-      --card-shadow:0 8px 22px -12px rgba(90,70,20,.22);
-      --toast-bg:#0a5c3d; --toast-color:#fff; --pattern-opacity:.05;
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+    /* ===================== الثيمات ===================== */
+    :root[data-theme="dark"]{
+        --primary:#10b981; --primary-deep:#059669; --primary-soft:rgba(16,185,129,.16);
+        --gold:#e6c068; --gold-deep:#caa24a; --gold-soft:rgba(230,192,104,.12);
+        --bg1:#0e201b; --bg2:#04100c;
+        --surface:rgba(255,255,255,.045); --surface-2:rgba(255,255,255,.075);
+        --border:rgba(230,192,104,.16); --border-strong:rgba(230,192,104,.3);
+        --text:#eef4f1; --muted:#8ba298; --danger:#f87171; --danger-soft:rgba(248,113,113,.14);
+        --meta:#04100c; --shadow:0 18px 50px -12px rgba(0,0,0,.6); --pattern-opacity:.05;
     }
-    [data-theme="sepia"]{
-      --bg:#f4ecd8; --bg2:#e3d4b3; --card-bg:#fcf7ea;
-      --text:#3c2a18; --text-muted:#7a6244;
-      --accent:#8a5a1c; --accent-deep:#6e4714; --accent-bg:rgba(138,90,28,.12);
-      --gold:#9a6b1f; --gold-soft:rgba(154,107,31,.18);
-      --border:rgba(122,84,24,.24);
-      --glass-bg:rgba(252,247,234,.85); --glass-border:rgba(122,84,24,.24);
-      --danger:#b4452b; --danger-soft:rgba(180,69,43,.12);
-      --card-shadow:0 8px 22px -12px rgba(90,60,20,.24);
-      --toast-bg:#6e4714; --toast-color:#fff; --pattern-opacity:.06;
+    :root[data-theme="light"]{
+        --primary:#0f7a52; --primary-deep:#0a5c3d; --primary-soft:rgba(15,122,82,.1);
+        --gold:#9a7b1f; --gold-deep:#7d6316; --gold-soft:rgba(154,123,31,.1);
+        --bg1:#fcf8ef; --bg2:#ece2cf;
+        --surface:#fffdf7; --surface-2:#fbf6ea;
+        --border:rgba(154,123,31,.2); --border-strong:rgba(154,123,31,.4);
+        --text:#1c2b24; --muted:#5f6f67; --danger:#dc2626; --danger-soft:rgba(220,38,38,.1);
+        --meta:#ece2cf; --shadow:0 14px 40px -16px rgba(60,50,20,.28); --pattern-opacity:.06;
     }
-    [data-theme="dark"]{
-      --bg:#04100c; --bg2:#0e201b; --card-bg:rgba(255,255,255,.05);
-      --text:#eef4f1; --text-muted:#8ba298;
-      --accent:#10b981; --accent-deep:#34d399; --accent-bg:rgba(16,185,129,.15);
-      --gold:#e6c068; --gold-soft:rgba(230,192,104,.16);
-      --border:rgba(230,192,104,.16);
-      --glass-bg:rgba(14,32,27,.82); --glass-border:rgba(230,192,104,.16);
-      --danger:#f87171; --danger-soft:rgba(248,113,113,.16);
-      --card-shadow:0 16px 44px -18px rgba(0,0,0,.6);
-      --toast-bg:#059669; --toast-color:#fff; --pattern-opacity:.05;
+    :root[data-theme="sepia"]{
+        --primary:#8a5a1c; --primary-deep:#6e4714; --primary-soft:rgba(138,90,28,.12);
+        --gold:#9a6b1f; --gold-deep:#7d5616; --gold-soft:rgba(154,107,31,.12);
+        --bg1:#f4ecd8; --bg2:#e3d4b3;
+        --surface:#fcf7ea; --surface-2:#f6efdc;
+        --border:rgba(122,84,24,.22); --border-strong:rgba(122,84,24,.42);
+        --text:#3c2a18; --muted:#7a6244; --danger:#b4452b; --danger-soft:rgba(180,69,43,.12);
+        --meta:#e3d4b3; --shadow:0 14px 40px -16px rgba(90,60,20,.3); --pattern-opacity:.07;
     }
 
-    *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
+    @font-face{
+        font-family:'ScheherazadeFont';
+        src:url('fonts/Scheherazade.ttf') format('truetype');
+        font-display:swap;
+    }
 
     body{
-      font-family:'Tajawal','Segoe UI', system-ui, sans-serif;
-      background:radial-gradient(125% 80% at 50% -10%, var(--bg2), var(--bg) 72%);
-      color:var(--text); transition:background .35s ease, color .35s ease;
-      line-height:1.6; overflow-x:hidden; min-height:100dvh;
+        margin:0; height:100dvh; overflow:hidden;
+        font-family:'Tajawal', system-ui, sans-serif;
+        background:
+            radial-gradient(120% 80% at 50% -10%, var(--bg1), var(--bg2) 70%);
+        color:var(--text); display:flex; justify-content:center;
+        transition:background .45s ease, color .45s ease;
     }
-    /* زخرفة إسلامية خفيفة (رُبع الحزب) */
+    /* خلفية زخرفية إسلامية (رُبع الحزب) — خفيفة وموثوقة */
     body::before{
-      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-      opacity:var(--pattern-opacity);
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23c9a14a' stroke-width='1'%3E%3Crect x='21' y='21' width='22' height='22'/%3E%3Crect x='21' y='21' width='22' height='22' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");
-      background-size:64px 64px;
-    }
-    header, main, .bottom-nav, .scroll-top, .toast, .modal-overlay, #scroll-progress{ position:relative; z-index:1; }
-
-    #scroll-progress{
-      position:fixed; top:0; left:0; height:3px; width:0%; z-index:1001;
-      background:linear-gradient(90deg, var(--accent), var(--gold)); transition:width .1s ease;
+        content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+        opacity:var(--pattern-opacity);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23c9a14a' stroke-width='1'%3E%3Crect x='21' y='21' width='22' height='22'/%3E%3Crect x='21' y='21' width='22' height='22' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");
+        background-size:64px 64px; background-position:center;
     }
 
-    /* ========== الشريط العلوي (هوية ثابتة خضراء/ذهبية) ========== */
-    header{
-      background:linear-gradient(135deg, #0e201b 0%, #0a3f2e 55%, #0e201b 100%);
-      color:#fff; padding:max(10px, env(safe-area-inset-top)) 14px 11px;
-      position:sticky; top:0; z-index:1000; box-shadow:0 4px 18px -8px rgba(0,0,0,.5);
-      border-bottom:1px solid rgba(230,192,104,.3);
-    }
-    .toolbar{ display:flex; gap:9px; align-items:center; max-width:800px; margin:0 auto; }
-    .home-btn, .action-btn{
-      background:rgba(255,255,255,.12); border:1px solid rgba(230,192,104,.22); border-radius:12px;
-      width:40px; height:40px; min-width:40px; display:flex; align-items:center; justify-content:center;
-      cursor:pointer; font-size:1.15rem; text-decoration:none; color:#fff; transition:transform .15s, background .2s;
-    }
-    .home-btn:active, .action-btn:active{ transform:scale(.9); }
-    .search-box{ flex:1; position:relative; }
-    .search-box input{
-      width:100%; padding:10px 16px; border-radius:12px; border:1px solid rgba(230,192,104,.25);
-      background:rgba(255,255,255,.95); color:#13241d; font-family:'Tajawal', sans-serif; font-size:.95rem; outline:none;
-      transition:box-shadow .2s;
-    }
-    .search-box input:focus{ box-shadow:0 0 0 3px rgba(230,192,104,.35); }
-    .search-box input:disabled{ opacity:.6; }
-
-    .theme-dock{ display:flex; gap:7px; }
-    .dot{
-      width:20px; height:20px; border-radius:50%; border:2px solid rgba(255,255,255,.45);
-      cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,.25); transition:.15s;
-    }
-    .dot:active{ transform:scale(.9); }
-    .dot.active{ transform:scale(1.18); border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); }
-
-    main{ max-width:800px; margin:0 auto; padding:22px 15px 120px; }
-
-    .section-header{ text-align:center; margin-bottom:22px; }
-    #book-title{ font-size:1rem; color:var(--gold); font-weight:700; letter-spacing:.3px; margin-bottom:6px; }
-    .section-title{ font-size:1.7rem; color:var(--accent); font-family:'Amiri', serif; font-weight:bold; line-height:1.5; }
-    .section-header .ornament{ width:90px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:10px auto 0; position:relative; }
-    .section-header .ornament::after{ content:"۞"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:var(--gold); font-size:14px; background:var(--bg); padding:0 6px; }
-
-    .cards-container{ display:flex; flex-direction:column; gap:16px; }
-
-    .card{
-      background:var(--card-bg); border-radius:20px; padding:20px;
-      box-shadow:var(--card-shadow); border:1px solid var(--border);
-      transition:transform .15s ease, box-shadow .2s; position:relative; overflow:hidden;
-    }
-    .card.hadith-card::before{ content:""; position:absolute; top:0; bottom:0; right:0; width:4px; background:var(--accent); }
-    .card.hadith-card.warn::before{ background:var(--danger); }
-
-    .card-arabic{
-      font-family:'Amiri','Scheherazade', serif; font-size:1.85rem; line-height:2;
-      margin-bottom:15px; text-align:justify; color:var(--text); word-spacing:1px;
+    .app-container{
+        width:100%; max-width:480px; height:100%; display:flex; flex-direction:column;
+        padding:max(18px, env(safe-area-inset-top)) 18px 0; position:relative; z-index:1;
     }
 
-    .card-ref{
-      font-size:.85rem; color:var(--text-muted); border-top:1px solid var(--border);
-      padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    /* ===================== الشريط العلوي ===================== */
+    .top-bar{ display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; margin-bottom:6px; border-bottom:1px solid var(--border); }
+    .brand{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .page-title{ font-size:19px; font-weight:800; margin:0; letter-spacing:.2px; }
+    .page-sub{ font-size:11px; color:var(--gold); font-weight:700; letter-spacing:2px; }
+    .top-actions{ display:flex; gap:8px; }
+
+    .icon-btn{
+        width:42px; height:42px; display:flex; align-items:center; justify-content:center;
+        background:var(--surface); border:1px solid var(--border); border-radius:13px;
+        color:var(--text); cursor:pointer; transition:transform .15s, background .2s, border-color .2s; font-size:19px;
     }
-    .card-ref b{ color:var(--text); }
+    .icon-btn:hover{ border-color:var(--border-strong); }
+    .icon-btn:active{ transform:scale(.9); }
 
-    .card-actions{ display:flex; gap:8px; align-items:center; }
-    .card-btn{
-      background:var(--glass-bg); border:1px solid var(--border); cursor:pointer; color:var(--text-muted);
-      transition:transform .1s, color .2s, background .2s; display:flex; align-items:center; justify-content:center;
-      width:34px; height:34px; border-radius:10px; font-size:1rem;
+    /* ===================== المنطقة الرئيسية ===================== */
+    .main-area{ flex:1; overflow-y:auto; padding:16px 0 60px; scroll-behavior:smooth; }
+    .main-area::-webkit-scrollbar{ display:none; }
+
+    #dbStatus{
+        text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px;
+        background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:9px 12px;
+        transition:opacity .4s; font-weight:500;
     }
-    .card-btn:active{ transform:scale(.85); background:var(--accent-bg); }
-    .card-btn svg{ stroke:var(--gold); }
-    .card-btn.active{ color:var(--gold); border-color:var(--gold); background:var(--gold-soft); }
 
-    .badge-ok{ color:var(--accent); font-weight:bold; background:var(--accent-bg); padding:3px 9px; border-radius:7px; }
-    .badge-warn{ color:var(--danger); font-weight:bold; background:var(--danger-soft); padding:3px 9px; border-radius:7px; }
-
-    mark{ background:var(--gold-soft); color:var(--gold); padding:0 3px; border-radius:4px; font-weight:700; }
-
-    /* وضع القراءة */
-    body.reading-mode .card{ background:transparent; box-shadow:none; border:none; padding:22px 4px; border-bottom:1px solid var(--border); border-radius:0; }
-    body.reading-mode .card.hadith-card::before{ display:none; }
-    body.reading-mode .card-arabic{ font-size:2.05rem; line-height:2.3; }
-    body.reading-mode .card-ref{ font-size:.9rem; }
-
-    /* ========== الشريط السفلي ========== */
-    .bottom-nav{
-      position:fixed; bottom:max(18px, env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
-      background:var(--glass-bg); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
-      padding:7px 12px; border-radius:30px; display:flex; gap:8px; align-items:center;
-      box-shadow:0 10px 30px -10px rgba(0,0,0,.4); z-index:999; width:92%; max-width:450px; justify-content:space-between;
+    /* ===================== بطاقة الحديث المميز ===================== */
+    .daily-card{
+        position:relative; background:var(--surface); border:1px solid var(--border);
+        border-radius:22px; padding:22px 20px 18px; margin-bottom:18px; overflow:hidden;
+        box-shadow:var(--shadow);
     }
-    .nav-btn{ background:none; border:none; color:var(--text); font-size:1.6rem; cursor:pointer; padding:4px 10px; transition:transform .1s, color .2s; line-height:1; }
-    .nav-btn:active{ transform:scale(.85); color:var(--accent); }
-    .custom-select-btn{
-      flex:1; background:transparent; border:none; color:var(--text);
-      font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold;
-      text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; padding:5px;
+    .daily-card::before{
+        content:""; position:absolute; top:0; right:0; left:0; height:3px;
+        background:linear-gradient(90deg, transparent, var(--gold), transparent);
     }
-    .custom-select-btn::after{ content:" ▾"; color:var(--gold); font-size:.8rem; }
-
-    /* زر الأعلى */
-    .scroll-top{
-      position:fixed; bottom:96px; right:15px; background:var(--accent); color:#fff;
-      width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-      font-size:1.4rem; cursor:pointer; box-shadow:0 6px 16px -4px rgba(0,0,0,.3);
-      z-index:998; opacity:0; transition:opacity .2s, transform .1s; pointer-events:none;
+    .daily-title{
+        display:flex; align-items:center; gap:8px; color:var(--gold);
+        font-size:13px; font-weight:800; letter-spacing:.3px; margin-bottom:14px;
+        text-transform:none;
     }
-    .scroll-top.visible{ opacity:1; pointer-events:auto; }
-    .scroll-top:active{ transform:scale(.9); }
-
-    /* التنبيه */
-    .toast{
-      position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--toast-bg);
-      color:var(--toast-color); padding:11px 26px; border-radius:40px; font-weight:bold; font-size:.9rem;
-      z-index:10000; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap;
-      box-shadow:0 8px 20px -6px rgba(0,0,0,.3);
+    .daily-title svg{ width:17px; stroke:var(--gold); }
+    .daily-title::after{ content:""; flex:1; height:1px; background:var(--border); }
+    .daily-text{
+        font-family:'Amiri','ScheherazadeFont', serif; font-size:24px; line-height:2;
+        text-align:justify; word-spacing:1px;
     }
-    .toast.show{ opacity:1; }
+    .daily-meta{
+        font-family:'Tajawal', sans-serif; font-size:12.5px; color:var(--primary);
+        font-weight:700; background:var(--primary-soft); padding:4px 10px; border-radius:8px;
+    }
 
-    /* المودال (ورقة سفلية) */
+    /* ===================== زر التصفح ===================== */
+    .action-btn{
+        display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+        background:linear-gradient(135deg, var(--surface-2), var(--surface));
+        border:1px solid var(--border); padding:14px; border-radius:16px; color:var(--text);
+        font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:18px;
+        transition:transform .15s, border-color .2s; font-size:15px;
+    }
+    .action-btn:hover{ border-color:var(--border-strong); }
+    .action-btn:active{ transform:scale(.97); }
+    .action-btn svg{ width:18px; stroke:var(--gold); }
+
+    /* ===================== شريط البحث ===================== */
+    .search-wrapper{
+        display:flex; align-items:center; background:var(--surface); border:1.5px solid var(--border);
+        border-radius:16px; padding:4px 6px; margin-bottom:14px; position:sticky; top:0; z-index:10;
+        box-shadow:0 6px 18px -8px rgba(0,0,0,.25); backdrop-filter:blur(14px);
+        transition:border-color .25s, box-shadow .25s;
+    }
+    .search-wrapper:focus-within{ border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-soft); }
+    .search-wrapper .search-icon{ width:20px; height:20px; margin-inline-start:10px; stroke:var(--muted); flex-shrink:0; }
+    .search-input{
+        flex:1; background:transparent; border:none; color:var(--text); padding:11px 10px;
+        font-family:'Tajawal', sans-serif; font-size:16px; width:100%;
+    }
+    .search-input::placeholder{ color:var(--muted); }
+    .search-input:disabled{ opacity:.5; }
+    .clear-input-btn{
+        background:var(--surface-2); border:none; color:var(--muted); width:30px; height:30px;
+        border-radius:50%; display:none; font-size:14px; cursor:pointer; flex-shrink:0;
+        align-items:center; justify-content:center; transition:.15s;
+    }
+    .clear-input-btn:active{ transform:scale(.85); }
+
+    /* ===================== فلتر الكتب ===================== */
+    .filter-label{ font-size:11px; font-weight:700; color:var(--muted); letter-spacing:1px; margin:4px 2px 8px; }
+    .books-filter{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+    .book-label{
+        background:var(--surface); border:1px solid var(--border); padding:7px 13px; border-radius:20px;
+        font-size:12px; color:var(--muted); cursor:pointer; transition:.18s; user-select:none;
+        display:flex; align-items:center; gap:5px;
+    }
+    .book-label input{ display:none; }
+    .book-label:has(input:checked){
+        background:var(--primary-soft); border-color:var(--primary); color:var(--primary-deep); font-weight:700;
+    }
+    :root[data-theme="dark"] .book-label:has(input:checked){ color:var(--text); }
+
+    /* مفتاح التشكيل */
+    .tashkeel-toggle{
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+        font-size:13px; color:var(--muted); margin-bottom:16px; background:var(--surface);
+        border:1px solid var(--border); border-radius:14px; padding:10px 14px; cursor:pointer;
+    }
+    .tashkeel-toggle .switch{ position:relative; width:42px; height:24px; flex-shrink:0; }
+    .tashkeel-toggle input{ display:none; }
+    .switch .track{ position:absolute; inset:0; background:var(--surface-2); border:1px solid var(--border); border-radius:20px; transition:.25s; }
+    .switch .thumb{ position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%; background:var(--muted); transition:.25s; }
+    .tashkeel-toggle input:checked + .track{ background:var(--primary-soft); border-color:var(--primary); }
+    .tashkeel-toggle input:checked + .track .thumb{ right:21px; background:var(--primary); }
+
+    /* ===================== سجل البحث ===================== */
+    .history-container{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:20px; align-items:center; }
+    .history-tag{
+        background:var(--surface); border:1px solid var(--border); padding:6px 14px; border-radius:20px;
+        font-size:13px; color:var(--muted); cursor:pointer; transition:.18s; display:flex; align-items:center; gap:6px;
+    }
+    .history-tag::before{ content:"⟲"; color:var(--gold); font-size:12px; }
+    .history-tag:active{ transform:scale(.95); }
+    .clear-history-btn{
+        background:var(--danger-soft); border:1px solid transparent; color:var(--danger);
+        padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; transition:.18s;
+    }
+    .clear-history-btn:active{ transform:scale(.95); }
+
+    /* ===================== ملخص النتائج ===================== */
+    .results-summary{
+        background:var(--surface); border:1px solid var(--border); padding:13px 15px; border-radius:14px;
+        margin-bottom:18px; font-size:14px; text-align:center; display:none; line-height:1.7;
+    }
+    .results-summary b{ font-weight:800; margin:0 3px; }
+    .summary-ok{ color:var(--primary); }
+    .summary-warn{ color:var(--danger); }
+
+    /* ===================== بطاقة الحديث ===================== */
+    .hadith-item{
+        position:relative; background:var(--surface); border:1px solid var(--border); border-radius:20px;
+        padding:18px 18px 16px; margin-bottom:14px; animation:fadeInUp .45s ease-out both;
+        overflow:hidden;
+    }
+    .hadith-item::before{ content:""; position:absolute; top:0; bottom:0; right:0; width:4px; background:var(--primary); }
+    .hadith-item.warn::before{ background:var(--danger); }
+    .hadith-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .badge-ok{ background:var(--primary-soft); color:var(--primary-deep); padding:5px 12px; border-radius:9px; font-size:12px; font-weight:800; }
+    .badge-warn{ background:var(--danger-soft); color:var(--danger); padding:5px 12px; border-radius:9px; font-size:12px; font-weight:800; }
+    :root[data-theme="dark"] .badge-ok{ color:var(--primary); }
+    .hadith-text{
+        font-family:'Amiri','ScheherazadeFont', serif; font-size:23px; line-height:2;
+        margin:6px 0 14px; text-align:justify; word-spacing:1px;
+    }
+    .hadith-meta{ font-size:12.5px; color:var(--muted); border-top:1px solid var(--border); padding-top:11px; line-height:1.7; }
+    .hadith-meta b{ color:var(--text); font-weight:700; }
+    .search-highlight{ background:var(--gold-soft); color:var(--gold-deep); border-radius:4px; padding:0 3px; font-weight:700; }
+    :root[data-theme="dark"] .search-highlight{ color:var(--gold); }
+
+    /* أيقونات داخل البطاقات */
+    .card-actions{ display:flex; gap:6px; }
+    .card-action-btn{
+        width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+        background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+        color:var(--text); cursor:pointer; transition:.18s; text-decoration:none;
+    }
+    .card-action-btn svg{ stroke:var(--gold); }
+    .card-action-btn:active{ transform:scale(.88); background:var(--primary-soft); }
+
+    /* ===================== حالات التحميل والفراغ ===================== */
+    .loader{ border:3px solid var(--border); border-top:3px solid var(--primary); border-radius:50%; width:30px; height:30px; animation:spin 1s linear infinite; margin:24px auto; display:none; }
+    .scroll-loader{ text-align:center; color:var(--muted); font-size:12px; padding:12px; display:none; }
+    .empty-state{ text-align:center; color:var(--muted); padding:36px 16px; }
+    .empty-state .icn{ font-size:34px; display:block; margin-bottom:10px; opacity:.6; }
+
+    /* ===================== المودال ===================== */
     .modal-overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(5px);
-      z-index:9999; opacity:0; pointer-events:none; transition:.3s; display:flex; align-items:flex-end; justify-content:center;
+        position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
+        display:flex; justify-content:center; align-items:flex-end; z-index:1000;
+        opacity:0; pointer-events:none; transition:.3s ease;
     }
-    .modal-overlay.active{ opacity:1; pointer-events:all; }
+    .modal-overlay.active{ opacity:1; pointer-events:auto; }
     .modal-content{
-      background:var(--bg); border:1px solid var(--border); border-bottom:none; border-radius:24px 24px 0 0;
-      width:100%; max-width:600px; max-height:78vh; display:flex; flex-direction:column;
-      transform:translateY(100%); transition:transform .32s cubic-bezier(.175,.885,.32,1.1);
-      box-shadow:0 -12px 40px rgba(0,0,0,.25); padding-bottom:env(safe-area-inset-bottom);
+        background:var(--bg1); border:1px solid var(--border); border-bottom:none;
+        width:100%; max-width:480px; border-radius:24px 24px 0 0; padding:22px 22px max(22px,env(safe-area-inset-bottom));
+        transform:translateY(40px); transition:.32s cubic-bezier(.22,1,.36,1); box-shadow:0 -10px 40px rgba(0,0,0,.3);
     }
     .modal-overlay.active .modal-content{ transform:translateY(0); }
-    .modal-content::before{ content:""; width:42px; height:4px; background:var(--border); border-radius:4px; margin:12px auto 0; }
-    .modal-header{
-      padding:16px 20px; text-align:center; border-bottom:1px solid var(--border);
-      font-weight:bold; font-size:1.15rem; position:relative; color:var(--text);
+    .modal-grip{ width:42px; height:4px; background:var(--border-strong); border-radius:4px; margin:0 auto 16px; }
+    .modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; font-weight:800; font-size:17px; }
+    .modal-header .close{ background:var(--surface-2); border:none; color:var(--muted); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:15px; }
+    .book-link-btn{
+        display:flex; align-items:center; justify-content:space-between; background:var(--surface);
+        border:1px solid var(--border); padding:15px; border-radius:14px; margin-bottom:9px;
+        color:var(--text); text-decoration:none; font-weight:600; transition:.18s;
     }
-    .close-modal{ position:absolute; left:15px; top:50%; transform:translateY(-50%); background:var(--card-bg); border:1px solid var(--border); color:var(--text-muted); width:32px; height:32px; border-radius:50%; font-size:.95rem; cursor:pointer; }
-    .modal-body{ overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:8px; }
-    .menu-item{
-      background:var(--card-bg); border:1px solid var(--border); border-radius:14px;
-      padding:15px; color:var(--text); font-size:1rem; cursor:pointer; transition:.18s;
-      display:flex; justify-content:space-between; align-items:center; font-weight:500; gap:10px;
-    }
-    .menu-item:active{ transform:scale(.98); }
-    .menu-item.active-item{ border-color:var(--accent); color:var(--accent); background:var(--accent-bg); }
-    .menu-item .count{ font-size:.8rem; color:var(--gold); font-weight:700; white-space:nowrap; }
+    .book-link-btn svg{ width:17px; stroke:var(--gold); }
+    .book-link-btn:active{ transform:scale(.97); background:var(--surface-2); }
 
-    .empty-note{ text-align:center; padding:40px 16px; color:var(--text-muted); }
-    .empty-note .icn{ font-size:32px; display:block; margin-bottom:10px; opacity:.6; }
+    /* ===================== التنبيه ===================== */
+    #toast{
+        position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-120px);
+        background:var(--primary-deep); color:#fff; padding:12px 24px; border-radius:50px; z-index:2000;
+        transition:.4s cubic-bezier(.22,1,.36,1); font-weight:700; font-size:14px;
+        box-shadow:0 12px 30px rgba(0,0,0,.25); display:flex; align-items:center; gap:8px;
+    }
+    #toast.show{ transform:translateX(-50%) translateY(0); }
 
     @keyframes spin{ to{ transform:rotate(360deg); } }
-  </style>
+    @keyframes fadeInUp{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+</style>
 </head>
-<body data-theme="light">
+<body>
 
-<div id="scroll-progress"></div>
+<div id="toast"><span></span></div>
 
-<header>
-  <div class="toolbar">
-    <a href="/Tasbee7/index.html" class="home-btn" title="العودة للبحث">🏠</a>
-    <div class="search-box">
-      <input type="text" id="search-input" placeholder="ابحث في هذا الكتاب...">
+<div class="modal-overlay" id="booksModal" onclick="if(event.target === this) toggleModal(false)">
+    <div class="modal-content">
+        <div class="modal-grip"></div>
+        <div class="modal-header">
+            <span>📚 تصفح الكتب الحديثية</span>
+            <button class="close" onclick="toggleModal(false)" aria-label="إغلاق">✕</button>
+        </div>
+        <div id="modalBooksContainer"></div>
     </div>
-    <div class="theme-dock">
-      <div class="dot" data-set="light" style="background:#fbf3df;" onclick="setTheme('light')"></div>
-      <div class="dot" data-set="sepia" style="background:#d9bf8a;" onclick="setTheme('sepia')"></div>
-      <div class="dot" data-set="dark" style="background:#0e201b;" onclick="setTheme('dark')"></div>
-    </div>
-    <button class="action-btn" id="readingModeBtn" title="وضع القراءة">📖</button>
-  </div>
-</header>
-
-<main>
-  <div class="section-header">
-    <h1 id="book-title">جاري التحميل...</h1>
-    <h2 id="main-title" class="section-title"></h2>
-    <div class="ornament"></div>
-  </div>
-  <div id="content-area">
-    <div style="text-align:center; padding:50px;">
-      <svg width="40" height="40" viewBox="0 0 24 24" style="animation:spin 1s linear infinite; stroke:var(--accent); fill:none; stroke-width:2;">
-          <circle cx="12" cy="12" r="10" opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path>
-      </svg>
-      <div style="margin-top:15px; color:var(--text-muted);">جاري التجهيز...</div>
-    </div>
-  </div>
-</main>
-
-<nav class="bottom-nav" id="bottomNav">
-  <button class="nav-btn" onclick="nav('prev')" aria-label="السابق">‹</button>
-  <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()">اختر الباب</button>
-  <button class="nav-btn" onclick="nav('next')" aria-label="التالي">›</button>
-  <button class="action-btn" style="background:transparent; border-color:transparent; color:var(--text);" id="bookmarkListBtn" title="المحفوظات">☆</button>
-</nav>
-
-<div class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
-<div id="toastMsg" class="toast"></div>
-
-<div class="modal-overlay" id="menuModal" onclick="if(event.target===this) closeMenu()">
-  <div class="modal-content">
-    <div class="modal-header">فهرس الأبواب<button class="close-modal" onclick="closeMenu()">✕</button></div>
-    <div class="modal-body" id="menuList"></div>
-  </div>
 </div>
 
-<div class="modal-overlay" id="bookmarkModal" onclick="if(event.target===this) closeBookmarkModal()">
-  <div class="modal-content">
-    <div class="modal-header">الأحاديث المحفوظة<button class="close-modal" onclick="closeBookmarkModal()">✕</button></div>
-    <div class="modal-body" id="bookmarkList"></div>
-  </div>
+<div class="app-container">
+    <div class="top-bar">
+        <div class="icon-btn" onclick="window.location.href='index.html'" aria-label="رجوع">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </div>
+
+        <div class="brand">
+            <h1 class="page-title">باحث الأحاديث</h1>
+            <span class="page-sub">زاد المسلم</span>
+        </div>
+
+        <div class="top-actions">
+            <div class="icon-btn" onclick="cycleTheme()" title="تغيير المظهر">🌗</div>
+            <div class="icon-btn" onclick="downloadDatabase()" title="تحميل قاعدة البيانات المدمجة">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-area">
+        <div id="dbStatus">جاري تحميل الكتب... ⏳</div>
+
+        <div class="daily-card" id="dailyCard">
+           <div class="daily-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke-linecap:round;stroke-linejoin:round;"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path></svg>
+                حديث من زادك
+           </div>
+           <div class="daily-text" id="dailyHadithText">جاري التحميل...</div>
+        </div>
+
+        <button class="action-btn" onclick="toggleModal(true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            تصفح الكتب الحديثية
+        </button>
+
+        <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السُنّة النبوية..." disabled>
+            <button class="clear-input-btn" id="clearInputBtn" onclick="clearSearchField()" aria-label="مسح">✕</button>
+        </div>
+
+        <div class="filter-label">تصفية حسب الكتاب</div>
+        <div class="books-filter" id="booksFilter"></div>
+
+        <label class="tashkeel-toggle">
+            مطابقة التشكيل بدقة
+            <span class="switch">
+                <input type="checkbox" id="strictTashkeel" onchange="initiateSearch()">
+                <span class="track"><span class="thumb"></span></span>
+            </span>
+        </label>
+
+        <div class="history-container" id="historyTags"></div>
+
+        <div class="loader" id="loader"></div>
+        <div id="resultsSummary" class="results-summary"></div>
+        <div id="resultsContainer"></div>
+
+        <div id="scrollTrigger" class="scroll-loader">جاري تحميل المزيد...</div>
+    </div>
 </div>
 
 <script>
-  let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
+    // ===================== الثيمات =====================
+    const THEMES = ['dark', 'light', 'sepia'];
+    let currentThemeIndex = parseInt(localStorage.getItem('appThemeIndex'), 10) || 0;
+    if (currentThemeIndex < 0 || currentThemeIndex >= THEMES.length) currentThemeIndex = 0;
 
-  // ================= الثيمات =================
-  function applyTheme() {
-    const t = localStorage.getItem('appTheme') || 'light';
-    document.body.setAttribute('data-theme', t);
-    document.querySelectorAll('.theme-dock .dot').forEach(d => d.classList.toggle('active', d.dataset.set === t));
-    setTimeout(() => {
-      const meta = getComputedStyle(document.body).getPropertyValue('--meta').trim() || '#0e201b';
-      document.getElementById('metaThemeColor').content = meta;
-    }, 30);
-  }
-  function setTheme(t) { localStorage.setItem('appTheme', t); applyTheme(); }
-
-  // ================= أدوات الواجهة =================
-  function showToast(msg, duration=2000) {
-    const toast = document.getElementById('toastMsg');
-    toast.textContent = msg; toast.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toast.classList.remove('show'), duration);
-  }
-
-  // نسخ موثوق يعمل دون اتصال (file:// / Capacitor)
-  function copyText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => showToast('📋 تم النسخ بنجاح')).catch(() => fallbackCopy(text));
-    } else { fallbackCopy(text); }
-  }
-  function fallbackCopy(text) {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.focus(); ta.select();
-      const ok = document.execCommand('copy'); document.body.removeChild(ta);
-      showToast(ok ? '📋 تم النسخ بنجاح' : '❌ تعذّر النسخ');
-    } catch (e) { showToast('❌ تعذّر النسخ'); }
-  }
-
-  // ================= المحفوظات =================
-  function getBookmarkKey() { return 'hadith_bookmarks_' + App.bookId; }
-  function loadBookmarks() { try { App.bookmarks = JSON.parse(localStorage.getItem(getBookmarkKey())) || []; } catch(e){ App.bookmarks=[]; } }
-  function saveBookmarks() { localStorage.setItem(getBookmarkKey(), JSON.stringify(App.bookmarks)); }
-  function isBookmarked(s, i) { return App.bookmarks.some(b => b.sectionIdx === s && b.itemIdx === i); }
-  function toggleBookmark(s, i) {
-    if (isBookmarked(s, i)) {
-      App.bookmarks = App.bookmarks.filter(b => !(b.sectionIdx === s && b.itemIdx === i));
-      showToast('❌ تمت الإزالة من المحفوظات');
-    } else { App.bookmarks.push({ sectionIdx:s, itemIdx:i }); showToast('⭐ أُضيف إلى المحفوظات'); }
-    saveBookmarks(); render();
-  }
-
-  // ================= منطق أساسي =================
-  function getHadithGrade(bookId, grades) {
-    if (bookId === 'bukhari' || bookId === 'muslim') return { text:'صحيح', isOk:true };
-    if (!grades || grades.length === 0) return { text:'غير محدد', isOk:true };
-    const albani = grades.find(g => (g && g.name || '').toLowerCase().includes('albani'));
-    const raw = (((albani ? albani.grade : grades[0].grade) || '') + '').toLowerCase();
-    const isOk = !raw.includes('daif') && !raw.includes("da'if") && !raw.includes('mawdu');
-    let arGrade = raw || 'غير محدد';
-    if (raw.includes('sahih')) arGrade = 'صحيح';
-    else if (raw.includes('hasan')) arGrade = 'حسن';
-    else if (raw.includes('daif') || raw.includes("da'if")) arGrade = 'ضعيف';
-    else if (raw.includes('mawdu')) arGrade = 'موضوع';
-    return { text:arGrade, isOk };
-  }
-
-  const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
-  const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
-  function normalizeText(text) {
-    return (text || "").replace(TASHKEEL_REGEX, '').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');
-  }
-  function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-  function buildHighlightRegex(rawQuery) {
-    let clean = normalizeText(rawQuery), pattern = "";
-    for (let ch of clean) {
-      if (/[اأإآ]/.test(ch)) pattern += "[أإآا]";
-      else if (/[ةه]/.test(ch)) pattern += "[ةه]";
-      else if (/[ىي]/.test(ch)) pattern += "[ىي]";
-      else if (ch === ' ') pattern += "\\s+";
-      else pattern += escapeRegex(ch);
-      if (ch !== ' ') pattern += "[" + TASHKEEL_STR + "]*";
+    function applyTheme() {
+        document.documentElement.setAttribute('data-theme', THEMES[currentThemeIndex]);
+        localStorage.setItem('appThemeIndex', currentThemeIndex);
+        const meta = getComputedStyle(document.documentElement).getPropertyValue('--meta').trim();
+        document.getElementById('metaThemeColor').content = meta;
     }
-    return new RegExp('(' + pattern + ')', 'g');
-  }
-
-  async function loadHadithData() {
-    const urlParams = new URLSearchParams(window.location.search);
-    App.bookId = urlParams.get('book');
-    const targetSectionNum = urlParams.get('section');
-
-    // الشاشة الرئيسية للمكتبة (بدون كتاب محدد)
-    if (!App.bookId) {
-      document.getElementById('book-title').textContent = "المكتبة الحديثية";
-      document.getElementById('main-title').textContent = "اختر كتاباً للقراءة";
-      document.getElementById('bottomNav').style.display = 'none';
-      const si = document.getElementById('search-input');
-      si.disabled = true; si.placeholder = "اختر الكتاب أولاً...";
-
-      const advancedBtn = `
-        <button onclick="window.location.href='/Tasbee7/index.html'" style="width:100%; margin-bottom:18px; background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-radius:16px; padding:15px; font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:var(--card-shadow);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="width:20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            البحث المتقدم في جميع الكتب
-        </button>`;
-      const AVAILABLE_BOOKS = [
-        { id:'bukhari', name:'صحيح البخاري' }, { id:'muslim', name:'صحيح مسلم' },
-        { id:'abudawud', name:'سنن أبي داود' }, { id:'tirmidhi', name:'جامع الترمذي' },
-        { id:'nasai', name:'سنن النسائي' }, { id:'ibnmajah', name:'سنن ابن ماجه' }
-      ];
-      const booksHtml = AVAILABLE_BOOKS.map(b => `
-        <a href="?book=${b.id}" class="card" style="text-align:center; display:block; text-decoration:none;">
-            <div style="font-size:1.55rem; font-weight:bold; color:var(--accent); padding:8px; font-family:'Amiri', serif;">${b.name}</div>
-            <div style="color:var(--text-muted); font-size:.9rem;">تصفح أبواب وأحاديث الكتاب</div>
-        </a>`).join('');
-      document.getElementById('content-area').innerHTML = `<div>${advancedBtn}<div class="cards-container">${booksHtml}</div></div>`;
-      return false;
+    function cycleTheme() {
+        currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+        applyTheme();
     }
-
-    try {
-      let translatedIndex = {};
-      try { const idxRes = await fetch('../assets/hadith/Index-translated.json'); if (idxRes.ok) translatedIndex = await idxRes.json(); } catch(e){}
-
-      App.bookName = translatedIndex[App.bookId] ? translatedIndex[App.bookId].name : App.bookId;
-      document.getElementById('book-title').textContent = App.bookName;
-
-      const bookRes = await fetch(`../assets/hadith/${App.bookId}.json`);
-      if (!bookRes.ok) throw new Error("ملف الكتاب غير موجود");
-      const bookJson = await bookRes.json();
-
-      const sectionsMap = {};
-      const metaSections = translatedIndex[App.bookId] ? translatedIndex[App.bookId].sections : (bookJson.metadata && bookJson.metadata.sections || {});
-      for (let key in metaSections) {
-        const title = metaSections[key];
-        if (typeof title === 'string' && title.trim() !== "") sectionsMap[key] = { title, sectionNumber:key, items:[] };
-      }
-      if (!sectionsMap["0"]) sectionsMap["0"] = { title:"مقدمة / أبواب أخرى", sectionNumber:"0", items:[] };
-
-      (bookJson.hadiths || []).forEach(h => {
-        const secNum = (h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0";
-        if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:`باب ${secNum}`, sectionNumber:secNum, items:[] };
-        const gradeInfo = getHadithGrade(App.bookId, h.grades);
-        sectionsMap[secNum].items.push({ ar:h.text, number:h.hadithnumber || h.arabicnumber, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
-      });
-
-      App.data = Object.values(sectionsMap).filter(sec => sec.items.length > 0);
-      App.data.sort((a,b) => {
-        const nA = parseInt(a.sectionNumber), nB = parseInt(b.sectionNumber);
-        if (nA === 0 && nB !== 0) return 1;
-        if (nB === 0 && nA !== 0) return -1;
-        return nA - nB;
-      });
-
-      if (targetSectionNum) {
-        const idx = App.data.findIndex(s => s.sectionNumber === targetSectionNum);
-        if (idx !== -1) App.currentIdx = idx;
-      }
-      return true;
-    } catch (err) {
-      document.getElementById('content-area').innerHTML = `<div class="empty-note"><span class="icn">❌</span>خطأ في تحميل الكتاب: ${err.message}<br>تأكد من وجود مجلد <b>hadith</b> وملفاته.</div>`;
-      return false;
-    }
-  }
-
-  function buildMenuAndSearchIndex() {
-    const menuList = document.getElementById('menuList');
-    menuList.innerHTML = ''; App.searchIndex = [];
-    App.data.forEach((sec, sIdx) => {
-      const btn = document.createElement('div');
-      btn.className = 'menu-item';
-      btn.innerHTML = `<span>${sec.title}</span><span class="count">${sec.items.length} حديث</span>`;
-      btn.onclick = () => selectSection(sIdx);
-      menuList.appendChild(btn);
-      sec.items.forEach((item, iIdx) => {
-        App.searchIndex.push({ sIdx, iIdx, title:sec.title, ar:item.ar, norm:normalizeText(item.ar), number:item.number, gradeText:item.gradeText, isOk:item.isOk });
-      });
-    });
-  }
-
-  function render() {
-    if (App.isSearchMode || App.data.length === 0) return;
-    const sec = App.data[App.currentIdx];
-    if (!sec) return;
-    document.getElementById('main-title').textContent = sec.title;
-    document.getElementById('customSelectBtn').textContent = sec.title;
-
-    const html = sec.items.map((item, i) => {
-      const badgeClass = item.isOk ? "badge-ok" : "badge-warn";
-      const textToCopy = encodeURIComponent(`${item.ar}\n\n[الكتاب: ${App.bookName} (${sec.title})\nرقم الحديث: ${item.number} | الحكم: ${item.gradeText}]`);
-      const saved = isBookmarked(App.currentIdx, i);
-      return `
-      <div class="card hadith-card ${item.isOk ? '' : 'warn'}" data-item="${i}">
-        <div class="card-arabic">${item.ar}</div>
-        <div class="card-ref">
-          <span>رقم: <b>${item.number}</b> &nbsp;<span class="${badgeClass}">${item.gradeText}</span></span>
-          <div class="card-actions">
-            <button class="card-btn" onclick="copyText(decodeURIComponent('${textToCopy}'))" title="نسخ الحديث">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </button>
-            <button class="card-btn ${saved ? 'active' : ''}" onclick="toggleBookmark(${App.currentIdx}, ${i})" title="حفظ الحديث">${saved ? '★' : '☆'}</button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-    document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
-    window.scrollTo(0, 0);
-  }
-
-  let searchDebounceTimer;
-  function handleSearch() {
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(() => {
-      const rawInput = document.getElementById('search-input').value.trim();
-      const query = normalizeText(rawInput);
-      if (!query || query.length < 3) { if (App.isSearchMode) { App.isSearchMode = false; render(); } return; }
-
-      App.isSearchMode = true;
-      document.getElementById('customSelectBtn').textContent = "نتائج البحث";
-      const results = App.searchIndex.filter(x => x.norm.includes(query)).slice(0, 50);
-      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
-
-      if (results.length === 0) {
-        document.getElementById('content-area').innerHTML = '<div class="empty-note"><span class="icn">🔍</span>لا توجد نتائج مطابقة في هذا الكتاب.</div>';
-        return;
-      }
-      let hre; try { hre = buildHighlightRegex(rawInput); } catch(e) { hre = null; }
-      document.getElementById('content-area').innerHTML = `<div class="cards-container">` + results.map(r => {
-        let text = r.ar;
-        if (hre) { try { text = r.ar.replace(hre, '<mark>$1</mark>'); } catch(e){} }
-        const badgeClass = r.isOk ? "badge-ok" : "badge-warn";
-        return `
-        <div class="card hadith-card ${r.isOk ? '' : 'warn'}" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer;">
-          <div style="font-size:.85rem; color:var(--gold); font-weight:bold; margin-bottom:8px;">${r.title}</div>
-          <div class="card-arabic" style="font-size:1.45rem; margin-bottom:10px;">${text}</div>
-          <div class="card-ref"><span>رقم: <b>${r.number}</b> &nbsp;<span class="${badgeClass}">${r.gradeText}</span></span></div>
-        </div>`;
-      }).join('') + `</div>`;
-    }, 350);
-  }
-
-  function jumpTo(sIdx, iIdx) {
-    App.currentIdx = sIdx; App.isSearchMode = false;
-    document.getElementById('search-input').value = '';
-    render();
-    setTimeout(() => {
-      const el = document.querySelector(`.card[data-item="${iIdx}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior:'smooth', block:'center' });
-        el.style.transition = 'background-color .3s';
-        el.style.backgroundColor = 'var(--accent-bg)';
-        setTimeout(() => { el.style.backgroundColor = ''; }, 2000);
-      }
-    }, 300);
-  }
-
-  function selectSection(idx) { App.currentIdx = idx; App.isSearchMode = false; closeMenu(); document.getElementById('search-input').value = ''; render(); }
-  function nav(dir) {
-    if (dir === 'next' && App.currentIdx < App.data.length-1) App.currentIdx++;
-    if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
-    App.isSearchMode = false; render();
-  }
-
-  function openMenu() {
-    const items = document.querySelectorAll('#menuList .menu-item');
-    items.forEach((item, idx) => {
-      const active = (idx === App.currentIdx && !App.isSearchMode);
-      item.classList.toggle('active-item', active);
-      if (active) setTimeout(() => item.scrollIntoView({ block:'center' }), 10);
-    });
-    document.getElementById('menuModal').classList.add('active');
-  }
-  function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
-
-  function showBookmarks() {
-    const bmList = document.getElementById('bookmarkList');
-    bmList.innerHTML = '';
-    if (App.bookmarks.length === 0) {
-      bmList.innerHTML = '<div class="empty-note"><span class="icn">☆</span>لا توجد أحاديث محفوظة في هذا الكتاب بعد.</div>';
-    } else {
-      App.bookmarks.forEach((bm) => {
-        const sec = App.data[bm.sectionIdx];
-        if (sec && sec.items[bm.itemIdx]) {
-          const item = sec.items[bm.itemIdx];
-          const div = document.createElement('div');
-          div.className = 'menu-item'; div.style.flexDirection = 'column'; div.style.alignItems = 'flex-start';
-          div.innerHTML = `<div style="font-weight:bold;color:var(--gold);">${sec.title}</div>
-            <div style="font-size:1.15rem; margin-top:6px; font-family:'Amiri','Scheherazade',serif;">${item.ar.substring(0, 90)}…</div>
-            <div style="font-size:.8rem; color:var(--text-muted); margin-top:5px;">رقم: ${item.number}</div>`;
-          div.onclick = () => { closeBookmarkModal(); jumpTo(bm.sectionIdx, bm.itemIdx); };
-          bmList.appendChild(div);
-        }
-      });
-    }
-    document.getElementById('bookmarkModal').classList.add('active');
-  }
-  function closeBookmarkModal() { document.getElementById('bookmarkModal').classList.remove('active'); }
-
-  // ================= التمرير =================
-  let scrollTimer;
-  function getScrollKey() { return `hadith_scrollPos_${App.bookId}`; }
-  window.addEventListener('scroll', () => {
-    const btn = document.getElementById('scrollTopBtn');
-    btn.classList.toggle('visible', window.scrollY > 300);
-    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    document.getElementById("scroll-progress").style.width = (height > 0 ? (winScroll / height) * 100 : 0) + "%";
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => { if (App.bookId && !App.isSearchMode) localStorage.setItem(getScrollKey(), window.scrollY); }, 500);
-  }, { passive:true });
-
-  function toggleReadingMode() {
-    document.body.classList.toggle('reading-mode');
-    localStorage.setItem('readingMode', document.body.classList.contains('reading-mode'));
-  }
-
-  async function init() {
     applyTheme();
-    if (localStorage.getItem('readingMode') === 'true') document.body.classList.add('reading-mode');
 
-    const isBookLoaded = await loadHadithData();
-    if (isBookLoaded && App.data.length > 0) {
-      loadBookmarks();
-      buildMenuAndSearchIndex();
-      const lastSecKey = `hadith_lastSection_${App.bookId}`;
-      const urlParams = new URLSearchParams(window.location.search);
-      const lastSection = localStorage.getItem(lastSecKey);
-      if (!urlParams.get('section') && lastSection && !isNaN(parseInt(lastSection)) && parseInt(lastSection) < App.data.length) {
-        App.currentIdx = parseInt(lastSection);
-      }
-      render();
-      const savedPos = localStorage.getItem(getScrollKey());
-      if (savedPos) setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 150);
+    // ===================== الكتب =====================
+    const BOOKS_INFO = [
+        { id: 'bukhari',  name: 'صحيح البخاري' },
+        { id: 'muslim',   name: 'صحيح مسلم' },
+        { id: 'abudawud', name: 'سنن أبي داود' },
+        { id: 'tirmidhi', name: 'جامع الترمذي' },
+        { id: 'nasai',    name: 'سنن النسائي' },
+        { id: 'ibnmajah', name: 'سنن ابن ماجه' }
+    ];
 
-      const origNav = nav, origSelect = selectSection;
-      window.nav = (dir) => { origNav(dir); localStorage.setItem(lastSecKey, App.currentIdx); };
-      window.selectSection = (idx) => { origSelect(idx); localStorage.setItem(lastSecKey, App.currentIdx); };
+    let localDatabase = [];
+    let currentSearchResults = [];
+    let currentRenderIndex = 0;
+    const CHUNK_SIZE = 20;
+    let scrollObserver = null;
+
+    // ===================== التطبيع (يُعرَّف مبكراً ليُستخدم عند التحميل) =====================
+    const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
+    const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
+
+    function normalizeText(text) {
+        return (text || "")
+            .replace(TASHKEEL_REGEX, '')
+            .replace(/[أإآ]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/ـ/g, '');   // إزالة التطويل (الكشيدة)
+    }
+    function escapeRegex(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    function buildRegex(query) {
+        let clean = normalizeText(query), pattern = "";
+        for (let char of clean) {
+            if (/[اأإآ]/.test(char)) pattern += "[أإآا]";
+            else if (/[ةه]/.test(char)) pattern += "[ةه]";
+            else if (/[ىي]/.test(char)) pattern += "[ىي]";
+            else if (char === ' ') pattern += "\\s+";
+            else pattern += escapeRegex(char);
+            if (char !== ' ') pattern += "[" + TASHKEEL_STR + "]*";
+        }
+        return new RegExp('(' + pattern + ')', 'g');
     }
 
-    document.getElementById('search-input').addEventListener('input', handleSearch);
-    document.getElementById('readingModeBtn').addEventListener('click', toggleReadingMode);
-    document.getElementById('bookmarkListBtn').addEventListener('click', showBookmarks);
-  }
+    // ===================== تحميل قاعدة البيانات =====================
+    async function loadBooks() {
+        const status = document.getElementById('dbStatus');
+        renderBookFilters();
+        renderModalBooks();
+        renderHistory();
 
-  // تمرير اللمس: لا نتنقل إلا عند سحب أفقي واضح (يمنع التنقل العرضي أثناء التمرير الرأسي)
-  let touchX = 0, touchY = 0;
-  document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].screenX; touchY = e.changedTouches[0].screenY; }, { passive:true });
-  document.addEventListener('touchend', e => {
-    const dx = touchX - e.changedTouches[0].screenX;
-    const dy = touchY - e.changedTouches[0].screenY;
-    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.8 && !App.isSearchMode) {
-      dx > 0 ? nav('prev') : nav('next');
+        try {
+            let translatedIndex = {};
+            try {
+                const indexRes = await fetch('hadith/Index-translated.json');
+                if (indexRes.ok) translatedIndex = await indexRes.json();
+            } catch (e) { console.log("ملف الفهرس المترجم غير متوفر"); }
+
+            const fetchPromises = BOOKS_INFO.map(book =>
+                fetch(`hadith/${book.id}.json`)
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => ({ id: book.id, name: book.name, data }))
+                    .catch(() => ({ id: book.id, name: book.name, data: null }))
+            );
+
+            const results = await Promise.all(fetchPromises);
+            let loadedBooks = 0, failedBooks = [];
+
+            results.forEach(res => {
+                if (res && res.data && res.data.hadiths) {
+                    loadedBooks++;
+                    res.data.hadiths.forEach(h => {
+                        let sectionName = "", sectionNumber = "";
+                        if (h.reference && h.reference.book !== undefined) {
+                            sectionNumber = h.reference.book.toString();
+                            if (translatedIndex[res.id] && translatedIndex[res.id].sections) {
+                                sectionName = translatedIndex[res.id].sections[sectionNumber] || "";
+                            }
+                        }
+                        localDatabase.push({
+                            bookId: res.id,
+                            bookName: res.name,
+                            sectionName,
+                            sectionNumber,
+                            text: h.text,
+                            normalized: normalizeText(h.text), // ⚡ تطبيع مسبق لتسريع البحث
+                            number: h.hadithnumber || h.arabicnumber,
+                            grades: h.grades || []
+                        });
+                    });
+                } else {
+                    failedBooks.push(res.name);
+                }
+            });
+
+            if (localDatabase.length > 0) {
+                let msg = `✅ تم تحميل ${localDatabase.length.toLocaleString('ar-EG')} حديث`;
+                if (failedBooks.length) msg += ` (تعذّر تحميل: ${failedBooks.join('، ')})`;
+                status.innerHTML = msg;
+                status.style.color = 'var(--primary)';
+                document.getElementById('searchInput').disabled = false;
+                fetchRandomHadith();
+                setTimeout(() => { status.style.opacity = '0'; setTimeout(() => status.style.display = 'none', 400); }, 3500);
+            } else {
+                throw new Error("لم يتم العثور على أحاديث");
+            }
+        } catch (error) {
+            status.innerHTML = `❌ تأكد من وجود مجلد <b>hadith</b> وملفات JSON بداخله`;
+            status.style.color = 'var(--danger)';
+            document.getElementById('dailyHadithText').innerHTML = "تعذّر تحميل قاعدة البيانات.";
+        }
     }
-  }, { passive:true });
 
-  init();
+    // ===================== سجل البحث =====================
+    let searchHistory = [];
+    try { searchHistory = JSON.parse(localStorage.getItem('hadithHistory')) || []; } catch (e) { searchHistory = []; }
+
+    function renderHistory() {
+        const container = document.getElementById('historyTags');
+        container.innerHTML = '';
+        if (!searchHistory.length) return;
+
+        searchHistory.forEach(term => {
+            const tag = document.createElement('span');
+            tag.className = 'history-tag';
+            tag.textContent = term;
+            tag.onclick = () => {
+                const input = document.getElementById('searchInput');
+                input.value = term;
+                document.getElementById('clearInputBtn').style.display = 'flex';
+                initiateSearch();
+            };
+            container.appendChild(tag);
+        });
+
+        const clearBtn = document.createElement('span');
+        clearBtn.className = 'clear-history-btn';
+        clearBtn.textContent = '✕ مسح السجل';
+        clearBtn.onclick = clearHistory;
+        container.appendChild(clearBtn);
+    }
+    function saveToHistory(term) {
+        if (!term || term.length < 3) return;
+        searchHistory = searchHistory.filter(t => t !== term);
+        searchHistory.unshift(term);
+        if (searchHistory.length > 6) searchHistory.pop();
+        localStorage.setItem('hadithHistory', JSON.stringify(searchHistory));
+        renderHistory();
+    }
+    function clearHistory() {
+        searchHistory = [];
+        localStorage.removeItem('hadithHistory');
+        renderHistory();
+        showToast("🧹 تم مسح سجل البحث");
+    }
+
+    // ===================== واجهة المستخدم =====================
+    function renderBookFilters() {
+        const container = document.getElementById('booksFilter');
+        BOOKS_INFO.forEach(book => {
+            const label = document.createElement('label');
+            label.className = 'book-label';
+            label.innerHTML = `<input type="checkbox" value="${book.id}" checked onchange="initiateSearch()"> ${book.name}`;
+            container.appendChild(label);
+        });
+    }
+    function renderModalBooks() {
+        const container = document.getElementById('modalBooksContainer');
+        BOOKS_INFO.forEach(book => {
+            const link = document.createElement('a');
+            link.href = `hadith-viewer.html?book=${book.id}`;
+            link.className = 'book-link-btn';
+            link.innerHTML = `<span>${book.name}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+            container.appendChild(link);
+        });
+    }
+    function toggleModal(show) {
+        document.getElementById('booksModal').classList.toggle('active', show);
+    }
+
+    function downloadDatabase() {
+        if (localDatabase.length === 0) { showToast("⚠️ جاري تحميل القاعدة، يرجى الانتظار..."); return; }
+        showToast("⏳ جاري التجهيز...");
+        // لا نُصدّر الحقل المطبّع المؤقت
+        const exportData = localDatabase.map(({ normalized, ...rest }) => rest);
+        const blob = new Blob([JSON.stringify(exportData)], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'Zad_AlMuslim_DB.json';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); showToast("✅ تم التحميل"); }, 100);
+    }
+
+    // نسخ موثوق يعمل أونلاين وأوفلاين (file:// / Capacitor)
+    function copyToClipboard(encodedText) {
+        const text = decodeURIComponent(encodedText);
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => showToast("✅ تم النسخ بنجاح")).catch(() => fallbackCopy(text));
+        } else {
+            fallbackCopy(text);
+        }
+    }
+    function fallbackCopy(text) {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.focus(); ta.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast(ok ? "✅ تم النسخ بنجاح" : "❌ تعذّر النسخ");
+        } catch (e) { showToast("❌ تعذّر النسخ"); }
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ===================== الحكم على الحديث =====================
+    function getHadithGrade(bookId, grades) {
+        if (bookId === 'bukhari' || bookId === 'muslim') return { text: 'صحيح', isOk: true };
+        if (!grades || grades.length === 0) return { text: 'غير محدد', isOk: true };
+        const albani = grades.find(g => (g && g.name || '').toLowerCase().includes('albani'));
+        const raw = (((albani ? albani.grade : grades[0].grade) || '') + '').toLowerCase();
+        const isOk = !raw.includes('daif') && !raw.includes("da'if") && !raw.includes('mawdu');
+        let arGrade = raw || 'غير محدد';
+        if (raw.includes('sahih')) arGrade = 'صحيح';
+        else if (raw.includes('hasan')) arGrade = 'حسن';
+        else if (raw.includes('daif') || raw.includes("da'if")) arGrade = 'ضعيف';
+        else if (raw.includes('mawdu')) arGrade = 'موضوع';
+        return { text: arGrade, isOk };
+    }
+
+    // ===================== الحديث المميز =====================
+    function buildCardActions(textToCopy, link) {
+        const copyBtn = `<button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="نسخ الحديث">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>`;
+        const viewBtn = link ? `<a href="${link}" class="card-action-btn" title="عرض في الكتاب">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        </a>` : '';
+        return `<div class="card-actions">${copyBtn}${viewBtn}</div>`;
+    }
+
+    async function fetchRandomHadith() {
+        try {
+            const res = await fetch('hadith/rand-hadith.json');
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    const random = data[Math.floor(Math.random() * data.length)];
+                    const text = random.hadith || random.text || "";
+                    const source = random.source || random.bookName || "";
+                    const grade = random.grade || (random.grades ? getHadithGrade('', random.grades).text : "");
+                    const textToCopy = encodeURIComponent(`${text}\n\n[${source} - ${grade}]`);
+                    document.getElementById('dailyHadithText').innerHTML = `
+                        ${text}
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;">
+                            <span class="daily-meta">${source}${grade ? ' • ' + grade : ''}</span>
+                            ${buildCardActions(textToCopy, null)}
+                        </div>`;
+                    return;
+                }
+            }
+        } catch (e) {
+            console.log("rand-hadith.json غير متوفر، سيتم استخدام القاعدة المحلية.");
+        }
+        setDynamicHadith();
+    }
+    function setDynamicHadith() {
+        if (!localDatabase.length) return;
+        const pool = localDatabase.filter(h => h.text.length <= 300 && getHadithGrade(h.bookId, h.grades).isOk);
+        const source = pool.length ? pool : localDatabase;
+        const random = source[Math.floor(Math.random() * source.length)];
+        const gradeInfo = getHadithGrade(random.bookId, random.grades);
+        const sectionText = random.sectionName ? ` (${random.sectionName})` : '';
+        const link = random.sectionNumber ? `hadith-viewer.html?book=${random.bookId}&section=${random.sectionNumber}` : null;
+        const textToCopy = encodeURIComponent(`${random.text}\n\n[${random.bookName}${sectionText} - رقم ${random.number} - ${gradeInfo.text}]`);
+        document.getElementById('dailyHadithText').innerHTML = `
+            ${random.text}
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;">
+                <span class="daily-meta">${random.bookName}${sectionText} • ${gradeInfo.text}</span>
+                ${buildCardActions(textToCopy, link)}
+            </div>`;
+    }
+
+    // ===================== محرّك البحث =====================
+    let typingTimer;
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', () => {
+        document.getElementById('clearInputBtn').style.display = searchInput.value ? 'flex' : 'none';
+        clearTimeout(typingTimer);
+        if (searchInput.value.trim().length >= 3) typingTimer = setTimeout(initiateSearch, 450);
+    });
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchInput.blur();
+            const query = searchInput.value.trim();
+            if (query.length >= 3) { saveToHistory(query); initiateSearch(); }
+        }
+    });
+
+    function clearSearchField() {
+        searchInput.value = '';
+        document.getElementById('clearInputBtn').style.display = 'none';
+        document.getElementById('resultsContainer').innerHTML = '';
+        document.getElementById('resultsSummary').style.display = 'none';
+        document.getElementById('scrollTrigger').style.display = 'none';
+        searchInput.focus();
+    }
+
+    function initiateSearch() {
+        const query = searchInput.value.trim();
+        if (query.length < 3) return;
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('resultsContainer').innerHTML = '';
+        document.getElementById('resultsSummary').style.display = 'none';
+        setTimeout(() => performSearchEngine(query), 30);
+    }
+
+    function performSearchEngine(query) {
+        const isStrict = document.getElementById('strictTashkeel').checked;
+        const normQuery = normalizeText(query);
+        const selected = new Set(Array.from(document.querySelectorAll('#booksFilter input:checked')).map(cb => cb.value));
+
+        // ⚡ يعتمد على الحقل المطبّع المحسوب مسبقاً: يُصلح عطل البحث الافتراضي ويسرّعه
+        currentSearchResults = localDatabase.filter(item => {
+            if (!selected.has(item.bookId)) return false;
+            return isStrict ? item.text.includes(query) : item.normalized.includes(normQuery);
+        });
+
+        document.getElementById('loader').style.display = 'none';
+        currentRenderIndex = 0;
+
+        const container = document.getElementById('resultsContainer');
+        if (currentSearchResults.length === 0) {
+            container.innerHTML = `<div class="empty-state"><span class="icn">🔍</span>لا توجد نتائج مطابقة لبحثك.<br>جرّب كلمات أقل أو ألغِ مطابقة التشكيل.</div>`;
+            document.getElementById('scrollTrigger').style.display = 'none';
+            return;
+        }
+
+        let okCount = 0, warnCount = 0;
+        currentSearchResults.forEach(h => getHadithGrade(h.bookId, h.grades).isOk ? okCount++ : warnCount++);
+        const summary = document.getElementById('resultsSummary');
+        summary.style.display = 'block';
+        summary.innerHTML = `عُثر على <b>${currentSearchResults.length.toLocaleString('ar-EG')}</b> نتيجة<br>
+            <span class="summary-ok">${okCount.toLocaleString('ar-EG')} مقبول</span> • <span class="summary-warn">${warnCount.toLocaleString('ar-EG')} ضعيف/مردود</span>`;
+
+        renderNextChunk();
+        setupIntersectionObserver();
+    }
+
+    function renderNextChunk() {
+        const container = document.getElementById('resultsContainer');
+        const fragment = document.createDocumentFragment();
+        const end = Math.min(currentRenderIndex + CHUNK_SIZE, currentSearchResults.length);
+        const query = searchInput.value.trim();
+        const highlightRegex = document.getElementById('strictTashkeel').checked
+            ? new RegExp('(' + escapeRegex(query) + ')', 'g')
+            : buildRegex(query);
+
+        for (let i = currentRenderIndex; i < end; i++) {
+            const hadith = currentSearchResults[i];
+            const gradeInfo = getHadithGrade(hadith.bookId, hadith.grades);
+            const badgeClass = gradeInfo.isOk ? "badge-ok" : "badge-warn";
+            let highlightedText = hadith.text;
+            try { highlightedText = hadith.text.replace(highlightRegex, '<span class="search-highlight">$1</span>'); } catch (e) {}
+            const sectionDisplay = hadith.sectionName ? ` (${hadith.sectionName})` : '';
+            const link = hadith.sectionNumber ? `hadith-viewer.html?book=${hadith.bookId}&section=${hadith.sectionNumber}` : null;
+            const textToCopy = encodeURIComponent(`${hadith.text}\n\nالكتاب: ${hadith.bookName}${sectionDisplay}\nرقم الحديث: ${hadith.number}\nالحكم: ${gradeInfo.text}`);
+
+            const card = document.createElement('div');
+            card.className = 'hadith-item' + (gradeInfo.isOk ? '' : ' warn');
+            card.style.animationDelay = ((i - currentRenderIndex) * 0.04) + 's';
+            card.innerHTML = `
+                <div class="hadith-head">
+                    <span class="${badgeClass}">${gradeInfo.text}</span>
+                    ${buildCardActions(textToCopy, link)}
+                </div>
+                <div class="hadith-text">${highlightedText}</div>
+                <div class="hadith-meta"><b>الكتاب:</b> ${hadith.bookName}${sectionDisplay} &nbsp;|&nbsp; <b>رقم الحديث:</b> ${hadith.number}</div>`;
+            fragment.appendChild(card);
+        }
+        container.appendChild(fragment);
+        currentRenderIndex = end;
+        document.getElementById('scrollTrigger').style.display = (currentRenderIndex < currentSearchResults.length) ? 'block' : 'none';
+    }
+
+    function setupIntersectionObserver() {
+        if (scrollObserver) scrollObserver.disconnect();
+        const trigger = document.getElementById('scrollTrigger');
+        scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && currentRenderIndex < currentSearchResults.length) renderNextChunk();
+        }, { rootMargin: '200px' });
+        scrollObserver.observe(trigger);
+    }
+
+    window.onload = loadBooks;
 </script>
 </body>
 </html>
