@@ -399,12 +399,12 @@
 
     try {
       let translatedIndex = {};
-      try { const idxRes = await fetch('hadith/Index-translated.json'); if (idxRes.ok) translatedIndex = await idxRes.json(); } catch(e){}
+      try { const idxRes = await fetch('../assets/hadith/Index-translated.json'); if (idxRes.ok) translatedIndex = await idxRes.json(); } catch(e){}
 
       App.bookName = translatedIndex[App.bookId] ? translatedIndex[App.bookId].name : App.bookId;
       document.getElementById('book-title').textContent = App.bookName;
 
-      const bookRes = await fetch(`hadith/${App.bookId}.json`);
+      const bookRes = await fetch(`../assets/hadith/${App.bookId}.json`);
       if (!bookRes.ok) throw new Error("ملف الكتاب غير موجود");
       const bookJson = await bookRes.json();
 
