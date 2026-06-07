@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>التكرار | زاد المسلم</title>
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a1a14; --bg2:#061210;
+  --surface:rgba(255,255,255,.04); --surface2:rgba(255,255,255,.07);
+  --border:rgba(16,185,129,.15); --border2:rgba(16,185,129,.28);
+  --text:#e8f5f0; --muted:#6b9a88; --accent:#10b981; --accent-deep:#059669;
+  --gold:#e6c068; --gold-soft:rgba(230,192,104,.12);
+  --danger:#ef4444; --danger-soft:rgba(239,68,68,.12);
+  --shadow:0 12px 40px -12px rgba(0,0,0,.5);
+  --radius:20px;
+}
+[data-theme="light"] {
+  --bg:#f4f8f6; --bg2:#e8efe9;
+  --surface:rgba(255,255,255,.75); --surface2:rgba(255,255,255,.55);
+  --border:rgba(16,185,129,.18); --border2:rgba(16,185,129,.35);
+  --text:#0f2922; --muted:#5a7a6a; --accent:#0f7a52; --accent-deep:#0a5c3d;
+  --gold:#8a6b1c; --gold-soft:rgba(138,107,28,.1);
+  --shadow:0 12px 40px -12px rgba(60,50,20,.15);
+}
+[data-theme="sepia"] {
+  --bg:#1a1610; --bg2:#12100c;
+  --surface:rgba(255,255,255,.05); --surface2:rgba(255,255,255,.08);
+  --border:rgba(200,160,80,.18); --border2:rgba(200,160,80,.3);
+  --text:#f0e8d8; --muted:#8a7a60; --accent:#c8a030; --accent-deep:#a88020;
+  --gold:#e6c068; --gold-soft:rgba(230,192,104,.12);
+  --shadow:0 12px 40px -12px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+
+body{
+  font-family:'Tajawal',sans-serif; background:var(--bg);
+  color:var(--text); min-height:100dvh; overflow-x:hidden;
+  display:flex; justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) 16px max(100px,env(safe-area-inset-bottom));
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 0%, rgba(16,185,129,.08), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(230,192,104,.05), transparent);
+}
+
+.app{width:100%; max-width:480px; display:flex; flex-direction:column; gap:14px; position:relative; z-index:1;}
+
+/* Header */
+.header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; border-radius:var(--radius);
+  background:var(--surface); border:1px solid var(--border);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+}
+.header-title{font-size:18px; font-weight:800;}
+.header-sub{font-size:11px; color:var(--accent); font-weight:700; letter-spacing:1px;}
+.icon-btn{
+  width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:.15s; font-size:18px;
+}
+.icon-btn:active{transform:scale(.9); background:var(--accent-deep); color:#fff;}
+
+/* Card */
+.card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px; display:flex; flex-direction:column; gap:10px;
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+}
+.card-label{font-size:12px; font-weight:700; color:var(--accent); letter-spacing:.5px; margin-bottom:2px;}
+
+/* Picker Button */
+.picker-btn{
+  width:100%; padding:14px 16px; border-radius:14px;
+  border:1px solid var(--border); background:var(--surface2);
+  color:var(--text); font-size:15px; font-family:inherit; font-weight:600;
+  cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+  transition:.15s; text-align:right;
+}
+.picker-btn:active{transform:scale(.98); border-color:var(--accent);}
+.picker-btn .arrow{font-size:11px; opacity:.5; transition:.2s;}
+.picker-btn.has-value{border-color:var(--accent); color:var(--accent);}
+
+/* Range Row */
+.range-row{display:flex; gap:10px; align-items:center;}
+.range-row .picker-btn{flex:1;}
+
+/* Speed / Repeat Controls */
+.stepper{display:flex; align-items:center; gap:12px; justify-content:center;}
+.stepper-btn{
+  width:42px; height:42px; border-radius:50%; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text); font-size:22px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:.15s;
+}
+.stepper-btn:active{transform:scale(.88); background:var(--accent-deep); color:#fff;}
+.stepper-value{
+  font-size:28px; font-weight:800; min-width:60px; text-align:center;
+  font-variant-numeric:tabular-nums; direction:ltr;
+}
+.stepper-label{font-size:12px; color:var(--muted); text-align:center; margin-top:-4px;}
+
+/* Speed Presets */
+.speed-presets{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
+.speed-preset{
+  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700;
+  border:1px solid var(--border); background:var(--surface2); color:var(--muted);
+  cursor:pointer; transition:.15s;
+}
+.speed-preset:active{transform:scale(.92);}
+.speed-preset.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+/* Play Button */
+.play-section{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:6px;}
+.play-btn{
+  width:72px; height:72px; border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color:#fff; border:none; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; box-shadow:0 8px 30px rgba(16,185,129,.35);
+  transition:.2s; position:relative;
+}
+.play-btn:active{transform:scale(.92);}
+.play-btn svg{width:30px; height:30px; fill:currentColor;}
+.play-btn.playing{background:linear-gradient(135deg, var(--danger), #dc2626); box-shadow:0 8px 30px rgba(239,68,68,.35);}
+
+/* Progress */
+.progress-area{width:100%; display:none; flex-direction:column; gap:6px;}
+.progress-area.visible{display:flex;}
+.progress-track{
+  width:100%; height:6px; background:var(--surface2); border-radius:3px;
+  overflow:hidden; direction:ltr; position:relative; cursor:pointer;
+}
+.progress-fill{height:100%; background:var(--accent); border-radius:3px; transition:width .3s linear; width:0%;}
+.progress-info{display:flex; justify-content:space-between; font-size:11px; color:var(--muted); direction:ltr; font-variant-numeric:tabular-nums;}
+
+/* Status Badge */
+.status-badge{
+  display:inline-flex; align-items:center; gap:6px; padding:6px 14px;
+  border-radius:20px; font-size:12px; font-weight:700;
+  background:var(--gold-soft); color:var(--gold); border:1px solid rgba(230,192,104,.2);
+}
+.status-badge.active{background:var(--accent-deep); color:#fff; border-color:var(--accent);}
+.status-badge .dot{width:6px; height:6px; border-radius:50%; background:currentColor; animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* Toast */
+.toast{
+  position:fixed; top:20px; left:50%; transform:translate(-50%,-100px);
+  background:var(--accent-deep); color:#fff; padding:12px 24px; border-radius:40px;
+  font-weight:700; font-size:14px; z-index:10000; transition:.4s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 8px 24px rgba(0,0,0,.3); white-space:nowrap;
+}
+.toast.show{transform:translate(-50%,0);}
+
+/* Bottom Sheet */
+.sheet-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
+  z-index:9998; opacity:0; pointer-events:none; transition:.3s;
+}
+.sheet-overlay.active{opacity:1; pointer-events:all;}
+.sheet{
+  position:fixed; bottom:0; left:0; right:0; max-height:75vh;
+  background:var(--bg); border-top:1px solid var(--border);
+  border-radius:24px 24px 0 0; z-index:10000;
+  transform:translateY(100%); transition:.35s cubic-bezier(.22,1,.36,1);
+  display:flex; flex-direction:column; box-shadow:0 -10px 40px rgba(0,0,0,.3);
+}
+.sheet.active{transform:translateY(0);}
+.sheet-grip{width:40px; height:4px; background:var(--border2); border-radius:4px; margin:10px auto 0;}
+.sheet-head{display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid var(--border);}
+.sheet-head h3{font-size:16px; font-weight:800;}
+.sheet-close{
+  width:32px; height:32px; border-radius:50%; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.sheet-body{flex:1; overflow-y:auto; padding:12px 20px 24px; display:flex; flex-direction:column; gap:8px;}
+.sheet-search{
+  width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text); font-family:inherit; font-size:14px;
+  outline:none; margin-bottom:4px;
+}
+.sheet-search:focus{border-color:var(--accent);}
+.sheet-item{
+  padding:14px; border-radius:14px; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); font-size:14px; font-weight:600; cursor:pointer; transition:.15s;
+  text-align:right;
+}
+.sheet-item:active{transform:scale(.97); background:var(--accent-deep); color:#fff;}
+.sheet-item.selected{border-color:var(--accent); background:rgba(16,185,129,.1); color:var(--accent);}
+.sheet-item .sub{font-size:11px; color:var(--muted); font-weight:400; margin-top:2px;}
+
+/* Ayah picker grid */
+.ayah-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px;}
+.ayah-cell{
+  padding:10px 4px; border-radius:10px; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); font-size:13px; font-weight:600; cursor:pointer; text-align:center; transition:.12s;
+}
+.ayah-cell:active{transform:scale(.9);}
+.ayah-cell.selected{background:var(--accent); color:#fff; border-color:var(--accent);}
+.ayah-cell.in-range{background:rgba(16,185,129,.15); border-color:var(--accent);}
+
+/* Repeat counter display */
+.repeat-display{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:8px 16px; border-radius:12px; background:var(--gold-soft);
+  font-size:13px; font-weight:700; color:var(--gold); margin-top:4px;
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+
+<!-- Reciter Sheet -->
+<div class="sheet" id="reciterSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-head"><h3>اختر القارئ</h3><button class="sheet-close" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-body" id="reciterList"></div>
+</div>
+
+<!-- Surah Sheet -->
+<div class="sheet" id="surahSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-head"><h3>اختر السورة</h3><button class="sheet-close" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-body">
+    <input type="text" class="sheet-search" id="surahSearch" placeholder="ابحث عن سورة..." oninput="filterSurahs()">
+    <div id="surahList"></div>
+  </div>
+</div>
+
+<!-- Ayah Range Sheet -->
+<div class="sheet" id="ayahSheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-head"><h3>نطاق الآيات</h3><button class="sheet-close" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-body">
+    <div class="card-label" style="margin-bottom:4px;">من آية</div>
+    <div class="ayah-grid" id="ayahFromGrid"></div>
+    <div style="height:10px;"></div>
+    <div class="card-label" style="margin-bottom:4px;">إلى آية</div>
+    <div class="ayah-grid" id="ayahToGrid"></div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="header-title">التكرار</div>
+      <div class="header-sub">زاد المسلم</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <div class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</div>
+      <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
+    </div>
+  </div>
+
+  <!-- Reciter -->
+  <div class="card">
+    <div class="card-label">القارئ</div>
+    <button class="picker-btn" id="reciterBtn" onclick="openSheet('reciter')">
+      <span>اختر القارئ...</span><span class="arrow">▾</span>
+    </button>
+  </div>
+
+  <!-- Surah -->
+  <div class="card">
+    <div class="card-label">السورة</div>
+    <button class="picker-btn" id="surahBtn" onclick="openSheet('surah')">
+      <span>اختر السورة...</span><span class="arrow">▾</span>
+    </button>
+  </div>
+
+  <!-- Ayah Range -->
+  <div class="card">
+    <div class="card-label">نطاق الآيات</div>
+    <button class="picker-btn" id="ayahBtn" onclick="openSheet('ayah')">
+      <span>اختر بداية ونهاية التلاوة...</span><span class="arrow">▾</span>
+    </button>
+  </div>
+
+  <!-- Repeat Count -->
+  <div class="card">
+    <div class="card-label">عدد التكرار</div>
+    <div class="stepper">
+      <button class="stepper-btn" onclick="adjustRepeat(-1)">−</button>
+      <div>
+        <div class="stepper-value" id="repeatValue">3</div>
+        <div class="stepper-label">مرة</div>
+      </div>
+      <button class="stepper-btn" onclick="adjustRepeat(1)">+</button>
+    </div>
+  </div>
+
+  <!-- Speed -->
+  <div class="card">
+    <div class="card-label">سرعة التلاوة</div>
+    <div class="stepper">
+      <button class="stepper-btn" onclick="adjustSpeed(-0.1)">−</button>
+      <div>
+        <div class="stepper-value" id="speedValue">1.0x</div>
+        <div class="stepper-label">سرعة</div>
+      </div>
+      <button class="stepper-btn" onclick="adjustSpeed(0.1)">+</button>
+    </div>
+    <div class="speed-presets">
+      <button class="speed-preset" onclick="setSpeed(0.5)">0.5x</button>
+      <button class="speed-preset" onclick="setSpeed(0.75)">0.75x</button>
+      <button class="speed-preset active" onclick="setSpeed(1)">1x</button>
+      <button class="speed-preset" onclick="setSpeed(1.25)">1.25x</button>
+      <button class="speed-preset" onclick="setSpeed(1.5)">1.5x</button>
+      <button class="speed-preset" onclick="setSpeed(2)">2x</button>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div style="text-align:center;">
+    <div class="status-badge" id="statusBadge">
+      <span class="dot"></span>
+      <span id="statusText">جاهز للتشغيل</span>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-area" id="progressArea">
+    <div class="progress-track" id="progressTrack" onclick="seekAudio(event)">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-info">
+      <span id="currentTime">0:00</span>
+      <span id="duration">0:00</span>
+    </div>
+  </div>
+
+  <!-- Play -->
+  <div class="play-section">
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">
+      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="stopIcon" viewBox="0 0 24 24" style="display:none;"><path d="M6 6h12v12H6z"/></svg>
+    </button>
+    <div class="repeat-display" id="repeatDisplay" style="display:none;">
+      <span>التكرار:</span>
+      <span id="repeatCounter">1 / 3</span>
+    </div>
+  </div>
+</div>
+
+<audio id="audioPlayer" preload="auto"></audio>
+
+<script>
+// ==================== DATA ====================
+const RECITERS = [
+  { id:'arabassy', name:'عبد الباسط عبد الصمد', folder:'Abdul_Basit_Murattal_192kbps' },
+  { id:'afasy', name:'مشاري العفاسي', folder:'Mishaari_Rashid_Afasy_128kbps' },
+  { id:'shuraym', name:'سعود الشريم', folder:'Saood_ash-Shuraym_128kbps' },
+  { id:'ghamdi', name:'سعد الغامدي', folder:'Saad_Al-Ghamdi_128kbps' },
+  { id:'ajamy', name:'أحمد العجمي', folder:'Ahmad_Ajamy_128kbps_ketaballah.net' },
+  { id:'muaiqly', name:'ماهر المعيقلي', folder:'Maher_AlMuawiqi_128kbps' },
+  { id:'dosary', name:'ياسر الدوسري', folder:'Yasir_Al-Dosari_32kbps' },
+  { id:'minshawi', name:'محمد صديق المنشاوي', folder:'Mohamed_Siddiq_Minshawi_Muallim_128kbps' },
+  { id:'husary', name:'محمود خليل الحصري', folder:'Mahmoud_Khalil_Al-Husary_128kbps' },
+  { id:'sudais', name:'عبد الرحمن السديس', folder:'Abdulrahman_Sudais_192kbps' },
+  { id:'shatiri', name:'عبدالرحمن الشتري', folder:'Abdulrahman_As-Shatri_128kbps' },
+  { id:'bukhatyr', name:'بندر بخاطر', folder:'Bander_Balila_192kbps' },
+  { id:'awlaki', name:'ムスリム (مشاري)' , folder:'Mishary_Rashid_Afasy_192kbps' },
+];
+
+const SURAH_NAMES = [
+  'الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس',
+  'هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه',
+  'الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم',
+  'لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر',
+  'فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق',
+  'الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة',
+  'الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج',
+  'نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس',
+  'التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد',
+  'الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات',
+  'القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر',
+  'المسد','الإخلاص','الفلق','الناس'
+];
+
+// ==================== STATE ====================
+let state = {
+  reciter: null,
+  surah: null,
+  ayahFrom: 1,
+  ayahTo: 1,
+  repeatCount: 3,
+  speed: 1,
+  currentRepeat: 0,
+  isPlaying: false,
+  currentAyah: 1
+};
+
+const audio = document.getElementById('audioPlayer');
+
+// ==================== THEME ====================
+const THEMES = ['dark','light','sepia'];
+let themeIdx = parseInt(localStorage.getItem('appThemeIdx'))||0;
+function applyTheme(){document.documentElement.setAttribute('data-theme',THEMES[themeIdx]);localStorage.setItem('appThemeIdx',themeIdx);}
+function cycleTheme(){themeIdx=(themeIdx+1)%THEMES.length;applyTheme();}
+applyTheme();
+
+// ==================== UTILS ====================
+function pad(n){return String(n).padStart(3,'0');}
+function fmtTime(s){const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ==================== SHEETS ====================
+let currentSheet = null;
+function openSheet(type){
+  currentSheet = type;
+  document.getElementById('sheetOverlay').classList.add('active');
+  if(type==='reciter') renderReciters();
+  else if(type==='surah') renderSurahs();
+  else if(type==='ayah') renderAyahs();
+  document.getElementById(type+'Sheet').classList.add('active');
+}
+function closeSheet(){
+  document.getElementById('sheetOverlay').classList.remove('active');
+  if(currentSheet) document.getElementById(currentSheet+'Sheet').classList.remove('active');
+  currentSheet = null;
+}
+
+// ==================== RECITER ====================
+function renderReciters(){
+  const list = document.getElementById('reciterList');
+  list.innerHTML = RECITERS.map(r => `
+    <div class="sheet-item ${state.reciter&&state.reciter.id===r.id?'selected':''}" onclick="selectReciter('${r.id}')">
+      ${r.name}
+    </div>`).join('');
+}
+function selectReciter(id){
+  state.reciter = RECITERS.find(r=>r.id===id);
+  document.getElementById('reciterBtn').classList.add('has-value');
+  document.getElementById('reciterBtn').querySelector('span').textContent = state.reciter.name;
+  closeSheet();
+  updatePlayBtn();
+}
+
+// ==================== SURAH ====================
+function renderSurahs(filter=''){
+  const list = document.getElementById('surahList');
+  const f = normalize(filter);
+  list.innerHTML = SURAH_NAMES
+    .map((n,i) => ({name:n, num:i+1}))
+    .filter(s => !f || normalize(s.name).includes(f))
+    .map(s => `
+      <div class="sheet-item ${state.surah===s.num?'selected':''}" onclick="selectSurah(${s.num})">
+        <span style="color:var(--accent);font-weight:800;margin-inline-start:8px;">${s.num}</span>
+        ${s.name}
+      </div>`).join('');
+}
+function filterSurahs(){renderSurahs(document.getElementById('surahSearch').value);}
+function selectSurah(num){
+  state.surah = num;
+  state.ayahFrom = 1;
+  state.ayahTo = 1;
+  document.getElementById('surahBtn').classList.add('has-value');
+  document.getElementById('surahBtn').querySelector('span').textContent = SURAH_NAMES[num-1];
+  document.getElementById('ayahBtn').querySelector('span').textContent = 'اختر بداية ونهاية التلاوة...';
+  document.getElementById('ayahBtn').classList.remove('has-value');
+  closeSheet();
+  updatePlayBtn();
+}
+
+// ==================== AYAH RANGE ====================
+function getAyahCount(surah){
+  const counts = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,37,34,30,73,54,45,83,182,88,59,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60,37,35,38,29,18,45,60];
+  return counts[surah-1]||1;
+}
+
+let ayahSelectMode = 'from'; // 'from' or 'to'
+function renderAyahs(){
+  if(!state.surah){showToast('اختر السورة أولاً');return;}
+  const count = getAyahCount(state.surah);
+  const fromGrid = document.getElementById('ayahFromGrid');
+  const toGrid = document.getElementById('ayahToGrid');
+  fromGrid.innerHTML = Array.from({length:count},(_, i)=>{
+    const n=i+1;
+    const sel = n===state.ayahFrom?'selected':(n>=state.ayahFrom&&n<=state.ayahTo?'in-range':'');
+    return `<div class="ayah-cell ${sel}" onclick="pickAyah('from',${n})">${n}</div>`;
+  }).join('');
+  toGrid.innerHTML = Array.from({length:count},(_, i)=>{
+    const n=i+1;
+    const sel = n===state.ayahTo?'selected':(n>=state.ayahFrom&&n<=state.ayahTo?'in-range':'');
+    return `<div class="ayah-cell ${sel}" onclick="pickAyah('to',${n})">${n}</div>`;
+  }).join('');
+}
+function pickAyah(type, num){
+  if(type==='from'){
+    state.ayahFrom = num;
+    if(state.ayahTo < num) state.ayahTo = num;
+  } else {
+    state.ayahTo = num;
+    if(state.ayahFrom > num) state.ayahFrom = num;
+  }
+  renderAyahs();
+  document.getElementById('ayahBtn').classList.add('has-value');
+  document.getElementById('ayahBtn').querySelector('span').textContent = `من آية ${state.ayahFrom} إلى آية ${state.ayahTo}`;
+  updatePlayBtn();
+}
+
+// ==================== REPEAT / SPEED ====================
+function adjustRepeat(delta){
+  state.repeatCount = Math.max(1, Math.min(99, state.repeatCount + delta));
+  document.getElementById('repeatValue').textContent = state.repeatCount;
+}
+function adjustSpeed(delta){
+  state.speed = Math.max(0.5, Math.min(3, Math.round((state.speed + delta)*10)/10));
+  updateSpeedUI();
+}
+function setSpeed(v){
+  state.speed = v;
+  audio.playbackRate = v;
+  updateSpeedUI();
+}
+function updateSpeedUI(){
+  document.getElementById('speedValue').textContent = state.speed.toFixed(1)+'x';
+  document.querySelectorAll('.speed-preset').forEach(b=>{
+    b.classList.toggle('active', parseFloat(b.textContent)===state.speed);
+  });
+}
+
+// ==================== PLAY ====================
+function getAudioUrl(reciter, surah, ayah){
+  return `https://everyayah.com/data/${reciter.folder}/${pad(surah)}${pad(ayah)}.mp3`;
+}
+
+function buildQueue(){
+  const queue = [];
+  for(let r=0; r<state.repeatCount; r++){
+    for(let a=state.ayahFrom; a<=state.ayahTo; a++){
+      queue.push({surah:state.surah, ayah:a, repeat:r+1});
+    }
+  }
+  return queue;
+}
+
+let queue = [];
+let queueIdx = 0;
+
+function togglePlay(){
+  if(state.isPlaying){stopPlay();return;}
+  if(!state.reciter||!state.surah){showToast('اختر القارئ والسورة أولاً');return;}
+  state.isPlaying = true;
+  state.currentRepeat = 1;
+  queue = buildQueue();
+  queueIdx = 0;
+  playQueueItem();
+  updatePlayBtn();
+  document.getElementById('progressArea').classList.add('visible');
+  document.getElementById('repeatDisplay').style.display='flex';
+  document.getElementById('statusBadge').classList.add('active');
+  document.getElementById('statusText').textContent = 'جاري التشغيل...';
+}
+
+function stopPlay(){
+  state.isPlaying = false;
+  audio.pause();
+  audio.src = '';
+  updatePlayBtn();
+  document.getElementById('progressArea').classList.remove('visible');
+  document.getElementById('repeatDisplay').style.display='none';
+  document.getElementById('statusBadge').classList.remove('active');
+  document.getElementById('statusText').textContent = 'جاهز للتشغيل';
+  document.getElementById('progressFill').style.width='0%';
+}
+
+function playQueueItem(){
+  if(queueIdx >= queue.length){stopPlay();showToast('انتهت التلاوة');return;}
+  const item = queue[queueIdx];
+  state.currentAyah = item.ayah;
+  state.currentRepeat = item.repeat;
+  document.getElementById('repeatCounter').textContent = `${item.repeat} / ${state.repeatCount}`;
+  audio.src = getAudioUrl(state.reciter, item.surah, item.ayah);
+  audio.playbackRate = state.speed;
+  audio.play().catch(()=>{});
+}
+
+audio.onended = function(){
+  if(!state.isPlaying) return;
+  queueIdx++;
+  playQueueItem();
+};
+
+audio.ontimeupdate = function(){
+  if(!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('currentTime').textContent = fmtTime(audio.currentTime);
+  document.getElementById('duration').textContent = fmtTime(audio.duration);
+};
+
+function seekAudio(e){
+  const rect = document.getElementById('progressTrack').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+}
+
+function updatePlayBtn(){
+  const btn = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  const stopIcon = document.getElementById('stopIcon');
+  if(state.isPlaying){
+    btn.classList.add('playing');
+    playIcon.style.display='none';
+    stopIcon.style.display='block';
+  } else {
+    btn.classList.remove('playing');
+    playIcon.style.display='block';
+    stopIcon.style.display='none';
+  }
+}
+
+// ==================== NORMALIZE ====================
+function normalize(t){
+  return (t||'').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');
+}
+</script>
+</body>
+</html>
