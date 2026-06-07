@@ -40,8 +40,17 @@ const STATIC_ASSETS = [
   "./js/tasmee-store.js",
 
   // ===== Extracted Quran modules =====
-  "./js/quran/app-main.js",
-  "./js/quran/ui-extras.js",
+  "./js/quran/state.js",
+  "./js/quran/navigation.js",
+  "./js/quran/highlights.js",
+  "./js/quran/audio.js",
+  "./js/quran/tafsir.js",
+  "./js/quran/settings.js",
+  "./js/quran/ui.js",
+  "./js/quran/search.js",
+  "./js/quran/download.js",
+  "./js/quran/init.js",
+  "./js/quran/tasmee.js",
 
   // ===== Offline Quran text (word-by-word Tasmee) =====
   "./data/quran.json",
