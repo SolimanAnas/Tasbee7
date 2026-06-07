@@ -6,45 +6,36 @@
 
 ## Phase 1 — Foundation (Weeks 1–3)
 
-### 1.1 Refactor quran.html Monolith
+### 1.1 Refactor quran.html Monolith ✅ COMPLETE
 
 **Goal:** Break the 6,719-line monolith into manageable modules.
 
-| Task | Detail | Priority |
-|------|--------|----------|
-| Extract inline CSS | Move ~2,440 lines of `<style>` into `css/quran-v4.css` | P0 |
-| Extract inline JS into modules | Split the ~2,810 lines of inline `<script>` into ES modules under `js/quran/` | P0 |
-| Create module structure | `js/quran/search.js`, `js/quran/audio.js`, `js/quran/tasmee.js`, `js/quran/settings.js`, `js/quran/navigation.js`, `js/quran/highlights.js`, `js/quran/download.js`, `js/quran/tafsir.js` | P0 |
-| Eliminate duplicate quran pages | Delete `quran-V2.html`, `quran-V3.html`, `quran-V4-2.html`. Keep one `quran.html` with variant selection | P1 |
-| Centralize state | Create `js/quran/state.js` — single source of truth for `currentPage`, `isPlaying`, `windowCurrentAyahGlobal`, `currentMushafVariant`, etc. | P0 |
+| Task | Detail | Priority | Status |
+|------|--------|----------|--------|
+| Extract inline CSS | Move ~2,440 lines of `<style>` into `css/quran-v4.css` | P0 | ✅ |
+| Extract inline JS into modules | Split the ~2,810 lines of inline `<script>` into ES modules under `js/quran/` | P0 | ✅ |
+| Create module structure | `js/quran/search.js`, `js/quran/audio.js`, `js/quran/tasmee.js`, `js/quran/settings.js`, `js/quran/navigation.js`, `js/quran/highlights.js`, `js/quran/download.js`, `js/quran/tafsir.js` | P0 | ✅ |
+| Eliminate duplicate quran pages | Delete `quran-V2.html`, `quran-V3.html`, `quran-V4-2.html`. Keep one `quran.html` with variant selection | P1 | ✅ |
+| Centralize state | Create `js/quran/state.js` — single source of truth for `currentPage`, `isPlaying`, `windowCurrentAyahGlobal`, `currentMushafVariant`, etc. | P0 | ✅ |
 
 **Current state:**
 ```
-pages/quran.html (6,719 lines)
-├── 2,440 lines inline CSS
-├── 2,810 lines inline JS (2 blocks)
-├── Loads: quran-common.js, tasmee-engine.js
-└── Data: quranpages.data.js (base64 MB), medina2.data.js (96K lines)
-```
-
-**Target state:**
-```
-pages/quran.html (~200 lines — HTML shell only)
+pages/quran.html (~1,470 lines — HTML shell only)
 css/quran-v4.css (all styles)
 js/quran/
-├── state.js          (centralized state)
-├── init.js           (bootstrap, DB init)
-├── navigation.js     (page nav, gestures, keyboard)
-├── highlights.js     (ayah overlay rendering)
-├── search.js         (SQLite search + UI)
-├── audio.js          (reciter, playback, repeat)
-├── tasmee.js         (Web Speech Tasmee')
-├── tarteel.js        (ONNX offline Tasmee')
-├── tasmee-pro.js     (AI Tasmee' Pro)
-├── tafsir.js         (tafsir loading)
-├── settings.js       (themes, variants, prefs)
-├── download.js       (offline page caching)
-└── ui.js             (modals, sheets, toasts)
+├── state.js          (129 lines — DB init, coords, ayah count map)
+├── navigation.js     (102 lines — page transitions, updateContent)
+├── highlights.js     (139 lines — ayah overlay rendering)
+├── audio.js          (376 lines — reciter picker, playback, mini player)
+├── tafsir.js         (191 lines — tafsir modal, navigation)
+├── settings.js       (178 lines — context menu, mushaf variants)
+├── ui.js             (199 lines — modals, toasts, bookmarks, selectors)
+├── search.js         (163 lines — search engine + results)
+├── download.js       (181 lines — download modal + offline caching)
+├── init.js           (136 lines — window init, swipe, keyboard nav)
+└── tasmee.js         (179 lines — Tasmee controller)
+js/quran-common.js (shared navigation/gesture logic)
+js/tasmee-engine.js
 ```
 
 ---
