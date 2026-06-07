@@ -44,7 +44,7 @@
 
     @font-face{
         font-family:'ScheherazadeFont';
-        src:url('fonts/Scheherazade.ttf') format('truetype');
+        src:url('../fonts/Scheherazade.ttf') format('truetype');
         font-display:swap;
     }
 
@@ -295,7 +295,7 @@
 
 <div class="app-container">
     <div class="top-bar">
-        <div class="icon-btn" onclick="window.location.href='index.html'" aria-label="رجوع">
+        <div class="icon-btn" onclick="window.location.href='/Tasbee7/index.html'" aria-label="رجوع">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </div>
 
@@ -427,12 +427,12 @@
         try {
             let translatedIndex = {};
             try {
-                const indexRes = await fetch('hadith/Index-translated.json');
+                const indexRes = await fetch('../assets/hadith/Index-translated.json');
                 if (indexRes.ok) translatedIndex = await indexRes.json();
             } catch (e) { console.log("ملف الفهرس المترجم غير متوفر"); }
 
             const fetchPromises = BOOKS_INFO.map(book =>
-                fetch(`hadith/${book.id}.json`)
+                fetch(`../assets/hadith/${book.id}.json`)
                     .then(res => res.ok ? res.json() : null)
                     .then(data => ({ id: book.id, name: book.name, data }))
                     .catch(() => ({ id: book.id, name: book.name, data: null }))
@@ -624,7 +624,7 @@
 
     async function fetchRandomHadith() {
         try {
-            const res = await fetch('hadith/rand-hadith.json');
+            const res = await fetch('../assets/hadith/rand-hadith.json');
             if (res.ok) {
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 0) {
