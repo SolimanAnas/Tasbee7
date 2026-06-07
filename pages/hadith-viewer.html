@@ -374,6 +374,9 @@
 
   const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
   const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
+  const ORDINALS = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون','الحادي والثلاثون','الثاني والثلاثون','الثالث والثلاثون','الرابع والثلاثون','الخامس والثلاثون','السادس والثلاثون','السابع والثلاثون','الثامن والثلاثون','التاسع والثلاثون','الأربعون'];
+  function toArabicOrdinal(n) { return ORDINALS[n-1] || n; }
+
   function normalizeText(text) {
     return (text || "").replace(TASHKEEL_REGEX, '').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');
   }
@@ -467,10 +470,20 @@
         }
         if (!sectionsMap["0"]) sectionsMap["0"] = { title:"مقدمة / أبواب أخرى", sectionNumber:"0", items:[] };
         records.forEach(h => {
-          const secNum = (h.chapterId !== undefined) ? h.chapterId.toString() : ((h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0");
-          if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:`باب ${secNum}`, sectionNumber:secNum, items:[] };
           const gradeInfo = getHadithGrade(App.bookId, h.grades);
           const arText = h.text || h.arabic || "";
+          // كتب معدولة (النواوي الأربعون، القدسية): كل حديث باب مستقل
+          const isNumberedBook = (App.bookId === 'nawawi40' || App.bookId === 'qudsi40');
+          let secNum, secTitle;
+          if (isNumberedBook) {
+            const n = h.idInBook || (sectionsMap[Object.keys(sectionsMap).length] ? sectionsMap[Object.keys(sectionsMap).length].items.length + 1 : 1);
+            secNum = String(n);
+            secTitle = 'الحديث ' + toArabicOrdinal(n);
+          } else {
+            secNum = (h.chapterId !== undefined) ? h.chapterId.toString() : ((h.reference && h.reference.book !== undefined) ? h.reference.book.toString() : "0");
+            secTitle = metaSections[secNum] || `باب ${secNum}`;
+          }
+          if (!sectionsMap[secNum]) sectionsMap[secNum] = { title:secTitle, sectionNumber:secNum, items:[] };
           sectionsMap[secNum].items.push({ ar:arText, number:h.hadithnumber || h.arabicnumber || h.idInBook, gradeText:gradeInfo.text, isOk:gradeInfo.isOk });
         });
       }
