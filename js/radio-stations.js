@@ -470,5 +470,225 @@ const RADIO_STATIONS = [
   {
     "name": "ترجمة معاني القرآن باللغة المجرية",
     "url": "https://backup.qurango.net/radio/translation_quran_hungarian"
+  },
+  {
+    "name": "إذاعة تكبيرات العيد",
+    "url": "https://qurango.net/radio/eid"
+  },
+  {
+    "name": "آيات السكينة",
+    "url": "https://qurango.net/radio/sakeenah"
+  },
+  {
+    "name": "سورة الملك",
+    "url": "https://qurango.net/radio/Surah_Al-Mulk"
+  },
+  {
+    "name": "إذاعة عبدالباسط عبدالصمد (تجويد)",
+    "url": "https://qurango.net/radio/abdulbasit_abdulsamad_mojawwad"
+  },
+  {
+    "name": "إذاعة عبدالباسط عبدالصمد (ورش)",
+    "url": "https://qurango.net/radio/abdulbasit_abdulsamad_warsh"
+  },
+  {
+    "name": "إذاعة محمد صديق المنشاوي (ترتيل)",
+    "url": "https://qurango.net/radio/mohammed_siddiq_alminshawi"
+  },
+  {
+    "name": "إذاعة محمود خليل الحصري (ورش)",
+    "url": "https://qurango.net/radio/mahmoud_khalil_alhussary_warsh"
+  },
+  {
+    "name": "إذاعة محمود علي البنا (ترتيل)",
+    "url": "https://qurango.net/radio/mahmoud_ali__albanna"
+  },
+  {
+    "name": "إذاعة سعود الشريم",
+    "url": "https://qurango.net/radio/saud_alshuraim"
+  },
+  {
+    "name": "إذاعة علي جابر",
+    "url": "https://qurango.net/radio/ali_jaber"
+  },
+  {
+    "name": "إذاعة محمد أيوب",
+    "url": "https://qurango.net/radio/mohammed_ayyub"
+  },
+  {
+    "name": "إذاعة سعد الغامدي",
+    "url": "https://qurango.net/radio/saad_alghamdi"
+  },
+  {
+    "name": "إذاعة علي الحذيفي (قالون)",
+    "url": "https://qurango.net/radio/ali_alhuthaifi_qalon"
+  },
+  {
+    "name": "إذاعة عبدالله عواد الجهني",
+    "url": "https://qurango.net/radio/abdullah_aljohany"
+  },
+  {
+    "name": "إذاعة عبدالله بصفر",
+    "url": "https://qurango.net/radio/abdullah_basfer"
+  },
+  {
+    "name": "إذاعة عبدالله خياط",
+    "url": "https://qurango.net/radio/abdullah_khayyat"
+  },
+  {
+    "name": "إذاعة عبدالمحسن الحارثي",
+    "url": "https://qurango.net/radio/abdulmohsin_alharthy"
+  },
+  {
+    "name": "إذاعة محمد جبريل",
+    "url": "https://qurango.net/radio/mohammed_jibreel"
+  },
+  {
+    "name": "هزاع البلوشي",
+    "url": "https://qurango.net/radio/hazza"
+  },
+  {
+    "name": "إذاعة إبراهيم الأخضر",
+    "url": "https://qurango.net/radio/ibrahim_alakdar"
+  },
+  {
+    "name": "إذاعة أحمد الحواشي",
+    "url": "https://qurango.net/radio/ahmad_alhawashi"
+  },
+  {
+    "name": "إذاعة خالد القحطاني",
+    "url": "https://qurango.net/radio/khaled_alqahtani"
+  },
+  {
+    "name": "إذاعة خليفة الطنيجي",
+    "url": "https://qurango.net/radio/khalifa_altunaiji"
+  },
+  {
+    "name": "إذاعة ياسر القرشي",
+    "url": "https://qurango.net/radio/yasser_alqurashi"
+  },
+  {
+    "name": "إذاعة ياسر المزروعي",
+    "url": "https://qurango.net/radio/yasser_almazroyee"
+  },
+  {
+    "name": "إذاعة ناصر العصفور",
+    "url": "https://qurango.net/radio/nasser_alosfor"
+  },
+  {
+    "name": "إذاعة عادل الكلباني",
+    "url": "https://qurango.net/radio/adel_alkhalbany"
+  },
+  {
+    "name": "إذاعة محمد عبدالكريم",
+    "url": "https://qurango.net/radio/mohammad_abdullkarem_alasbahani"
+  },
+  {
+    "name": "إذاعة عبدالرحمن الماجد",
+    "url": "https://qurango.net/radio/abdulrahman_almajed"
+  },
+  {
+    "name": "إذاعة ماجد الزامل",
+    "url": "https://qurango.net/radio/majed_alzamel"
+  },
+  {
+    "name": "بدر التركي",
+    "url": "https://qurango.net/radio/bader"
+  },
+  {
+    "name": "إذاعة عبدالله الموسى",
+    "url": "https://qurango.net/radio/abdullah_almousa"
+  },
+  {
+    "name": "إذاعة عبدالله الخلف",
+    "url": "https://qurango.net/radio/abdullah_alkhalaf"
+  },
+  {
+    "name": "صالح الهبدان",
+    "url": "https://qurango.net/radio/saleh_alhabdan"
+  },
+  {
+    "name": "عبدالله البعيجان",
+    "url": "https://qurango.net/radio/buajan"
+  },
+  {
+    "name": "إذاعة جمعان العصيمي",
+    "url": "https://qurango.net/radio/jamaan_alosaimi"
+  },
+  {
+    "name": "إذاعة ابراهيم الدوسري",
+    "url": "https://qurango.net/radio/ibrahim_aldosari"
+  },
+  {
+    "name": "إذاعة العيون الكوشي",
+    "url": "https://qurango.net/radio/aloyoon_alkoshi"
+  },
+  {
+    "name": "حاتم فريد الواعر",
+    "url": "https://qurango.net/radio/hatem_fareed_alwaer"
+  },
+  {
+    "name": "إذاعة يوسف بن نوح أحمد",
+    "url": "https://qurango.net/radio/yousef_bin_noah_ahmad"
+  },
+  {
+    "name": "إذاعة عادل ريان",
+    "url": "https://qurango.net/radio/adel_ryyan"
+  },
+  {
+    "name": "إذاعة نبيل الرفاعي",
+    "url": "https://qurango.net/radio/nabil_al_rifay"
+  },
+  {
+    "name": "إذاعة أحمد عامر",
+    "url": "https://qurango.net/radio/ahmed_amer"
+  },
+  {
+    "name": "إذاعة عبدالرحمن الشحات",
+    "url": "https://qurango.net/radio/a_alshahhat"
+  },
+  {
+    "name": "في ظلال السيرة النبوية - 400 حلقة عن سيرة نبينا محمد صلى الله عليه وسلم",
+    "url": "https://qurango.net/radio/fi_zilal_alsiyra"
+  },
+  {
+    "name": "صحيح مسلم",
+    "url": "https://qurango.net/radio/saheh-muslim"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة الألمانية",
+    "url": "https://qurango.net/radio/translation_quran_german"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة الإسبانية",
+    "url": "https://qurango.net/radio/translation_quran_spanish_afs"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة التركية",
+    "url": "https://qurango.net/radio/translation_quran_turkish"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة الروسية",
+    "url": "https://qurango.net/radio/translation_quran_Russia"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة الصينية",
+    "url": "https://qurango.net/radio/translation_quran_chinese"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة الكردية",
+    "url": "https://qurango.net/radio/translation_quran_kurdish"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة البوسنية",
+    "url": "https://qurango.net/radio/translation_quran_bosnia"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة الكورية",
+    "url": "https://qurango.net/radio/translation_quran_Korean"
+  },
+  {
+    "name": "ترجمة معاني القرآن باللغة اليونانية",
+    "url": "https://qurango.net/radio/translation_quran_greek"
   }
 ];
