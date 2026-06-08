@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v25"; // v25: local-first notifications + server-cron background push (schedule upload)
+const CACHE_NAME = "zad-muslim-v26"; // v26: takrar scope by surah/juz/hizb/rub/page (quran-structure.js)
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -16,6 +16,7 @@ const STATIC_ASSETS = [
   "./pages/hadith.html",
   "./pages/qibla.html",
   "./pages/notifications.html",
+  "./pages/takrar.html",
   "./pages/howto.html",
   "./pages/about.html",
 
@@ -29,6 +30,7 @@ const STATIC_ASSETS = [
   // ===== Core JS =====
   "./data/cities.js",
   "./data/adhan.js",
+  "./js/quran-structure.js",
   "./js/native-init.js",
   "./js/notifications.js",
   "./js/plugins/capacitor-core.js",
