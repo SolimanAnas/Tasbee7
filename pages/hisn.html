@@ -530,6 +530,8 @@
     const svgCopy = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
     const svgStarOutline = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
     const svgStarFilled = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+    const svgPlay = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    const svgPause = `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
 
     const App = {
       data: [],
@@ -551,6 +553,32 @@
       document.getElementById("scroll-progress").style.width = scrolled + "%";
     };
 
+    let currentAudio = null;
+    let currentBtn = null;
+
+    function toggleAudio(url, btn) {
+      if (currentAudio && currentAudio._url === url && !currentAudio.paused) {
+        currentAudio.pause();
+        if (currentBtn) currentBtn.innerHTML = svgPlay;
+        currentBtn = null;
+        return;
+      }
+      if (currentAudio) {
+        currentAudio.pause();
+        if (currentBtn) currentBtn.innerHTML = svgPlay;
+      }
+      currentAudio = new Audio(url);
+      currentAudio._url = url;
+      currentBtn = btn;
+      btn.innerHTML = svgPause;
+      currentAudio.play();
+      currentAudio.onended = () => {
+        btn.innerHTML = svgPlay;
+        currentBtn = null;
+        currentAudio = null;
+      };
+    }
+
     function normalizeText(text) {
         return text.replace(/[ًٌٍَُِّْـ]/g, '');
     }
@@ -569,12 +597,8 @@
         document.documentElement.style.setProperty('--dynamic-font-color', savedColor);
       }
 
-      const parts = [1, 2, 3, 4, 5];
-      const results = await Promise.all(parts.map(p => 
-        fetch(`../assets/part${p}.json`).then(res => res.ok ? res.json() : []).catch(() => [])
-      ));
-      
-      App.data = results.flat();
+      const res = await fetch('../assets/hisn_complete.json');
+      App.data = res.ok ? await res.json() : [];
       
       const cachedIdx = parseInt(localStorage.getItem('hisnCurrentIdx'));
       if (!isNaN(cachedIdx) && cachedIdx >= 0 && cachedIdx < App.data.length) {
@@ -605,10 +629,16 @@
             titleNorm: normalizeText(sec.title),
             ar: item.ar,
             norm: normalizeText(item.ar),
+            enNorm: normalizeText(item.en || ''),
+            transNorm: normalizeText(item.transliteration || ''),
             ref: item.ref || ''
           });
         });
       });
+    }
+
+    function escapeJS(str) {
+      return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
     }
 
     function buildCardHTML(item, sIdx, iIdx, searchTitle = null) {
@@ -616,21 +646,29 @@
       const starIcon = isBookmarked ? svgStarFilled : svgStarOutline;
       const bmClass = isBookmarked ? 'bookmarked' : '';
       
-      const safeText = item.ar.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n');
+      const safeText = escapeJS(item.ar);
+      const safeAudio = item.audio ? escapeJS(item.audio) : '';
       
       const searchHeader = searchTitle ? `<div class="search-result-title" style="font-size:0.9rem; color:var(--accent); font-weight:bold; margin-bottom:8px; font-family:'Amiri', 'Scheherazade', serif;">${searchTitle}</div>` : '';
       const contentClick = searchTitle ? `onclick="jumpTo(${sIdx}, ${iIdx})" style="cursor:pointer;"` : '';
       const borderStyle = searchTitle ? 'border-right:4px solid var(--accent);' : '';
-      const referenceHtml = item.ref ? `<div class="card-ref">${item.ref}</div>` : '';
+      
+      const enHtml = item.en ? `<div style="font-size:0.95rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border); padding-top:8px; direction:ltr; text-align:left;">${item.en}</div>` : '';
+      const transHtml = item.transliteration ? `<div style="font-size:0.95rem; color:var(--text-muted); font-style:italic; margin-top:6px;">${item.transliteration}</div>` : '';
+      const repeatHtml = item.repeat && item.repeat > 1 ? `<span style="font-size:0.85rem; color:var(--accent); margin-top:6px; display:inline-block;">(${item.repeat} مرات)</span>` : '';
+      const audioBtn = item.audio ? `<button class="action-btn" onclick="toggleAudio('${safeAudio}', this)" title="استماع" style="color:var(--accent);">${svgPlay}</button>` : '';
 
       return `
         <div class="card" data-item="${iIdx}" style="${borderStyle}">
           <div ${contentClick}>
             ${searchHeader}
             <div class="card-arabic">${item.ar}</div>
-            ${referenceHtml}
+            ${transHtml}
+            ${repeatHtml}
+            ${enHtml}
           </div>
           <div class="card-actions">
+            ${audioBtn}
             <button class="action-btn" onclick="copyText('${safeText}')" title="نسخ">
               ${svgCopy}
             </button>
@@ -772,13 +810,18 @@
       App.isSearchMode = true;
       document.getElementById('customSelectBtn').textContent = "نتائج البحث";
       
+      const ql = query.toLowerCase();
       const results = App.searchIndex.filter(x => 
-          x.norm.includes(query) || x.titleNorm.includes(query)
+          x.norm.includes(query) || x.titleNorm.includes(query) ||
+          x.enNorm.toLowerCase().includes(ql) || x.transNorm.toLowerCase().includes(ql)
       ).slice(0, 50);
       
       document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
       
-      const html = results.map(r => buildCardHTML({ar: r.ar, ref: r.ref}, r.sIdx, r.iIdx, r.title)).join('');
+      const html = results.map(r => {
+        const orig = App.data[r.sIdx].items[r.iIdx];
+        return buildCardHTML({ar: r.ar, en: orig.en || '', transliteration: orig.transliteration || '', audio: orig.audio || '', ref: r.ref}, r.sIdx, r.iIdx, r.title);
+      }).join('');
       document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
     };
 
@@ -821,6 +864,7 @@
     window.copyText = copyText;
     window.toggleBookmark = toggleBookmark;
     window.viewBookmarks = viewBookmarks;
+    window.toggleAudio = toggleAudio;
 
     init();
   </script>
