@@ -27,11 +27,11 @@
     const DL_KEY   = 'quranV3DlDone';
     const DL_CACHE = 'quran-mushaf-images-v1';
     const DL_SIZES = {
-      'mushaf-colored':    '~65 Ù…ÙŠØ¬Ø§Ø¨Ø§ÙŠØª',
-      'mushaf-madina1441': '~70 Ù…ÙŠØ¬Ø§Ø¨Ø§ÙŠØª',
-      'mushaf-tajweed':    '~75 Ù…ÙŠØ¬Ø§Ø¨Ø§ÙŠØª',
-      'mushaf-borderd':    '~120 Ù…ÙŠØ¬Ø§Ø¨Ø§ÙŠØª',
-      'mushaf-green':      '~65 Ù…ÙŠØ¬Ø§Ø¨Ø§ÙŠØª',
+      'mushaf-colored':    '~65 ميجابايت',
+      'mushaf-madina1441': '~70 ميجابايت',
+      'mushaf-tajweed':    '~75 ميجابايت',
+      'mushaf-borderd':    '~120 ميجابايت',
+      'mushaf-green':      '~65 ميجابايت',
     };
     let dlSelected  = new Set(['mushaf-colored']);
     let dlRunning   = false;
@@ -66,7 +66,7 @@
             <div class="dl-vname">${v.nameAr}</div>
             <div class="dl-vsize">
               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              ${DL_SIZES[v.id] || '~70 Ù…ÙŠØ¬Ø§Ø¨Ø§ÙŠØª'}
+              ${DL_SIZES[v.id] || '~70 ميجابايت'}
             </div>
           </div>`;
         div.onclick = () => {
@@ -87,7 +87,7 @@
       document.getElementById('dlModal')?.classList.remove('active');
     }
 
-    // â”€â”€ Minimize / restore â”€â”€
+    // ── Minimize / restore ──
     function dlMinimize() {
       document.getElementById('dlModal').classList.remove('active');
       document.getElementById('dlMiniPill').classList.add('active');
@@ -108,7 +108,7 @@
     function showDlCompleteToast(variantNames) {
       document.getElementById('dlMiniPill').classList.remove('active');
       const sub = document.getElementById('dlToastSub');
-      if (sub) sub.textContent = variantNames.join(' Â· ');
+      if (sub) sub.textContent = variantNames.join(' · ');
       const bar = document.getElementById('dlToastBarFill');
       if (bar) { bar.style.animation = 'none'; bar.offsetWidth; bar.style.animation = ''; }
       document.getElementById('dlCompleteToast').classList.add('show');
@@ -164,8 +164,8 @@
           const pageNum = Math.min(p + BATCH - 1, 604);
           document.getElementById('dlPct').textContent      = pct + '%';
           document.getElementById('dlBarFill').style.width  = pct + '%';
-          document.getElementById('dlProgPages').textContent = `ØµÙØ­Ø© ${pageNum} Ù…Ù† Ù¦Ù Ù¤`;
-          document.getElementById('dlStatusMsg').textContent = `Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„â€¦  ${done} / ${totalPages}`;
+          document.getElementById('dlProgPages').textContent = `صفحة ${pageNum} من ٦٠٤`;
+          document.getElementById('dlStatusMsg').textContent = `جاري التحميل…  ${done} / ${totalPages}`;
           document.getElementById('dlRingFill').style.strokeDashoffset =
             (307.88 * (1 - pct / 100)).toFixed(2);
           dlSyncMiniPill(pct, v.nameAr);

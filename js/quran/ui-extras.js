@@ -1,4 +1,4 @@
-﻿  // Ã¢â€â‚¬Ã¢â€â‚¬ Tarteel integration Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+﻿  // ── Tarteel integration ───────────────────────────────────────────────────
   let _tarteelWorker = null;
   let _tarteelReady = false;
   let _tarteelRecording = false;
@@ -24,7 +24,7 @@
     _tarteelWorker.onmessage = _tarteelOnMsg;
     _tarteelWorker.onerror = e => {
       e.preventDefault();
-      const msg = e.message || (e.error && e.error.message) || ('Ã˜Â³Ã˜Â·Ã˜Â± ' + e.lineno + ' Ã™ÂÃ™Å  ' + e.filename);
+      const msg = e.message || (e.error && e.error.message) || ('سطر ' + e.lineno + ' في ' + e.filename);
       _tarteelShowError(msg);
     };
   }
@@ -59,14 +59,14 @@
   function _tarteelSetLoading(pct, status) {
     const dot = document.getElementById('tarteelDot');
     dot.className = 'tarteel-status-dot loading';
-    document.getElementById('tarteelStatusText').textContent = status || 'Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â­Ã™â€¦Ã™Å Ã™â€ž...';
+    document.getElementById('tarteelStatusText').textContent = status || 'جاري التحميل...';
     document.getElementById('tarteelProgressBar').style.display = 'block';
     document.getElementById('tarteelProgressFill').style.width = pct + '%';
   }
 
   function _tarteelSetReady() {
     document.getElementById('tarteelDot').className = 'tarteel-status-dot ready';
-    document.getElementById('tarteelStatusText').textContent = 'Ã˜Â§Ã™â€žÃ™â€ Ã™â€¦Ã™Ë†Ã˜Â°Ã˜Â¬ Ã˜Â¬Ã˜Â§Ã™â€¡Ã˜Â²';
+    document.getElementById('tarteelStatusText').textContent = 'النموذج جاهز';
     document.getElementById('tarteelProgressBar').style.display = 'none';
     document.getElementById('tarteelDownloadRow').style.display = 'none';
     document.getElementById('tarteelRecordArea').style.display = 'block';
@@ -77,9 +77,9 @@
   function _tarteelSetProcessing() {
     _tarteelProcessing = true;
     document.getElementById('tarteelDot').className = 'tarteel-status-dot loading';
-    document.getElementById('tarteelStatusText').textContent = 'Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â­Ã™â€žÃ™Å Ã™â€ž...';
+    document.getElementById('tarteelStatusText').textContent = 'جاري التحليل...';
     document.getElementById('tarteelRecordCircle').classList.add('processing');
-    document.getElementById('tarteelRecordLabel').textContent = 'Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜Â§Ã™â€žÃ™â€¦Ã˜Â¹Ã˜Â§Ã™â€žÃ˜Â¬Ã˜Â©...';
+    document.getElementById('tarteelRecordLabel').textContent = 'جاري المعالجة...';
     document.getElementById('tarteelRecordCircle').disabled = true;
   }
 
@@ -88,23 +88,23 @@
     _tarteelResult = result;
 
     document.getElementById('tarteelDot').className = 'tarteel-status-dot ready';
-    document.getElementById('tarteelStatusText').textContent = 'Ã˜Â§Ã™â€žÃ™â€ Ã™â€¦Ã™Ë†Ã˜Â°Ã˜Â¬ Ã˜Â¬Ã˜Â§Ã™â€¡Ã˜Â²';
+    document.getElementById('tarteelStatusText').textContent = 'النموذج جاهز';
     document.getElementById('tarteelRecordCircle').classList.remove('processing');
     document.getElementById('tarteelRecordCircle').disabled = false;
-    document.getElementById('tarteelRecordLabel').textContent = 'Ã˜Â§Ã˜Â¶Ã˜ÂºÃ˜Â· Ã™â€žÃ™â€žÃ˜ÂªÃ˜Â³Ã˜Â¬Ã™Å Ã™â€ž';
+    document.getElementById('tarteelRecordLabel').textContent = 'اضغط للتسجيل';
 
     if (result && result.surah) {
       const surahEntry = typeof SURAH_MAP !== 'undefined'
         ? SURAH_MAP.find(s => s.number === result.surah) : null;
-      const surahName = result.surahName || (surahEntry ? surahEntry.name : 'Ã˜Â³Ã™Ë†Ã˜Â±Ã˜Â© ' + result.surah);
+      const surahName = result.surahName || (surahEntry ? surahEntry.name : 'سورة ' + result.surah);
       document.getElementById('tarteelResultSurah').textContent =
-        surahName + ' Ã¢â‚¬â€ Ã˜Â§Ã™â€žÃ˜Â¢Ã™Å Ã˜Â© ' + result.ayah;
+        surahName + ' — الآية ' + result.ayah;
       document.getElementById('tarteelResultText').textContent = result.text || '';
       const pct = Math.round((result.score || 0) * 100);
-      document.getElementById('tarteelConfidence').textContent = 'Ã˜Â¯Ã™â€šÃ˜Â©: ' + pct + '%';
+      document.getElementById('tarteelConfidence').textContent = 'دقة: ' + pct + '%';
       document.getElementById('tarteelResultCard').classList.add('visible');
     } else {
-      document.getElementById('tarteelResultSurah').textContent = 'Ã™â€žÃ™â€¦ Ã™Å Ã˜ÂªÃ™â€¦ Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â¹Ã˜Â±Ã™Â Ã˜Â¹Ã™â€žÃ™â€° Ã˜Â§Ã™â€žÃ˜Â¢Ã™Å Ã˜Â©';
+      document.getElementById('tarteelResultSurah').textContent = 'لم يتم التعرف على الآية';
       document.getElementById('tarteelResultText').textContent = result?.transcript || '';
       document.getElementById('tarteelConfidence').textContent = '';
       document.getElementById('tarteelResultCard').classList.add('visible');
@@ -116,12 +116,12 @@
     _tarteelProcessing = false;
     _tarteelRecording = false;
     document.getElementById('tarteelDot').className = 'tarteel-status-dot';
-    document.getElementById('tarteelStatusText').textContent = 'Ã˜Â®Ã˜Â·Ã˜Â£: ' + (msg || 'Ã˜ÂºÃ™Å Ã˜Â± Ã™â€¦Ã˜Â¹Ã˜Â±Ã™Ë†Ã™Â');
+    document.getElementById('tarteelStatusText').textContent = 'خطأ: ' + (msg || 'غير معروف');
     document.getElementById('tarteelRecordCircle').classList.remove('processing', 'recording');
     document.getElementById('tarteelRecordCircle').disabled = false;
     document.getElementById('tarteelMicIcon').style.display = '';
     document.getElementById('tarteelStopIcon').style.display = 'none';
-    document.getElementById('tarteelRecordLabel').textContent = 'Ã˜Â§Ã˜Â¶Ã˜ÂºÃ˜Â· Ã™â€žÃ™â€žÃ˜ÂªÃ˜Â³Ã˜Â¬Ã™Å Ã™â€ž';
+    document.getElementById('tarteelRecordLabel').textContent = 'اضغط للتسجيل';
     if (_tarteelStream) { _tarteelStream.getTracks().forEach(t => t.stop()); _tarteelStream = null; }
     if (_tarteelRecorder && _tarteelRecorder.state !== 'inactive') { _tarteelRecorder.stop(); }
     _tarteelRecorder = null;
@@ -169,7 +169,7 @@
           const audio = new Float32Array(resampled.getChannelData(0));
           _tarteelWorker.postMessage({ type: 'recognize', audio }, [audio.buffer]);
         } catch (err) {
-          _tarteelShowError('Ã˜Â®Ã˜Â·Ã˜Â£ Ã™ÂÃ™Å  Ã™â€¦Ã˜Â¹Ã˜Â§Ã™â€žÃ˜Â¬Ã˜Â© Ã˜Â§Ã™â€žÃ˜ÂµÃ™Ë†Ã˜Âª: ' + err.message);
+          _tarteelShowError('خطأ في معالجة الصوت: ' + err.message);
         }
       };
       _tarteelRecorder.start();
@@ -178,13 +178,13 @@
       document.getElementById('tarteelRecordCircle').classList.add('recording');
       document.getElementById('tarteelMicIcon').style.display = 'none';
       document.getElementById('tarteelStopIcon').style.display = '';
-      document.getElementById('tarteelRecordLabel').textContent = 'Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â³Ã˜Â¬Ã™Å Ã™â€ž... Ã˜Â§Ã˜Â¶Ã˜ÂºÃ˜Â· Ã™â€žÃ™â€žÃ˜Â¥Ã™Å Ã™â€šÃ˜Â§Ã™Â';
+      document.getElementById('tarteelRecordLabel').textContent = 'جاري التسجيل... اضغط للإيقاف';
       document.getElementById('tarteelDot').className = 'tarteel-status-dot recording';
-      document.getElementById('tarteelStatusText').textContent = 'Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â³Ã˜Â¬Ã™Å Ã™â€ž...';
+      document.getElementById('tarteelStatusText').textContent = 'جاري التسجيل...';
       document.getElementById('tarteelResultCard').classList.remove('visible');
       document.getElementById('tarteelRetryRow').style.display = 'none';
     } catch (err) {
-      _tarteelShowError('Ã˜ÂªÃ˜Â¹Ã˜Â°Ã˜Â± Ã˜Â§Ã™â€žÃ™Ë†Ã˜ÂµÃ™Ë†Ã™â€ž Ã™â€žÃ™â€žÃ™â€¦Ã™Å Ã™Æ’Ã˜Â±Ã™Ë†Ã™ÂÃ™Ë†Ã™â€ : ' + err.message);
+      _tarteelShowError('تعذر الوصول للميكروفون: ' + err.message);
     }
   }
 
@@ -193,9 +193,9 @@
     document.getElementById('tarteelRecordCircle').classList.remove('recording');
     document.getElementById('tarteelMicIcon').style.display = '';
     document.getElementById('tarteelStopIcon').style.display = 'none';
-    document.getElementById('tarteelRecordLabel').textContent = 'Ã˜Â§Ã˜Â¶Ã˜ÂºÃ˜Â· Ã™â€žÃ™â€žÃ˜ÂªÃ˜Â³Ã˜Â¬Ã™Å Ã™â€ž';
+    document.getElementById('tarteelRecordLabel').textContent = 'اضغط للتسجيل';
     if (_tarteelRecorder && _tarteelRecorder.state !== 'inactive') {
-      _tarteelRecorder.stop(); // triggers onstop Ã¢â€ â€™ decodes Ã¢â€ â€™ sends to worker
+      _tarteelRecorder.stop(); // triggers onstop → decodes → sends to worker
     }
     _tarteelRecorder = null;
   }
@@ -217,7 +217,7 @@
     }
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Settings row: check model cache status and update label Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // ── Settings row: check model cache status and update label ──────────────
   const _TARTEEL_MODEL_URL = './models/fastconformer_ar_ctc_q8.onnx';
   const _TARTEEL_CACHE_NAME = 'tarteel-model-v1';
 
@@ -229,16 +229,16 @@
       const cache = await caches.open(_TARTEEL_CACHE_NAME);
       const cached = await cache.match(_TARTEEL_MODEL_URL);
       if (cached) {
-        statusEl.textContent = 'Ã˜Â¬Ã˜Â§Ã™â€¡Ã˜Â² Ã¢â‚¬â€ Ã˜Â§Ã™â€žÃ™â€ Ã™â€¦Ã™Ë†Ã˜Â°Ã˜Â¬ Ã™â€¦Ã˜Â¯Ã™â€¦Ã˜Â¬ Ã™ÂÃ™Å  Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â·Ã˜Â¨Ã™Å Ã™â€š';
+        statusEl.textContent = 'جاهز — النموذج مدمج في التطبيق';
         statusEl.style.color = 'var(--accent)';
         chevronEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
       } else {
-        statusEl.textContent = 'Ã˜Â¬Ã˜Â§Ã™â€¡Ã˜Â² Ã¢â‚¬â€ Ã˜Â§Ã˜Â¶Ã˜ÂºÃ˜Â· Ã™â€žÃ™â€žÃ˜Â¥Ã˜Â¹Ã˜Â¯Ã˜Â§Ã˜Â¯';
+        statusEl.textContent = 'جاهز — اضغط للإعداد';
         statusEl.style.color = '';
         chevronEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
       }
     } catch (e) {
-      statusEl.textContent = 'Ã˜Â§Ã˜Â¶Ã˜ÂºÃ˜Â· Ã™â€žÃ™â€žÃ˜Â¥Ã˜Â¹Ã˜Â¯Ã˜Â§Ã˜Â¯';
+      statusEl.textContent = 'اضغط للإعداد';
     }
   }
 
@@ -250,12 +250,12 @@
   // Update status label on page load
   tarteelUpdateSettingsRow();
 
-  // Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
-  //  Tasmee' Pro Ã¢â‚¬â€ full-screen immersive memorisation mode
-  // Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
+  // ════════════════════════════════════════════════════════════════════
+  //  Tasmee' Pro — full-screen immersive memorisation mode
+  // ════════════════════════════════════════════════════════════════════
   let _tarteelTasmeeMode = false;
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ shared audio capture helper Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // ── shared audio capture helper ───────────────────────────────────────
   async function _doCapture(onAudio, onError) {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
@@ -280,7 +280,7 @@
     return { stream, rec };
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Tasmee' Pro state Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // ── Tasmee' Pro state ─────────────────────────────────────────────────
   let _tp = {
     ayahs: [],          // [{surah, ayah, text, surahName}, ...]
     revealed: new Set(), // indices of revealed ayahs
@@ -292,21 +292,21 @@
     recorder: null,
     timerInterval: null,
     timerStart: 0,
-    masksByAyah: {},    // {surah_ayah: [maskDiv, ...]} Ã¢â‚¬â€ word-level masks
+    masksByAyah: {},    // {surah_ayah: [maskDiv, ...]} — word-level masks
     revealedMasks: new Set(), // mask divs that have been revealed
     peekMode: false,
     maskContainer: null,
   };
 
   function _tpArabicNum(n) {
-    return String(n).replace(/[0-9]/g, d => 'Ã™Â Ã™Â¡Ã™Â¢Ã™Â£Ã™Â¤Ã™Â¥Ã™Â¦Ã™Â§Ã™Â¨Ã™Â©'[d]);
+    return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
   }
 
   async function startAITasmee() {
     if (!_tarteelReady) return;
     closeTarteelSheet();
 
-    showCustomToast('Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜ÂªÃ˜Â­Ã™â€¦Ã™Å Ã™â€ž Ã˜Â¢Ã™Å Ã˜Â§Ã˜Âª Ã˜Â§Ã™â€žÃ˜ÂµÃ™ÂÃ˜Â­Ã˜Â©...');
+    showCustomToast('جاري تحميل آيات الصفحة...');
     let ayahs;
     try {
       const r = await fetch(`https://api.alquran.cloud/v1/page/${currentPage}/ar.uthmani`);
@@ -316,7 +316,7 @@
         text: a.text, surahName: a.surah.name
       }));
     } catch (_) {
-      showCustomToast('Ã˜ÂªÃ˜Â¹Ã˜Â°Ã˜Â± Ã˜ÂªÃ˜Â­Ã™â€¦Ã™Å Ã™â€ž Ã˜Â¢Ã™Å Ã˜Â§Ã˜Âª Ã˜Â§Ã™â€žÃ˜ÂµÃ™ÂÃ˜Â­Ã˜Â©'); return;
+      showCustomToast('تعذر تحميل آيات الصفحة'); return;
     }
 
     _tp.ayahs = ayahs;
@@ -329,9 +329,9 @@
     _tp.revealedMasks = new Set();
     _tp.peekMode = false;
 
-    document.getElementById('tpPageLabel').textContent = `Ã˜ÂµÃ™ÂÃ˜Â­Ã˜Â© ${_tpArabicNum(currentPage)}`;
-    document.getElementById('tpErrorBadge').textContent = 'Ã™Â  Ã˜Â£Ã˜Â®Ã˜Â·Ã˜Â§Ã˜Â¡';
-    document.getElementById('tpErrorPill').textContent = 'Ã˜Â£Ã˜Â®Ã˜Â·Ã˜Â§Ã˜Â¡ Ã™Â ';
+    document.getElementById('tpPageLabel').textContent = `صفحة ${_tpArabicNum(currentPage)}`;
+    document.getElementById('tpErrorBadge').textContent = '٠ أخطاء';
+    document.getElementById('tpErrorPill').textContent = 'أخطاء ٠';
 
     const mb = document.getElementById('tpMicBtn');
     mb.className = 'tp-mic-btn';
@@ -346,7 +346,7 @@
     document.body.style.overflow = 'hidden';
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Word-level coordinate extraction Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+  // ── Word-level coordinate extraction ──────────────────────────────────
   function getWordLevelLegacyCoords(pageNumber) {
     if (!db || !dbReady) return [];
     const query = `SELECT soraid, ayaid, minx, maxx, miny, maxy FROM ayarects WHERE page = ${pageNumber}`;
@@ -498,8 +498,8 @@
   }
 
   function _tpUpdateErrorPill() {
-    document.getElementById('tpErrorPill').textContent = 'Ã˜Â£Ã˜Â®Ã˜Â·Ã˜Â§Ã˜Â¡ ' + _tpArabicNum(_tp.errors);
-    document.getElementById('tpErrorBadge').textContent = _tpArabicNum(_tp.errors) + ' Ã˜Â£Ã˜Â®Ã˜Â·Ã˜Â§Ã˜Â¡';
+    document.getElementById('tpErrorPill').textContent = 'أخطاء ' + _tpArabicNum(_tp.errors);
+    document.getElementById('tpErrorBadge').textContent = _tpArabicNum(_tp.errors) + ' أخطاء';
   }
 
   function _tpSelectAyah(idx) {
@@ -507,7 +507,7 @@
     _tp.expectedIdx = idx;
     const el = document.getElementById('tp-a-' + idx);
     if (el) { el.classList.add('selected-target', 'current-expected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    showCustomToast('Ã˜Â§Ã˜Â®Ã˜ÂªÃ™Å Ã˜Â±Ã˜Âª: ' + _tp.ayahs[idx].surahName + ' Ã¢â‚¬â€ Ã˜Â§Ã™â€žÃ˜Â¢Ã™Å Ã˜Â© ' + _tp.ayahs[idx].ayah);
+    showCustomToast('اختيرت: ' + _tp.ayahs[idx].surahName + ' — الآية ' + _tp.ayahs[idx].ayah);
   }
 
   function _tpSetExpected(idx) {
@@ -585,7 +585,7 @@
         }, 1800);
         document.getElementById('tpLiveStrip').classList.add('active');
         document.getElementById('tpLiveStrip').innerHTML =
-          '<span class="tp-live-word" style="opacity:0.6;animation:none">Ã˜Â¬Ã˜Â§Ã˜Â±Ã™Å  Ã˜Â§Ã™â€žÃ˜Â§Ã˜Â³Ã˜ÂªÃ™â€¦Ã˜Â§Ã˜Â¹...</span>';
+          '<span class="tp-live-word" style="opacity:0.6;animation:none">جاري الاستماع...</span>';
         document.getElementById('tpMicBtn').className = 'tp-mic-btn recording';
         document.getElementById('tpMicIcon').style.display = 'none';
         document.getElementById('tpStopIcon').style.display = '';
@@ -621,12 +621,12 @@
     document.getElementById('tpRecTimer').textContent = '00:00';
     document.getElementById('tpLiveStrip').classList.remove('active');
     if (!result || !result.surah) {
-      showCustomToast('Ã™â€žÃ™â€¦ Ã™Å Ã™ÂÃ˜ÂªÃ˜Â¹Ã˜Â±Ã™Å½Ã™â€˜Ã™Â Ã˜Â¹Ã™â€žÃ™â€° Ã˜Â§Ã™â€žÃ˜Â¢Ã™Å Ã˜Â© Ã¢â‚¬â€ Ã˜Â­Ã˜Â§Ã™Ë†Ã™â€ž Ã™â€¦Ã˜Â¬Ã˜Â¯Ã˜Â¯Ã˜Â§Ã™â€¹');
+      showCustomToast('لم يُتعرَّف على الآية — حاول مجدداً');
       _tp.errors++; _tpUpdateErrorPill(); return;
     }
     const matchIdx = _tp.ayahs.findIndex(a => a.surah === result.surah && a.ayah === result.ayah);
     if (matchIdx < 0) {
-      showCustomToast((result.surahName || 'Ã˜Â³Ã™Ë†Ã˜Â±Ã˜Â©') + ' Ã¢â‚¬â€ Ã˜Â§Ã™â€žÃ˜Â¢Ã™Å Ã˜Â© ' + result.ayah + ' (Ã™â€žÃ™Å Ã˜Â³Ã˜Âª Ã™ÂÃ™Å  Ã™â€¡Ã˜Â°Ã™â€¡ Ã˜Â§Ã™â€žÃ˜ÂµÃ™ÂÃ˜Â­Ã˜Â©)');
+      showCustomToast((result.surahName || 'سورة') + ' — الآية ' + result.ayah + ' (ليست في هذه الصفحة)');
       _tp.errors++; _tpUpdateErrorPill(); return;
     }
     const isCorrect = _tp.expectedIdx === null || matchIdx === _tp.expectedIdx;
@@ -634,7 +634,7 @@
     if (!isCorrect) { _tp.errors++; _tpUpdateErrorPill(); _tpFlashErrorMask(result.surah, result.ayah); }
     else { _tpRevealAyahMasks(result.surah, result.ayah); }
     const a = _tp.ayahs[matchIdx];
-    showCustomToast((isCorrect ? 'Ã¢Å“â€œ ' : 'Ã¢Å“â€” ') + a.surahName + ' Ã¢â‚¬â€ Ã˜Â§Ã™â€žÃ˜Â¢Ã™Å Ã˜Â© ' + a.ayah);
+    showCustomToast((isCorrect ? '✓ ' : '✗ ') + a.surahName + ' — الآية ' + a.ayah);
     _tpSetExpected(matchIdx + 1 < _tp.ayahs.length ? matchIdx + 1 : null);
   }
 
@@ -652,7 +652,7 @@
     document.getElementById('tpRecDot').className = 'tp-rec-dot';
     document.getElementById('tpRecTimer').textContent = '00:00';
     document.getElementById('tpLiveStrip').classList.remove('active');
-    showCustomToast(msg || 'Ã˜Â®Ã˜Â·Ã˜Â£ Ã™ÂÃ™Å  Ã˜Â§Ã™â€žÃ˜ÂªÃ˜Â³Ã˜Â¬Ã™Å Ã™â€ž');
+    showCustomToast(msg || 'خطأ في التسجيل');
   }
 
   function _tpUpdateErrors() { _tpUpdateErrorPill(); }

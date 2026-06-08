@@ -302,9 +302,6 @@
         }
       }
     }
-        }
-      }
-    }
 
     function updatePlayButtons(playing) {
       miniPlayPause.innerHTML = playing ? svgPause : svgPlay;

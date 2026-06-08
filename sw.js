@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v27"; // v27: audio caching, stale-while-revalidate, new pages
+const CACHE_NAME = "zad-muslim-v30"; // v29: fix mojibake in quran modules + audio.js stray-brace syntax error
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -41,9 +41,9 @@ const STATIC_ASSETS = [
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
   "./js/quran-common.js",
-  "./js/tasmee-engine.ts",
-  "./js/tasmee-matcher.ts",
-  "./js/tasmee-store.ts",
+  "./js/tasmee-engine.js",
+  "./js/tasmee-matcher.js",
+  "./js/tasmee-store.js",
 
   // ===== Extracted Quran modules =====
   "./js/quran/state.js",

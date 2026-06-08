@@ -1,16 +1,26 @@
     // ========== CORE FUNCTIONALITY ==========
+    function haptic(pattern) {
+      if (navigator.vibrate) {
+        navigator.vibrate(pattern || 10);
+      }
+    }
+
     function showCustomToast(message) {
       const toast = document.getElementById('customToast');
       if (!toast) return;
-      toast.innerHTML = message; toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
+      toast.innerHTML = message;
+      toast.classList.add('show');
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     function openSettingsModal() {
       updateVariantUI();
       const theme = localStorage.getItem('quranColorTheme') || 'golden';
       const label = document.getElementById('colorThemeLabel');
-      if (label) label.textContent = THEME_NAMES[theme] || 'Ø°Ù‡Ø¨ÙŠ';
+      if (label) label.textContent = THEME_NAMES[theme] || 'ذهبي';
       document.querySelectorAll('.theme-swatch').forEach(el => el.classList.toggle('active', el.dataset.theme === theme));
       document.getElementById('settingsModal').classList.add('active');
       if (typeof tarteelUpdateSettingsRow === 'function') tarteelUpdateSettingsRow();
@@ -35,7 +45,7 @@
       const topJuzName = document.getElementById('juzName');
       const topPageName = document.getElementById('pageName');
       let sName = ""; let jName = "";
-      if (typeof getCurrentJuz === 'function') { const j = getCurrentJuz(); if(j) jName = `Ø§Ù„Ø¬Ø²Ø¡ ${j.number}`; }
+      if (typeof getCurrentJuz === 'function') { const j = getCurrentJuz(); if(j) jName = `الجزء ${j.number}`; }
       if (typeof getCurrentSurah === 'function') { const s = getCurrentSurah(); if(s) sName = s.name; }
       if (juzLabel && jName) juzLabel.textContent = jName;
       if (surahLabel && sName) surahLabel.textContent = sName;
@@ -50,9 +60,9 @@
       if (topSurahName && sName) topSurahName.textContent = sName;
       if (topPageName) {
         if (dualPage && window.innerWidth >= 700 && currentPage < 604) {
-          topPageName.textContent = `ØµÙØ­Ø© ${currentPage}-${currentPage + 1}`;
+          topPageName.textContent = `صفحة ${currentPage}-${currentPage + 1}`;
         } else {
-          topPageName.textContent = `ØµÙØ­Ø© ${currentPage}`;
+          topPageName.textContent = `صفحة ${currentPage}`;
         }
       }
     }
@@ -85,7 +95,7 @@
     function confirmPageSelection() {
       const page = parseInt(document.getElementById('gotoPageInput').value);
       if (page >= 1 && page <= 604) { goToPage(page); closeModal('pageSelectorModal'); }
-      else showCustomToast('Ø±Ù‚Ù… Ø§Ù„ØµÙØ­Ø© ØºÙŠØ± ØµØ­ÙŠØ­');
+      else showCustomToast('رقم الصفحة غير صحيح');
     }
 
     function toggleBookmark() {
@@ -94,8 +104,8 @@
       let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
       const key = `page_${currentPage}`;
       const exists = bookmarks.find(b => b.key === key);
-      if (exists) { bookmarks = bookmarks.filter(b => b.key !== key); showCustomToast('ØªÙ…Øª Ø¥Ø²Ø§Ù„Ø© Ø§Ù„Ø¹Ù„Ø§Ù…Ø©'); }
-      else { bookmarks.push({ key, surah: surah.name, page: currentPage }); showCustomToast('ØªÙ…Øª Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ø¹Ù„Ø§Ù…Ø©'); }
+      if (exists) { bookmarks = bookmarks.filter(b => b.key !== key); showCustomToast('تمت إزالة العلامة'); }
+      else { bookmarks.push({ key, surah: surah.name, page: currentPage }); showCustomToast('تمت إضافة العلامة'); }
       localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
       updateBookmarkStar();
     }
@@ -108,7 +118,7 @@
       const list = document.getElementById('bookmarksList');
       const bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
       if (!bookmarks.length) {
-        list.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-hint); font-size:0.95rem;">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¹Ù„Ø§Ù…Ø§Øª Ù…Ø­ÙÙˆØ¸Ø©</div>';
+        list.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-hint); font-size:0.95rem;">لا توجد علامات محفوظة</div>';
       } else {
         list.innerHTML = '';
         bookmarks.forEach(b => {
@@ -137,7 +147,7 @@
     function openJuzSelector() {
       const list = document.getElementById('juzList');
       list.innerHTML = '';
-      const ordinals = ['Ø§Ù„Ø£ÙˆÙ„','Ø§Ù„Ø«Ø§Ù†ÙŠ','Ø§Ù„Ø«Ø§Ù„Ø«','Ø§Ù„Ø±Ø§Ø¨Ø¹','Ø§Ù„Ø®Ø§Ù…Ø³','Ø§Ù„Ø³Ø§Ø¯Ø³','Ø§Ù„Ø³Ø§Ø¨Ø¹','Ø§Ù„Ø«Ø§Ù…Ù†','Ø§Ù„ØªØ§Ø³Ø¹','Ø§Ù„Ø¹Ø§Ø´Ø±','Ø§Ù„Ø­Ø§Ø¯ÙŠ Ø¹Ø´Ø±','Ø§Ù„Ø«Ø§Ù†ÙŠ Ø¹Ø´Ø±','Ø§Ù„Ø«Ø§Ù„Ø« Ø¹Ø´Ø±','Ø§Ù„Ø±Ø§Ø¨Ø¹ Ø¹Ø´Ø±','Ø§Ù„Ø®Ø§Ù…Ø³ Ø¹Ø´Ø±','Ø§Ù„Ø³Ø§Ø¯Ø³ Ø¹Ø´Ø±','Ø§Ù„Ø³Ø§Ø¨Ø¹ Ø¹Ø´Ø±','Ø§Ù„Ø«Ø§Ù…Ù† Ø¹Ø´Ø±','Ø§Ù„ØªØ§Ø³Ø¹ Ø¹Ø´Ø±','Ø§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø­Ø§Ø¯ÙŠ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø«Ø§Ù†ÙŠ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø«Ø§Ù„Ø« ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø±Ø§Ø¨Ø¹ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø®Ø§Ù…Ø³ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø³Ø§Ø¯Ø³ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø³Ø§Ø¨Ø¹ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø«Ø§Ù…Ù† ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„ØªØ§Ø³Ø¹ ÙˆØ§Ù„Ø¹Ø´Ø±ÙˆÙ†','Ø§Ù„Ø«Ù„Ø§Ø«ÙˆÙ†'];
+      const ordinals = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون'];
       for (let i = 0; i < JUZ_MAP.length; i++) {
         const j = JUZ_MAP[i];
         const nextPage = i < JUZ_MAP.length - 1 ? JUZ_MAP[i+1].page - 1 : 604;
@@ -148,10 +158,10 @@
         div.innerHTML = `
           <div class="juz-card-badge juz-card-badge-${j.number}">${j.number}</div>
           <div class="juz-card-body">
-            <span class="juz-card-ordinal">Ø§Ù„Ø¬Ø²Ø¡ ${ordinals[i]}</span>
+            <span class="juz-card-ordinal">الجزء ${ordinals[i]}</span>
             <span class="juz-card-surah">${surah ? surah.name : ''}</span>
           </div>
-          <span class="juz-card-pages">${j.page}â€“${nextPage}</span>`;
+          <span class="juz-card-pages">${j.page}–${nextPage}</span>`;
         div.onclick = () => { goToPage(j.page); closeModal('juzSelectorModal'); };
         list.appendChild(div);
       }

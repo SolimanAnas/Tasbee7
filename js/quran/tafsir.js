@@ -127,7 +127,7 @@
           if (next.page && next.page !== currentPage) window.goToPage(next.page);
           await contextShowTafsir(true);
       } else {
-          showCustomToast("ØªÙ… Ø§Ù„ÙˆØµÙˆÙ„ Ù„Ù†Ù‡Ø§ÙŠØ© Ø§Ù„Ù…ØµØ­Ù");
+          showCustomToast("تم الوصول لنهاية المصحف");
       }
     }
 
@@ -142,7 +142,7 @@
           if (prev.page && prev.page !== currentPage) window.goToPage(prev.page);
           await contextShowTafsir(true);
       } else {
-          showCustomToast("ØªÙ… Ø§Ù„ÙˆØµÙˆÙ„ Ù„Ø¨Ø¯Ø§ÙŠØ© Ø§Ù„Ù…ØµØ­Ù");
+          showCustomToast("تم الوصول لبداية المصحف");
       }
     }
 
@@ -162,7 +162,7 @@
 
     async function contextShowTafsir(isNavigation = false) {
       if(!isNavigation) closeContextMenu();
-      if(!windowCurrentAyahGlobal) { showCustomToast("Ø§Ù„Ø±Ø¬Ø§Ø¡ ØªØ­Ø¯ÙŠØ¯ Ø¢ÙŠØ© Ø£ÙˆÙ„Ø§Ù‹"); return; }
+      if(!windowCurrentAyahGlobal) { showCustomToast("الرجاء تحديد آية أولاً"); return; }
       const { surah, ayah } = windowCurrentAyahGlobal;
       const contentDiv = document.getElementById('tafsirContent');
       document.getElementById('tafsirModal').classList.add('visible');
@@ -171,24 +171,24 @@
         tafsirSelectedDB = document.getElementById('tafsirBookSelect')?.value || tafsirSelectedDB;
         localStorage.setItem('tafsirSelectedBook', tafsirSelectedDB);
         contentDiv.innerHTML = typeof tafsirDropdownHTML === 'function'
-          ? tafsirDropdownHTML(tafsirSelectedDB) + '<div style="text-align:center; padding:30px; color:var(--accent);">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...</div>'
-          : '<div style="text-align:center; padding:30px; color:var(--accent);">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...</div>';
+          ? tafsirDropdownHTML(tafsirSelectedDB) + '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>'
+          : '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
         const [ayaTextRes, tafText] = await Promise.all([
           fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`),
           getTafsirText(tafsirSelectedDB, surah, ayah)
         ]);
         const ayaData = await ayaTextRes.json();
         const ayahText = (ayaData.code === 200) ? ayaData.data.text : '';
-        const tafsirText = tafText || 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ ØªÙØ³ÙŠØ± Ù„Ù‡Ø°Ù‡ Ø§Ù„Ø¢ÙŠØ©.';
+        const tafsirText = tafText || 'لم يتم العثور على تفسير لهذه الآية.';
         let html = typeof tafsirDropdownHTML === 'function' ? tafsirDropdownHTML(tafsirSelectedDB) : '';
-        html += `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">Ø§Ù„Ø¢ÙŠØ© ${ayah}</div>`;
-        html += `<div class="imlaei-text">ï´¿ ${ayahText} ï´¾</div>`;
+        html += `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
+        html += `<div class="imlaei-text">﴿ ${ayahText} ﴾</div>`;
         html += `<div style="text-align:justify; font-size:1.1rem; line-height:2; border-top:1px dashed var(--glass-border); padding-top:16px;">${tafsirText.replace(/\n/g, '<br>')}</div>`;
         contentDiv.innerHTML = html;
         highlightAyah(surah, ayah);
       } catch(e) {
         console.error(e);
-        contentDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px;">ØªØ¹Ø°Ø± ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØªÙØ³ÙŠØ± Ø£Ùˆ Ø§Ù„Ø¢ÙŠØ© ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©</div><button onclick="contextShowTafsir()" class="action-btn" style="margin-top:10px; justify-content:center;">Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø©</button>`;
+        contentDiv.innerHTML = `<div style="text-align:center; color:var(--danger); padding:20px;">تعذر تحميل التفسير أو الآية غير موجودة</div><button onclick="contextShowTafsir()" class="action-btn" style="margin-top:10px; justify-content:center;">إعادة المحاولة</button>`;
       }
     }
 

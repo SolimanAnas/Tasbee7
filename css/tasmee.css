@@ -457,3 +457,24 @@ body::before {
 @media (min-width: 481px) {
   .dashboard { padding-top: var(--spacing-md); }
 }
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== SHIMMER SKELETON ===== */
+@keyframes skelShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skel {
+  background: linear-gradient(90deg, var(--card-bg, rgba(255,255,255,0.06)) 25%, rgba(255,255,255,0.12) 50%, var(--card-bg, rgba(255,255,255,0.06)) 75%);
+  background-size: 200% 100%;
+  animation: skelShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}

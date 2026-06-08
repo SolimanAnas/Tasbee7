@@ -87,18 +87,18 @@
       try {
         const res = await fetch(`https://api.alquran.cloud/v1/ayah/${reference}`);
         const data = await res.json();
-        if(data.code === 200) { navigator.clipboard.writeText(data.data.text); showCustomToast("ØªÙ… Ù†Ø³Ø® Ø§Ù„Ø¢ÙŠØ©"); }
-      } catch(e) { showCustomToast("Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ù†Ø³Ø®"); }
+        if(data.code === 200) { navigator.clipboard.writeText(data.data.text); showCustomToast("تم نسخ الآية"); }
+      } catch(e) { showCustomToast("خطأ في النسخ"); }
     }
 
     // ========== V3 MUSHAF VARIANT MANAGEMENT ==========
     const MUSHAF_VARIANTS = [
-      { id: 'mushaf-colored',    nameAr: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø©',       desc: 'Ø§Ù„Ù…ØµØ­Ù Ø§Ù„Ù…Ù„ÙˆÙ† - Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠØ©',        ext: 'webp' },
-      { id: 'mushaf-madina1441', nameAr: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© 1441', desc: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© Ø§Ù„Ù†Ø¨ÙˆÙŠØ© - Ø·Ø¨Ø¹Ø© 1441',            ext: 'webp' },
-      { id: 'mushaf-tajweed',    nameAr: 'Ù…ØµØ­Ù Ø§Ù„ØªØ¬ÙˆÙŠØ¯',       desc: 'Ù…ØµØ­Ù Ø§Ù„ØªØ¬ÙˆÙŠØ¯ Ø§Ù„Ù…Ù„ÙˆÙ†',                    ext: 'webp' },
-      { id: 'mushaf-borderd',    nameAr: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© 1421', desc: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© Ø§Ù„Ù†Ø¨ÙˆÙŠØ© - Ø·Ø¨Ø¹Ø© 1421',                 ext: 'png' },
-      { id: 'mushaf-green',    nameAr: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© Ø§Ù„Ø£Ø®Ø¶Ø±', desc: 'Ù…ØµØ­Ù Ø§Ù„Ù…Ø¯ÙŠÙ†Ø© Ø§Ù„Ø£Ø®Ø¶Ø± - Ù…Ø¬Ù…Ø¹ Ø§Ù„Ù…Ù„Ùƒ ÙÙ‡Ø¯',      ext: 'webp' },
-      { id: 'mushaf-text',       nameAr: 'Ø§Ù„Ù…ØµØ­Ù Ø§Ù„Ù†ØµÙŠ',        desc: 'Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ù†ØµÙŠØ© Ù„Ù„Ù‚Ø±Ø¢Ù† Ø§Ù„ÙƒØ±ÙŠÙ…',               ext: '' }
+      { id: 'mushaf-colored',    nameAr: 'مصحف المدينة',       desc: 'المصحف الملون - النسخة الافتراضية',        ext: 'webp' },
+      { id: 'mushaf-madina1441', nameAr: 'مصحف المدينة 1441', desc: 'مصحف المدينة النبوية - طبعة 1441',            ext: 'webp' },
+      { id: 'mushaf-tajweed',    nameAr: 'مصحف التجويد',       desc: 'مصحف التجويد الملون',                    ext: 'webp' },
+      { id: 'mushaf-borderd',    nameAr: 'مصحف المدينة 1421', desc: 'مصحف المدينة النبوية - طبعة 1421',                 ext: 'png' },
+      { id: 'mushaf-green',    nameAr: 'مصحف المدينة الأخضر', desc: 'مصحف المدينة الأخضر - مجمع الملك فهد',      ext: 'webp' },
+      { id: 'mushaf-text',       nameAr: 'المصحف النصي',        desc: 'النسخة النصية للقرآن الكريم',               ext: '' }
     ];
 
     let currentMushafVariant = localStorage.getItem('quranV3Variant') || 'mushaf-colored';
@@ -107,7 +107,7 @@
     let borderZoomState = false; // false=OUT (1.2,1.4), true=IN (1.0,1.3)
     let zoomHintTimeout = null;
 
-    const THEME_NAMES = { golden:'Ø°Ù‡Ø¨ÙŠ',teal:'ÙÙŠØ±ÙˆØ²ÙŠ',crimson:'Ù‚Ø±Ù…Ø²ÙŠ',camel:'Ø¹Ø³Ù„ÙŠ',olive:'Ø²ÙŠØªÙˆÙ†ÙŠ',royal:'Ù…Ù„ÙƒÙŠ' };
+    const THEME_NAMES = { golden:'ذهبي',teal:'فيروزي',crimson:'قرمزي',camel:'عسلي',olive:'زيتوني',royal:'ملكي' };
 
     function setColorTheme(themeId) {
       if (!THEME_NAMES[themeId]) return;
@@ -130,7 +130,7 @@
         updateVariantUI();
         updateContent();
         const v = getVariantInfo(variantId);
-        showCustomToast(`ØªÙ… Ø§Ù„ØªØ¨Ø¯ÙŠÙ„ Ø¥Ù„Ù‰ ${v.nameAr}`);
+        showCustomToast(`تم التبديل إلى ${v.nameAr}`);
         if (variantId === 'mushaf-borderd' || variantId === 'mushaf-green') showZoomHint();
       }
     }
@@ -187,7 +187,7 @@
         if (v.id === 'mushaf-madina1441') {
           const badge = document.createElement('span');
           badge.className = 'mushaf-card-badge';
-          badge.textContent = 'Ø§ÙØªØ±Ø§Ø¶ÙŠ';
+          badge.textContent = 'افتراضي';
           card.appendChild(badge);
         }
 
