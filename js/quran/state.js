@@ -54,6 +54,9 @@
         console.log('Legacy DB loaded');
       } catch(e) {
         console.error("DB error:", e);
+        if (typeof showCustomToast === 'function') {
+          showCustomToast("تعذر تحميل قاعدة البيانات — بعض الميزات قد لا تعمل");
+        }
       }
     }
 
@@ -77,7 +80,10 @@
         if (window.__MEDINA2_COORDS__) {
           data = window.__MEDINA2_COORDS__;
         } else {
-          const res = await fetch('../json/medina2_coords.json');
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 10000);
+          const res = await fetch('../json/medina2_coords.json', { signal: controller.signal });
+          clearTimeout(timer);
           data = await res.json();
         }
         medinaCoordsByAyah = {};

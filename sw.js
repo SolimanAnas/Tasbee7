@@ -1,4 +1,5 @@
-const CACHE_NAME = "zad-muslim-v26"; // v26: takrar scope by surah/juz/hizb/rub/page (quran-structure.js)
+const CACHE_NAME = "zad-muslim-v27"; // v27: audio caching, stale-while-revalidate, new pages
+const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -19,6 +20,8 @@ const STATIC_ASSETS = [
   "./pages/takrar.html",
   "./pages/howto.html",
   "./pages/about.html",
+  "./pages/tasmee-dashboard.html",
+  "./pages/tasmee-review.html",
 
   // ===== Config =====
   "./manifest.json",
@@ -26,6 +29,7 @@ const STATIC_ASSETS = [
   // ===== Styles =====
   "./css/style.css",
   "./css/quran-v4.css",
+  "./css/tasmee.css",
 
   // ===== Core JS =====
   "./data/cities.js",
@@ -46,6 +50,7 @@ const STATIC_ASSETS = [
   "./js/quran/navigation.js",
   "./js/quran/highlights.js",
   "./js/quran/audio.js",
+  "./js/quran/audio-cache.js",
   "./js/quran/tafsir.js",
   "./js/quran/settings.js",
   "./js/quran/ui.js",
@@ -53,6 +58,8 @@ const STATIC_ASSETS = [
   "./js/quran/download.js",
   "./js/quran/init.js",
   "./js/quran/tasmee.js",
+  "./js/quran/tasmee-dashboard.js",
+  "./js/quran/tasmee-review.js",
 
   // ===== Offline Quran text (word-by-word Tasmee) =====
   "./data/quran.json",
@@ -123,8 +130,7 @@ const DEEP_LINKS = {
   default: "./index.html"
 };
 
-// ⚠️ التعديل الجوهري: تحميل الملفات واحداً تلو الآخر. 
-// إذا استخدمنا `cache.addAll` وفشل ملف واحد (مثلاً أيقونة غير موجودة)، سيفشل الكاش بالكامل.
+// ===== Install: cache static assets =====
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
@@ -147,11 +153,12 @@ self.addEventListener("install", event => {
   );
 });
 
+// ===== Activate: clean old caches =====
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(key => key !== CACHE_NAME && !key.startsWith("quran-offline") && !key.startsWith("quran-pages"))
+        keys.filter(key => key !== CACHE_NAME && key !== AUDIO_CACHE && !key.startsWith("quran-offline") && !key.startsWith("quran-pages"))
           .map(key => caches.delete(key))
       )
     )
@@ -160,35 +167,68 @@ self.addEventListener("activate", event => {
   return self.clients.claim();
 });
 
+// ===== Fetch handler =====
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
 
-  if (url.hostname.includes("mp3quran") || url.hostname.includes("archive.org") ||
-      url.hostname.includes("radiojar") || url.hostname.includes("api.alquran.cloud") ||
-      url.pathname.endsWith(".mp3") || url.pathname.endsWith(".m3u8") ||
-      url.pathname.endsWith(".onnx")) {
-    return;
-  }
-
-  if (req.headers.get("accept")?.includes("text/html")) {
+  // --- Audio files: cache-first with audio-cache-v1 ---
+  if (url.pathname.endsWith(".mp3") ||
+      url.hostname.includes("mp3quran") ||
+      url.hostname.includes("archive.org")) {
     event.respondWith(
-      fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
-        return res;
-      }).catch(() => {
-        // ⚠️ تم إصلاح الـ Syntax Error (الأقواس) وتمت إضافة ignoreSearch للروابط العميقة أوفلاين
-        return caches.match(req, { ignoreSearch: true }).then(cachedRes => 
-          cachedRes || caches.match("./index.html", { ignoreSearch: true })
-        );
+      caches.open(AUDIO_CACHE).then(async cache => {
+        const cached = await cache.match(req);
+        if (cached) return cached;
+        try {
+          const response = await fetch(req);
+          if (response && response.ok) {
+            cache.put(req, response.clone());
+          }
+          return response;
+        } catch (_) {
+          return new Response("", { status: 503 });
+        }
       })
     );
     return;
   }
 
+  // --- API calls: network-first, no caching (let client handle) ---
+  if (url.hostname.includes("api.alquran.cloud") ||
+      url.pathname.endsWith(".m3u8") ||
+      url.pathname.endsWith(".onnx")) {
+    return;
+  }
+
+  // --- HTML pages: stale-while-revalidate ---
+  if (req.headers.get("accept")?.includes("text/html")) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async cache => {
+        const cached = await cache.match(req);
+        const networkFetch = fetch(req).then(res => {
+          if (res && res.ok) {
+            cache.put(req, res.clone());
+          }
+          return res;
+        }).catch(() => cached);
+
+        // Return cached immediately if available, update in background
+        if (cached) {
+          fetch(req).then(res => {
+            if (res && res.ok) cache.put(req, res);
+          }).catch(() => {});
+          return cached;
+        }
+        return networkFetch;
+      })
+    );
+    return;
+  }
+
+  // --- Static assets: cache-first, network fallback ---
   event.respondWith(
     caches.match(req).then(cacheRes => cacheRes ||
       fetch(req).then(networkRes => {
@@ -197,24 +237,23 @@ self.addEventListener("fetch", event => {
           caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
         return networkRes;
-      }).catch(err => new Response("Offline", { status: 503, statusText: "Service Unavailable", headers: { "Content-Type": "text/plain" } }))
+      }).catch(() => new Response("Offline", { status: 503, statusText: "Service Unavailable", headers: { "Content-Type": "text/plain" } }))
     )
   );
 });
 
-// Push notification receive
+// ===== Push notification receive =====
 self.addEventListener("push", event => {
   let data = {};
-  
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
     data = { title: "🔔 Zad Al-Muslim", body: "تذكير جديد" };
   }
-  
+
   const notificationData = data.data || {};
   const targetUrl = notificationData.url || DEEP_LINKS[notificationData.type] || DEEP_LINKS.default;
-  
+
   const options = {
     body: data.body || "زاد المسلم",
     icon: "./icons/icon-192.png",
@@ -222,7 +261,7 @@ self.addEventListener("push", event => {
     vibrate: [200, 100, 200],
     tag: data.tag || "zad-muslim",
     renotify: true,
-    data: { 
+    data: {
       url: targetUrl,
       type: notificationData.type || "default"
     },
@@ -233,23 +272,21 @@ self.addEventListener("push", event => {
   };
 
   console.log("📨 Push received:", data.title);
-  
   event.waitUntil(
     self.registration.showNotification(data.title || "🔔 Zad Al-Muslim", options)
   );
 });
 
-// Notification click handler
+// ===== Notification click handler =====
 self.addEventListener("notificationclick", event => {
   event.notification.close();
-  
   if (event.action === "dismiss") return;
-  
+
   const targetUrl = event.notification.data?.url || DEEP_LINKS.default;
   const fullTargetUrl = new URL(targetUrl, self.location.href).href;
-  
+
   console.log("👆 Notification clicked, opening:", fullTargetUrl);
-  
+
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
       const targetPath = new URL(fullTargetUrl).pathname;
@@ -265,4 +302,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v13 loaded");
+console.log("✅ Service Worker v27 loaded");

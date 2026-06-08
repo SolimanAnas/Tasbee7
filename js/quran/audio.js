@@ -1,9 +1,17 @@
     // ========== AUDIO PLAYER ==========
     const svgPlay = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor" style="padding:13%"><path d="M8 5v14l11-7z"/></svg>`;
     const svgPause = `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor" style="padding:13%"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    const AUDIO_FETCH_TIMEOUT = 10000;
 
     let audioPlayer = new Audio();
     const preloaderAudio = new Audio();
+
+    audioPlayer.onerror = () => {
+      console.error('Audio playback error:', audioPlayer.error);
+      isPlaying = false;
+      updatePlayButtons(false);
+      showCustomToast("خطأ في تشغيل الملف الصوتي — تحقق من الاتصال");
+    };
 
     let currentReciter = localStorage.getItem('quranReciter') || 'ar.minshawi';
     let isPlaying = false;
@@ -110,10 +118,21 @@
     async function fetchAudioData(surah, ayah) {
       const reference = `${surah}:${ayah}`;
       try {
-        const res = await fetch(`https://api.alquran.cloud/v1/ayah/${reference}/${currentReciter}`);
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), AUDIO_FETCH_TIMEOUT);
+        const res = await fetch(`https://api.alquran.cloud/v1/ayah/${reference}/${currentReciter}`, { signal: controller.signal });
+        clearTimeout(timer);
         const data = await res.json();
-        if(data.code === 200 && data.data) return data.data;
-      } catch(e) { console.error(e); }
+        if(data.code === 200 && data.data) {
+          if (data.data.audio && typeof AudioCache !== 'undefined') {
+            AudioCache.put(data.data.audio, new Response('')).catch(() => {});
+          }
+          return data.data;
+        }
+      } catch(e) {
+        if (e.name === 'AbortError') console.warn('Audio fetch timeout:', reference);
+        else console.error('Audio fetch error:', e);
+      }
       return null;
     }
 
@@ -135,12 +154,14 @@
          if (nextAyahNum > maxAyah) { nextSurah++; nextAyahNum = 1; }
          if (nextSurah > 114) return;
        }
-       const nextData = await fetchAudioData(nextSurah, nextAyahNum);
-       if (nextData && nextData.audio) {
-           preloaderAudio.src = nextData.audio;
-           preloaderAudio.preload = 'auto';
-           preloaderAudio.load();
-       }
+       try {
+         const nextData = await fetchAudioData(nextSurah, nextAyahNum);
+         if (nextData && nextData.audio) {
+             preloaderAudio.src = nextData.audio;
+             preloaderAudio.preload = 'auto';
+             preloaderAudio.load();
+         }
+       } catch (_) {}
     }
 
     async function startPlayback(surah, ayah) {
@@ -148,9 +169,13 @@
       windowCurrentAyahGlobal = { surah: parseInt(surah), ayah: parseInt(ayah) };
       const data = await fetchAudioData(surah, ayah);
       if(!data) {
-          const next = await getNextAyahDb(surah, ayah);
-          if (next) { startPlayback(next.surah, next.ayah); }
-          else { stopAudio(); showCustomToast("ØªÙ… Ø®ØªÙ… Ø§Ù„Ù‚Ø±Ø¢Ù† Ø§Ù„ÙƒØ±ÙŠÙ…"); }
+          try {
+            const next = await getNextAyahDb(surah, ayah);
+            if (next) { startPlayback(next.surah, next.ayah); }
+            else { stopAudio(); showCustomToast("تم اختراق القرآن الكريم"); }
+          } catch (_) {
+            stopAudio();
+          }
           return;
       }
       currentPlaylist = [{ surah, ayah, audioUrl: data.audio, page: data.page }];
@@ -158,24 +183,42 @@
       playCurrent();
     }
 
-    function playCurrent() {
+    async function playCurrent() {
       if(currentIndex >= currentPlaylist.length) { stopAudio(); return; }
       const item = currentPlaylist[currentIndex];
       windowCurrentAyahGlobal = { surah: item.surah, ayah: item.ayah };
       if (item.page && item.page !== currentPage) { window.goToPage(item.page); }
-      audioPlayer.src = item.audioUrl;
+
+      let audioUrl = item.audioUrl;
+      if (typeof AudioCache !== 'undefined') {
+        try {
+          const cached = await AudioCache.fetchCached(item.audioUrl);
+          if (cached) {
+            const blob = await cached.blob();
+            audioUrl = URL.createObjectURL(blob);
+          }
+        } catch (_) {}
+      }
+
+      audioPlayer.src = audioUrl;
       audioPlayer.playbackRate = parseFloat(speedSelect.value);
-      audioPlayer.play().catch(e => showCustomToast("Ø®Ø·Ø£ ÙÙŠ Ø§Ù„ØªØ´ØºÙŠÙ„"));
+      audioPlayer.play().catch(e => {
+        console.error('Audio play() error:', e);
+        showCustomToast("خطأ في التشغيل — جارٍ المحاولة مرة أخرى");
+        setTimeout(() => {
+          audioPlayer.play().catch(() => {});
+        }, 1500);
+      });
       isPlaying = true; updatePlayButtons(true);
       highlightAyah(item.surah, item.ayah);
-      preloadNext();
+      preloadNext().catch(() => {});
       if ('mediaSession' in navigator) {
-        const surahName = document.getElementById('surahLabel')?.textContent || `Ø³ÙˆØ±Ø© ${item.surah}`;
+        const surahName = document.getElementById('surahLabel')?.textContent || `سورة ${item.surah}`;
         const recOpt = expandedReciterSelect.options[expandedReciterSelect.selectedIndex];
         navigator.mediaSession.metadata = new MediaMetadata({
-          title:  `${surahName} â€” Ø§Ù„Ø¢ÙŠØ© ${item.ayah}`,
+          title:  `${surahName} — الآية ${item.ayah}`,
           artist: recOpt ? recOpt.text : '',
-          album:  'Ø§Ù„Ù…ØµØ­Ù Ø§Ù„Ø´Ø±ÙŠÙ',
+          album:  'المصحف الشريف',
           artwork: [
             { src: '../icons/icon-192.png', sizes: '192x192', type: 'image/png' },
             { src: '../icons/icon_512.png', sizes: '512x512', type: 'image/png' }
@@ -189,40 +232,50 @@
     }
 
     async function nextAyah() {
-       if(!windowCurrentAyahGlobal) {
-           const first = await getFirstAyahOfPage(currentPage);
-           if (first) { windowCurrentAyahGlobal = first; } else return;
-       }
-       const rTo = parseInt(rangeToInput.value);
-       const rFrom = parseInt(rangeFromInput.value) || 1;
-       const rCount = parseInt(rangeRepeatInput.value) || 1;
-       if (rangeRepeatToggle.checked && rTo > 0 && windowCurrentAyahGlobal.ayah >= rTo) {
-           if (currentRangeRepeat < rCount - 1) {
-               currentRangeRepeat++;
-               startPlayback(windowCurrentAyahGlobal.surah, rFrom);
-           } else {
-               stopAudio(); currentRangeRepeat = 0;
-           }
-       } else {
-           const next = await getNextAyahDb(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
-           if (next) {
-               startPlayback(next.surah, next.ayah);
-           } else {
-               stopAudio(); showCustomToast("ØªÙ… Ø®ØªÙ… Ø§Ù„Ù‚Ø±Ø¢Ù† Ø§Ù„ÙƒØ±ÙŠÙ…");
-           }
+       try {
+         if(!windowCurrentAyahGlobal) {
+             const first = await getFirstAyahOfPage(currentPage);
+             if (first) { windowCurrentAyahGlobal = first; } else return;
+         }
+         const rTo = parseInt(rangeToInput.value);
+         const rFrom = parseInt(rangeFromInput.value) || 1;
+         const rCount = parseInt(rangeRepeatInput.value) || 1;
+         if (rangeRepeatToggle.checked && rTo > 0 && windowCurrentAyahGlobal.ayah >= rTo) {
+             if (currentRangeRepeat < rCount - 1) {
+                 currentRangeRepeat++;
+                 startPlayback(windowCurrentAyahGlobal.surah, rFrom);
+             } else {
+                 stopAudio(); currentRangeRepeat = 0;
+             }
+         } else {
+             const next = await getNextAyahDb(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
+             if (next) {
+                 startPlayback(next.surah, next.ayah);
+             } else {
+                 stopAudio(); showCustomToast("تم اختراق القرآن الكريم");
+             }
+         }
+       } catch (e) {
+         console.error('nextAyah error:', e);
+         stopAudio();
        }
     }
 
     async function prevAyah() {
-       if(!windowCurrentAyahGlobal) {
-           const first = await getFirstAyahOfPage(currentPage);
-           if (first) { windowCurrentAyahGlobal = first; } else return;
-       }
-       const prev = await getPrevAyahDb(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
-       if (prev) {
-           startPlayback(prev.surah, prev.ayah);
-       } else {
-           showCustomToast("Ù‡Ø°Ù‡ Ø¨Ø¯Ø§ÙŠØ© Ø§Ù„Ù…ØµØ­Ù");
+       try {
+         if(!windowCurrentAyahGlobal) {
+             const first = await getFirstAyahOfPage(currentPage);
+             if (first) { windowCurrentAyahGlobal = first; } else return;
+         }
+         const prev = await getPrevAyahDb(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
+         if (prev) {
+             startPlayback(prev.surah, prev.ayah);
+         } else {
+             showCustomToast("هذه بداية المصحف");
+         }
+       } catch (e) {
+         console.error('prevAyah error:', e);
+         stopAudio();
        }
     }
 
@@ -235,13 +288,20 @@
         } else if(windowCurrentAyahGlobal) {
             startPlayback(windowCurrentAyahGlobal.surah, windowCurrentAyahGlobal.ayah);
         } else {
-            const first = await getFirstAyahOfPage(currentPage);
-            if (first) {
-                windowCurrentAyahGlobal = first;
-                startPlayback(first.surah, first.ayah);
-            } else {
-                showCustomToast("Ø§Ù„Ø±Ø¬Ø§Ø¡ ØªØ­Ø¯ÙŠØ¯ Ø¢ÙŠØ© Ø£ÙˆÙ„Ø§Ù‹");
+            try {
+              const first = await getFirstAyahOfPage(currentPage);
+              if (first) {
+                  windowCurrentAyahGlobal = first;
+                  startPlayback(first.surah, first.ayah);
+              } else {
+                  showCustomToast("الرجاء تحديد آية أولاً");
+              }
+            } catch (_) {
+              showCustomToast("خطأ في تحميل الآيات");
             }
+        }
+      }
+    }
         }
       }
     }

@@ -188,7 +188,7 @@
     function cacheAllPages() {
       const btn = document.getElementById('offlineDownloadBtn');
       btn.disabled = true;
-      btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...`;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> جاري التحميل...`;
       let count = 0; const total = 604; const cacheName = `quran-pages-${currentMushafVariant}`;
       const v = getVariantInfo(currentMushafVariant);
       caches.open(cacheName).then(cache => {
@@ -198,10 +198,75 @@
         }
         function finish() {
           btn.disabled = false;
-          btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> ØªÙ… Ø§Ù„ØªØ­Ù…ÙŠÙ„ Ø¨Ù†Ø¬Ø§Ø­`;
+          btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> تم التحميل بنجاح`;
           setTimeout(()=> {
-            btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ØªØ­Ù…ÙŠÙ„ Ø¬Ù…ÙŠØ¹ Ø§Ù„ØµÙØ­Ø§Øª Ù„Ù„Ù‚Ø±Ø§Ø¡Ø© Ø¨Ø¯ÙˆÙ† Ø¥Ù†ØªØ±Ù†Øª`;
+            btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> تحميل جميع الصفحات للقراءة بدون إنترنت`;
           }, 3000);
         }
       });
+    }
+
+    // ===== Audio Cache Management =====
+    function updateAudioCacheStatus() {
+      const el = document.getElementById('audioCacheStatus');
+      if (!el || typeof AudioCache === 'undefined') {
+        if (el) el.textContent = 'غير متوفر';
+        return;
+      }
+      const stats = AudioCache.getStats();
+      el.textContent = stats.count > 0
+        ? `${stats.count} ملف صوتي — ${stats.totalMB} MB`
+        : 'لا توجد ملفات محفوظة';
+    }
+
+    async function prefetchCurrentSurahAudio() {
+      if (typeof AudioCache === 'undefined') {
+        showCustomToast('تخزين الصوت غير متوفر');
+        return;
+      }
+      if (!windowCurrentAyahGlobal) {
+        showCustomToast('حدد آية أولاً');
+        return;
+      }
+
+      const surah = windowCurrentAyahGlobal.surah;
+      const maxAyah = ayahCountMap[surah] || AYAH_COUNTS_FALLBACK[surah] || 286;
+      const reciter = currentReciter;
+      let cached = 0;
+
+      showCustomToast(`جاري تحميل سورة ${surah}...`);
+
+      for (let ayah = 1; ayah <= maxAyah; ayah++) {
+        try {
+          const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/${reciter}`);
+          const data = await res.json();
+          if (data.code === 200 && data.data && data.data.audio) {
+            const audioRes = await fetch(data.data.audio);
+            if (audioRes.ok) {
+              await AudioCache.put(data.data.audio, audioRes);
+              cached++;
+            }
+          }
+        } catch (_) {}
+      }
+
+      showCustomToast(`تم تحميل ${cached} آية من سورة ${surah}`);
+      updateAudioCacheStatus();
+    }
+
+    async function clearAudioCache() {
+      if (typeof AudioCache === 'undefined') return;
+      if (!confirm('مسح جميع ملفات الصوت المحفوظة؟')) return;
+      await AudioCache.clearAll();
+      showCustomToast('تم مسح التخزين');
+      updateAudioCacheStatus();
+    }
+
+    // Update cache status on settings open
+    const _origOpenSettings = window.openSettingsModal;
+    if (typeof _origOpenSettings === 'function') {
+      window.openSettingsModal = function() {
+        _origOpenSettings();
+        updateAudioCacheStatus();
+      };
     }

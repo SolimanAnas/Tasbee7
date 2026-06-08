@@ -325,6 +325,25 @@
     moon.style.display = theme === 'light' ? 'block' : 'none';
   }
 
+  /* ===== Mastery grid ===== */
+  async function renderMasteryGrid() {
+    var grid = $('masteryGrid');
+    if (!grid) return;
+    var allRevisions = await getAll('revisions');
+    grid.innerHTML = '';
+    for (var s = 1; s <= 114; s++) {
+      var surahRevisions = allRevisions.filter(function (r) { return r.surah === s; });
+      var avgLevel = 0;
+      if (surahRevisions.length > 0) {
+        avgLevel = surahRevisions.reduce(function (sum, r) { return sum + r.level; }, 0) / surahRevisions.length;
+      }
+      var cell = document.createElement('div');
+      cell.className = 'mastery-cell l' + Math.min(5, Math.round(avgLevel));
+      cell.title = getSurahName(s) + ' (مستوى ' + Math.round(avgLevel) + ')';
+      grid.appendChild(cell);
+    }
+  }
+
   /* ===== INIT ===== */
   async function init() {
     var savedTheme = localStorage.getItem('theme') || 'dark';
@@ -379,6 +398,7 @@
       renderWeakWords(agg.weakWords);
       renderHistory(sessions);
       renderDueRevisions(due);
+      renderMasteryGrid();
 
     } catch (err) {
       console.error('Tasmee dashboard init error:', err);

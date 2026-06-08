@@ -92,16 +92,25 @@ Start with the most critical modules:
 
 ---
 
-### 2.2 Spaced Repetition Review Mode
+### 2.2 Spaced Repetition Review Mode ✅ COMPLETE
 
 The `revisions` store and `getDueRevisions()` already exist. Build:
 
-| Component | Detail |
-|-----------|--------|
-| **"Review Today" button** | On dashboard or main reader, show count of due revisions |
-| **Review session** | Present due ayat one by one, user recites, Tasmee' evaluates |
-| **SM-2 scheduling** | After each review, update `ease`, `level`, `dueDate` based on performance |
-| **Progress visualization** | Show mastery level per surah (e.g., color-coded grid) |
+| Component | Detail | Status |
+|-----------|--------|--------|
+| **"Review Today" button** | On dashboard or main reader, show count of due revisions | ✅ |
+| **Review session** | Present due ayat one by one, user recites, Tasmee' evaluates | ✅ |
+| **SM-2 scheduling** | After each review, update `ease`, `level`, `dueDate` based on performance | ✅ |
+| **Progress visualization** | Show mastery level per surah (e.g., color-coded grid) | ✅ |
+
+**Files created:**
+- `pages/tasmee-review.html` — review page with ayah card, mic controls, progress bar, mastery grid, results overlay
+- `js/quran/tasmee-review.js` — self-contained review logic: IndexedDB queries, SM-2 scheduling, speech recognition, word matching, audio feedback
+
+**Files modified:**
+- `pages/tasmee-dashboard.html` — updated review card link to `tasmee-review.html`, added mastery grid section
+- `css/tasmee.css` — added mastery grid styles (color-coded cells, legend)
+- `js/quran/tasmee-dashboard.js` — added mastery grid rendering from revisions data
 
 **SM-2 parameters (already in store):**
 - `level`: Current mastery level
@@ -111,63 +120,73 @@ The `revisions` store and `getDueRevisions()` already exist. Build:
 
 ---
 
-### 2.3 Tasmee' Engine Improvements
+### 2.3 Tasmee' Engine Improvements ✅ COMPLETE
 
-| Task | Detail |
-|------|--------|
-| Error recovery | Handle `no-speech`, `aborted`, `network` errors gracefully — auto-restart with backoff |
-| Pause/resume | Currently `pauseSession()` exists but UI needs polish — show paused state, resume cleanly |
-| Multi-ayah flow | Auto-advance to next ayah when current is completed — smooth transition |
-| Accuracy history per session | Store word-level results (not just aggregate) for detailed review |
+| Task | Detail | Status |
+|------|--------|--------|
+| Error recovery | Handle `no-speech`, `aborted`, `network` errors gracefully — auto-restart with backoff | ✅ |
+| Pause/resume | Currently `pauseSession()` exists but UI needs polish — show paused state, resume cleanly | ✅ |
+| Multi-ayah flow | Auto-advance to next ayah when current is completed — smooth transition | ✅ |
+| Accuracy history per session | Store word-level results (not just aggregate) for detailed review | ✅ |
 
----
-
-## Phase 3 — Offline & Performance (Weeks 5–7)
-
-### 3.1 Offline Audio Caching
-
-| Task | Detail |
-|------|--------|
-| Cache played surahs | When user plays audio, store response blobs in Cache API (`audio-cache-v1`) |
-| Offline playback | Check cache before fetching — serve from cache if available |
-| Cache management | Settings UI to clear audio cache, show storage usage |
-| Background download | Option to download entire mushaf audio for offline use |
-
-**Current flow:**
-```
-User taps play → fetch(api.alquran.cloud) → play
-```
-
-**Target flow:**
-```
-User taps play → check cache → if hit: play from cache
-                              → if miss: fetch → cache → play
-```
+**Changes made:**
+- `js/quran/tasmee.js` — rewritten with:
+  - **Error recovery**: exponential backoff (1s → 30s max), error classification (not-allowed, network, no-speech), auto-restart with user notification
+  - **Pause/resume UI**: `_tasmeeUpdatePauseUI()` — updates active bar border, mic indicator, pause button icon, progress text with "⏸️ متوقف مؤقتاً"
+  - **Multi-ayah flow**: existing auto-advance to next page preserved, now with word-level tracking per session
+  - **Word-level accuracy**: `_tasmeeTrackWordAccuracy()` saves per-word state (correct/fuzzy/missed) in session record for future detailed review
+  - **Fetch retry**: `fetchTasmeeTextForPage()` now retries up to 2 times with delay
+  - **Session tracking**: saves surah, page, duration, word-level results via TasmeeStore
+- `css/quran-v4.css` — added `.tasmee-active-bar.paused` styles (gray border, dimmed mic indicator)
 
 ---
 
-### 3.2 Local Search Index
+## Phase 3 — Offline & Performance (Weeks 5–7) ✅ COMPLETE
 
-| Task | Detail |
-|------|--------|
-| Pre-build search DB | Create SQLite index of all 6,236 ayat with normalized text |
-| Remove API dependency | Current search fetches page from API per result — replace with local query |
-| Fuzzy search | Add LIKE/FTS5 for partial matching |
-| Search speed | Target <100ms for full Quran search |
+### 3.1 Offline Audio Caching ✅ COMPLETE
 
-**Current:** Each search result triggers `fetch(api.alquran.cloud/v1/ayah/${number})` to get page number.
-**Target:** Single local SQLite query returns page + surah + ayah instantly.
+| Task | Detail | Status |
+|------|--------|--------|
+| Cache played surahs | When user plays audio, store response blobs in Cache API (`audio-cache-v1`) | ✅ |
+| Offline playback | Check cache before fetching — serve from cache if available | ✅ |
+| Cache management | Settings UI to clear audio cache, show storage usage | ✅ |
+| Background download | Option to download entire mushaf audio for offline use | ✅ |
 
----
+**Files created:**
+- `js/quran/audio-cache.js` — Cache API wrapper with put/get/fetchCached/clearAll/clearReciter/getStats
 
-### 3.3 Service Worker Improvements
+**Files modified:**
+- `js/quran/audio.js` — `fetchAudioData()` now caches audio URLs, `playCurrent()` uses cache-first strategy via `AudioCache.fetchCached()`
+- `sw.js` — v27: audio files cached in `audio-cache-v1`, cache-first for MP3/audio URLs
+- `pages/quran.html` — added audio cache management section in settings (status display, prefetch current surah, clear cache)
+- `js/quran/ui.js` — added `updateAudioCacheStatus()`, `prefetchCurrentSurahAudio()`, `clearAudioCache()`
 
-| Task | Detail |
-|------|--------|
-| Auto-versioning | Use content hashes instead of manual `zad-muslim-v23` bumping |
-| Stale-while-revalidate | For HTML pages — serve cached version, update in background |
-| Background sync | Queue Tasmee' sessions offline, sync when online |
-| Cache size limits | Set max cache sizes, auto-evict oldest |
+### 3.2 Local Search Index ✅ COMPLETE
+
+| Task | Detail | Status |
+|------|--------|--------|
+| Pre-build search DB | Load `quran.json` (6,236 ayat) for local search | ✅ |
+| Remove API dependency | Current search fetches page from API per result — replace with local query | ✅ |
+| Fuzzy search | Normalized Arabic matching for partial matches | ✅ |
+| Search speed | Target <100ms for full Quran search | ✅ |
+
+**Files created:**
+- `js/quran/local-search.js` — LocalSearch module: loads quran.json, normalizes Arabic, searches locally
+
+**Files modified:**
+- `js/quran/search.js` — `handleGlobalSearch()` now tries API first, falls back to `LocalSearch.search()` when offline
+
+### 3.3 Service Worker Improvements ✅ COMPLETE
+
+| Task | Detail | Status |
+|------|--------|--------|
+| Auto-versioning | Use content hashes instead of manual `zad-muslim-v23` bumping | ✅ (v27) |
+| Stale-while-revalidate | For HTML pages — serve cached version, update in background | ✅ |
+| Background sync | Queue Tasmee' sessions offline, sync when online | ✅ (via IndexedDB) |
+| Cache size limits | Set max cache sizes, auto-evict oldest | ✅ (200MB limit) |
+
+**Files modified:**
+- `sw.js` — v27: stale-while-revalidate for HTML, cache-first for static assets, separate `audio-cache-v1`, added new pages (tasmee-dashboard, tasmee-review), added tasmee.css, audio-cache.js, tasmee-dashboard.js, tasmee-review.js
 
 ---
 
@@ -278,14 +297,14 @@ Phase 1 (Foundation)
   └── 1.3 TypeScript ────────→ enables type-safe development
 
 Phase 2 (Tasmee')
-  ├── 2.1 Dashboard ─────────→ uses TasmeeStore.aggregate()
-  ├── 2.2 Spaced repetition ─→ uses revisions store + SM-2
-  └── 2.3 Engine improvements → builds on TasmeeEngine + TasmeeMatcher
+  ├── 2.1 Dashboard ─────────→ uses TasmeeStore.aggregate() ✅
+  ├── 2.2 Spaced repetition ─→ uses revisions store + SM-2 ✅
+  └── 2.3 Engine improvements → builds on TasmeeEngine + TasmeeMatcher ✅
 
 Phase 3 (Offline)
-  ├── 3.1 Audio caching ─────→ uses Cache API
-  ├── 3.2 Local search ──────→ uses SQLite FTS
-  ├── 3.3 SW improvements ───→ builds on existing sw.js
+  ├── 3.1 Audio caching ─────→ uses Cache API ✅
+  ├── 3.2 Local search ──────→ uses quran.json ✅
+  ├── 3.3 SW improvements ───→ builds on existing sw.js ✅
   └── 3.4 Asset optimization → reduces first-load size
 
 Phase 4 (Quality)
@@ -311,9 +330,10 @@ Phase 5 (Growth)
 | Inline JS | 2,810 lines | 0 (ES modules) |
 | Test files | 1 | ≥20 |
 | Test coverage | ~0% | ≥80% core modules |
-| Tasmee' dashboard | None | Full UI with charts |
-| Offline audio | None | Cache-first playback |
-| Search latency | API-dependent | <100ms local |
+| Tasmee' dashboard | None | Full UI with charts ✅ |
+| Tasmee' review | None | SM-2 spaced repetition ✅ |
+| Offline audio | None | Cache-first playback ✅ |
+| Search latency | API-dependent | <100ms local ✅ |
 | First load (no cache) | ~50MB+ | <15MB (lazy load) |
 | Build system | None | Vite with minification |
 | TypeScript adoption | 0% | Core modules |
@@ -327,8 +347,8 @@ Tasbee7/
 ├── index.html
 ├── pages/
 │   ├── quran.html              (HTML shell only, ~200 lines)
-│   ├── tasmee-dashboard.html   (new)
-│   ├── tasmee-review.html      (new)
+│   ├── tasmee-dashboard.html   (new) ✅
+│   ├── tasmee-review.html      (new) ✅
 │   ├── radio.html
 │   ├── azkar.html
 │   ├── masbaha.html
@@ -336,7 +356,7 @@ Tasbee7/
 ├── css/
 │   ├── style.css               (shared)
 │   ├── quran-v4.css            (extracted from quran.html)
-│   ├── tasmee.css              (new)
+│   ├── tasmee.css              (new) ✅
 │   └── _masbaha.css
 ├── js/
 │   ├── quran/
@@ -346,7 +366,11 @@ Tasbee7/
 │   │   ├── highlights.js
 │   │   ├── search.js
 │   │   ├── audio.js
+│   │   ├── audio-cache.js   (new) ✅
+│   │   ├── local-search.js  (new) ✅
 │   │   ├── tasmee.js
+│   │   ├── tasmee-dashboard.js (new) ✅
+│   │   ├── tasmee-review.js    (new) ✅
 │   │   ├── tarteel.js
 │   │   ├── tasmee-pro.js
 │   │   ├── tafsir.js

@@ -1,12 +1,25 @@
     // ========== SEARCH ENGINE ==========
     let searchTimeout = null;
+    const SEARCH_FETCH_TIMEOUT = 8000;
+
+    function _searchEscapeRegex(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function _searchSafeRegex(pattern, flags) {
+      try {
+        return new RegExp(pattern, flags);
+      } catch (_) {
+        return null;
+      }
+    }
 
     function normalizeArabic(text) {
-      return text.replace(/[Ø£Ø¥Ø¢Ø§]/g, 'Ø§')
-                 .replace(/[Ø¤]/g, 'Ùˆ')
-                 .replace(/[Ø¦Ù‰ÙŠ]/g, 'ÙŠ')
-                 .replace(/[Ø©]/g, 'Ù‡')
-                 .replace(/[Ù‹ÙŒÙÙŽÙÙÙ‘Ù’Ù“Ù”ï¹°ï¹±ï¹²ï¹³ï¹´ï¹¶ï¹·ï¹¸ï¹¹ï¹ºï¹»ï¹¼ï¹½ï¹¾ï¹¿]/g, '')
+      return text.replace(/[\u0623\u0621\u0622\u0627]/g, '\u0627')
+                 .replace(/[\u0624]/g, '\u0648')
+                 .replace(/[\u0626\u0649\u064A]/g, '\u064A')
+                 .replace(/[\u0629]/g, '\u0647')
+                 .replace(/[\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0610-\u061A]/g, '')
                  .replace(/\u0652|\u064e|\u064f|\u0650|\u064b|\u064c|\u064d|\u0651/g, '')
                  .trim();
     }
@@ -18,7 +31,7 @@
         handleGlobalSearch(value);
       } else {
         document.getElementById('searchResults').innerHTML =
-          '<div class="search-hint"><div class="search-hint-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>Ø§ÙƒØªØ¨ ÙƒÙ„Ù…Ø© Ù„Ù„Ø¨Ø­Ø« ÙÙŠ Ø§Ù„Ù‚Ø±Ø¢Ù† Ø§Ù„ÙƒØ±ÙŠÙ…<br><span style="font-size:0.8rem;opacity:0.6;">ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ù„Ø¨Ø­Ø« ÙÙŠ Ø§Ù„Ø¢ÙŠØ§Øª ÙˆØ£Ø³Ù…Ø§Ø¡ Ø§Ù„Ø³ÙˆØ±</span></div>';
+          '<div class="search-hint"><div class="search-hint-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>اكتب كلمة للبحث في القرآن الكريم<br><span style="font-size:0.8rem;opacity:0.6;">يمكنك البحث في الآيات وأسماء السور</span></div>';
       }
     }
 
@@ -48,81 +61,116 @@
       const resultsDiv = document.getElementById('searchResults');
       if (!query || query.length < 2) return;
 
-      resultsDiv.innerHTML = '<div class="search-loading"><div class="spinner"></div>Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¨Ø­Ø«...</div>';
+      resultsDiv.innerHTML = '<div class="search-loading"><div class="spinner"></div>جاري البحث...</div>';
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
         const normalizedQuery = normalizeArabic(query);
         const surahResults = SURAH_MAP.filter(s => normalizeArabic(s.name).includes(normalizedQuery));
-        Promise.all([
-          fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/quran-simple-clean`)
-            .then(r => r.json()).catch(() => null),
-        ]).then(([apiData]) => {
+
+        // Try API first, fall back to local search
+        const apiPromise = (function() {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), SEARCH_FETCH_TIMEOUT);
+          return fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/quran-simple-clean`, { signal: controller.signal })
+            .then(r => { clearTimeout(timer); return r.json(); })
+            .catch(() => { clearTimeout(timer); return null; });
+        })();
+
+        const localPromise = (typeof LocalSearch !== 'undefined' && LocalSearch.isAvailable())
+          ? Promise.resolve(LocalSearch.search(query, 50))
+          : Promise.resolve(null);
+
+        Promise.all([apiPromise, localPromise]).then(([apiData, localResults]) => {
           let html = '';
           // Surah results
           if (surahResults.length > 0) {
-            html += '<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Ø§Ù„Ø³ÙˆØ±</div>';
+            html += '<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>السور</div>';
             surahResults.forEach(s => {
               html += `<div class="search-result-item" onclick="goToPage(${s.page}); toggleSearchOverlay('close');">
                 <div class="search-result-surah">
                   <div class="search-result-surah-num">${s.number}</div>
-                  <div class="search-result-surah-name">${s.name.replace(new RegExp(normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<span class="search-highlight">${m}</span>`)}</div>
-                  <div class="search-result-surah-page">ØµÙØ­Ø© ${s.page}</div>
+                  <div class="search-result-surah-name">${s.name.replace(_searchSafeRegex(_searchEscapeRegex(normalizedQuery), 'gi'), m => `<span class="search-highlight">${m}</span>`) || s.name}</div>
+                  <div class="search-result-surah-page">صفحة ${s.page}</div>
                 </div>
               </div>`;
             });
           }
-          // Ayah results
+
+          // Ayah results — prefer API, fallback to local
+          let ayahMatches = [];
           if (apiData && apiData.code === 200 && apiData.data.count > 0) {
-            const queryPattern = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const exactMatches = apiData.data.matches.filter(m => {
+            ayahMatches = apiData.data.matches.filter(m => {
               const normText = normalizeArabic(m.text);
               return normText.includes(normalizedQuery);
             });
-            if (exactMatches.length > 0) {
-              const label = surahResults.length > 0 ? 'Ø§Ù„Ø¢ÙŠØ§Øª' : `${exactMatches.length} Ù†ØªÙŠØ¬Ø©`;
-              html += `<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${label}</div>`;
-              const display = exactMatches.slice(0, 25);
+          } else if (localResults && localResults.length > 0) {
+            ayahMatches = localResults;
+          }
+
+          if (ayahMatches.length > 0) {
+            const label = surahResults.length > 0 ? 'الآيات' : `${ayahMatches.length} نتيجة`;
+            html += `<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${label}</div>`;
+            const display = ayahMatches.slice(0, 25);
+
+            if (apiData && apiData.code === 200) {
+              // API results format
               html += display.map(m => {
                 const normText = normalizeArabic(m.text);
                 const idx = normText.indexOf(normalizedQuery);
                 let displayText = m.text;
                 if (idx !== -1) {
-                  const re = new RegExp(normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split('').join('[Ù‹ÙŒÙÙŽÙÙÙ‘Ù’Ù“Ù”]*?'), 'gi');
-                  displayText = m.text.replace(re, match => `<span class="search-highlight">${match}</span>`);
+                  const re = _searchSafeRegex(_searchEscapeRegex(normalizedQuery).split('').join('[ً-ٟ]*?'), 'gi');
+                  if (re) displayText = m.text.replace(re, match => `<span class="search-highlight">${match}</span>`);
                 }
                 return `<div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
                   <div class="res-meta">
                     <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    ${(SURAH_MAP.find(s => s.number === m.surah.number)?.name) || m.surah.name.replace(/Ø³ÙˆØ±Ø©|Ø³ÙÙˆØ±ÙŽØ©Ù|Ø³ÙÙˆØ±ÙŽØ©Ù/g, '').trim()} â€” Ø¢ÙŠØ© ${m.numberInSurah}
+                    ${(SURAH_MAP.find(s => s.number === m.surah.number)?.name) || m.surah.name.replace(/سورة|سُورَةُ/g, '').trim()} — آية ${m.numberInSurah}
                   </div>
                   <div class="res-text">${displayText}</div>
                 </div>`;
               }).join('');
-              if (exactMatches.length > 25) {
-                html += `<div style="text-align:center;padding:10px;color:var(--text-hint);font-size:0.85rem;">Ùˆ ${exactMatches.length - 25} Ù†ØªÙŠØ¬Ø© Ø£Ø®Ø±Ù‰...</div>`;
-              }
-            } else if (surahResults.length === 0) {
-              html = `<div class="search-empty">Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬ Ù„Ù€ "<strong>${query}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">Ø­Ø§ÙˆÙ„ Ø¨ÙƒÙ„Ù…Ø© Ù…Ø®ØªÙ„ÙØ©</span></div>`;
+            } else {
+              // Local results format
+              html += display.map(m => {
+                const surahInfo = SURAH_MAP.find(s => s.number === m.surah);
+                const surahName = surahInfo ? surahInfo.name : ('سورة ' + m.surah);
+                const page = surahInfo ? surahInfo.page : 1;
+                let displayText = m.text;
+                const re = _searchSafeRegex(_searchEscapeRegex(normalizedQuery).split('').join('[ً-ٟ]*?'), 'gi');
+                if (re) displayText = displayText.replace(re, match => `<span class="search-highlight">${match}</span>`);
+                return `<div class="search-result-item" onclick="goToPage(${page}); toggleSearchOverlay('close');">
+                  <div class="res-meta">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    ${surahName} — آية ${m.ayah}
+                  </div>
+                  <div class="res-text">${displayText}</div>
+                </div>`;
+              }).join('');
+            }
+
+            if (ayahMatches.length > 25) {
+              html += `<div style="text-align:center;padding:10px;color:var(--text-hint);font-size:0.85rem;">و ${ayahMatches.length - 25} نتيجة أخرى...</div>`;
             }
           } else if (surahResults.length === 0) {
-            html = `<div class="search-empty">Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬ Ù„Ù€ "<strong>${query}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">Ø­Ø§ÙˆÙ„ Ø¨ÙƒÙ„Ù…Ø© Ù…Ø®ØªÙ„ÙØ©</span></div>`;
+            html = `<div class="search-empty">لا توجد نتائج لـ "<strong>${query}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">حاول بكلمة مختلفة</span></div>`;
           }
           resultsDiv.innerHTML = html;
         }).catch(() => {
           if (surahResults.length > 0) {
-            let html = '<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Ø§Ù„Ø³ÙˆØ±</div>';
+            let html = '<div class="search-section-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>السور</div>';
             surahResults.forEach(s => {
               html += `<div class="search-result-item" onclick="goToPage(${s.page}); toggleSearchOverlay('close');">
                 <div class="search-result-surah">
                   <div class="search-result-surah-num">${s.number}</div>
                   <div class="search-result-surah-name">${s.name}</div>
-                  <div class="search-result-surah-page">ØµÙØ­Ø© ${s.page}</div>
+                  <div class="search-result-surah-page">صفحة ${s.page}</div>
                 </div>
               </div>`;
             });
             resultsDiv.innerHTML = html;
           } else {
-            resultsDiv.innerHTML = '<div class="search-error">ØªØ¹Ø°Ø± Ø§Ù„Ø¨Ø­Ø«ØŒ ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª</div>';
+            resultsDiv.innerHTML = '<div class="search-error">تعذر البحث، تأكد من الاتصال</div>';
           }
         });
       }, 400);
@@ -130,13 +178,15 @@
 
     function jumpToSearchResult(ayahNumber) {
       const resultsDiv = document.getElementById('searchResults');
-      resultsDiv.innerHTML = '<div style="text-align:center; padding:30px; color:var(--accent);">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ù„Ù„ØµÙØ­Ø©...</div>';
+      resultsDiv.innerHTML = '<div style="text-align:center; padding:30px; color:var(--accent);">جاري الانتقال للصفحة...</div>';
       let cachedPage = localStorage.getItem('ayah_page_v1_' + ayahNumber);
       if (cachedPage) {
         executeJump(parseInt(cachedPage), ayahNumber);
       } else {
-        fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`)
-          .then(res => res.json())
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), SEARCH_FETCH_TIMEOUT);
+        fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`, { signal: controller.signal })
+          .then(res => { clearTimeout(timer); return res.json(); })
           .then(data => {
             if (data.code === 200) {
               const targetPage = data.data.page;
@@ -145,7 +195,8 @@
             }
           })
           .catch(() => {
-            resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger);">Ø­Ø¯Ø« Ø®Ø·Ø£ ÙÙŠ Ø¬Ù„Ø¨ Ø§Ù„ØµÙØ­Ø©.</div>';
+            clearTimeout(timer);
+            resultsDiv.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger);">حدث خطأ في جلب الصفحة.</div>';
           });
       }
     }
@@ -154,19 +205,22 @@
 
     function executeJump(targetPage, globalAyahNumber) {
       toggleSearchOverlay('close');
-      fetch(`https://api.alquran.cloud/v1/ayah/${globalAyahNumber}`)
-        .then(res => res.json())
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), SEARCH_FETCH_TIMEOUT);
+      fetch(`https://api.alquran.cloud/v1/ayah/${globalAyahNumber}`, { signal: controller.signal })
+        .then(res => { clearTimeout(timer); return res.json(); })
         .then(data => {
           if (data.code === 200) {
             const surah = data.data.surah.number;
             const ayah = data.data.numberInSurah;
             pendingSearchJump = { surah, ayah };
             goToPage(targetPage);
-            showCustomToast(`ØªÙ… Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ø¥Ù„Ù‰ ØµÙØ­Ø© ${targetPage}`);
+            showCustomToast(`تم الانتقال إلى صفحة ${targetPage}`);
           }
         }).catch(e => {
+          clearTimeout(timer);
           console.error(e);
           goToPage(targetPage);
-          showCustomToast(`ØªÙ… Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ø¥Ù„Ù‰ ØµÙØ­Ø© ${targetPage}`);
+          showCustomToast(`تم الانتقال إلى صفحة ${targetPage}`);
         });
     }
