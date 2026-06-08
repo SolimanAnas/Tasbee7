@@ -44,7 +44,7 @@ A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual
 | 🔍 | **باحث الأحاديث** | Hadith search and viewer |
 | 🔔 | **الإشعارات** | Prayer time notifications |
 | 🧭 | **اتجاه القبلة** | Qibla compass with AR overlay |
-| 🎨 | **واجهة زجاجية** | 3-theme glassmorphism system (Light, Dark, Sepia) with smooth animations |
+| 🎨 | **واجهة زجاجية** | 4-theme glassmorphism system (Light, Dark, Sepia, OLED Black) with smooth animations |
 | 📱 | **تطبيق متكامل** | Installable PWA — works offline on iOS and Android |
 
 </div>
@@ -109,8 +109,7 @@ Tasbee7/
 │   ├── qibla.html              # Qibla compass
 │   ├── notifications.html      # Prayer notifications
 │   ├── about.html              # About page
-│   ├── howto.html              # How-to guide
-│   └── 404.html                # Not found page
+│   └── howto.html              # How-to guide
 ├── css/
 │   ├── style.css               # Global styles
 │   ├── quran-v4.css            # Quran reader styles (2,440 lines)
@@ -184,13 +183,14 @@ Tasbee7/
 
 ## Design System
 
-The app uses a custom **glassmorphism** design system with 3 themes:
+The app uses a custom **glassmorphism** design system with 4 themes:
 
 | Theme | Background | Glass Effect | Accent |
 |---|---|---|---|
 | **Light** | `Background-light.png` | White translucent panels | Emerald `#10B981` |
 | **Dark** | `Background-dark.png` | Slate translucent panels | Emerald `#10B981` |
-| **Sepia** | `background-sepia.png` | Warm parchment panels | Amber `#8a5a1c` |
+| **Sepia** | `background-sepia.png` | Warm parchment panels | Gold `#E0B252` |
+| **OLED Black** | None (pure black `#000000`) | Dark slate translucent panels | Emerald `#10B981` |
 
 Key design tokens:
 - **Fonts:** Tajawal (UI), Amiri (Quran/Arabic text)
