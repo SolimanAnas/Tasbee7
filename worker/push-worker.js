@@ -120,6 +120,85 @@ async function signVapid(privateKey32, publicKey65, audience) {
   return b64url(new Uint8Array(sig));
 }
 
+// ====== Send one encrypted Web Push to a single subscription ======
+// Returns the HTTP status from the push service (2xx = delivered, 410/404 = gone).
+async function sendPushToSubscriber(env, subscription, payloadObj) {
+  const privKey = b64urlDec(env.VAPID_PRIVATE_KEY);
+  const pubKey  = b64urlDec(env.VAPID_PUBLIC_KEY);
+
+  const aud = new URL(subscription.endpoint).origin;     // VAPID aud = endpoint origin (per browser)
+  const vapidToken = await signVapid(privKey, pubKey, aud);
+  const vapidKeyB64 = b64url(pubKey);
+
+  const encrypted = await encryptPayload(
+    JSON.stringify(payloadObj),
+    b64urlDec(subscription.keys.p256dh),
+    b64urlDec(subscription.keys.auth));
+
+  const res = await fetch(subscription.endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Encoding': 'aes128gcm',
+      'TTL': '86400',
+      'Urgency': 'normal',
+      'Authorization': `vapid t=${vapidToken}, k=${vapidKeyB64}`,
+    },
+    body: encrypted
+  });
+  return res.status;
+}
+
+// ====== CRON DISPATCHER ======
+// Each subscriber record holds a client-computed schedule of absolute-time
+// events: { tag, title, body, url, ts }. The client (which already runs adhan.js)
+// uploads ~7 days ahead via /subscribe. This handler — invoked by the Cloudflare
+// cron trigger every minute — fires whatever has come due since last run. No
+// prayer-time math lives on the server.
+async function dispatchDue(env) {
+  const now = Date.now();
+  const MAX_LATE = 15 * 60 * 1000; // don't fire events that are >15 min stale (e.g. after a cron outage)
+
+  const list = await env.PUSH_SUBS.list();
+  await Promise.all(list.keys.map(async ({ name }) => {
+    const raw = await env.PUSH_SUBS.get(name);
+    if (!raw) return;
+
+    let rec;
+    try { rec = JSON.parse(raw); } catch { return; }
+
+    // Backward compat: legacy records were the bare subscription object
+    const subscription = rec.subscription || rec;
+    const schedule = Array.isArray(rec.schedule) ? rec.schedule : [];
+    if (!subscription || !subscription.endpoint || !schedule.length) return;
+
+    const cursor = rec.lastDispatch || 0;
+    const due = schedule.filter(e => e.ts <= now && e.ts > cursor && e.ts > now - MAX_LATE);
+    if (!due.length) return;
+
+    let gone = false;
+    for (const e of due) {
+      try {
+        const status = await sendPushToSubscriber(env, subscription, {
+          title: e.title || '🔔 زاد المسلم',
+          body:  e.body  || '',
+          tag:   e.tag   || 'zad-muslim',
+          data:  { url: e.url || './index.html', type: e.tag || 'default' }
+        });
+        if (status === 410 || status === 404) { gone = true; break; }
+      } catch { /* transient — will retry next minute if still within MAX_LATE */ }
+    }
+
+    if (gone) { await env.PUSH_SUBS.delete(name); return; }
+
+    // Advance cursor and drop events that are now in the past
+    rec.subscription = subscription;
+    rec.schedule = schedule.filter(e => e.ts > now);
+    rec.lastDispatch = now;
+    await env.PUSH_SUBS.put(name, JSON.stringify(rec));
+  }));
+}
+
 // ====== MAIN ======
 
 export default {
@@ -142,17 +221,33 @@ export default {
       });
     }
 
-    // POST /subscribe
+    // POST /subscribe — upsert subscription + its precomputed notification schedule
     if (url.pathname === '/subscribe' && request.method === 'POST') {
       const body = await request.json();
-      const { subscription, userId } = body;
+      const { subscription, userId, schedule, tzOffset } = body;
       if (!subscription) {
         return new Response(JSON.stringify({ success: false, error: 'Missing subscription' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
-      await env.PUSH_SUBS.put(userId || subscription.endpoint, JSON.stringify(subscription));
-      return new Response(JSON.stringify({ success: true }), {
+
+      const key = userId || subscription.endpoint;
+
+      // Preserve the dispatch cursor across re-uploads so already-fired events don't repeat
+      let lastDispatch = 0;
+      const prev = await env.PUSH_SUBS.get(key);
+      if (prev) { try { lastDispatch = (JSON.parse(prev).lastDispatch) || 0; } catch {} }
+
+      const rec = {
+        subscription,
+        schedule: Array.isArray(schedule) ? schedule : [],
+        tzOffset: typeof tzOffset === 'number' ? tzOffset : 0,
+        lastDispatch,
+        updated: Date.now()
+      };
+      await env.PUSH_SUBS.put(key, JSON.stringify(rec));
+
+      return new Response(JSON.stringify({ success: true, events: rec.schedule.length }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
     }
@@ -167,11 +262,9 @@ export default {
       });
     }
 
-    // POST /notify — send encrypted push to ALL subscribers
+    // POST /notify — admin broadcast: send one encrypted push to ALL subscribers
     if (url.pathname === '/notify' && request.method === 'POST') {
       const body = await request.json();
-      const privKey = b64urlDec(env.VAPID_PRIVATE_KEY);
-      const pubKey = b64urlDec(env.VAPID_PUBLIC_KEY);
 
       const payload = {
         title: body.title || '🔔 Zad Al-Muslim',
@@ -179,7 +272,6 @@ export default {
         tag: body.tag || 'zad-muslim',
         data: body.data || { url: './index.html', type: 'default' }
       };
-      const payloadStr = JSON.stringify(payload);
 
       const allSubs = await env.PUSH_SUBS.list();
       let sent = 0, failed = 0;
@@ -188,35 +280,12 @@ export default {
         const raw = await env.PUSH_SUBS.get(name);
         if (!raw) { failed++; return; }
         try {
-          const sub = JSON.parse(raw);
-
-          // VAPID aud = push endpoint origin (varies per browser)
-          const aud = new URL(sub.endpoint).origin;
-          const vapidToken = await signVapid(privKey, pubKey, aud);
-          const vapidKeyB64 = b64url(pubKey);
-
-          // Encrypt payload
-          const encrypted = await encryptPayload(
-            payloadStr,
-            b64urlDec(sub.keys.p256dh),
-            b64urlDec(sub.keys.auth));
-
-          // Send
-          const res = await fetch(sub.endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/octet-stream',
-              'Content-Encoding': 'aes128gcm',
-              'TTL': '86400',
-              'Urgency': 'normal',
-              'Authorization': `vapid t=${vapidToken}, k=${vapidKeyB64}`,
-            },
-            body: encrypted
-          });
-
-          if (res.ok) sent++;
+          const rec = JSON.parse(raw);
+          const subscription = rec.subscription || rec; // tolerate legacy bare-subscription records
+          const status = await sendPushToSubscriber(env, subscription, payload);
+          if (status >= 200 && status < 300) sent++;
           else {
-            if (res.status === 410 || res.status === 404) await env.PUSH_SUBS.delete(name);
+            if (status === 410 || status === 404) await env.PUSH_SUBS.delete(name);
             failed++;
           }
         } catch { failed++; }
@@ -228,5 +297,10 @@ export default {
     }
 
     return new Response('Not found', { status: 404, headers: corsHeaders });
+  },
+
+  // Cloudflare cron trigger (configure `crons = ["* * * * *"]` in wrangler.toml)
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dispatchDue(env));
   }
 };

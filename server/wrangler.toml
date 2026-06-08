@@ -1,0 +1,24 @@
+# Cloudflare Worker config for the Zad Al-Muslim push server.
+# Deploy:  wrangler deploy
+#
+# One-time setup (see DEPLOY.md for full steps):
+#   1. Create the KV namespace and paste its id below:
+#        wrangler kv namespace create PUSH_SUBS
+#   2. Store VAPID keys as secrets (NOT in this file):
+#        wrangler secret put VAPID_PUBLIC_KEY
+#        wrangler secret put VAPID_PRIVATE_KEY
+
+name = "zad-push-server"
+main = "cloudflare.js"
+compatibility_date = "2024-09-01"
+
+# Fire the dispatcher every minute so due prayer/azkar notifications go out
+# even when the app is closed.
+[triggers]
+crons = ["* * * * *"]
+
+# KV namespace that stores each device's subscription + precomputed schedule.
+# Replace the id with the one printed by `wrangler kv namespace create PUSH_SUBS`.
+[[kv_namespaces]]
+binding = "PUSH_SUBS"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"

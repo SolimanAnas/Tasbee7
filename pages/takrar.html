@@ -18,6 +18,7 @@
   --overlay: rgba(255, 255, 255, 0.2); --modal-overlay: rgba(0, 0, 0, 0.3);
   --list-hover: rgba(0, 0, 0, 0.05); --gold: #9a7b1f; --gold-soft: rgba(154,123,31,.12);
   --danger: #ef4444;
+  --play-glow: rgba(16, 185, 129, 0.45);
 }
 [data-theme="dark"] {
   --bg-image: url('../images/Background-dark.png');
@@ -29,6 +30,7 @@
   --overlay: rgba(15, 23, 42, 0.5); --modal-overlay: rgba(0, 0, 0, 0.7);
   --list-hover: rgba(255, 255, 255, 0.05); --gold: #e6c068; --gold-soft: rgba(230,192,104,.15);
   --danger: #f87171;
+  --play-glow: rgba(16, 185, 129, 0.5);
 }
 [data-theme="sepia"] {
   --bg-image: url('../images/background-sepia.png');
@@ -40,6 +42,7 @@
   --overlay: rgba(244, 236, 216, 0.2); --modal-overlay: rgba(0, 0, 0, 0.3);
   --list-hover: rgba(122, 84, 24, 0.06); --gold: #9a6b1f; --gold-soft: rgba(154,107,31,.12);
   --danger: #c0392b;
+  --play-glow: rgba(138, 90, 28, 0.45);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -176,24 +179,26 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 /* Play */
 .play-area { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:8px; }
-.play-controls { display:flex; align-items:center; justify-content:center; gap:22px; }
+.play-controls { display:flex; align-items:center; justify-content:center; gap:16px; }
 .play-pause-btn {
   width:72px; height:72px; border-radius:50%; background:var(--accent-main); color:#fff; border:none;
   display:flex; align-items:center; justify-content:center; cursor:pointer;
-  box-shadow:0 6px 20px rgba(16,185,129,.45); transition:transform .2s, box-shadow .3s;
+  box-shadow:0 6px 20px var(--play-glow, rgba(16,185,129,.45)); transition:transform .2s, box-shadow .3s;
 }
 .play-pause-btn:active { transform:scale(.92); }
 .play-pause-btn svg { width:30px; height:30px; fill:currentColor; }
 .ctrl-btn {
-  width:46px; height:46px; border-radius:50%; background:var(--list-hover);
-  border:1px solid var(--glass-border); color:var(--text-primary);
+  width:44px; height:44px; border-radius:50%; background:var(--glass);
+  border:1px solid var(--glass-border); color:var(--text-secondary);
   display:flex; align-items:center; justify-content:center; cursor:pointer;
-  transition:opacity .25s, transform .2s; opacity:0; pointer-events:none; transform:scale(.7);
+  transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1), background .25s, color .25s, border-color .25s;
+  opacity:0; pointer-events:none; transform:scale(.65);
 }
 .ctrl-btn.visible { opacity:1; pointer-events:auto; transform:scale(1); }
-.ctrl-btn svg { width:20px; height:20px; fill:currentColor; }
-.ctrl-btn:active { transform:scale(.9); }
-.ctrl-spacer { width:46px; height:46px; }
+.ctrl-btn svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.ctrl-btn:active { transform:scale(.88) !important; }
+.nav-btn:hover { background:var(--accent-muted); color:var(--accent-main); border-color:var(--accent-main); }
+.nav-btn:active { background:var(--accent-main) !important; color:#fff !important; }
 .spinner { width:28px; height:28px; border:3px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
 @keyframes spin { to{ transform:rotate(360deg); } }
 
@@ -254,34 +259,66 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 /* Ayah Picker Inline */
 .ayah-picker-inline { display:none; }
-.ayah-picker-inline.visible { display:flex; flex-direction:column; gap:10px; }
-.ayah-input-row { display:flex; align-items:center; gap:10px; }
-.ayah-input-row label { font-size:13px; color:var(--accent-main); font-weight:700; white-space:nowrap; }
+.ayah-picker-inline.visible { display:flex; flex-direction:column; gap:12px; }
+.range-input-group {
+  background:var(--list-hover); border-radius:16px; padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  border:1px solid var(--glass-border);
+}
+.range-input-wrap { display:flex; align-items:center; gap:8px; }
+.range-input-wrap label {
+  font-size:13px; color:var(--text-secondary); font-weight:600;
+  background:var(--glass); padding:4px 10px; border-radius:8px;
+  white-space:nowrap;
+}
 .ayah-num-input {
-  width:60px; padding:10px 8px; border-radius:10px; border:1px solid var(--glass-border);
-  background:var(--list-hover); color:var(--text-primary); font-size:16px; font-weight:700;
+  width:58px; padding:8px 6px; border-radius:8px; border:1px solid var(--glass-border);
+  background:var(--bg-surface); color:var(--text-primary); font-size:16px; font-weight:700;
   text-align:center; font-family:inherit; outline:none; transition:.2s; direction:ltr;
 }
-.ayah-num-input:focus { border-color:var(--accent-main); }
-.ayah-range-label { font-size:13px; color:var(--text-secondary); font-weight:600; }
-.ayah-grid-unified { display:grid; grid-template-columns:repeat(8,1fr); gap:5px; max-height:200px; overflow-y:auto; }
-.ayah-grid-unified::-webkit-scrollbar { width:4px; }
+.ayah-num-input:focus { border-color:var(--accent-main); box-shadow:0 0 0 3px var(--accent-muted); }
+.range-arrow { color:var(--text-secondary); font-size:13px; font-weight:700; opacity:.5; }
+.ayah-grid-unified {
+  display:grid; grid-template-columns:repeat(8,1fr); gap:4px; max-height:180px; overflow-y:auto;
+  padding:2px; direction:ltr;
+}
+.ayah-grid-unified::-webkit-scrollbar { width:3px; }
 .ayah-grid-unified::-webkit-scrollbar-thumb { background:var(--accent-main); border-radius:4px; }
 .ayah-cell-unified {
-  padding:8px 2px; border-radius:8px; background:var(--list-hover);
-  border:1px solid var(--glass-border); color:var(--text-primary); font-size:12px;
-  font-weight:600; cursor:pointer; text-align:center; transition:.15s;
+  padding:6px 0; border-radius:6px; background:var(--list-hover);
+  border:1px solid var(--glass-border); color:var(--text-secondary); font-size:11px;
+  font-weight:700; cursor:pointer; text-align:center; transition:all .15s ease; font-variant-numeric:tabular-nums;
 }
-.ayah-cell-unified:active { transform:scale(.88); }
-.ayah-cell-unified.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
-.ayah-cell-unified.in-range { background:var(--accent-muted); border-color:var(--accent-main); }
+.ayah-cell-unified:hover { background:var(--accent-muted); border-color:var(--accent-main); color:var(--accent-main); }
+.ayah-cell-unified:active { transform:scale(.9); }
+.ayah-cell-unified.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); box-shadow:0 2px 8px rgba(16,185,129,.3); }
+.ayah-cell-unified.in-range { background:var(--accent-muted); border-color:var(--accent-main); color:var(--accent-main); }
 .ayah-confirm-btn {
-  padding:12px; border-radius:14px; border:none; background:var(--accent-main);
-  color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
-  transition:.2s; box-shadow:0 4px 15px rgba(16,185,129,.3);
+  padding:12px; border-radius:12px; border:none; background:var(--accent-main);
+  color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:all .25s ease; width:100%;
 }
-.ayah-confirm-btn:active { transform:scale(.96); }
+.ayah-confirm-btn:hover { filter:brightness(1.08); }
+.ayah-confirm-btn:active { transform:scale(.97); }
 .ayah-confirm-btn:disabled { opacity:.4; cursor:default; transform:none; }
+
+/* Range stepper */
+.range-stepper-wrap {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--list-hover); border-radius:16px; padding:10px 16px;
+  border:1px solid var(--glass-border);
+}
+.range-stepper-label { font-size:13px; color:var(--text-secondary); font-weight:600; display:flex; align-items:center; gap:6px; }
+.range-stepper-label svg { width:16px; height:16px; stroke:var(--accent-main); fill:none; stroke-width:2; }
+.range-stepper { display:flex; align-items:center; gap:16px; }
+.range-stepper-btn {
+  width:36px; height:36px; border-radius:50%; background:var(--glass);
+  border:1px solid var(--glass-border); color:var(--text-primary); font-size:18px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .2s ease; line-height:1;
+}
+.range-stepper-btn:active { transform:scale(.88); background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
+.range-stepper-val { font-size:22px; font-weight:800; min-width:36px; text-align:center; direction:ltr; font-variant-numeric:tabular-nums; color:var(--text-primary); }
 
 /* Section Label */
 .section-label {
@@ -347,21 +384,30 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     </div>
     <div id="rangeSettings" style="display:none;">
       <div class="ayah-picker-inline visible" id="ayahPickerInline">
-        <div class="ayah-input-row">
-          <label>من</label>
-          <input type="number" class="ayah-num-input" id="ayahFromInput" min="1" value="1" oninput="onAyahInput('from')">
-          <span class="ayah-range-label">إلى</span>
-          <input type="number" class="ayah-num-input" id="ayahToInput" min="1" value="1" oninput="onAyahInput('to')">
+        <div class="range-input-group">
+          <div class="range-input-wrap">
+            <label for="ayahFromInput">من</label>
+            <input type="number" class="ayah-num-input" id="ayahFromInput" min="1" value="1" oninput="onAyahInput('from')">
+          </div>
+          <span class="range-arrow">← إلى →</span>
+          <div class="range-input-wrap">
+            <label for="ayahToInput">إلى</label>
+            <input type="number" class="ayah-num-input" id="ayahToInput" min="1" value="1" oninput="onAyahInput('to')">
+          </div>
         </div>
         <div class="ayah-grid-unified" id="ayahUnifiedGrid"></div>
         <button class="ayah-confirm-btn" id="ayahConfirmBtn" onclick="confirmAyahRange()">تأكيد النطاق</button>
       </div>
-      <div style="height:4px;"></div>
-      <label>عدد تكرار النطاق</label>
-      <div class="stepper">
-        <button class="stepper-btn" onclick="adjustRangeRepeat(-1)">−</button>
-        <div><div class="stepper-val" id="rangeRepeatVal">3</div><div class="stepper-lbl">مرة</div></div>
-        <button class="stepper-btn" onclick="adjustRangeRepeat(1)">+</button>
+      <div class="range-stepper-wrap">
+        <div class="range-stepper-label">
+          <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          عدد مرات التكرار
+        </div>
+        <div class="range-stepper">
+          <button class="range-stepper-btn" onclick="adjustRangeRepeat(-1)">−</button>
+          <div class="range-stepper-val" id="rangeRepeatVal">3</div>
+          <button class="range-stepper-btn" onclick="adjustRangeRepeat(1)">+</button>
+        </div>
       </div>
     </div>
   </div>
@@ -432,15 +478,17 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
       <span id="repeatText"></span>
     </div>
     <div class="play-controls">
-      <button class="ctrl-btn" id="stopBtn" onclick="stopPlay()" title="إيقاف وإعادة">
-        <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+      <button class="ctrl-btn nav-btn" id="prevBtn" onclick="prevAyah()" title="الآية السابقة">
+        <svg viewBox="0 0 24 24"><polyline points="11 18 17 12 11 6"/><line x1="6" y1="6" x2="6" y2="18"/></svg>
       </button>
       <button class="play-pause-btn" id="playBtn" onclick="togglePlay()">
         <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         <svg id="iconPause" viewBox="0 0 24 24" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
         <span id="iconSpin" class="spinner" style="display:none;"></span>
       </button>
-      <div class="ctrl-spacer"></div>
+      <button class="ctrl-btn nav-btn" id="nextBtn" onclick="nextAyah()" title="الآية التالية">
+        <svg viewBox="0 0 24 24"><polyline points="13 18 7 12 13 6"/><line x1="18" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
   </div>
 </div>
@@ -580,9 +628,11 @@ function pickReciter(id) {
 function normalize(t) { return (t || '').replace(/[\u064B-\u065F\u0670]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ـ/g, ''); }
 function renderSurahs(f = '') {
   const n = normalize(f);
+  const num = parseInt(f);
   document.getElementById('surahList').innerHTML = SURAH_NAMES
-    .map((nm, i) => ({ nm, num: i + 1 })).filter(s => !n || normalize(s.nm).includes(n))
-    .map(s => `<div class="sheet-item ${S.surah === s.num ? 'selected' : ''}" onclick="pickSurah(${s.num})"><span style="color:var(--accent-main);font-weight:800;margin-inline-start:8px;">${s.num}</span>${s.nm}</div>`).join('');
+    .map((nm, i) => ({ nm, num: i + 1 }))
+    .filter(s => !n || normalize(s.nm).includes(n) || s.num === num)
+    .map(s => `<div class="sheet-item ${S.surah === s.num ? 'selected' : ''}" onclick="pickSurah(${s.num})"><span style="color:var(--accent-main);font-weight:800;margin-inline-start:6px;">${s.num}.</span>${s.nm}</div>`).join('');
 }
 function filterSurahs() { renderSurahs(document.getElementById('surahSearch').value); }
 function pickSurah(n) {
@@ -774,7 +824,8 @@ function togglePlay() {
   if (queue.length === 0) { showToast('اختر نطاق التكرار أو فعّل تكرار الآية'); return; }
   document.getElementById('progressWrap').classList.add('visible');
   document.getElementById('repeatCounter').classList.add('visible');
-  document.getElementById('stopBtn').classList.add('visible');
+  document.getElementById('prevBtn').classList.add('visible');
+  document.getElementById('nextBtn').classList.add('visible');
   playItem();
 }
 
@@ -784,7 +835,8 @@ function stopPlay() {
   queue = []; qIdx = 0;
   document.getElementById('progressWrap').classList.remove('visible');
   document.getElementById('repeatCounter').classList.remove('visible');
-  document.getElementById('stopBtn').classList.remove('visible');
+  document.getElementById('prevBtn').classList.remove('visible');
+  document.getElementById('nextBtn').classList.remove('visible');
   document.getElementById('ayahDisplay').classList.remove('visible');
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('curTime').textContent = '0:00';
@@ -825,6 +877,17 @@ function playItem() {
   });
   showAyahText(item.surah, item.ayah);
   updateMediaSession(item);
+}
+
+function prevAyah() {
+  if (S.state === 'idle' || queue.length === 0) return;
+  if (qIdx > 0) { qIdx--; playItem(); }
+  else showToast('أنت في أول الآيات');
+}
+function nextAyah() {
+  if (S.state === 'idle' || queue.length === 0) return;
+  if (qIdx < queue.length - 1) { qIdx++; playItem(); }
+  else showToast('أنت في آخر الآيات');
 }
 
 /* ---------- Audio events ---------- */

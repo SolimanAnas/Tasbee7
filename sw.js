@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v24"; // v24: extracted quran-v4.css, app-main.js, ui-extras.js from quran.html monolith
+const CACHE_NAME = "zad-muslim-v25"; // v25: local-first notifications + server-cron background push (schedule upload)
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
