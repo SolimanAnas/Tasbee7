@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>الأذكار بعد الصلاة المفروضة · زاد المسلم</title>
+<link rel="icon" href="../icons/icon-192.png">
+<style>
+@font-face{
+  font-family:'Qortoba';
+  src:url('../fonts/qortoba.ttf') format('truetype');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Amiri';
+  src:url('../fonts/Amiri.ttf') format('truetype');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body{
+  min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;
+  font-family:'Amiri',serif;
+  background:#1a1410;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(180,140,80,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180,140,80,.05) 0%, transparent 60%);
+  padding:clamp(16px,4vw,40px);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.page{
+  width:100%;max-width:780px;
+  position:relative;
+  animation:pageRise 1s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* ── Outer frame ── */
+.frame{
+  position:relative;
+  background:linear-gradient(175deg,#f5ede0 0%,#ede0c8 40%,#e8d8b8 100%);
+  border-radius:4px;
+  box-shadow:
+    0 0 0 12px #2c1810,
+    0 0 0 14px rgba(180,140,80,.3),
+    0 24px 80px rgba(0,0,0,.6);
+  padding:clamp(16px,3vw,32px);
+  overflow:hidden;
+}
+
+/* parchment grain */
+.frame::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
+  background-size:400px 400px;
+  opacity:.5;
+}
+
+/* inner gold border */
+.frame::after{
+  content:'';position:absolute;z-index:1;pointer-events:none;
+  inset:6px;
+  border:1.5px solid rgba(180,140,80,.35);
+  border-radius:2px;
+}
+
+.content-wrap{
+  position:relative;z-index:2;
+  border:1px solid rgba(180,140,80,.2);
+  padding:clamp(20px,4vw,48px) clamp(16px,3vw,40px);
+}
+
+/* ── Corner ornaments ── */
+.corner{position:absolute;width:28px;height:28px;z-index:3;color:rgba(180,140,80,.5);}
+.corner svg{width:100%;height:100%;display:block;}
+.corner-tl{top:-4px;right:-4px;}
+.corner-tr{top:-4px;left:-4px;transform:scaleX(-1);}
+.corner-bl{bottom:-4px;right:-4px;transform:scaleY(-1);}
+.corner-br{bottom:-4px;left:-4px;transform:scale(-1,-1);}
+
+/* ── Header Banner ── */
+.banner{
+  position:relative;
+  background:linear-gradient(135deg,#3d2415,#2c1810 50%,#3d2415);
+  border-radius:2px;
+  padding:clamp(14px,2.5vw,24px) clamp(16px,3vw,32px);
+  text-align:center;
+  margin-bottom:clamp(20px,4vw,40px);
+  box-shadow:
+    0 4px 20px rgba(44,24,16,.3),
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.3);
+  animation:rise 1s cubic-bezier(.22,1,.36,1) .08s both;
+}
+.banner::before{
+  content:'';position:absolute;inset:4px;
+  border:1px solid rgba(180,140,80,.3);
+  border-radius:1px;pointer-events:none;
+}
+.banner::after{
+  content:'';position:absolute;inset:8px;
+  border:1px solid rgba(180,140,80,.15);
+  border-radius:1px;pointer-events:none;
+}
+.banner-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(60% 60% at 50% 40%, rgba(180,140,80,.12) 0%, transparent 70%);
+  pointer-events:none;
+}
+.banner h1{
+  font-family:'Qortoba',serif;
+  font-weight:400;
+  font-size:clamp(1.1rem,3vw,1.6rem);
+  color:#e8d5a8;
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+  position:relative;
+  letter-spacing:.02em;
+  line-height:1.4;
+}
+.banner-sub{
+  font-family:'Amiri',serif;
+  font-size:clamp(.8rem,1.8vw,1rem);
+  color:rgba(232,213,168,.6);
+  margin-top:4px;
+  letter-spacing:.04em;
+}
+
+/* ── Body ── */
+.body-text{
+  position:relative;
+  display:flex;flex-direction:column;gap:clamp(14px,2vw,24px);
+}
+
+.dhikr{
+  position:relative;
+  padding-right:clamp(24px,4vw,40px);
+  animation:rise .8s cubic-bezier(.22,1,.36,1) both;
+}
+.dhikr:nth-child(1){animation-delay:.12s}
+.dhikr:nth-child(2){animation-delay:.18s}
+.dhikr:nth-child(3){animation-delay:.24s}
+.dhikr:nth-child(4){animation-delay:.30s}
+.dhikr:nth-child(5){animation-delay:.36s}
+.dhikr:nth-child(6){animation-delay:.42s}
+.dhikr:nth-child(7){animation-delay:.48s}
+
+.dhikr .marker{
+  position:absolute;right:0;top:.45em;
+  color:rgba(180,140,80,.6);
+  font-size:.75em;
+  line-height:1;
+}
+.dhikr-text{
+  font-size:clamp(1.05rem,2.2vw,1.35rem);
+  line-height:1.9;
+  color:#2c1810;
+  font-weight:400;
+}
+.dhikr-text strong{
+  font-weight:700;
+  color:#1a0e08;
+}
+.quran{
+  color:#8b1a1a;
+  font-weight:700;
+  line-height:2;
+}
+.ref{
+  font-size:clamp(.7rem,1.3vw,.8rem);
+  color:rgba(44,24,16,.5);
+  display:block;
+  margin-top:2px;
+  padding-right:4px;
+  font-weight:400;
+}
+.count-badge{
+  display:inline-block;
+  font-size:.7em;
+  color:rgba(180,140,80,.8);
+  font-weight:700;
+  margin:0 2px;
+  vertical-align:super;
+}
+
+/* ── Divider ── */
+.divider{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  margin:4px 0;
+  animation:rise .8s cubic-bezier(.22,1,.36,1) .5s both;
+}
+.divider-line{
+  flex:1;max-width:120px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(180,140,80,.4),transparent);
+}
+.divider-diamond{
+  width:6px;height:6px;
+  background:rgba(180,140,80,.5);
+  transform:rotate(45deg);
+  border-radius:1px;
+}
+
+/* ── Footnotes ── */
+.footnotes{
+  margin-top:clamp(16px,3vw,28px);
+  padding-top:clamp(12px,2vw,20px);
+  border-top:1px solid rgba(180,140,80,.25);
+  display:flex;flex-wrap:wrap;gap:6px clamp(10px,2vw,20px);
+  justify-content:center;
+  animation:rise .8s cubic-bezier(.22,1,.36,1) .55s both;
+}
+.fn-item{
+  font-size:clamp(.65rem,1.2vw,.75rem);
+  color:rgba(44,24,16,.55);
+  display:inline-flex;align-items:center;gap:4px;
+  font-weight:400;
+}
+.fn-num{
+  font-weight:700;
+  color:rgba(180,140,80,.7);
+  font-size:.85em;
+}
+
+/* ── Animations ── */
+@keyframes pageRise{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:none}
+}
+@keyframes rise{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:none}
+}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .frame{padding:10px}
+  .content-wrap{padding:16px 12px}
+  .corner{width:18px;height:18px}
+  .dhikr{padding-right:20px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important}
+}
+
+/* ── App integration: exit trigger for back nav ── */
+body.fade-out{opacity:0;transition:opacity .25s}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="frame">
+
+    <div class="content-wrap">
+
+      <!-- Corner ornaments -->
+      <div class="corner corner-tl" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M28 0C28 8 26 12 20 16S14 22 14 28" stroke-linecap="round"/>
+          <circle cx="3" cy="3" r="1.5" fill="currentColor" stroke="none" opacity=".5"/>
+          <path d="M0 0h8v1H0zM0 0v8h1V0z" fill="currentColor" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="corner corner-tr" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M28 0C28 8 26 12 20 16S14 22 14 28" stroke-linecap="round"/>
+          <circle cx="3" cy="3" r="1.5" fill="currentColor" stroke="none" opacity=".5"/>
+          <path d="M0 0h8v1H0zM0 0v8h1V0z" fill="currentColor" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="corner corner-bl" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M28 0C28 8 26 12 20 16S14 22 14 28" stroke-linecap="round"/>
+          <circle cx="3" cy="3" r="1.5" fill="currentColor" stroke="none" opacity=".5"/>
+          <path d="M0 0h8v1H0zM0 0v8h1V0z" fill="currentColor" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="corner corner-br" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M28 0C28 8 26 12 20 16S14 22 14 28" stroke-linecap="round"/>
+          <circle cx="3" cy="3" r="1.5" fill="currentColor" stroke="none" opacity=".5"/>
+          <path d="M0 0h8v1H0zM0 0v8h1V0z" fill="currentColor" opacity=".3"/>
+        </svg>
+      </div>
+
+      <!-- Header -->
+      <div class="banner">
+        <div class="banner-glow"></div>
+        <h1>الأذكار بعد الصلاة المفروضة</h1>
+        <div class="banner-sub">بعد كل صلاة — كما ورد عن النبي ﷺ</div>
+      </div>
+
+      <!-- Body -->
+      <div class="body-text">
+
+        <!-- 1 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            أَسْتَغْفِرُ اللَّهَ <span class="count-badge">×٣</span>،<br>
+            <strong>اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ</strong>.
+          </div>
+          <span class="ref">رواه مسلم</span>
+        </div>
+
+        <!-- 2 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            <strong>لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ</strong>، اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ.
+          </div>
+          <span class="ref">متفق عليه</span>
+        </div>
+
+        <!-- 3 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            <strong>لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ</strong>،<br>
+            لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ،<br>
+            لَا إِلَهَ إِلَّا اللَّهُ،<br>
+            وَلَا نَعْبُدُ إِلَّا إِيَّاهُ،<br>
+            لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ،<br>
+            <strong>لَا إِلَهَ إِلَّا اللَّهُ مُخْلِصِينَ لَهُ الدِّينَ وَلَوْ كَرِهَ الْكَافِرُونَ</strong>.
+          </div>
+          <span class="ref">رواه مسلم</span>
+        </div>
+
+        <!-- 4: Tasbih -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            <strong>سُبْحَانَ اللَّهِ</strong> <span class="count-badge">×٣٣</span><br>
+            <strong>الْحَمْدُ لِلَّهِ</strong> <span class="count-badge">×٣٣</span><br>
+            <strong>اللَّهُ أَكْبَرُ</strong> <span class="count-badge">×٣٣</span><br>
+            <strong>لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ</strong>
+          </div>
+          <span class="ref">رواه مسلم</span>
+        </div>
+
+        <!-- 5: Surahs -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            <strong>سُورَةُ الْإِخْلَاصِ</strong><br>
+            <span class="quran">قُلْ هُوَ اللَّهُ أَحَدٌ ﴿١﴾ اللَّهُ الصَّمَدُ ﴿٢﴾ لَمْ يَلِدْ وَلَمْ يُولَدْ ﴿٣﴾ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ ﴿٤﴾</span>
+          </div>
+          <div class="dhikr-text" style="margin-top:8px;">
+            <strong>سُورَةُ الْفَلَقِ</strong><br>
+            <span class="quran">قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ﴿١﴾ مِن شَرِّ مَا خَلَقَ ﴿٢﴾ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ﴿٣﴾ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ﴿٤﴾ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ﴿٥﴾</span>
+          </div>
+          <div class="dhikr-text" style="margin-top:8px;">
+            <strong>سُورَةُ النَّاسِ</strong><br>
+            <span class="quran">قُلْ أَعُوذُ بِرَبِّ النَّاسِ ﴿١﴾ مَلِكِ النَّاسِ ﴿٢﴾ إِلَٰهِ النَّاسِ ﴿٣﴾ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ﴿٤﴾ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ﴿٥﴾ مِنَ الْجِنَّةِ وَالنَّاسِ ﴿٦﴾</span>
+          </div>
+          <span class="ref">رواه الترمذي وحسنه الألباني</span>
+        </div>
+
+        <!-- 6: Ayat al-Kursi -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            <strong>آيَةُ الْكُرْسِيِّ</strong>
+          </div>
+          <div class="dhikr-text" style="margin-top:4px;">
+            <span class="quran">
+              اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ
+            </span>
+          </div>
+          <span class="ref">رواه النسائي وصححه الألباني — البقرة ٢٥٥</span>
+        </div>
+
+        <!-- 7 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">۞</span>
+          <div class="dhikr-text">
+            <strong>لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ</strong>
+            <span class="count-badge">×١٠</span>
+          </div>
+          <span class="ref">بعد صلاة المغرب والفجر — رواه الترمذي وأحمد</span>
+        </div>
+
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-diamond"></span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- Footnotes -->
+      <div class="footnotes">
+        <span class="fn-item"><span class="fn-num">۞</span>رواه مسلم</span>
+        <span class="fn-item"><span class="fn-num">۞</span>متفق عليه</span>
+        <span class="fn-item"><span class="fn-num">۞</span>رواه الترمذي</span>
+        <span class="fn-item"><span class="fn-num">۞</span>رواه النسائي</span>
+        <span class="fn-item"><span class="fn-num">۞</span>رواه أحمد</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+window.addEventListener("pageshow", () => document.body.classList.remove("fade-out"));
+</script>
+</body>
+</html>

@@ -753,6 +753,16 @@ body.player-active .page-wrapper {
   </div>
 </div>
 
+<!-- Image Modal for salah type -->
+<div class="sound-options" id="imageModal" onclick="if(event.target===this) closeImageModal()">
+  <div class="sound-options-content" style="padding:8px;background:transparent;border:none;max-width:95%;">
+    <iframe src="../pages/salah.html" title="أذكار بعد الصلاة" style="width:100%;height:80vh;border:none;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.5);" onclick="event.stopPropagation()"></iframe>
+    <button class="sound-option-btn" onclick="closeImageModal()" style="margin-top:12px;justify-content:center;color:var(--text-primary);">
+      <span>✕</span><span>إغلاق</span>
+    </button>
+  </div>
+</div>
+
 <div class="page-wrapper">
 
   <div class="session-progress" aria-hidden="true">
@@ -883,13 +893,24 @@ const fullCircle = 565.48;
 let swipeNavEnabled = localStorage.getItem("zikrSwipeNav") === "true";
 
 const type = new URLSearchParams(window.location.search).get("type") || "morning";
+const isSalah = type === "salah";
 
-fetch("../assets/azkar.json")
+const dataFile = isSalah ? "../assets/salah.json" : "../assets/azkar.json";
+
+fetch(dataFile)
 .then(res => res.json())
 .then(data => {
-  azkarData = data[type];
+  azkarData = isSalah ? data : data[type];
   loadZikr();
 });
+
+/* --- Image Modal for Salah --- */
+function openImageModal() {
+  document.getElementById('imageModal').classList.add('active');
+}
+function closeImageModal() {
+  document.getElementById('imageModal').classList.remove('active');
+}
 
 /* --- Daily Tracking Function for Stats --- */
 function checkDailyResetAzkar() {
@@ -1302,6 +1323,14 @@ function hidePlayerFromOptions() {
 /* --- Long-press handler on 🔊 icon --- */
 (function setupSoundBtn() {
   const soundBtn = document.getElementById('soundBtn');
+
+  if (isSalah) {
+    soundBtn.textContent = '🖼️';
+    soundBtn.title = 'عرض أذكار بعد الصلاة';
+    soundBtn.addEventListener('click', openImageModal);
+    return;
+  }
+
   let pressTimer = null;
   let longPressFired = false;
   let pressActive = false;
@@ -1385,6 +1414,11 @@ function detectIOS() {
 window.addEventListener("load", () => {
   detectIOS(); // add .is-ios before paint settles so top padding is correct
   checkDailyResetAzkar(); // التأكد من التصفير اليومي عند فتح الصفحة
+
+  if (isSalah) {
+    document.getElementById('miniPlayer').style.display = 'none';
+    document.getElementById('soundOptions').style.display = 'none';
+  }
 
   const savedSize = localStorage.getItem("zikrFontSize");
   if (savedSize) {
