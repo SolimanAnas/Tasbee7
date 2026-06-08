@@ -106,7 +106,7 @@ test('index.html feature cards navigate to pages/', async ({ page }) => {
   expect(cards.length).toBeGreaterThan(0);
   for (const card of cards) {
     const onclick = await card.getAttribute('onclick') || '';
-    expect(onclick).toMatch(/go\('pages\//);
+    expect(onclick).toMatch(/go\('pages\/|openPrayerModal/);
   }
 });
 

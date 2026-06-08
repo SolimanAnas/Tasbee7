@@ -31,7 +31,7 @@
   --danger: #f87171;
 }
 [data-theme="sepia"] {
-  --bg-image: url('../images/Background-light.png');
+  --bg-image: url('../images/background-sepia.png');
   --bg-surface: rgba(244, 236, 216, 0.55);
   --text-primary: #3c2a18; --text-secondary: #7a6244;
   --accent-main: #8a5a1c; --accent-muted: rgba(138, 90, 28, 0.12);
@@ -238,6 +238,47 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 .ayah-cell:active { transform:scale(.9); }
 .ayah-cell.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
 .ayah-cell.in-range { background:var(--accent-muted); border-color:var(--accent-main); }
+
+/* Mode Tabs */
+.mode-tabs { display:flex; gap:6px; }
+.mode-tab {
+  flex:1; padding:12px 10px; border-radius:14px; border:1px solid var(--glass-border);
+  background:var(--list-hover); color:var(--text-secondary); font-size:14px; font-weight:700;
+  cursor:pointer; transition:.25s; text-align:center; font-family:inherit;
+}
+.mode-tab:active { transform:scale(.96); }
+.mode-tab.active { background:var(--accent-main); color:#fff; border-color:var(--accent-main); box-shadow:0 4px 15px rgba(16,185,129,.3); }
+
+/* Ayah Picker Inline */
+.ayah-picker-inline { display:none; }
+.ayah-picker-inline.visible { display:flex; flex-direction:column; gap:10px; }
+.ayah-input-row { display:flex; align-items:center; gap:10px; }
+.ayah-input-row label { font-size:13px; color:var(--accent-main); font-weight:700; white-space:nowrap; }
+.ayah-num-input {
+  width:60px; padding:10px 8px; border-radius:10px; border:1px solid var(--glass-border);
+  background:var(--list-hover); color:var(--text-primary); font-size:16px; font-weight:700;
+  text-align:center; font-family:inherit; outline:none; transition:.2s; direction:ltr;
+}
+.ayah-num-input:focus { border-color:var(--accent-main); }
+.ayah-range-label { font-size:13px; color:var(--text-secondary); font-weight:600; }
+.ayah-grid-unified { display:grid; grid-template-columns:repeat(8,1fr); gap:5px; max-height:200px; overflow-y:auto; }
+.ayah-grid-unified::-webkit-scrollbar { width:4px; }
+.ayah-grid-unified::-webkit-scrollbar-thumb { background:var(--accent-main); border-radius:4px; }
+.ayah-cell-unified {
+  padding:8px 2px; border-radius:8px; background:var(--list-hover);
+  border:1px solid var(--glass-border); color:var(--text-primary); font-size:12px;
+  font-weight:600; cursor:pointer; text-align:center; transition:.15s;
+}
+.ayah-cell-unified:active { transform:scale(.88); }
+.ayah-cell-unified.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
+.ayah-cell-unified.in-range { background:var(--accent-muted); border-color:var(--accent-main); }
+.ayah-confirm-btn {
+  padding:12px; border-radius:14px; border:none; background:var(--accent-main);
+  color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:.2s; box-shadow:0 4px 15px rgba(16,185,129,.3);
+}
+.ayah-confirm-btn:active { transform:scale(.96); }
+.ayah-confirm-btn:disabled { opacity:.4; cursor:default; transform:none; }
 </style>
 </head>
 <body>
@@ -278,14 +319,15 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <div>
-      <div class="header-title">التكرار</div>
-      <div class="header-sub">زاد المسلم</div>
-    </div>
-    <div style="display:flex; gap:8px;">
-      <button class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</button>
-      <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
-    </div>
+    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
+    <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);">التكرار</div>
+    <button class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</button>
+  </div>
+
+  <!-- Mode Tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="setMode('range')" id="tabRange">تكرار النطاق</button>
+    <button class="mode-tab" onclick="setMode('ayah')" id="tabAyah">تكرار الآية</button>
   </div>
 
   <!-- Reciter -->
@@ -304,12 +346,17 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     </button>
   </div>
 
-  <!-- Ayah Range -->
-  <div class="card">
-    <label>نطاق الآيات</label>
-    <button class="custom-select-btn" id="ayahBtn" onclick="openSheet('ayah')">
-      <span>اختر بداية ونهاية التلاوة...</span>
-    </button>
+  <!-- Ayah Range (inline) -->
+  <div class="card ayah-picker-inline" id="ayahPickerInline">
+    <label>نطاق التكرار</label>
+    <div class="ayah-input-row">
+      <label>من</label>
+      <input type="number" class="ayah-num-input" id="ayahFromInput" min="1" value="1" oninput="onAyahInput('from')">
+      <span class="ayah-range-label">إلى</span>
+      <input type="number" class="ayah-num-input" id="ayahToInput" min="1" value="1" oninput="onAyahInput('to')">
+    </div>
+    <div class="ayah-grid-unified" id="ayahUnifiedGrid"></div>
+    <button class="ayah-confirm-btn" id="ayahConfirmBtn" onclick="confirmAyahRange()" disabled>تأكيد النطاق</button>
   </div>
 
   <!-- Repeat -->
@@ -432,8 +479,9 @@ const AYAH_COUNTS = [
   11,8,3,9,5,4,7,3,6,3,5,4,5,6
 ];
 
-let S = { reciter:null, surah:null, ayahFrom:1, ayahTo:1, repeat:3, speed:1, state:'idle' };
+let S = { reciter:null, surah:null, ayahFrom:1, ayahTo:1, repeat:3, speed:1, state:'idle', mode:'range' };
 // state: 'idle' | 'loading' | 'playing' | 'paused'
+// mode: 'range' | 'ayah'
 let queue=[], qIdx=0, errCount=0;
 const audio = document.getElementById('audio');
 
@@ -510,16 +558,113 @@ function renderSurahs(f=''){
 function filterSurahs(){renderSurahs(document.getElementById('surahSearch').value);}
 function pickSurah(n){
   if(S.state!=='idle') stopPlay();
-  S.surah=n; S.ayahFrom=1; S.ayahTo=1;
+  S.surah=n; S.ayahFrom=1; S.ayahTo=AYAH_COUNTS[n-1];
   const btn=document.getElementById('surahBtn');
   btn.classList.add('has-value');
   btn.querySelector('span').textContent=SURAH_NAMES[n-1];
-  // reset ayah range button label
-  const ab=document.getElementById('ayahBtn');
-  ab.classList.add('has-value');
-  ab.querySelector('span').textContent=`كامل السورة (1 - ${AYAH_COUNTS[n-1]})`;
-  S.ayahTo=AYAH_COUNTS[n-1];
+  if(S.mode==='range'){
+    showInlinePicker();
+  } else {
+    //ayah mode: show inline with only 1 ayah
+    S.ayahFrom=1; S.ayahTo=1;
+    showInlinePicker();
+  }
   closeSheet();
+}
+
+/* ---------- Mode Tabs ---------- */
+function setMode(m){
+  S.mode=m;
+  document.getElementById('tabRange').classList.toggle('active',m==='range');
+  document.getElementById('tabAyah').classList.toggle('active',m==='ayah');
+  if(S.surah){
+    if(m==='range'){
+      S.ayahFrom=1; S.ayahTo=AYAH_COUNTS[S.surah-1];
+      showInlinePicker();
+    } else {
+      S.ayahFrom=1; S.ayahTo=1;
+      showInlinePicker();
+    }
+  }
+}
+
+/* ---------- Inline Ayah Picker ---------- */
+function showInlinePicker(){
+  if(!S.surah) return;
+  const cnt=AYAH_COUNTS[S.surah-1]||1;
+  const picker=document.getElementById('ayahPickerInline');
+  picker.classList.add('visible');
+  const fromIn=document.getElementById('ayahFromInput');
+  const toIn=document.getElementById('ayahToInput');
+  fromIn.max=cnt; toIn.max=cnt;
+  fromIn.value=S.ayahFrom; toIn.value=S.ayahTo;
+  renderUnifiedGrid();
+  updateConfirmBtn();
+}
+function onAyahInput(which){
+  if(!S.surah) return;
+  const cnt=AYAH_COUNTS[S.surah-1]||1;
+  const fromIn=document.getElementById('ayahFromInput');
+  const toIn=document.getElementById('ayahToInput');
+  let v=parseInt(which==='from'?fromIn.value:toIn.value)||1;
+  v=Math.max(1,Math.min(cnt,v));
+  if(which==='from'){
+    S.ayahFrom=v;
+    if(S.ayahTo<v){ S.ayahTo=v; toIn.value=v; }
+  } else {
+    S.ayahTo=v;
+    if(S.ayahFrom>v){ S.ayahFrom=v; fromIn.value=v; }
+  }
+  renderUnifiedGrid();
+  updateConfirmBtn();
+}
+function renderUnifiedGrid(){
+  if(!S.surah) return;
+  const cnt=AYAH_COUNTS[S.surah-1]||1;
+  const grid=document.getElementById('ayahUnifiedGrid');
+  grid.innerHTML=Array.from({length:cnt},(_,i)=>{
+    const n=i+1;
+    let cls='ayah-cell-unified';
+    if(n===S.ayahFrom||n===S.ayahTo) cls+=' selected';
+    else if(n>S.ayahFrom&&n<S.ayahTo) cls+=' in-range';
+    return `<div class="${cls}" onclick="pickUnifiedAyah(${n})">${n}</div>`;
+  }).join('');
+}
+function pickUnifiedAyah(n){
+  if(S.mode==='ayah'){
+    S.ayahFrom=n; S.ayahTo=n;
+  } else {
+    // toggle: if clicking near start, move from; else move to
+    if(Math.abs(n-S.ayahFrom)<=Math.abs(n-S.ayahTo)){
+      S.ayahFrom=n;
+      if(S.ayahTo<S.ayahFrom) S.ayahTo=S.ayahFrom;
+    } else {
+      S.ayahTo=n;
+      if(S.ayahFrom>S.ayahTo) S.ayahFrom=S.ayahTo;
+    }
+  }
+  document.getElementById('ayahFromInput').value=S.ayahFrom;
+  document.getElementById('ayahToInput').value=S.ayahTo;
+  renderUnifiedGrid();
+  updateConfirmBtn();
+}
+function updateConfirmBtn(){
+  const btn=document.getElementById('ayahConfirmBtn');
+  btn.disabled=(S.ayahFrom===S.ayahTo&&S.mode==='range')?false:!S.surah;
+  btn.disabled=!S.surah;
+}
+function confirmAyahRange(){
+  if(!S.surah) return;
+  const label=S.mode==='ayah'
+    ? `${SURAH_NAMES[S.surah-1]} — آية ${S.ayahFrom}`
+    : `من آية ${S.ayahFrom} إلى آية ${S.ayahTo}`;
+  document.getElementById('ayahConfirmBtn').textContent='✓ تم التأكيد';
+  document.getElementById('ayahConfirmBtn').style.background='var(--gold)';
+  setTimeout(()=>{
+    document.getElementById('ayahConfirmBtn').textContent='تأكيد النطاق';
+    document.getElementById('ayahConfirmBtn').style.background='';
+  },1200);
+  showToast(label);
 }
 
 /* ---------- Ayah Range ---------- */
@@ -583,7 +728,11 @@ showAyahText._t=0;
 /* ---------- Queue / Playback ---------- */
 function buildQueue(){
   const q=[];
-  for(let r=0;r<S.repeat;r++) for(let a=S.ayahFrom;a<=S.ayahTo;a++) q.push({surah:S.surah,ayah:a,round:r+1});
+  if(S.mode==='ayah'){
+    for(let r=0;r<S.repeat;r++) q.push({surah:S.surah,ayah:S.ayahFrom,round:r+1});
+  } else {
+    for(let r=0;r<S.repeat;r++) for(let a=S.ayahFrom;a<=S.ayahTo;a++) q.push({surah:S.surah,ayah:a,round:r+1});
+  }
   return q;
 }
 
