@@ -69,18 +69,24 @@ Start with the most critical modules:
 
 ## Phase 2 — Tasmee' Features (Weeks 3–5)
 
-### 2.1 Tasmee' Dashboard Page
+### 2.1 Tasmee' Dashboard Page ✅ COMPLETE
 
 `TasmeeStore.aggregate()` already computes all the data. Build the UI:
 
-| Component | Data Source | Detail |
-|-----------|-------------|--------|
-| **Session history** | `getAllSessions()` | List of past sessions with date, surah, accuracy, duration |
-| **Accuracy trend chart** | `aggregate().weekly` | Line/bar chart — last 7 days accuracy |
-| **Daily streak** | `aggregate().streak` | Consecutive days with ≥1 session |
-| **Total stats** | `aggregate()` | Total sessions, total time, average accuracy |
-| **Weak words** | `aggregate().weakWords` | Top 10 most-missed words with counts |
-| **Mistake breakdown** | `getAllMistakes()` | Pie chart — missing vs wrong vs extra |
+| Component | Data Source | Detail | Status |
+|-----------|-------------|--------|--------|
+| **Session history** | `getAllSessions()` | List of past sessions with date, surah, accuracy, duration | ✅ |
+| **Accuracy trend chart** | `aggregate().weekly` | Line/bar chart — last 7 days accuracy | ✅ |
+| **Daily streak** | `aggregate().streak` | Consecutive days with ≥1 session | ✅ |
+| **Total stats** | `aggregate()` | Total sessions, total time, average accuracy | ✅ |
+| **Weak words** | `aggregate().weakWords` | Top 10 most-missed words with counts | ✅ |
+| **Mistake breakdown** | `getAllMistakes()` | Bar chart — missing vs wrong vs extra | ✅ |
+| **Due revisions** | `getDueRevisions()` | Count of items due for review | ✅ |
+
+**Files created:**
+- `pages/tasmee-dashboard.html` — full dashboard page with skeleton loading, streak hero, stats cards, weekly chart, mistake breakdown, weak words, session history, and review card
+- `css/tasmee.css` — dashboard styles with theme support (dark/light/sepia), glassmorphism, animations
+- `js/quran/tasmee-dashboard.js` — self-contained dashboard logic (IndexedDB queries, canvas chart rendering, DOM updates)
 
 **File:** `pages/tasmee-dashboard.html` + `js/quran/tasmee-dashboard.js`
 

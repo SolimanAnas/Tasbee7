@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>مراجعة اليوم - زاد المسلم</title>
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/tasmee.css">
+  <style>
+    /* ===== Review-specific overrides ===== */
+    .review-hero {
+      text-align: center;
+      padding: 24px 16px 16px;
+      animation: heroIn 0.5s var(--ease-spring) backwards;
+    }
+    .review-hero-title {
+      font-size: 1.1rem; font-weight: 700; color: var(--on-surface);
+      margin-bottom: 4px;
+    }
+    .review-hero-sub {
+      font-size: 0.85rem; color: var(--on-surface-variant);
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin: 0 var(--spacing-md) var(--spacing-md);
+      animation: cardIn 0.5s var(--ease-smooth) 0.1s backwards;
+    }
+    .progress-bar-track {
+      width: 100%; height: 6px;
+      background: var(--surface-active);
+      border-radius: 3px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary), #34d399);
+      transition: width 0.6s var(--ease-spring);
+      width: 0%;
+    }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.75rem; color: var(--on-surface-variant);
+      margin-top: 6px; font-weight: 500;
+    }
+
+    /* Ayah card */
+    .ayah-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      margin: 0 var(--spacing-md) var(--spacing-md);
+      min-height: 180px;
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center;
+      position: relative;
+      animation: cardIn 0.5s var(--ease-smooth) 0.15s backwards;
+    }
+    .ayah-surah-label {
+      position: absolute; top: 14px; right: 16px;
+      font-size: 0.75rem; font-weight: 600; color: var(--on-surface-variant);
+      background: var(--surface-raised);
+      padding: 4px 10px; border-radius: 8px;
+    }
+    .ayah-number-badge {
+      position: absolute; top: 14px; left: 16px;
+      font-size: 0.75rem; font-weight: 700; color: var(--primary);
+      background: var(--primary-soft);
+      padding: 4px 10px; border-radius: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .ayah-text-display {
+      font-family: 'Amiri', serif;
+      font-size: 1.6rem; line-height: 2.2;
+      color: var(--on-surface);
+      max-width: 100%;
+      word-break: break-word;
+      padding: 8px 0;
+      transition: opacity 0.3s ease;
+    }
+    .ayah-text-display.hidden-text {
+      opacity: 0.15;
+      user-select: none;
+    }
+    .ayah-controls {
+      display: flex; gap: 10px; margin-top: 12px;
+    }
+    .ayah-ctrl-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.8rem; font-weight: 600;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: transform var(--ease-smooth), background var(--ease-smooth);
+    }
+    .ayah-ctrl-btn:active { transform: scale(0.95); background: var(--surface-active); }
+    .ayah-ctrl-btn.active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+    .ayah-ctrl-btn svg { width: 16px; height: 16px; }
+
+    /* Mic indicator */
+    .mic-area {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      margin-bottom: var(--spacing-md);
+      animation: cardIn 0.5s var(--ease-smooth) 0.2s backwards;
+    }
+    .mic-pulse {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      cursor: pointer;
+      transition: transform var(--ease-smooth);
+    }
+    .mic-pulse:active { transform: scale(0.92); }
+    .mic-pulse svg { width: 28px; height: 28px; color: var(--primary); z-index: 1; }
+    .mic-pulse::before {
+      content: ''; position: absolute; inset: -6px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      opacity: 0; transform: scale(0.8);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .mic-pulse.listening::before {
+      opacity: 0.4; transform: scale(1);
+      animation: micRing 1.5s ease-in-out infinite;
+    }
+    .mic-pulse.paused svg { color: var(--on-surface-variant); }
+    @keyframes micRing {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.15); opacity: 0.15; }
+    }
+    .mic-status {
+      font-size: 0.8rem; font-weight: 600; color: var(--on-surface-variant);
+    }
+    .mic-status.active { color: var(--primary); }
+
+    /* Action buttons */
+    .action-row {
+      display: flex; gap: 10px;
+      padding: 0 var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      animation: cardIn 0.5s var(--ease-smooth) 0.25s backwards;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.9rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: transform var(--ease-smooth), opacity var(--ease-smooth);
+    }
+    .action-btn:active { transform: scale(0.96); }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .action-btn svg { width: 18px; height: 18px; }
+    .btn-skip {
+      background: var(--surface-raised);
+      color: var(--on-surface-variant);
+      border: 1px solid var(--border);
+    }
+    .btn-next {
+      background: linear-gradient(135deg, var(--primary), #059669);
+      color: #fff;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-next:disabled { box-shadow: none; }
+
+    /* Results overlay */
+    .results-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .results-overlay.active { opacity: 1; pointer-events: all; }
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      max-width: 360px; width: 90%;
+      text-align: center;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.4s var(--ease-spring);
+    }
+    .results-overlay.active .results-card { transform: none; }
+    .results-emoji { font-size: 3rem; margin-bottom: 12px; }
+    .results-title { font-size: 1.3rem; font-weight: 800; color: var(--on-surface); margin-bottom: 4px; }
+    .results-sub { font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 20px; }
+
+    .results-stats {
+      display: flex; gap: 12px; justify-content: center; margin-bottom: 24px;
+    }
+    .result-stat {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      min-width: 60px;
+    }
+    .result-stat-val { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .result-stat-lbl { font-size: 0.7rem; font-weight: 500; color: var(--on-surface-variant); }
+
+    .results-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: linear-gradient(135deg, var(--primary), #059669);
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      transition: transform var(--ease-smooth);
+    }
+    .results-btn:active { transform: scale(0.97); }
+
+    /* Empty state */
+    .empty-review {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 60px 24px; gap: 12px; text-align: center;
+      animation: cardIn 0.5s var(--ease-smooth) backwards;
+    }
+    .empty-review svg { opacity: 0.25; }
+    .empty-review h2 { font-size: 1.1rem; font-weight: 700; color: var(--on-surface); }
+    .empty-review p { font-size: 0.85rem; color: var(--on-surface-variant); max-width: 260px; }
+    .empty-review .back-link {
+      margin-top: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      text-decoration: none;
+      transition: transform var(--ease-smooth);
+    }
+    .empty-review .back-link:active { transform: scale(0.96); }
+
+    /* Mastery grid (inline) */
+    .mastery-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      margin: 0 var(--spacing-md) var(--spacing-md);
+      animation: cardIn 0.5s var(--ease-smooth) 0.3s backwards;
+    }
+    .mastery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(18px, 1fr));
+      gap: 3px;
+    }
+    .mastery-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: var(--surface-active);
+      transition: background 0.3s ease;
+    }
+    .mastery-cell.l0 { background: var(--surface-active); }
+    .mastery-cell.l1 { background: #fca5a5; }
+    .mastery-cell.l2 { background: #fdba74; }
+    .mastery-cell.l3 { background: #fde68a; }
+    .mastery-cell.l4 { background: #86efac; }
+    .mastery-cell.l5 { background: #10b981; }
+    .mastery-legend {
+      display: flex; gap: 8px; justify-content: center;
+      margin-top: 10px; flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; color: var(--on-surface-variant);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <header class="dash-header">
+      <button class="back-btn" onclick="history.back()" aria-label="رجوع">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+      <h1 class="dash-title">مراجعة اليوم</h1>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="تبديل السمة">
+        <svg id="themeSun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="themeMoon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Loading skeleton -->
+    <div id="loadingSkeleton" class="skeleton-wrap">
+      <div class="skel skel-hero"></div>
+      <div class="skel skel-chart"></div>
+      <div class="skel skel-list"></div>
+    </div>
+
+    <!-- Empty state (shown when no due revisions) -->
+    <div id="emptyState" class="empty-review" style="display:none">
+      <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <h2>لا توجد مراجعات الآن</h2>
+      <p>أحسنت! جميع الآيات محدثة. عدّ لاحقاً للمراجعة التالية.</p>
+      <a href="tasmee-dashboard.html" class="back-link">العودة للوحة التلمييع</a>
+    </div>
+
+    <!-- Main review content -->
+    <div id="reviewContent" style="display:none">
+
+      <!-- Hero -->
+      <div class="review-hero">
+        <div class="review-hero-title" id="reviewTitle">مراجعة اليوم</div>
+        <div class="review-hero-sub" id="reviewSub"></div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progressCurrent">0</span>
+          <span id="progressTotal">من 0</span>
+        </div>
+      </div>
+
+      <!-- Ayah display card -->
+      <div class="ayah-card" id="ayahCard">
+        <div class="ayah-surah-label" id="ayahSurah"></div>
+        <div class="ayah-number-badge" id="ayahNumber"></div>
+        <div class="ayah-text-display" id="ayahText"></div>
+        <div class="ayah-controls">
+          <button class="ayah-ctrl-btn" id="hideTextBtn" onclick="toggleHideText()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            إخفاء النص
+          </button>
+          <button class="ayah-ctrl-btn" id="playBtn" onclick="playAyahAudio()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            استماع
+          </button>
+        </div>
+      </div>
+
+      <!-- Mic area -->
+      <div class="mic-area">
+        <div class="mic-pulse" id="micPulse" onclick="toggleMic()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
+        <div class="mic-status" id="micStatus">اضغط للبدء</div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-row">
+        <button class="action-btn btn-skip" id="skipBtn" onclick="skipAyah()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/>
+          </svg>
+          تخطي
+        </button>
+        <button class="action-btn btn-next" id="nextBtn" onclick="nextAyah()" disabled>
+          التالي
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mastery grid -->
+      <div class="mastery-section">
+        <div class="section-header">
+          <h2 class="section-title">خريطة الإتقان</h2>
+        </div>
+        <div class="mastery-grid" id="masteryGrid"></div>
+        <div class="mastery-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--surface-active)"></div>جديد</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fca5a5"></div>ضعيف</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fdba74"></div>متوسط</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fde68a"></div>جيد</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#86efac"></div>ممتاز</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>مُتقَن</div>
+        </div>
+      </div>
+
+    </div><!-- /reviewContent -->
+
+    <!-- Results overlay -->
+    <div class="results-overlay" id="resultsOverlay">
+      <div class="results-card">
+        <div class="results-emoji" id="resultsEmoji"></div>
+        <div class="results-title" id="resultsTitle"></div>
+        <div class="results-sub" id="resultsSub"></div>
+        <div class="results-stats">
+          <div class="result-stat">
+            <div class="result-stat-val" style="color:var(--primary)" id="rsCorrect">0</div>
+            <div class="result-stat-lbl">صحيح</div>
+          </div>
+          <div class="result-stat">
+            <div class="result-stat-val" style="color:#f59e0b" id="rsFuzzy">0</div>
+            <div class="result-stat-lbl">قريب</div>
+          </div>
+          <div class="result-stat">
+            <div class="result-stat-val" style="color:var(--danger)" id="rsMissed">0</div>
+            <div class="result-stat-lbl">مفقود</div>
+          </div>
+          <div class="result-stat">
+            <div class="result-stat-val" style="color:var(--on-surface-variant)" id="rsTotal">0</div>
+            <div class="result-stat-lbl">المجموع</div>
+          </div>
+        </div>
+        <button class="results-btn" onclick="closeResults()">متابعة</button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="../js/quran/tasmee-review.js"></script>
+</body>
+</html>
