@@ -20,10 +20,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/salma"
   },
   {
-    "name": "إذاعة تكبيرات العيد",
-    "url": "https://backup.qurango.net/radio/eid"
-  },
-  {
     "name": "إذاعة الرقية الشرعية",
     "url": "https://backup.qurango.net/radio/roqiah"
   },
@@ -34,14 +30,6 @@ const RADIO_STATIONS = [
   {
     "name": "أذكار المساء",
     "url": "https://backup.qurango.net/radio/athkar_masa"
-  },
-  {
-    "name": "آيات السكينة",
-    "url": "https://backup.qurango.net/radio/sakeenah"
-  },
-  {
-    "name": "سورة الملك",
-    "url": "https://backup.qurango.net/radio/Surah_Al-Mulk"
   },
   {
     "name": "إذاعة ---سورة البقرة - لعدد من القراء---",
@@ -56,18 +44,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/abdulbasit_abdulsamad"
   },
   {
-    "name": "إذاعة عبدالباسط عبدالصمد (تجويد)",
-    "url": "https://backup.qurango.net/radio/abdulbasit_abdulsamad_mojawwad"
-  },
-  {
-    "name": "إذاعة عبدالباسط عبدالصمد (ورش)",
-    "url": "https://backup.qurango.net/radio/abdulbasit_abdulsamad_warsh"
-  },
-  {
-    "name": "إذاعة محمد صديق المنشاوي (ترتيل)",
-    "url": "https://backup.qurango.net/radio/mohammed_siddiq_alminshawi"
-  },
-  {
     "name": "إذاعة محمد صديق المنشاوي (تجويد)",
     "url": "https://backup.qurango.net/radio/mohammed_siddiq_alminshawi_mojawwad"
   },
@@ -80,16 +56,8 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/mahmoud_khalil_alhussary_mojawwad"
   },
   {
-    "name": "إذاعة محمود خليل الحصري (ورش)",
-    "url": "https://backup.qurango.net/radio/mahmoud_khalil_alhussary_warsh"
-  },
-  {
     "name": "إذاعة مصطفى إسماعيل",
     "url": "https://backup.qurango.net/radio/mustafa_ismail"
-  },
-  {
-    "name": "إذاعة محمود علي البنا (ترتيل)",
-    "url": "https://backup.qurango.net/radio/mahmoud_ali__albanna"
   },
   {
     "name": "إذاعة محمود علي البنا (تجويد)",
@@ -108,10 +76,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/abdulrahman_alsudaes"
   },
   {
-    "name": "إذاعة سعود الشريم",
-    "url": "https://backup.qurango.net/radio/saud_alshuraim"
-  },
-  {
     "name": "إذاعة ماهر المعيقلي",
     "url": "https://backup.qurango.net/radio/maher"
   },
@@ -120,20 +84,8 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/yasser_aldosari"
   },
   {
-    "name": "إذاعة علي جابر",
-    "url": "https://backup.qurango.net/radio/ali_jaber"
-  },
-  {
-    "name": "إذاعة محمد أيوب",
-    "url": "https://backup.qurango.net/radio/mohammed_ayyub"
-  },
-  {
     "name": "إذاعة محمد أيوب - قراءة مميزة",
     "url": "https://backup.qurango.net/radio/ayyoub2"
-  },
-  {
-    "name": "إذاعة سعد الغامدي",
-    "url": "https://backup.qurango.net/radio/saad_alghamdi"
   },
   {
     "name": "إذاعة صلاح البدير",
@@ -148,36 +100,12 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/ali_alhuthaifi"
   },
   {
-    "name": "إذاعة علي الحذيفي (قالون)",
-    "url": "https://backup.qurango.net/radio/ali_alhuthaifi_qalon"
-  },
-  {
-    "name": "إذاعة عبدالله عواد الجهني",
-    "url": "https://backup.qurango.net/radio/abdullah_aljohany"
-  },
-  {
     "name": "إذاعة عبدالله المطرود",
     "url": "https://backup.qurango.net/radio/abdullah_almattrod"
   },
   {
-    "name": "إذاعة عبدالله بصفر",
-    "url": "https://backup.qurango.net/radio/abdullah_basfer"
-  },
-  {
-    "name": "إذاعة عبدالله خياط",
-    "url": "https://backup.qurango.net/radio/abdullah_khayyat"
-  },
-  {
-    "name": "إذاعة عبدالمحسن الحارثي",
-    "url": "https://backup.qurango.net/radio/abdulmohsin_alharthy"
-  },
-  {
     "name": "إذاعة محمد اللحيدان",
     "url": "https://backup.qurango.net/radio/mohammed_allohaidan"
-  },
-  {
-    "name": "إذاعة محمد جبريل",
-    "url": "https://backup.qurango.net/radio/mohammed_jibreel"
   },
   {
     "name": "إذاعة مصطفى اللاهوني",
@@ -196,44 +124,12 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/ahmad_alajmy"
   },
   {
-    "name": "هزاع البلوشي",
-    "url": "https://backup.qurango.net/radio/hazza"
-  },
-  {
     "name": "إذاعة ناصر القطامي",
     "url": "https://backup.qurango.net/radio/nasser_alqatami"
   },
   {
-    "name": "إذاعة إبراهيم الأخضر",
-    "url": "https://backup.qurango.net/radio/ibrahim_alakdar"
-  },
-  {
-    "name": "إذاعة أحمد الحواشي",
-    "url": "https://backup.qurango.net/radio/ahmad_alhawashi"
-  },
-  {
-    "name": "إذاعة خالد القحطاني",
-    "url": "https://backup.qurango.net/radio/khaled_alqahtani"
-  },
-  {
-    "name": "إذاعة خليفة الطنيجي",
-    "url": "https://backup.qurango.net/radio/khalifa_altunaiji"
-  },
-  {
-    "name": "إذاعة ياسر القرشي",
-    "url": "https://backup.qurango.net/radio/yasser_alqurashi"
-  },
-  {
-    "name": "إذاعة ياسر المزروعي",
-    "url": "https://backup.qurango.net/radio/yasser_almazroyee"
-  },
-  {
     "name": "إذاعة وليد النائحي",
     "url": "https://backup.qurango.net/radio/waleed_alnaehi"
-  },
-  {
-    "name": "إذاعة ناصر العصفور",
-    "url": "https://backup.qurango.net/radio/nasser_alosfor"
   },
   {
     "name": "إذاعة صلاح بو خاطر",
@@ -246,10 +142,6 @@ const RADIO_STATIONS = [
   {
     "name": "إذاعة يوسف الشويعي",
     "url": "https://backup.qurango.net/radio/yousef_alshoaey"
-  },
-  {
-    "name": "إذاعة عادل الكلباني",
-    "url": "https://backup.qurango.net/radio/adel_alkhalbany"
   },
   {
     "name": "إذاعة بندر بليلة",
@@ -276,10 +168,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/mohammad_abdullkarem"
   },
   {
-    "name": "إذاعة محمد عبدالكريم",
-    "url": "https://backup.qurango.net/radio/mohammad_abdullkarem_alasbahani"
-  },
-  {
     "name": "إذاعة عبدالعزيز الأحمد",
     "url": "https://backup.qurango.net/radio/abdul_aziz_alahmad"
   },
@@ -304,10 +192,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/muftah_alsaltany_aldorai"
   },
   {
-    "name": "إذاعة مفتاح السلطني",
-    "url": "https://backup.qurango.net/radio/muftah_alsaltany"
-  },
-  {
     "name": "إذاعة مفتاح السلطني (ابن ذكوان عن ابن عامر)",
     "url": "https://backup.qurango.net/radio/muftah_alsaltany_ibn_thakwan_an_ibn_amr"
   },
@@ -320,56 +204,20 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/mohammad_alabdullah_aldorai"
   },
   {
-    "name": "إذاعة عبدالرحمن الماجد",
-    "url": "https://backup.qurango.net/radio/abdulrahman_almajed"
-  },
-  {
     "name": "إذاعة ناصر الماجد",
     "url": "https://backup.qurango.net/radio/nasser_almajed"
-  },
-  {
-    "name": "إذاعة ماجد الزامل",
-    "url": "https://backup.qurango.net/radio/majed_alzamel"
-  },
-  {
-    "name": "بدر التركي",
-    "url": "https://backup.qurango.net/radio/bader"
   },
   {
     "name": "إذاعة هيثم الجدعاني",
     "url": "https://backup.qurango.net/radio/hitham_aljadani"
   },
   {
-    "name": "إذاعة عبدالله الموسى",
-    "url": "https://backup.qurango.net/radio/abdullah_almousa"
-  },
-  {
-    "name": "إذاعة عبدالله الخلف",
-    "url": "https://backup.qurango.net/radio/abdullah_alkhalaf"
-  },
-  {
     "name": "إذاعة خالد الجليل",
     "url": "https://backup.qurango.net/radio/khalid_aljileel"
   },
   {
-    "name": "صالح الهبدان",
-    "url": "https://backup.qurango.net/radio/saleh_alhabdan"
-  },
-  {
-    "name": "عبدالله البعيجان",
-    "url": "https://backup.qurango.net/radio/buajan"
-  },
-  {
-    "name": "إذاعة جمعان العصيمي",
-    "url": "https://backup.qurango.net/radio/jamaan_alosaimi"
-  },
-  {
     "name": "إذاعة معيض الحارثي",
     "url": "https://backup.qurango.net/radio/moeedh_alharthi"
-  },
-  {
-    "name": "إذاعة ابراهيم الدوسري",
-    "url": "https://backup.qurango.net/radio/ibrahim_aldosari"
   },
   {
     "name": "إذاعة زكي داغستاني",
@@ -394,10 +242,6 @@ const RADIO_STATIONS = [
   {
     "name": "إذاعة القارئ ياسين",
     "url": "https://backup.qurango.net/radio/alqaria_yassen"
-  },
-  {
-    "name": "إذاعة العيون الكوشي",
-    "url": "https://backup.qurango.net/radio/aloyoon_alkoshi"
   },
   {
     "name": "إذاعة عمر القزابري",
@@ -430,14 +274,6 @@ const RADIO_STATIONS = [
   {
     "name": "إذاعة موسى بلال",
     "url": "https://backup.qurango.net/radio/mousa_bilal"
-  },
-  {
-    "name": "حاتم فريد الواعر",
-    "url": "https://backup.qurango.net/radio/hatem_fareed_alwaer"
-  },
-  {
-    "name": "إذاعة يوسف بن نوح أحمد",
-    "url": "https://backup.qurango.net/radio/yousef_bin_noah_ahmad"
   },
   {
     "name": "إذاعة عبدالله الكندري",
@@ -480,10 +316,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/mahmood_alsheimy"
   },
   {
-    "name": "إذاعة عادل ريان",
-    "url": "https://backup.qurango.net/radio/adel_ryyan"
-  },
-  {
     "name": "إذاعة صابر عبدالحكم",
     "url": "https://backup.qurango.net/radio/saber_abdulhakm"
   },
@@ -512,10 +344,6 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/emad_hafez"
   },
   {
-    "name": "إذاعة نبيل الرفاعي",
-    "url": "https://backup.qurango.net/radio/nabil_al_rifay"
-  },
-  {
     "name": "إذاعة هاني الرفاعي",
     "url": "https://backup.qurango.net/radio/hani_arrifai"
   },
@@ -536,20 +364,12 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/ahmed_altrabulsi"
   },
   {
-    "name": "إذاعة أحمد عامر",
-    "url": "https://backup.qurango.net/radio/ahmed_amer"
-  },
-  {
     "name": "إذاعة أحمد خليل شاهين",
     "url": "https://backup.qurango.net/radio/ahmad_shaheen"
   },
   {
     "name": "أذاعة محمد أبوسنينة",
     "url": "https://backup.qurango.net/radio/sneineh"
-  },
-  {
-    "name": "إذاعة عبدالرحمن الشحات",
-    "url": "https://backup.qurango.net/radio/a_alshahhat"
   },
   {
     "name": "إذاعة --تفسير القران الكريم--",
@@ -566,10 +386,6 @@ const RADIO_STATIONS = [
   {
     "name": "تفسير غريب القرآن",
     "url": "https://backup.qurango.net/radio/gareeb-quran"
-  },
-  {
-    "name": "في ظلال السيرة النبوية - 400 حلقة عن سيرة نبينا محمد صلى الله عليه وسلم",
-    "url": "https://backup.qurango.net/radio/fi_zilal_alsiyra"
   },
   {
     "name": "المختصر في السيرة النبوية",
@@ -590,10 +406,6 @@ const RADIO_STATIONS = [
   {
     "name": "صحيح البخاري",
     "url": "https://backup.qurango.net/radio/saheh-bokharee"
-  },
-  {
-    "name": "صحيح مسلم",
-    "url": "https://backup.qurango.net/radio/saheh-muslim"
   },
   {
     "name": "كتاب الاختيارات الفقهية في مسائل العبادات والمعاملات",
@@ -636,40 +448,12 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/translation_quran_french"
   },
   {
-    "name": "ترجمة معاني القرآن باللغة الألمانية",
-    "url": "https://backup.qurango.net/radio/translation_quran_german"
-  },
-  {
-    "name": "ترجمة معاني القرآن باللغة الإسبانية",
-    "url": "https://backup.qurango.net/radio/translation_quran_spanish_afs"
-  },
-  {
     "name": "ترجمة معاني القرآن باللغة البرتغالية",
     "url": "https://backup.qurango.net/radio/translation_quran_portuguese"
   },
   {
-    "name": "ترجمة معاني القرآن باللغة التركية",
-    "url": "https://backup.qurango.net/radio/translation_quran_turkish"
-  },
-  {
-    "name": "ترجمة معاني القرآن باللغة الروسية",
-    "url": "https://backup.qurango.net/radio/translation_quran_Russia"
-  },
-  {
-    "name": "ترجمة معاني القرآن باللغة الصينية",
-    "url": "https://backup.qurango.net/radio/translation_quran_chinese"
-  },
-  {
     "name": "ترجمة معاني القرآن باللغة الفارسية",
     "url": "https://backup.qurango.net/radio/translation_quran_farsi"
-  },
-  {
-    "name": "ترجمة معاني القرآن باللغة الكردية",
-    "url": "https://backup.qurango.net/radio/translation_quran_kurdish"
-  },
-  {
-    "name": "ترجمة معاني القرآن باللغة البوسنية",
-    "url": "https://backup.qurango.net/radio/translation_quran_bosnia"
   },
   {
     "name": "ترجمة معاني القرآن باللغة الألبانية",
@@ -684,15 +468,7 @@ const RADIO_STATIONS = [
     "url": "https://backup.qurango.net/radio/Translation_Quran_Hausa"
   },
   {
-    "name": "ترجمة معاني القرآن باللغة الكورية",
-    "url": "https://backup.qurango.net/radio/translation_quran_Korean"
-  },
-  {
     "name": "ترجمة معاني القرآن باللغة المجرية",
     "url": "https://backup.qurango.net/radio/translation_quran_hungarian"
-  },
-  {
-    "name": "ترجمة معاني القرآن باللغة اليونانية",
-    "url": "https://backup.qurango.net/radio/translation_quran_greek"
   }
 ];
