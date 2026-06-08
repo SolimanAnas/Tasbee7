@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>أذكار النوم · زاد المسلم</title>
+<link rel="icon" href="../icons/icon-192.png">
+<style>
+@font-face{
+  font-family:'Qortoba';
+  src:url('../fonts/qortoba.ttf') format('truetype');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Amiri';
+  src:url('../fonts/Amiri.ttf') format('truetype');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body{
+  min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;
+  font-family:'Amiri',serif;
+  background:#0a0e1a;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(100,140,255,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(100,140,255,.04) 0%, transparent 60%);
+  padding:clamp(16px,4vw,40px);
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ── twinkling stars background ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 50%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,255,255,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 20% 70%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 90%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 40%, rgba(255,255,255,.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.4) 0%, transparent 100%);
+  animation:twinkle 6s ease-in-out infinite alternate;
+}
+@keyframes twinkle{
+  0%,100%{opacity:.5}
+  50%{opacity:1}
+}
+
+.page{
+  width:100%;max-width:780px;
+  position:relative;z-index:1;
+  animation:pageRise 1s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* ── Outer frame ── */
+.frame{
+  position:relative;
+  background:linear-gradient(175deg,#12182e 0%,#0d1328 40%,#0a0f20 100%);
+  border-radius:6px;
+  box-shadow:
+    0 0 0 12px #080b17,
+    0 0 0 14px rgba(120,160,255,.15),
+    0 24px 80px rgba(0,0,0,.7);
+  padding:clamp(16px,3vw,32px);
+  overflow:hidden;
+}
+
+/* starfield grain */
+.frame::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  background-size:400px 400px;
+  opacity:.6;
+}
+
+/* inner silver border */
+.frame::after{
+  content:'';position:absolute;z-index:1;pointer-events:none;
+  inset:6px;
+  border:1.5px solid rgba(120,160,255,.2);
+  border-radius:3px;
+}
+
+.content-wrap{
+  position:relative;z-index:2;
+  border:1px solid rgba(120,160,255,.12);
+  padding:clamp(20px,4vw,48px) clamp(16px,3vw,40px);
+}
+
+/* ── Star corner ornaments ── */
+.corner{position:absolute;width:28px;height:28px;z-index:3;color:rgba(180,200,255,.35);}
+.corner svg{width:100%;height:100%;display:block;}
+.corner-tl{top:-4px;right:-4px;}
+.corner-tr{top:-4px;left:-4px;transform:scaleX(-1);}
+.corner-bl{bottom:-4px;right:-4px;transform:scaleY(-1);}
+.corner-br{bottom:-4px;left:-4px;transform:scale(-1,-1);}
+
+/* ── Header Banner ── */
+.banner{
+  position:relative;
+  background:linear-gradient(135deg,#1a2248,#0f1530 50%,#1a2248);
+  border-radius:3px;
+  padding:clamp(14px,2.5vw,24px) clamp(16px,3vw,32px);
+  text-align:center;
+  margin-bottom:clamp(20px,4vw,40px);
+  box-shadow:
+    0 4px 20px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -1px 0 rgba(0,0,0,.3);
+  animation:rise 1s cubic-bezier(.22,1,.36,1) .08s both;
+}
+.banner::before{
+  content:'';position:absolute;inset:4px;
+  border:1px solid rgba(120,160,255,.2);
+  border-radius:2px;pointer-events:none;
+}
+.banner::after{
+  content:'';position:absolute;inset:8px;
+  border:1px solid rgba(120,160,255,.1);
+  border-radius:2px;pointer-events:none;
+}
+.banner-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(60% 60% at 50% 40%, rgba(120,160,255,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.banner h1{
+  font-family:'Qortoba',serif;
+  font-weight:400;
+  font-size:clamp(1.1rem,3vw,1.6rem);
+  color:#c8d8ff;
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+  position:relative;
+  letter-spacing:.02em;
+  line-height:1.4;
+}
+.banner-sub{
+  font-family:'Amiri',serif;
+  font-size:clamp(.8rem,1.8vw,1rem);
+  color:rgba(180,200,255,.45);
+  margin-top:4px;
+  letter-spacing:.04em;
+}
+
+/* ── Crescent icon ── */
+.crescent-wrap{
+  display:flex;justify-content:center;margin-bottom:clamp(12px,2vw,20px);
+  animation:rise .8s cubic-bezier(.22,1,.36,1) .1s both;
+}
+.crescent{
+  width:clamp(24px,4vw,36px);height:clamp(24px,4vw,36px);
+  color:rgba(180,200,255,.25);
+}
+
+/* ── Body ── */
+.body-text{
+  position:relative;
+  display:flex;flex-direction:column;gap:clamp(14px,2vw,24px);
+}
+
+.dhikr{
+  position:relative;
+  padding-right:clamp(24px,4vw,40px);
+  animation:rise .8s cubic-bezier(.22,1,.36,1) both;
+}
+.dhikr:nth-child(1){animation-delay:.12s}
+.dhikr:nth-child(2){animation-delay:.16s}
+.dhikr:nth-child(3){animation-delay:.20s}
+.dhikr:nth-child(4){animation-delay:.24s}
+.dhikr:nth-child(5){animation-delay:.28s}
+.dhikr:nth-child(6){animation-delay:.32s}
+.dhikr:nth-child(7){animation-delay:.36s}
+.dhikr:nth-child(8){animation-delay:.40s}
+.dhikr:nth-child(9){animation-delay:.44s}
+.dhikr:nth-child(10){animation-delay:.48s}
+.dhikr:nth-child(11){animation-delay:.52s}
+.dhikr:nth-child(12){animation-delay:.56s}
+.dhikr:nth-child(13){animation-delay:.60s}
+
+.dhikr .marker{
+  position:absolute;right:0;top:.45em;
+  color:rgba(120,160,255,.4);
+  font-size:.7em;
+  line-height:1;
+}
+.dhikr-text{
+  font-size:clamp(1.05rem,2.2vw,1.35rem);
+  line-height:1.9;
+  color:#c0cce8;
+  font-weight:400;
+}
+.dhikr-text strong{
+  font-weight:700;
+  color:#dce4ff;
+}
+.quran{
+  color:#a8c8ff;
+  font-weight:700;
+  line-height:2;
+}
+.ref{
+  font-size:clamp(.7rem,1.3vw,.8rem);
+  color:rgba(160,185,255,.4);
+  display:block;
+  margin-top:2px;
+  padding-right:4px;
+  font-weight:400;
+}
+.count-badge{
+  display:inline-block;
+  font-size:.7em;
+  color:rgba(160,185,255,.6);
+  font-weight:700;
+  margin:0 2px;
+  vertical-align:super;
+}
+
+/* ── Divider ── */
+.divider{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  margin:4px 0;
+  animation:rise .8s cubic-bezier(.22,1,.36,1) .6s both;
+}
+.divider-line{
+  flex:1;max-width:120px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(120,160,255,.25),transparent);
+}
+.divider-diamond{
+  width:6px;height:6px;
+  background:rgba(120,160,255,.35);
+  transform:rotate(45deg);
+  border-radius:1px;
+}
+
+/* ── Footnotes ── */
+.footnotes{
+  margin-top:clamp(16px,3vw,28px);
+  padding-top:clamp(12px,2vw,20px);
+  border-top:1px solid rgba(120,160,255,.15);
+  display:flex;flex-wrap:wrap;gap:6px clamp(10px,2vw,20px);
+  justify-content:center;
+  animation:rise .8s cubic-bezier(.22,1,.36,1) .6s both;
+}
+.fn-item{
+  font-size:clamp(.65rem,1.2vw,.75rem);
+  color:rgba(160,185,255,.35);
+  display:inline-flex;align-items:center;gap:4px;
+  font-weight:400;
+}
+.fn-num{
+  font-weight:700;
+  color:rgba(120,160,255,.5);
+  font-size:.85em;
+}
+
+/* ── Animations ── */
+@keyframes pageRise{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:none}
+}
+@keyframes rise{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:none}
+}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .frame{padding:10px}
+  .content-wrap{padding:16px 12px}
+  .corner{width:18px;height:18px}
+  .dhikr{padding-right:20px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important}
+}
+
+/* ── App integration: exit trigger for back nav ── */
+body.fade-out{opacity:0;transition:opacity .25s}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="frame">
+
+    <div class="content-wrap">
+
+      <!-- Star corner ornaments -->
+      <div class="corner corner-tl" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M14 0l1.5 4.5 3.5-3.5-1.5 5L22 7l-5 1 1 5-3-3.5L12 13l1-5-5-1 4.5-1.5-1.5-5 3.5 3.5L14 0z"/>
+        </svg>
+      </div>
+      <div class="corner corner-tr" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M14 0l1.5 4.5 3.5-3.5-1.5 5L22 7l-5 1 1 5-3-3.5L12 13l1-5-5-1 4.5-1.5-1.5-5 3.5 3.5L14 0z"/>
+        </svg>
+      </div>
+      <div class="corner corner-bl" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M14 0l1.5 4.5 3.5-3.5-1.5 5L22 7l-5 1 1 5-3-3.5L12 13l1-5-5-1 4.5-1.5-1.5-5 3.5 3.5L14 0z"/>
+        </svg>
+      </div>
+      <div class="corner corner-br" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width=".8">
+          <path d="M14 0l1.5 4.5 3.5-3.5-1.5 5L22 7l-5 1 1 5-3-3.5L12 13l1-5-5-1 4.5-1.5-1.5-5 3.5 3.5L14 0z"/>
+        </svg>
+      </div>
+
+      <!-- Crescent -->
+      <div class="crescent-wrap">
+        <svg class="crescent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+          <path d="M21 12.5A9 9 0 0 1 11 2a9 9 0 1 0 10 10.5z"/>
+        </svg>
+      </div>
+
+      <!-- Header -->
+      <div class="banner">
+        <div class="banner-glow"></div>
+        <h1>أذكار النوم</h1>
+        <div class="banner-sub">عند النوم — كما ورد عن النبي ﷺ</div>
+      </div>
+
+      <!-- Body -->
+      <div class="body-text">
+
+        <!-- 1: Surahs -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>سُورَةُ الْإِخْلَاصِ، الْفَلَقِ، النَّاسِ</strong><br>
+            <span class="quran">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ﴿قُلْ هُوَ اللَّهُ أَحَدٌ﴾ — ﴿قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ﴾ — ﴿قُلْ أَعُوذُ بِرَبِّ النَّاسِ﴾</span>
+          </div>
+          <div class="dhikr-text" style="margin-top:4px;">
+            ثُمَّ يَمْسَحُ بِهِمَا مَا اسْتَطَاعَ مِنْ جَسَدِهِ، يَبْدَأُ بِرَأْسِهِ وَوَجْهِهِ وَمَا أَقْبَلَ مِنْ جَسَدِهِ. <strong>(يَفْعَلُ ذَلِكَ ثَلَاثَ مَرَّاتٍ)</strong>
+          </div>
+          <span class="ref">صحيح البخاري</span>
+        </div>
+
+        <!-- 2: Ayat al-Kursi -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>آيَةُ الْكُرْسِيِّ</strong>
+          </div>
+          <div class="dhikr-text" style="margin-top:4px;">
+            <span class="quran">
+              اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ، وَلَا يَئُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ
+            </span>
+          </div>
+          <span class="ref">رواه النسائي في الكبرى — البقرة ٢٥٥</span>
+        </div>
+
+        <!-- 3: Amanar Rasul -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>خَوَاتِيمُ سُورَةِ الْبَقَرَةِ</strong>
+          </div>
+          <div class="dhikr-text" style="margin-top:4px;">
+            <span class="quran">
+              آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ... ﴿الْبَقَرَةُ ٢٨٥–٢٨٦﴾
+            </span>
+          </div>
+          <span class="ref">صحيح البخاري</span>
+        </div>
+
+        <!-- 4 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا، بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ</strong>
+          </div>
+          <span class="ref">صحيح البخاري ومسلم</span>
+        </div>
+
+        <!-- 5 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>اللَّهُمَّ إِنَّكَ خَلَقْتَ نَفْسِي وَأَنْتَ تَوَفَّاهَا، لَكَ مَمَاتُهَا وَمَحْيَاهَا، إِنْ أَحْيَيْتَهَا فَاحْفَظْهَا، وَإِنْ أَمَتَّهَا فَاغْفِرْ لَهَا. اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ</strong>
+          </div>
+          <span class="ref">رواه مسلم</span>
+        </div>
+
+        <!-- 6 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ</strong>
+          </div>
+          <span class="ref">رواه أبو داود</span>
+        </div>
+
+        <!-- 7 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا</strong>
+          </div>
+          <span class="ref">متفق عليه</span>
+        </div>
+
+        <!-- 8 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>سُبْحَانَ اللَّهِ</strong> <span class="count-badge">×٣٣</span><br>
+            <strong>الْحَمْدُ لِلَّهِ</strong> <span class="count-badge">×٣٣</span><br>
+            <strong>اللَّهُ أَكْبَرُ</strong> <span class="count-badge">×٣٤</span>
+          </div>
+          <span class="ref">متفق عليه</span>
+        </div>
+
+        <!-- 9 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>اللَّهُمَّ رَبَّ السَّمَاوَاتِ السَّبْعِ وَرَبَّ الْأَرْضِ، وَرَبَّ الْعَرْشِ الْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ الْحَبِّ وَالنَّوَى، وَمُنْزِلَ التَّوْرَاةِ وَالْإِنْجِيلِ وَالْفُرْقَانِ، أَعُوذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ. اللَّهُمَّ أَنْتَ الْأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ الْآخِرُ فَلَيْسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ الظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ الْبَاطِنُ فَلَيْسَ دُونَكَ شَيْءٌ، اقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ</strong>
+          </div>
+          <span class="ref">رواه مسلم</span>
+        </div>
+
+        <!-- 10 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا، وَكَفَانَا، وَآوَانَا، فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِيَ</strong>
+          </div>
+          <span class="ref">رواه مسلم</span>
+        </div>
+
+        <!-- 11 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ، فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا، أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ</strong>
+          </div>
+          <span class="ref">سنن الترمذي</span>
+        </div>
+
+        <!-- 12 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>سُورَةُ السَّجْدَةِ وَسُورَةُ الْمُلْكِ</strong><br>
+            يَقْرَأُ ﴿الم﴾ تَنْزِيلَ السَّجْدَةِ، وَ﴿تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ﴾
+          </div>
+          <span class="ref">رواه الترمذي</span>
+        </div>
+
+        <!-- 13 -->
+        <div class="dhikr">
+          <span class="marker" aria-hidden="true">✦</span>
+          <div class="dhikr-text">
+            <strong>اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ، وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ</strong>
+          </div>
+          <span class="ref">متفق عليه</span>
+        </div>
+
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-diamond"></span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- Footnotes -->
+      <div class="footnotes">
+        <span class="fn-item"><span class="fn-num">✦</span>صحيح البخاري</span>
+        <span class="fn-item"><span class="fn-num">✦</span>صحيح مسلم</span>
+        <span class="fn-item"><span class="fn-num">✦</span>متفق عليه</span>
+        <span class="fn-item"><span class="fn-num">✦</span>سنن الترمذي</span>
+        <span class="fn-item"><span class="fn-num">✦</span>سنن أبي داود</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+window.addEventListener("pageshow", () => document.body.classList.remove("fade-out"));
+</script>
+</body>
+</html>
