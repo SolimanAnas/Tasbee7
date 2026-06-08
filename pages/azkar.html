@@ -843,7 +843,7 @@ body.player-active .page-wrapper {
       <div class="theme-buttons">
         <button class="btn" id="settMorning" onclick="setAudioSource('morning')">☀️ الصباح</button>
         <button class="btn" id="settNight" onclick="setAudioSource('night')">🌙 المساء</button>
-        <button class="btn" id="settRokya" onclick="setAudioSource('rokia')">📿 الرقية</button>
+        <button class="btn" id="settRuqia" onclick="setAudioSource('ruqia')">📿 الرقية</button>
       </div>
       <button class="btn" style="width:100%;margin-top:12px;" onclick="hidePlayerFromOptions(); closeSettings();">👁️ إخفاء المشغل (يستمر التشغيل)</button>
     </div>
@@ -860,7 +860,7 @@ body.player-active .page-wrapper {
     <button class="sound-option-btn" id="optNight" onclick="setAudioSource('night')">
       <span>🌙</span><span>أذكار المساء</span><span class="check">✓</span>
     </button>
-    <button class="sound-option-btn" id="optRokya" onclick="setAudioSource('rokia')">
+    <button class="sound-option-btn" id="optRuqia" onclick="setAudioSource('ruqia')">
       <span>📿</span><span>الرقية الشرعية</span><span class="check">✓</span>
     </button>
     <button class="sound-option-btn" onclick="hidePlayerFromOptions()">
@@ -1115,17 +1115,17 @@ function updateAudioSourceUI() {
   // Sound options popup (long-press)
   const optM = document.getElementById('optMorning');
   const optN = document.getElementById('optNight');
-  const optR = document.getElementById('optRokya');
+  const optR = document.getElementById('optRuqia');
   if (optM) optM.classList.toggle('active-source', audioSource === 'morning');
   if (optN) optN.classList.toggle('active-source', audioSource === 'night');
-  if (optR) optR.classList.toggle('active-source', audioSource === 'rokia');
+  if (optR) optR.classList.toggle('active-source', audioSource === 'ruqia');
   // Settings modal
   const settM = document.getElementById('settMorning');
   const settN = document.getElementById('settNight');
-  const settR = document.getElementById('settRokya');
+  const settR = document.getElementById('settRuqia');
   if (settM) settM.classList.toggle('primary', audioSource === 'morning');
   if (settN) settN.classList.toggle('primary', audioSource === 'night');
-  if (settR) settR.classList.toggle('primary', audioSource === 'rokia');
+  if (settR) settR.classList.toggle('primary', audioSource === 'ruqia');
 }
 
 function closeSettings() {
@@ -1155,11 +1155,11 @@ function goHome() {
 
 /* --- Audio Mini Player --- */
 let audio = null;
-let audioSource = type; // 'morning' or 'night' — defaults to URL type
+let audioSource = type; // 'morning', 'night', or 'ruqia' — defaults to URL type
 const SOURCES = {
   morning: '../assets/media/Azkar-morning.mp3',
   night:   '../assets/media/Azkar-night.mp3',
-  rokia:   '../assets/media/rokia06.mp3'
+  ruqia:   '../assets/media/rokia06.mp3'
 };
 
 function initAudio() {
