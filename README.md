@@ -17,6 +17,7 @@
 <br>
 
 A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual companion.
+Supports **5 languages**: العربية, English, Türkçe, کوردی, اردو.
 
 <br>
 
@@ -30,7 +31,7 @@ A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual
 
 | | Feature | Description |
 |:---:|:---|:---|
-| 📖 | **تصفّح المصحف** | Interactive Quran with 5 mushaf variants, word-level ayah highlighting, search, bookmarks, and offline caching |
+| 📖 | **المصحف الشريف** | Interactive Quran with 5 mushaf variants, word-level ayah highlighting, search, bookmarks, and offline caching |
 | 🎧 | **الاستماع للقرآن** | Multi-reciter audio player with background playback, media session, sleep timer, and favorites |
 | 🔁 | **التكرار** | Repeat ayahs with configurable reciter, surah range, speed control, and ayah text display |
 | 📿 | **المسبحة** | Smart digital counter with haptic feedback, daily targets, lifetime stats, and OLED power-saving mode |
@@ -42,8 +43,10 @@ A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual
 | 🕋 | **الرقية الشرعية** | Prophetic Ruqyah supplications |
 | 📚 | **الأربعين النووية** | Imam An-Nawawi's 40 Hadith collection |
 | 🔍 | **باحث الأحاديث** | Hadith search and viewer |
-| 🔔 | **الإشعارات** | Prayer time notifications |
+| 🧠 | **التلقين (Tasmee)** | Ayah-by-ayah memorization coach with speech recognition, spaced repetition, mistake tracking, and weekly charts |
+| 🔔 | **الإشعارات** | Prayer time notifications with adhan alerts |
 | 🧭 | **اتجاه القبلة** | Qibla compass with AR overlay |
+| 🌐 | **5 لغات** | Full i18n — Arabic, English, Turkish, Kurdish (Sorani), Urdu |
 | 🎨 | **واجهة زجاجية** | 4-theme glassmorphism system (Light, Dark, Sepia, OLED Black) with smooth animations |
 | 📱 | **تطبيق متكامل** | Installable PWA — works offline on iOS and Android |
 
@@ -62,8 +65,9 @@ A modern, lightweight, ad-free Progressive Web App — your all-in-one spiritual
 | **Database** | SQLite via sql.js for ayah-level highlighting coordinates |
 | **Search** | Tarteel.js for Quran text search |
 | **Storage** | localStorage + IndexedDB for settings, bookmarks, statistics, and tasmee data |
+| **i18n** | Custom lightweight engine — 5 locales (ar, en, tr, ckb, ur) |
 | **PWA** | Service Workers + Web App Manifest for offline support |
-| **Testing** | Playwright — 45 automated tests (resource loading, navigation links, path consistency) |
+| **Testing** | Playwright — ~40 automated tests (resource loading, navigation, i18n key parity) |
 
 ---
 
@@ -106,20 +110,29 @@ Tasbee7/
 │   ├── duaa.html               # Duaa collection
 │   ├── hadith.html             # Hadith browser
 │   ├── hadith-viewer.html      # Hadith viewer
+│   ├── salah.html              # After-salah adhkar
+│   ├── sleeping.html           # Sleeping adhkar
+│   ├── tasmee-dashboard.html   # Tasmee memorization dashboard
+│   ├── tasmee-review.html      # Tasmee review interface
 │   ├── qibla.html              # Qibla compass
 │   ├── notifications.html      # Prayer notifications
 │   ├── about.html              # About page
 │   └── howto.html              # How-to guide
 ├── css/
 │   ├── style.css               # Global styles
-│   ├── quran-v4.css            # Quran reader styles (2,440 lines)
+│   ├── quran-v4.css            # Quran reader styles
 │   └── _masbaha.css            # Masbaha styles
 ├── js/
+│   ├── i18n.js                 # Internationalization engine
+│   ├── i18n/                   # Locale dictionaries (5 languages)
+│   │   ├── ar.js, en.js, tr.js, ckb.js, ur.js
+│   │   └── names.js            # Localized surah/reciter/station names
 │   ├── quran/                  # Quran reader modules
 │   │   ├── state.js            # App state management
 │   │   ├── navigation.js       # Page navigation
 │   │   ├── highlights.js       # Ayah highlighting
 │   │   ├── audio.js            # Audio playback
+│   │   ├── audio-cache.js      # Audio caching
 │   │   ├── tafsir.js           # Tafsir display
 │   │   ├── settings.js         # User settings
 │   │   ├── ui.js               # UI utilities
@@ -127,7 +140,8 @@ Tasbee7/
 │   │   ├── download.js         # Offline download
 │   │   ├── init.js             # Initialization
 │   │   ├── tasmee.js           # Tasmee integration
-│   │   └── ui-extras.js        # Extra UI features
+│   │   ├── tasmee-dashboard.js # Tasmee dashboard
+│   │   └── tasmee-review.js    # Tasmee review
 │   ├── tasmee-engine.ts        # Tasmee engine (TypeScript)
 │   ├── tasmee-matcher.ts       # Word alignment engine (TypeScript)
 │   ├── tasmee-store.ts         # IndexedDB persistence (TypeScript)
@@ -140,18 +154,22 @@ Tasbee7/
 ├── db/                         # SQLite databases (tafsir, ayah coords)
 ├── json/                       # Ayah highlight coordinates
 ├── images/                     # Backgrounds, icons, featured images
+├── img/                        # UI images and SVGs
 ├── icons/                      # PWA icons
 ├── fonts/                      # Local font files
-├── assets/                     # Static assets
+├── assets/                     # Static assets (azkar JSON, audio, PDFs)
 ├── tests/
-│   └── pages.spec.js           # Playwright test suite (45 tests)
+│   ├── pages.spec.js           # Playwright page tests
+│   └── i18n.spec.js            # i18n key parity tests
+├── scripts/                    # Utility scripts
 ├── docs/
-│   └── plan.md                 # Development roadmap
+│   └── check-test.md           # Pre-launch health check
 ├── tsconfig.json               # TypeScript configuration
 ├── vite.config.js              # Vite build configuration
+├── playwright.config.js        # Playwright configuration
 ├── package.json                # Dependencies and scripts
-├── manifest.json               # PWA manifest
-└── sw.js                       # Service worker
+├── sw.js                       # Service worker
+└── manifest.json               # PWA manifest
 ```
 
 ---
@@ -173,11 +191,14 @@ Tasbee7/
 | Duaa | `pages/duaa.html` | Comprehensive duaa collection |
 | Hadith | `pages/hadith.html` | Hadith browser by collection |
 | Hadith Viewer | `pages/hadith-viewer.html` | Individual hadith display |
+| Salah | `pages/salah.html` | After-salah adhkar |
+| Sleeping | `pages/sleeping.html` | Bedtime adhkar |
+| Tasmee Dashboard | `pages/tasmee-dashboard.html` | Memorization progress & weekly charts |
+| Tasmee Review | `pages/tasmee-review.html` | Due revisions with spaced repetition |
 | Qibla | `pages/qibla.html` | Qibla compass with AR overlay |
 | Notifications | `pages/notifications.html` | Prayer time notification settings |
 | About | `pages/about.html` | App information |
 | How To | `pages/howto.html` | Usage guide |
-| 404 | `pages/404.html` | Not found page |
 
 ---
 
@@ -194,19 +215,36 @@ The app uses a custom **glassmorphism** design system with 4 themes:
 
 Key design tokens:
 - **Fonts:** Tajawal (UI), Amiri (Quran/Arabic text)
-- **Glass:** `backdrop-filter: blur(16px)` with translucent backgrounds
+- **Glass:** `backdrop-filter: blur(14px–16px)` with translucent backgrounds
 - **Radius:** 12px–32px depending on component
 - **Animations:** fadeIn, pulse, spin, staggered card entrance
+- **Notch support:** `@supports` CSS rule for 30px safe-area padding on notched iPhones (Android unaffected)
 
-Full design system reference: `~/.agents/skills/frontend-Soliman/SKILL.md`
+---
+
+## Internationalization
+
+The app supports **5 languages** via a custom i18n engine (`js/i18n.js`):
+
+| Language | Code | Status |
+|---|---|---|
+| العربية | `ar` | ✅ 612 keys |
+| English | `en` | ✅ 612 keys |
+| Türkçe | `tr` | ✅ 612 keys |
+| کوردی (Sorani) | `ckb` | ✅ 612 keys |
+| اردو | `ur` | ✅ 612 keys |
+
+All 5 locales have full key parity — no missing or extra keys against English.
+The language picker saves to `localStorage` and persists across sessions.
 
 ---
 
 ## Testing
 
 ```bash
-npm test                    # Run all 45 Playwright tests
-npx playwright test --ui    # Open Playwright UI mode
+npm test                          # Run all Playwright tests
+npx playwright test --ui          # Open Playwright UI mode
+npx playwright test -- -g "i18n"  # Run only i18n tests
 ```
 
 Tests cover:
@@ -216,6 +254,8 @@ Tests cover:
 - Intra-page link validation
 - Service worker asset list verification
 - HTML file existence checks
+- i18n key parity (all 5 locales compared to English baseline)
+- `data-i18n-html` placeholder safety (no child-destruction risk)
 
 ---
 
