@@ -102,6 +102,7 @@ export default {
   'prayer_asr': 'İkindi',
   'prayer_maghrib': 'Akşam',
   'prayer_isha': 'Yatsı',
+  'prayer_pick_date': 'Tarih seçin',
   'prayer_hint': 'Günü değiştirmek için kaydırın veya dokunun',
 
   'location_title': 'Konum Belirle',

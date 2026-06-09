@@ -111,6 +111,7 @@ export default {
   'prayer_asr': 'Asr',
   'prayer_maghrib': 'Maghrib',
   'prayer_isha': 'Isha',
+  'prayer_pick_date': 'Pick a date',
   'prayer_hint': 'Swipe or tap to change the day',
 
   // Location Modal

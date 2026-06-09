@@ -925,7 +925,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <div class="pt-head-row">
         <button class="pt-icon-btn" id="ptTodayBtn" onclick="goToToday()" data-i18n="prayer_today">اليوم</button>
         <div class="modal-title" data-i18n="prayer_times_title">مواعيد الصلاة</div>
-        <button class="pt-icon-btn" onclick="openDatePicker()" aria-label="اختر تاريخاً">
+        <button class="pt-icon-btn" onclick="openDatePicker()" data-i18n-aria="prayer_pick_date" aria-label="اختر تاريخاً">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         </button>
         <input type="date" id="ptDatePicker" class="pt-date-input" onchange="onDatePicked(this.value)">
@@ -942,7 +942,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <svg class="ch" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
     </div>
 
-    <div class="prayer-next-banner" id="prayerNextBanner">جاري الحساب…</div>
+    <div class="prayer-next-banner" id="prayerNextBanner" data-i18n="prayer_calculating">جاري الحساب…</div>
     <div class="prayer-list" id="prayerModalList"></div>
     <button class="btn-primary btn-secondary" onclick="changeLocationFromPrayer()" data-i18n="prayer_change_location">📍 تغيير الموقع</button>
   </div>
@@ -1043,11 +1043,11 @@ function computePrayer(lat, lng) {
   const pt = new adhan.PrayerTimes(coords, now, params);
   let nextEnum = pt.nextPrayer();
   let nextDate = nextEnum !== 'none' ? pt[nextEnum] : null;
-  let nextName = prayerNamesAr[nextEnum];
+  let nextName = getPrayerName(nextEnum);
   if(nextEnum === 'none') {
     const tmw = new Date(now); tmw.setDate(tmw.getDate()+1);
     const tpt = new adhan.PrayerTimes(coords, tmw, params);
-    nextEnum='fajr'; nextDate=tpt.fajr; nextName=prayerNamesAr['fajr'];
+    nextEnum='fajr'; nextDate=tpt.fajr; nextName=getPrayerName('fajr');
   }
   const city = localStorage.getItem('current_location_name') || t('prayer_saved_location');
   const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'}).format(now);
@@ -1076,7 +1076,7 @@ function updateUIWithPrayerTimes(lat, lng) {
       const isNext = (k === nextEnum);
       chipsHtml += `
         <div class="prayer-chip ${isNext ? 'active' : ''}">
-          <span class="chip-name">${prayerNamesAr[k]}</span>
+          <span class="chip-name">${getPrayerName(k)}</span>
           <span class="chip-time">${formatTimeArabic12h(pt[k])}</span>
         </div>`;
     }
@@ -1248,7 +1248,7 @@ function renderPrayerModal() {
     if(!pt[k]) continue;
     const isNext = isToday && k === nextEnum;
     html += `<div class="prayer-row ${isNext ? 'next' : ''}">
-      <span class="pr-name"><span class="pr-dot"></span>${prayerNamesAr[k]}</span>
+      <span class="pr-name"><span class="pr-dot"></span>${getPrayerName(k)}</span>
       <span class="pr-time">${formatTimeArabic12h(pt[k])}</span>
     </div>`;
   }

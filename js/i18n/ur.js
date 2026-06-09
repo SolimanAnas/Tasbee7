@@ -102,6 +102,7 @@ export default {
   'prayer_asr': 'عصر',
   'prayer_maghrib': 'مغرب',
   'prayer_isha': 'عشاء',
+  'prayer_pick_date': 'تاریخ منتخب کریں',
   'prayer_hint': 'دن بدلنے کے لیے سوائپ کریں یا دبائیں',
 
   'location_title': 'مقام مقرر کریں',

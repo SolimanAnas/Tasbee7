@@ -111,6 +111,7 @@ export default {
   'prayer_asr': 'ئێوارە',
   'prayer_maghrib': 'ئێوارە',
   'prayer_isha': 'شێوان',
+  'prayer_pick_date': 'بژاردنی بەروار',
   'prayer_hint': 'بۆ گۆڕینی ڕۆژ بکەشە یان دابگرە',
 
   // Location Modal
