@@ -110,16 +110,16 @@ body::before {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  /* DEFAULT: moved up 30px (was 46px base). iOS notch override below. */
-  padding: calc(16px + env(safe-area-inset-top)) 16px 10px;
+  padding: 16px 16px 10px;
   flex-shrink: 0;
   position: relative;
   z-index: 20;
 }
 
-/* Restore the larger, notch-safe spacing only on iOS devices */
-body.is-ios .top-bar {
-  padding-top: calc(46px + env(safe-area-inset-top));
+@supports (-webkit-touch-callout: none) and (padding-top: env(safe-area-inset-top)) {
+  .top-bar {
+    padding-top: 30px;
+  }
 }
 
 .top-bar-group {
@@ -193,6 +193,9 @@ body.is-ios .top-bar {
   white-space: nowrap;
   letter-spacing: 0.3px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+}
+.zikr-index-counter:empty {
+  display: none;
 }
 
 /* --- Session progress bar (how far through the full set) --- */
@@ -763,7 +766,9 @@ body.player-active .page-wrapper {
   <div class="zikr-index-counter" id="zikrIndexCounter"></div>
 
   <div class="top-bar-group end">
-    <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">🌐</div>
+    <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">
+      <div style="width:24px;height:24px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
+    </div>
     <div class="icon-btn" onclick="openSettings()" title="الإعدادات" data-i18n-title="settings">⚙️</div>
   </div>
 </div>
@@ -1419,21 +1424,8 @@ function hidePlayerFromOptions() {
   });
 })();
 
-/* --- iOS / notched device detection (keeps larger top padding only there) --- */
-function detectIOS() {
-  const ua = navigator.userAgent || '';
-  const platform = navigator.platform || '';
-  const isIOS = /iPad|iPhone|iPod/.test(ua) ||
-                /iP(hone|od|ad)/.test(platform) ||
-                // iPadOS 13+ reports as Mac, detect via touch support
-                (platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-                (ua.includes('Mac') && 'ontouchend' in document);
-  if (isIOS) document.body.classList.add('is-ios');
-}
-
 /* Load saved preferences & Init */
 window.addEventListener("load", () => {
-  detectIOS(); // add .is-ios before paint settles so top padding is correct
   checkDailyResetAzkar(); // التأكد من التصفير اليومي عند فتح الصفحة
 
   if (isPoster) {
