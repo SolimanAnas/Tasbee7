@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v36"; // v36: themed translate icon via .icon-mask (visible cross-browser) + nav label → Language
+const CACHE_NAME = "zad-muslim-v37"; // v37: fix azkar_of {target} literal showing in UI
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
