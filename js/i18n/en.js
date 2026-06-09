@@ -94,6 +94,7 @@ export default {
   'prayer_asr': 'Asr',
   'prayer_maghrib': 'Maghrib',
   'prayer_isha': 'Isha',
+  'prayer_hint': 'Swipe or tap to change the day',
 
   // Location Modal
   'location_title': 'Set Location',
@@ -141,6 +142,7 @@ export default {
   'masbaha_meanings_title': 'Adhkar Meanings',
   'masbaha_confirm_title': 'Confirm Action',
   'masbaha_power_hint': 'Long press to exit',
+  'masbaha_long_exit': 'LONG_PRESS_TO_EXIT',
 
   // Azkar
   'azkar_title': 'Adhkar — Zad Al-Muslim',

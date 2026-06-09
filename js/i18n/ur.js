@@ -27,7 +27,7 @@ export default {
   'section_quran': 'قرآن و تلاوت',
   'card_quran_audio': 'قرآن کی آواز',
   'card_radio': 'قرآن ریڈیو',
-  'card_memorization:': 'حفظ',
+  'card_memorization': 'حفظ',
   'card_tasmee': 'تقریر رپورٹ',
   'card_ruqyah': 'رقیہ شرعیہ',
 
@@ -40,7 +40,7 @@ export default {
   'card_post_prayer': 'نماز کے بعد کے اذکار',
 
   'section_tools': 'ٹولز و اوقات',
-  'card_tasbih:': 'تسبیح',
+  'card_tasbih': 'تسبیح',
   'card_qibla': 'قبلہ کی سمت',
   'card_hadith': 'حدیث موسوعہ',
   'card_prayer_times': 'نماز کے اوقات',
@@ -85,6 +85,7 @@ export default {
   'prayer_asr': 'عصر',
   'prayer_maghrib': 'مغرب',
   'prayer_isha': 'عشاء',
+  'prayer_hint': 'دن بدلنے کے لیے سوائپ کریں یا دبائیں',
 
   'location_title': 'مقام مقرر کریں',
   'location_subtitle': 'دقیق نماز کے اوقات کے لیے',
@@ -128,6 +129,7 @@ export default {
   'masbaha_meanings_title': 'اذکار کے معانی',
   'masbaha_confirm_title': 'عمل کی تصدیق',
   'masbaha_power_hint': 'باہر جنے کے لیے دیر تک دبائیں',
+  'masbaha_long_exit': 'DABAE_RAKHEIN_BAHAR_JANE_K_LIYE',
 
   'azkar_title': 'اذکار — زاد المسلم',
   'azkar_remaining': 'باقی',

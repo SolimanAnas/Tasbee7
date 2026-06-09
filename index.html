@@ -977,7 +977,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 <script src="data/adhan.js"></script>
 
 <!-- Capacitor plugin loader (must come before notifications.js) -->
-<script type="module" src="js/i18n.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/plugins/capacitor-core.js"></script>
 <script src="js/plugins/capacitor-shim.js"></script>
 <script src="js/plugins/local-notifications.js"></script>
@@ -1399,8 +1399,10 @@ function updateStats() {
 }
 
 window.addEventListener('load', async () => {
-  await I18n.init();
-  I18n.createSwitcher('langSwitcher');
+  if (window.I18n) {
+    await I18n.init();
+    I18n.createSwitcher('langSwitcher');
+  }
 
   const saved = localStorage.getItem('themeMode');
   if(!saved) autoTheme(); else setTheme(saved);

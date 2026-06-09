@@ -94,6 +94,7 @@ export default {
   'prayer_asr': 'العصر',
   'prayer_maghrib': 'المغرب',
   'prayer_isha': 'العشاء',
+  'prayer_hint': 'اسحب أو اضغط لتغيير اليوم',
 
   // Location Modal
   'location_title': 'تحديد الموقع',

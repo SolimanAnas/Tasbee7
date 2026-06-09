@@ -85,6 +85,7 @@ export default {
   'prayer_asr': 'İkindi',
   'prayer_maghrib': 'Akşam',
   'prayer_isha': 'Yatsı',
+  'prayer_hint': 'Günü değiştirmek için kaydırın veya dokunun',
 
   'location_title': 'Konum Belirle',
   'location_subtitle': 'Doğru namaz vakitleri için',
@@ -128,6 +129,7 @@ export default {
   'masbaha_meanings_title': 'Zikir Anlamları',
   'masbaha_confirm_title': 'İşlemi Onayla',
   'masbaha_power_hint': 'Çıkmak için uzun basın',
+  'masbaha_long_exit': 'UZUN_BASIN_CIKMAK_ICIN',
 
   'azkar_title': 'Zikirler — Zad Al-Muslim',
   'azkar_remaining': 'Kalan',

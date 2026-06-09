@@ -1,11 +1,11 @@
 /**
  * i18n - Internationalization Engine for Zad Al-Muslim
- * Languages: Arabic (ar), English (en), Urdu (ur), Turkish (tr)
+ * Languages: Arabic (ar), English (en), Kurdish Sorani (ckb), Turkish (tr)
  */
 const I18n = (() => {
   const STORAGE_KEY = 'zad_lang';
   const DEFAULT_LANG = 'ar';
-  const RTL_LANGS = ['ar', 'ur'];
+  const RTL_LANGS = ['ar', 'ckb', 'ur'];
 
   let currentLang = localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG;
   let translations = {};
@@ -13,9 +13,14 @@ const I18n = (() => {
   async function loadLang(lang) {
     if (translations[lang]) return translations[lang];
     try {
-      const mod = await import(`./i18n/${lang}.js`);
-      translations[lang] = mod.default || mod;
-      return translations[lang];
+      const resp = await fetch(`js/i18n/${lang}.js`);
+      const text = await resp.text();
+      // Extract the object from "export default { ... }"
+      const match = text.match(/export\s+default\s+(\{[\s\S]*\})/);
+      if (match) {
+        translations[lang] = (new Function('return ' + match[1]))();
+      }
+      return translations[lang] || {};
     } catch (e) {
       console.warn(`Failed to load lang: ${lang}`, e);
       if (lang !== DEFAULT_LANG) return loadLang(DEFAULT_LANG);
@@ -32,9 +37,12 @@ const I18n = (() => {
     return str;
   }
 
-  function setLang(lang) {
+  async function setLang(lang) {
     currentLang = lang;
     localStorage.setItem(STORAGE_KEY, lang);
+    // Load the dictionary BEFORE applying — otherwise applyTranslations()
+    // reads an empty dict and the UI stays in the previous language.
+    await loadLang(lang);
     applyTranslations();
     updateDir();
     document.documentElement.lang = lang;
@@ -106,12 +114,13 @@ const I18n = (() => {
     const langs = [
       { code: 'ar', label: 'العربية', flag: '🇸🇦' },
       { code: 'en', label: 'English', flag: '🇬🇧' },
-      { code: 'ur', label: 'اردو', flag: '🇵🇰' },
+      { code: 'ckb', label: 'کوردی', flag: '☀️' },
       { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+      { code: 'ur', label: 'اردو', flag: '🇵🇰' },
     ];
 
     container.innerHTML = langs.map(l => `
-      <button class="lang-btn ${l.code === currentLang ? 'active' : ''}"
+      <button type="button" class="lang-btn ${l.code === currentLang ? 'active' : ''}"
               data-lang="${l.code}"
               title="${l.label}">
         <span class="lang-flag">${l.flag}</span>
@@ -133,4 +142,5 @@ const I18n = (() => {
 })();
 
 // Global shorthand
+window.I18n = I18n;
 window.t = I18n.t;
