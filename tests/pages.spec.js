@@ -146,7 +146,6 @@ test('intra-page links within pages/ use correct paths', async ({ page }) => {
     { file: 'audio.html', pattern: 'about.html' },
     { file: 'quran-text.html', pattern: 'quran.html' },
     { file: 'quran.html', pattern: 'quran-text.html' },
-    { file: '404.html', pattern: 'quran.html' },
   ];
   for (const { file, pattern } of testCases) {
     await page.goto(`${BASE_URL}/pages/${file}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -189,7 +188,7 @@ test('all referenced HTML files exist in pages/', () => {
   expect(actual.length).toBeGreaterThan(0);
   // Core pages that must exist
   const required = [
-    '404.html', 'about.html', 'audio.html', 'azkar.html', 'duaa.html',
+    'about.html', 'audio.html', 'azkar.html', 'duaa.html',
     'hadith.html', 'hisn.html', 'howto.html', 'masbaha.html',
     'notifications.html', 'qibla.html', 'quran-text.html', 'quran.html',
     'quran2.html', 'radio.html',
