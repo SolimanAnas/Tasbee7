@@ -150,7 +150,7 @@
       ayahData.forEach((a, i) => {
         const numAr = a.numberInSurah.toLocaleString('ar-EG');
         html += `<span class="ayah-text" data-tasmee-ayah="${i}">${a.text}</span>`;
-        html += `<span class="tasmee-ayah-end" style="color:var(--accent);font-size:0.85em;margin:0 4px;">﴾${numAr}﴿</span> `;
+        html += `<span class="tasmee-ayah-end">﴾${numAr}﴿</span> `;
       });
       container.innerHTML = html;
     }
@@ -202,6 +202,17 @@
           progressText.textContent = progressText.dataset.original;
         }
       }
+    }
+
+    // ============================================================
+    //  PROGRESS BAR + COUNT CHIP
+    // ============================================================
+    function _tasmeeUpdateProgress(done, total) {
+      const fill = document.getElementById('tasmeePanelProgressFill');
+      const chip = document.getElementById('tasmeePanelCount');
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      if (fill) fill.style.width = pct + '%';
+      if (chip) chip.textContent = `${done.toLocaleString('ar-EG')} / ${total.toLocaleString('ar-EG')}`;
     }
 
     // ============================================================
@@ -269,6 +280,7 @@
         onWordMatch: (_idx, _state, progress) => {
           const el = document.getElementById('tasmeeProgressText');
           if (el) el.textContent = `${progress.done} / ${progress.total} كلمة`;
+          _tasmeeUpdateProgress(progress.done, progress.total);
           if (progress.currentAyahIdx >= 0) _tasmeeHighlightPanelAyah(progress.currentAyahIdx);
         },
         onSessionEnd: (summary) => {
@@ -312,6 +324,7 @@
       tasmeeEngine.startSession(ayahData, { hideText })
         .then(() => {
           document.getElementById('tasmeeProgressText').textContent = `0 / ${tasmeeEngine._wordTokens.length} كلمة`;
+          _tasmeeUpdateProgress(0, tasmeeEngine._wordTokens.length);
           document.getElementById('tasmeeMicIndicator').classList.remove('paused');
           document.getElementById('tasmeePauseBtn').innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
           document.getElementById('tasmeeActiveBar').classList.add('active');

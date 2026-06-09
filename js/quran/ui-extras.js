@@ -339,11 +339,12 @@
     document.getElementById('tpStopIcon').style.display = 'none';
     document.getElementById('tpEyeBtn').classList.remove('active');
 
-    // Render word-level masks on the mushaf image
-    _tpRenderImageMasks(currentPage);
-
     document.getElementById('tasmeeProPanel').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+
+    // Render word-level masks AFTER the panel is visible so the cloned image
+    // has real layout dimensions to position the masks against.
+    requestAnimationFrame(() => _tpRenderImageMasks(currentPage));
   }
 
   // ── Word-level coordinate extraction ──────────────────────────────────
@@ -443,10 +444,15 @@
     const words = _tpGetWordCoords(pageNumber);
     if (!words || words.length === 0) return;
     // Wait for image to load then render masks
+    let _maskTries = 0;
     const renderMasks = () => {
       const imgW = maskImg.offsetWidth;
       const imgH = maskImg.offsetHeight;
-      if (!imgW || !imgH) return;
+      if (!imgW || !imgH) {
+        // Layout not ready yet — retry on the next frame (capped) instead of bailing.
+        if (_maskTries++ < 30) requestAnimationFrame(renderMasks);
+        return;
+      }
       const yRange = cal.pageBotY - cal.pageTopY;
       words.forEach(w => {
         if (w.isMarker) return;

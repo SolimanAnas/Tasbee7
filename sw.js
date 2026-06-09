@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v30"; // v29: fix mojibake in quran modules + audio.js stray-brace syntax error
+const CACHE_NAME = "zad-muslim-v31"; // v31: Tasmee' modal redesign (Amiri/fullscreen/progress/mic-permission) + Tasmee'-Pro fix (restore missing live-strip/rec elements, mask render order)
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [

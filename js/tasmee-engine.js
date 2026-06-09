@@ -29,9 +29,24 @@ class TasmeeEngine {
         this.isActive = true;
         this._restartAttempts = 0;
         this._ayahOffset = ayahOffset;
+        // Explicitly request microphone permission on the user gesture so the
+        // browser prompt appears reliably and we can give a clear message if denied.
         if (navigator.mediaDevices?.getUserMedia) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(t => t.stop());
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(t => t.stop());
+            }
+            catch (err) {
+                this.isActive = false;
+                const name = err?.name || '';
+                if (name === 'NotAllowedError' || name === 'SecurityError') {
+                    throw new Error('تم رفض إذن المايكروفون. يرجى السماح بالوصول للمايكروفون من إعدادات المتصفح ثم إعادة المحاولة. (not-allowed)');
+                }
+                if (name === 'NotFoundError' || name === 'NotReadableError') {
+                    throw new Error('تعذر الوصول للمايكروفون — تحقق من توصيل المايكروفون. (audio-capture)');
+                }
+                // Other (transient) errors: fall through and let SpeechRecognition request its own permission.
+            }
         }
         this._injectWordSpans(hideText);
         this._highlightWord(0, 'active');
