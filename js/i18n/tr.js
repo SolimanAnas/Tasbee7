@@ -151,7 +151,7 @@ export default {
 
   'azkar_title': 'Zikirler — Zad Al-Muslim',
   'azkar_remaining': 'Kalan',
-  'azkar_of': '/ {target}',
+  'azkar_of': '/',
   'azkar_index_counter': "{current} / {total}",
   'azkar_auto': 'Otomatik',
   'azkar_font_size': 'Yazı Tipi Boyutu',

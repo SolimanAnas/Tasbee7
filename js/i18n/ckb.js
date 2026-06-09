@@ -165,7 +165,7 @@ export default {
   // Azkar
   'azkar_title': 'ئێکار — زادالمسلم',
   'azkar_remaining': 'ماوە',
-  'azkar_of': 'لە {target}',
+  'azkar_of': 'لە',
   'azkar_index_counter': "{current} لە {total}",
   'azkar_auto': 'خۆکار',
   'azkar_font_size': 'قەبارەی فۆنت',

@@ -151,7 +151,7 @@ export default {
 
   'azkar_title': 'اذکار — زاد المسلم',
   'azkar_remaining': 'باقی',
-  'azkar_of': 'میں سے {target}',
+  'azkar_of': 'میں سے',
   'azkar_index_counter': "{current} / {total}",
   'azkar_auto': 'خودکار',
   'azkar_font_size': 'فونٹ سائز',
