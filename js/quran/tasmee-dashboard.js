@@ -305,7 +305,10 @@
       return;
     }
     if (section) section.style.display = '';
-    $('dueCount').textContent = due.length;
+    // Number is set here; the trailing label is a separate data-i18n span that
+    // I18n.applyTranslations() localizes — avoids any render/i18n race.
+    var el = $('dueCount');
+    if (el) el.textContent = due.length;
   }
 
   /* ===== Theme toggle ===== */

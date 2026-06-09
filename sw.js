@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v34"; // v34: language-picker sheet (globe in audio/radio) + first-run language prompt on index
+const CACHE_NAME = "zad-muslim-v36"; // v36: themed translate icon via .icon-mask (visible cross-browser) + nav label → Language
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [

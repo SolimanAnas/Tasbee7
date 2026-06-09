@@ -25,6 +25,7 @@ export default {
   nav_times: 'کاتەکان',
   nav_achievements: 'سەرکەوتووییەکانم',
   nav_settings: 'ڕێکخستنەکان',
+  nav_language: "زمان",
 
   // Home Page
   'home_title': 'زادالمسلم',
@@ -619,7 +620,7 @@ export default {
   'tasmee_no_sessions': `هێشتا جلیسە نییە`,
   'tasmee_start_first': `جلیسەی یەکەمی تەلەمیعەکەت لە قورئانەکەوە دەستپێ بکە`,
   'tasmee_review_today': `سەیرکردنەوەی ئەمڕۆ`,
-  'tasmee_review_count': `{n} ئایەت بۆ سەیرکردنەوە`,
+  'tasmee_review_count': `ئایەت بۆ سەیرکردنەوە`,
   'tasmee_mastery_title': `نەخشی تەواوبوون`,
   'tasmee_mastery_new': `نوێ`,
   'tasmee_mastery_weak': `لاواز`,

@@ -22,6 +22,7 @@ export default {
   nav_times: 'اوقات',
   nav_achievements: 'میری کامیابیاں',
   nav_settings: 'ترتیبات',
+  nav_language: "زبان",
 
   'home_title': 'زاد المسلم',
   'section_quran': 'قرآن و تلاوت',
@@ -590,7 +591,7 @@ export default {
   'tasmee_no_sessions': `ابھی تک کوئی نشست نہیں`,
   'tasmee_start_first': `قرآن سے اپنی پہلی حفظ نشست شروع کریں`,
   'tasmee_review_today': `آج کا جائزہ`,
-  'tasmee_review_count': `{n} آیات جائزہ لینے کے لیے`,
+  'tasmee_review_count': `آیات جائزہ لینے کے لیے`,
   'tasmee_mastery_title': `مہارت کا نقشہ`,
   'tasmee_mastery_new': `نئی`,
   'tasmee_mastery_weak': `کمزور`,

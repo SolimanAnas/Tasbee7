@@ -25,6 +25,7 @@ export default {
   nav_times: 'المواقيت',
   nav_achievements: 'إنجازاتي',
   nav_settings: 'الإعدادات',
+  nav_language: "اللغة",
 
   // Home Page
   'home_title': 'زاد المسلم',
@@ -619,7 +620,7 @@ export default {
   'tasmee_no_sessions': `لا توجد جلسات بعد`,
   'tasmee_start_first': `ابدأ أول جلسة تلمييع من المصحف`,
   'tasmee_review_today': `مراجعة اليوم`,
-  'tasmee_review_count': `{n} آية للمراجعة`,
+  'tasmee_review_count': `آية للمراجعة`,
   'tasmee_mastery_title': `خريطة الإتقان`,
   'tasmee_mastery_new': `جديد`,
   'tasmee_mastery_weak': `ضعيف`,

@@ -25,6 +25,7 @@ export default {
   nav_times: 'Times',
   nav_achievements: 'My Achievements',
   nav_settings: 'Settings',
+  nav_language: "Language",
 
   // Home Page
   'home_title': 'Zad Al-Muslim',
@@ -619,7 +620,7 @@ export default {
   'tasmee_no_sessions': `No sessions yet`,
   'tasmee_start_first': `Start your first memorization session from the Quran`,
   'tasmee_review_today': `Today's Review`,
-  'tasmee_review_count': `{n} ayahs to review`,
+  'tasmee_review_count': `ayahs to review`,
   'tasmee_mastery_title': `Mastery Map`,
   'tasmee_mastery_new': `New`,
   'tasmee_mastery_weak': `Weak`,

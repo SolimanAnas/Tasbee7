@@ -22,6 +22,7 @@ export default {
   nav_times: 'Vakitler',
   nav_achievements: 'Başarılarım',
   nav_settings: 'Ayarlar',
+  nav_language: "Dil",
 
   'home_title': 'Zad Al-Muslim',
   'section_quran': 'Kuran ve Tilavet',
@@ -590,7 +591,7 @@ export default {
   'tasmee_no_sessions': `Henüz oturum yok`,
   'tasmee_start_first': `Kur'an'dan ilk ezberleme oturumunuzu başlatın`,
   'tasmee_review_today': `Bugünün Tekrarı`,
-  'tasmee_review_count': `{n} ayet tekrar edilecek`,
+  'tasmee_review_count': `ayet tekrar edilecek`,
   'tasmee_mastery_title': `Hakimiyet Haritası`,
   'tasmee_mastery_new': `Yeni`,
   'tasmee_mastery_weak': `Zayıf`,

@@ -434,6 +434,13 @@ input, textarea, select {
 }
 .nav-item.active svg { fill: currentColor; stroke: none; }
 .nav-item.active .icon-mask { background-color: var(--primary); }
+/* Themed translate icon — uses the app's .icon-mask pattern (background-color:
+   currentColor + mask) so it follows the nav colour, → --primary when active,
+   exactly like the sibling icons. The translate.svg file is untouched. */
+.nav-translate-icon {
+  -webkit-mask-image: url('img/translate.svg');
+          mask-image: url('img/translate.svg');
+}
 .nav-label { font-size: 0.65rem; font-weight: 600; }
 
 /* ======================== BOTTOM SHEETS & MODALS ======================== */
@@ -796,8 +803,8 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
 <nav class="bottom-nav">
   <div class="nav-item" onclick="I18n.openLangSheet()">
-    <img src="img/translate.svg" width="24" height="24" alt="language" style="pointer-events:none;">
-    <span class="nav-label" data-i18n="nav_home">الرئيسية</span>
+    <span class="icon-mask nav-translate-icon" aria-hidden="true"></span>
+    <span class="nav-label" data-i18n="nav_language">اللغة</span>
   </div>
   <div class="nav-item" onclick="openPrayerModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
