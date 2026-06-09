@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v31"; // v31: Tasmee' modal redesign (Amiri/fullscreen/progress/mic-permission) + Tasmee'-Pro fix (restore missing live-strip/rec elements, mask render order)
+const CACHE_NAME = "zad-muslim-v34"; // v34: language-picker sheet (globe in audio/radio) + first-run language prompt on index
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -44,6 +44,15 @@ const STATIC_ASSETS = [
   "./js/tasmee-engine.js",
   "./js/tasmee-matcher.js",
   "./js/tasmee-store.js",
+
+  // ===== i18n engine + locale dictionaries =====
+  "./js/i18n.js",
+  "./js/i18n/names.js",
+  "./js/i18n/ar.js",
+  "./js/i18n/en.js",
+  "./js/i18n/tr.js",
+  "./js/i18n/ckb.js",
+  "./js/i18n/ur.js",
 
   // ===== Extracted Quran modules =====
   "./js/quran/state.js",

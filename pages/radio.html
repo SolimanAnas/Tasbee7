@@ -391,12 +391,12 @@
   <div class="app">
     <div class="header">
       <div style="display: flex; gap: 10px;">
-        <button class="icon-btn" onclick="window.location.href='/Tasbee7/index.html'" title="العودة للرئيسية">
+        <button class="icon-btn" onclick="window.location.href='/Tasbee7/index.html'" title="العودة للرئيسية" data-i18n-title="home">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           </svg>
         </button>
-        <button class="icon-btn" onclick="toggleTheme()" title="تغيير المظهر">
+        <button class="icon-btn" onclick="toggleTheme()" title="تغيير المظهر" data-i18n-title="radio_toggle_theme">
           <svg id="themeIconSun" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -412,9 +412,15 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
+        <button class="icon-btn" onclick="I18n.openLangSheet()" title="اللغة / Language" aria-label="Language">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path>
+            <path d="M12 3c2.5 2.7 3.9 5.7 3.9 9s-1.4 6.3-3.9 9c-2.5-2.7-3.9-5.7-3.9-9S9.5 5.7 12 3z"></path>
+          </svg>
+        </button>
       </div>
-      <div class="header-title">إذاعة القرآن الكريم</div>
-      <button class="icon-btn" onclick="openFavModal()" title="المفضلة">
+      <div class="header-title" data-i18n="radio_header">إذاعة القرآن الكريم</div>
+      <button class="icon-btn" onclick="openFavModal()" title="المفضلة" data-i18n-title="radio_fav_title">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
@@ -422,15 +428,15 @@
     </div>
 
     <div class="card picker-card">
-      <label>اختر الإذاعة</label>
+      <label data-i18n="radio_choose">اختر الإذاعة</label>
       <div class="custom-select-wrapper" id="radioDropdown">
         <div class="custom-select-trigger" id="dropdownTrigger">
-          <span id="selectedText">جاري تحميل الإذاعات...</span>
+          <span id="selectedText" data-i18n="radio_loading">جاري تحميل الإذاعات...</span>
           <span>▼</span>
         </div>
         <div class="custom-options" id="dropdownOptions">
           <div class="search-container">
-            <input type="text" class="search-input" id="radioSearch" placeholder="ابحث عن قارئ أو إذاعة...">
+            <input type="text" class="search-input" id="radioSearch" placeholder="ابحث عن قارئ أو إذاعة..." data-i18n-placeholder="radio_search_placeholder">
           </div>
           <div class="options-scroll" id="optionsList"></div>
         </div>
@@ -438,14 +444,14 @@
     </div>
 
     <div class="card now">
-      <div class="nowStation" id="nowStation">اختر إذاعة للبدء</div>
+      <div class="nowStation" id="nowStation" data-i18n="radio_default">اختر إذاعة للبدء</div>
       <div class="live-indicator" id="liveIndicator">
         <div class="pulse-dot"></div>
-        <span id="liveText">متوقف</span>
+        <span id="liveText" data-i18n="radio_stopped">متوقف</span>
       </div>
 
       <div class="controls">
-        <button class="action-btn" id="favBtn" title="إضافة للمفضلة">
+        <button class="action-btn" id="favBtn" title="إضافة للمفضلة" data-i18n-title="radio_add_fav">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
@@ -469,9 +475,9 @@
 
   <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
     <div class="modal-content">
-      <h3 style="margin-top:0; text-align:center; color:var(--accent-main);">المفضلة</h3>
+      <h3 style="margin-top:0; text-align:center; color:var(--accent-main);" data-i18n="radio_fav_title">المفضلة</h3>
       <div id="favList"></div>
-      <button onclick="closeFavModal()" style="margin-top:20px; width:100%; padding:12px; border-radius:12px; border:none; background:var(--accent-main); color:white; font-weight:bold; cursor:pointer;">إغلاق</button>
+      <button onclick="closeFavModal()" style="margin-top:20px; width:100%; padding:12px; border-radius:12px; border:none; background:var(--accent-main); color:white; font-weight:bold; cursor:pointer;" data-i18n="close">إغلاق</button>
     </div>
   </div>
 
@@ -501,9 +507,9 @@
     function updateMediaSession(stationName) {
       if (!('mediaSession' in navigator)) return;
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: stationName || 'إذاعة القرآن الكريم',
-        artist: 'البث المباشر',
-        album: 'زاد المسلم',
+        title: stationName || t('radio_title'),
+        artist: t('radio_live_artist'),
+        album: t('radio_media_artist'),
         artwork: [
           { src: `${_mediaBase}/icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
           { src: `${_mediaBase}/icons/icon_512.png`, sizes: '512x512', type: 'image/png' },
@@ -542,12 +548,12 @@
             if (data.fatal) {
               hls.destroy();
               hls = null;
-              showToast('حدث خطأ في البث');
+              showToast(t('radio_stream_error'));
               updateUI(false);
             }
           });
         } else {
-          showToast('متصفحك لا يدعم بث HLS');
+          showToast(t('radio_hls_not_supported'));
         }
       } else {
         audio.src = url;
@@ -561,7 +567,7 @@
     // --- Play/Pause with loading state and error handling ---
     function togglePlay(forcePlay = null) {
       if (!currentStation) {
-        showToast('اختر إذاعة أولاً');
+        showToast(t('radio_select_first'));
         return;
       }
 
@@ -579,7 +585,7 @@
           }).catch((err) => {
             console.error('Play failed:', err);
             playBtn.classList.remove('loading');
-            showToast('تعذر التشغيل، تحقق من الاتصال بالإنترنت');
+            showToast(t('radio_play_error'));
             userWantsPlay = false;
             updateUI(false);
           });
@@ -598,12 +604,12 @@
         playIcon.style.display = 'none';
         pauseIcon.style.display = 'block';
         liveIndicator.classList.add('playing');
-        liveText.textContent = 'مباشر';
+        liveText.textContent = t('radio_live');
       } else {
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
         liveIndicator.classList.remove('playing');
-        liveText.textContent = 'متوقف';
+        liveText.textContent = t('radio_stopped');
         playBtn.classList.remove('loading');
       }
       if ('mediaSession' in navigator) {
@@ -627,7 +633,7 @@
       console.error('Audio error:', e);
       playBtn.classList.remove('loading');
       updateUI(false);
-      showToast('خطأ في تشغيل البث');
+      showToast(t('radio_playback_error'));
     });
 
     // --- Background playback guard (Android Chrome pauses audio when page hides) ---
@@ -655,10 +661,10 @@
       const index = favs.findIndex(f => f.url === currentStation.url);
       if (index === -1) {
         favs.push(currentStation);
-        showToast('تمت الإضافة للمفضلة');
+        showToast(t('radio_fav_added'));
       } else {
         favs.splice(index, 1);
-        showToast('تمت الإزالة من المفضلة');
+        showToast(t('radio_fav_removed'));
       }
       localStorage.setItem('favRadios', JSON.stringify(favs));
       checkFavStatus(currentStation.url);
@@ -668,7 +674,7 @@
       const list = document.getElementById('favList');
       const favs = JSON.parse(localStorage.getItem('favRadios') || '[]');
       if (favs.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.7;">قائمة المفضلة فارغة</div>';
+        list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.7;">' + t('radio_fav_empty') + '</div>';
       } else {
         list.innerHTML = '';
         favs.forEach(fav => {
@@ -676,7 +682,7 @@
           div.style = "padding:15px 0; border-bottom:1px solid var(--glass-border); cursor:pointer; display:flex; justify-content:space-between; align-items:center;";
           div.innerHTML = `
             <span style="font-weight:bold;">${fav.name}</span>
-            <button onclick="removeFromFav('${fav.url}', event)" style="background:none; border:none; color:var(--live-color); cursor:pointer; font-weight:bold; padding:5px;">حذف</button>
+            <button onclick="removeFromFav('${fav.url}', event)" style="background:none; border:none; color:var(--live-color); cursor:pointer; font-weight:bold; padding:5px;">${t('radio_fav_delete')}</button>
           `;
           div.onclick = () => {
             selectStation(fav);
@@ -695,7 +701,7 @@
       localStorage.setItem('favRadios', JSON.stringify(favs));
       if (currentStation && currentStation.url === url) checkFavStatus(url);
       openFavModal(); // تحديث القائمة
-      showToast('تم الحذف من المفضلة');
+      showToast(t('radio_fav_deleted'));
     }
 
     function closeFavModal() {
@@ -705,8 +711,13 @@
     // --- Station selection ---
     function selectStation(station) {
       currentStation = station;
-      selectedText.textContent = station.name;
-      nowStation.textContent = station.name;
+      // Drop the i18n placeholders so a later applyTranslations() (e.g. on
+      // language switch) won't overwrite the chosen station name.
+      selectedText.removeAttribute('data-i18n');
+      nowStation.removeAttribute('data-i18n');
+      const dispName = I18n.name('stations', station.name, station.name);
+      selectedText.textContent = dispName;
+      nowStation.textContent = dispName;
       localStorage.setItem('lastStation', JSON.stringify(station));
       loadStream(station.url, station.name);
       updateUI(false); // ensure UI shows stopped until user clicks play
@@ -719,13 +730,13 @@
     function renderList(list) {
       optionsList.innerHTML = '';
       if (list.length === 0) {
-        optionsList.innerHTML = '<div class="custom-option" style="text-align:center;">لا توجد نتائج مطابقة</div>';
+        optionsList.innerHTML = '<div class="custom-option" style="text-align:center;">' + t('radio_no_results') + '</div>';
         return;
       }
       list.forEach(station => {
         const div = document.createElement('div');
         div.className = 'custom-option';
-        div.textContent = station.name;
+        div.textContent = I18n.name('stations', station.name, station.name);
         div.onclick = () => selectStation(station);
         optionsList.appendChild(div);
       });
@@ -748,12 +759,25 @@
       }
     }
 
-    // --- Search filter ---
+    // --- Search filter (matches Arabic name + localized name) ---
     searchInput.oninput = (e) => {
       const term = e.target.value.toLowerCase();
-      const filtered = allStations.filter(s => s.name.toLowerCase().includes(term));
+      const filtered = allStations.filter(s =>
+        s.name.toLowerCase().includes(term) ||
+        I18n.name('stations', s.name, s.name).toLowerCase().includes(term)
+      );
       renderList(filtered);
     };
+
+    // Re-render station names when the UI language changes.
+    window.addEventListener('langchange', () => {
+      renderList(allStations);
+      if (currentStation) {
+        const dn = I18n.name('stations', currentStation.name, currentStation.name);
+        selectedText.textContent = dn;
+        nowStation.textContent = dn;
+      }
+    });
 
     // --- Dropdown toggle with click outside ---
     document.getElementById('dropdownTrigger').onclick = (e) => {
@@ -814,6 +838,11 @@
       updateThemeIcon(savedTheme);
       init();
     };
+  </script>
+  <script src="../js/i18n/names.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script>
+    if (window.I18n) I18n.init();
   </script>
 </body>
 

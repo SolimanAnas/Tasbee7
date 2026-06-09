@@ -143,27 +143,27 @@
 
   <header class="top-bar">
     <button class="icon-btn" onclick="window.location.href='/Tasbee7/index.html'" title="الرئيسية">🏠</button>
-    <h1>الإشعارات الذكية</h1>
+    <h1 data-i18n="notif_title">الإشعارات الذكية</h1>
     <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تغيير المظهر">🌙</button>
   </header>
 
   <div class="container">
-    <p class="subtitle">تحكم كامل في تنبيهاتك وعباداتك اليومية</p>
+    <p class="subtitle" data-i18n="notif_subtitle">تحكم كامل في تنبيهاتك وعباداتك اليومية</p>
     
     <div class="status-bar">
       <div class="status-text-wrap">
         <div class="status-dot active" id="statusDot"></div>
-        <span id="statusText">نظام الإشعارات نشط</span>
+        <span id="statusText" data-i18n="notif_status_active">نظام الإشعارات نشط</span>
       </div>
       <span style="font-size:0.85rem; color:var(--text-secondary); font-weight: bold;">
-        الاستمرارية: <strong id="streakCount" style="color:var(--accent-main); font-size:1rem;">0</strong> يوم
+        الاستمرارية: <strong id="streakCount" style="color:var(--accent-main); font-size:1rem;">0</strong> <span data-i18n="notif_day">يوم</span>
       </span>
     </div>
     
     <div class="streak-display">
       <div>
         <div class="streak-number" id="bigStreak">0</div>
-        <div class="streak-label">يوم متتالي من العبادة</div>
+        <div class="streak-label" data-i18n="notif_streak_label">يوم متتالي من العبادة</div>
       </div>
       <div class="streak-icon">🔥</div>
     </div>
@@ -172,11 +172,11 @@
       <div class="card-header">
         <span class="card-icon">📍</span>
         <div>
-          <h2>الموقع الجغرافي (تلقائي)</h2>
-          <p id="locationInfo">جاري تحديد الموقع...</p>
+          <h2 data-i18n="notif_location_title">الموقع الجغرافي (تلقائي)</h2>
+          <p id="locationInfo" data-i18n="notif_location_loading">جاري تحديد الموقع...</p>
         </div>
       </div>
-      <button class="btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="refreshLocation()">
+      <button class="btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="refreshLocation()" data-i18n="notif_refresh_location">
         🔄 تحديث الموقع الآن
       </button>
     </div>
@@ -185,15 +185,15 @@
       <div class="card-header">
         <span class="card-icon">🕌</span>
         <div>
-          <h2>أوقات الصلاة</h2>
-          <p>جلب المواقيت تلقائياً حسب مدينتك</p>
+          <h2 data-i18n="notif_prayer_title">أوقات الصلاة</h2>
+          <p data-i18n="notif_prayer_desc">جلب المواقيت تلقائياً حسب مدينتك</p>
         </div>
       </div>
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>تفعيل التنبيهات الأساسية</span>
-          <small>السماح للتطبيق بإرسال إشعارات الصلوات والأذكار</small>
+          <span data-i18n="notif_toggle_enabled">تفعيل التنبيهات الأساسية</span>
+          <small data-i18n="notif_toggle_enabled_desc">السماح للتطبيق بإرسال إشعارات الصلوات والأذكار</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleEnabled" onchange="toggleSetting('enabled', this.checked)">
@@ -203,8 +203,8 @@
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>تذكير مسبق للصلاة</span>
-          <small>تنبيه قبل دخول وقت الصلاة بـ 10 دقائق لتستعد</small>
+          <span data-i18n="notif_toggle_preremind">تذكير مسبق للصلاة</span>
+          <small data-i18n="notif_toggle_preremind_desc">تنبيه قبل دخول وقت الصلاة بـ 10 دقائق لتستعد</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="togglePreReminders" onchange="toggleSetting('preReminders', this.checked)">
@@ -214,8 +214,8 @@
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>الضبط التلقائي للموقع</span>
-          <small>الاعتماد على إحداثياتك لتحديد المواقيت بدقة</small>
+          <span data-i18n="notif_toggle_autoloc">الضبط التلقائي للموقع</span>
+          <small data-i18n="notif_toggle_autoloc_desc">الاعتماد على إحداثياتك لتحديد المواقيت بدقة</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleAutoLocation" onchange="toggleSetting('autoLocation', this.checked)">
@@ -224,8 +224,8 @@
       </div>
       
       <div class="btn-group">
-        <button class="btn btn-secondary" onclick="refreshTimes()">🔄 تحديث الأوقات</button>
-        <button class="btn btn-secondary" onclick="showManualTimes()">⚙️ ضبط يدوي</button>
+        <button class="btn btn-secondary" onclick="refreshTimes()" data-i18n="notif_refresh_times">🔄 تحديث الأوقات</button>
+        <button class="btn btn-secondary" onclick="showManualTimes()" data-i18n="notif_manual_setup">⚙️ ضبط يدوي</button>
       </div>
     </div>
     
@@ -233,15 +233,15 @@
       <div class="card-header">
         <span class="card-icon">📿</span>
         <div>
-          <h2>الأذكار اليومية</h2>
-          <p>تنبيهات أذكار الصباح والمساء</p>
+          <h2 data-i18n="notif_azkar_title">الأذكار اليومية</h2>
+          <p data-i18n="notif_azkar_desc">تنبيهات أذكار الصباح والمساء</p>
         </div>
       </div>
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>تذكير أذكار الصباح</span>
-          <small>بين الساعة 4 و 8 صباحاً</small>
+          <span data-i18n="notif_toggle_morning">تذكير أذكار الصباح</span>
+          <small data-i18n="notif_toggle_morning_desc">بين الساعة 4 و 8 صباحاً</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleMorning" onchange="toggleSetting('azkarMorning', this.checked)">
@@ -251,8 +251,8 @@
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>تذكير أذكار المساء</span>
-          <small>بين الساعة 3 و 6 مساءً</small>
+          <span data-i18n="notif_toggle_evening">تذكير أذكار المساء</span>
+          <small data-i18n="notif_toggle_evening_desc">بين الساعة 3 و 6 مساءً</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleEvening" onchange="toggleSetting('azkarEvening', this.checked)">
@@ -262,8 +262,8 @@
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>الرسائل التحفيزية</span>
-          <small>تشجيع يومي للحفاظ على الاستمرارية (الستريك)</small>
+          <span data-i18n="notif_toggle_streak">الرسائل التحفيزية</span>
+          <small data-i18n="notif_toggle_streak_desc">تشجيع يومي للحفاظ على الاستمرارية (الستريك)</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleStreak" onchange="toggleSetting('streakReminders', this.checked)">
@@ -276,15 +276,15 @@
       <div class="card-header">
         <span class="card-icon">🕋</span>
         <div>
-          <h2>المناسبات الخاصة</h2>
-          <p>يوم الجمعة وشهر رمضان المبارك</p>
+          <h2 data-i18n="notif_special_title">المناسبات الخاصة</h2>
+          <p data-i18n="notif_special_desc">يوم الجمعة وشهر رمضان المبارك</p>
         </div>
       </div>
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>سورة الكهف - الجمعة</span>
-          <small>تذكير أسبوعي بقراءة السورة يوم الجمعة</small>
+          <span data-i18n="notif_toggle_friday">سورة الكهف - الجمعة</span>
+          <small data-i18n="notif_toggle_friday_desc">تذكير أسبوعي بقراءة السورة يوم الجمعة</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleFriday" onchange="toggleSetting('fridayKahf', this.checked)">
@@ -297,15 +297,15 @@
       <div class="card-header">
         <span class="card-icon">🌙</span>
         <div>
-          <h2>ساعات الهدوء</h2>
-          <p>نوم هادئ وبدون إزعاج</p>
+          <h2 data-i18n="notif_quiet_title">ساعات الهدوء</h2>
+          <p data-i18n="notif_quiet_desc">نوم هادئ وبدون إزعاج</p>
         </div>
       </div>
       
       <div class="toggle-row">
         <div class="toggle-label">
-          <span>تفعيل وضع السكون</span>
-          <small>إيقاف الإشعارات مؤقتاً من 11 مساءً حتى 5 صباحاً</small>
+          <span data-i18n="notif_toggle_quiet">تفعيل وضع السكون</span>
+          <small data-i18n="notif_toggle_quiet_desc">إيقاف الإشعارات مؤقتاً من 11 مساءً حتى 5 صباحاً</small>
         </div>
         <label class="switch">
           <input type="checkbox" id="toggleQuiet" onchange="toggleSetting('quietHours', this.checked)">
@@ -318,20 +318,23 @@
       <div class="card-header">
         <span class="card-icon">⏱️</span>
         <div>
-          <h2>مواقيت الصلاة الحالية</h2>
-          <p>بناءً على موقعك الجغرافي المسجل</p>
+          <h2 data-i18n="notif_current_times_title">مواقيت الصلاة الحالية</h2>
+          <p data-i18n="notif_current_times_desc">بناءً على موقعك الجغرافي المسجل</p>
         </div>
       </div>
       <div id="timesList" style="margin-top: 10px;"></div>
     </div>
     
-    <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="testNotification()">
+    <button class="btn btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="testNotification()" data-i18n="notif_test_btn">
       🧪 إرسال إشعار تجريبي الآن
     </button>
   </div>
   
   <script src="../data/adhan.js"></script>
   <script src="../js/notifications.js"></script>
+  <meta name="i18n-title" content="notif_title">
+  <script src="../js/i18n.js"></script>
+  <script>if (window.I18n) I18n.init();</script>
   <script>
     // Theme logic
     function initTheme() {
@@ -399,7 +402,7 @@
       
       // Status
       const isEnabled = getVal('enabled');
-      document.getElementById('statusText').textContent = isEnabled ? 'الإشعارات مفعلة' : 'الإشعارات متوقفة';
+      document.getElementById('statusText').textContent = isEnabled ? t('notif_status_active') : t('notif_status_inactive');
       document.getElementById('statusDot').className = isEnabled ? 'status-dot active' : 'status-dot inactive';
       
       // Streak
@@ -419,7 +422,7 @@
       // Location
       const locationName = localStorage.getItem('current_location_name')
                         || localStorage.getItem('userCity')
-                        || 'غير محدد';
+                        || t('notif_location_unknown');
       const country = (!localStorage.getItem('current_location_name') && localStorage.getItem('userCountry'))
                         ? '، ' + localStorage.getItem('userCountry') : '';
       document.getElementById('locationInfo').textContent = locationName + country;
@@ -434,7 +437,7 @@
           </div>
         `).join('');
       } else {
-        timesList.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 10px;">جاري تحميل المواقيت...</div>';
+        timesList.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 10px;">' + t('notif_loading_times') + '</div>';
       }
     }
 
@@ -449,7 +452,7 @@
       if(typeof NotificationSystem !== 'undefined') {
         await NotificationSystem.refreshPrayerTimes();
         updateUI();
-        alert('تم تحديث أوقات الصلاة بنجاح ✅');
+        alert(t('notif_times_updated'));
       }
     }
 
@@ -467,41 +470,41 @@
       NotificationSystem.settings.autoLocation = prevAutoLocation;
       
       updateUI();
-      alert('تم تحديث موقعك بنجاح ✅');
+      alert(t('notif_location_updated'));
     }
 
     function showManualTimes() {
-      alert('ميزة الضبط اليدوي قيد التطوير وسيتم توفيرها قريباً ⏳');
+      alert(t('notif_manual_coming_soon'));
     }
 
     async function testNotification() {
-      if(typeof NotificationSystem === 'undefined') { alert('⚠️ نظام الإشعارات لم يتم تحميله بعد'); return; }
-      if(Notification.permission === 'denied') { alert('⚠️ تم رفض الإشعارات مسبقاً. يرجى السماح من إعدادات المتصفح.'); return; }
+      if(typeof NotificationSystem === 'undefined') { alert(t('notif_not_loaded')); return; }
+      if(Notification.permission === 'denied') { alert(t('notif_denied')); return; }
       if(Notification.permission === 'default') {
         const result = await Notification.requestPermission();
-        if(result !== 'granted') { alert('⚠️ لم يتم منح صلاحية الإشعارات'); return; }
+        if(result !== 'granted') { alert(t('notif_permission_denied')); return; }
       }
       try {
-        const result = await NotificationSystem.showNotification('🔔 اختبار الإشعارات', {
-          body: 'نظام الإشعارات يعمل بكفاءة! ✅',
+        const result = await NotificationSystem.showNotification(t('notif_test_title'), {
+          body: t('notif_test_body'),
           tag: 'test',
           forceQuiet: true,
           forceEnable: true,
           data: { url: './index.html', type: 'test' }
         });
-        if(result) { alert('✅ تم عرض الإشعار بنجاح'); }
+        if(result) { alert(t('notif_test_success')); }
         else {
           var errMsg = NotificationSystem._lastError || 'غير معروف';
-          alert('⚠️ لم يتم عرض الإشعار\nالسبب: ' + errMsg + '\n\n📌 تحقق من صلاحية الإشعارات في إعدادات المتصفح/الجهاز');
+          alert(t('notif_test_failed') + errMsg);
         }
       } catch(e) {
-        alert('❌ فشل الإشعار عبر النظام: ' + e.message);
-        alert('💡 تجربة إشعار مباشر...');
+        alert(t('notif_system_failed') + e.message);
+        alert(t('notif_try_direct'));
         try {
-          const n = new Notification('🔔 اختبار مباشر', { body: 'هذا إشعار مباشر من المتصفح ✅' });
+          const n = new Notification(t('notif_direct_title'), { body: t('notif_direct_body') });
           setTimeout(() => n.close(), 5000);
         } catch(e2) {
-          alert('❌ فشل الإشعار المباشر أيضاً: ' + e2.message + ' - المتصفح قد لا يدعم الإشعارات');
+          alert(t('notif_direct_failed') + e2.message);
         }
       }
     }

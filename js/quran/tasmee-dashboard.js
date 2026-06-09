@@ -105,25 +105,27 @@
   function $(id) { return document.getElementById(id); }
 
   function formatDuration(sec) {
-    if (sec < 60) return Math.round(sec) + ' ث';
-    if (sec < 3600) return Math.round(sec / 60) + ' د';
+    if (sec < 60) return Math.round(sec) + (window.t ? ' ' + t('tasmee_sec') : ' ث');
+    if (sec < 3600) return Math.round(sec / 60) + (window.t ? ' ' + t('tasmee_min') : ' د');
     const h = Math.floor(sec / 3600);
     const m = Math.round((sec % 3600) / 60);
-    return m > 0 ? h + ' س ' + m + ' د' : h + ' س';
+    return m > 0 ? h + (window.t ? ' ' + t('tasmee_hour') + ' ' : ' س ') + m + (window.t ? ' ' + t('tasmee_min') : ' د') : h + (window.t ? ' ' + t('tasmee_hour') : ' س');
   }
 
   function formatDate(ts) {
     const d = new Date(ts);
     const now = new Date();
     const diff = now - d;
-    if (diff < 86400000 && d.getDate() === now.getDate()) return 'اليوم';
-    if (diff < 172800000) return 'أمس';
+    if (diff < 86400000 && d.getDate() === now.getDate()) return window.t ? t('tasmee_today') : 'اليوم';
+    if (diff < 172800000) return window.t ? t('tasmee_yesterday') : 'أمس';
     return d.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' });
   }
 
   function dayLabel(dateStr) {
     const d = new Date(dateStr);
-    return ['أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'][d.getDay()];
+    var keys = ['tasmee_day_sun', 'tasmee_day_mon', 'tasmee_day_tue', 'tasmee_day_wed', 'tasmee_day_thu', 'tasmee_day_fri', 'tasmee_day_sat'];
+    var fallbacks = ['أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+    return window.t ? t(keys[d.getDay()]) : fallbacks[d.getDay()];
   }
 
   function animateValue(el, end, duration, suffix) {
@@ -225,7 +227,7 @@
             '<span>' + formatDate(ses.date) + '</span>' +
             '<span class="dot">·</span>' +
             '<span>' + formatDuration(ses.durationSec || 0) + '</span>' +
-            (ses.fromAyah ? '<span class="dot">·</span><span>آية ' + ses.fromAyah + (ses.toAyah && ses.toAyah !== ses.fromAyah ? '–' + ses.toAyah : '') + '</span>' : '') +
+            (ses.fromAyah ? '<span class="dot">·</span><span>' + (window.t ? t('tasmee_ayah') + ' ' : 'آية ') + ses.fromAyah + (ses.toAyah && ses.toAyah !== ses.fromAyah ? '–' + ses.toAyah : '') + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<div class="session-accuracy">' +
@@ -265,7 +267,7 @@
   /* ===== Render mistake breakdown ===== */
   function renderMistakes(mistakes) {
     var total = mistakes.length;
-    $('mistakeTotal').textContent = total ? total + ' خطأ' : 'لا أخطاء';
+    $('mistakeTotal').textContent = total ? total + (window.t ? ' ' + t('tasmee_mistakes') : ' خطأ') : (window.t ? t('tasmee_no_mistakes') : 'لا أخطاء');
     $('countMissing').textContent = '0';
     $('countWrong').textContent = '0';
     $('countExtra').textContent = '0';
@@ -339,7 +341,7 @@
       }
       var cell = document.createElement('div');
       cell.className = 'mastery-cell l' + Math.min(5, Math.round(avgLevel));
-      cell.title = getSurahName(s) + ' (مستوى ' + Math.round(avgLevel) + ')';
+      cell.title = getSurahName(s) + (window.t ? ' (' + t('tasmee_level') + ' ' : ' (مستوى ') + Math.round(avgLevel) + ')';
       grid.appendChild(cell);
     }
   }
@@ -356,8 +358,8 @@
           '<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.3">' +
             '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' +
           '</svg>' +
-          '<p>التلمييع غير مدعوم في هذا المتصفح</p>' +
-          '<span>استخدم Chrome أو Edge للحصول على أفضل تجربة</span>' +
+          '<p>' + (window.t ? t('tasmee_not_supported') : 'التلمييع غير مدعوم في هذا المتصفح') + '</p>' +
+          '<span>' + (window.t ? t('tasmee_use_chrome') : 'استخدم Chrome أو Edge للحصول على أفضل تجربة') + '</span>' +
         '</div>';
       return;
     }
@@ -382,11 +384,11 @@
 
       animateValue($('streakCount'), agg.streak, 800);
       if (agg.streak >= 7) {
-        $('streakSub').textContent = 'ما شاء الله! استمر!';
+        $('streakSub').textContent = window.t ? t('tasmee_streak_great') : 'ما شاء الله! استمر!';
       } else if (agg.streak >= 3) {
-        $('streakSub').textContent = 'أحسنت! لا تكسر السلسلة';
+        $('streakSub').textContent = window.t ? t('tasmee_streak_good') : 'أحسنت! لا تكسر السلسلة';
       } else if (agg.streak > 0) {
-        $('streakSub').textContent = 'بداية جيدة!';
+        $('streakSub').textContent = window.t ? t('tasmee_streak_start') : 'بداية جيدة!';
       }
 
       animateValue($('totalSessions'), agg.totalSessions, 600);
@@ -404,7 +406,7 @@
       console.error('Tasmee dashboard init error:', err);
       $('loadingSkeleton').innerHTML =
         '<div class="empty-state" style="padding:60px 20px">' +
-          '<p>حدث خطأ أثناء تحميل البيانات</p>' +
+          '<p>' + (window.t ? t('tasmee_load_error') : 'حدث خطأ أثناء تحميل البيانات') + '</p>' +
           '<span>' + (err.message || err) + '</span>' +
         '</div>';
     }

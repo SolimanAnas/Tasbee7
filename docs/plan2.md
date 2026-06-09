@@ -38,7 +38,7 @@ The **product breadth is excellent**; the **delivery pipeline is the weak link**
 | W5 | **Third-party media dependency / link rot** | Audio from everyayah.com, mp3quran, qurango.net, archive.org. Recent commits fixed 56 dead radio + 26 dead reciters; `docs/broken-urls.md` tracks rot | 🟠 Features silently break over time |
 | W6 | **Thin automated coverage** | One Playwright spec (`tests/pages.spec.js`, link/resource checks). 0 unit tests for the complex Tasmee' matcher/engine. `tests/` is also (contradictorily) listed in `.gitignore` though tracked | 🟠 Regressions in core logic go unnoticed |
 | W7 | **Doc drift** | README links `/blob/main/LICENSE` (file is lowercase `license`), lists `pages/404.html` (deleted in `dde763f`), says "Tarteel.js search" though local search shipped, "45 tests" unverified | 🟡 Onboarding friction, broken badge link |
-| W8 | **Arabic-only UI** | No i18n; excludes the large non-Arabic-speaking Muslim audience | 🟡 Caps reach (also an opportunity → O3) |
+| W8 | **~~Arabic-only UI~~ → largely resolved** | UI i18n now shipped: `js/i18n.js` + 5 locales (ar/en/ckb/tr/ur, 582 keys), RTL auto-switch, 14/22 pages done (see [`translation.md`](translation.md)). Remaining: `quran*.html` + `tasmee-review.html` chrome, and Quran-text translations (O3) | ✅ mostly addressed |
 | W9 | **Manual SW asset list** | `STATIC_ASSETS` hand-maintained in `sw.js`; easy to forget a file (already a class of past bugs). `plan.md` 3.3 claims auto-versioning but it's still manual `v27` | 🟡 Offline gaps when assets added |
 
 ### 🔵 Opportunities
@@ -47,7 +47,7 @@ The **product breadth is excellent**; the **delivery pipeline is the weak link**
 |---|-------------|-----------|
 | O1 | **Proper CI/CD deploy** | A GitHub Actions job that runs `vite build` and deploys `dist/` to Pages fixes W1+W2 at once — TS transpiled, assets hashed/minified, smaller payloads |
 | O2 | **Hifz tracker + teacher mode** | Tasmee' data (sessions, mistakes, revisions, mastery) already exists → high-value features at low marginal cost (`plan.md` 5.1/5.2) |
-| O3 | **Internationalization** | Quran translations + UI i18n (en/ur/tr/id) unlocks a massive global audience; data-driven, no architecture change |
+| O3 | **Internationalization** | UI i18n ✅ done (ar/en/ckb/tr/ur). Remaining: finish `quran*.html`/`tasmee-review.html` chrome + add **Quran-text translations** alongside Uthmanic — unlocks a massive global audience; data-driven, no architecture change |
 | O4 | **Native app via Capacitor** | Plugin stubs already present (`js/plugins/*`, `js/native-init.js`); reliable background prayer notifications + app-store reach |
 | O5 | **Background push notifications** | Cloudflare worker + cron design already drafted (`server/`); finishing it delivers closed-app prayer alerts |
 | O6 | **Performance & Lighthouse wins** | Font subsetting, WebP/responsive mushaf images, lazy ONNX (`plan.md` 3.4) → faster first load, better SEO (SEO meta already added) |

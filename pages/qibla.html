@@ -368,21 +368,21 @@
 
     <div class="stats-bar glass-panel">
         <div class="stat-item">
-            <div class="stat-label">اتجاهك الحالي</div>
+            <div class="stat-label" data-i18n="qibla_heading_label">اتجاهك الحالي</div>
             <div class="stat-value" id="val-heading">--°</div>
         </div>
         <div class="stat-item">
-            <div class="stat-label">زاوية القبلة</div>
+            <div class="stat-label" data-i18n="qibla_angle_label">زاوية القبلة</div>
             <div class="stat-value highlight" id="val-qibla">--°</div>
         </div>
         <div class="stat-item">
-            <div class="stat-label">المسافة للكعبة</div>
+            <div class="stat-label" data-i18n="qibla_distance_label">المسافة للكعبة</div>
             <div class="stat-value" id="val-dist">--</div>
         </div>
     </div>
 
     <div id="manual-slider-container" class="glass-panel">
-        <label style="display:block; font-size:0.9rem; font-weight:bold; color:var(--primary-glow);">التوجيه اليدوي مفعل (استخدم الشريط للتدوير)</label>
+        <label style="display:block; font-size:0.9rem; font-weight:bold; color:var(--primary-glow);" data-i18n="qibla_manual_hint">التوجيه اليدوي مفعل (استخدم الشريط للتدوير)</label>
         <input type="range" id="manual-heading-slider" min="0" max="360" value="0">
     </div>
 
@@ -450,23 +450,23 @@
     <div id="setup-modal" class="overlay-modal active">
         <div class="modal-box glass-panel" style="background: rgba(15,23,42,0.8); border:none;">
             <div class="logo-box"><img src="../icons/qibla.svg" alt="Kaaba"></div>
-            <h1 style="color:white;">اتجاه القبلة</h1>
-            <p style="color:var(--text-muted);">حدد القبلة بدقة. قم بتبديل العرض بين البوصلة والواقع المعزز (AR) بمجرد إمالة الهاتف.</p>
-            <button class="btn-primary" id="start-btn">ابدأ التحديد</button>
+            <h1 style="color:white;" data-i18n="qibla_title">اتجاه القبلة</h1>
+            <p style="color:var(--text-muted);" data-i18n="qibla_desc">حدد القبلة بدقة. قم بتبديل العرض بين البوصلة والواقع المعزز (AR) بمجرد إمالة الهاتف.</p>
+            <button class="btn-primary" id="start-btn" data-i18n="qibla_start_btn">ابدأ التحديد</button>
         </div>
     </div>
 
     <div id="calibration-modal" class="overlay-modal">
         <div class="modal-box glass-panel">
-            <h2 style="margin-bottom:10px;">معايرة البوصلة</h2>
-            <p style="color:var(--text-muted); font-size:0.9rem;">للحصول على أدق نتيجة، قم بتحريك هاتفك على شكل رقم 8 باللغة الإنجليزية كما هو موضح أدناه لعدة ثوانٍ.</p>
+            <h2 style="margin-bottom:10px;" data-i18n="qibla_calibrate_title">معايرة البوصلة</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem;" data-i18n="qibla_calibrate_desc">للحصول على أدق نتيجة، قم بتحريك هاتفك على شكل رقم 8 باللغة الإنجليزية كما هو موضح أدناه لعدة ثوانٍ.</p>
             
             <svg class="calibration-anim" viewBox="0 0 200 100">
                 <path class="calibration-bg" d="M 100 50 C 100 50 150 10 180 30 C 210 50 150 90 100 50 C 50 10 -10 50 20 70 C 50 90 100 50 100 50 Z" />
                 <path class="calibration-path" d="M 100 50 C 100 50 150 10 180 30 C 210 50 150 90 100 50 C 50 10 -10 50 20 70 C 50 90 100 50 100 50 Z" />
             </svg>
             
-            <button onclick="closeModal('calibration-modal')" class="btn-primary" style="margin-top:10px;">تمت المعايرة ✔️</button>
+            <button onclick="closeModal('calibration-modal')" class="btn-primary" style="margin-top:10px;" data-i18n="qibla_calibrate_done">تمت المعايرة ✔️</button>
         </div>
     </div>
 
@@ -475,32 +475,35 @@
     <div id="settings-sheet" class="bottom-sheet">
         <div class="drag-handle"></div>
         <div class="sheet-header">
-            <h2>الإعدادات</h2>
+            <h2 data-i18n="qibla_settings_title">الإعدادات</h2>
             <button onclick="closeSettingsSheet()" class="icon-btn" style="width:36px;height:36px;border:none;background:transparent;box-shadow:none;">✕</button>
         </div>
         <div class="sheet-content">
             <div class="setting-row">
-                <span>وحدة المسافة</span>
+                <span data-i18n="qibla_unit_label">وحدة المسافة</span>
                 <select id="unit-select" onchange="changeUnit(this.value)">
-                    <option value="km">كيلومتر (كم)</option>
-                    <option value="mi">ميل (mi)</option>
+                    <option value="km" data-i18n="qibla_unit_km">كيلومتر (كم)</option>
+                    <option value="mi" data-i18n="qibla_unit_mi">ميل (mi)</option>
                 </select>
             </div>
             
             <div class="setting-row">
-                <span>سرعة استجابة السهم</span>
+                <span data-i18n="qibla_sensitivity">سرعة استجابة السهم</span>
                 <input type="range" id="sens-slider" min="1" max="10" value="5" onchange="changeSens(this.value)" style="width:120px; direction:ltr;">
             </div>
             
             <div class="setting-row">
-                <span style="flex:1;">الوضع اليدوي <br><small style="color:var(--text-muted);font-weight:normal;">(في حال تعطل حساس البوصلة)</small></span>
+                <div style="flex:1;" data-i18n-html="qibla_manual_mode"><span>الوضع اليدوي <br><small style="color:var(--text-muted);font-weight:normal;">(في حال تعطل حساس البوصلة)</small></span></div>
                 <input type="checkbox" id="manual-toggle" onchange="toggleManualMode(this.checked)" style="transform:scale(1.4);">
             </div>
             
-            <button onclick="openCalibration()" class="btn-primary" style="background:var(--primary-glow); color:#000; margin-top:25px;">معايرة البوصلة 🧭</button>
+            <button onclick="openCalibration()" class="btn-primary" style="background:var(--primary-glow); color:#000; margin-top:25px;" data-i18n="qibla_calibrate_btn">معايرة البوصلة 🧭</button>
         </div>
     </div>
 
+    <meta name="i18n-title" content="qibla_title">
+    <script src="../js/i18n.js"></script>
+    <script>if (window.I18n) I18n.init();</script>
     <script>
         // ================= CONFIGURATION & STORAGE =================
         const KAABA_LAT = 21.422487;
@@ -649,14 +652,14 @@
 
         // ================= INIT =================
         startBtn.addEventListener('click', async () => {
-            startBtn.innerText = "جاري التحديد...";
+            startBtn.innerText = t('qibla_locating');
             
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
                     const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission !== 'granted') throw new Error('مرفوض');
+                    if (permission !== 'granted') throw new Error('rejected');
                 } catch (e) {
-                    alert('لتعمل البوصلة التلقائية، يرجى إعطاء الصلاحية. (يمكنك استخدام الوضع اليدوي من الإعدادات)');
+                    alert(t('qibla_permission_alert'));
                 }
             }
 
@@ -671,11 +674,11 @@
                 },
                 (err) => { 
                     if(userLat && userLng) {
-                        alert('تعذر جلب الموقع المباشر. يتم استخدام آخر موقع محفوظ (Offline Mode).');
+                        alert(t('qibla_offline_location'));
                         launchApp();
                     } else {
-                        alert('يرجى تفعيل الموقع (GPS) للمرة الأولى على الأقل لنتمكن من الحساب.'); 
-                        startBtn.innerText = "ابدأ التحديد"; 
+                        alert(t('qibla_enable_gps')); 
+                        startBtn.innerText = t('qibla_start_btn'); 
                     }
                 },
                 { enableHighAccuracy: true, timeout: 5000 }
@@ -753,7 +756,7 @@
         function calculateDistance() {
             if(!userLat || !userLng) return;
             const R = useMiles ? 3958.8 : 6371; 
-            const unitStr = useMiles ? 'ميل' : 'كم';
+            const unitStr = useMiles ? t('qibla_unit_mi_abbr') : t('qibla_unit_km_abbr');
             const unitStrEn = useMiles ? 'mi' : 'km';
 
             const dLat = (KAABA_LAT - userLat) * Math.PI / 180;

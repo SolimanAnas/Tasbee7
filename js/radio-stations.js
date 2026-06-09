@@ -1,11 +1,11 @@
 const RADIO_STATIONS = [
   {
     "name": "إذاعة القرآن الكريم - القاهرة",
-    "url": "https://n0b.radiojar.com/8s5u5tpdtwzuv"
+    "url": "https://backup.qurango.net/radio/mustafa_ismail"
   },
   {
     "name": "إذاعة القرآن الكريم - مكة",
-    "url": "https://stream.radiojar.com/0tpy1h0kxtzuv"
+    "url": "https://backup.qurango.net/radio/maher"
   },
   {
     "name": "إذاعة القرآن الكريم - الشارقة",
@@ -65,7 +65,7 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة محمد الطبلاوي",
-    "url": "https://backup.qurango.net/radio/mohammad_altablaway"
+    "url": "https://backup.qurango.net/radio/mahmoud_ali__albanna_mojawwad"
   },
   {
     "name": "إذاعة أحمد نعينع",
@@ -125,7 +125,7 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة ناصر القطامي",
-    "url": "https://backup.qurango.net/radio/nasser_alqatami"
+    "url": "https://backup.qurango.net/radio/abdulrahman_alsudaes"
   },
   {
     "name": "إذاعة وليد النائحي",
@@ -133,7 +133,7 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة صلاح بو خاطر",
-    "url": "https://backup.qurango.net/radio/slaah_bukhatir"
+    "url": "https://backup.qurango.net/radio/salah_albudair"
   },
   {
     "name": "إذاعة صلاح الهاشم",
@@ -221,11 +221,11 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة زكي داغستاني",
-    "url": "https://backup.qurango.net/radio/zaki_daghistani"
+    "url": "https://backup.qurango.net/radio/mustafa_ismail"
   },
   {
     "name": "إذاعة شيرزاد عبدالرحمن طاهر",
-    "url": "https://backup.qurango.net/radio/shirazad_taher"
+    "url": "https://backup.qurango.net/radio/mahmoud_ali__albanna_mojawwad"
   },
   {
     "name": "إذاعة أكرم العلاقمي",
@@ -285,7 +285,7 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة الدوكالي محمد العالم",
-    "url": "https://backup.qurango.net/radio/addokali_mohammad_alalim"
+    "url": "https://backup.qurango.net/radio/yasser_aldosari"
   },
   {
     "name": "إذاعة الفاتح محمد الزبير",
@@ -309,7 +309,7 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة خالد عبدالكافي",
-    "url": "https://backup.qurango.net/radio/khalid_abdulkafi"
+    "url": "https://backup.qurango.net/radio/mustafa_ismail"
   },
   {
     "name": "إذاعة محمود الشيمي",
@@ -341,11 +341,11 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة عماد زهير حافظ",
-    "url": "https://backup.qurango.net/radio/emad_hafez"
+    "url": "https://backup.qurango.net/radio/abdulbasit_abdulsamad"
   },
   {
     "name": "إذاعة هاني الرفاعي",
-    "url": "https://backup.qurango.net/radio/hani_arrifai"
+    "url": "https://backup.qurango.net/radio/nabil_al_rifay"
   },
   {
     "name": "إذاعة محمود الرفاعي",
@@ -421,7 +421,7 @@ const RADIO_STATIONS = [
   },
   {
     "name": "ترجمة معاني القرآن باللغة الأوردية - عبدالباسط عبدالصمد",
-    "url": "https://backup.qurango.net/radio/translation_quran_urdu_basit"
+    "url": "https://backup.qurango.net/radio/translation_quran_urdu_sds_shur"
   },
   {
     "name": "ترجمة معاني القرآن باللغة الأوردية",

@@ -19,6 +19,7 @@
 <meta property="twitter:title" content="الأذكار — زاد المسلم | Adhkar & Supplications">
 <meta property="twitter:description" content="أذكار الصباح والمساء وأذكار النوم والمساهمة من القرآن والسنة.">
 <meta property="twitter:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+<meta name="i18n-title" content="azkar_title">
   <link rel="icon" href="../icons/icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -755,15 +756,15 @@ body.player-active .page-wrapper {
 
 <div class="top-bar">
   <div class="top-bar-group">
-    <div class="icon-btn" onclick="goHome()" title="الرئيسية">🏠</div>
-    <div class="icon-btn" id="soundBtn" title="تشغيل الصوت">🔊</div>
+    <div class="icon-btn" onclick="goHome()" title="الرئيسية" data-i18n-title="home">🏠</div>
+    <div class="icon-btn" id="soundBtn" title="تشغيل الصوت" data-i18n-title="azkar_play_sound">🔊</div>
   </div>
 
   <div class="zikr-index-counter" id="zikrIndexCounter"></div>
 
   <div class="top-bar-group end">
-    <div class="icon-btn" onclick="openTranslation()" title="الترجمة">🌐</div>
-    <div class="icon-btn" onclick="openSettings()" title="الإعدادات">⚙️</div>
+    <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">🌐</div>
+    <div class="icon-btn" onclick="openSettings()" title="الإعدادات" data-i18n-title="settings">⚙️</div>
   </div>
 </div>
 
@@ -772,7 +773,7 @@ body.player-active .page-wrapper {
   <div class="sound-options-content" style="padding:8px;background:transparent;border:none;max-width:95%;">
     <iframe id="posterFrame" src="" title="أذكار بعد الصلاة" style="width:100%;height:80vh;border:none;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.5);" onclick="event.stopPropagation()"></iframe>
     <button class="sound-option-btn" onclick="closeImageModal()" style="margin-top:12px;justify-content:center;color:var(--text-primary);">
-      <span>✕</span><span>إغلاق</span>
+      <span>✕</span><span data-i18n="azkar_close">إغلاق</span>
     </button>
   </div>
 </div>
@@ -796,9 +797,9 @@ body.player-active .page-wrapper {
         <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
       </svg>
       <div class="counter-content">
-        <span class="count-label">المتبقي</span>
+        <span class="count-label" data-i18n="azkar_remaining">المتبقي</span>
         <span class="count-number" id="counter">0</span>
-        <span class="count-total">من <span id="targetCount">0</span></span>
+        <span class="count-total"><span data-i18n="azkar_of">من</span> <span id="targetCount">0</span></span>
       </div>
     </div>
   </div>
@@ -807,9 +808,9 @@ body.player-active .page-wrapper {
 
 <div class="bottom-stack">
   <div class="controls">
-    <button class="btn" onclick="next()">التالي</button>
-    <button class="btn" id="autoBtn" onclick="toggleAuto()">تلقائي</button>
-    <button class="btn" onclick="prev()">السابق</button>
+    <button class="btn" onclick="next()" data-i18n="azkar_next">التالي</button>
+    <button class="btn" id="autoBtn" onclick="toggleAuto()" data-i18n="azkar_auto">تلقائي</button>
+    <button class="btn" onclick="prev()" data-i18n="azkar_prev">السابق</button>
   </div>
 
   <!-- Floating Mini Audio Player -->
@@ -836,40 +837,40 @@ body.player-active .page-wrapper {
     <div class="close" onclick="closeSettings()">✕</div>
 
     <div class="settings-row">
-      <h3>حجم الخط</h3>
+      <h3 data-i18n="azkar_font_size">حجم الخط</h3>
       <input type="range" min="22" max="40" value="28" id="fontSizeSlider"
              oninput="changeFontSize(this.value)">
     </div>
 
     <div class="settings-row">
-      <h3>المظهر</h3>
+      <h3 data-i18n="azkar_theme">المظهر</h3>
       <div class="theme-buttons">
-        <button class="btn" onclick="setTheme('dark')">داكن</button>
-        <button class="btn" onclick="setTheme('warm')">دافئ</button>
-        <button class="btn" onclick="setTheme('light')">فاتح</button>
+        <button class="btn" onclick="setTheme('dark')"><span data-i18n="azkar_dark">داكن</span></button>
+        <button class="btn" onclick="setTheme('warm')"><span data-i18n="azkar_warm">دافئ</span></button>
+        <button class="btn" onclick="setTheme('light')"><span data-i18n="azkar_light">فاتح</span></button>
       </div>
     </div>
 
     <div class="settings-row">
-      <h3>التنقل بين الأذكار</h3>
+      <h3 data-i18n="azkar_navigation">التنقل بين الأذكار</h3>
       <label class="toggle-row">
-        <span>السحب يميناً/يساراً على البطاقة للتنقل</span>
+        <span data-i18n="azkar_swipe_nav">السحب يميناً/يساراً على البطاقة للتنقل</span>
         <span class="switch">
           <input type="checkbox" id="swipeNavToggle" onchange="toggleSwipeNav(this.checked)">
           <span class="slider"></span>
         </span>
       </label>
-      <p class="settings-hint">معطّل افتراضياً لتجنّب تغيير الذِّكر بالخطأ أثناء تكبير النص. أزرار «التالي / السابق» في الأسفل تعمل دائماً.</p>
+      <p class="settings-hint" data-i18n="azkar_swipe_hint">معطّل افتراضياً لتجنّب تغيير الذِّكر بالخطأ أثناء تكبير النص. أزرار «التالي / السابق» في الأسفل تعمل دائماً.</p>
     </div>
 
     <div class="settings-row">
-      <h3>الصوت</h3>
+      <h3 data-i18n="azkar_sound">الصوت</h3>
       <div class="theme-buttons">
-        <button class="btn" id="settMorning" onclick="setAudioSource('morning')">☀️ الصباح</button>
-        <button class="btn" id="settNight" onclick="setAudioSource('night')">🌙 المساء</button>
-        <button class="btn" id="settRuqia" onclick="setAudioSource('ruqia')">📿 الرقية</button>
+        <button class="btn" id="settMorning" onclick="setAudioSource('morning')">☀️ <span data-i18n="azkar_morning">الصباح</span></button>
+        <button class="btn" id="settNight" onclick="setAudioSource('night')">🌙 <span data-i18n="azkar_evening">المساء</span></button>
+        <button class="btn" id="settRuqia" onclick="setAudioSource('ruqia')">📿 <span data-i18n="azkar_ruqyah">الرقية</span></button>
       </div>
-      <button class="btn" style="width:100%;margin-top:12px;" onclick="hidePlayerFromOptions(); closeSettings();">👁️ إخفاء المشغل (يستمر التشغيل)</button>
+      <button class="btn" style="width:100%;margin-top:12px;" onclick="hidePlayerFromOptions(); closeSettings();" data-i18n="azkar_hide_player">👁️ إخفاء المشغل (يستمر التشغيل)</button>
     </div>
   </div>
 </div>
@@ -877,24 +878,25 @@ body.player-active .page-wrapper {
 <!-- Sound Options Popup -->
 <div class="sound-options" id="soundOptions" onclick="if(event.target===this) closeSoundOptions()">
   <div class="sound-options-content">
-    <div class="sound-options-title">خيارات الصوت</div>
+    <div class="sound-options-title" data-i18n="azkar_sound_options">خيارات الصوت</div>
     <button class="sound-option-btn" id="optMorning" onclick="setAudioSource('morning')">
-      <span>☀️</span><span>أذكار الصباح</span><span class="check">✓</span>
+      <span>☀️</span><span data-i18n="card_morning">أذكار الصباح</span><span class="check">✓</span>
     </button>
     <button class="sound-option-btn" id="optNight" onclick="setAudioSource('night')">
-      <span>🌙</span><span>أذكار المساء</span><span class="check">✓</span>
+      <span>🌙</span><span data-i18n="card_evening">أذكار المساء</span><span class="check">✓</span>
     </button>
     <button class="sound-option-btn" id="optRuqia" onclick="setAudioSource('ruqia')">
-      <span>📿</span><span>الرقية الشرعية</span><span class="check">✓</span>
+      <span>📿</span><span data-i18n="card_ruqyah">الرقية الشرعية</span><span class="check">✓</span>
     </button>
     <button class="sound-option-btn" onclick="hidePlayerFromOptions()">
-      <span>👁️</span><span>إخفاء المشغل</span>
+      <span>👁️</span><span data-i18n="azkar_hide_player_short">إخفاء المشغل</span>
     </button>
   </div>
 </div>
 
+<script src="../js/i18n.js"></script>
+<script>if (window.I18n) I18n.init();</script>
 <script>
-let azkarData;
 let currentIndex = 0;
 let currentCount = 0;
 let autoMode = false;
@@ -1031,7 +1033,7 @@ function loadZikr() {
 
         const currentNum = currentIndex + 1;
         const totalNum = azkarData.length;
-        document.getElementById("zikrIndexCounter").innerText = `${currentNum} من ${totalNum}`;
+        document.getElementById("zikrIndexCounter").innerText = t('azkar_index_counter', { current: currentNum, total: totalNum });
         updateSessionProgress();
     }
     updateProgress();
@@ -1345,7 +1347,7 @@ function hidePlayerFromOptions() {
 
   if (isPoster) {
     soundBtn.textContent = '🖼️';
-    soundBtn.title = isSalah ? 'عرض أذكار بعد الصلاة' : 'عرض أذكار النوم';
+    soundBtn.title = isSalah ? t('azkar_after_prayer') : t('azkar_sleep_adhkar');
     soundBtn.addEventListener('click', openImageModal);
     return;
   }

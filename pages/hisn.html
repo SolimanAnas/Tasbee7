@@ -18,6 +18,7 @@
   <meta property="twitter:title" content="حصن المسلم — زاد المسلم | Hisn Al-Muslim">
   <meta property="twitter:description" content="حصن المسلم - 132 فصلاً من الأذكار والأدعية من القرآن والسنة.">
   <meta property="twitter:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+  <meta name="i18n-title" content="hisn_title">
   <link rel="icon" href="../icons/icon-192.png">
   <style>
     /* ========== LOCAL FONTS ========== */
@@ -431,7 +432,7 @@
     <div class="toolbar">
       <a href="/Tasbee7/index.html" class="header-btn">🏠</a>
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="ابحث في الأذكار والعناوين...">
+        <input type="text" id="search-input" placeholder="ابحث في الأذكار والعناوين..." data-i18n-placeholder="hisn_search_placeholder">
       </div>
       <button class="header-btn" onclick="openSettings()">⚙️</button>
     </div>
@@ -439,22 +440,22 @@
 
   <main>
     <div class="section-header">
-      <h1 id="main-title" class="section-title">حصن المسلم</h1>
+      <h1 id="main-title" class="section-title" data-i18n="hisn_main_title">حصن المسلم</h1>
     </div>
     <div id="content-area">
-      <div style="text-align:center; padding:50px;">جاري التحميل بخط شهريزاد الأصيل...</div>
+      <div style="text-align:center; padding:50px;" data-i18n="hisn_loading">جاري التحميل بخط شهريزاد الأصيل...</div>
     </div>
   </main>
 
   <nav class="bottom-nav">
     <button class="nav-btn" onclick="nav('prev')">‹</button>
-    <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()">اختر الباب</button>
+    <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()" data-i18n="hisn_select_chapter">اختر الباب</button>
     <button class="nav-btn" onclick="nav('next')">›</button>
   </nav>
 
   <div class="modal-overlay" id="menuModal" onclick="if(event.target===this) closeMenu()">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" data-i18n="hisn_menu_title">
         فهرس الأبواب
         <button class="close-modal" onclick="closeMenu()">✕</button>
       </div>
@@ -464,19 +465,19 @@
 
   <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) closeSettings()">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" data-i18n="hisn_settings">
         الإعدادات
         <button class="close-modal" onclick="closeSettings()">✕</button>
       </div>
       <div class="modal-body">
         
         <div class="setting-row">
-          <span>المفضلة</span>
-          <button class="settings-action-btn" onclick="viewBookmarks()">⭐ عرض المفضلة</button>
+          <span data-i18n="hisn_favorites">المفضلة</span>
+          <button class="settings-action-btn" onclick="viewBookmarks()" data-i18n="hisn_show_favorites">⭐ عرض المفضلة</button>
         </div>
 
         <div class="setting-row">
-          <span>المظهر</span>
+          <span data-i18n="hisn_theme">المظهر</span>
           <div class="theme-dock">
             <div class="dot" style="background:#fff;" onclick="setTheme('light')"></div>
             <div class="dot" style="background:#f4ecd8;" onclick="setTheme('sepia')"></div>
@@ -485,12 +486,12 @@
         </div>
 
         <div class="setting-row">
-          <span>حجم الخط</span>
+          <span data-i18n="hisn_font_size">حجم الخط</span>
           <input type="range" id="fontSizeSlider" min="1" max="3" step="0.1" value="1.75" oninput="updateFontSize(this.value)">
         </div>
 
         <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 15px;">
-          <span>لون الخط</span>
+          <span data-i18n="hisn_font_color">لون الخط</span>
           <div class="color-palette" style="width: 100%;">
             <button class="color-swatch reset-color-btn" onclick="resetFontColor()" title="استعادة اللون الافتراضي للمظهر">↺</button>
             <div class="color-swatch" style="background:#000000;" onclick="updateFontColor('#000000')"></div>
@@ -506,8 +507,8 @@
         </div>
 
         <div class="setting-row">
-          <span>عن التطبيق والكتاب</span>
-          <button class="settings-action-btn" onclick="openAbout()">ℹ️ التفاصيل</button>
+          <span data-i18n="hisn_about_label">عن التطبيق والكتاب</span>
+          <button class="settings-action-btn" onclick="openAbout()" data-i18n="hisn_details">ℹ️ التفاصيل</button>
         </div>
 
       </div>
@@ -516,18 +517,18 @@
 
   <div class="modal-overlay" id="aboutModal" onclick="if(event.target===this) closeAbout()">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" data-i18n="hisn_about_title">
         حول الكتاب
         <button class="close-modal" onclick="closeAbout()">✕</button>
       </div>
       <div class="modal-body about-text">
-        <p>هذا المحتوى مأخوذ من:</p>
+        <p data-i18n="hisn_source">هذا المحتوى مأخوذ من:</p>
         <p style="color: var(--accent); font-weight: bold; font-size: 1.5rem; margin: 10px 0;">حصن المسلم من أذكار الكتاب والسنة</p>
         <p>للشيخ د. سعيد بن علي بن وهف القحطاني (رحمه الله)</p>
         
         <br>
         <p>لتحميل النسخة الأصلية (PDF) من صفحة رسالة الحرمين:</p>
-        <a href="https://risala.prh.gov.sa/storage/contents/51/ar_hisnulmuslim.pdf" target="_blank" class="about-link">📥 اضغط هنا للتحميل</a>
+        <a href="https://risala.prh.gov.sa/storage/contents/51/ar_hisnulmuslim.pdf" target="_blank" class="about-link" data-i18n="hisn_download">📥 اضغط هنا للتحميل</a>
         
         <br><br>
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
@@ -538,8 +539,10 @@
     </div>
   </div>
 
-  <div id="toast">تم النسخ بنجاح</div>
+  <div id="toast" data-i18n="hisn_copied">تم النسخ بنجاح</div>
 
+  <script src="../js/i18n.js"></script>
+  <script>if (window.I18n) I18n.init();</script>
   <script>
     const svgCopy = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
     const svgStarOutline = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
@@ -669,8 +672,8 @@
       
       const enHtml = item.en ? `<div style="font-size:0.95rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border); padding-top:8px; direction:ltr; text-align:left;">${item.en}</div>` : '';
       const transHtml = item.transliteration ? `<div style="font-size:0.95rem; color:var(--text-muted); font-style:italic; margin-top:6px;">${item.transliteration}</div>` : '';
-      const repeatHtml = item.repeat && item.repeat > 1 ? `<span style="font-size:0.85rem; color:var(--accent); margin-top:6px; display:inline-block;">(${item.repeat} مرات)</span>` : '';
-      const audioBtn = item.audio ? `<button class="action-btn" onclick="toggleAudio('${safeAudio}', this)" title="استماع" style="color:var(--accent);">${svgPlay}</button>` : '';
+      const repeatHtml = item.repeat && item.repeat > 1 ? `<span style="font-size:0.85rem; color:var(--accent); margin-top:6px; display:inline-block;">` + t('hisn_repeat_times', { n: item.repeat }) + `</span>` : '';
+      const audioBtn = item.audio ? `<button class="action-btn" onclick="toggleAudio('${safeAudio}', this)" title="` + t('hisn_listen') + `" style="color:var(--accent);">${svgPlay}</button>` : '';
 
       return `
         <div class="card" data-item="${iIdx}" style="${borderStyle}">
@@ -683,10 +686,10 @@
           </div>
           <div class="card-actions">
             ${audioBtn}
-            <button class="action-btn" onclick="copyText('${safeText}')" title="نسخ">
+            <button class="action-btn" onclick="copyText('${safeText}')" title="${t('hisn_copy')}">
               ${svgCopy}
             </button>
-            <button class="action-btn ${bmClass}" onclick="toggleBookmark(${sIdx}, ${iIdx}, this)" title="إضافة للمفضلة">
+            <button class="action-btn ${bmClass}" onclick="toggleBookmark(${sIdx}, ${iIdx}, this)" title="${t('hisn_add_favorites')}">
               ${starIcon}
             </button>
           </div>
@@ -735,11 +738,11 @@
     function viewBookmarks() {
       closeSettings();
       App.isSearchMode = true;
-      document.getElementById('customSelectBtn').textContent = "المفضلة";
-      document.getElementById('main-title').textContent = `المفضلة (${bookmarks.length})`;
+      document.getElementById('customSelectBtn').textContent = t('hisn_favorites');
+      document.getElementById('main-title').textContent = t('hisn_favorites_count', { n: bookmarks.length });
       
       if(bookmarks.length === 0) {
-        document.getElementById('content-area').innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-muted);'>لا توجد أذكار في المفضلة بعد</div>";
+        document.getElementById('content-area').innerHTML = "<div style='text-align:center; padding:50px; color:var(--text-muted);'>" + t('hisn_no_favorites') + "</div>";
         return;
       }
 
@@ -822,7 +825,7 @@
       }
 
       App.isSearchMode = true;
-      document.getElementById('customSelectBtn').textContent = "نتائج البحث";
+      document.getElementById('customSelectBtn').textContent = t('hisn_search_results');
       
       const ql = query.toLowerCase();
       const results = App.searchIndex.filter(x => 
@@ -830,7 +833,7 @@
           x.enNorm.toLowerCase().includes(ql) || x.transNorm.toLowerCase().includes(ql)
       ).slice(0, 50);
       
-      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
+      document.getElementById('main-title').textContent = t('hisn_search_results_count', { n: results.length });
       
       const html = results.map(r => {
         const orig = App.data[r.sIdx].items[r.iIdx];

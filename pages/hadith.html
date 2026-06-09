@@ -9,6 +9,7 @@
 <meta name="keywords" content="البحث في الأحاديث, Hadith search, Sahih Bukhari, Sahih Muslim, Abu Dawud, Tirmidhi, Nasai, Ibn Majah, صحيح البخاري, صحيح مسلم, حديث, Islamic hadith, hadith database">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/hadith.html">
+<meta name="i18n-title" content="hadith_title">
 <meta property="og:type" content="website">
 <meta property="og:title" content="باحث الأحاديث — زاد المسلم | Hadith Search">
 <meta property="og:description" content="ابحث في 12 مجموعة حديثية: صحيح البخاري، صحيح مسلم، سنن أبي داود. Search 12 hadith collections.">
@@ -300,7 +301,7 @@
     <div class="modal-content">
         <div class="modal-grip"></div>
         <div class="modal-header">
-            <span>📚 تصفح الكتب الحديثية</span>
+            <span data-i18n="hadith_browse_books">📚 تصفح الكتب الحديثية</span>
             <button class="close" onclick="toggleModal(false)" aria-label="إغلاق">✕</button>
         </div>
         <div id="modalBooksContainer"></div>
@@ -314,7 +315,7 @@
         </div>
 
         <div class="brand">
-            <h1 class="page-title">باحث الأحاديث</h1>
+            <h1 class="page-title" data-i18n="hadith_title">باحث الأحاديث</h1>
             <span class="page-sub">زاد المسلم</span>
         </div>
 
@@ -327,32 +328,32 @@
     </div>
 
     <div class="main-area">
-        <div id="dbStatus">جاري تحميل الكتب... ⏳</div>
+        <div id="dbStatus" data-i18n="hadith_loading_db">جاري تحميل الكتب... ⏳</div>
 
         <div class="daily-card" id="dailyCard">
            <div class="daily-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke-linecap:round;stroke-linejoin:round;"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path></svg>
-                حديث من زادك
+                <span data-i18n="hadith_daily_title">حديث من زادك</span>
            </div>
-           <div class="daily-text" id="dailyHadithText">جاري التحميل...</div>
+           <div class="daily-text" id="dailyHadithText" data-i18n="hadith_loading">جاري التحميل...</div>
         </div>
 
         <button class="action-btn" onclick="window.location.href='hadith-viewer.html'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-            تصفح الكتب الحديثية
+            <span data-i18n="hadith_browse_btn">تصفح الكتب الحديثية</span>
         </button>
 
         <div class="search-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السُنّة النبوية..." disabled>
+            <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السُنّة النبوية..." data-i18n-placeholder="hadith_search_placeholder" disabled>
             <button class="clear-input-btn" id="clearInputBtn" onclick="clearSearchField()" aria-label="مسح">✕</button>
         </div>
 
-        <div class="filter-label">تصفية حسب الكتاب</div>
+        <div class="filter-label" data-i18n="hadith_filter_label">تصفية حسب الكتاب</div>
         <div class="books-filter" id="booksFilter"></div>
 
         <label class="tashkeel-toggle">
-            مطابقة التشكيل بدقة
+            <span data-i18n="hadith_tashkeel_toggle">مطابقة التشكيل بدقة</span>
             <span class="switch">
                 <input type="checkbox" id="strictTashkeel" onchange="initiateSearch()">
                 <span class="track"><span class="thumb"></span></span>
@@ -365,10 +366,11 @@
         <div id="resultsSummary" class="results-summary"></div>
         <div id="resultsContainer"></div>
 
-        <div id="scrollTrigger" class="scroll-loader">جاري تحميل المزيد...</div>
+        <div id="scrollTrigger" class="scroll-loader" data-i18n="hadith_loading_more">جاري تحميل المزيد...</div>
     </div>
 </div>
 
+<script src="../js/i18n.js"></script>
 <script>
     // ===================== الثيمات =====================
     const THEMES = ['dark', 'light', 'sepia'];
@@ -443,7 +445,7 @@
             try {
                 const indexRes = await fetch('../assets/hadith/Index-translated.json');
                 if (indexRes.ok) translatedIndex = await indexRes.json();
-            } catch (e) { console.log("ملف الفهرس المترجم غير متوفر"); }
+            } catch (e) { console.log(t('hadith_index_missing')); }
 
             const fetchPromises = BOOKS_INFO.map(book =>
                 fetch(`../assets/hadith/${book.id}.json`)
@@ -483,20 +485,20 @@
             });
 
             if (localDatabase.length > 0) {
-                let msg = `✅ تم تحميل ${localDatabase.length.toLocaleString('ar-EG')} حديث`;
-                if (failedBooks.length) msg += ` (تعذّر تحميل: ${failedBooks.join('، ')})`;
+                let msg = t('hadith_loaded_count', { n: localDatabase.length.toLocaleString('ar-EG') });
+                if (failedBooks.length) msg += ' (' + t('hadith_load_failed', { books: failedBooks.join(', ') }) + ')';
                 status.innerHTML = msg;
                 status.style.color = 'var(--primary)';
                 document.getElementById('searchInput').disabled = false;
                 fetchRandomHadith();
                 setTimeout(() => { status.style.opacity = '0'; setTimeout(() => status.style.display = 'none', 400); }, 3500);
             } else {
-                throw new Error("لم يتم العثور على أحاديث");
+                throw new Error(t('hadith_not_found'));
             }
         } catch (error) {
-            status.innerHTML = `❌ تأكد من وجود مجلد <b>hadith</b> وملفات JSON بداخله`;
+            status.innerHTML = t('hadith_db_error');
             status.style.color = 'var(--danger)';
-            document.getElementById('dailyHadithText').innerHTML = "تعذّر تحميل قاعدة البيانات.";
+            document.getElementById('dailyHadithText').innerHTML = t('hadith_db_load_failed');
         }
     }
 
@@ -524,7 +526,7 @@
 
         const clearBtn = document.createElement('span');
         clearBtn.className = 'clear-history-btn';
-        clearBtn.textContent = '✕ مسح السجل';
+        clearBtn.textContent = '✕ ' + t('hadith_clear_history');
         clearBtn.onclick = clearHistory;
         container.appendChild(clearBtn);
     }
@@ -540,7 +542,7 @@
         searchHistory = [];
         localStorage.removeItem('hadithHistory');
         renderHistory();
-        showToast("🧹 تم مسح سجل البحث");
+        showToast(t('hadith_history_cleared'));
     }
 
     // ===================== واجهة المستخدم =====================
@@ -569,8 +571,8 @@
     }
 
     function downloadDatabase() {
-        if (localDatabase.length === 0) { showToast("⚠️ جاري تحميل القاعدة، يرجى الانتظار..."); return; }
-        showToast("⏳ جاري التجهيز...");
+        if (localDatabase.length === 0) { showToast(t('hadith_db_loading')); return; }
+        showToast(t('hadith_preparing'));
         // لا نُصدّر الحقل المطبّع المؤقت
         const exportData = localDatabase.map(({ normalized, ...rest }) => rest);
         const blob = new Blob([JSON.stringify(exportData)], { type: "application/json;charset=utf-8" });
@@ -578,14 +580,14 @@
         const a = document.createElement('a');
         a.href = url; a.download = 'Zad_AlMuslim_DB.json';
         document.body.appendChild(a); a.click();
-        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); showToast("✅ تم التحميل"); }, 100);
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); showToast(t('hadith_downloaded')); }, 100);
     }
 
     // نسخ موثوق يعمل أونلاين وأوفلاين (file:// / Capacitor)
     function copyToClipboard(encodedText) {
         const text = decodeURIComponent(encodedText);
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).then(() => showToast("✅ تم النسخ بنجاح")).catch(() => fallbackCopy(text));
+            navigator.clipboard.writeText(text).then(() => showToast(t('hadith_copied'))).catch(() => fallbackCopy(text));
         } else {
             fallbackCopy(text);
         }
@@ -598,8 +600,8 @@
             document.body.appendChild(ta); ta.focus(); ta.select();
             const ok = document.execCommand('copy');
             document.body.removeChild(ta);
-            showToast(ok ? "✅ تم النسخ بنجاح" : "❌ تعذّر النسخ");
-        } catch (e) { showToast("❌ تعذّر النسخ"); }
+            showToast(ok ? t('hadith_copied') : t('hadith_copy_failed'));
+        } catch (e) { showToast(t('hadith_copy_failed')); }
     }
 
     function showToast(msg) {
@@ -612,25 +614,25 @@
 
     // ===================== الحكم على الحديث =====================
     function getHadithGrade(bookId, grades) {
-        if (bookId === 'bukhari' || bookId === 'muslim') return { text: 'صحيح', isOk: true };
-        if (!grades || grades.length === 0) return { text: 'غير محدد', isOk: true };
+        if (bookId === 'bukhari' || bookId === 'muslim') return { text: t('hadith_grade_sahih'), isOk: true };
+        if (!grades || grades.length === 0) return { text: t('hadith_grade_undefined'), isOk: true };
         const albani = grades.find(g => (g && g.name || '').toLowerCase().includes('albani'));
         const raw = (((albani ? albani.grade : grades[0].grade) || '') + '').toLowerCase();
         const isOk = !raw.includes('daif') && !raw.includes("da'if") && !raw.includes('mawdu');
-        let arGrade = raw || 'غير محدد';
-        if (raw.includes('sahih')) arGrade = 'صحيح';
-        else if (raw.includes('hasan')) arGrade = 'حسن';
-        else if (raw.includes('daif') || raw.includes("da'if")) arGrade = 'ضعيف';
-        else if (raw.includes('mawdu')) arGrade = 'موضوع';
+        let arGrade = raw || t('hadith_grade_undefined');
+        if (raw.includes('sahih')) arGrade = t('hadith_grade_sahih');
+        else if (raw.includes('hasan')) arGrade = t('hadith_grade_hasan');
+        else if (raw.includes('daif') || raw.includes("da'if")) arGrade = t('hadith_grade_daif');
+        else if (raw.includes('mawdu')) arGrade = t('hadith_grade_mawdu');
         return { text: arGrade, isOk };
     }
 
     // ===================== الحديث المميز =====================
     function buildCardActions(textToCopy, link) {
-        const copyBtn = `<button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="نسخ الحديث">
+        const copyBtn = `<button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="${t('hadith_copy_tooltip')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>`;
-        const viewBtn = link ? `<a href="${link}" class="card-action-btn" title="عرض في الكتاب">
+        const viewBtn = link ? `<a href="${link}" class="card-action-btn" title="${t('hadith_view_tooltip')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         </a>` : '';
         return `<div class="card-actions">${copyBtn}${viewBtn}</div>`;
@@ -657,7 +659,7 @@
                 }
             }
         } catch (e) {
-            console.log("rand-hadith.json غير متوفر، سيتم استخدام القاعدة المحلية.");
+            console.log(t('hadith_rand_unavailable'));
         }
         setDynamicHadith();
     }
@@ -730,7 +732,7 @@
 
         const container = document.getElementById('resultsContainer');
         if (currentSearchResults.length === 0) {
-            container.innerHTML = `<div class="empty-state"><span class="icn">🔍</span>لا توجد نتائج مطابقة لبحثك.<br>جرّب كلمات أقل أو ألغِ مطابقة التشكيل.</div>`;
+            container.innerHTML = `<div class="empty-state"><span class="icn">🔍</span>${t('hadith_no_results')}</div>`;
             document.getElementById('scrollTrigger').style.display = 'none';
             return;
         }
@@ -739,8 +741,8 @@
         currentSearchResults.forEach(h => getHadithGrade(h.bookId, h.grades).isOk ? okCount++ : warnCount++);
         const summary = document.getElementById('resultsSummary');
         summary.style.display = 'block';
-        summary.innerHTML = `عُثر على <b>${currentSearchResults.length.toLocaleString('ar-EG')}</b> نتيجة<br>
-            <span class="summary-ok">${okCount.toLocaleString('ar-EG')} مقبول</span> • <span class="summary-warn">${warnCount.toLocaleString('ar-EG')} ضعيف/مردود</span>`;
+        summary.innerHTML = t('hadith_results_summary', { count: currentSearchResults.length.toLocaleString('ar-EG') }) + '<br>' +
+            '<span class="summary-ok">' + t('hadith_summary_ok', { n: okCount.toLocaleString('ar-EG') }) + '</span> • <span class="summary-warn">' + t('hadith_summary_warn', { n: warnCount.toLocaleString('ar-EG') }) + '</span>';
 
         renderNextChunk();
         setupIntersectionObserver();
@@ -763,7 +765,7 @@
             try { highlightedText = hadith.text.replace(highlightRegex, '<span class="search-highlight">$1</span>'); } catch (e) {}
             const sectionDisplay = hadith.sectionName ? ` (${hadith.sectionName})` : '';
             const link = hadith.sectionNumber ? `hadith-viewer.html?book=${hadith.bookId}&section=${hadith.sectionNumber}` : null;
-            const textToCopy = encodeURIComponent(`${hadith.text}\n\nالكتاب: ${hadith.bookName}${sectionDisplay}\nرقم الحديث: ${hadith.number}\nالحكم: ${gradeInfo.text}`);
+            const textToCopy = encodeURIComponent(`${hadith.text}\n\n${t('hadith_book_prefix')}${hadith.bookName}${sectionDisplay}\n${t('hadith_number_prefix')}${hadith.number}\n${t('hadith_grade_prefix')}${gradeInfo.text}`);
 
             const card = document.createElement('div');
             card.className = 'hadith-item' + (gradeInfo.isOk ? '' : ' warn');
@@ -774,7 +776,7 @@
                     ${buildCardActions(textToCopy, link)}
                 </div>
                 <div class="hadith-text">${highlightedText}</div>
-                <div class="hadith-meta"><b>الكتاب:</b> ${hadith.bookName}${sectionDisplay} &nbsp;|&nbsp; <b>رقم الحديث:</b> ${hadith.number}</div>`;
+                <div class="hadith-meta"><b>${t('hadith_book_prefix')}</b> ${hadith.bookName}${sectionDisplay} &nbsp;|&nbsp; <b>${t('hadith_number_prefix')}</b> ${hadith.number}</div>`;
             fragment.appendChild(card);
         }
         container.appendChild(fragment);
@@ -793,5 +795,6 @@
 
     window.onload = loadBooks;
 </script>
+<script>if (window.I18n) I18n.init();</script>
 </body>
 </html>

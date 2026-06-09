@@ -606,12 +606,12 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
         <span class="prayer-hijri" id="homeHijri">-- رمضان</span>
         <span class="prayer-city" id="homeCity">
           <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          جاري التحديد...
+          <span data-i18n="prayer_locating">جاري التحديد...</span>
         </span>
       </div>
       <div class="prayer-countdown-area">
         <div class="prayer-timer" id="homeCountdown">--:--:--</div>
-        <div class="prayer-next-label" id="homeNextLabel">⏳ جاري الحساب</div>
+        <div class="prayer-next-label" id="homeNextLabel" data-i18n="prayer_calculating">⏳ جاري الحساب</div>
       </div>
     </div>
     <div class="prayer-chips" id="homePrayerChips"></div>
@@ -619,8 +619,8 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
   <div class="quran-hero" onclick="handleQuranClick()">
     <div class="quran-hero-text">
-      <span class="quran-hero-title">المصحف الشريف</span>
-      <span class="quran-hero-sub" id="quranHeroSub">الرسم العثماني · النصي</span>
+      <span class="quran-hero-title" data-i18n="quran_hero_title">المصحف الشريف</span>
+      <span class="quran-hero-sub" id="quranHeroSub" data-i18n="quran_hero_sub">الرسم العثماني · النصي</span>
     </div>
     <div class="quran-hero-icon">
       <svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
@@ -1002,15 +1002,15 @@ function formatTimeArabic12h(d) {
 function initQuranHero() {
   const lastPage = localStorage.getItem('lastPage');
   const sub = document.getElementById('quranHeroSub');
-  if (lastPage && sub) sub.innerText = `مواصلة القراءة · صفحة ${lastPage}`;
+  if (lastPage && sub) sub.innerText = t('quran_hero_continue', {page: lastPage});
 }
 
 function startCountdown(nextObj, nameAr) {
   if(countdownInterval) clearInterval(countdownInterval);
   const lbl = document.getElementById('homeNextLabel');
   const tmr = document.getElementById('homeCountdown');
-  if(!nextObj) { lbl.innerText="يرجى تحديد الموقع"; tmr.innerText="--:--:--"; return; }
-  lbl.innerText = `متبقي على صلاة ${nameAr}`;
+  if(!nextObj) { lbl.innerText=t('prayer_no_location'); tmr.innerText="--:--:--"; return; }
+  lbl.innerText = t('prayer_remaining', {name: nameAr});
   countdownInterval = setInterval(() => {
     const diff = nextObj.getTime() - Date.now();
     if(diff <= 0) { refreshPrayerTimes(); return; }
@@ -1045,7 +1045,7 @@ function computePrayer(lat, lng) {
     const tpt = new adhan.PrayerTimes(coords, tmw, params);
     nextEnum='fajr'; nextDate=tpt.fajr; nextName=prayerNamesAr['fajr'];
   }
-  const city = localStorage.getItem('current_location_name') || "موقع محفوظ";
+  const city = localStorage.getItem('current_location_name') || t('prayer_saved_location');
   const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'}).format(now);
   return { pt, nextEnum, nextDate, nextName, city, hijri };
 }
@@ -1054,8 +1054,8 @@ function updateUIWithPrayerTimes(lat, lng) {
   const chipsContainer = document.getElementById('homePrayerChips');
   if(!window.adhan) return;
   if(!lat || !lng) {
-    document.getElementById('homeCity').innerHTML = '📍 اضغط لتحديد موقعك';
-    chipsContainer.innerHTML = '<div style="opacity:0.6;font-size:0.85rem;">يرجى تحديد موقعك أولاً لتفعيل المواقيت.</div>';
+    document.getElementById('homeCity').innerHTML = t('prayer_set_location');
+    chipsContainer.innerHTML = `<div style="opacity:0.6;font-size:0.85rem;">${t('prayer_no_location_desc')}</div>`;
     return;
   }
   try {
@@ -1109,12 +1109,12 @@ function ptToISO(d) {
 }
 function ptRelLabel(d) {
   const o = ptOffsetFromToday(d);
-  if(o === 0) return 'اليوم';
-  if(o === 1) return 'غداً';
-  if(o === -1) return 'أمس';
-  if(o === 2) return 'بعد يومين';
-  if(o === -2) return 'قبل يومين';
-  return o > 0 ? `بعد ${o} أيام` : `قبل ${Math.abs(o)} أيام`;
+  if(o === 0) return t('today');
+  if(o === 1) return t('tomorrow');
+  if(o === -1) return t('yesterday');
+  if(o === 2) return t('prayer_times_for', {day: 'بعد يومين'});
+  if(o === -2) return t('prayer_times_for', {day: 'قبل يومين'});
+  return o > 0 ? t('prayer_times_for', {day: `بعد ${o} أيام`}) : t('prayer_times_for', {day: `قبل ${Math.abs(o)} أيام`});
 }
 function ptFmtHijri(d) { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
 function ptFmtGreg(d) { return new Intl.DateTimeFormat('ar', {day:'numeric', month:'long', year:'numeric'}).format(d); }
@@ -1225,11 +1225,11 @@ function renderPrayerModal() {
   const sub = document.getElementById('prayerModalSub');
   const banner = document.getElementById('prayerNextBanner');
   if(prayerModalInterval) { clearInterval(prayerModalInterval); prayerModalInterval = null; }
-  if(!loc) { sub.innerHTML = '<span class="pt-city-line">تعذّر حساب المواقيت</span>'; return; }
+  if(!loc) { sub.innerHTML = `<span class="pt-city-line">${t('prayer_error')}</span>`; return; }
 
   const date = selectedPrayerDate;
   const pt = computePrayerForDate(loc.lat, loc.lng, date);
-  if(!pt) { sub.innerHTML = '<span class="pt-city-line">تعذّر حساب المواقيت</span>'; return; }
+  if(!pt) { sub.innerHTML = `<span class="pt-city-line">${t('prayer_error')}</span>`; return; }
 
   const isToday = ptSameDay(date, new Date());
   let nextEnum = null, nextDate = null, nextName = null;
@@ -1250,7 +1250,7 @@ function renderPrayerModal() {
   }
   document.getElementById('prayerModalList').innerHTML = html;
 
-  const city = localStorage.getItem('current_location_name') || "موقع محفوظ";
+  const city = localStorage.getItem('current_location_name') || t('prayer_saved_location');
   sub.innerHTML = `<span class="pt-city-line">📍 ${city}</span>`
     + `<span class="pt-hijri-line">${ptFmtHijri(date)}</span>`
     + `<span class="pt-greg-line">${ptFmtGreg(date)} · ${ptRelLabel(date)}</span>`;
@@ -1263,13 +1263,13 @@ function renderPrayerModal() {
       const diff = nextDate.getTime() - Date.now();
       if(diff <= 0) { renderPrayerModal(); refreshPrayerTimes(); return; }
       const h = Math.floor(diff/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
-      banner.innerText = `الصلاة القادمة: ${nextName} بعد ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      banner.innerText = t('prayer_next', {name: nextName, time: `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`});
     };
     tick();
     prayerModalInterval = setInterval(tick, 1000);
   } else {
     banner.classList.add('is-past');
-    banner.innerText = `📅 مواقيت ${ptRelLabel(date)}`;
+    banner.innerText = t('prayer_times_for', {day: ptRelLabel(date)});
   }
 }
 
@@ -1279,15 +1279,15 @@ function closeLocationModal() { document.getElementById('locationModal').classLi
 function startGPS() {
   const btn = document.getElementById('gpsBtn');
   const orig = btn.innerText;
-  btn.innerText = "جاري التحديد...";
-  if(!navigator.geolocation) { alert("المتصفح لا يدعم GPS"); btn.innerText=orig; return; }
+  btn.innerText = t('prayer_locating');
+  if(!navigator.geolocation) { alert(t('gps_not_supported')); btn.innerText=orig; return; }
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       localStorage.setItem('prayer_lat', pos.coords.latitude);
       localStorage.setItem('prayer_lng', pos.coords.longitude);
-      localStorage.setItem('current_location_name', 'موقعك الحالي (GPS)');
+      localStorage.setItem('current_location_name', t('prayer_gps_location'));
       refreshPrayerTimes();
-      btn.innerText = "تم التحديد بنجاح!";
+      btn.innerText = t('gps_success');
       
       if (typeof NotificationSystem !== 'undefined') {
          NotificationSystem.refreshPrayerTimes();
@@ -1295,7 +1295,7 @@ function startGPS() {
 
       setTimeout(() => { btn.innerText = orig; closeLocationModal(); }, 1000);
     },
-    () => { btn.innerText = orig; alert("الرجاء السماح بصلاحية الموقع."); },
+    () => { btn.innerText = orig; alert(t('gps_permission_denied')); },
     { enableHighAccuracy: true, timeout: 8000 }
   );
 }
@@ -1370,19 +1370,19 @@ function setTheme(mode) {
 function autoTheme() { setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
 
 function setCalcMethod(m) { calcMethod=m; localStorage.setItem('calcMethod',m); refreshPrayerTimes(); }
-function resetData() { if(confirm('تأكيد مسح جميع البيانات؟')) { localStorage.clear(); location.reload(); } }
+function resetData() { if(confirm(t('confirm_reset_data'))) { localStorage.clear(); location.reload(); } }
 function shareApp() {
   const link = 'https://solimananas.github.io/Tasbee7/';
   
   if (navigator.share) {
     navigator.share({
-      title: 'زاد المسلم',
-      text: 'جرب تطبيق زاد المسلم، رفيقك اليومي للقرآن والأذكار:',
+      title: t('app_name'),
+      text: t('share_app_text'),
       url: link
     }).catch(console.error);
   } else {
     navigator.clipboard.writeText(link).then(() => {
-      alert('تم نسخ رابط التطبيق بنجاح!');
+      alert(t('share_copied'));
     }).catch(err => {
       console.error('فشل النسخ: ', err);
     });
@@ -1402,6 +1402,7 @@ window.addEventListener('load', async () => {
   if (window.I18n) {
     await I18n.init();
     I18n.createSwitcher('langSwitcher');
+    I18n.maybeFirstRun();   // first-visit "choose your language" prompt
   }
 
   const saved = localStorage.getItem('themeMode');

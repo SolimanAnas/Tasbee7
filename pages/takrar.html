@@ -432,16 +432,16 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <!-- Reciter Sheet -->
 <div class="bottom-sheet" id="reciterSheet">
   <div class="drag-handle"></div>
-  <div class="sheet-header"><h2>اختر القارئ</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-header"><h2 data-i18n="takrar_choose_reciter">اختر القارئ</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
   <div class="sheet-content" id="reciterList"></div>
 </div>
 
 <!-- Surah Sheet -->
 <div class="bottom-sheet" id="surahSheet">
   <div class="drag-handle"></div>
-  <div class="sheet-header"><h2>اختر السورة</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-header"><h2 data-i18n="takrar_choose_surah">اختر السورة</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
   <div class="sheet-content">
-    <input type="text" class="sheet-search" id="surahSearch" placeholder="ابحث عن سورة..." oninput="filterSurahs()">
+    <input type="text" class="sheet-search" id="surahSearch" placeholder="ابحث عن سورة..." oninput="filterSurahs()" data-i18n-placeholder="takrar_search_surah">
     <div id="surahList"></div>
   </div>
 </div>
@@ -449,9 +449,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <!-- Generic Unit Sheet (juz / hizb / rub / page) -->
 <div class="bottom-sheet" id="unitSheet">
   <div class="drag-handle"></div>
-  <div class="sheet-header"><h2 id="unitSheetTitle">اختر الوحدة</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-header"><h2 id="unitSheetTitle" data-i18n="takrar_choose_unit">اختر الوحدة</h2><button class="icon-btn" onclick="closeSheet()">✕</button></div>
   <div class="sheet-content">
-    <input type="text" class="sheet-search" id="unitSearch" inputmode="numeric" placeholder="ابحث بالرقم..." oninput="filterUnits()">
+    <input type="text" class="sheet-search" id="unitSearch" inputmode="numeric" placeholder="ابحث بالرقم..." oninput="filterUnits()" data-i18n-placeholder="takrar_search_number">
     <div id="unitList"></div>
   </div>
 </div>
@@ -459,31 +459,31 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
-    <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);">التكرار</div>
+    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;" data-i18n-title="home">🏠</a>
+    <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);" data-i18n="takrar_header">التكرار</div>
     <button class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</button>
   </div>
 
   <!-- Reciter -->
   <div class="card">
-    <label>القارئ</label>
+    <label data-i18n="takrar_reciter">القارئ</label>
     <button class="custom-select-btn" id="reciterBtn" onclick="openSheet('reciter')">
-      <span>اختر القارئ...</span>
+      <span data-i18n="takrar_select_reciter">اختر القارئ...</span>
     </button>
   </div>
 
   <!-- Scope: surah / juz / hizb / rub / page -->
   <div class="card">
-    <label>المقطع</label>
+    <label data-i18n="takrar_section">المقطع</label>
     <div class="type-seg" id="typeSeg">
-      <button class="type-seg-btn active" data-type="surah" onclick="setRangeType('surah')">سورة</button>
-      <button class="type-seg-btn" data-type="juz"  onclick="setRangeType('juz')">جزء</button>
-      <button class="type-seg-btn" data-type="hizb" onclick="setRangeType('hizb')">حزب</button>
-      <button class="type-seg-btn" data-type="rub"  onclick="setRangeType('rub')">ربع</button>
-      <button class="type-seg-btn" data-type="page" onclick="setRangeType('page')">صفحة</button>
+      <button class="type-seg-btn active" data-type="surah" onclick="setRangeType('surah')" data-i18n="takrar_scope_surah">سورة</button>
+      <button class="type-seg-btn" data-type="juz"  onclick="setRangeType('juz')" data-i18n="takrar_scope_juz">جزء</button>
+      <button class="type-seg-btn" data-type="hizb" onclick="setRangeType('hizb')" data-i18n="takrar_scope_hizb">حزب</button>
+      <button class="type-seg-btn" data-type="rub"  onclick="setRangeType('rub')" data-i18n="takrar_scope_rub">ربع</button>
+      <button class="type-seg-btn" data-type="page" onclick="setRangeType('page')" data-i18n="takrar_scope_page">صفحة</button>
     </div>
     <button class="custom-select-btn" id="unitBtn" onclick="openUnitSheet()">
-      <span>اختر السورة...</span>
+      <span data-i18n="takrar_select_surah">اختر السورة...</span>
     </button>
     <div class="scope-resolved" id="scopeResolved"></div>
   </div>
@@ -492,8 +492,8 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <div class="card" id="rangeCard">
     <div class="toggle-row">
       <div>
-        <div class="toggle-label">تكرار النطاق</div>
-        <div class="toggle-desc">تكرار المقطع المحدد (سورة/جزء/حزب/ربع/صفحة) عدة مرات</div>
+        <div class="toggle-label" data-i18n="takrar_range_repeat">تكرار النطاق</div>
+        <div class="toggle-desc" data-i18n="takrar_range_desc">تكرار المقطع المحدد (سورة/جزء/حزب/ربع/صفحة) عدة مرات</div>
       </div>
       <div class="switch" id="rangeSwitch" onclick="toggleRange()"></div>
     </div>
@@ -505,21 +505,21 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
       <div class="ayah-picker-inline" id="ayahPickerInline">
         <div class="range-endpoints">
           <div class="endpoint" id="endpointFrom">
-            <span class="endpoint-lbl">من آية</span>
+            <span class="endpoint-lbl" data-i18n="takrar_from_verse">من آية</span>
             <input type="number" class="ayah-num-input" id="ayahFromInput" min="1" value="1" inputmode="numeric" oninput="onAyahInput('from')">
           </div>
           <div class="range-connector" aria-hidden="true">
             <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 5 12 12 19"/></svg>
           </div>
           <div class="endpoint" id="endpointTo">
-            <span class="endpoint-lbl">إلى آية</span>
+            <span class="endpoint-lbl" data-i18n="takrar_to_verse">إلى آية</span>
             <input type="number" class="ayah-num-input" id="ayahToInput" min="1" value="1" inputmode="numeric" oninput="onAyahInput('to')">
           </div>
         </div>
 
         <div class="range-actions-row">
-          <button class="range-quick" onclick="selectWholeSurah()">⤢ السورة كاملة</button>
-          <span class="range-hint" id="rangeHint">اختر آية البداية</span>
+          <button class="range-quick" onclick="selectWholeSurah()" data-i18n="takrar_full_surah">⤢ السورة كاملة</button>
+          <span class="range-hint" id="rangeHint" data-i18n="takrar_start_verse">اختر آية البداية</span>
         </div>
 
         <div class="ayah-grid-unified" id="ayahUnifiedGrid"></div>
@@ -533,7 +533,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
       <div class="range-stepper-wrap" style="margin-top:13px;">
         <div class="range-stepper-label">
           <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          عدد مرات التكرار
+          <span data-i18n="takrar_repeat_count">عدد مرات التكرار</span>
         </div>
         <div class="range-stepper">
           <button class="range-stepper-btn" onclick="adjustRangeRepeat(-1)">−</button>
@@ -548,16 +548,16 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <div class="card" id="ayahCard">
     <div class="toggle-row">
       <div>
-        <div class="toggle-label">تكرار الآية</div>
-        <div class="toggle-desc">تكرار كل آية عدة مرات قبل الانتقال للتالية</div>
+        <div class="toggle-label" data-i18n="takrar_verse_repeat">تكرار الآية</div>
+        <div class="toggle-desc" data-i18n="takrar_verse_repeat_desc">تكرار كل آية عدة مرات قبل الانتقال للتالية</div>
       </div>
       <div class="switch" id="ayahSwitch" onclick="toggleAyahRepeat()"></div>
     </div>
     <div id="ayahSettings" style="display:none;">
-      <label>عدد تكرار الآية</label>
+      <label data-i18n="takrar_verse_count">عدد تكرار الآية</label>
       <div class="stepper">
         <button class="stepper-btn" onclick="adjustAyahRepeat(-1)">−</button>
-        <div><div class="stepper-val" id="ayahRepeatVal">3</div><div class="stepper-lbl">مرة</div></div>
+        <div><div class="stepper-val" id="ayahRepeatVal">3</div><div class="stepper-lbl" data-i18n="takrar_times">مرة</div></div>
         <button class="stepper-btn" onclick="adjustAyahRepeat(1)">+</button>
       </div>
     </div>
@@ -565,10 +565,10 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
   <!-- Speed -->
   <div class="card">
-    <label>سرعة التلاوة</label>
+    <label data-i18n="takrar_speed">سرعة التلاوة</label>
     <div class="stepper">
       <button class="stepper-btn" onclick="adjustSpeed(-0.1)">−</button>
-      <div><div class="stepper-val" id="speedVal">1.0x</div><div class="stepper-lbl">سرعة</div></div>
+      <div><div class="stepper-val" id="speedVal">1.0x</div><div class="stepper-lbl" data-i18n="takrar_speed_label">سرعة</div></div>
       <button class="stepper-btn" onclick="adjustSpeed(0.1)">+</button>
     </div>
     <div class="speed-grid" id="speedGrid">
@@ -584,7 +584,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <!-- Status -->
   <div class="status-bar" id="statusBar">
     <span class="status-dot"></span>
-    <span id="statusText">جاهز للتشغيل</span>
+    <span id="statusText" data-i18n="takrar_ready">جاهز للتشغيل</span>
   </div>
 
   <!-- Ayah Text Display -->
@@ -610,7 +610,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
       <span id="repeatText"></span>
     </div>
     <div class="play-controls">
-      <button class="ctrl-btn nav-btn" id="prevBtn" onclick="prevAyah()" title="الآية السابقة">
+      <button class="ctrl-btn nav-btn" id="prevBtn" onclick="prevAyah()" title="الآية السابقة" data-i18n-title="previous">
         <svg viewBox="0 0 24 24"><polyline points="11 18 17 12 11 6"/><line x1="6" y1="6" x2="6" y2="18"/></svg>
       </button>
       <button class="play-pause-btn" id="playBtn" onclick="togglePlay()">
@@ -618,7 +618,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
         <svg id="iconPause" viewBox="0 0 24 24" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
         <span id="iconSpin" class="spinner" style="display:none;"></span>
       </button>
-      <button class="ctrl-btn nav-btn" id="nextBtn" onclick="nextAyah()" title="الآية التالية">
+      <button class="ctrl-btn nav-btn" id="nextBtn" onclick="nextAyah()" title="الآية التالية" data-i18n-title="next">
         <svg viewBox="0 0 24 24"><polyline points="13 18 7 12 13 6"/><line x1="18" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -627,6 +627,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 <audio id="audio" preload="auto"></audio>
 
+<script src="../js/i18n.js"></script>
 <script src="../js/quran-structure.js"></script>
 <script>
 const RECITERS = [
@@ -863,11 +864,11 @@ function updateUnitButton() {
   const span = btn.querySelector('span');
   if (S.rangeType === 'surah') {
     if (S.surah) { btn.classList.add('has-value'); span.textContent = `${S.surah}. ${SURAH_NAMES[S.surah - 1]}`; }
-    else { btn.classList.remove('has-value'); span.textContent = 'اختر السورة...'; }
+    else { btn.classList.remove('has-value'); span.textContent = t('takrar_select_surah'); }
   } else {
     const info = UNIT_INFO[S.rangeType], n = S.unitByType[S.rangeType];
     if (n) { btn.classList.add('has-value'); span.textContent = `${info.name} ${n}`; }
-    else { btn.classList.remove('has-value'); span.textContent = `اختر ${info.name}...`; }
+    else { btn.classList.remove('has-value'); span.textContent = t('takrar_select_unit', {name: info.name}); }
   }
 }
 function openUnitSheet() {
@@ -877,7 +878,7 @@ function openUnitSheet() {
 function renderUnitSheet(filter = '') {
   const type = S.rangeType, info = UNIT_INFO[type];
   if (!info) return;
-  document.getElementById('unitSheetTitle').textContent = `اختر ${info.name}`;
+  document.getElementById('unitSheetTitle').textContent = t('takrar_unit_title', {name: info.name});
   const starts = unitStarts(type);
   let html = '';
   for (let n = 1; n <= info.count; n++) {
@@ -886,10 +887,10 @@ function renderUnitSheet(filter = '') {
     const sel = S.unitByType[type] === n ? 'selected' : '';
     html += `<div class="sheet-item unit-row ${sel}" onclick="pickUnit(${n})">`
       + `<span style="color:var(--accent-main);font-weight:800;">${info.name} ${n}</span>`
-      + `<span class="unit-meta">يبدأ: ${SURAH_NAMES[st[0] - 1]} ${st[1]}</span></div>`;
+      + `<span class="unit-meta">${t('takrar_starts_at', {surah: SURAH_NAMES[st[0] - 1], ayah: st[1]})}</span></div>`;
   }
   document.getElementById('unitList').innerHTML = html
-    || '<div style="text-align:center;color:var(--text-secondary);padding:24px;">لا نتائج</div>';
+    || `<div style="text-align:center;color:var(--text-secondary);padding:24px;">${t('takrar_no_results')}</div>`;
 }
 function filterUnits() { renderUnitSheet(document.getElementById('unitSearch').value.trim()); }
 function pickUnit(n) {
@@ -907,14 +908,14 @@ function renderScopeResolved() {
   if (S.rangeType === 'surah') {
     if (!S.surah) { el.style.display = 'none'; return; }
     el.style.display = 'flex';
-    el.innerHTML = `${_bookmarkSvg}<span>${SURAH_NAMES[S.surah - 1]} · <b>${AYAH_COUNTS[S.surah - 1]}</b> آية</span>`;
+    el.innerHTML = `${_bookmarkSvg}<span>${t('takrar_scope_surah_label', {surah: SURAH_NAMES[S.surah - 1], count: AYAH_COUNTS[S.surah - 1]})}</span>`;
     return;
   }
   const n = S.unitByType[S.rangeType];
   if (!n) { el.style.display = 'none'; return; }
   const info = UNIT_INFO[S.rangeType], r = unitRef(S.rangeType, n);
   el.style.display = 'flex';
-  el.innerHTML = `${_bookmarkSvg}<span>${info.name} ${n} · ${SURAH_NAMES[r.start.surah - 1]} ${r.start.ayah} ← ${SURAH_NAMES[r.end.surah - 1]} ${r.end.ayah} · <b>${r.count}</b> آية</span>`;
+  el.innerHTML = `${_bookmarkSvg}<span>${t('takrar_scope_unit_label', {name: info.name, n: n, start_surah: SURAH_NAMES[r.start.surah - 1], start_ayah: r.start.ayah, end_surah: SURAH_NAMES[r.end.surah - 1], end_ayah: r.end.ayah, count: r.count})}</span>`;
 }
 // Decide which sub-block of the range card to show for the current scope
 function renderRangeCard() {
@@ -930,14 +931,14 @@ function renderRangeCard() {
   const info = UNIT_INFO[S.rangeType], n = S.unitByType[S.rangeType];
   if (!n) {
     empty.style.display = '';
-    empty.innerHTML = `اختر ${info.name} أولاً ↑`;
+    empty.innerHTML = t('takrar_choose_unit_first', {name: info.name});
     unitNote.style.display = 'none';
     return;
   }
   empty.style.display = 'none';
   unitNote.style.display = 'flex';
   const r = unitRef(S.rangeType, n);
-  unitNote.innerHTML = `${_bookmarkSvg}<span>سيُكرَّر <b>${info.name} ${n}</b> كاملاً · ${ayahCountLabel(r.count)}</span>`;
+  unitNote.innerHTML = `${_bookmarkSvg}<span>${t('takrar_will_repeat_unit', {name: info.name, n: n, count: ayahCountLabel(r.count)})}</span>`;
 }
 
 /* ---------- Range Toggle ---------- */
@@ -964,17 +965,17 @@ function toggleAyahRepeat() {
    The active endpoint card + hint always show where the next tap will land.
    Number inputs are an equivalent precise path and a manual edit ends selection. */
 function ayahCountLabel(n) {
-  if (n === 1) return 'آية واحدة';
-  if (n === 2) return 'آيتان';
-  if (n >= 3 && n <= 10) return n + ' آيات';
-  return n + ' آية';
+  if (n === 1) return t('takrar_verse_count_1');
+  if (n === 2) return t('takrar_verse_count_2');
+  if (n >= 3 && n <= 10) return t('takrar_verse_count_3_10', {n});
+  return t('takrar_verse_count_plural', {n});
 }
 function showInlinePicker() {
   const empty = document.getElementById('rangeEmpty');
   const picker = document.getElementById('ayahPickerInline');
   if (!S.surah) {                       // no surah yet → guide the user
     empty.style.display = '';
-    empty.innerHTML = 'اختر سورة أولاً ↑<br>ثم حدّد آيات البداية والنهاية';
+    empty.innerHTML = t('takrar_pick_surah_guide');
     picker.classList.remove('visible');
     return;
   }
@@ -1045,7 +1046,7 @@ function selectWholeSurah() {
   syncRangeInputs();
   renderUnifiedGrid();
   updateRangeUI();
-  showToast(`السورة كاملة · ${ayahCountLabel(cnt)}`);
+  showToast(t('takrar_full_surah_toast', {count: ayahCountLabel(cnt)}));
 }
 function updateRangeUI() {
   const count = S.ayahTo - S.ayahFrom + 1;
@@ -1053,11 +1054,11 @@ function updateRangeUI() {
   if (summary) {
     summary.innerHTML =
       `<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`
-      + `النطاق: من <b>${S.ayahFrom}</b> إلى <b>${S.ayahTo}</b> · ${ayahCountLabel(count)}`;
+      + t('takrar_range_label', {from: S.ayahFrom, to: S.ayahTo, count: ayahCountLabel(count)});
   }
   const hint = document.getElementById('rangeHint');
   if (hint) {
-    hint.textContent = S._pickingEnd ? '↳ الآن اختر آية النهاية' : 'اختر آية البداية لبدء نطاق جديد';
+    hint.textContent = S._pickingEnd ? t('takrar_pick_end_verse') : t('takrar_pick_start_verse');
     hint.classList.toggle('picking', !!S._pickingEnd);
   }
   document.getElementById('endpointFrom').classList.toggle('active', !S._pickingEnd);
@@ -1103,12 +1104,12 @@ async function showAyahText(surah, ayah) {
   const txt = document.getElementById('ayahText');
   const ref = document.getElementById('ayahRef');
   disp.classList.add('visible');
-  txt.innerHTML = '<div class="ayah-loading">جاري تحميل الآية...</div>';
-  ref.textContent = `${SURAH_NAMES[surah - 1]} - آية ${ayah}`;
+  txt.innerHTML = `<div class="ayah-loading">${t('takrar_loading_ayah')}</div>`;
+  ref.textContent = t('takrar_ayah_ref', {surah: SURAH_NAMES[surah - 1], ayah});
   const myToken = ++showAyahText._t;
   const text = await fetchAyahText(surah, ayah);
   if (myToken !== showAyahText._t) return;
-  txt.textContent = text || '(تعذّر تحميل نص الآية)';
+  txt.textContent = text || t('takrar_ayah_load_error');
 }
 showAyahText._t = 0;
 
@@ -1138,20 +1139,20 @@ function buildQueue() {
 function togglePlay() {
   if (S.state === 'playing') {
     audio.pause(); setState('paused');
-    setStatus('متوقف مؤقتًا'); return;
+    setStatus(t('takrar_paused')); return;
   }
   if (S.state === 'paused') {
-    audio.play().then(() => setState('playing')).catch(() => showToast('اضغط مرة أخرى للتشغيل'));
+    audio.play().then(() => setState('playing')).catch(() => showToast(t('takrar_tap_to_play_again')));
     return;
   }
   // idle -> start
-  if (!S.reciter) { showToast('اختر القارئ أولاً'); return; }
+  if (!S.reciter) { showToast(t('takrar_choose_reciter_first')); return; }
   if (!hasScopeSelection()) {
     const lbl = S.rangeType === 'surah' ? 'السورة' : UNIT_INFO[S.rangeType].name;
-    showToast(`اختر ${lbl} أولاً`); return;
+    showToast(t('takrar_choose_first', {label: lbl})); return;
   }
   errCount = 0; queue = buildQueue(); qIdx = 0;
-  if (queue.length === 0) { showToast('لا توجد آيات في النطاق المحدد'); return; }
+  if (queue.length === 0) { showToast(t('takrar_no_ayahs_in_range')); return; }
   document.getElementById('progressWrap').classList.add('visible');
   document.getElementById('repeatCounter').classList.add('visible');
   document.getElementById('prevBtn').classList.add('visible');
@@ -1171,30 +1172,30 @@ function stopPlay() {
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('curTime').textContent = '0:00';
   document.getElementById('durTime').textContent = '0:00';
-  setStatus('جاهز للتشغيل');
+  setStatus(t('takrar_ready'));
 }
 
 function updateRepeatDisplay(item) {
   let parts = [];
-  if (item.round)     parts.push(`<span class="repeat-badge">النطاق: ${item.round}/${S.rangeRepeat}</span>`);
-  if (item.ayahRound) parts.push(`<span class="repeat-badge">الآية: ${item.ayahRound}/${S.ayahRepeat}</span>`);
+  if (item.round)     parts.push(`<span class="repeat-badge">${t('takrar_range_repeat_badge', {current: item.round, total: S.rangeRepeat})}</span>`);
+  if (item.ayahRound) parts.push(`<span class="repeat-badge">${t('takrar_ayah_repeat_badge', {current: item.ayahRound, total: S.ayahRepeat})}</span>`);
   if (parts.length === 0) parts.push(`<span>${qIdx + 1} / ${queue.length}</span>`);
   document.getElementById('repeatText').innerHTML = parts.join('');
 }
 
 function playItem() {
   if (qIdx >= queue.length) {
-    stopPlay(); showToast('انتهت التلاوة 🤲'); return;
+    stopPlay(); showToast(t('takrar_recitation_ended')); return;
   }
   const item = queue[qIdx];
   updateRepeatDisplay(item);
   setState('loading');
-  setStatus(`${SURAH_NAMES[item.surah - 1]} • آية ${item.ayah}`);
+  setStatus(t('takrar_surah_ayah', {surah: SURAH_NAMES[item.surah - 1], ayah: item.ayah}));
   audio.src = `https://everyayah.com/data/${S.reciter.folder}/${pad(item.surah)}${pad(item.ayah)}.mp3`;
   audio.playbackRate = S.speed;
   audio.play().catch(() => {
     setState('paused');
-    setStatus('اضغط للتشغيل');
+    setStatus(t('takrar_press_to_play'));
   });
   showAyahText(item.surah, item.ayah);
   updateMediaSession(item);
@@ -1203,16 +1204,16 @@ function playItem() {
 function prevAyah() {
   if (S.state === 'idle' || queue.length === 0) return;
   if (qIdx > 0) { qIdx--; playItem(); }
-  else showToast('أنت في أول الآيات');
+  else showToast(t('takrar_first_ayah'));
 }
 function nextAyah() {
   if (S.state === 'idle' || queue.length === 0) return;
   if (qIdx < queue.length - 1) { qIdx++; playItem(); }
-  else showToast('أنت في آخر الآيات');
+  else showToast(t('takrar_last_ayah'));
 }
 
 /* ---------- Audio events ---------- */
-audio.addEventListener('playing', () => { if (S.state !== 'idle') { setState('playing'); const it = queue[qIdx]; if (it) setStatus(`${SURAH_NAMES[it.surah - 1]} • آية ${it.ayah}`); } });
+audio.addEventListener('playing', () => { if (S.state !== 'idle') { setState('playing'); const it = queue[qIdx]; if (it) setStatus(t('takrar_surah_ayah', {surah: SURAH_NAMES[it.surah - 1], ayah: it.ayah})); } });
 audio.addEventListener('waiting', () => { if (S.state === 'playing') setState('loading'); });
 audio.addEventListener('ended', () => { if (S.state === 'idle') return; errCount = 0; qIdx++; playItem(); });
 audio.addEventListener('error', () => {
@@ -1220,8 +1221,8 @@ audio.addEventListener('error', () => {
   errCount++;
   if (errCount >= 3) {
     stopPlay();
-    setStatus('تعذّر تحميل التلاوة', true);
-    showToast('تعذّر تحميل ملفات هذا القارئ، جرّب قارئًا آخر', true);
+    setStatus(t('takrar_error_load_audio'), true);
+    showToast(t('takrar_error_load_reciter'), true);
     return;
   }
   qIdx++; playItem();
@@ -1264,7 +1265,7 @@ function updateMediaSession(item) {
   if (!('mediaSession' in navigator)) return;
   try {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: `${SURAH_NAMES[item.surah - 1]} • آية ${item.ayah}`,
+      title: t('takrar_surah_ayah', {surah: SURAH_NAMES[item.surah - 1], ayah: item.ayah}),
       artist: S.reciter ? S.reciter.name : '',
       album: 'التكرار — زاد المسلم'
     });
@@ -1278,6 +1279,7 @@ function updateMediaSession(item) {
 
 /* ---------- Init ---------- */
 loadPrefs();
+if (window.I18n) I18n.init();
 updateSpeedUI();
 
 // Restore reciter

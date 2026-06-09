@@ -300,28 +300,34 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <body>
 
 <div class="toast" id="toast">
-    <span id="toastText">تم الإجراء بنجاح</span>
+    <span id="toastText"></span>
     <div class="download-progress-bar" id="downloadProgressBar"><div class="download-progress-fill" id="downloadProgressFill"></div></div>
 </div>
 
 <div class="custom-alert-overlay" id="clearCacheModal">
     <div class="custom-alert-box">
-        <div class="custom-alert-title">تحذير! ⚠️</div>
-        <div class="custom-alert-msg">هل أنت متأكد من مسح الذاكرة المؤقتة للتطبيق؟ سيتم فقدان التفضيلات وآخر مقطع تم تشغيله.</div>
+        <div class="custom-alert-title" data-i18n="audio_clear_cache_title">تحذير! ⚠️</div>
+        <div class="custom-alert-msg" data-i18n="audio_clear_cache_msg">هل أنت متأكد من مسح الذاكرة المؤقتة للتطبيق؟ سيتم فقدان التفضيلات وآخر مقطع تم تشغيله.</div>
         <div class="custom-alert-actions">
-            <button class="custom-alert-btn cancel" onclick="closeClearCacheModal()">إلغاء</button>
-            <button class="custom-alert-btn confirm" onclick="executeClearCache()">مسح</button>
+            <button class="custom-alert-btn cancel" onclick="closeClearCacheModal()" data-i18n="cancel">إلغاء</button>
+            <button class="custom-alert-btn confirm" onclick="executeClearCache()" data-i18n="audio_execute_clear">مسح</button>
         </div>
     </div>
 </div>
 
 <div class="app">
   <div class="header">
-    <button class="icon-btn" onclick="haptic(); window.location.href='/Tasbee7/index.html'" title="الرئيسية">
+    <button class="icon-btn" onclick="haptic(); window.location.href='/Tasbee7/index.html'" title="الرئيسية" data-i18n-title="home">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
     </button>
-    <div class="header-title">الاستماع للقرآن</div>
-    <button class="icon-btn" onclick="haptic(); openSheet('settingsSheet', true)" title="الإعدادات">
+    <div class="header-title" data-i18n="audio_header">الاستماع للقرآن</div>
+    <button class="icon-btn" onclick="haptic(); I18n.openLangSheet()" title="اللغة / Language" aria-label="Language">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path>
+        <path d="M12 3c2.5 2.7 3.9 5.7 3.9 9s-1.4 6.3-3.9 9c-2.5-2.7-3.9-5.7-3.9-9S9.5 5.7 12 3z"></path>
+      </svg>
+    </button>
+    <button class="icon-btn" onclick="haptic(); openSheet('settingsSheet', true)" title="الإعدادات" data-i18n-title="settings">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
          <circle cx="12" cy="12" r="3"></circle>
@@ -330,17 +336,17 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   </div>
 
   <div class="card">
-    <label>اختر القارئ</label>
-    <div class="custom-select-btn" id="reciterSelectBtn" onclick="haptic(); openReciterSheet()">جاري التحميل...</div>
+    <label data-i18n="audio_choose_reciter">اختر القارئ</label>
+    <div class="custom-select-btn" id="reciterSelectBtn" onclick="haptic(); openReciterSheet()" data-i18n="loading">جاري التحميل...</div>
   </div>
 
   <div class="card">
-    <label>اختر السورة / الجزء</label>
-    <div class="custom-select-btn" id="juzSelectBtn" onclick="haptic(); openJuzSheet()">جاري التحميل...</div>
+    <label data-i18n="audio_choose_surah">اختر السورة / الجزء</label>
+    <div class="custom-select-btn" id="juzSelectBtn" onclick="haptic(); openJuzSheet()" data-i18n="loading">جاري التحميل...</div>
   </div>
 
   <div class="card now">
-    <div class="nowSurah" id="nowSurah">اختر تلاوة للبدء</div>
+    <div class="nowSurah" id="nowSurah" data-i18n="audio_default">اختر تلاوة للبدء</div>
     <div class="nowReciter" id="nowReciter">—</div>
     
     <div class="progress-container">
@@ -350,32 +356,32 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     </div>
 
     <div class="controls-main">
-      <button class="skip-btn" onclick="haptic(); playPrevTrack()" title="السابق">
+      <button class="skip-btn" onclick="haptic(); playPrevTrack()" title="السابق" data-i18n-title="previous">
          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
       <button class="play-pause-btn" id="mainPlayBtn" onclick="haptic(); togglePlay()">
         <svg id="playIcon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         <svg id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
       </button>
-      <button class="skip-btn" onclick="haptic(); playNextTrack(true)" title="التالي">
+      <button class="skip-btn" onclick="haptic(); playNextTrack(true)" title="التالي" data-i18n-title="next">
          <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
       </button>
     </div>
 
     <div class="controls-secondary">
-      <button class="action-btn" id="repeatBtn" onclick="haptic(); toggleRepeat()" title="تكرار">
+      <button class="action-btn" id="repeatBtn" onclick="haptic(); toggleRepeat()" title="تكرار" data-i18n-title="audio_repeat">
         <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
       </button>
-      <button class="action-btn" id="downloadBtn" onclick="haptic(); downloadTrack()" title="تحميل">
+      <button class="action-btn" id="downloadBtn" onclick="haptic(); downloadTrack()" title="تحميل" data-i18n-title="audio_download">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       </button>
       <button class="action-btn fill-icon" id="favBtn" onclick="haptic(); toggleFavorite()" title="إضافة للمفضلة">
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
       </button>
-      <button class="action-btn" id="shuffleBtn" onclick="haptic(); toggleShuffle()" title="تشغيل عشوائي">
+      <button class="action-btn" id="shuffleBtn" onclick="haptic(); toggleShuffle()" title="تشغيل عشوائي" data-i18n-title="audio_shuffle">
         <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
       </button>
-      <button class="action-btn" id="speedBtn" onclick="haptic(); toggleSpeed()" title="سرعة التشغيل">1x</button>
+      <button class="action-btn" id="speedBtn" onclick="haptic(); toggleSpeed()" title="سرعة التشغيل" data-i18n-title="audio_speed">1x</button>
     </div>
   </div>
 
@@ -391,7 +397,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   </div>
   <div class="sheet-content">
     <div id="searchContainer" class="search-container" style="display: none;">
-      <input type="text" id="reciterSearchInput" class="search-input" placeholder="ابحث..." autocomplete="off">
+      <input type="text" id="reciterSearchInput" class="search-input" placeholder="ابحث..." autocomplete="off" data-i18n-placeholder="audio_search_placeholder">
     </div>
     <div class="selection-list" id="selectionList"></div>
   </div>
@@ -400,34 +406,34 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div id="settingsSheet" class="bottom-sheet">
   <div class="drag-handle"></div>
   <div class="sheet-header">
-    <h2>الإعدادات</h2>
+    <h2 data-i18n="settings">الإعدادات</h2>
     <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px;">✕</button>
   </div>
   <div class="sheet-content">
     <div class="setting-row" onclick="haptic(); toggleThemeUI()">
-        <span>الوضع الليلي</span>
+        <span data-i18n="audio_dark_mode">الوضع الليلي</span>
         <svg id="sunIcon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
         <svg id="moonIcon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
     </div>
     <div class="setting-row" onclick="haptic(); toggleAutoPlayUI()">
-        <span>التشغيل التلقائي للتالي</span>
+        <span data-i18n="audio_autoplay">التشغيل التلقائي للتالي</span>
         <div class="toggle-switch active" id="autoplayToggle"></div>
     </div>
     <div class="setting-row" onclick="haptic(); openSheet('timerSheet', false)">
-        <span>مؤقت النوم 😴</span>
+        <span data-i18n="audio_sleep_timer">مؤقت النوم 😴</span>
         <span style="color:var(--text-muted); font-size: 0.9rem;" id="timerStatusText">إيقاف ›</span>
     </div>
     <div class="setting-row" onclick="haptic(); openFavSheet()">
-        <span>المقاطع المفضلة ❤️</span>
+        <span data-i18n="audio_favorites">المقاطع المفضلة ❤️</span>
         <span style="color:var(--text-muted);">›</span>
     </div>
     <div class="setting-row" onclick="haptic(); window.location.href='about.html'">
-        <span>عن التطبيق ℹ️</span>
+        <span data-i18n="audio_about">عن التطبيق ℹ️</span>
         <span style="color:var(--text-muted);">›</span>
     </div>
     
     <div class="setting-row" onclick="haptic(); openClearCacheModal()" style="color: #ef4444;">
-        <span style="display:flex; align-items:center; gap:8px;">مسح الذاكرة المؤقتة <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+        <span style="display:flex; align-items:center; gap:8px;"><span data-i18n="audio_clear_cache">مسح الذاكرة المؤقتة</span> <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
         <span style="color:var(--text-muted);">›</span>
     </div>
   </div>
@@ -435,7 +441,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 
 <div id="timerSheet" class="bottom-sheet">
   <div class="sheet-header">
-    <h2>مؤقت النوم</h2>
+    <h2 data-i18n="audio_sleep_title">مؤقت النوم</h2>
     <button class="icon-btn" onclick="openSheet('settingsSheet', true)" style="width:36px;height:36px;">✕</button>
   </div>
   <div class="sheet-content" style="align-items: center; justify-content: center;">
@@ -521,7 +527,7 @@ function executeClearCache() {
     localStorage.removeItem('lastSurah');
     localStorage.removeItem('lastReciter');
     localStorage.removeItem('favorites');
-    showToast("تم مسح الذاكرة بنجاح 🧹");
+    showToast(t('audio_clear_cache_success'));
     setTimeout(() => location.reload(), 1500);
 }
 
@@ -610,7 +616,7 @@ function toggleAutoPlayUI() {
     isAutoPlay = !isAutoPlay;
     localStorage.setItem('audioAutoPlay', isAutoPlay);
     document.getElementById('autoplayToggle').classList.toggle('active', isAutoPlay);
-    showToast(isAutoPlay ? "تم تفعيل التشغيل التلقائي" : "تم إيقاف التشغيل التلقائي");
+    showToast(isAutoPlay ? t('audio_autoplay_enabled') : t('audio_autoplay_disabled'));
 }
 
 // ================= SLEEP TIMER ROLLER LOGIC =================
@@ -649,7 +655,7 @@ function startCustomTimer() {
     const s = Math.round(document.getElementById('s-picker').scrollTop / 60);
     
     const ms = ((h * 3600) + (m * 60) + s) * 1000;
-    if(ms <= 0) return showToast("الرجاء اختيار وقت أولاً");
+    if(ms <= 0) return showToast(t('audio_timer_pick_time'));
 
     cancelSleepTimer(false); 
     
@@ -660,12 +666,12 @@ function startCustomTimer() {
     sleepTimerId = setTimeout(() => {
         audio.pause();
         cancelSleepTimer(false);
-        showToast("تم إيقاف التشغيل (مؤقت النوم) 😴");
+        showToast(t('audio_timer_stopped'));
     }, ms);
     
     let totalMinsForStatus = Math.round(ms / 60000);
-    document.getElementById('timerStatusText').innerText = `مفعل (${totalMinsForStatus} د) ›`;
-    showToast(`سيتم إيقاف التشغيل بعد ${totalMinsForStatus} دقيقة 😴`);
+    document.getElementById('timerStatusText').innerText = t('audio_timer_active', { n: totalMinsForStatus });
+    showToast(t('audio_timer_started', { n: totalMinsForStatus }));
     
     document.getElementById('rollerPicker').style.display = 'none';
     document.getElementById('timerGrid').style.display = 'none';
@@ -680,14 +686,14 @@ function cancelSleepTimer(showMsg = true) {
     sleepCountdownId = null;
     sleepEndTime = 0;
     
-    document.getElementById('timerStatusText').innerText = "إيقاف ›";
+    document.getElementById('timerStatusText').innerText = t('audio_timer_off');
     
     document.getElementById('rollerPicker').style.display = 'flex';
     document.getElementById('timerGrid').style.display = 'grid';
     document.getElementById('activeTimerDisplay').style.display = 'none';
     document.getElementById('timerPlayIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>'; 
     
-    if(showMsg) showToast("تم إلغاء المؤقت");
+    if(showMsg) showToast(t('audio_timer_cancelled'));
 }
 
 function updateTimerDisplay() {
@@ -711,25 +717,35 @@ const audio = document.getElementById("audio"), reciterSelectBtn = document.getE
 
 const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
+// Display helpers: localize the visible name; all matching/storage stays Arabic.
+function reciterDisplay(r) {
+  return r ? (window.I18n ? I18n.name('reciters', r.id, r.name) : r.name) : '';
+}
+function juzDisplay(j) {
+  if (!j) return '';
+  if (j.number && window.I18n) return j.number + ' - ' + I18n.name('surahs', j.number, j.originalName || j.name);
+  return j.name;
+}
+
 async function loadMultipleJSONs() {
   try {
-    const fetchPromises = [];
+    // Files are numbered contiguously (audio-01, audio-02, ...). Fetch
+    // sequentially and stop at the first missing one — avoids spamming
+    // 404s for the full 1..20 range when only a few files exist.
     for (let i = 1; i <= 20; i++) {
       let fileNum = i < 10 ? '0' + i : i;
-      let filePath = `../json/audio-${fileNum}.json?v=${new Date().getTime()}`;
-      fetchPromises.push(fetch(filePath));
-    }
-    const responses = await Promise.allSettled(fetchPromises);
-    for (let result of responses) {
-      if (result.status === "fulfilled" && result.value.ok) {
-        let data = await result.value.json();
-        if (data && data.reciters) appData.reciters.push(...data.reciters);
-      }
+      let res;
+      try {
+        res = await fetch(`../json/audio-${fileNum}.json?v=${new Date().getTime()}`);
+      } catch (_) { break; }
+      if (!res.ok) break;
+      let data = await res.json();
+      if (data && data.reciters) appData.reciters.push(...data.reciters);
     }
     if (appData.reciters.length > 0) initData();
     else throw new Error("No data found");
   } catch (error) {
-    reciterSelectBtn.innerText = "تعذر تحميل البيانات";
+    reciterSelectBtn.innerText = t('audio_load_error');
   }
 }
 
@@ -746,22 +762,24 @@ function initData() {
       if (foundReciterIndex !== -1) selectedReciterIndex = foundReciterIndex;
   }
   
-  reciterSelectBtn.innerText = appData.reciters[selectedReciterIndex].name;
+  reciterSelectBtn.innerText = reciterDisplay(appData.reciters[selectedReciterIndex]);
   buildJuzData();
 
   if (lastTrack && lastTrack.startsWith("http")) {
       let foundJuzIndex = currentJuzData.findIndex(j => j.url === lastTrack);
       if (foundJuzIndex !== -1) {
           selectedJuzIndex = foundJuzIndex;
-          juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+          juzSelectBtn.innerText = juzDisplay(currentJuzData[selectedJuzIndex]);
       }
-      
-      currentTrackUrl = lastTrack; 
+
+      currentTrackUrl = lastTrack;
       audio.src = lastTrack;
-      document.getElementById("nowSurah").innerText = localStorage.getItem("lastSurah") || "";
-      document.getElementById("nowReciter").innerText = localStorage.getItem("lastReciter") || "";
-      document.getElementById("miniSurah").innerText = localStorage.getItem("lastSurah") || "";
-      document.getElementById("miniReciter").innerText = localStorage.getItem("lastReciter") || "";
+      const reciterDisp = reciterDisplay(appData.reciters[selectedReciterIndex]);
+      const surahDisp = foundJuzIndex !== -1 ? juzDisplay(currentJuzData[selectedJuzIndex]) : (localStorage.getItem("lastSurah") || "");
+      document.getElementById("nowSurah").innerText = surahDisp;
+      document.getElementById("nowReciter").innerText = reciterDisp;
+      document.getElementById("miniSurah").innerText = surahDisp;
+      document.getElementById("miniReciter").innerText = reciterDisp;
       checkFavStatus();
   } else { 
       prepareTrack(false); 
@@ -786,27 +804,29 @@ function buildJuzData() {
 function renderReciterList(filterText = '') {
   const list = document.getElementById('selectionList');
   list.innerHTML = '';
-  const filtered = appData.reciters.filter(r => r.name.toLowerCase().includes(filterText.toLowerCase()));
-  if (filtered.length === 0) { list.innerHTML = '<div class="selection-item" style="text-align:center;">لا توجد نتائج</div>'; return; }
+  const ft = filterText.toLowerCase();
+  const filtered = appData.reciters.filter(r =>
+    r.name.toLowerCase().includes(ft) || reciterDisplay(r).toLowerCase().includes(ft));
+  if (filtered.length === 0) { list.innerHTML = `<div class="selection-item" style="text-align:center;">${t('audio_no_results')}</div>`; return; }
   filtered.forEach((r, i) => {
     const originalIndex = appData.reciters.findIndex(orig => orig.name === r.name);
     let div = document.createElement('div');
     div.className = 'selection-item' + (originalIndex === selectedReciterIndex ? ' active' : '');
-    div.innerText = r.name;
-    div.onclick = () => { 
+    div.innerText = reciterDisplay(r);
+    div.onclick = () => {
         haptic();
-        selectedReciterIndex = originalIndex; 
-        reciterSelectBtn.innerText = r.name; 
+        selectedReciterIndex = originalIndex;
+        reciterSelectBtn.innerText = reciterDisplay(r);
         errorRetryCount = 0;
         let previousJuzName = currentJuzData[selectedJuzIndex]?.name;
         buildJuzData(); 
         
         let newIndex = currentJuzData.findIndex(j => j.name === previousJuzName);
-        selectedJuzIndex = newIndex !== -1 ? newIndex : 0; 
-        
-        juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+        selectedJuzIndex = newIndex !== -1 ? newIndex : 0;
+
+        juzSelectBtn.innerText = juzDisplay(currentJuzData[selectedJuzIndex]);
         closeAllSheets();
-        prepareTrack(true); 
+        prepareTrack(true);
     };
     list.appendChild(div);
   });
@@ -814,7 +834,7 @@ function renderReciterList(filterText = '') {
 
 function openReciterSheet() {
   if (appData.reciters.length === 0) return;
-  document.getElementById('selectionSheetTitle').innerText = "اختر القارئ";
+  document.getElementById('selectionSheetTitle').innerText = t('audio_choose_reciter_sheet');
   document.getElementById('searchContainer').style.display = 'block';
   const searchInput = document.getElementById('reciterSearchInput');
   searchInput.value = '';
@@ -834,18 +854,20 @@ function openReciterSheet() {
 function renderJuzList(filterText = '') {
   const list = document.getElementById('selectionList');
   list.innerHTML = '';
-  const filtered = currentJuzData.filter(j => j.name.toLowerCase().includes(filterText.toLowerCase()));
-  if (filtered.length === 0) { list.innerHTML = '<div class="selection-item" style="text-align:center;">لا توجد نتائج</div>'; return; }
-  
+  const ft = filterText.toLowerCase();
+  const filtered = currentJuzData.filter(j =>
+    j.name.toLowerCase().includes(ft) || juzDisplay(j).toLowerCase().includes(ft));
+  if (filtered.length === 0) { list.innerHTML = `<div class="selection-item" style="text-align:center;">${t('audio_no_results')}</div>`; return; }
+
   filtered.forEach((j) => {
     const originalIndex = currentJuzData.findIndex(orig => orig.name === j.name);
     let div = document.createElement('div');
     div.className = 'selection-item' + (originalIndex === selectedJuzIndex ? ' active' : '');
-    div.innerText = j.name;
-    div.onclick = () => { 
+    div.innerText = juzDisplay(j);
+    div.onclick = () => {
         haptic();
-        selectedJuzIndex = originalIndex; 
-        juzSelectBtn.innerText = j.name; 
+        selectedJuzIndex = originalIndex;
+        juzSelectBtn.innerText = juzDisplay(j);
         errorRetryCount = 0;
         closeAllSheets(); 
         prepareTrack(true); 
@@ -856,7 +878,7 @@ function renderJuzList(filterText = '') {
 
 function openJuzSheet() {
   if (currentJuzData.length === 0) return;
-  document.getElementById('selectionSheetTitle').innerText = "اختر السورة / الجزء";
+  document.getElementById('selectionSheetTitle').innerText = t('audio_choose_surah_sheet');
   document.getElementById('searchContainer').style.display = 'block';
   const searchInput = document.getElementById('reciterSearchInput');
   searchInput.value = '';
@@ -878,22 +900,27 @@ function prepareTrack(userInitiated = false) {
   let url = currentJuzData[selectedJuzIndex].url;
   let reciterName = appData.reciters[selectedReciterIndex].name;
   let juzName = currentJuzData[selectedJuzIndex].name;
+  let reciterDisp = reciterDisplay(appData.reciters[selectedReciterIndex]);
+  let juzDisp = juzDisplay(currentJuzData[selectedJuzIndex]);
 
   if(currentTrackUrl !== url) {
     audio.src = url; currentTrackUrl = url;
-    document.getElementById("nowSurah").innerText = juzName; 
-    document.getElementById("nowReciter").innerText = reciterName;
-    document.getElementById("miniSurah").innerText = juzName; 
-    document.getElementById("miniReciter").innerText = reciterName;
-    document.getElementById("progress").value = 0; 
+    reciterSelectBtn.innerText = reciterDisp;
+    juzSelectBtn.innerText = juzDisp;
+    document.getElementById("nowSurah").innerText = juzDisp;
+    document.getElementById("nowReciter").innerText = reciterDisp;
+    document.getElementById("miniSurah").innerText = juzDisp;
+    document.getElementById("miniReciter").innerText = reciterDisp;
+    document.getElementById("progress").value = 0;
     document.getElementById("progress").style.background = 'transparent';
     checkFavStatus();
-    
-    localStorage.setItem("lastTrack", url); 
-    localStorage.setItem("lastSurah", juzName); 
+
+    // Storage keeps the Arabic canonical names (used for matching/restore).
+    localStorage.setItem("lastTrack", url);
+    localStorage.setItem("lastSurah", juzName);
     localStorage.setItem("lastReciter", reciterName);
-    
-    updateMediaSession(juzName, reciterName);
+
+    updateMediaSession(juzDisp, reciterDisp);
   }
 
   if (userInitiated || isAutoPlay) {
@@ -912,28 +939,28 @@ function toggleSpeed() {
     audio.playbackRate = newSpeed;
     document.getElementById("speedBtn").innerText = newSpeed + "x";
     document.getElementById("speedBtn").classList.toggle('active', newSpeed !== 1);
-    showToast(`سرعة التشغيل: ${newSpeed}x`);
+    showToast(t('audio_speed_toast', { speed: newSpeed }));
 }
 
 function toggleShuffle() { 
     isShuffle = !isShuffle; 
     document.getElementById("shuffleBtn").classList.toggle("active", isShuffle); 
-    showToast(isShuffle ? "تم تفعيل العشوائي" : "تم إيقاف العشوائي"); 
+    showToast(isShuffle ? t('audio_shuffle_on') : t('audio_shuffle_off')); 
 }
 
 function toggleRepeat() { 
     isRepeat = !isRepeat; 
     document.getElementById("repeatBtn").classList.toggle("active", isRepeat); 
-    showToast(isRepeat ? "تكرار مفعل" : "تكرار معطل"); 
+    showToast(isRepeat ? t('audio_repeat_on') : t('audio_repeat_off')); 
 }
 
 // ================= MEDIA SESSION (FIXED) =================
 function updateMediaSession(title, artist) {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: title || "الاستماع للقرآن",
-      artist: artist || "زاد المسلم",
-      album: "زاد المسلم Pro",
+      title: title || t('audio_media_title'),
+      artist: artist || t('audio_media_artist'),
+      album: t('audio_media_album'),
       artwork: [{ src: "../icons/icon_512.png", sizes: "512x512", type: "image/png" }]
     });
     navigator.mediaSession.setActionHandler("play", () => togglePlay());
@@ -947,7 +974,7 @@ function updateMediaSession(title, artist) {
 function togglePlay() {
   if(!currentTrackUrl) return;
   errorRetryCount = 0;
-  if (audio.paused) audio.play().catch(e => showToast("تعذر التشغيل، يرجى فحص الاتصال"));
+  if (audio.paused) audio.play().catch(e => showToast(t('audio_play_error')));
   else audio.pause();
 }
 
@@ -958,7 +985,7 @@ function playNextTrack(userInitiated = false) {
   else if (nextIndex >= currentJuzData.length) nextIndex = 0; 
   
   selectedJuzIndex = nextIndex;
-  juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+  juzSelectBtn.innerText = juzDisplay(currentJuzData[selectedJuzIndex]);
   prepareTrack(userInitiated || isAutoPlay); 
 }
 
@@ -968,7 +995,7 @@ function playPrevTrack() {
   if (prevIndex < 0) prevIndex = currentJuzData.length - 1;
   
   selectedJuzIndex = prevIndex;
-  juzSelectBtn.innerText = currentJuzData[selectedJuzIndex].name;
+  juzSelectBtn.innerText = juzDisplay(currentJuzData[selectedJuzIndex]);
   prepareTrack(true); 
 }
 
@@ -981,11 +1008,11 @@ audio.addEventListener('error', () => {
   if(currentTrackUrl) {
     updatePlayPauseUI(false);
     if (errorRetryCount < 3) {
-      showToast("خطأ في المقطع، جاري التخطي...");
+      showToast(t('audio_track_error'));
       errorRetryCount++;
       setTimeout(() => playNextTrack(true), 1500); 
     } else {
-      showToast("تعذر التشغيل، السيرفر متوقف");
+      showToast(t('audio_server_down'));
     }
   }
 });
@@ -1044,7 +1071,7 @@ async function downloadTrack() {
   const btn = document.getElementById("downloadBtn");
   if(btn.disabled) return; 
   btn.disabled = true;
-  showToast("جاري التحميل... 0%", 0, true); 
+  showToast(t('audio_downloading', { percent: 0 }), 0, true);
   
   try {
     const response = await fetch(currentTrackUrl);
@@ -1065,7 +1092,7 @@ async function downloadTrack() {
         chunks.push(value);
         loaded += value.length;
         let percent = Math.round((loaded / total) * 100);
-        document.getElementById("toastText").innerText = `جاري التحميل... ${percent}%`;
+        document.getElementById("toastText").innerText = t('audio_downloading', { percent });
         fillBar.style.width = percent + "%";
     }
 
@@ -1082,11 +1109,11 @@ async function downloadTrack() {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
     
-    showToast("تم التحميل بنجاح ✅", 3000, false);
+    showToast(t('audio_download_success'), 3000, false);
   } catch (error) {
     console.error("Download fallback:", error);
     let a = document.createElement("a"); a.href = currentTrackUrl; a.download = "quran.mp3"; a.target = "_blank"; a.click();
-    showToast("جاري فتح الرابط للتحميل...", 3000, false);
+    showToast(t('audio_download_opening'), 3000, false);
   } finally {
     btn.disabled = false;
   }
@@ -1094,15 +1121,22 @@ async function downloadTrack() {
 
 // ================= FAVORITES =================
 function openFavSheet() {
-  document.getElementById('selectionSheetTitle').innerText = "مقاطع المفضلة";
+  document.getElementById('selectionSheetTitle').innerText = t('audio_fav_sheet_title');
   document.getElementById('searchContainer').style.display = 'none';
   const list = document.getElementById('selectionList');
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
-  list.innerHTML = favs.length === 0 ? '<div style="text-align:center; padding:30px; opacity:0.5;">لا توجد مفضلات</div>' : '';
+  list.innerHTML = favs.length === 0 ? `<div style="text-align:center; padding:30px; opacity:0.5;">${t('audio_no_favorites')}</div>` : '';
   favs.forEach((fav, index) => {
     let div = document.createElement('div'); div.className = 'selection-item';
     div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center'; div.style.padding = '12px 15px';
-    div.innerHTML = `<div style="cursor:pointer; width:80%; text-align:right;" onclick="haptic(); playFromFav('${fav.url}', '${fav.surah}', '${fav.reciter}')"><div style="font-weight:bold; color:var(--text-primary);">${fav.surah}</div><div style="font-size:13px; color:var(--accent-main);">${fav.reciter}</div></div><button class="danger-btn" style="width:auto; padding:8px 12px; margin:0;" onclick="haptic(); removeFav(${index}, event)">✕</button>`;
+    // Localize the displayed names; the onclick keeps the stored Arabic values
+    // so playFromFav() can match reciter/track correctly.
+    const rObj = appData.reciters.find(r => r.name === fav.reciter);
+    const rDisp = rObj ? reciterDisplay(rObj) : fav.reciter;
+    let sDisp = fav.surah;
+    const mnum = /^(\d+)/.exec(fav.surah || '');
+    if (mnum && window.I18n) sDisp = mnum[1] + ' - ' + I18n.name('surahs', +mnum[1], (fav.surah || '').replace(/^\d+\s*-\s*/, ''));
+    div.innerHTML = `<div style="cursor:pointer; width:80%; text-align:right;" onclick="haptic(); playFromFav('${fav.url}', '${fav.surah}', '${fav.reciter}')"><div style="font-weight:bold; color:var(--text-primary);">${sDisp}</div><div style="font-size:13px; color:var(--accent-main);">${rDisp}</div></div><button class="danger-btn" style="width:auto; padding:8px 12px; margin:0;" onclick="haptic(); removeFav(${index}, event)">✕</button>`;
     list.appendChild(div);
   });
   openSheet('selectionSheet', false);
@@ -1111,8 +1145,8 @@ function openFavSheet() {
 function toggleFavorite() {
   if(!currentTrackUrl) return;
   let favs = JSON.parse(localStorage.getItem("favorites") || "[]"), exists = favs.findIndex(f => f.url === currentTrackUrl);
-  if(exists === -1) { favs.push({ reciter: document.getElementById("nowReciter").innerText, surah: document.getElementById("nowSurah").innerText, url: currentTrackUrl }); showToast("تمت الإضافة للمفضلة ❤️"); } 
-  else { favs.splice(exists, 1); showToast("تمت الإزالة"); }
+  if(exists === -1) { favs.push({ reciter: appData.reciters[selectedReciterIndex].name, surah: currentJuzData[selectedJuzIndex].name, url: currentTrackUrl }); showToast(t('audio_fav_added')); }
+  else { favs.splice(exists, 1); showToast(t('audio_fav_removed')); }
   localStorage.setItem("favorites", JSON.stringify(favs)); checkFavStatus();
 }
 
@@ -1122,20 +1156,26 @@ function checkFavStatus() {
   document.getElementById("favBtn").classList.toggle("active", favs.some(f => f.url === currentTrackUrl)); 
 }
 
-function playFromFav(url, surah, reciter) { 
-    audio.src = url; currentTrackUrl = url; 
-    document.getElementById("nowSurah").innerText = surah; 
-    document.getElementById("nowReciter").innerText = reciter; 
-    
+function playFromFav(url, surah, reciter) {
+    audio.src = url; currentTrackUrl = url;
+    // surah/reciter arrive as the stored Arabic names; localize for display.
+    const rObj = appData.reciters.find(r => r.name === reciter);
+    let reciterDisp = rObj ? reciterDisplay(rObj) : reciter;
+    let surahDisp = surah;
+
     let foundReciterIndex = appData.reciters.findIndex(r => r.name === reciter);
     if(foundReciterIndex !== -1) {
-        selectedReciterIndex = foundReciterIndex; reciterSelectBtn.innerText = reciter; buildJuzData();
+        selectedReciterIndex = foundReciterIndex; reciterSelectBtn.innerText = reciterDisp; buildJuzData();
         let foundJuzIndex = currentJuzData.findIndex(j => j.url === url);
-        if(foundJuzIndex !== -1) { selectedJuzIndex = foundJuzIndex; juzSelectBtn.innerText = surah; }
+        if(foundJuzIndex !== -1) { selectedJuzIndex = foundJuzIndex; surahDisp = juzDisplay(currentJuzData[foundJuzIndex]); juzSelectBtn.innerText = surahDisp; }
     }
+    document.getElementById("nowSurah").innerText = surahDisp;
+    document.getElementById("nowReciter").innerText = reciterDisp;
+    document.getElementById("miniSurah").innerText = surahDisp;
+    document.getElementById("miniReciter").innerText = reciterDisp;
     errorRetryCount = 0;
-    audio.play().catch(()=>{}); 
-    closeAllSheets(); 
+    audio.play().catch(()=>{});
+    closeAllSheets();
 }
 
 function removeFav(index, e) { e.stopPropagation(); let favs = JSON.parse(localStorage.getItem("favorites") || "[]"); favs.splice(index, 1); localStorage.setItem("favorites", JSON.stringify(favs)); openFavSheet(); checkFavStatus(); }
@@ -1148,6 +1188,25 @@ window.addEventListener("load", () => {
   initPicker('s-picker', 59);
   loadMultipleJSONs();
 });
+  // Re-localize visible reciter/surah names when the UI language changes.
+  window.addEventListener('langchange', () => {
+    if (!appData.reciters.length) return;
+    const r = appData.reciters[selectedReciterIndex];
+    const j = currentJuzData[selectedJuzIndex];
+    if (r) reciterSelectBtn.innerText = reciterDisplay(r);
+    if (j) juzSelectBtn.innerText = juzDisplay(j);
+    if (currentTrackUrl && r && j) {
+      document.getElementById('nowSurah').innerText = juzDisplay(j);
+      document.getElementById('nowReciter').innerText = reciterDisplay(r);
+      document.getElementById('miniSurah').innerText = juzDisplay(j);
+      document.getElementById('miniReciter').innerText = reciterDisplay(r);
+    }
+  });
+</script>
+<script src="../js/i18n/names.js"></script>
+<script src="../js/i18n.js"></script>
+<script>
+  if (window.I18n) I18n.init();
 </script>
 </body>
 </html>

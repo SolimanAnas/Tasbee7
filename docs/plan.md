@@ -275,14 +275,19 @@ The `revisions` store and `getDueRevisions()` already exist. Build:
 
 ---
 
-### 5.3 Multi-Language UI
+### 5.3 Multi-Language UI — 🟡 IN PROGRESS
 
-| Component | Detail |
-|-----------|--------|
-| i18n framework | Use `Intl.MessageFormat` or lightweight i18n library |
-| Translation files | `locales/en.json`, `locales/tr.json`, `locales/ur.json` |
-| RTL/LTR toggle | UI layout direction based on language |
-| Quran translations | Add translation text alongside Uthmanic (separate data files) |
+> UI i18n shipped: `js/i18n.js` engine + `js/i18n/{ar,en,ckb,tr,ur}.js` (582 keys each),
+> RTL auto-switching, and a language switcher. **14/22 pages translated** so far.
+> See [`translation.md`](translation.md) for the live status table. Remaining work below.
+
+| Component | Detail | Status |
+|-----------|--------|--------|
+| i18n framework | Lightweight custom engine (`js/i18n.js`), `data-i18n*` attributes + `t()` | ✅ |
+| Translation files | `js/i18n/{ar,en,ckb,tr,ur}.js` (5 languages, 582 keys) | ✅ |
+| RTL/LTR toggle | Auto via `RTL_LANGS = [ar, ckb, ur]` → `<html dir>` | ✅ |
+| Remaining UI pages | `quran.html`, `quran-text.html`, `tasmee-review.html` (chrome only) | ⏳ |
+| Quran translations | Add translation text alongside Uthmanic (separate data files) | ⏳ |
 
 ---
 
