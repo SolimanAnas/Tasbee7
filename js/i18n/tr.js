@@ -676,4 +676,8 @@ export default {
 
   // Tasmee dashboard
   'tasmee_mastery_average': `Orta`,
+
+  // Sleeping adhkar
+  'azkar_sleeping': `Uyku Zikirleri`,
+  'azkar_open_sleeping': `Uyku Zikirlerini Aç`,
 };

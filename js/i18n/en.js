@@ -705,4 +705,8 @@ export default {
 
   // Tasmee dashboard
   'tasmee_mastery_average': `Average`,
+
+  // Sleeping adhkar
+  'azkar_sleeping': `Sleep Adhkar`,
+  'azkar_open_sleeping': `Open Sleep Adhkar`,
 };

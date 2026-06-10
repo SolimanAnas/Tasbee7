@@ -432,22 +432,33 @@ body.player-active .page-wrapper {
 
 .btn{
   padding:12px 20px;
-  border-radius:16px;
+  border-radius:14px;
   border: 1px solid var(--glass-border);
-  background: var(--bg-surface);
+  background: rgba(255,255,255,0.05);
   color: var(--text-primary);
   cursor:pointer;
-  font-size:16px;
+  font-size:15px;
+  font-weight: 500;
   flex:0 1 auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: background 0.3s, color 0.3s;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn.primary{
   background:var(--accent-main);
   color: var(--bg-surface);
-  font-weight:bold;
+  font-weight:600;
   border: none;
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.3);
+}
+.btn.primary:hover {
+  box-shadow: 0 6px 24px rgba(52, 211, 153, 0.4);
 }
 
 /* Modal */
@@ -471,17 +482,28 @@ body.player-active .page-wrapper {
 }
 
 .modal-content{
-  width:90%;
-  max-width:600px;
+  width:92%;
+  max-width:420px;
   background: var(--bg-surface);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
-  border-radius:24px;
-  padding:30px;
-  transform:translateY(30px);
-  transition:.3s ease;
-  max-height: 85vh;
+  border-radius:28px;
+  padding:32px 28px;
+  transform:translateY(20px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 0 1px var(--glass-border);
+}
+.modal-content::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--accent-main);
+  border-radius: 4px;
 }
 
 .modal.active .modal-content{
@@ -496,31 +518,108 @@ body.player-active .page-wrapper {
 }
 
 .close{
-  text-align:left;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:var(--accent-muted);
   cursor:pointer;
-  font-size:20px;
-  margin-bottom:15px;
+  font-size:14px;
   color: var(--text-primary);
+  transition: all 0.2s ease;
+  margin-bottom:20px;
+  margin-left:auto;
+}
+.close:hover {
+  background:var(--accent-main);
+  transform: rotate(90deg);
 }
 
 .settings-row {
-  margin-bottom: 22px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.settings-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .settings-row h3 {
-  color: var(--accent-main);
-  margin: 0 0 10px 0;
-  font-size: 16px;
+  color: var(--text-primary);
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.7;
 }
 .theme-buttons {
   display: flex;
-  gap: 15px;
+  gap: 10px;
+}
+.theme-buttons .btn {
+  flex: 1;
+  text-align: center;
+  padding: 14px 12px;
+  border-radius: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.theme-buttons .btn:hover {
+  transform: translateY(-1px);
+}
+.theme-buttons .btn:active {
+  transform: translateY(0);
 }
 
 .settings-hint {
   font-size: 12px;
   color: var(--text-secondary);
-  margin: 8px 0 0;
-  line-height: 1.55;
+  margin: 10px 0 0;
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border-right: 2px solid var(--accent-main);
+}
+
+/* --- Range slider --- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--accent-muted);
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: var(--accent-main);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.5);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--accent-main);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
 }
 
 /* --- Toggle switch --- */
@@ -529,17 +628,24 @@ body.player-active .page-wrapper {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-primary);
   cursor: pointer;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  transition: background 0.2s ease;
+}
+.toggle-row:hover {
+  background: rgba(255,255,255,0.05);
 }
 
 .switch {
   position: relative;
-  width: 50px;
-  height: 28px;
+  width: 48px;
+  height: 26px;
   flex-shrink: 0;
-  direction: ltr; /* keep knob travel consistent regardless of page RTL */
+  direction: ltr;
 }
 
 .switch input {
@@ -552,25 +658,26 @@ body.player-active .page-wrapper {
   position: absolute;
   inset: 0;
   background: var(--accent-muted);
-  border-radius: 28px;
-  transition: background 0.25s ease;
+  border-radius: 26px;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .switch .slider::before {
   content: '';
   position: absolute;
-  height: 22px;
-  width: 22px;
+  height: 20px;
+  width: 20px;
   left: 3px;
   top: 3px;
   background: #fff;
   border-radius: 50%;
-  transition: transform 0.25s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
 .switch input:checked + .slider {
   background: var(--accent-main);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
 }
 
 .switch input:checked + .slider::before {
@@ -694,49 +801,57 @@ body.player-active .page-wrapper {
 .sound-options-content {
   background: var(--bg-surface);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 20px;
-  width: 85%;
-  max-width: 320px;
-  transform: scale(0.95);
-  transition: transform 0.25s ease;
+  border-radius: 24px;
+  padding: 24px;
+  width: 88%;
+  max-width: 340px;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
 }
 
 .sound-options.active .sound-options-content {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
 .sound-options-title {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 .sound-option-btn {
-  background: var(--bg-main);
-  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid transparent;
   color: var(--text-primary);
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
   font-size: 15px;
   cursor: pointer;
   font-family: inherit;
   text-align: right;
   display: flex;
   align-items: center;
-  gap: 10px;
-  transition: background 0.2s ease;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+.sound-option-btn:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateX(-2px);
 }
 
 .sound-option-btn:active {
-  background: var(--accent-muted);
+  transform: scale(0.98);
 }
 
 .sound-option-btn.active-source {
+  background: rgba(52, 211, 153, 0.1);
   border-color: var(--accent-main);
   color: var(--accent-main);
   font-weight: 600;
@@ -839,7 +954,10 @@ body.player-active .page-wrapper {
 
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
-    <div class="close" onclick="closeSettings()">✕</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <h2 style="margin:0;font-size:20px;font-weight:700;color:var(--text-primary);" data-i18n="settings">الإعدادات</h2>
+      <div class="close" onclick="closeSettings()">✕</div>
+    </div>
 
     <div class="settings-row">
       <h3 data-i18n="azkar_font_size">حجم الخط</h3>
@@ -875,7 +993,18 @@ body.player-active .page-wrapper {
         <button class="btn" id="settNight" onclick="setAudioSource('night')">🌙 <span data-i18n="azkar_evening">المساء</span></button>
         <button class="btn" id="settRuqia" onclick="setAudioSource('ruqia')">📿 <span data-i18n="azkar_ruqyah">الرقية</span></button>
       </div>
-      <button class="btn" style="width:100%;margin-top:12px;" onclick="hidePlayerFromOptions(); closeSettings();" data-i18n="azkar_hide_player">👁️ إخفاء المشغل (يستمر التشغيل)</button>
+      <button class="btn" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="hidePlayerFromOptions(); closeSettings();">
+        <span>👁️</span>
+        <span data-i18n="azkar_hide_player">إخفاء المشغل (يستمر التشغيل)</span>
+      </button>
+    </div>
+
+    <div class="settings-row" id="sleepingLinkRow" style="display:none;">
+      <h3 data-i18n="azkar_sleeping">أذكار النوم</h3>
+      <button class="btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="window.location.href='sleeping.html'">
+        <span>🌙</span>
+        <span data-i18n="azkar_open_sleeping">فتح أذكار النوم</span>
+      </button>
     </div>
   </div>
 </div>
@@ -927,10 +1056,9 @@ fetch(dataFile)
   loadZikr();
 });
 
-/* --- Image Modal for poster types --- */
+/* --- Image Modal for salah type --- */
 function openImageModal() {
-  const poster = isSalah ? 'salah' : 'sleeping';
-  document.getElementById('posterFrame').src = `../pages/${poster}.html`;
+  document.getElementById('posterFrame').src = `../pages/salah.html`;
   document.getElementById('imageModal').classList.add('active');
 }
 function closeImageModal() {
@@ -1252,6 +1380,111 @@ function hideMiniPlayer() {
   document.body.classList.remove('player-active');
 }
 
+/* --- Sleeping Zikr Audio (plays each zikr's audio in sequence) --- */
+let sleepAudio = null;
+let sleepPlaying = false;
+
+function toggleSleepAudio() {
+  if (!azkarData || !azkarData[currentIndex]) return;
+
+  if (sleepPlaying && sleepAudio) {
+    sleepAudio.pause();
+    sleepPlaying = false;
+    document.getElementById('soundBtn').classList.remove('audio-playing');
+    hideMiniPlayer();
+    return;
+  }
+
+  playSleepZikr(currentIndex);
+}
+
+function playSleepZikr(index) {
+  if (!azkarData || !azkarData[index]) return;
+
+  const audioSrc = azkarData[index].audio;
+  if (!audioSrc) return;
+
+  if (sleepAudio) {
+    sleepAudio.pause();
+    sleepAudio.src = '';
+  }
+
+  sleepAudio = new Audio(audioSrc);
+  sleepAudio.preload = 'metadata';
+
+  sleepAudio.addEventListener('play', () => {
+    sleepPlaying = true;
+    document.getElementById('playPauseBtn').innerText = '⏸';
+    document.getElementById('soundBtn').classList.add('audio-playing');
+    showMiniPlayer();
+    document.getElementById('currentTime').innerText = '0:00';
+  });
+
+  sleepAudio.addEventListener('pause', () => {
+    document.getElementById('playPauseBtn').innerText = '▶';
+    document.getElementById('soundBtn').classList.remove('audio-playing');
+  });
+
+  sleepAudio.addEventListener('timeupdate', () => {
+    if (sleepAudio.duration) {
+      const progress = (sleepAudio.currentTime / sleepAudio.duration) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+      document.getElementById('currentTime').innerText = formatTime(sleepAudio.currentTime);
+      document.getElementById('totalTime').innerText = formatTime(sleepAudio.duration);
+    }
+  });
+
+  sleepAudio.addEventListener('ended', () => {
+    sleepPlaying = false;
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('playPauseBtn').innerText = '▶';
+    document.getElementById('soundBtn').classList.remove('audio-playing');
+    // Auto-advance to next zikr if available
+    if (currentIndex < azkarData.length - 1) {
+      currentIndex++;
+      loadZikr();
+      setTimeout(() => playSleepZikr(currentIndex), 300);
+    }
+  });
+
+  sleepAudio.play().catch(err => console.warn('Sleep audio play failed:', err));
+}
+
+/* Override togglePlayPause for sleeping mode */
+const originalTogglePlayPause = togglePlayPause;
+togglePlayPause = function() {
+  if (isSleeping) {
+    toggleSleepAudio();
+  } else {
+    originalTogglePlayPause();
+  }
+};
+
+/* Override closeMiniPlayer for sleeping mode */
+const originalCloseMiniPlayer = closeMiniPlayer;
+closeMiniPlayer = function() {
+  if (isSleeping && sleepAudio) {
+    sleepAudio.pause();
+    sleepAudio.src = '';
+    sleepPlaying = false;
+  }
+  originalCloseMiniPlayer();
+};
+
+/* Override seekAudio for sleeping mode */
+const originalSeekAudio = seekAudio;
+seekAudio = function(e) {
+  if (isSleeping && sleepAudio && sleepAudio.duration) {
+    const bar = document.getElementById('progressBar');
+    const rect = bar.getBoundingClientRect();
+    let percent = (e.clientX - rect.left) / rect.width;
+    percent = Math.max(0, Math.min(1, percent));
+    sleepAudio.currentTime = sleepAudio.duration * percent;
+    return;
+  }
+  originalSeekAudio(e);
+};
+
 function toggleAudio() {
   const a = initAudio();
   const playerVisible = document.getElementById('miniPlayer').classList.contains('active');
@@ -1350,10 +1583,17 @@ function hidePlayerFromOptions() {
 (function setupSoundBtn() {
   const soundBtn = document.getElementById('soundBtn');
 
-  if (isPoster) {
+  if (isSalah) {
     soundBtn.textContent = '🖼️';
-    soundBtn.title = isSalah ? t('azkar_after_prayer') : t('azkar_sleep_adhkar');
+    soundBtn.title = t('azkar_after_prayer');
     soundBtn.addEventListener('click', openImageModal);
+    return;
+  }
+
+  if (isSleeping) {
+    soundBtn.textContent = '🔊';
+    soundBtn.title = t('azkar_sleep_adhkar');
+    soundBtn.addEventListener('click', toggleSleepAudio);
     return;
   }
 
@@ -1428,9 +1668,14 @@ function hidePlayerFromOptions() {
 window.addEventListener("load", () => {
   checkDailyResetAzkar(); // التأكد من التصفير اليومي عند فتح الصفحة
 
-  if (isPoster) {
+  if (isSalah) {
     document.getElementById('miniPlayer').style.display = 'none';
     document.getElementById('soundOptions').style.display = 'none';
+  }
+
+  // Show sleeping page link in settings
+  if (isSleeping) {
+    document.getElementById('sleepingLinkRow').style.display = '';
   }
 
   const savedSize = localStorage.getItem("zikrFontSize");

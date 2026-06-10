@@ -705,4 +705,8 @@ export default {
 
   // Tasmee dashboard
   'tasmee_mastery_average': `متوسط`,
+
+  // Sleeping adhkar
+  'azkar_sleeping': `أذكار النوم`,
+  'azkar_open_sleeping': `فتح أذكار النوم`,
 };

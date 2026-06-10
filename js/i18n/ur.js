@@ -676,4 +676,8 @@ export default {
 
   // Tasmee dashboard
   'tasmee_mastery_average': `اوسط`,
+
+  // Sleeping adhkar
+  'azkar_sleeping': `سوتے کے اذکار`,
+  'azkar_open_sleeping': `سوتے کے اذکار کھولیں`,
 };

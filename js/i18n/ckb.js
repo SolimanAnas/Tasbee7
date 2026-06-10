@@ -705,4 +705,8 @@ export default {
 
   // Tasmee dashboard
   'tasmee_mastery_average': `ناوەند`,
+
+  // Sleeping adhkar
+  'azkar_sleeping': `بیرخسینەوە زیکرەکان`,
+  'azkar_open_sleeping': `بیرخسینەوە زیکرەکان بیکەرەوە`,
 };
