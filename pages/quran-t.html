@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>المصحف الشريف — تسميع متطور | Quran Tasmee'</title>
+  <meta name="description" content="اقرأ المصحف الشريف بـ 5 نسخ مختلفة: المصحف الم.dkwnي، المصحف المdkwnي الأخضر، المصحف المdkwnي البني، المصحف المdkwnي 1420، والمصحف المdkwnي الملون بالتجويد. Read the Holy Quran with 5 mushaf variants including Tajweed-colored.">
+  <meta name="keywords" content="المصحف الشريف, Quran reader, Quran mushaf, Madina mushaf, Tajweed colored, Quran online, تلاوة القرآن, قراءة المصحف, Mushaf page by page">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/quran.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="المصحف الشريف — زاد المسلم | Quran Reader">
+  <meta property="og:description" content="اقرأ المصحف الشريف بـ 5 نسخ مختلفة including Tajweed-colored. Read the Holy Quran with 5 mushaf variants.">
+  <meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/quran.html">
+  <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+  <meta property="og:locale" content="ar_AR">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="المصحف الشريف — زاد المسلم | Quran Reader">
+  <meta property="twitter:description" content="اقرأ المصحف الشريف بـ 5 نسخ مختلفة including Tajweed-colored.">
+  <meta property="twitter:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#FAF6EE">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script src="../js/quranpages.data.js"></script>
+  <script src="../js/medina2.data.js"></script>
+
+  <link rel="stylesheet" href="../css/quran-v4.css">
+  <link rel="stylesheet" href="../css/tasmee-pro-v2.css">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header id="appHeader">
+    <div class="header-right">
+      <button class="icon-btn" onclick="goHome()" title="الرئيسية">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="header-center">
+      <div id="surahName" class="nav-item surah-nav" onclick="openSurahSelector()" title="اختر سورة">سورة الفاتحة</div>
+      <div class="meta-row">
+        <span id="juzName"  class="nav-item juz-nav"  onclick="openJuzSelector()"  title="اختر جزء">الجزء ١</span>
+        <span class="meta-dot"></span>
+        <span id="pageName" class="nav-item page-nav" onclick="openPageSelector()" title="اختر صفحة">صفحة ١</span>
+      </div>
+    </div>
+
+    <div class="header-left">
+      <button class="icon-btn" id="searchIconBtn" onclick="toggleSearchOverlay('toggle')" title="بحث">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+<button class="icon-btn" id="tarteelMicBtn" onclick="openTarteelSheet()" title="تعرف على الآية">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="fitWidthBtn" onclick="toggleFitWidth()" title="عرض بالعرض الكامل" style="display:none">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+      <button class="icon-btn" id="dualPageBtn" onclick="toggleDualPage()" title="صفحتان كالمصحف" style="display:none">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg>
+      </button>
+      <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== SEARCH OVERLAY ===== -->
+  <div class="search-backdrop" id="searchBackdrop" onclick="toggleSearchOverlay('close')"></div>
+
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-header">
+      <div class="search-header-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <span class="search-header-title">البحث في القرآن</span>
+      <button class="search-header-settings" onclick="openSettingsModal()" title="الإعدادات">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+      <button class="search-header-close" onclick="toggleSearchOverlay('close')" title="إغلاق">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="search-bar-row">
+      <div class="search-input-wrap">
+        <input type="text" id="searchInput" placeholder="كلمة، آية، أو اسم سورة..."
+               oninput="onSearchInput(this.value)"
+               onkeydown="if(event.key==='Enter'){ this.blur(); handleGlobalSearch(this.value); }">
+        <button class="search-input-clear" id="searchClearBtn" onclick="clearSearch()" title="مسح">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="search-results-container" id="searchResults">
+      <div class="search-hint">
+        <div class="search-hint-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        اكتب كلمة للبحث في القرآن الكريم<br><span style="font-size:0.8rem;opacity:0.6;">يمكنك البحث في الآيات وأسماء السور</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <main id="swipeArea">
+    <div class="mushaf-border-top"></div>
+    <div class="mushaf-border-bottom"></div>
+    <div class="label-box label-top-left"  id="surahLabel" onclick="openSurahSelector()">سورة الفاتحة</div>
+    <div class="label-box label-top-right" id="juzLabel"   onclick="openJuzSelector()">الجزء ١</div>
+    <div class="label-box label-bottom"    id="pageLabel"  onclick="openPageSelector()">١</div>
+
+    <div class="page-frame" id="pageFrame">
+      <div id="mushafContainer" class="mushaf-container">
+        <img id="pageImg" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
+        <div id="highlightOverlay" class="highlight-overlay"></div>
+        <div class="dual-page-label" id="dualPageLabel1" style="display:none"></div>
+      </div>
+      <div class="dual-page-separator" id="dualPageSep" style="display:none"></div>
+      <div id="mushafContainer2" class="mushaf-container" style="display:none">
+        <img id="pageImg2" class="mushaf-img" alt="جاري تحميل صفحة القرآن" draggable="false">
+        <div class="dual-page-label" id="dualPageLabel2" style="display:none"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Desktop-only page navigation (hidden on touch screens via CSS) -->
+  <button class="desktop-page-nav desktop-nav-prev" id="desktopPrevBtn"
+          title="الصفحة السابقة" onclick="desktopNavPrev()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </button>
+  <button class="desktop-page-nav desktop-nav-next" id="desktopNextBtn"
+          title="الصفحة التالية" onclick="desktopNavNext()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+
+  <div id="customToast" class="custom-toast"></div>
+  <div id="zoomHint" class="zoom-hint" onclick="dismissZoomHint()">
+    <div class="zoom-hint-card" onclick="event.stopPropagation()">
+
+      <!-- Animated pinch gesture -->
+      <div class="zoom-hint-gesture">
+        <svg class="pinch-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- glow beneath each finger -->
+          <ellipse class="zh-glow-l" cx="62" cy="88" rx="14" ry="5" fill="var(--accent)" opacity="0.18"/>
+          <ellipse class="zh-glow-r" cx="98" cy="88" rx="14" ry="5" fill="var(--accent)" opacity="0.18"/>
+
+          <!-- left finger -->
+          <g class="zh-finger-l">
+            <rect x="51" y="18" width="22" height="68" rx="11" fill="var(--accent)"/>
+            <rect x="54" y="24" width="7" height="18" rx="3.5" fill="white" opacity="0.28"/>
+          </g>
+
+          <!-- right finger -->
+          <g class="zh-finger-r">
+            <rect x="87" y="18" width="22" height="68" rx="11" fill="var(--accent)"/>
+            <rect x="90" y="24" width="7" height="18" rx="3.5" fill="white" opacity="0.28"/>
+          </g>
+
+          <!-- spread arrows -->
+          <g class="zh-arrow-l" opacity="0">
+            <line x1="44" y1="52" x2="28" y2="52" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="34,46 28,52 34,58" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g class="zh-arrow-r" opacity="0">
+            <line x1="116" y1="52" x2="132" y2="52" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="126,46 132,52 126,58" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="zoom-hint-title">تكبير الصفحة وتصغيرها</div>
+      <div class="zoom-hint-body">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير</div>
+      <button class="zoom-hint-dismiss" onclick="dismissZoomHint()">فهمت</button>
+      <button class="zoom-hint-no-show" onclick="dismissZoomHintForever()">لا تُظهر مجدداً</button>
+    </div>
+  </div>
+
+  <!-- ===== AUDIO MINI PLAYER ===== -->
+  <div id="audioMiniPlayer" class="audio-mini-player">
+    <div class="mini-player-info" onclick="toggleExpandPlayer()">
+      <div class="expand-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="18 15 12 9 6 15"/>
+        </svg>
+      </div>
+      <div class="mini-player-avatar">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+      </div>
+      <div class="mini-player-text">
+        <span class="reciter-name" id="miniReciterName">الشيخ</span>
+        <span class="mini-playing-label">
+          <span style="width:6px;height:6px;background:var(--accent);border-radius:50%;display:inline-block;"></span>
+          قيد التشغيل
+        </span>
+      </div>
+    </div>
+
+    <div class="mini-controls" dir="rtl">
+      <button class="mini-ctrl-btn" onclick="event.stopPropagation(); prevAyah();" title="السابق">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+        </svg>
+      </button>
+      <button id="miniPlayPauseBtn" class="mini-play-btn" onclick="event.stopPropagation(); togglePlayPause(event);"></button>
+      <button class="mini-ctrl-btn" onclick="event.stopPropagation(); nextAyah();" title="التالي">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== AUDIO EXPANDED SHEET ===== -->
+  <!-- ===== AUDIO EXPANDED SHEET BACKDROP ===== -->
+  <div class="sheet-backdrop" id="audioSheetBackdrop"></div>
+
+  <div id="audioExpandedSheet" class="audio-expanded-sheet">
+    <div class="sheet-drag-handle"></div>
+    <div class="expanded-header">
+      <div class="sheet-title">
+        <div class="sheet-title-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        المشغل الصوتي
+      </div>
+      <div class="sheet-header-actions">
+        <button class="sheet-icon-btn" onclick="closeAudioExpanded(); toggleSearchOverlay('toggle')" title="بحث">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <button class="close-sheet" onclick="closeAudioExpanded()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="reciter-wrapper">
+      <button class="reciter-trigger" onclick="toggleReciterPicker()">
+        <div class="reciter-trigger-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
+        <div class="reciter-trigger-body">
+          <span class="reciter-trigger-lbl">القارئ الحالي</span>
+          <span class="reciter-trigger-name" id="reciterTriggerName">…</span>
+        </div>
+        <div class="reciter-trigger-arrow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </button>
+      <div class="reciter-picker" id="reciterPickerEl"></div>
+      <select id="expandedReciterSelect" class="reciter-selector">
+        <option value="ar.husary"              data-short="الحصري">محمود خليل الحصري</option>
+        <option value="ar.abdulbasitmurattal"  data-short="عبد الباسط">عبد الباسط عبد الصمد</option>
+        <option value="ar.minshawi"            data-short="المنشاوي">محمد صديق المنشاوي</option>
+        <option value="ar.mahermuaiqly"        data-short="المعيقلي">ماهر المعيقلي</option>
+        <option value="ar.abdurrahmaansudais"  data-short="السديس">عبدالرحمن السديس</option>
+        <option value="ar.saudshuraim"         data-short="الشريم">سعود الشريم</option>
+        <option value="ar.ahmedajamy"          data-short="العجمي">أحمد العجمي</option>
+        <option value="ar.alafasy"             data-short="العفاسي">مشاري العفاسي</option>
+        <option value="ar.hudhaify"            data-short="الحذيفي">علي الحذيفي</option>
+        <option value="ar.muhammadayyoub"      data-short="أيوب">محمد أيوب</option>
+        <option value="ar.muhammadjibreel"     data-short="جبريل">محمد جبريل</option>
+        <option value="ar.abdullahbasfar"      data-short="بصفر">عبدالله بصفر</option>
+        <option value="ar.hanirifai"           data-short="الرفاعي">هاني الرفاعي</option>
+        <option value="ar.ibrahimakhdar"       data-short="الأخضر">إبراهيم الأخضر</option>
+        <optgroup label="التلاوات المجودة">
+          <option value="ar.abdulsamad"        data-short="عبد الباسط">عبد الباسط (مجود)</option>
+          <option value="ar.husarymujawwad"    data-short="الحصري">الحصري (مجود)</option>
+          <option value="ar.minshawimujawwad"  data-short="المنشاوي">المنشاوي (مجود)</option>
+        </optgroup>
+      </select>
+      <span class="select-chevron">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </span>
+    </div>
+
+    <div class="controls-row">
+      <button id="prevAyahBtn" class="ctrl-btn" title="السابق">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+        </svg>
+      </button>
+      <button id="expandedPlayPauseBtn" class="ctrl-btn primary"></button>
+      <button id="nextAyahBtn" class="ctrl-btn" title="التالي">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+          <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="repeat-options">
+      <div class="repeat-row">
+        <span class="repeat-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+          تكرار الآية الواحدة
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="verseRepeatToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="repeat-input-group" id="verseRepeatGroup">
+        <span class="repeat-label">عدد التكرار:</span>
+        <input type="number" id="verseRepeatCount" min="1" max="999" value="3">
+        <span class="repeat-label">مرات</span>
+      </div>
+
+      <div class="repeat-row">
+        <span class="repeat-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          تكرار النطاق (السورة الحالية)
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="rangeRepeatToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="repeat-input-group" id="rangeRepeatGroup" style="flex-direction: column; align-items: stretch;">
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px;">
+          <span class="repeat-label">من:</span>
+          <input type="number" id="rangeFromInput" min="1" max="286" style="flex:1;">
+          <span class="repeat-label">إلى:</span>
+          <input type="number" id="rangeToInput" min="1" max="286" style="flex:1;">
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span class="repeat-label">إعادة المقطع:</span>
+          <input type="number" id="rangeRepeatCount" min="1" max="50" value="1" style="width:64px;">
+          <span class="repeat-label">مرات</span>
+        </div>
+      </div>
+
+      <div class="speed-row">
+        <span class="speed-label">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          سرعة القراءة
+        </span>
+        <select id="playbackSpeed">
+          <option value="0.5">0.5×</option>
+          <option value="0.75">0.75×</option>
+          <option value="1" selected>1.0× (عادي)</option>
+          <option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTEXT MENU SHEET BACKDROP ===== -->
+  <div class="sheet-backdrop" id="contextSheetBackdrop"></div>
+
+  <div id="contextMenuSheet" class="audio-expanded-sheet" style="z-index: 1002;">
+    <div class="sheet-drag-handle"></div>
+    <div class="expanded-header">
+      <div class="sheet-title">
+        <div class="sheet-title-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
+        </div>
+        الإجراءات
+      </div>
+      <div class="sheet-header-actions">
+        <button class="sheet-icon-btn" onclick="closeContextMenu(); toggleSearchOverlay('toggle')" title="بحث">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <button class="sheet-icon-btn" onclick="closeContextMenu(); openTasmeeSetup()" title="التسميع">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <button class="sheet-icon-btn" onclick="closeContextMenu(); openSettingsModal()" title="الإعدادات">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <button class="close-sheet" onclick="closeContextMenu()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mushaf version selector -->
+    <div class="sheet-mushaf-row" onclick="closeContextMenu(); openMushafSelectorModal();">
+      <div class="sheet-mushaf-icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </div>
+      <div class="sheet-mushaf-info">
+        <div class="sheet-mushaf-label">المصحف الحالي</div>
+        <div class="sheet-mushaf-value" id="contextMushafLabel">إطار بني</div>
+      </div>
+      <div class="sheet-mushaf-arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Ayah-specific actions (shown/hidden via JS) -->
+    <div class="sheet-actions-col" style="margin-bottom: 8px;">
+      <button class="action-btn primary-action" id="contextPlayBtn" onclick="contextPlayAyah()" style="display:none;">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </span>
+        استماع للآية المحددة
+      </button>
+      <button class="action-btn" id="contextTasmeeBtn" onclick="closeContextMenu(); openTasmeeSetup()" style="display:none;">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </span>
+        تسميع من هذه الآية
+      </button>
+      <button class="action-btn" id="contextTafsirBtn" onclick="contextShowTafsir()" style="display:none;">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </span>
+        عرض التفسير
+      </button>
+      <button class="action-btn" id="contextCopyBtn" onclick="contextCopyAyah()" style="display:none;">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </span>
+        نسخ الآية
+      </button>
+    </div>
+
+    <div class="sheet-divider"></div>
+    <div class="sheet-section-title">التنقل</div>
+
+    <div class="sheet-actions-col">
+      <button class="action-btn" onclick="openRepeatSettings()">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </span>
+        إعدادات الصوت والتكرار
+      </button>
+      <button class="action-btn" onclick="navigateToJuz()">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </span>
+        الذهاب إلى جزء
+      </button>
+      <button class="action-btn" onclick="navigateToSurah()">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </span>
+        الذهاب إلى سورة
+      </button>
+      <button class="action-btn" onclick="navigateToPage()">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </span>
+        الذهاب إلى صفحة
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TAFSIR SHEET BACKDROP ===== -->
+  <div class="sheet-backdrop" id="tafsirSheetBackdrop"></div>
+
+  <!-- ===== TAFSIR SHEET ===== -->
+  <div id="tafsirModal" class="audio-expanded-sheet" style="z-index: 1003; display: flex; flex-direction: column; transition: all 0.3s ease;">
+    <div class="sheet-drag-handle"></div>
+    <div class="expanded-header" style="flex-shrink:0;">
+      <div class="sheet-title">
+        <div class="sheet-title-icon" style="background:var(--gold-light); color:var(--gold);">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
+        التفسير
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="close-sheet" onclick="toggleTafsirFullscreen()" title="ملء الشاشة">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+            <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </button>
+        <button class="close-sheet" onclick="closeTafsirModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="tafsirContent" class="tafsir-content" style="flex:1; overflow-y:auto; touch-action:pan-y;">اختر آية أولاً...</div>
+
+    <div class="tafsir-nav-row" style="flex-shrink:0;">
+      <button class="tafsir-nav-btn" onclick="prevTafsirAyah()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+        السابق
+      </button>
+      <button class="tafsir-nav-btn" onclick="nextTafsirAyah()">
+        التالي
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TASMEE' TEXT PANEL ===== -->
+  <div class="tasmee-text-panel" id="tasmeeTextPanel">
+    <div class="tasmee-progress-track"><div class="tasmee-progress-fill" id="tasmeePanelProgressFill"></div></div>
+    <div class="tasmee-text-panel-header">
+      <div class="tasmee-text-panel-title">
+        <div class="tasmee-mic-indicator" id="tasmeePanelMicDot" style="width:10px;height:10px;flex-shrink:0;"></div>
+        التسميع
+        <span class="tasmee-panel-count" id="tasmeePanelCount">٠ / ٠</span>
+      </div>
+      <button onclick="endTasmeeSession()" style="background:rgba(217,64,64,0.1);color:var(--danger);border:none;border-radius:8px;padding:6px 14px;font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;">إنهاء</button>
+    </div>
+    <div class="tasmee-text-panel-scroll" id="tasmeeTextContent"></div>
+  </div>
+
+  <!-- ===== TASMEE' SETUP SHEET ===== -->
+  <div class="sheet-backdrop" id="tasmeeSheetBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1099;" onclick="closeTasmeeSetup()"></div>
+  <div class="audio-expanded-sheet" id="tasmeeSetupSheet" style="z-index:1100;max-height:100dvh;height:100dvh;border-radius:0;border-top:none;top:0;">
+    <div class="expanded-header" style="padding-top:calc(env(safe-area-inset-top) + 12px);">
+      <div class="sheet-title">
+        <div class="sheet-title-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+        </div>
+        وضع التسميع
+      </div>
+      <button class="close-sheet" onclick="closeTasmeeSetup()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="tasmee-setup-content" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+      <!-- Hero -->
+      <div style="display:flex;flex-direction:column;align-items:center;padding:16px 16px 12px;gap:8px;flex-shrink:0;">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(26,112,64,0.1);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text-secondary);text-align:center;margin:0;font-family:'Tajawal',sans-serif;line-height:1.5;">
+          تلاوة من الحفظ — يستمع التطبيق ويُصحّح الكلمات في الوقت الفعلي
+        </p>
+      </div>
+      <!-- Rows (scrollable) -->
+      <div style="flex:1;overflow-y:auto;">
+        <div class="tasmee-setup-row">
+          <span>إخفاء النص — اختبار الحفظ</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tasmeeHideText">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="tasmee-setup-row">
+          <span>إظهار نهاية الآيات</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tasmeeShowAyahEnd">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="tasmee-setup-row">
+          <span>الانتقال التلقائي للصفحة التالية</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tasmeeAutoFlip" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="tasmee-setup-row" style="border-bottom:none;">
+          <span>صوت التنبيه عند الإجابة</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tasmeeAudioFeedback" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <!-- Start button -->
+      <div style="padding:12px 16px calc(12px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid var(--glass-border);">
+        <button class="tasmee-start-btn" id="startTasmeeBtn" onclick="startTasmeeSession()" style="width:100%;padding:14px;font-size:1.05rem;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          ابدأ التسميع
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TASMEE' ACTIVE BAR ===== -->
+  <div class="tasmee-active-bar" id="tasmeeActiveBar">
+    <div class="tasmee-mic-indicator" id="tasmeeMicIndicator"></div>
+    <div class="tasmee-progress-text" id="tasmeeProgressText">٠ / ٠ كلمة</div>
+    <button class="tasmee-eye-btn" id="tasmeeEyeBtn" onclick="tasmeeToggleText()" title="إظهار/إخفاء النص">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    </button>
+    <div class="tasmee-bar-divider"></div>
+    <button class="tasmee-pause-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+        <rect x="6" y="4" width="4" height="16" rx="1"/>
+        <rect x="14" y="4" width="4" height="16" rx="1"/>
+      </svg>
+    </button>
+    <button class="tasmee-end-btn" onclick="endTasmeeSession()">إنهاء</button>
+  </div>
+
+  <!-- ===== TASMEE' RESULTS MODAL ===== -->
+  <div class="modal-overlay" id="tasmeeResultsModal" onclick="handleOverlayClick(event,'tasmeeResultsModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">نتيجة التسميع</div>
+        <button class="close-btn" onclick="closeModal('tasmeeResultsModal')">✕</button>
+      </div>
+      <div id="tasmeeResultsBody"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button style="flex:1;padding:12px;background:var(--accent);color:white;border:none;border-radius:12px;font-weight:bold;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.95rem;" onclick="retryTasmeeSession()">إعادة التسميع</button>
+        <button style="flex:1;padding:12px;background:rgba(128,128,128,0.15);color:var(--text-primary);border:none;border-radius:12px;font-weight:bold;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.95rem;" onclick="closeModal('tasmeeResultsModal')">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS MODAL ===== -->
+  <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          الإعدادات
+        </div>
+        <button class="close-btn" onclick="closeModal('settingsModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Mushaf version -->
+        <div class="setting-row clickable" onclick="closeModal('settingsModal'); openMushafSelectorModal();">
+          <div class="setting-label">
+            <span class="row-icon accent">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">إصدار المصحف</div>
+              <div class="label-sub" id="currentMushafLabel">مصحف المدينة</div>
+            </div>
+          </div>
+          <span class="row-chevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Search -->
+        <div class="setting-row clickable" onclick="closeModal('settingsModal'); toggleSearchOverlay('toggle');">
+          <div class="setting-label">
+            <span class="row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">البحث في القرآن</div>
+              <div class="label-sub">بحث دقيق في كل الآيات</div>
+            </div>
+          </div>
+          <span class="row-chevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Bookmarks -->
+        <div class="setting-row clickable" onclick="openBookmarksModal(); closeModal('settingsModal');">
+          <div class="setting-label">
+            <span class="row-icon gold">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">المفضلة</div>
+              <div class="label-sub">الصفحات المحفوظة</div>
+            </div>
+          </div>
+          <span class="row-chevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Color Theme -->
+        <div class="setting-row" style="flex-direction:column; align-items:stretch; gap:10px; padding:12px 16px;">
+          <div class="setting-label" style="margin-bottom:4px;">
+            <span class="row-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">السمة اللونية</div>
+              <div class="label-sub" id="colorThemeLabel">ذهبي</div>
+            </div>
+          </div>
+          <div class="theme-grid">
+            <div class="theme-swatch" data-theme="golden" style="background:#A9791D" onclick="setColorTheme('golden')" title="ذهبي"></div>
+            <div class="theme-swatch" data-theme="teal" style="background:#4AA7A3" onclick="setColorTheme('teal')" title="فيروزي"></div>
+            <div class="theme-swatch" data-theme="crimson" style="background:#9A1418" onclick="setColorTheme('crimson')" title="قرمزي"></div>
+            <div class="theme-swatch" data-theme="camel" style="background:#AF8356" onclick="setColorTheme('camel')" title="عسلي"></div>
+            <div class="theme-swatch" data-theme="olive" style="background:#739326" onclick="setColorTheme('olive')" title="زيتوني"></div>
+            <div class="theme-swatch" data-theme="royal" style="background:#0D6FAF" onclick="setColorTheme('royal')" title="ملكي"></div>
+          </div>
+        </div>
+
+        <!-- How to use -->
+        <div class="setting-row clickable" onclick="closeModal('settingsModal'); openHowToUse();">
+          <div class="setting-label">
+            <span class="row-icon" style="background:rgba(138,90,220,0.12);color:#8A5ADC;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">كيفية الاستخدام</div>
+              <div class="label-sub">دليل الميزات والتنقل</div>
+            </div>
+          </div>
+          <span class="row-chevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Tarteel engine download -->
+        <div class="setting-row clickable" id="tarteelEngineRow" onclick="tarteelSettingsAction()">
+          <div class="setting-label">
+            <span class="row-icon accent">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">نموذج التعرف على الآيات</div>
+              <div class="label-sub" id="tarteelEngineStatus">جاري التحقق...</div>
+            </div>
+          </div>
+          <span class="row-chevron" id="tarteelEngineChevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Download -->
+        <button class="offline-btn" id="offlineDownloadBtn" onclick="cacheAllPages()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          تحميل جميع الصفحات للقراءة بدون إنترنت
+        </button>
+
+        <!-- Audio Cache Management -->
+        <div class="setting-row" style="flex-direction:column; align-items:stretch; gap:10px; padding:12px 16px;">
+          <div class="setting-label" style="margin-bottom:4px;">
+            <span class="row-icon accent">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+              </svg>
+            </span>
+            <div class="label-text">
+              <div class="label-main">تخزين الصوت المؤقت</div>
+              <div class="label-sub" id="audioCacheStatus">جاري التحقق...</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="offline-btn" style="flex:1;margin:0;padding:10px;font-size:0.8rem;" onclick="prefetchCurrentSurahAudio()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              تحميل السورة الحالية
+            </button>
+            <button class="offline-btn" style="flex:1;margin:0;padding:10px;font-size:0.8rem;background:rgba(239,68,68,0.08);color:var(--danger);" onclick="clearAudioCache()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              مسح التخزين
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOW TO USE SHEET ===== -->
+  <div class="sheet-backdrop" id="howToUseBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1199;" onclick="closeHowToUse()"></div>
+  <div id="howToUseSheet" class="how-to-use-sheet">
+    <div class="htu-header">
+      <div class="htu-header-title">
+        <div class="htu-header-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        كيفية الاستخدام
+      </div>
+      <button class="htu-close" onclick="closeHowToUse()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="htu-body">
+      <!-- Navigation -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(var(--accent-rgb,26,112,64),0.12);color:var(--accent);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">التنقل بين الصفحات</div>
+          <div class="htu-card-desc">اسحب يميناً للصفحة التالية، أو يساراً للصفحة السابقة. يمكنك أيضاً استخدام سهمي التنقل في الشاشة.</div>
+        </div>
+      </div>
+
+      <!-- Zoom -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(var(--accent-rgb,26,112,64),0.12);color:var(--accent);">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">التكبير والتصغير</div>
+          <div class="htu-card-desc">ضع إصبعين على الشاشة وباعد بينهما للتكبير، أو قرّب للتصغير. انقر مرتين لإعادة الحجم الافتراضي.</div>
+        </div>
+      </div>
+
+      <!-- Audio -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(168,106,0,0.12);color:#A86A00;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">الاستماع للقرآن</div>
+          <div class="htu-card-desc">اضغط على أيقونة الصوت في الشريط العلوي لفتح مشغل الصوت. اختر القارئ والسورة والآية، واستمع بصوت عالٍ.</div>
+        </div>
+      </div>
+
+      <!-- Context menu -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(0,106,168,0.12);color:#006AA8;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">قائمة الإجراءات</div>
+          <div class="htu-card-desc">اضغط على أيقونة النقاط الثلاث (⋮) في أسفل الشاشة لفتح قائمة الإجراءات — الانتقال إلى آية أو جزء أو سورة، التفسير، والإعدادات.</div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(168,0,106,0.12);color:#A8006A;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">البحث في القرآن</div>
+          <div class="htu-card-desc">اضغط على أيقونة البحث للبحث في كامل نص القرآن الكريم. ستُنقل مباشرةً إلى الصفحة التي تحتوي على الآية.</div>
+        </div>
+      </div>
+
+      <!-- Tasmee -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(217,64,64,0.12);color:#D94040;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">وضع التسميع</div>
+          <div class="htu-card-desc">اضغط على أيقونة الميكروفون لتفعيل التسميع. يستمع التطبيق إلى تلاوتك ويُصحّح كل كلمة في الوقت الفعلي مع تقرير نهائي بنسبة الصواب.</div>
+        </div>
+      </div>
+
+      <!-- Bookmarks -->
+      <div class="htu-card">
+        <div class="htu-card-icon" style="background:rgba(168,130,0,0.12);color:#A88200;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">المفضلة والعلامات</div>
+          <div class="htu-card-desc">اضغط على أيقونة الإشارة المرجعية لحفظ صفحتك الحالية. يمكنك الوصول إلى المحفوظات من الإعدادات.</div>
+        </div>
+      </div>
+
+      <!-- Offline -->
+      <div class="htu-card" style="border-bottom:none;">
+        <div class="htu-card-icon" style="background:rgba(50,130,200,0.12);color:#3282C8;">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div class="htu-card-body">
+          <div class="htu-card-title">القراءة بدون إنترنت</div>
+          <div class="htu-card-desc">من الإعدادات اضغط "تحميل جميع الصفحات" لتخزين القرآن كاملاً على جهازك والقراءة دون اتصال بالإنترنت.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE SELECTOR MODAL ===== -->
+  <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          الذهاب إلى صفحة
+        </div>
+        <button class="close-btn" onclick="closeModal('pageSelectorModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="picker-container">
+          <div class="picker-highlight"></div>
+          <div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div>
+        </div>
+        <div class="manual-input-group">
+          <input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة"
+                 oninput="syncPickerWithInput()"
+                 onkeydown="if(event.key==='Enter') confirmPageSelection()">
+          <button class="btn-go" onclick="confirmPageSelection()">انتقال</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== V3 MUSHAF SELECTOR MODAL ===== -->
+  <div class="modal-overlay" id="mushafSelectorModal" onclick="handleOverlayClick(event,'mushafSelectorModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          إصدار المصحف
+        </div>
+        <button class="close-btn" onclick="closeModal('mushafSelectorModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="mushaf-grid" id="mushafGrid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BOOKMARKS MODAL ===== -->
+  <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon" style="background:var(--gold-light); color:var(--gold);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          المفضلة
+        </div>
+        <button class="close-btn" onclick="closeModal('bookmarksModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="selector-scroll" id="bookmarksList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SURAH SELECTOR MODAL ===== -->
+  <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          اختر سورة
+        </div>
+        <button class="close-btn" onclick="closeModal('surahSelectorModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input class="search-input" id="surahSearch" type="search"
+               placeholder="ابحث عن سورة..." autocomplete="off"
+               onkeydown="if(event.key==='Enter'){ this.blur(); filterSurahs(this.value); }"
+               oninput="filterSurahs(this.value)">
+        <div class="selector-scroll" id="surahList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== JUZ SELECTOR MODAL ===== -->
+  <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          اختر جزءًا
+        </div>
+        <button class="close-btn" onclick="closeModal('juzSelectorModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="selector-scroll" id="juzList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/quran-common.js"></script>
+
+  <script src="../js/quran/state.js"></script>
+  <script src="../js/quran/navigation.js"></script>
+  <script src="../js/quran/highlights.js"></script>
+  <script src="../js/quran/audio.js"></script>
+  <script src="../js/quran/tafsir.js"></script>
+  <script src="../js/quran/settings.js"></script>
+  <script src="../js/quran/ui.js"></script>
+  <script src="../js/quran/search.js"></script>
+  <script src="../js/quran/download.js"></script>
+  <script src="../js/quran/init.js"></script>
+  <script src="../js/tasmee-store.js"></script>
+  <script src="../js/tasmee-engine.js"></script>
+  <script src="../js/quran/tasmee.js"></script>
+
+  <!-- ===== TARTEEL SHEET ===== -->
+  <div class="bottom-sheet" id="tarteelSheet">
+    <div class="sheet-drag-handle"></div>
+    <div style="padding:0 4px 20px">
+
+      <div class="tarteel-title">التعرف على الآية</div>
+      <div class="tarteel-subtitle">اتلُ آية ونتعرف عليها بدون إنترنت</div>
+
+      <!-- Status row -->
+      <div class="tarteel-status-row" id="tarteelStatusRow">
+        <div class="tarteel-status-dot" id="tarteelDot"></div>
+        <div style="flex:1">
+          <div class="tarteel-status-text" id="tarteelStatusText">لم يتم تحميل النموذج بعد</div>
+          <div class="tarteel-progress-bar" id="tarteelProgressBar" style="display:none">
+            <div class="tarteel-progress-fill" id="tarteelProgressFill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download button (shown when not loaded) -->
+      <div class="tarteel-btn-row" id="tarteelDownloadRow">
+        <button class="tarteel-action-btn primary" id="tarteelDownloadBtn" onclick="tarteelDownload()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          تحميل النموذج
+        </button>
+      </div>
+
+      <!-- Record area (shown when model ready) -->
+      <div id="tarteelRecordArea" style="display:none">
+        <div class="tarteel-record-wrap">
+          <button class="tarteel-record-circle" id="tarteelRecordCircle" onclick="tarteelToggleRecord()">
+            <svg id="tarteelMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+            <svg id="tarteelStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+            </svg>
+          </button>
+          <div class="tarteel-record-label" id="tarteelRecordLabel">اضغط للتسجيل</div>
+        </div>
+
+        <!-- Result card -->
+        <div class="tarteel-result-card" id="tarteelResultCard">
+          <div class="tarteel-result-surah" id="tarteelResultSurah"></div>
+          <div class="tarteel-result-text" id="tarteelResultText"></div>
+          <div class="tarteel-result-meta">
+            <div class="tarteel-confidence" id="tarteelConfidence"></div>
+            <button class="tarteel-action-btn primary" style="flex:0;padding:8px 18px;font-size:0.82rem" onclick="tarteelNavigate()">
+              الانتقال للآية
+            </button>
+          </div>
+        </div>
+
+        <div class="tarteel-btn-row" id="tarteelRetryRow" style="display:none">
+          <button class="tarteel-action-btn secondary" onclick="tarteelReset()">محاولة أخرى</button>
+        </div>
+
+        <!-- Tasmee' Pro entry button (shown when model ready) -->
+        <div class="tarteel-btn-row" id="tarteelStartTasmeeRow" style="display:none;margin-top:2px">
+          <button class="tarteel-action-btn secondary" onclick="startAITasmee()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+            تسميع الصفحة الحالية
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Tasmee' Pro Session ── -->
+      <div id="tarteelTasmeeSession" style="display:none">
+
+        <div class="tasmee-session-header">
+          <div class="tarteel-title" style="margin:0;font-size:0.95rem">التسميع الذكي</div>
+          <span class="tasmee-session-badge" id="tarteelTasmeeScore">٠ / ٠</span>
+        </div>
+
+        <!-- Current ayah display -->
+        <div class="tasmee-ayah-card" id="tarteelAyahCard">
+          <div class="tasmee-ayah-text" id="tarteelAyahText"></div>
+          <div class="tasmee-ayah-ref" id="tarteelAyahRef"></div>
+        </div>
+
+        <!-- Session record button -->
+        <div class="tarteel-record-wrap" id="tarteelSessionRecordWrap">
+          <button class="tarteel-record-circle" id="tarteelSessionRecordCircle" onclick="aiTasmeeToggleRecord()">
+            <svg id="tarteelSessionMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+            <svg id="tarteelSessionStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+            </svg>
+          </button>
+          <div class="tarteel-record-label" id="tarteelSessionRecordLabel">اضغط للتلاوة</div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="tasmee-feedback" id="tarteelTasmeeFeedback">
+          <div class="tasmee-feedback-emoji" id="tarteelFeedbackEmoji"></div>
+          <div class="tasmee-feedback-title" id="tarteelFeedbackTitle"></div>
+          <div class="tasmee-feedback-detail" id="tarteelFeedbackDetail"></div>
+        </div>
+
+        <!-- Next / Retry -->
+        <div class="tarteel-btn-row" id="tarteelTasmeeControls" style="display:none">
+          <button class="tarteel-action-btn secondary" onclick="aiTasmeeRetry()">إعادة</button>
+          <button class="tarteel-action-btn primary" id="tarteelTasmeeNextBtn" onclick="aiTasmeeNext()">التالية ›</button>
+        </div>
+
+        <!-- Summary (shown at end) -->
+        <div class="tasmee-summary" id="tarteelTasmeeSummary" style="display:none">
+          <div class="tasmee-summary-num" id="tarteelSummaryNum"></div>
+          <div class="tasmee-summary-label" id="tarteelSummaryLabel"></div>
+        </div>
+        <div class="tarteel-btn-row" id="tarteelSummaryActions" style="display:none">
+          <button class="tarteel-action-btn secondary" onclick="endAITasmee()">إغلاق</button>
+          <button class="tarteel-action-btn primary" onclick="restartAITasmee()">مجدداً</button>
+        </div>
+
+        <!-- End session -->
+        <div class="tarteel-btn-row" id="tarteelTasmeeEndRow" style="margin-top:4px">
+          <button class="tarteel-action-btn secondary" style="font-size:0.8rem;color:var(--text-hint)" onclick="endAITasmee()">إنهاء التسميع</button>
+        </div>
+      </div>
+
+      <!-- Close -->
+      <div class="tarteel-btn-row" style="margin-top:4px">
+        <button class="tarteel-action-btn secondary" onclick="closeTarteelSheet()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+  <div class="sheet-backdrop" id="tarteelBackdrop" onclick="closeTarteelSheet()"></div>
+
+  <!-- ════ Tasmee' Pro v2 — text-rendered mushaf panel ════ -->
+  <div id="tasmeeProPanel" style="display:none">
+
+    <!-- Header -->
+    <div class="tpv2-header">
+      <button class="tpv2-hbtn" onclick="closeTasmeePro()" title="إغلاق" aria-label="إغلاق التسميع">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="tpv2-htitle">
+        <span class="tpv2-hsurah" id="tpv2Surah"></span>
+        <span class="tpv2-hpage" id="tpPageLabel">صفحة ١</span>
+      </div>
+      <span class="tpv2-badge" id="tpErrorBadge">٠ أخطاء</span>
+    </div>
+
+    <!-- Text-rendered mushaf page -->
+    <div class="tpv2-stage" id="tpv2Stage">
+      <div class="tpv2-page" id="tpv2PageHost"></div>
+    </div>
+
+    <!-- Recording indicator (auto-shows while recording via :has) -->
+    <div class="tp-rec-pill" id="tpRecPill">
+      <span class="tp-rec-dot" id="tpRecDot"></span>
+      <span class="tp-rec-timer" id="tpRecTimer">00:00</span>
+    </div>
+
+    <!-- Live transcript strip -->
+    <div class="tp-live-strip" id="tpLiveStrip"></div>
+
+    <!-- Control dock: one flex bar, safe-area aware, can never overlap -->
+    <div class="tpv2-dock" dir="rtl">
+      <button class="tpv2-dock-btn" id="tpEyeBtn" onclick="tpToggleText()" title="اختلاس النظر" aria-label="إظهار/إخفاء النص">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+      <button class="tpv2-dock-btn" onclick="tpSkipBack()" title="إعادة الآية السابقة" aria-label="إعادة الآية السابقة">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+      </button>
+      <div class="tpv2-mic-wrap">
+        <button class="tp-mic-btn" id="tpMicBtn" onclick="tpToggleRecord()" title="تسجيل" aria-label="بدء/إيقاف التسجيل">
+          <svg id="tpMicIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+          </svg>
+          <svg id="tpStopIcon" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display:none">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+          </svg>
+        </button>
+      </div>
+      <button class="tpv2-dock-btn" onclick="tpPrev()" title="إخفاء آخر كلمة" aria-label="تراجع كلمة">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="tpv2-pill" id="tpErrorPill">أخطاء ٠</div>
+    </div>
+  </div>
+
+  <script src="../js/quran/ui-extras.js"></script>
+  <script src="../js/quran/tasmee-pro-v2.js"></script>
+
+  <!-- ===== MUSHAF DOWNLOAD MODAL ===== -->
+  <div id="dlModal">
+    <div class="dl-sheet">
+
+      <!-- Header -->
+      <div class="dl-header">
+        <div class="dl-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
+        <h2 class="dl-title">حفظ المصحف الشريف</h2>
+        <p class="dl-subtitle">اختر نسخة المصحف لحفظها على جهازك<br>للاستخدام دون الحاجة إلى اتصال بالإنترنت</p>
+      </div>
+
+      <div class="dl-divider">
+        <div class="dl-div-line"></div><div class="dl-div-gem"></div><div class="dl-div-line"></div>
+      </div>
+
+      <!-- Selection section -->
+      <div id="dlSelectSection">
+        <div id="dlVariants" class="dl-variants"></div>
+        <div class="dl-settings-hint">
+          يمكنك دائماً تحميل نسخة المصحف من الإعدادات ⚙️
+        </div>
+        <div class="dl-footer">
+          <button class="dl-btn-go" id="dlGoBtn" onclick="dlStart()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-left:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            تحميل المحدد
+          </button>
+          <button class="dl-btn-skip" onclick="dlSkip()">لاحقاً</button>
+        </div>
+      </div>
+
+      <!-- Progress section -->
+      <div id="dlProgressSection" style="display:none">
+        <div class="dl-progress-header">
+          <span class="dl-progress-title">جاري التحميل…</span>
+          <button class="dl-minimize-btn" onclick="dlMinimize()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            تصغير
+          </button>
+        </div>
+        <div class="dl-progress">
+        <div class="dl-ring-wrap">
+          <svg class="dl-ring-svg" width="110" height="110" viewBox="0 0 110 110">
+            <defs>
+              <linearGradient id="dlGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#8F5E06"/>
+                <stop offset="50%"  stop-color="#F5D060"/>
+                <stop offset="100%" stop-color="#8F5E06"/>
+              </linearGradient>
+            </defs>
+            <circle class="dl-ring-bg"   cx="55" cy="55" r="49"/>
+            <circle class="dl-ring-fill" cx="55" cy="55" r="49" id="dlRingFill"/>
+          </svg>
+          <div class="dl-ring-center">
+            <div class="dl-ring-pct" id="dlPct">0%</div>
+            <div class="dl-ring-sub">مكتمل</div>
+          </div>
+        </div>
+        <div class="dl-prog-name"  id="dlProgName"></div>
+        <div class="dl-prog-pages" id="dlProgPages">جاري التحضير…</div>
+        <div class="dl-bar"><div class="dl-bar-fill" id="dlBarFill"></div></div>
+        <div class="dl-status"     id="dlStatusMsg"></div>
+      </div>
+      </div><!-- /dlProgressSection inner -->
+
+      <!-- Done section -->
+      <div id="dlDoneSection" class="dl-done" style="display:none">
+        <div class="dl-done-ring">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="dl-done-title">تمّ الحفظ بنجاح!</div>
+        <div class="dl-done-sub">يمكنك الآن تصفّح المصحف الشريف<br>دون اتصال بالإنترنت</div>
+        <button class="dl-done-btn" onclick="dlClose()">ابدأ القراءة</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== DOWNLOAD MINIMIZED PILL ===== -->
+  <div id="dlMiniPill" onclick="dlRestore()" title="فتح نافذة التحميل">
+    <div class="dl-mini-ring">
+      <svg width="36" height="36" viewBox="0 0 36 36">
+        <circle class="dl-mini-ring-bg"   cx="18" cy="18" r="15"/>
+        <circle class="dl-mini-ring-fill" cx="18" cy="18" r="15" id="dlMiniRingFill"/>
+      </svg>
+    </div>
+    <div class="dl-mini-info">
+      <div class="dl-mini-pct"   id="dlMiniPct">0%</div>
+      <div class="dl-mini-label" id="dlMiniLabel">جاري التحميل…</div>
+    </div>
+    <button class="dl-mini-restore" onclick="event.stopPropagation(); dlRestore()" title="استعادة">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+      </svg>
+    </button>
+  </div>
+
+    <!-- Hidden link for variant switching -->
+  <a id="quranTextLink" href="quran-text.html" style="display:none"></a>
+
+  <!-- ===== DOWNLOAD COMPLETION TOAST ===== -->
+  <div id="dlCompleteToast">
+    <div class="dl-toast-inner">
+      <div class="dl-toast-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="dl-toast-body">
+        <div class="dl-toast-title">تمّ حفظ المصحف بنجاح ✓</div>
+        <div class="dl-toast-sub" id="dlToastSub"></div>
+      </div>
+      <button class="dl-toast-x" onclick="hideDlCompleteToast()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="dl-toast-bar"><div class="dl-toast-bar-fill" id="dlToastBarFill"></div></div>
+  </div>
+
+</body>
+</html>

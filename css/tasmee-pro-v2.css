@@ -1,0 +1,314 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Tasmee' Pro v2 — "Illuminated Manuscript" memorisation screen
+   Text-rendered mushaf page (no image masking). Words hide by becoming
+   transparent — layout never collapses. Ayah medallions stay visible.
+   Used by pages/quran-t.html only. Inherits app color-theme tokens.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'MadinahMarkers';
+  src: url('../fonts/uthmani-colored.ttf') format('opentype'),
+       url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
+  font-display: block;
+}
+
+#tasmeeProPanel {
+  position: fixed; inset: 0; z-index: 1300;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% -10%, var(--accent-light), transparent 60%),
+    var(--bg-page);
+}
+/* parchment grain */
+#tasmeeProPanel::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.35 0 0 0 0 0.18 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.tpv2-header {
+  position: relative; z-index: 2; flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--glass-border);
+}
+.tpv2-hbtn {
+  width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+  flex-shrink: 0;
+  background: var(--bg-surface); color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition-fast);
+}
+.tpv2-hbtn:hover { background: var(--bg-surface-hover); }
+.tpv2-htitle {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  align-items: center; gap: 1px; text-align: center;
+}
+.tpv2-hsurah {
+  font-family: 'Amiri', serif; font-weight: 700;
+  font-size: 1.02rem; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.tpv2-hpage {
+  font-family: 'Tajawal', sans-serif; font-size: 0.72rem; font-weight: 600;
+  color: var(--text-hint); letter-spacing: 0.2px;
+}
+.tpv2-badge {
+  flex-shrink: 0;
+  font-family: 'Tajawal', sans-serif; font-size: 0.76rem; font-weight: 700;
+  background: var(--danger-light); color: var(--danger);
+  padding: 5px 12px; border-radius: 20px; min-width: 64px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: transform var(--transition-fast);
+}
+.tpv2-badge.bump { animation: tpv2-bump 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes tpv2-bump { 35% { transform: scale(1.22); } }
+
+/* ── Stage & page sheet ─────────────────────────────────────────── */
+.tpv2-stage {
+  position: relative; z-index: 1; flex: 1; min-height: 0;
+  display: flex; align-items: stretch; justify-content: center;
+  padding: 10px clamp(8px, 3vw, 28px)
+           calc(108px + env(safe-area-inset-bottom));  /* room for dock */
+}
+.tpv2-page {
+  width: 100%;
+  max-width: min(620px, 100%);
+  display: flex; flex-direction: column;
+  direction: rtl;
+  padding: clamp(8px, 2vh, 20px) clamp(10px, 3vw, 26px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(175deg, rgba(255,255,255,0.55), rgba(255,255,255,0.12));
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    0 14px 34px -18px var(--glass-shadow);
+}
+
+/* one mushaf line */
+.tpv2-line {
+  position: relative; flex: 1; min-height: 0;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 0.18em;
+  white-space: nowrap;
+  font-family: 'ScheherazadeLocal', 'Amiri', serif;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.tpv2-line.centered { justify-content: center; gap: 0.45em; }
+/* faint ruled guide under lines that still hold hidden words */
+.tpv2-line::after {
+  content: ''; position: absolute; right: 2%; left: 2%; bottom: 6%;
+  height: 1px; background: var(--text-primary);
+  opacity: 0; transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.tpv2-line.has-hidden::after { opacity: 0.09; }
+
+/* ── Words ──────────────────────────────────────────────────────── */
+.tpv2-word {
+  position: relative;
+  transition: color 0.45s ease, filter 0.45s ease, opacity 0.45s ease;
+  will-change: color, filter;
+}
+.tpv2-word.masked { color: transparent; text-shadow: none; }
+/* peek: ghost of the hidden words */
+.tpv2-page.peek .tpv2-word.masked {
+  color: var(--text-primary);
+  opacity: 0.30; filter: blur(2.5px);
+}
+/* reveal moment */
+.tpv2-word.just-revealed { animation: tpv2-word-in 0.6s cubic-bezier(0.22,1,0.36,1); }
+@keyframes tpv2-word-in {
+  0%   { opacity: 0; transform: translateY(0.12em); filter: blur(4px); color: var(--accent); }
+  55%  { opacity: 1; filter: blur(0); color: var(--accent); }
+  100% { transform: translateY(0); color: inherit; }
+}
+/* a word the reciter skipped — revealed but flagged */
+.tpv2-word.missed { color: #C56A00; }
+/* the next expected word: subtle breathing cursor under it */
+.tpv2-word.expected::after {
+  content: ''; position: absolute; right: 8%; left: 8%; bottom: -0.06em;
+  height: 2px; border-radius: 2px; background: var(--accent);
+  animation: tpv2-cursor 1.6s ease-in-out infinite;
+}
+@keyframes tpv2-cursor { 0%,100% { opacity: 0.15; } 50% { opacity: 0.75; } }
+/* wrong-ayah flash on the expected word */
+.tpv2-word.flash-err { animation: tpv2-err 0.6s ease; }
+@keyframes tpv2-err {
+  0%, 100% { background: transparent; }
+  30% { background: rgba(217,64,64,0.22); border-radius: 4px; }
+}
+
+/* ── Ayah medallion (always visible, digits enclosed via overlay) ── */
+.tpv2-marker {
+  position: relative;
+  font-family: 'MadinahMarkers', 'ScheherazadeLocal', serif;
+  color: var(--gold);
+  font-size: 1.18em;
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: color 0.4s ease, transform 0.4s ease;
+}
+.tpv2-marker-glyph { line-height: 1; }
+.tpv2-marker-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.40em; font-weight: 700; line-height: 1;
+  padding-bottom: 0.18em;
+  color: inherit;
+}
+/* non-recited ornaments inside the text flow (۞, sajdah…) */
+.tpv2-ornament {
+  color: var(--gold); flex-shrink: 0;
+  font-family: 'MadinahMarkers', 'ScheherazadeLocal', serif;
+}
+.tpv2-marker.lit { color: var(--accent); animation: tpv2-marker-pop 0.55s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes tpv2-marker-pop { 40% { transform: scale(1.25); } }
+
+/* ── Surah header & basmala rows ────────────────────────────────── */
+.tpv2-surah-header {
+  flex: 1; min-height: 0; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.tpv2-surah-header img {
+  position: absolute; height: 92%; max-height: 52px; width: auto; max-width: 96%;
+  opacity: 0.9;
+}
+.tpv2-surah-header span {
+  position: relative; z-index: 1;
+  font-family: 'Amiri', serif; font-weight: 700;
+  font-size: clamp(0.9rem, 2.6vh, 1.25rem);
+  color: var(--text-primary);
+}
+.tpv2-basmala {
+  flex: 1; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'ScheherazadeLocal', 'Amiri', serif;
+  color: var(--text-secondary);
+  font-size: 0.88em;
+}
+.tpv2-basmala img { height: 70%; max-height: 34px; opacity: 0.85; }
+
+/* ── Completion state ───────────────────────────────────────────── */
+#tasmeeProPanel.complete .tpv2-page {
+  border-color: var(--accent-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    0 0 0 1px var(--accent-border),
+    0 14px 44px -16px var(--accent-glow);
+}
+#tasmeeProPanel.complete .tpv2-mic-wrap::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid var(--gold);
+  animation: tpv2-halo 1.8s ease-out infinite;
+}
+@keyframes tpv2-halo {
+  from { transform: scale(0.85); opacity: 0.9; }
+  to   { transform: scale(1.35); opacity: 0; }
+}
+
+/* ── Control dock — single flex bar, nothing can overlap ────────── */
+.tpv2-dock {
+  position: fixed;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  z-index: 1310;
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(8px, 2.6vw, 16px);
+  max-width: calc(100vw - 20px);
+  padding: 10px clamp(12px, 3vw, 20px);
+  border-radius: 40px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 36px -10px var(--glass-shadow), 0 2px 8px rgba(60,40,10,0.08);
+}
+.tpv2-dock-btn {
+  width: clamp(40px, 11vw, 46px); height: clamp(40px, 11vw, 46px);
+  border-radius: 50%; border: none; cursor: pointer; flex-shrink: 0;
+  background: var(--bg-surface); color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+.tpv2-dock-btn:hover  { background: var(--bg-surface-hover); }
+.tpv2-dock-btn:active { transform: scale(0.92); }
+.tpv2-dock-btn.active { color: var(--accent); background: var(--accent-light); }
+.tpv2-dock-btn.danger { color: var(--danger); background: var(--danger-light); }
+
+.tpv2-pill {
+  flex-shrink: 1; min-width: 0;
+  font-family: 'Tajawal', sans-serif; font-size: 0.78rem; font-weight: 700;
+  color: var(--danger); background: var(--danger-light);
+  border: 1px solid rgba(217,64,64,0.25);
+  padding: 8px 13px; border-radius: 30px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+/* mic FAB lives inside the dock; defuse the legacy fixed positioning */
+.tpv2-mic-wrap { position: relative; flex-shrink: 0; }
+#tasmeeProPanel .tp-mic-btn {
+  position: static;
+  width: clamp(56px, 15vw, 64px); height: clamp(56px, 15vw, 64px);
+  border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent);
+  background: linear-gradient(160deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #063 30%) 100%);
+  box-shadow: 0 6px 18px -4px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+#tasmeeProPanel .tp-mic-btn:active { transform: scale(0.93); }
+#tasmeeProPanel .tp-mic-btn.recording {
+  background: linear-gradient(160deg, #E05252 0%, #B22B2B 100%);
+  box-shadow: 0 6px 20px -4px rgba(217,64,64,0.55);
+  animation: tpv2-breathe 1.4s ease-in-out infinite;
+}
+#tasmeeProPanel .tp-mic-btn.processing {
+  background: linear-gradient(160deg, var(--gold) 0%, #8F6606 100%);
+  box-shadow: 0 6px 18px -4px rgba(184,136,12,0.5);
+  animation: none;
+}
+@keyframes tpv2-breathe {
+  0%, 100% { box-shadow: 0 6px 20px -4px rgba(217,64,64,0.55), 0 0 0 0 rgba(217,64,64,0.35); }
+  50%      { box-shadow: 0 6px 20px -4px rgba(217,64,64,0.55), 0 0 0 12px rgba(217,64,64,0); }
+}
+
+/* ── Recording pill & live transcript (repositioned) ────────────── */
+#tasmeeProPanel .tp-rec-pill {
+  top: auto; bottom: calc(96px + env(safe-area-inset-bottom) + 46px);
+  z-index: 1311;
+}
+#tasmeeProPanel .tp-live-strip {
+  position: fixed; left: 50%; right: auto; transform: translateX(-50%);
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  z-index: 1309;
+  width: max-content; max-width: calc(100vw - 24px);
+  border-radius: 18px; padding: 7px 16px;
+  background: rgba(20, 16, 8, 0.72);
+  min-height: 0;
+}
+#tasmeeProPanel .tp-live-word { font-size: 0.95rem; }
+
+/* ── Responsive guards ──────────────────────────────────────────── */
+@media (max-width: 379px) {
+  .tpv2-dock { gap: 7px; padding: 8px 10px; }
+  .tpv2-pill { font-size: 0.7rem; padding: 7px 9px; }
+}
+@media (orientation: landscape) and (max-height: 480px) {
+  .tpv2-stage { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .tpv2-dock { padding: 6px 14px; }
+  #tasmeeProPanel .tp-mic-btn { width: 48px; height: 48px; }
+  .tpv2-dock-btn { width: 38px; height: 38px; }
+  .tpv2-header { padding-top: calc(env(safe-area-inset-top) + 6px); padding-bottom: 6px; }
+}
+/* tablets: page floats like a real mushaf sheet */
+@media (min-width: 700px) {
+  .tpv2-stage { align-items: center; }
+  .tpv2-page { height: 100%; max-height: 880px; }
+}
