@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════
-//  Tasmee' Pro v2 — text-rendered mushaf page (quran-t.html)
+//  Tasmee' Pro v2 — text-rendered mushaf page (quran.html, default)
 //
 //  Loaded AFTER ui-extras.js: redefines the rendering layer of the
 //  Tasmee' Pro panel while reusing its audio capture + worker pipeline

@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>المصحف الشريف — تسميع متطور | Quran Tasmee'</title>
+  <title>المصحف الشريف — زاد المسلم | Quran Reader</title>
   <meta name="description" content="اقرأ المصحف الشريف بـ 5 نسخ مختلفة: المصحف الم.dkwnي، المصحف المdkwnي الأخضر، المصحف المdkwnي البني، المصحف المdkwnي 1420، والمصحف المdkwnي الملون بالتجويد. Read the Holy Quran with 5 mushaf variants including Tajweed-colored.">
   <meta name="keywords" content="المصحف الشريف, Quran reader, Quran mushaf, Madina mushaf, Tajweed colored, Quran online, تلاوة القرآن, قراءة المصحف, Mushaf page by page">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/quran.html">
+  <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/quran-old.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="المصحف الشريف — زاد المسلم | Quran Reader">
+  <meta property="og:title" content="المصحف الشريف — زاد المسلم (إصدار سابق) | Quran Reader (Legacy)">
   <meta property="og:description" content="اقرأ المصحف الشريف بـ 5 نسخ مختلفة including Tajweed-colored. Read the Holy Quran with 5 mushaf variants.">
-  <meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/quran.html">
+  <meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/quran-old.html">
   <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
   <meta property="og:locale" content="ar_AR">
   <meta property="twitter:card" content="summary_large_image">
@@ -28,7 +28,6 @@
   <script src="../js/medina2.data.js"></script>
 
   <link rel="stylesheet" href="../css/quran-v4.css">
-  <link rel="stylesheet" href="../css/tasmee-pro-v2.css">
 </head>
 <body>
 
@@ -1332,27 +1331,64 @@
   </div>
   <div class="sheet-backdrop" id="tarteelBackdrop" onclick="closeTarteelSheet()"></div>
 
-  <!-- ════ Tasmee' Pro v2 — text-rendered mushaf panel ════ -->
+  <!-- ════ Tasmee' Pro full-screen panel ════ -->
   <div id="tasmeeProPanel" style="display:none">
 
     <!-- Header -->
-    <div class="tpv2-header">
-      <button class="tpv2-hbtn" onclick="closeTasmeePro()" title="إغلاق" aria-label="إغلاق التسميع">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <div class="tp-header">
+      <button class="tp-close-btn" onclick="closeTasmeePro()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
-      <div class="tpv2-htitle">
-        <span class="tpv2-hsurah" id="tpv2Surah"></span>
-        <span class="tpv2-hpage" id="tpPageLabel">صفحة ١</span>
-      </div>
-      <span class="tpv2-badge" id="tpErrorBadge">٠ أخطاء</span>
+      <span class="tp-page-label" id="tpPageLabel">صفحة ١</span>
+      <span class="tp-error-badge" id="tpErrorBadge">٠ أخطاء</span>
     </div>
 
-    <!-- Text-rendered mushaf page -->
-    <div class="tpv2-stage" id="tpv2Stage">
-      <div class="tpv2-page" id="tpv2PageHost"></div>
+    <!-- Image container with word masks -->
+    <div class="tp-image-container" id="tpImageContainer"></div>
+
+    <!-- Bottom bar -->
+    <div class="tp-bottom-bar">
+      <div class="tp-error-pill" id="tpErrorPill">أخطاء ٠</div>
+      <div class="tp-nav-btns">
+        <button class="tp-icon-btn" onclick="tpPrev()" title="السابق">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <button class="tp-icon-btn" onclick="tpSkipBack()" title="رجوع آيتين">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <polyline points="19 18 13 12 19 6"/><polyline points="11 18 5 12 11 6"/>
+          </svg>
+        </button>
+        <button class="tp-icon-btn" id="tpEyeBtn" onclick="tpToggleText()" title="إظهار/إخفاء">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
     </div>
+
+    <!-- Floating mic button -->
+    <button class="tp-mic-btn" id="tpMicBtn" onclick="tpToggleRecord()">
+      <svg id="tpMicIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+      </svg>
+      <svg id="tpStopIcon" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+      </svg>
+    </button>
+
+    <!-- Floating stop button -->
+    <button class="tp-stop-btn" id="tpStopBtn" onclick="closeTasmeePro()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
 
     <!-- Recording indicator (auto-shows while recording via :has) -->
     <div class="tp-rec-pill" id="tpRecPill">
@@ -1362,44 +1398,9 @@
 
     <!-- Live transcript strip -->
     <div class="tp-live-strip" id="tpLiveStrip"></div>
-
-    <!-- Control dock: one flex bar, safe-area aware, can never overlap -->
-    <div class="tpv2-dock" dir="rtl">
-      <button class="tpv2-dock-btn" id="tpEyeBtn" onclick="tpToggleText()" title="اختلاس النظر" aria-label="إظهار/إخفاء النص">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-      </button>
-      <button class="tpv2-dock-btn" onclick="tpSkipBack()" title="إعادة الآية السابقة" aria-label="إعادة الآية السابقة">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"/>
-          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-        </svg>
-      </button>
-      <div class="tpv2-mic-wrap">
-        <button class="tp-mic-btn" id="tpMicBtn" onclick="tpToggleRecord()" title="تسجيل" aria-label="بدء/إيقاف التسجيل">
-          <svg id="tpMicIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-            <line x1="12" y1="19" x2="12" y2="22"/>
-          </svg>
-          <svg id="tpStopIcon" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display:none">
-            <rect x="3" y="3" width="18" height="18" rx="3"/>
-          </svg>
-        </button>
-      </div>
-      <button class="tpv2-dock-btn" onclick="tpPrev()" title="إخفاء آخر كلمة" aria-label="تراجع كلمة">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-      <div class="tpv2-pill" id="tpErrorPill">أخطاء ٠</div>
-    </div>
   </div>
 
   <script src="../js/quran/ui-extras.js"></script>
-  <script src="../js/quran/tasmee-pro-v2.js"></script>
 
   <!-- ===== MUSHAF DOWNLOAD MODAL ===== -->
   <div id="dlModal">
