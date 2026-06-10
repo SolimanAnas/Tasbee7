@@ -18,7 +18,6 @@ const _v2 = {
   markers: {},      // "s_a" -> marker span
   ayahRanges: {},   // "s_a" -> {start, end} indices into words[]
   ptr: 0,           // next expected word index
-  streamBase: 0,    // ptr value when current recording started
   errors: 0,
   peek: false,
   quranIndex: null, // "s_a" -> {words:[], surahName}
@@ -106,7 +105,7 @@ function _v2RenderPage(pageNumber) {
   host.innerHTML = '';
   host.classList.remove('peek');
   _v2.words = []; _v2.markers = {}; _v2.ayahRanges = {};
-  _v2.ptr = 0; _v2.streamBase = 0;
+  _v2.ptr = 0;
 
   const { rects, maxWord } = _v2QueryPage(pageNumber);
   if (!rects.length) {
@@ -163,8 +162,11 @@ function _v2RenderPage(pageNumber) {
       if (rect.word === maxW) {
         const m = document.createElement('span');
         m.className = 'tpv2-marker';
-        m.innerHTML = '<span class="tpv2-marker-glyph">۝</span>' +
-                      '<span class="tpv2-marker-num">' + _v2Digits(rect.ayah) + '</span>';
+        // uthmani-colored.ttf ligates the digits themselves into a numbered
+        // ayah medallion — adding U+06DD would draw a second empty sign
+        m.textContent = _v2Digits(rect.ayah);
+        m.title = 'البدء من الآية ' + _v2Digits(rect.ayah);
+        m.onclick = () => _v2StartFromAyah(rect.surah, rect.ayah);
         row.appendChild(m);
         _v2.markers[key] = m;
         return;
@@ -324,16 +326,19 @@ function _tpHandleStreamResult(data) {
     strip.appendChild(sp);
   });
 
-  // transcript is cumulative for this recording → re-match from streamBase
-  let p = _v2.streamBase;
+  // The worker transcribes only the last ~7s, so the transcript is a
+  // sliding window: anchor at the CURRENT pointer. Window words that were
+  // already matched (or noise) simply fail against expected[p] and are
+  // skipped; new words advance the pointer.
+  let p = _v2.ptr;
   const missed = [];
   for (const raw of spoken) {
     if (p >= _v2.words.length) break;
     const tw = _v2Norm(raw);
     if (!tw) continue;
     if (_v2FuzzyEq(tw, _v2.words[p].norm)) { p++; continue; }
-    // lookahead: reciter skipped up to 2 words → flag them as missed
-    for (let ahead = 1; ahead <= 2 && p + ahead < _v2.words.length; ahead++) {
+    // lookahead: reciter skipped up to 3 words (or ASR garbled them)
+    for (let ahead = 1; ahead <= 3 && p + ahead < _v2.words.length; ahead++) {
       if (_v2FuzzyEq(tw, _v2.words[p + ahead].norm)) {
         for (let m = 0; m < ahead; m++) missed.push(p + m);
         p += ahead + 1;
@@ -409,6 +414,11 @@ async function _v2Open(pageNumber) {
   document.getElementById('tasmeeProPanel').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => _v2RenderPage(pageNumber));
+
+  if (!localStorage.getItem('tpv2_marker_hint')) {
+    localStorage.setItem('tpv2_marker_hint', '1');
+    setTimeout(() => showCustomToast('💡 اضغط على رقم أي آية للبدء من عندها'), 900);
+  }
 }
 
 async function startAITasmee() {
@@ -423,7 +433,7 @@ function closeTasmeePro() {
   if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
   if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
   if (_tpAudioCtx) { _tpAudioCtx.close().catch(() => {}); _tpAudioCtx = null; }
-  _tpAllSamples = [];
+  _tpAllSamples = []; _v2BufferLen = 0;
   _v2.words = []; _v2.markers = {}; _v2.ayahRanges = {}; _v2.ptr = 0;
   const host = document.getElementById('tpv2PageHost');
   if (host) host.innerHTML = '';
@@ -442,7 +452,6 @@ function tpToggleText() {
 
 function tpPrev() {           // step one word back
   _v2SetPtr(_v2.ptr - 1);
-  _v2.streamBase = Math.min(_v2.streamBase, _v2.ptr);
 }
 
 function tpSkipBack() {       // re-mask the previous ayah and retry it
@@ -450,18 +459,96 @@ function tpSkipBack() {       // re-mask the previous ayah and retry it
   if (!prev) return;
   const range = _v2.ayahRanges[prev.surah + '_' + prev.ayah];
   _v2SetPtr(range ? range.start : 0);
-  _v2.streamBase = Math.min(_v2.streamBase, _v2.ptr);
   showCustomToast('أُعيد إخفاء الآية — أعد تلاوتها');
 }
 
-// keep streamBase in sync: every new recording starts matching from ptr
-(function () {
-  const orig = window.tpToggleRecord;
-  window.tpToggleRecord = async function () {
-    if (!_tp.recording) _v2.streamBase = _v2.ptr;
-    return orig.apply(this, arguments);
-  };
-})();
+// start the session from any ayah: tap its medallion — everything before
+// it is revealed as context, recitation begins at that ayah
+function _v2StartFromAyah(surah, ayah) {
+  const range = _v2.ayahRanges[surah + '_' + ayah];
+  if (!range) return;
+  _v2SetPtr(range.start);
+  showCustomToast('البدء من الآية ' + _v2Digits(ayah));
+}
+
+// ── Recording: rolling 12s buffer instead of unbounded accumulation ──
+// ui-extras' version merged and structured-cloned the WHOLE recording to
+// the worker every 1.8s (and ran the final inference on all of it), which
+// got slower the longer you recited. The worker only looks at the last 7s
+// anyway, so keep a 12s window: constant cost no matter how long the
+// session runs, and the final 'recognize' stays fast and meaningful.
+const _V2_BUFFER_SAMPLES = 16000 * 12;
+let _v2BufferLen = 0;
+
+function _v2MergeBuffer() {
+  const merged = new Float32Array(_v2BufferLen);
+  let pos = 0;
+  _tpAllSamples.forEach(c => { merged.set(c, pos); pos += c.length; });
+  return merged;
+}
+
+async function tpToggleRecord() {
+  if (!_tarteelReady) return;
+  if (_tp.recording) {
+    _tp.recording = false;
+    clearInterval(_tp.timerInterval);
+    clearInterval(_tpStreamTimer);
+    document.getElementById('tpLiveStrip').classList.remove('active');
+    if (_tp.stream) { _tp.stream.getTracks().forEach(t => t.stop()); _tp.stream = null; }
+    if (_tpScriptProc) { _tpScriptProc.disconnect(); _tpScriptProc = null; }
+    if (_tpAudioCtx) { _tpAudioCtx.close().catch(() => {}); _tpAudioCtx = null; }
+    document.getElementById('tpMicIcon').style.display = '';
+    document.getElementById('tpStopIcon').style.display = 'none';
+    document.getElementById('tpRecDot').className = 'tp-rec-dot';
+    if (_v2BufferLen > 16000 * 0.8) {
+      const merged = _v2MergeBuffer();
+      _tpAllSamples = []; _v2BufferLen = 0;
+      _tarteelTasmeeMode = true;
+      document.getElementById('tpMicBtn').className = 'tp-mic-btn processing';
+      _tarteelWorker.postMessage({ type: 'recognize', audio: merged }, [merged.buffer]);
+    } else {
+      _tpAllSamples = []; _v2BufferLen = 0;
+      document.getElementById('tpMicBtn').className = 'tp-mic-btn';
+      document.getElementById('tpRecTimer').textContent = '00:00';
+    }
+  } else {
+    try {
+      _tp.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      _tpAudioCtx = new AudioContext({ sampleRate: 16000 });
+      const src = _tpAudioCtx.createMediaStreamSource(_tp.stream);
+      _tpScriptProc = _tpAudioCtx.createScriptProcessor(4096, 1, 1);
+      _tpAllSamples = []; _v2BufferLen = 0;
+      _tpScriptProc.onaudioprocess = ev => {
+        if (!_tp.recording) return;
+        _tpAllSamples.push(new Float32Array(ev.inputBuffer.getChannelData(0)));
+        _v2BufferLen += 4096;
+        while (_v2BufferLen > _V2_BUFFER_SAMPLES && _tpAllSamples.length > 1) {
+          _v2BufferLen -= _tpAllSamples.shift().length;
+        }
+      };
+      src.connect(_tpScriptProc);
+      _tpScriptProc.connect(_tpAudioCtx.destination);
+      _tp.recording = true;
+      _tp.timerStart = Date.now();
+      _tp.timerInterval = setInterval(() => {
+        const s = Math.floor((Date.now() - _tp.timerStart) / 1000);
+        document.getElementById('tpRecTimer').textContent =
+          String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+      }, 1000);
+      _tpStreamTimer = setInterval(() => {
+        if (!_tp.recording || _v2BufferLen < 16000 * 1.2) return;
+        _tarteelWorker.postMessage({ type: 'stream', audio: _v2MergeBuffer() });
+      }, 1500);
+      document.getElementById('tpLiveStrip').classList.add('active');
+      document.getElementById('tpLiveStrip').innerHTML =
+        '<span class="tp-live-word" style="opacity:0.6;animation:none">جاري الاستماع...</span>';
+      document.getElementById('tpMicBtn').className = 'tp-mic-btn recording';
+      document.getElementById('tpMicIcon').style.display = 'none';
+      document.getElementById('tpStopIcon').style.display = '';
+      document.getElementById('tpRecDot').className = 'tp-rec-dot recording';
+    } catch (err) { _tpShowError(err.message); }
+  }
+}
 
 window.addEventListener('resize', () => {
   if (document.getElementById('tasmeeProPanel').style.display === 'none') return;

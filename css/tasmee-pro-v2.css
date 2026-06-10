@@ -117,10 +117,11 @@
   will-change: color, filter;
 }
 .tpv2-word.masked { color: transparent; text-shadow: none; }
-/* peek: ghost of the hidden words */
+/* peek: hidden words become readable ghosts (clearly distinct from
+   revealed ink, but no blur — must stay legible on phones) */
 .tpv2-page.peek .tpv2-word.masked {
-  color: var(--text-primary);
-  opacity: 0.30; filter: blur(2.5px);
+  color: var(--text-secondary);
+  opacity: 0.62;
 }
 /* reveal moment */
 .tpv2-word.just-revealed { animation: tpv2-word-in 0.6s cubic-bezier(0.22,1,0.36,1); }
@@ -145,23 +146,21 @@
   30% { background: rgba(217,64,64,0.22); border-radius: 4px; }
 }
 
-/* ── Ayah medallion (always visible, digits enclosed via overlay) ── */
+/* ── Ayah medallion — the font ligates digits into the numbered sign.
+     Also the tap target for "start from this ayah". ────────────────── */
 .tpv2-marker {
-  position: relative;
   font-family: 'MadinahMarkers', 'ScheherazadeLocal', serif;
   color: var(--gold);
-  font-size: 1.18em;
+  font-size: 1.05em;
   flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: color 0.4s ease, transform 0.4s ease;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0.08em 0.12em;
+  transition: color 0.4s ease, transform 0.4s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
-.tpv2-marker-glyph { line-height: 1; }
-.tpv2-marker-num {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.40em; font-weight: 700; line-height: 1;
-  padding-bottom: 0.18em;
-  color: inherit;
+.tpv2-marker:hover, .tpv2-marker:active {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 2px var(--accent-border);
 }
 /* non-recited ornaments inside the text flow (۞, sajdah…) */
 .tpv2-ornament {

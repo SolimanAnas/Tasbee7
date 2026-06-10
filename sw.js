@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v37"; // v37: fix azkar_of {target} literal showing in UI
+const CACHE_NAME = "zad-muslim-v38"; // v38: quran-t.html Tasmee' v2 (text-rendered masking)
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   "./index.html",
   "./404.html",
   "./pages/quran.html",
+  "./pages/quran-t.html",
   "./pages/quran-text.html",
   "./pages/audio.html",
   "./pages/radio.html",
@@ -30,6 +31,7 @@ const STATIC_ASSETS = [
   "./css/style.css",
   "./css/quran-v4.css",
   "./css/tasmee.css",
+  "./css/tasmee-pro-v2.css",
 
   // ===== Core JS =====
   "./data/cities.js",
@@ -67,6 +69,7 @@ const STATIC_ASSETS = [
   "./js/quran/download.js",
   "./js/quran/init.js",
   "./js/quran/tasmee.js",
+  "./js/quran/tasmee-pro-v2.js",
   "./js/quran/tasmee-dashboard.js",
   "./js/quran/tasmee-review.js",
 
