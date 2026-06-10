@@ -381,6 +381,84 @@
     .toast.show {
       transform: translateX(-50%) translateY(0);
     }
+
+    /* =======================================================
+       ✦ UI/UX UPLIFT — "On-Air" live radio
+       Drives the live visuals off the existing
+       .live-indicator.playing class via :has() — no JS change.
+       ======================================================= */
+    @keyframes rUp { from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+    .header      { animation:rUp .5s cubic-bezier(.22,1,.36,1) both; }
+    .picker-card { animation:rUp .55s .07s cubic-bezier(.22,1,.36,1) both; }
+    .card.now    { animation:rUp .6s .15s cubic-bezier(.22,1,.36,1) both; }
+
+    /* Hero "now playing" card */
+    .card.now {
+      position:relative; overflow:hidden; padding:46px 22px 40px;
+      background:
+        radial-gradient(120% 80% at 50% 16%, color-mix(in srgb, var(--accent-main) 15%, transparent), transparent 58%),
+        var(--glass);
+    }
+
+    /* Station name */
+    .nowStation { font-size:27px; line-height:1.35; letter-spacing:.3px; }
+
+    /* LIVE badge */
+    .live-indicator {
+      gap:9px; font-size:12.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+      padding:6px 15px; border-radius:999px; width:fit-content; margin:6px auto 18px;
+      background:color-mix(in srgb, var(--text-secondary) 14%, transparent);
+      color:var(--text-secondary); transition:background .3s, color .3s;
+    }
+    .live-indicator.playing {
+      background:color-mix(in srgb, var(--live-color) 16%, transparent);
+      color:var(--live-color);
+    }
+    .pulse-dot { width:9px; height:9px; }
+
+    /* Equalizer — animates only when on air */
+    .eq { display:flex; align-items:flex-end; justify-content:center; gap:4px; height:26px; margin:-6px 0 18px; opacity:0; transition:opacity .3s; }
+    .eq span { width:4px; height:6px; border-radius:2px; background:var(--accent-main); }
+    .card.now:has(.live-indicator.playing) .eq { opacity:.9; }
+    .card.now:has(.live-indicator.playing) .eq span { animation:eqJump .9s ease-in-out infinite; }
+    .eq span:nth-child(1){ animation-delay:0s; }   .eq span:nth-child(2){ animation-delay:.18s; }
+    .eq span:nth-child(3){ animation-delay:.34s; }  .eq span:nth-child(4){ animation-delay:.46s; }
+    .eq span:nth-child(5){ animation-delay:.22s; }
+    @keyframes eqJump { 0%,100%{height:6px;} 50%{height:24px;} }
+
+    /* Play button — bigger, gradient, glowing; emits radio-wave rings when live */
+    .controls { gap:26px; }
+    .play-pause-btn {
+      width:86px; height:86px;
+      background:linear-gradient(145deg, color-mix(in srgb, var(--accent-main) 86%, #fff), var(--accent-main));
+      box-shadow:0 12px 32px -6px color-mix(in srgb, var(--accent-main) 70%, transparent), inset 0 2px 0 rgba(255,255,255,.28);
+      transition:transform .15s ease, box-shadow .3s ease;
+    }
+    .play-pause-btn:active { transform:scale(.93); }
+    .play-pause-btn::before, .play-pause-btn::after {
+      content:''; position:absolute; inset:0; border-radius:50%;
+      border:2px solid var(--accent-main); opacity:0; pointer-events:none;
+    }
+    .card.now:has(.live-indicator.playing) .play-pause-btn::before { animation:wave 2.2s ease-out infinite; }
+    .card.now:has(.live-indicator.playing) .play-pause-btn::after  { animation:wave 2.2s ease-out infinite 1.1s; }
+    @keyframes wave { 0%{opacity:.5; transform:scale(1);} 100%{opacity:0; transform:scale(2.05);} }
+
+    /* Favourite button */
+    .action-btn { width:54px; height:54px; transition:.2s; }
+    .action-btn:active { transform:scale(.9); }
+    .action-btn.active {
+      color:var(--live-color); border-color:var(--live-color);
+      background:color-mix(in srgb, var(--live-color) 12%, transparent);
+    }
+    .action-btn.active svg { filter:drop-shadow(0 0 6px color-mix(in srgb, var(--live-color) 50%, transparent)); }
+
+    .custom-select-trigger { transition:transform .15s ease, border-color .2s ease; }
+    .custom-select-trigger:active { transform:scale(.99); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .header,.picker-card,.card.now,.eq span,
+      .play-pause-btn::before,.play-pause-btn::after { animation:none !important; }
+    }
   </style>
 </head>
 
@@ -447,6 +525,8 @@
         <span id="liveText" data-i18n="radio_stopped">متوقف</span>
       </div>
 
+      <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
       <div class="controls">
         <button class="action-btn" id="favBtn" title="إضافة للمفضلة" data-i18n-title="radio_add_fav">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -467,7 +547,7 @@
       </div>
     </div>
 
-    <audio id="audio" preload="metadata" playsinline crossorigin="anonymous"></audio>
+    <audio id="audio" preload="none" playsinline></audio>
   </div>
 
   <div class="modal-overlay" id="favModal" onclick="if(event.target === this) closeFavModal()">
@@ -559,6 +639,7 @@
       nowStation.innerText = stationName;
       updateMediaSession(stationName);
       checkFavStatus(url);
+      audio.dataset.loadedUrl = url;
     }
 
     // --- Play/Pause with loading state and error handling ---
@@ -572,6 +653,10 @@
 
       if (shouldPlay) {
         userWantsPlay = true;
+        // Lazy-connect to the stream the first time the user plays this station.
+        if (currentStation && audio.dataset.loadedUrl !== currentStation.url) {
+          loadStream(currentStation.url, currentStation.name);
+        }
         playBtn.classList.add('loading');
         const playPromise = audio.play();
         if (playPromise !== undefined) {
@@ -627,9 +712,12 @@
       playBtn.classList.add('loading');
     });
     audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
       playBtn.classList.remove('loading');
       updateUI(false);
+      // Only surface an error if the user actually tried to play — ignore idle/
+      // preload errors so opening the page never shows "failed to connect".
+      if (!userWantsPlay) return;
+      console.error('Audio error:', e);
       showToast(t('radio_playback_error'));
     });
 
@@ -716,9 +804,19 @@
       selectedText.textContent = dispName;
       nowStation.textContent = dispName;
       localStorage.setItem('lastStation', JSON.stringify(station));
-      loadStream(station.url, station.name);
-      updateUI(false); // ensure UI shows stopped until user clicks play
+      // Lazy-connect: don't touch the audio stream until the user presses play.
+      // Auto-loading on open caused a spurious "failed to connect" for streams
+      // without CORS/preload support.
+      const wasPlaying = userWantsPlay;
+      audio.pause();
+      if (hls) { hls.destroy(); hls = null; }
+      audio.dataset.loadedUrl = '';
+      // NB: don't register mediaSession here (it would expose a 'play' handler
+      // that can auto-fire). It's set in loadStream() when the user plays.
+      checkFavStatus(station.url);
       playBtn.classList.remove('loading');
+      if (wasPlaying) { togglePlay(true); }   // switching while playing → keep playing
+      else { updateUI(false); }               // idle → just show stopped
       // Close dropdown
       document.getElementById('dropdownOptions').classList.remove('open');
     }

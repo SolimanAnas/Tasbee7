@@ -6,13 +6,11 @@
   <meta name="theme-color" content="#0e201b" id="metaThemeColor">
   <title>قراءة الكتاب | زاد المسلم</title>
   <style>
-    /* ========== الخطوط المحلية (تعمل دون اتصال) ========== */
     @font-face{ font-family:'Tajawal'; src:url('../fonts/Tajawal.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
     @font-face{ font-family:'Tajawal'; src:url('../fonts/Tajawal.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
     @font-face{ font-family:'Amiri'; src:url('../fonts/Amiri.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
     @font-face{ font-family:'Amiri'; src:url('../fonts/Amiri.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
 
-    /* ========== الثيمات ========== */
     :root{ --meta:#0e201b; }
     [data-theme="light"]{
       --bg:#fcf8ef; --bg2:#ece2cf; --card-bg:#fffdf7;
@@ -56,7 +54,6 @@
       color:var(--text); transition:background .35s ease, color .35s ease;
       line-height:1.6; overflow-x:hidden; min-height:100dvh;
     }
-    /* زخرفة إسلامية خفيفة (رُبع الحزب) */
     body::before{
       content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
       opacity:var(--pattern-opacity);
@@ -70,7 +67,6 @@
       background:linear-gradient(90deg, var(--accent), var(--gold)); transition:width .1s ease;
     }
 
-    /* ========== الشريط العلوي (هوية ثابتة خضراء/ذهبية) ========== */
     header{
       background:linear-gradient(135deg, #0e201b 0%, #0a3f2e 55%, #0e201b 100%);
       color:#fff; padding:max(10px, env(safe-area-inset-top)) 14px 11px;
@@ -146,13 +142,11 @@
 
     mark{ background:var(--gold-soft); color:var(--gold); padding:0 3px; border-radius:4px; font-weight:700; }
 
-    /* وضع القراءة */
     body.reading-mode .card{ background:transparent; box-shadow:none; border:none; padding:22px 4px; border-bottom:1px solid var(--border); border-radius:0; }
     body.reading-mode .card.hadith-card::before{ display:none; }
     body.reading-mode .card-arabic{ font-size:2.05rem; line-height:2.3; }
     body.reading-mode .card-ref{ font-size:.9rem; }
 
-    /* ========== الشريط السفلي ========== */
     .bottom-nav{
       position:fixed; bottom:max(18px, env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
       background:var(--glass-bg); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
@@ -168,7 +162,6 @@
     }
     .custom-select-btn::after{ content:" ▾"; color:var(--gold); font-size:.8rem; }
 
-    /* زر الأعلى */
     .scroll-top{
       position:fixed; bottom:96px; right:15px; background:var(--accent); color:#fff;
       width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -178,7 +171,6 @@
     .scroll-top.visible{ opacity:1; pointer-events:auto; }
     .scroll-top:active{ transform:scale(.9); }
 
-    /* التنبيه */
     .toast{
       position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--toast-bg);
       color:var(--toast-color); padding:11px 26px; border-radius:40px; font-weight:bold; font-size:.9rem;
@@ -187,7 +179,6 @@
     }
     .toast.show{ opacity:1; }
 
-    /* المودال (ورقة سفلية) */
     .modal-overlay{
       position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(5px);
       z-index:9999; opacity:0; pointer-events:none; transition:.3s; display:flex; align-items:flex-end; justify-content:center;
@@ -223,6 +214,99 @@
     .group-head::before, .group-head::after{ content:""; flex:1; height:1px; background:var(--border); }
 
     @keyframes spin{ to{ transform:rotate(360deg); } }
+
+    /* Book grid - luxury editorial style */
+    .book-grid{
+      display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;
+    }
+    .book-card{
+      position:relative; border-radius:14px; overflow:hidden;
+      background:var(--card-bg); border:1px solid var(--border);
+      box-shadow:var(--card-shadow);
+      transition:transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s;
+      cursor:pointer; text-decoration:none; color:var(--text);
+      display:flex; flex-direction:column;
+    }
+    .book-card:active{ transform:scale(.97); }
+
+    .book-card-cover{
+      position:relative; width:100%; aspect-ratio:3/2; overflow:hidden;
+    }
+    .book-card-cover::before{
+      content:""; position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 30% 20%, var(--gold-soft) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, var(--accent-bg) 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg2) 0%, var(--card-bg) 100%);
+    }
+    .book-card-cover::after{
+      content:""; position:absolute; inset:8px;
+      border:1px solid var(--border); border-radius:12px;
+      background:repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 8px,
+        var(--gold-soft) 8px,
+        var(--gold-soft) 9px
+      );
+      opacity:.3;
+    }
+
+    .book-card-icon{
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      width:44px; height:44px; border-radius:50%;
+      background:linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(0,0,0,.2);
+      z-index:2;
+    }
+    .book-card-icon::before{
+      content:""; width:20px; height:20px;
+      background:currentColor; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M19 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z'/%3E%3C/svg%3E") center/contain no-repeat;
+      -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M19 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z'/%3E%3C/svg%3E") center/contain no-repeat;
+      color:#fff;
+    }
+
+    .book-card-body{
+      padding:10px 8px; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .book-card-title{
+      font-family:'Amiri', serif; font-size:.9rem; font-weight:bold; line-height:1.3;
+      text-align:center; color:var(--text);
+    }
+    .book-card-sub{
+      font-size:.75rem; color:var(--text-muted); margin-top:4px;
+    }
+
+    /* Decorative corner flourish */
+    .book-card-flourish{
+      position:absolute; top:8px; right:8px; width:22px; height:22px;
+      border-top:2px solid var(--gold); border-right:2px solid var(--gold);
+      border-radius:0 6px 0 0; opacity:.4; z-index:3;
+    }
+
+    @media (min-width:480px){
+      .book-grid{ grid-template-columns:repeat(3, 1fr); }
+    }
+
+    /* Advanced search button */
+    .advanced-search-btn{
+      width:100%; margin-bottom:20px; background:var(--card-bg);
+      color:var(--text); border:1px solid var(--border); border-radius:18px;
+      padding:18px; font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold;
+      display:flex; align-items:center; justify-content:center; gap:12px; cursor:pointer;
+      box-shadow:var(--card-shadow); transition:transform .2s, box-shadow .2s;
+      position:relative; overflow:hidden;
+    }
+    .advanced-search-btn::before{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(135deg, var(--accent-bg) 0%, transparent 50%);
+      opacity:0; transition:opacity .2s;
+    }
+    .advanced-search-btn:active{ transform:scale(.98); }
+    .advanced-search-btn:active::before{ opacity:1; }
+    .advanced-search-btn svg{ stroke:var(--gold); position:relative; z-index:1; }
+    .advanced-search-btn span{ position:relative; z-index:1; }
   </style>
 </head>
 <body data-theme="light">
@@ -287,15 +371,12 @@
 <script>
   let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
 
-  // مسار ملفات الكتب
   const HADITH_PATH = '../assets/hadith/';
-  // الكتب الأساسية (صيغة الحديث المرقّم/المُدرّج)
   const MAIN_BOOKS = [
     { id:'bukhari', name:'صحيح البخاري' }, { id:'muslim', name:'صحيح مسلم' },
     { id:'abudawud', name:'سنن أبي داود' }, { id:'tirmidhi', name:'جامع الترمذي' },
     { id:'nasai', name:'سنن النسائي' }, { id:'ibnmajah', name:'سنن ابن ماجه' }
   ];
-  // كتب أخرى (صيغة document_id/metadata/content)
   const OTHER_BOOKS = [
     { id:'riyad_assalihin', name:'رياض الصالحين' },
     { id:'bulugh_almaram', name:'بلوغ المرام' },
@@ -308,7 +389,6 @@
   const BOOK_NAMES = {};
   [...MAIN_BOOKS, ...OTHER_BOOKS].forEach(b => BOOK_NAMES[b.id] = b.name);
 
-  // ================= الثيمات =================
   function applyTheme() {
     const t = localStorage.getItem('appTheme') || 'light';
     document.body.setAttribute('data-theme', t);
@@ -320,7 +400,6 @@
   }
   function setTheme(t) { localStorage.setItem('appTheme', t); applyTheme(); }
 
-  // ================= أدوات الواجهة =================
   function showToast(msg, duration=2000) {
     const toast = document.getElementById('toastMsg');
     toast.textContent = msg; toast.classList.add('show');
@@ -328,7 +407,6 @@
     showToast._t = setTimeout(() => toast.classList.remove('show'), duration);
   }
 
-  // نسخ موثوق يعمل دون اتصال (file:// / Capacitor)
   function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => showToast('📋 تم النسخ بنجاح')).catch(() => fallbackCopy(text));
@@ -344,7 +422,6 @@
     } catch (e) { showToast('❌ تعذّر النسخ'); }
   }
 
-  // ================= المحفوظات =================
   function getBookmarkKey() { return 'hadith_bookmarks_' + App.bookId; }
   function loadBookmarks() { try { App.bookmarks = JSON.parse(localStorage.getItem(getBookmarkKey())) || []; } catch(e){ App.bookmarks=[]; } }
   function saveBookmarks() { localStorage.setItem(getBookmarkKey(), JSON.stringify(App.bookmarks)); }
@@ -357,7 +434,6 @@
     saveBookmarks(); render();
   }
 
-  // ================= منطق أساسي =================
   function getHadithGrade(bookId, grades) {
     if (bookId === 'bukhari' || bookId === 'muslim') return { text:'صحيح', isOk:true };
     if (!grades || grades.length === 0) return { text:'غير محدد', isOk:true };
@@ -374,7 +450,7 @@
 
   const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
   const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
-  const ORDINALS = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون','الحادي والثلاثون','الثاني والثلاثون','الثالث والثلاثون','الرابع والثلاثون','الخامس والثلاثون','السادس والثلاثون','السابع والثلاثون','الثامن والثلاثون','التاسع والثلاثون','الأربعون'];
+  const ORDINALS = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون','الحادي والثلاثون','الثاني والثلاثون','الثالث والثلاثون','الرابع والثلاثون','الخامس والثلاثون','السادس والثلاثون','السابع والثلاثون','الثامن والثلاثون','التاسع والأربعون','الأربعون'];
   function toArabicOrdinal(n) { return ORDINALS[n-1] || n; }
 
   function normalizeText(text) {
@@ -399,7 +475,6 @@
     App.bookId = urlParams.get('book');
     const targetSectionNum = urlParams.get('section');
 
-    // الشاشة الرئيسية للمكتبة (بدون كتاب محدد)
     if (!App.bookId) {
       document.getElementById('book-title').textContent = "المكتبة الحديثية";
       document.getElementById('main-title').textContent = "اختر كتاباً للقراءة";
@@ -407,26 +482,29 @@
       const si = document.getElementById('search-input');
       si.disabled = true; si.placeholder = "اختر الكتاب أولاً...";
 
-      const advancedBtn = `
-        <button onclick="window.location.href='hadith.html'" style="width:100%; margin-bottom:6px; background:var(--card-bg); color:var(--text); border:1px solid var(--border); border-radius:16px; padding:15px; font-family:'Tajawal', sans-serif; font-size:1.05rem; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:var(--card-shadow);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="width:20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            البحث المتقدم في جميع الكتب
-        </button>`;
       const bookCard = b => `
-        <a href="?book=${b.id}" class="card" style="text-align:center; display:block; text-decoration:none;">
-            <div style="font-size:1.5rem; font-weight:bold; color:var(--accent); padding:6px; font-family:'Amiri', serif;">${b.name}</div>
-            <div style="color:var(--text-muted); font-size:.88rem;">تصفح أبواب وأحاديث الكتاب</div>
+        <a href="?book=${b.id}" class="book-card">
+            <div class="book-card-cover">
+                <div class="book-card-flourish"></div>
+                <div class="book-card-icon"></div>
+            </div>
+            <div class="book-card-body">
+                <div class="book-card-title">${b.name}</div>
+            </div>
         </a>`;
+
       const mainHtml = MAIN_BOOKS.map(bookCard).join('');
       const otherHtml = OTHER_BOOKS.map(bookCard).join('');
+
       document.getElementById('content-area').innerHTML = `
-        <div>
-          ${advancedBtn}
-          <div class="group-head">الكتب الأمّهات</div>
-          <div class="cards-container">${mainHtml}</div>
-          <div class="group-head">كتب أخرى</div>
-          <div class="cards-container">${otherHtml}</div>
-        </div>`;
+        <button class="advanced-search-btn" onclick="window.location.href='hadith.html'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>البحث المتقدم في جميع الكتب</span>
+        </button>
+        <div class="group-head">الكتب الأمّهات</div>
+        <div class="book-grid">${mainHtml}</div>
+        <div class="group-head">كتب أخرى</div>
+        <div class="book-grid">${otherHtml}</div>`;
       return false;
     }
 
@@ -438,7 +516,6 @@
       if (!bookRes.ok) throw new Error("ملف الكتاب غير موجود");
       const bookJson = await bookRes.json();
 
-      // استخراج السجلات بصرف النظر عن الصيغة
       const records = Array.isArray(bookJson) ? bookJson : (bookJson.hadiths || bookJson.data || bookJson.records || []);
       const first = records[0] || {};
       const isNewFormat = !!(first.content || (first.metadata && first.metadata.chapter_id !== undefined));
@@ -446,7 +523,6 @@
       const sectionsMap = {};
 
       if (isNewFormat) {
-        // صيغة: { metadata:{ book_title_ar, chapter_id, chapter_title_ar, hadith_number_in_book }, content:{ arabic_text } }
         App.bookName = (first.metadata && first.metadata.book_title_ar) || BOOK_NAMES[App.bookId] || App.bookId;
         records.forEach(rec => {
           const md = rec.metadata || {}, ct = rec.content || {};
@@ -461,7 +537,6 @@
           });
         });
       } else {
-        // الصيغة الأصلية: { hadiths:[{ text, hadithnumber, reference:{book}, grades }], metadata:{sections} }
         App.bookName = (translatedIndex[App.bookId] && translatedIndex[App.bookId].name) || BOOK_NAMES[App.bookId] || App.bookId;
         const metaSections = (translatedIndex[App.bookId] && translatedIndex[App.bookId].sections) || (bookJson.metadata && bookJson.metadata.sections) || {};
         for (let key in metaSections) {
@@ -472,7 +547,6 @@
         records.forEach(h => {
           const gradeInfo = getHadithGrade(App.bookId, h.grades);
           const arText = h.text || h.arabic || "";
-          // كتب معدولة (النواوي الأربعون، القدسية): كل حديث باب مستقل
           const isNumberedBook = (App.bookId === 'nawawi40' || App.bookId === 'qudsi40');
           let secNum, secTitle;
           if (isNumberedBook) {
@@ -568,138 +642,111 @@
 
       if (results.length === 0) {
         document.getElementById('content-area').innerHTML = '<div class="empty-note"><span class="icn">🔍</span>لا توجد نتائج مطابقة في هذا الكتاب.</div>';
-        return;
-      }
-      let hre; try { hre = buildHighlightRegex(rawInput); } catch(e) { hre = null; }
-      document.getElementById('content-area').innerHTML = `<div class="cards-container">` + results.map(r => {
-        let text = r.ar;
-        if (hre) { try { text = r.ar.replace(hre, '<mark>$1</mark>'); } catch(e){} }
-        const badgeClass = r.gradeText === 'غير محدد' ? "badge-neutral" : (r.isOk ? "badge-ok" : "badge-warn");
-        return `
-        <div class="card hadith-card ${r.isOk ? '' : 'warn'}" onclick="jumpTo(${r.sIdx}, ${r.iIdx})" style="cursor:pointer;">
-          <div style="font-size:.85rem; color:var(--gold); font-weight:bold; margin-bottom:8px;">${r.title}</div>
-          <div class="card-arabic" style="font-size:1.45rem; margin-bottom:10px;">${text}</div>
-          <div class="card-ref"><span>رقم: <b>${r.number}</b> &nbsp;<span class="${badgeClass}">${r.gradeText}</span></span></div>
-        </div>`;
-      }).join('') + `</div>`;
-    }, 350);
-  }
-
-  function jumpTo(sIdx, iIdx) {
-    App.currentIdx = sIdx; App.isSearchMode = false;
-    document.getElementById('search-input').value = '';
-    render();
-    setTimeout(() => {
-      const el = document.querySelector(`.card[data-item="${iIdx}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior:'smooth', block:'center' });
-        el.style.transition = 'background-color .3s';
-        el.style.backgroundColor = 'var(--accent-bg)';
-        setTimeout(() => { el.style.backgroundColor = ''; }, 2000);
+      } else {
+        const highlightRegex = buildHighlightRegex(rawInput);
+        const html = results.map(r => {
+          const badgeClass = r.gradeText === 'غير محدد' ? "badge-neutral" : (r.isOk ? "badge-ok" : "badge-warn");
+          const highlighted = r.ar.replace(highlightRegex, '<mark>$1</mark>');
+          return `
+          <div class="card hadith-card ${r.isOk ? '' : 'warn'}" data-item="${r.iIdx}" onclick="goToResult(${r.sIdx},${r.iIdx})" style="cursor:pointer">
+            <div class="card-arabic">${highlighted}</div>
+            <div class="card-ref">
+              <span>باب: <b>${r.title}</b> &nbsp;رقم: <b>${r.number}</b> &nbsp;<span class="${badgeClass}">${r.gradeText}</span></span>
+            </div>
+          </div>`;
+        }).join('');
+        document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
       }
     }, 300);
   }
 
-  function selectSection(idx) { App.currentIdx = idx; App.isSearchMode = false; closeMenu(); document.getElementById('search-input').value = ''; render(); }
-  function nav(dir) {
-    if (dir === 'next' && App.currentIdx < App.data.length-1) App.currentIdx++;
-    if (dir === 'prev' && App.currentIdx > 0) App.currentIdx--;
-    App.isSearchMode = false; render();
+  function goToResult(sIdx, iIdx) {
+    document.getElementById('search-input').value = '';
+    App.isSearchMode = false;
+    App.currentIdx = sIdx;
+    render();
+    setTimeout(() => {
+      const card = document.querySelector(`.card[data-item="${iIdx}"]`);
+      if (card) card.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 100);
   }
 
-  function openMenu() {
-    const items = document.querySelectorAll('#menuList .menu-item');
-    items.forEach((item, idx) => {
-      const active = (idx === App.currentIdx && !App.isSearchMode);
-      item.classList.toggle('active-item', active);
-      if (active) setTimeout(() => item.scrollIntoView({ block:'center' }), 10);
-    });
-    document.getElementById('menuModal').classList.add('active');
+  function selectSection(idx) {
+    App.currentIdx = idx;
+    App.isSearchMode = false;
+    render();
+    closeMenu();
   }
+
+  function nav(dir) {
+    if (App.data.length === 0) return;
+    if (dir === 'prev') App.currentIdx = Math.max(0, App.currentIdx - 1);
+    else App.currentIdx = Math.min(App.data.length - 1, App.currentIdx + 1);
+    render();
+  }
+
+  function openMenu() { document.getElementById('menuModal').classList.add('active'); }
   function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
 
-  function showBookmarks() {
-    const bmList = document.getElementById('bookmarkList');
-    bmList.innerHTML = '';
+  function openBookmarkModal() {
+    const list = document.getElementById('bookmarkList');
     if (App.bookmarks.length === 0) {
-      bmList.innerHTML = '<div class="empty-note"><span class="icn">☆</span>لا توجد أحاديث محفوظة في هذا الكتاب بعد.</div>';
+      list.innerHTML = '<div class="empty-note"><span class="icn">☆</span>لا توجد أحاديث محفوظة بعد.</div>';
     } else {
-      App.bookmarks.forEach((bm) => {
-        const sec = App.data[bm.sectionIdx];
-        if (sec && sec.items[bm.itemIdx]) {
-          const item = sec.items[bm.itemIdx];
-          const div = document.createElement('div');
-          div.className = 'menu-item'; div.style.flexDirection = 'column'; div.style.alignItems = 'flex-start';
-          div.innerHTML = `<div style="font-weight:bold;color:var(--gold);">${sec.title}</div>
-            <div style="font-size:1.15rem; margin-top:6px; font-family:'Amiri', serif;">${item.ar.substring(0, 90)}…</div>
-            <div style="font-size:.8rem; color:var(--text-muted); margin-top:5px;">رقم: ${item.number}</div>`;
-          div.onclick = () => { closeBookmarkModal(); jumpTo(bm.sectionIdx, bm.itemIdx); };
-          bmList.appendChild(div);
-        }
-      });
+      list.innerHTML = App.bookmarks.map(b => {
+        const sec = App.data[b.sectionIdx];
+        if (!sec || !sec.items[b.itemIdx]) return '';
+        const item = sec.items[b.itemIdx];
+        return `
+        <div class="menu-item" onclick="goToBookmark(${b.sectionIdx},${b.itemIdx})">
+          <span style="flex:1; text-align:right; font-family:'Amiri',serif; line-height:1.6;">${item.ar.substring(0, 80)}...</span>
+          <span class="count">${sec.title}</span>
+        </div>`;
+      }).join('');
     }
     document.getElementById('bookmarkModal').classList.add('active');
   }
   function closeBookmarkModal() { document.getElementById('bookmarkModal').classList.remove('active'); }
-
-  // ================= التمرير =================
-  let scrollTimer;
-  function getScrollKey() { return `hadith_scrollPos_${App.bookId}`; }
-  window.addEventListener('scroll', () => {
-    const btn = document.getElementById('scrollTopBtn');
-    btn.classList.toggle('visible', window.scrollY > 300);
-    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    document.getElementById("scroll-progress").style.width = (height > 0 ? (winScroll / height) * 100 : 0) + "%";
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => { if (App.bookId && !App.isSearchMode) localStorage.setItem(getScrollKey(), window.scrollY); }, 500);
-  }, { passive:true });
-
-  function toggleReadingMode() {
-    document.body.classList.toggle('reading-mode');
-    localStorage.setItem('readingMode', document.body.classList.contains('reading-mode'));
+  function goToBookmark(sIdx, iIdx) {
+    App.currentIdx = sIdx;
+    App.isSearchMode = false;
+    render();
+    closeBookmarkModal();
+    setTimeout(() => {
+      const card = document.querySelector(`.card[data-item="${iIdx}"]`);
+      if (card) card.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 100);
   }
 
-  async function init() {
+  document.addEventListener('DOMContentLoaded', async () => {
     applyTheme();
-    if (localStorage.getItem('readingMode') === 'true') document.body.classList.add('reading-mode');
-
-    const isBookLoaded = await loadHadithData();
-    if (isBookLoaded && App.data.length > 0) {
-      loadBookmarks();
-      buildMenuAndSearchIndex();
-      const lastSecKey = `hadith_lastSection_${App.bookId}`;
-      const urlParams = new URLSearchParams(window.location.search);
-      const lastSection = localStorage.getItem(lastSecKey);
-      if (!urlParams.get('section') && lastSection && !isNaN(parseInt(lastSection)) && parseInt(lastSection) < App.data.length) {
-        App.currentIdx = parseInt(lastSection);
-      }
-      render();
-      const savedPos = localStorage.getItem(getScrollKey());
-      if (savedPos) setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 150);
-
-      const origNav = nav, origSelect = selectSection;
-      window.nav = (dir) => { origNav(dir); localStorage.setItem(lastSecKey, App.currentIdx); };
-      window.selectSection = (idx) => { origSelect(idx); localStorage.setItem(lastSecKey, App.currentIdx); };
-    }
+    const ok = await loadHadithData();
+    if (ok) { loadBookmarks(); buildMenuAndSearchIndex(); render(); }
 
     document.getElementById('search-input').addEventListener('input', handleSearch);
-    document.getElementById('readingModeBtn').addEventListener('click', toggleReadingMode);
-    document.getElementById('bookmarkListBtn').addEventListener('click', showBookmarks);
-  }
 
-  // تمرير اللمس: لا نتنقل إلا عند سحب أفقي واضح (يمنع التنقل العرضي أثناء التمرير الرأسي)
-  let touchX = 0, touchY = 0;
-  document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].screenX; touchY = e.changedTouches[0].screenY; }, { passive:true });
-  document.addEventListener('touchend', e => {
-    const dx = touchX - e.changedTouches[0].screenX;
-    const dy = touchY - e.changedTouches[0].screenY;
-    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.8 && !App.isSearchMode) {
-      dx > 0 ? nav('prev') : nav('next');
-    }
-  }, { passive:true });
+    document.getElementById('readingModeBtn').addEventListener('click', () => {
+      document.body.classList.toggle('reading-mode');
+      showToast(document.body.classList.contains('reading-mode') ? '📖 وضع القراءة' : '📄 الوضع العادي');
+    });
 
-  init();
+    document.getElementById('bookmarkListBtn').addEventListener('click', openBookmarkModal);
+
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      scrollBtn.classList.toggle('visible', window.scrollY > 300);
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+      document.getElementById('scroll-progress').style.width = pct + '%';
+    });
+
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+    document.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(diff) > 80) nav(diff < 0 ? 'next' : 'prev');
+    });
+  });
 </script>
 </body>
 </html>
