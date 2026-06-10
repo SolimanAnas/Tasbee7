@@ -231,9 +231,7 @@
 
     .book-card-cover{
       position:relative; width:100%; aspect-ratio:3/2; overflow:hidden;
-    }
-    .book-card-cover::before{
-      content:""; position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
       background:
         radial-gradient(circle at 30% 20%, var(--gold-soft) 0%, transparent 50%),
         radial-gradient(circle at 70% 80%, var(--accent-bg) 0%, transparent 50%),
@@ -241,16 +239,17 @@
     }
     .book-card-cover::after{
       content:""; position:absolute; inset:8px;
-      border:1px solid var(--border); border-radius:12px;
-      background:repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 8px,
-        var(--gold-soft) 8px,
-        var(--gold-soft) 9px
-      );
-      opacity:.3;
+      border:1px solid var(--border); border-radius:50%;
+      opacity:.3; pointer-events:none;
     }
+
+    .book-card-thumb{
+      width:72%; height:72%; border-radius:50%; object-fit:cover;
+      filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));
+      transition:transform .3s cubic-bezier(.4,0,.2,1);
+      z-index:2;
+    }
+    .book-card:active .book-card-thumb{ transform:scale(1.05); }
 
     .book-card-icon{
       position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -307,6 +306,68 @@
     .advanced-search-btn:active::before{ opacity:1; }
     .advanced-search-btn svg{ stroke:var(--gold); position:relative; z-index:1; }
     .advanced-search-btn span{ position:relative; z-index:1; }
+
+    /* =======================================================
+       ✦ UI/UX UPLIFT — refined hadith library & reading
+       Additive polish over the existing themed design.
+       ======================================================= */
+
+    /* Orchestrated, staggered load reveal */
+    @keyframes hvRise { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .section-header, .group-head, .advanced-search-btn,
+    .cards-container .card, .book-grid .book-card {
+      animation: hvRise .5s cubic-bezier(.22,1,.36,1) both;
+    }
+    .cards-container .card:nth-child(1),  .book-grid .book-card:nth-child(1)  { animation-delay:.05s; }
+    .cards-container .card:nth-child(2),  .book-grid .book-card:nth-child(2)  { animation-delay:.10s; }
+    .cards-container .card:nth-child(3),  .book-grid .book-card:nth-child(3)  { animation-delay:.15s; }
+    .cards-container .card:nth-child(4),  .book-grid .book-card:nth-child(4)  { animation-delay:.20s; }
+    .cards-container .card:nth-child(5),  .book-grid .book-card:nth-child(5)  { animation-delay:.25s; }
+    .cards-container .card:nth-child(6),  .book-grid .book-card:nth-child(6)  { animation-delay:.30s; }
+    .cards-container .card:nth-child(7),  .book-grid .book-card:nth-child(7)  { animation-delay:.35s; }
+    .cards-container .card:nth-child(8),  .book-grid .book-card:nth-child(8)  { animation-delay:.40s; }
+    .cards-container .card:nth-child(n+9), .book-grid .book-card:nth-child(n+9){ animation-delay:.45s; }
+
+    /* Book cards — tactile lift + sheen sweep */
+    .book-card { transition:transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s, border-color .25s; }
+    .book-card-icon { transition:transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s; }
+    .book-card::after {
+      content:""; position:absolute; inset:0; z-index:4; pointer-events:none;
+      background:linear-gradient(115deg, transparent 32%, rgba(255,255,255,.20) 48%, transparent 62%);
+      transform:translateX(-130%); transition:transform .65s ease;
+    }
+    @media (hover:hover) {
+      .book-card:hover { transform:translateY(-4px); box-shadow:0 20px 46px -18px rgba(0,0,0,.46); border-color:var(--gold); }
+      .book-card:hover::after { transform:translateX(130%); }
+      .book-card:hover .book-card-icon { transform:translate(-50%,-50%) scale(1.1); box-shadow:0 8px 22px -4px var(--accent-bg); }
+    }
+    .book-card:active::after { transform:translateX(130%); }
+
+    /* Hadith cards — glowing accent spine + hover float */
+    .card.hadith-card { transition:transform .18s ease, box-shadow .25s; }
+    .card.hadith-card::before {
+      width:5px; border-radius:3px 0 0 3px;
+      background:linear-gradient(180deg, var(--accent), var(--accent-deep));
+      box-shadow:-2px 0 16px -3px var(--accent);
+    }
+    .card.hadith-card.warn::before { box-shadow:-2px 0 16px -3px var(--danger); }
+    @media (hover:hover) {
+      .card.hadith-card:hover { transform:translateY(-2px); box-shadow:0 20px 44px -20px rgba(0,0,0,.42); }
+    }
+
+    /* Refined controls + menu hovers */
+    @media (hover:hover) {
+      .home-btn:hover, .action-btn:hover { background:rgba(255,255,255,.22); }
+      .menu-item:hover { border-color:var(--gold); background:var(--gold-soft); }
+      .card-btn:hover { color:var(--gold); border-color:var(--gold); }
+      .nav-btn:hover { color:var(--accent); }
+    }
+    .card-btn.active { box-shadow:0 0 0 1px var(--gold), 0 4px 12px -4px var(--gold-soft); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .section-header, .group-head, .advanced-search-btn,
+      .cards-container .card, .book-grid .book-card, .book-card::after { animation:none !important; transition:none !important; }
+    }
   </style>
 </head>
 <body data-theme="light">
@@ -482,16 +543,28 @@
       const si = document.getElementById('search-input');
       si.disabled = true; si.placeholder = "اختر الكتاب أولاً...";
 
-      const bookCard = b => `
+      const MAIN_THUMBS = {
+        bukhari: '../assets/thumbnails/6/ImamBukhari1.png',
+        muslim: '../assets/thumbnails/6/ImamMuslim1.png',
+        abudawud: '../assets/thumbnails/6/Abu Dawwod.png',
+        tirmidhi: '../assets/thumbnails/6/Imam_al-Trimdhi.png',
+        nasai: '../assets/thumbnails/6/Nasa\'ie.png',
+        ibnmajah: '../assets/thumbnails/6/Ibn majah.png'
+      };
+
+      const bookCard = b => {
+        const thumb = MAIN_THUMBS[b.id];
+        const coverContent = thumb
+          ? `<img class="book-card-thumb" src="${thumb}" alt="${b.name}" loading="lazy">`
+          : `<div class="book-card-flourish"></div><div class="book-card-icon"></div>`;
+        return `
         <a href="?book=${b.id}" class="book-card">
-            <div class="book-card-cover">
-                <div class="book-card-flourish"></div>
-                <div class="book-card-icon"></div>
-            </div>
+            <div class="book-card-cover">${coverContent}</div>
             <div class="book-card-body">
                 <div class="book-card-title">${b.name}</div>
             </div>
         </a>`;
+      };
 
       const mainHtml = MAIN_BOOKS.map(bookCard).join('');
       const otherHtml = OTHER_BOOKS.map(bookCard).join('');

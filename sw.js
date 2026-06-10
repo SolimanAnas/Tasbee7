@@ -123,6 +123,15 @@ const STATIC_ASSETS = [
   // ===== Background images =====
   "./images/Background-dark.png",
   "./images/Background-light.png",
+  "./images/background-sepia.png",
+
+  // ===== Hadith book thumbnails =====
+  "./assets/thumbnails/6/ImamBukhari1.png",
+  "./assets/thumbnails/6/ImamMuslim1.png",
+  "./assets/thumbnails/6/Abu Dawwod.png",
+  "./assets/thumbnails/6/Imam_al-Trimdhi.png",
+  "./assets/thumbnails/6/Nasa'ie.png",
+  "./assets/thumbnails/6/Ibn majah.png",
 
   // ===== Quran page images =====
   "./img/text-container.png",

@@ -107,6 +107,12 @@
 
   --ease-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
   --ease-smooth: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Background safety net: guarantees a background even if data-theme is an
+     unknown value (e.g. a theme set by another page). The per-theme blocks
+     below override these. */
+  --bg-image: url('images/Background-dark.png');
+  --bg-base: #0F172A;
 }
 
 [data-theme="dark"] {
@@ -1364,9 +1370,19 @@ function closeAllSheets() {
   if(prayerModalInterval) { clearInterval(prayerModalInterval); prayerModalInterval = null; }
 }
 
-function setTheme(mode) {
+const VALID_THEMES = ['light', 'dark', 'sepia', 'plain-dark'];
+// Map any foreign theme (e.g. azkar's "warm", which shares the themeMode key)
+// to a valid index theme so the page never renders with no background / broken colors.
+function normalizeTheme(mode) {
+  if (VALID_THEMES.includes(mode)) return mode;
+  return mode === 'warm' ? 'sepia' : 'light';
+}
+function setTheme(mode, persist = true) {
+  mode = normalizeTheme(mode);
   document.documentElement.setAttribute('data-theme', mode);
-  localStorage.setItem('themeMode', mode);
+  // On load we don't persist (persist=false) so a value set by another page
+  // (e.g. azkar's "warm") is kept for that page rather than overwritten here.
+  if (persist) localStorage.setItem('themeMode', mode);
   document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
   let id = mode === 'light' ? 't-light' : (mode === 'dark' ? 't-dark' : (mode === 'sepia' ? 't-sepia' : 't-plain'));
   document.getElementById(id)?.classList.add('active');
@@ -1410,7 +1426,7 @@ window.addEventListener('load', async () => {
   }
 
   const saved = localStorage.getItem('themeMode');
-  if(!saved) autoTheme(); else setTheme(saved);
+  if(!saved) autoTheme(); else setTheme(saved, false);
 
   const dl = document.querySelector('.cities-datalist-opts');
   if(dl && typeof cityCoordinatesMap !== 'undefined')

@@ -55,15 +55,15 @@ function generateSVG(book) {
     <line x1="25" y1="5" x2="25" y2="45" stroke="${book.accent}" stroke-width="1"/>
   </g>
   
-  <!-- Book name -->
-  <text x="200" y="150" text-anchor="middle" fill="${book.accent}" font-family="'Amiri', 'Traditional Arabic', serif" font-size="28" font-weight="bold">${book.name}</text>
+  <!-- Book name - Thuluth calligraphy style -->
+  <text x="200" y="150" text-anchor="middle" fill="${book.accent}" font-family="'Thuluth', 'AMiri', 'Traditional Arabic', serif" font-size="32" font-weight="bold" letter-spacing="1">${book.name}</text>
   
-  <!-- Subtitle line -->
-  <line x1="120" y1="170" x2="280" y2="170" stroke="${book.accent}44" stroke-width="1"/>
+  <!-- Decorative underline -->
+  <path d="M140 172 Q200 180 260 172" fill="none" stroke="${book.accent}44" stroke-width="1.5"/>
   
   <!-- Hadith count badge -->
-  <rect x="155" y="185" width="90" height="28" rx="14" fill="${book.accent}22" stroke="${book.accent}44" stroke-width="1"/>
-  <text x="200" y="204" text-anchor="middle" fill="${book.accent}" font-family="'Tajawal', sans-serif" font-size="12" font-weight="500">كتاب حديث</text>
+  <rect x="155" y="188" width="90" height="28" rx="14" fill="${book.accent}22" stroke="${book.accent}44" stroke-width="1"/>
+  <text x="200" y="207" text-anchor="middle" fill="${book.accent}" font-family="'Tajawal', sans-serif" font-size="12" font-weight="500">كتاب حديث</text>
   
   <!-- Bottom decorative dots -->
   <circle cx="180" cy="240" r="2" fill="${book.accent}44"/>
