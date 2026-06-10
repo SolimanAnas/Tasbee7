@@ -151,6 +151,7 @@ export default {
 
   'azkar_title': 'اذکار — زاد المسلم',
   'azkar_remaining': 'باقی',
+  azkar_tap_hint: "گننے کے لیے دبائیں",
   'azkar_of': 'میں سے',
   'azkar_index_counter': "{current} / {total}",
   'azkar_auto': 'خودکار',

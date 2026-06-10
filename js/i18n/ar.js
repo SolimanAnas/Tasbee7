@@ -165,6 +165,7 @@ export default {
   // Azkar
   'azkar_title': 'الأذكار — زاد المسلم',
   'azkar_remaining': 'المتبقي',
+  azkar_tap_hint: "اضغط للعدّ",
   'azkar_of': 'من',
   'azkar_index_counter': "{current} من {total}",
   'azkar_auto': 'تلقائي',

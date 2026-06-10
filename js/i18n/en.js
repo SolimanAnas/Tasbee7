@@ -165,6 +165,7 @@ export default {
   // Azkar
   'azkar_title': 'Adhkar — Zad Al-Muslim',
   'azkar_remaining': 'Remaining',
+  azkar_tap_hint: "Tap to count",
   'azkar_of': 'of',
   'azkar_index_counter': "{current} of {total}",
   'azkar_auto': 'Auto',
