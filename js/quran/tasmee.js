@@ -414,7 +414,7 @@
     // ============================================================
     function retryTasmeeSession() {
       closeModal('tasmeeResultsModal');
-      if (tasmeeLastPage !== null) openTasmeeSetup();
+      if (tasmeeLastPage !== null && typeof _v2Open === 'function') _v2Open(currentPage);
     }
 
     // ============================================================

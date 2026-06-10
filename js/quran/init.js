@@ -142,6 +142,40 @@
       setupSheetDragClose(contextSheet);
       setupSheetDragClose(document.getElementById('tafsirModal'));
       setupSheetDragClose(expandedSheet);
+
+      // Back-button interception for modals (Android / browser back)
+      history.pushState({ quran: true }, '');
+      window.addEventListener('popstate', () => {
+        // If tasmee pro panel is open, close it
+        const proPanel = document.getElementById('tasmeeProPanel');
+        if (proPanel && proPanel.style.display !== 'none') {
+          if (typeof closeTasmeePro === 'function') closeTasmeePro();
+          history.pushState({ quran: true }, '');
+          return;
+        }
+        // If tasmee setup sheet is open, close it
+        const setupSheet = document.getElementById('tasmeeSetupSheet');
+        if (setupSheet && setupSheet.classList.contains('visible')) {
+          if (typeof closeTasmeeSetup === 'function') closeTasmeeSetup();
+          history.pushState({ quran: true }, '');
+          return;
+        }
+        // If any modal overlay is open, close it
+        const openModal = document.querySelector('.modal-overlay.active');
+        if (openModal) {
+          openModal.classList.remove('active');
+          history.pushState({ quran: true }, '');
+          return;
+        }
+        // If any sheet is open, close it
+        const openSheet = document.querySelector('.audio-expanded-sheet.visible, .bottom-sheet.active');
+        if (openSheet) {
+          openSheet.classList.remove('visible', 'active');
+          history.pushState({ quran: true }, '');
+          return;
+        }
+        // Otherwise allow normal back (to index.html)
+      });
     };
 
     function goHome() { window.location.href = '/Tasbee7/index.html'; }
