@@ -135,7 +135,7 @@ function buildTemplateHTML(title, subtitle, screenshotBase64) {
   /* Header */
   .header {
     position: relative; z-index: 1;
-    width: 100%; padding: 100px 80px 60px;
+    width: 100%; padding: 80px 80px 40px;
     text-align: center;
   }
   .header .emerald-line {
@@ -167,9 +167,9 @@ function buildTemplateHTML(title, subtitle, screenshotBase64) {
     width: 100%; padding: 0 40px;
   }
   .phone-frame {
-    width: 380px; border-radius: 36px;
+    width: 780px; border-radius: 52px;
     overflow: hidden;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 2px rgba(255,255,255,0.08);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.65), 0 0 0 3px rgba(255,255,255,0.1);
     background: #1a1a1a;
   }
   .phone-frame img {
@@ -179,7 +179,7 @@ function buildTemplateHTML(title, subtitle, screenshotBase64) {
   /* Footer */
   .footer {
     position: relative; z-index: 1;
-    width: 100%; padding: 50px 80px 90px;
+    width: 100%; padding: 40px 80px 70px;
     display: flex; align-items: center; justify-content: center; gap: 24px;
     border-top: 1px solid rgba(255,255,255,0.06);
   }
