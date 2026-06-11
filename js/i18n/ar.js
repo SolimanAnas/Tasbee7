@@ -256,7 +256,7 @@ export default {
 
   // Radio
   'radio_title': 'إذاعة القرآن الكريم — زاد المسلم',
-  'radio_header': 'إذاعة القرآن الكريم',
+  'radio_header': 'راديو القرآن',
   'radio_choose': 'اختر الإذاعة',
   'radio_loading': 'جاري تحميل الإذاعات...',
   'radio_search_placeholder': 'ابحث عن قارئ أو إذاعة...',
