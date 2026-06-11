@@ -6,7 +6,8 @@
 
 # زاد المسلم — Zad Al-Muslim
 
-[![Live Demo](https://img.shields.io/badge/LIVE-DEMO-00C853?style=for-the-badge&logo=googlechrome&logoColor=white)](https://solimananas.github.io/Tasbee7)
+[![Google Play](https://img.shields.io/badge/Google%20Play-00C853?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=io.github.solimananas.twa)
+[![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://solimananas.github.io/Tasbee7)
 [![GitHub stars](https://img.shields.io/github/stars/SolimanAnas/Tasbee7?style=for-the-badge&color=FFD700)](https://github.com/SolimanAnas/Tasbee7/stargazers)
 [![License](https://img.shields.io/github/license/SolimanAnas/Tasbee7?style=for-the-badge&color=1A7040)](https://github.com/SolimanAnas/Tasbee7/blob/main/LICENSE)
 
@@ -42,7 +43,7 @@ Supports **5 languages**: العربية, English, Türkçe, کوردی, ارد�
 | 🤲 | **الدعاء** | Comprehensive duaa collection |
 | 🕋 | **الرقية الشرعية** | Prophetic Ruqyah supplications |
 | 📚 | **الأربعين النووية** | Imam An-Nawawi's 40 Hadith collection |
-| 🔍 | **باحث الأحاديث** | Hadith search and viewer |
+| 🔍 | **باحث الأحاديث** | Hadith search and viewer with 13 book collections |
 | 🧠 | **التلقين (Tasmee)** | Ayah-by-ayah memorization coach with speech recognition, spaced repetition, mistake tracking, and weekly charts |
 | 🔔 | **الإشعارات** | Prayer time notifications with adhan alerts |
 | 🧭 | **اتجاه القبلة** | Qibla compass with AR overlay |
@@ -67,7 +68,7 @@ Supports **5 languages**: العربية, English, Türkçe, کوردی, ارد�
 | **Storage** | localStorage + IndexedDB for settings, bookmarks, statistics, and tasmee data |
 | **i18n** | Custom lightweight engine — 5 locales (ar, en, tr, ckb, ur) |
 | **PWA** | Service Workers + Web App Manifest for offline support |
-| **Testing** | Playwright — ~40 automated tests (resource loading, navigation, i18n key parity) |
+| **Testing** | Playwright — ~144 automated tests (resource loading, navigation, i18n key parity) |
 
 ---
 
@@ -97,7 +98,8 @@ npm run dev        # Dev server at http://localhost:5173
 Tasbee7/
 ├── index.html                  # Main entry — app home
 ├── pages/
-│   ├── quran.html              # Quran reader (primary)
+│   ├── quran.html              # Quran reader (Tasmee Pro v2 engine)
+│   ├── quran-old.html          # Legacy image-based mushaf reader
 │   ├── quran-text.html         # Quran text viewer
 │   ├── quran2.html             # Quran reader v2
 │   ├── audio.html              # Audio player
@@ -109,7 +111,7 @@ Tasbee7/
 │   ├── hisn.html               # Hisn Al-Muslim
 │   ├── duaa.html               # Duaa collection
 │   ├── hadith.html             # Hadith browser
-│   ├── hadith-viewer.html      # Hadith viewer
+│   ├── hadith-viewer.html      # Hadith viewer (13 book collections)
 │   ├── salah.html              # After-salah adhkar
 │   ├── sleeping.html           # Sleeping adhkar
 │   ├── tasmee-dashboard.html   # Tasmee memorization dashboard
@@ -121,6 +123,8 @@ Tasbee7/
 ├── css/
 │   ├── style.css               # Global styles
 │   ├── quran-v4.css            # Quran reader styles
+│   ├── tasmee.css              # Tasmee engine styles
+│   ├── tasmee-pro-v2.css       # Tasmee Pro v2 styles
 │   └── _masbaha.css            # Masbaha styles
 ├── js/
 │   ├── i18n.js                 # Internationalization engine
@@ -136,20 +140,28 @@ Tasbee7/
 │   │   ├── tafsir.js           # Tafsir display
 │   │   ├── settings.js         # User settings
 │   │   ├── ui.js               # UI utilities
+│   │   ├── ui-extras.js        # UI extras
 │   │   ├── search.js           # Quran search
+│   │   ├── local-search.js     # Local search
 │   │   ├── download.js         # Offline download
 │   │   ├── init.js             # Initialization
 │   │   ├── tasmee.js           # Tasmee integration
+│   │   ├── tasmee-pro-v2.js    # Tasmee Pro v2 engine
 │   │   ├── tasmee-dashboard.js # Tasmee dashboard
 │   │   └── tasmee-review.js    # Tasmee review
-│   ├── tasmee-engine.ts        # Tasmee engine (TypeScript)
-│   ├── tasmee-matcher.ts       # Word alignment engine (TypeScript)
-│   ├── tasmee-store.ts         # IndexedDB persistence (TypeScript)
+│   ├── tasmee-engine.js        # Tasmee engine
+│   ├── tasmee-matcher.js       # Word alignment engine
+│   ├── tasmee-store.js         # IndexedDB persistence
 │   ├── quran-common.js         # Shared Quran navigation
 │   ├── quran-app.js            # Quran app logic
 │   ├── radio-stations.js       # Radio station data
 │   ├── masbaha.js              # Counter logic
-│   └── notifications.js        # Notification logic
+│   ├── notifications.js        # Notification logic
+│   ├── juz-map.js              # Juz mapping
+│   ├── surah-map.js            # Surah mapping
+│   ├── medina2.data.js         # Medina font data
+│   ├── quranpages.data.js      # Quran page data
+│   └── tarteel-worker.js       # Tarteel search worker
 ├── data/                       # Quran data, adhan times, city data
 ├── db/                         # SQLite databases (tafsir, ayah coords)
 ├── json/                       # Ayah highlight coordinates
@@ -158,9 +170,12 @@ Tasbee7/
 ├── icons/                      # PWA icons
 ├── fonts/                      # Local font files
 ├── assets/                     # Static assets (azkar JSON, audio, PDFs)
+│   ├── thumbnails/6/           # Main 6 hadith book portraits (PNG)
+│   └── thumbnails/others/      # Other hadith book covers (PNG)
 ├── tests/
 │   ├── pages.spec.js           # Playwright page tests
-│   └── i18n.spec.js            # i18n key parity tests
+│   ├── i18n.spec.js            # i18n key parity tests
+│   └── tasmee-v2.spec.js       # Tasmee Pro v2 tests
 ├── scripts/                    # Utility scripts
 ├── docs/
 │   └── check-test.md           # Pre-launch health check
@@ -168,7 +183,7 @@ Tasbee7/
 ├── vite.config.js              # Vite build configuration
 ├── playwright.config.js        # Playwright configuration
 ├── package.json                # Dependencies and scripts
-├── sw.js                       # Service worker
+├── sw.js                       # Service worker (v41)
 └── manifest.json               # PWA manifest
 ```
 
@@ -179,20 +194,21 @@ Tasbee7/
 | Page | File | Description |
 |---|---|---|
 | Home | `index.html` | Feature grid, prayer widget, bottom navigation |
-| Quran | `pages/quran.html` | Interactive mushaf with 5 variants, word highlighting, tafsir |
+| Quran | `pages/quran.html` | Interactive mushaf with Tasmee Pro v2, 5 variants, word highlighting, tafsir |
+| Quran (Legacy) | `pages/quran-old.html` | Legacy image-based mushaf reader |
 | Quran Text | `pages/quran-text.html` | Plain text Quran reader with tasmee integration |
 | Audio | `pages/audio.html` | Multi-reciter player with sleep timer, favorites, full-screen mode |
 | Takrar | `pages/takrar.html` | Ayah repetition — range or single ayah, speed control, confirm picker |
-| Radio | `pages/radio.html` | 24/7 live Quran radio stations |
+| Radio | `pages/radio.html` | 24/7 live Quran radio stations with On-Air visuals |
 | Masbaha | `pages/masbaha.html` | Smart counter with targets, stats, OLED mode |
 | Azkar | `pages/azkar.html` | Morning & evening supplications |
 | Azkar 2 | `pages/azkar2.html` | Additional adhkar collection |
 | Hisn | `pages/hisn.html` | Complete Hisn Al-Muslim |
 | Duaa | `pages/duaa.html` | Comprehensive duaa collection |
 | Hadith | `pages/hadith.html` | Hadith browser by collection |
-| Hadith Viewer | `pages/hadith-viewer.html` | Individual hadith display |
+| Hadith Viewer | `pages/hadith-viewer.html` | Hadith viewer with 13 book collections, editorial book grid |
 | Salah | `pages/salah.html` | After-salah adhkar |
-| Sleeping | `pages/sleeping.html` | Bedtime adhkar |
+| Sleeping | `pages/sleeping.html` | Bedtime adhkar with audio playback |
 | Tasmee Dashboard | `pages/tasmee-dashboard.html` | Memorization progress & weekly charts |
 | Tasmee Review | `pages/tasmee-review.html` | Due revisions with spaced repetition |
 | Qibla | `pages/qibla.html` | Qibla compass with AR overlay |
@@ -263,6 +279,7 @@ Tests cover:
 
 **Soliman Anas** — [@SolimanAnas](https://github.com/SolimanAnas)
 
+Google Play: [Zad Al-Muslim](https://play.google.com/store/apps/details?id=io.github.solimananas.twa)
 Live App: [solimananas.github.io/Tasbee7](https://solimananas.github.io/Tasbee7)
 
 ---
