@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/featured.png" alt="Zad Al-Muslim — زاد المسلم" width="100%">
+<img src="images/Featured.png" alt="Zad Al-Muslim — زاد المسلم" width="100%">
 
 <br>
 
