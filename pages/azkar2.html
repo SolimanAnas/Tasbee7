@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0F172A">
-<title>الأذكار</title>
+<title>الأذكار — زاد المسلم | Adhkar & Supplications</title>
+<meta name="description" content="أذكار الصباح والمساء وأذكار النوم والمساهمة من القرآن والسنة. Morning and evening adhkar, sleeping adhkar, and daily supplications from Quran and Sunnah.">
+<meta name="keywords" content="الأذكار, Adhkar, morning adhkar, evening adhkar, أذكار الصباح, أذكار المساء, sleeping adhkar, أذكار النوم, daily supplications, أذكار يومية, Muslim prayers">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/azkar2.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="الأذكار — زاد المسلم | Adhkar & Supplications">
+<meta property="og:description" content="أذكار الصباح والمساء وأذكار النوم والمساهمة من القرآن والسنة. Morning and evening adhkar.">
+<meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/azkar.html">
+<meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+<meta property="og:locale" content="ar_AR">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:title" content="الأذكار — زاد المسلم | Adhkar & Supplications">
+<meta property="twitter:description" content="أذكار الصباح والمساء وأذكار النوم والمساهمة من القرآن والسنة.">
+<meta property="twitter:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+<meta name="i18n-title" content="azkar_title">
   <link rel="icon" href="../icons/icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +32,8 @@
   /* Default Dark Theme */
   --bg-main: #0F172A;
   --bg-surface: #1E293B;
+  --bg-image: url('../images/Background-dark.png');
+  --overlay: rgba(15, 23, 42, 0.5);
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --accent-main: #34D399;
@@ -31,6 +48,8 @@
   /* Crisp Light Theme */
   --bg-main: #F4F6F8;
   --bg-surface: #FFFFFF;
+  --bg-image: url('../images/Background-light.png');
+  --overlay: rgba(255, 255, 255, 0.2);
   --text-primary: #1A1D20;
   --text-secondary: #6C757D;
   --accent-main: #198754;
@@ -39,11 +58,14 @@
   --glass-border: rgba(0, 0, 0, 0.1);
   --ambient: rgba(25, 135, 84, 0.08);
 }
+[data-theme="light"] body::before { opacity: .15; }
 
 [data-theme="warm"] {
   /* Sepia / Reading Theme */
   --bg-main: #F4ECD8;
   --bg-surface: #FCF6E8;
+  --bg-image: url('../images/background-sepia.png');
+  --overlay: rgba(244, 236, 216, 0.2);
   --text-primary: #4A3B32;
   --text-secondary: #8C7B6E;
   --accent-main: #5C6B52;
@@ -52,13 +74,18 @@
   --glass-border: rgba(74, 59, 50, 0.15);
   --ambient: rgba(92, 107, 82, 0.12);
 }
+[data-theme="warm"] body::before { opacity: .2; }
 
 *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
 
 body{
   margin:0;
   font-family:'Tajawal',sans-serif;
-  background: var(--bg-main);
+  background-color: var(--bg-main);
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color:var(--text-primary);
   height:100dvh;
   display:flex;
@@ -66,16 +93,26 @@ body{
   overflow:hidden;
   position: relative;
   transition: background 0.3s ease, color 0.3s ease;
+  /* App-like feel: no accidental text highlighting / long-press callout */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
-/* Ambient glow for depth (frontend-design: atmosphere over flat color) */
+/* Allow selecting/copying the translation text inside the modal */
+#englishText, #englishText * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Overlay for text readability */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 55% at 50% 0%, var(--ambient), transparent 60%);
-  pointer-events: none;
-  z-index: 0;
+  background: var(--overlay);
+  z-index: -1;
 }
 
 /* --- Top Bar: cohesive header holding the upper icons --- */
@@ -84,16 +121,16 @@ body::before {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  /* DEFAULT: moved up 30px (was 46px base). iOS notch override below. */
-  padding: calc(16px + env(safe-area-inset-top)) 16px 10px;
+  padding: 16px 16px 10px;
   flex-shrink: 0;
   position: relative;
   z-index: 20;
 }
 
-/* Restore the larger, notch-safe spacing only on iOS devices */
-body.is-ios .top-bar {
-  padding-top: calc(46px + env(safe-area-inset-top));
+@supports (-webkit-touch-callout: none) and (padding-top: env(safe-area-inset-top)) {
+  .top-bar {
+    padding-top: 30px;
+  }
 }
 
 .top-bar-group {
@@ -167,6 +204,34 @@ body.is-ios .top-bar {
   white-space: nowrap;
   letter-spacing: 0.3px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+}
+.zikr-index-counter:empty {
+  display: none;
+}
+
+/* --- Session progress bar (how far through the full set) --- */
+.session-progress {
+  position: relative;
+  z-index: 15;
+  width: 100%;
+  max-width: 700px;
+  height: 5px;
+  margin: 0 auto;
+  background: var(--accent-muted);
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.session-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,
+              color-mix(in srgb, var(--accent-main) 65%, transparent),
+              var(--accent-main));
+  border-radius: 999px;
+  box-shadow: 0 0 10px -1px var(--accent-main);
+  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Main Layout */
@@ -378,22 +443,33 @@ body.player-active .page-wrapper {
 
 .btn{
   padding:12px 20px;
-  border-radius:16px;
+  border-radius:14px;
   border: 1px solid var(--glass-border);
-  background: var(--bg-surface);
+  background: rgba(255,255,255,0.05);
   color: var(--text-primary);
   cursor:pointer;
-  font-size:16px;
+  font-size:15px;
+  font-weight: 500;
   flex:0 1 auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: background 0.3s, color 0.3s;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn.primary{
   background:var(--accent-main);
   color: var(--bg-surface);
-  font-weight:bold;
+  font-weight:600;
   border: none;
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.3);
+}
+.btn.primary:hover {
+  box-shadow: 0 6px 24px rgba(52, 211, 153, 0.4);
 }
 
 /* Modal */
@@ -417,17 +493,28 @@ body.player-active .page-wrapper {
 }
 
 .modal-content{
-  width:90%;
-  max-width:600px;
+  width:92%;
+  max-width:420px;
   background: var(--bg-surface);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
-  border-radius:24px;
-  padding:30px;
-  transform:translateY(30px);
-  transition:.3s ease;
-  max-height: 85vh;
+  border-radius:28px;
+  padding:32px 28px;
+  transform:translateY(20px) scale(0.97);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 0 1px var(--glass-border);
+}
+.modal-content::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--accent-main);
+  border-radius: 4px;
 }
 
 .modal.active .modal-content{
@@ -442,31 +529,108 @@ body.player-active .page-wrapper {
 }
 
 .close{
-  text-align:left;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:var(--accent-muted);
   cursor:pointer;
-  font-size:20px;
-  margin-bottom:15px;
+  font-size:14px;
   color: var(--text-primary);
+  transition: all 0.2s ease;
+  margin-bottom:20px;
+  margin-left:auto;
+}
+.close:hover {
+  background:var(--accent-main);
+  transform: rotate(90deg);
 }
 
 .settings-row {
-  margin-bottom: 22px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.settings-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .settings-row h3 {
-  color: var(--accent-main);
-  margin: 0 0 10px 0;
-  font-size: 16px;
+  color: var(--text-primary);
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.7;
 }
 .theme-buttons {
   display: flex;
-  gap: 15px;
+  gap: 10px;
+}
+.theme-buttons .btn {
+  flex: 1;
+  text-align: center;
+  padding: 14px 12px;
+  border-radius: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.theme-buttons .btn:hover {
+  transform: translateY(-1px);
+}
+.theme-buttons .btn:active {
+  transform: translateY(0);
 }
 
 .settings-hint {
   font-size: 12px;
   color: var(--text-secondary);
-  margin: 8px 0 0;
-  line-height: 1.55;
+  margin: 10px 0 0;
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border-right: 2px solid var(--accent-main);
+}
+
+/* --- Range slider --- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--accent-muted);
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: var(--accent-main);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.5);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--accent-main);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
 }
 
 /* --- Toggle switch --- */
@@ -475,17 +639,24 @@ body.player-active .page-wrapper {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-primary);
   cursor: pointer;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  transition: background 0.2s ease;
+}
+.toggle-row:hover {
+  background: rgba(255,255,255,0.05);
 }
 
 .switch {
   position: relative;
-  width: 50px;
-  height: 28px;
+  width: 48px;
+  height: 26px;
   flex-shrink: 0;
-  direction: ltr; /* keep knob travel consistent regardless of page RTL */
+  direction: ltr;
 }
 
 .switch input {
@@ -498,25 +669,26 @@ body.player-active .page-wrapper {
   position: absolute;
   inset: 0;
   background: var(--accent-muted);
-  border-radius: 28px;
-  transition: background 0.25s ease;
+  border-radius: 26px;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .switch .slider::before {
   content: '';
   position: absolute;
-  height: 22px;
-  width: 22px;
+  height: 20px;
+  width: 20px;
   left: 3px;
   top: 3px;
   background: #fff;
   border-radius: 50%;
-  transition: transform 0.25s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
 .switch input:checked + .slider {
   background: var(--accent-main);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
 }
 
 .switch input:checked + .slider::before {
@@ -640,49 +812,57 @@ body.player-active .page-wrapper {
 .sound-options-content {
   background: var(--bg-surface);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 20px;
-  width: 85%;
-  max-width: 320px;
-  transform: scale(0.95);
-  transition: transform 0.25s ease;
+  border-radius: 24px;
+  padding: 24px;
+  width: 88%;
+  max-width: 340px;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
 }
 
 .sound-options.active .sound-options-content {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
 .sound-options-title {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 .sound-option-btn {
-  background: var(--bg-main);
-  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid transparent;
   color: var(--text-primary);
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
   font-size: 15px;
   cursor: pointer;
   font-family: inherit;
   text-align: right;
   display: flex;
   align-items: center;
-  gap: 10px;
-  transition: background 0.2s ease;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+.sound-option-btn:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateX(-2px);
 }
 
 .sound-option-btn:active {
-  background: var(--accent-muted);
+  transform: scale(0.98);
 }
 
 .sound-option-btn.active-source {
+  background: rgba(52, 211, 153, 0.1);
   border-color: var(--accent-main);
   color: var(--accent-main);
   font-weight: 600;
@@ -698,6 +878,103 @@ body.player-active .page-wrapper {
 .sound-option-btn.active-source .check {
   opacity: 1;
 }
+
+/* ============================================================
+   <img src="../img/SVG/star.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> UI/UX UPLIFT — "serene dhikr sanctuary"
+   Additive polish: gradient counter ring, tactile per-tap feedback,
+   ornamented reading card, ambient depth, refined controls + load reveal.
+   All existing ids / classes / JS hooks preserved.
+   ============================================================ */
+
+/* Emerald→azure ring + soft azure accent per theme */
+:root            { --ring-a:#34D399; --ring-b:#38bdf8; --gold:#38bdf8; --gold-soft:rgba(56,189,248,.45); }
+[data-theme="light"] { --ring-a:#198754; --ring-b:#0284c7; --gold:#0284c7; --gold-soft:rgba(2,132,199,.35); }
+[data-theme="warm"]  { --ring-a:#5C6B52; --ring-b:#3a7ca5; --gold:#3a7ca5; --gold-soft:rgba(58,124,165,.38); }
+.ring-stop-1 { stop-color: var(--ring-a); }
+.ring-stop-2 { stop-color: var(--ring-b); }
+
+/* Ambient centred glow behind the ring for depth */
+body::after {
+  content:''; position:fixed; z-index:-1; left:50%; top:60%;
+  width:min(92vw,540px); aspect-ratio:1; transform:translate(-50%,-50%);
+  background:radial-gradient(circle, var(--ambient), transparent 66%);
+  pointer-events:none;
+}
+
+/* Staggered page-load reveal */
+@keyframes uiRise { from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
+.top-bar         { animation:uiRise .5s cubic-bezier(.22,1,.36,1) both; }
+.session-progress{ animation:uiRise .5s .05s cubic-bezier(.22,1,.36,1) both; }
+.counter-anchor  { animation:uiRise .55s .14s cubic-bezier(.22,1,.36,1) both; }
+.bottom-stack    { animation:uiRise .55s .2s cubic-bezier(.22,1,.36,1) both; }
+
+/* Counter badge → refined pill */
+.zikr-index-counter {
+  font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg, var(--glass), color-mix(in srgb, var(--accent-main) 9%, var(--glass)));
+  box-shadow:0 4px 16px rgba(0,0,0,.12), inset 0 0 0 1px rgba(255,255,255,.05);
+}
+
+/* Reading card → ornament + scroll fades + deeper float */
+.zikr-container {
+  border-radius:28px; position:relative;
+  box-shadow:0 20px 54px -26px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.zikr-container::before {
+  content:'\06DE'; position:absolute; top:9px; left:50%; transform:translateX(-50%);
+  font-family:'Amiri',serif; font-size:17px; line-height:1; color:var(--gold);
+  opacity:.55; z-index:2; pointer-events:none;
+}
+.zikr-scroll-area {
+  padding-top:16px;
+  -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
+          mask-image:linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
+}
+.zikr-text { line-height:2.5; letter-spacing:.2px; max-width:42ch; margin-inline:auto; }
+:root .zikr-text { text-shadow:0 1px 18px rgba(0,0,0,.35); }
+[data-theme="light"] .zikr-text, [data-theme="warm"] .zikr-text { text-shadow:none; }
+
+/* Hero counter ring */
+.counter-anchor { width:min(46vw,200px); height:min(46vw,200px); }
+.bg-circle { stroke-width:9; opacity:.45; }
+.fg-circle { stroke:url(#ringGrad); stroke-width:9; filter:drop-shadow(0 0 7px var(--gold-soft)); }
+.progress-wrapper { box-shadow:0 0 90px -30px var(--gold); }
+.progress-wrapper::after {           /* per-tap ripple */
+  content:''; position:absolute; inset:5%; border-radius:50%;
+  border:2px solid var(--gold); opacity:0; pointer-events:none;
+}
+.progress-wrapper.tick::after { animation:tapRipple .45s ease-out; }
+@keyframes tapRipple { 0%{opacity:.55; transform:scale(.84);} 100%{opacity:0; transform:scale(1.14);} }
+.progress-wrapper.tick .count-number { animation:numPop .34s cubic-bezier(.34,1.56,.64,1); }
+@keyframes numPop { 0%{transform:scale(1);} 42%{transform:scale(1.16);} 100%{transform:scale(1);} }
+.count-label { text-transform:uppercase; letter-spacing:.16em; font-size:10px; opacity:.8; }
+.count-number {
+  background:linear-gradient(180deg, var(--text-primary), color-mix(in srgb, var(--accent-main) 55%, var(--text-primary)));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.count-total { color:var(--gold); opacity:.92; }
+
+/* Tap-to-count hint */
+.tap-hint {
+  margin-top:30px; text-align:center; font-family:'Tajawal',sans-serif;
+  font-size:11.5px; letter-spacing:.05em; color:var(--text-secondary);
+  opacity:.65; animation:hintBreathe 3.2s ease-in-out infinite;
+}
+@keyframes hintBreathe { 0%,100%{opacity:.45;} 50%{opacity:.8;} }
+
+/* Refined control pills */
+.controls .btn {
+  border-radius:16px; padding:13px 22px; font-weight:600;
+  background:color-mix(in srgb, var(--glass) 82%, transparent);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 6px 18px -8px rgba(0,0,0,.45);
+}
+.controls .btn.primary { box-shadow:0 8px 24px -6px var(--gold-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .top-bar, .session-progress, .counter-anchor, .bottom-stack,
+  .tap-hint, .progress-wrapper.tick::after, .progress-wrapper.tick .count-number { animation:none; }
+}
 </style>
 </head>
 
@@ -705,19 +982,35 @@ body.player-active .page-wrapper {
 
 <div class="top-bar">
   <div class="top-bar-group">
-    <div class="icon-btn" onclick="goHome()" title="الرئيسية"><img src="img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
-    <div class="icon-btn" id="soundBtn" title="تشغيل الصوت"><img src="img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    <div class="icon-btn" onclick="goHome()" title="الرئيسية" data-i18n-title="home"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    <div class="icon-btn" id="soundBtn" title="تشغيل الصوت" data-i18n-title="azkar_play_sound"><img src="../img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
   </div>
 
   <div class="zikr-index-counter" id="zikrIndexCounter"></div>
 
   <div class="top-bar-group end">
-    <div class="icon-btn" onclick="openTranslation()" title="الترجمة"><img src="img/SVG/globe.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
-    <div class="icon-btn" onclick="openSettings()" title="الإعدادات"><img src="img/SVG/settings.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️</div>
+    <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">
+      <div style="width:24px;height:24px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
+    </div>
+    <div class="icon-btn" onclick="openSettings()" title="الإعدادات" data-i18n-title="settings"><img src="../img/SVG/settings.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️</div>
+  </div>
+</div>
+
+<!-- Image Modal for salah type -->
+<div class="sound-options" id="imageModal" onclick="if(event.target===this) closeImageModal()">
+  <div class="sound-options-content" style="padding:8px;background:transparent;border:none;max-width:95%;">
+    <iframe id="posterFrame" src="" title="أذكار بعد الصلاة" style="width:100%;height:80vh;border:none;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.5);" onclick="event.stopPropagation()"></iframe>
+    <button class="sound-option-btn" onclick="closeImageModal()" style="margin-top:12px;justify-content:center;color:var(--text-primary);">
+      <span><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span><span data-i18n="azkar_close">إغلاق</span>
+    </button>
   </div>
 </div>
 
 <div class="page-wrapper">
+
+  <div class="session-progress" aria-hidden="true">
+    <div class="session-progress-fill" id="sessionProgressFill"></div>
+  </div>
 
   <div class="zikr-container fade-in" onclick="increment()">
     <div class="zikr-scroll-area">
@@ -728,83 +1021,105 @@ body.player-active .page-wrapper {
   <div class="counter-anchor">
     <div class="progress-wrapper" onclick="increment()">
       <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop class="ring-stop-1" offset="0%"/>
+            <stop class="ring-stop-2" offset="100%"/>
+          </linearGradient>
+        </defs>
         <circle class="bg-circle" cx="100" cy="100" r="90"/>
         <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90"/>
       </svg>
       <div class="counter-content">
-        <span class="count-label">المتبقي</span>
+        <span class="count-label" data-i18n="azkar_remaining">المتبقي</span>
         <span class="count-number" id="counter">0</span>
-        <span class="count-total">من <span id="targetCount">0</span></span>
+        <span class="count-total"><span data-i18n="azkar_of">من</span> <span id="targetCount">0</span></span>
       </div>
     </div>
+    <div class="tap-hint" data-i18n="azkar_tap_hint">اضغط للعدّ</div>
   </div>
 
 </div>
 
 <div class="bottom-stack">
   <div class="controls">
-    <button class="btn" onclick="next()">التالي</button>
-    <button class="btn" id="autoBtn" onclick="toggleAuto()">تلقائي</button>
-    <button class="btn" onclick="prev()">السابق</button>
+    <button class="btn" onclick="next()" data-i18n="azkar_next">التالي</button>
+    <button class="btn" id="autoBtn" onclick="toggleAuto()" data-i18n="azkar_auto">تلقائي</button>
+    <button class="btn" onclick="prev()" data-i18n="azkar_prev">السابق</button>
   </div>
 
   <!-- Floating Mini Audio Player -->
   <div class="mini-player" id="miniPlayer" role="region" aria-label="مشغل الصوت">
-    <button class="mini-player-btn" id="playPauseBtn" onclick="togglePlayPause()" aria-label="تشغيل/إيقاف"><img src="img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    <button class="mini-player-btn" id="playPauseBtn" onclick="togglePlayPause()" aria-label="تشغيل/إيقاف"><img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
     <span class="mini-player-time" id="currentTime">0:00</span>
     <div class="mini-player-progress" id="progressBar" onclick="seekAudio(event)">
       <div class="mini-player-progress-fill" id="progressFill"></div>
     </div>
     <span class="mini-player-time" id="totalTime">0:00</span>
-    <button class="mini-player-btn" onclick="closeMiniPlayer()" aria-label="إغلاق المشغل"><img src="img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    <button class="mini-player-btn" onclick="closeMiniPlayer()" aria-label="إغلاق المشغل"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
   </div>
 </div>
 
 <div class="modal" id="translationModal" onclick="if(event.target===this) closeTranslation()">
   <div class="modal-content">
-    <div class="close" onclick="closeTranslation()"><img src="img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    <div class="close" onclick="closeTranslation()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
     <div id="englishText"></div>
   </div>
 </div>
 
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
-    <div class="close" onclick="closeSettings()"><img src="img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <h2 style="margin:0;font-size:20px;font-weight:700;color:var(--text-primary);" data-i18n="settings">الإعدادات</h2>
+      <div class="close" onclick="closeSettings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    </div>
 
     <div class="settings-row">
-      <h3>حجم الخط</h3>
+      <h3 data-i18n="azkar_font_size">حجم الخط</h3>
       <input type="range" min="22" max="40" value="28" id="fontSizeSlider"
              oninput="changeFontSize(this.value)">
     </div>
 
     <div class="settings-row">
-      <h3>المظهر</h3>
+      <h3 data-i18n="azkar_theme">المظهر</h3>
       <div class="theme-buttons">
-        <button class="btn" onclick="setTheme('dark')">داكن</button>
-        <button class="btn" onclick="setTheme('warm')">دافئ</button>
-        <button class="btn" onclick="setTheme('light')">فاتح</button>
+        <button class="btn" onclick="setTheme('dark')"><span data-i18n="azkar_dark">داكن</span></button>
+        <button class="btn" onclick="setTheme('warm')"><span data-i18n="azkar_warm">دافئ</span></button>
+        <button class="btn" onclick="setTheme('light')"><span data-i18n="azkar_light">فاتح</span></button>
       </div>
     </div>
 
     <div class="settings-row">
-      <h3>التنقل بين الأذكار</h3>
+      <h3 data-i18n="azkar_navigation">التنقل بين الأذكار</h3>
       <label class="toggle-row">
-        <span>السحب يميناً/يساراً على البطاقة للتنقل</span>
+        <span data-i18n="azkar_swipe_nav">السحب يميناً/يساراً على البطاقة للتنقل</span>
         <span class="switch">
           <input type="checkbox" id="swipeNavToggle" onchange="toggleSwipeNav(this.checked)">
           <span class="slider"></span>
         </span>
       </label>
-      <p class="settings-hint">معطّل افتراضياً لتجنّب تغيير الذِّكر بالخطأ أثناء تكبير النص. أزرار «التالي / السابق» في الأسفل تعمل دائماً.</p>
+      <p class="settings-hint" data-i18n="azkar_swipe_hint">معطّل افتراضياً لتجنّب تغيير الذِّكر بالخطأ أثناء تكبير النص. أزرار «التالي / السابق» في الأسفل تعمل دائماً.</p>
     </div>
 
     <div class="settings-row">
-      <h3>الصوت</h3>
+      <h3 data-i18n="azkar_sound">الصوت</h3>
       <div class="theme-buttons">
-        <button class="btn" id="settMorning" onclick="setAudioSource('morning')"><img src="img/SVG/sun.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️ الصباح</button>
-        <button class="btn" id="settNight" onclick="setAudioSource('night')"><img src="img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> المساء</button>
+        <button class="btn" id="settMorning" onclick="setAudioSource('morning')"><img src="../img/SVG/sun.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️ <span data-i18n="azkar_morning">الصباح</span></button>
+        <button class="btn" id="settNight" onclick="setAudioSource('night')"><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="azkar_evening">المساء</span></button>
+        <button class="btn" id="settRuqia" onclick="setAudioSource('ruqia')"><img src="../img/SVG/azkar.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="azkar_ruqyah">الرقية</span></button>
       </div>
-      <button class="btn" style="width:100%;margin-top:12px;" onclick="hidePlayerFromOptions(); closeSettings();"><img src="img/SVG/info.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️ إخفاء المشغل (يستمر التشغيل)</button>
+      <button class="btn" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="hidePlayerFromOptions(); closeSettings();">
+        <span></span>
+        <span data-i18n="azkar_hide_player">إخفاء المشغل (يستمر التشغيل)</span>
+      </button>
+    </div>
+
+    <div class="settings-row" id="sleepingLinkRow" style="display:none;">
+      <h3 data-i18n="azkar_sleeping">أذكار النوم</h3>
+      <button class="btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="window.location.href='sleeping.html'">
+        <span><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>
+        <span data-i18n="azkar_open_sleeping">فتح أذكار النوم</span>
+      </button>
     </div>
   </div>
 </div>
@@ -812,21 +1127,25 @@ body.player-active .page-wrapper {
 <!-- Sound Options Popup -->
 <div class="sound-options" id="soundOptions" onclick="if(event.target===this) closeSoundOptions()">
   <div class="sound-options-content">
-    <div class="sound-options-title">خيارات الصوت</div>
+    <div class="sound-options-title" data-i18n="azkar_sound_options">خيارات الصوت</div>
     <button class="sound-option-btn" id="optMorning" onclick="setAudioSource('morning')">
-      <span><img src="img/SVG/sun.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️</span><span>أذكار الصباح</span><span class="check"><img src="img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>
+      <span><img src="../img/SVG/sun.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️</span><span data-i18n="card_morning">أذكار الصباح</span><span class="check"><img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>
     </button>
     <button class="sound-option-btn" id="optNight" onclick="setAudioSource('night')">
-      <span><img src="img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span><span>أذكار المساء</span><span class="check"><img src="img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>
+      <span><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span><span data-i18n="card_evening">أذكار المساء</span><span class="check"><img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>
+    </button>
+    <button class="sound-option-btn" id="optRuqia" onclick="setAudioSource('ruqia')">
+      <span><img src="../img/SVG/azkar.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span><span data-i18n="card_ruqyah">الرقية الشرعية</span><span class="check"><img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>
     </button>
     <button class="sound-option-btn" onclick="hidePlayerFromOptions()">
-      <span><img src="img/SVG/info.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️</span><span>إخفاء المشغل</span>
+      <span><img src="../img/SVG/info.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️</span><span data-i18n="azkar_hide_player_short">إخفاء المشغل</span>
     </button>
   </div>
 </div>
 
+<script src="../js/i18n.js"></script>
+<script>if (window.I18n) I18n.init();</script>
 <script>
-let azkarData;
 let currentIndex = 0;
 let currentCount = 0;
 let autoMode = false;
@@ -839,13 +1158,28 @@ const fullCircle = 565.48;
 let swipeNavEnabled = localStorage.getItem("zikrSwipeNav") === "true";
 
 const type = new URLSearchParams(window.location.search).get("type") || "morning";
+const isSalah = type === "salah";
+const isSleeping = type === "sleeping";
+const isPoster = isSalah || isSleeping;
 
-fetch("../assets/azkar.json")
+const dataFile = isSalah ? "../assets/salah.json" : isSleeping ? "../assets/sleeping-zikr.json" : "../assets/azkar.json";
+
+fetch(dataFile)
 .then(res => res.json())
 .then(data => {
-  azkarData = data[type];
+  azkarData = isPoster ? data : data[type];
   loadZikr();
 });
+
+/* --- Image Modal for salah type --- */
+function openImageModal() {
+  document.getElementById('posterFrame').src = `../pages/salah.html`;
+  document.getElementById('imageModal').classList.add('active');
+}
+function closeImageModal() {
+  document.getElementById('posterFrame').src = '';
+  document.getElementById('imageModal').classList.remove('active');
+}
 
 /* --- Daily Tracking Function for Stats --- */
 function checkDailyResetAzkar() {
@@ -947,7 +1281,8 @@ function loadZikr() {
 
         const currentNum = currentIndex + 1;
         const totalNum = azkarData.length;
-        document.getElementById("zikrIndexCounter").innerText = `${currentNum} من ${totalNum}`;
+        document.getElementById("zikrIndexCounter").innerText = t('azkar_index_counter', { current: currentNum, total: totalNum });
+        updateSessionProgress();
     }
     updateProgress();
 
@@ -974,6 +1309,14 @@ function updateProgress() {
   document.getElementById("progressCircle").style.strokeDashoffset = offset;
 }
 
+/* Session progress: position within the full set (fills as you advance) */
+function updateSessionProgress() {
+  if (!azkarData || !azkarData.length) return;
+  const pct = ((currentIndex + 1) / azkarData.length) * 100;
+  const fill = document.getElementById('sessionProgressFill');
+  if (fill) fill.style.width = pct + '%';
+}
+
 
 function increment() {
   if(!azkarData) return;
@@ -992,6 +1335,7 @@ function increment() {
     // ---------------------------------------------------------
 
     updateProgress();
+    pulseTick();
     if (currentCount === target) {
       if (navigator.vibrate) {
         navigator.vibrate([30, 40, 60]);
@@ -1000,6 +1344,16 @@ function increment() {
       setTimeout(next, 600);
     }
   }
+}
+
+// Subtle per-tap feedback: ripple + number pop (re-triggers each tap via reflow)
+function pulseTick() {
+  const wrapper = document.querySelector(".progress-wrapper");
+  if (!wrapper) return;
+  wrapper.classList.remove("tick");
+  void wrapper.offsetWidth;
+  wrapper.classList.add("tick");
+  setTimeout(() => wrapper.classList.remove("tick"), 460);
 }
 
 function triggerGlow() {
@@ -1062,13 +1416,17 @@ function updateAudioSourceUI() {
   // Sound options popup (long-press)
   const optM = document.getElementById('optMorning');
   const optN = document.getElementById('optNight');
+  const optR = document.getElementById('optRuqia');
   if (optM) optM.classList.toggle('active-source', audioSource === 'morning');
   if (optN) optN.classList.toggle('active-source', audioSource === 'night');
+  if (optR) optR.classList.toggle('active-source', audioSource === 'ruqia');
   // Settings modal
   const settM = document.getElementById('settMorning');
   const settN = document.getElementById('settNight');
+  const settR = document.getElementById('settRuqia');
   if (settM) settM.classList.toggle('primary', audioSource === 'morning');
   if (settN) settN.classList.toggle('primary', audioSource === 'night');
+  if (settR) settR.classList.toggle('primary', audioSource === 'ruqia');
 }
 
 function closeSettings() {
@@ -1098,10 +1456,11 @@ function goHome() {
 
 /* --- Audio Mini Player --- */
 let audio = null;
-let audioSource = type; // 'morning' or 'night' — defaults to URL type
+let audioSource = type; // 'morning', 'night', or 'ruqia' — defaults to URL type
 const SOURCES = {
   morning: '../assets/media/Azkar-morning.mp3',
-  night:   '../assets/media/Azkar-night.mp3'
+  night:   '../assets/media/Azkar-night.mp3',
+  ruqia:   '../assets/media/rokia06.mp3'
 };
 
 function initAudio() {
@@ -1110,11 +1469,11 @@ function initAudio() {
   audio.preload = 'metadata';
 
   audio.addEventListener('play', () => {
-    document.getElementById('playPauseBtn').innerText = '<img src="img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    document.getElementById('playPauseBtn').innerText = '<img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
     document.getElementById('soundBtn').classList.add('audio-playing');
   });
   audio.addEventListener('pause', () => {
-    document.getElementById('playPauseBtn').innerText = '<img src="img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    document.getElementById('playPauseBtn').innerText = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
     document.getElementById('soundBtn').classList.remove('audio-playing');
   });
   audio.addEventListener('timeupdate', () => {
@@ -1130,7 +1489,7 @@ function initAudio() {
   audio.addEventListener('ended', () => {
     document.getElementById('progressFill').style.width = '0%';
     audio.currentTime = 0;
-    document.getElementById('playPauseBtn').innerText = '<img src="img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    document.getElementById('playPauseBtn').innerText = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
     document.getElementById('soundBtn').classList.remove('audio-playing');
   });
 
@@ -1146,6 +1505,111 @@ function hideMiniPlayer() {
   document.getElementById('miniPlayer').classList.remove('active');
   document.body.classList.remove('player-active');
 }
+
+/* --- Sleeping Zikr Audio (plays each zikr's audio in sequence) --- */
+let sleepAudio = null;
+let sleepPlaying = false;
+
+function toggleSleepAudio() {
+  if (!azkarData || !azkarData[currentIndex]) return;
+
+  if (sleepPlaying && sleepAudio) {
+    sleepAudio.pause();
+    sleepPlaying = false;
+    document.getElementById('soundBtn').classList.remove('audio-playing');
+    hideMiniPlayer();
+    return;
+  }
+
+  playSleepZikr(currentIndex);
+}
+
+function playSleepZikr(index) {
+  if (!azkarData || !azkarData[index]) return;
+
+  const audioSrc = azkarData[index].audio;
+  if (!audioSrc) return;
+
+  if (sleepAudio) {
+    sleepAudio.pause();
+    sleepAudio.src = '';
+  }
+
+  sleepAudio = new Audio(audioSrc);
+  sleepAudio.preload = 'metadata';
+
+  sleepAudio.addEventListener('play', () => {
+    sleepPlaying = true;
+    document.getElementById('playPauseBtn').innerText = '<img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    document.getElementById('soundBtn').classList.add('audio-playing');
+    showMiniPlayer();
+    document.getElementById('currentTime').innerText = '0:00';
+  });
+
+  sleepAudio.addEventListener('pause', () => {
+    document.getElementById('playPauseBtn').innerText = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    document.getElementById('soundBtn').classList.remove('audio-playing');
+  });
+
+  sleepAudio.addEventListener('timeupdate', () => {
+    if (sleepAudio.duration) {
+      const progress = (sleepAudio.currentTime / sleepAudio.duration) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+      document.getElementById('currentTime').innerText = formatTime(sleepAudio.currentTime);
+      document.getElementById('totalTime').innerText = formatTime(sleepAudio.duration);
+    }
+  });
+
+  sleepAudio.addEventListener('ended', () => {
+    sleepPlaying = false;
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('playPauseBtn').innerText = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    document.getElementById('soundBtn').classList.remove('audio-playing');
+    // Auto-advance to next zikr if available
+    if (currentIndex < azkarData.length - 1) {
+      currentIndex++;
+      loadZikr();
+      setTimeout(() => playSleepZikr(currentIndex), 300);
+    }
+  });
+
+  sleepAudio.play().catch(err => console.warn('Sleep audio play failed:', err));
+}
+
+/* Override togglePlayPause for sleeping mode */
+const originalTogglePlayPause = togglePlayPause;
+togglePlayPause = function() {
+  if (isSleeping) {
+    toggleSleepAudio();
+  } else {
+    originalTogglePlayPause();
+  }
+};
+
+/* Override closeMiniPlayer for sleeping mode */
+const originalCloseMiniPlayer = closeMiniPlayer;
+closeMiniPlayer = function() {
+  if (isSleeping && sleepAudio) {
+    sleepAudio.pause();
+    sleepAudio.src = '';
+    sleepPlaying = false;
+  }
+  originalCloseMiniPlayer();
+};
+
+/* Override seekAudio for sleeping mode */
+const originalSeekAudio = seekAudio;
+seekAudio = function(e) {
+  if (isSleeping && sleepAudio && sleepAudio.duration) {
+    const bar = document.getElementById('progressBar');
+    const rect = bar.getBoundingClientRect();
+    let percent = (e.clientX - rect.left) / rect.width;
+    percent = Math.max(0, Math.min(1, percent));
+    sleepAudio.currentTime = sleepAudio.duration * percent;
+    return;
+  }
+  originalSeekAudio(e);
+};
 
 function toggleAudio() {
   const a = initAudio();
@@ -1241,9 +1705,24 @@ function hidePlayerFromOptions() {
   closeSoundOptions();
 }
 
-/* --- Long-press handler on <img src="img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> icon --- */
+/* --- Long-press handler on <img src="../img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> icon --- */
 (function setupSoundBtn() {
   const soundBtn = document.getElementById('soundBtn');
+
+  if (isSalah) {
+    soundBtn.textContent = '<img src="../img/SVG/image.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️';
+    soundBtn.title = t('azkar_after_prayer');
+    soundBtn.addEventListener('click', openImageModal);
+    return;
+  }
+
+  if (isSleeping) {
+    soundBtn.textContent = '<img src="../img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    soundBtn.title = t('azkar_sleep_adhkar');
+    soundBtn.addEventListener('click', toggleSleepAudio);
+    return;
+  }
+
   let pressTimer = null;
   let longPressFired = false;
   let pressActive = false;
@@ -1311,22 +1790,19 @@ function hidePlayerFromOptions() {
   });
 })();
 
-/* --- iOS / notched device detection (keeps larger top padding only there) --- */
-function detectIOS() {
-  const ua = navigator.userAgent || '';
-  const platform = navigator.platform || '';
-  const isIOS = /iPad|iPhone|iPod/.test(ua) ||
-                /iP(hone|od|ad)/.test(platform) ||
-                // iPadOS 13+ reports as Mac, detect via touch support
-                (platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-                (ua.includes('Mac') && 'ontouchend' in document);
-  if (isIOS) document.body.classList.add('is-ios');
-}
-
 /* Load saved preferences & Init */
 window.addEventListener("load", () => {
-  detectIOS(); // add .is-ios before paint settles so top padding is correct
   checkDailyResetAzkar(); // التأكد من التصفير اليومي عند فتح الصفحة
+
+  if (isSalah) {
+    document.getElementById('miniPlayer').style.display = 'none';
+    document.getElementById('soundOptions').style.display = 'none';
+  }
+
+  // Show sleeping page link in settings
+  if (isSleeping) {
+    document.getElementById('sleepingLinkRow').style.display = '';
+  }
 
   const savedSize = localStorage.getItem("zikrFontSize");
   if (savedSize) {

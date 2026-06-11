@@ -301,8 +301,8 @@
     <div class="modal-content">
         <div class="modal-grip"></div>
         <div class="modal-header">
-            <span data-i18n="hadith_browse_books"><img src="img/SVG/books.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تصفح الكتب الحديثية</span>
-            <button class="close" onclick="toggleModal(false)" aria-label="إغلاق"><img src="img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+            <span data-i18n="hadith_browse_books"><img src="../img/SVG/books.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تصفح الكتب الحديثية</span>
+            <button class="close" onclick="toggleModal(false)" aria-label="إغلاق"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
         </div>
         <div id="modalBooksContainer"></div>
     </div>
@@ -320,7 +320,7 @@
         </div>
 
         <div class="top-actions">
-            <div class="icon-btn" onclick="cycleTheme()" title="تغيير المظهر"><img src="img/SVG/moon.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+            <div class="icon-btn" onclick="cycleTheme()" title="تغيير المظهر"><img src="../img/SVG/moon.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
             <div class="icon-btn" onclick="downloadDatabase()" title="تحميل قاعدة البيانات المدمجة">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </div>
@@ -346,7 +346,7 @@
         <div class="search-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السُنّة النبوية..." data-i18n-placeholder="hadith_search_placeholder" disabled>
-            <button class="clear-input-btn" id="clearInputBtn" onclick="clearSearchField()" aria-label="مسح"><img src="img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+            <button class="clear-input-btn" id="clearInputBtn" onclick="clearSearchField()" aria-label="مسح"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
         </div>
 
         <div class="filter-label" data-i18n="hadith_filter_label">تصفية حسب الكتاب</div>
@@ -474,7 +474,7 @@
                             sectionName,
                             sectionNumber,
                             text: h.text,
-                            normalized: normalizeText(h.text), // <img src="img/SVG/zap.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تطبيع مسبق لتسريع البحث
+                            normalized: normalizeText(h.text), // <img src="../img/SVG/zap.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تطبيع مسبق لتسريع البحث
                             number: h.hadithnumber || h.arabicnumber,
                             grades: h.grades || []
                         });
@@ -526,7 +526,7 @@
 
         const clearBtn = document.createElement('span');
         clearBtn.className = 'clear-history-btn';
-        clearBtn.textContent = '<img src="img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> ' + t('hadith_clear_history');
+        clearBtn.textContent = '<img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> ' + t('hadith_clear_history');
         clearBtn.onclick = clearHistory;
         container.appendChild(clearBtn);
     }
@@ -721,7 +721,7 @@
         const normQuery = normalizeText(query);
         const selected = new Set(Array.from(document.querySelectorAll('#booksFilter input:checked')).map(cb => cb.value));
 
-        // <img src="img/SVG/zap.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> يعتمد على الحقل المطبّع المحسوب مسبقاً: يُصلح عطل البحث الافتراضي ويسرّعه
+        // <img src="../img/SVG/zap.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> يعتمد على الحقل المطبّع المحسوب مسبقاً: يُصلح عطل البحث الافتراضي ويسرّعه
         currentSearchResults = localDatabase.filter(item => {
             if (!selected.has(item.bookId)) return false;
             return isStrict ? item.text.includes(query) : item.normalized.includes(normQuery);
@@ -732,7 +732,7 @@
 
         const container = document.getElementById('resultsContainer');
         if (currentSearchResults.length === 0) {
-            container.innerHTML = `<div class="empty-state"><span class="icn"><img src="img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>${t('hadith_no_results')}</div>`;
+            container.innerHTML = `<div class="empty-state"><span class="icn"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>${t('hadith_no_results')}</div>`;
             document.getElementById('scrollTrigger').style.display = 'none';
             return;
         }
