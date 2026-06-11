@@ -52,7 +52,7 @@
 
         /* اللون عند التطابق مع القبلة */
         body.qibla-aligned {
-            --primary-glow: #ffd700; /* الذهبي المتوهج */
+            --primary-glow: #38bdf8; /* أزرق سماوي متوهج عند المحاذاة */
         }
 
         * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -195,7 +195,7 @@
         }
         body.qibla-aligned .qibla-icon-container { transform: scale(1.15); box-shadow: 0 0 60px var(--primary-glow), inset 0 0 30px var(--primary-glow); }
 
-        .qibla-icon-container img { width: 50px; height: 50px; object-fit: contain; filter: brightness(0) invert(1) drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+        .qibla-icon-container img { width: 50px; height: 50px; object-fit: contain; filter: invert(0.88) sepia(0.12) drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
 
         .distance-bubble {
             color: #ffffff; padding: 8px 24px; font-weight: 800; font-size: 1.2rem;
@@ -287,7 +287,7 @@
             margin-bottom: 25px; background: linear-gradient(135deg, #10b981, #059669);
             box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); border: 2px solid rgba(255,255,255,0.2);
         }
-        .logo-box img { width: 50px; filter: brightness(0) invert(1); }
+        .logo-box img { width: 50px; filter: invert(0.88) sepia(0.12); }
         
         .btn-primary {
             background: var(--text-main); color: var(--bg-dark-top); border: none; padding: 15px; width: 100%;
@@ -345,6 +345,106 @@
             padding: 8px 12px; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer;
         }
         select option { background: #1e293b; color: #fff; }
+
+        /* ============================================================
+           ✦ UI/UX UPLIFT — "sacred compass"
+           Additive polish over the existing AR + 2D compass. All ids,
+           transforms and JS hooks are preserved.
+           ============================================================ */
+
+        /* Deeper celestial backdrop with concentric compass rings + glow */
+        #virtual-bg { background: radial-gradient(circle at 50% 34%, #14304a 0%, #0a1a2c 46%, #020617 86%); }
+        #virtual-bg::before {
+            content:''; position:absolute; left:50%; top:38%; transform:translate(-50%,-50%);
+            width:min(160vw,760px); aspect-ratio:1; border-radius:50%; pointer-events:none;
+            background: repeating-radial-gradient(circle, transparent 0 39px, rgba(255,255,255,.03) 39px 40px);
+            -webkit-mask: radial-gradient(circle, #000 0%, transparent 68%);
+                    mask: radial-gradient(circle, #000 0%, transparent 68%);
+        }
+        #virtual-bg::after {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background: radial-gradient(circle at 50% 36%, rgba(16,185,129,.12), transparent 56%);
+            transition: background .4s ease;
+        }
+        body.qibla-aligned #virtual-bg::after { background: radial-gradient(circle at 50% 36%, rgba(56,189,248,.18), transparent 56%); }
+
+        /* Orchestrated load reveal */
+        @keyframes qRise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+        .top-nav   { animation: qRise .5s cubic-bezier(.22,1,.36,1) both; }
+        .stats-bar { animation: qRise .5s .08s cubic-bezier(.22,1,.36,1) both; }
+
+        /* Icon buttons: glassy + hover */
+        .icon-btn { background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); }
+        @media (hover:hover) { .icon-btn:hover { border-color: var(--primary-glow); } }
+
+        /* Stats bar refinement */
+        .stats-bar { padding: 14px 8px; border-radius: 18px; }
+        .stat-item { flex: 1; }
+        .stat-item + .stat-item { border-inline-start: 1px solid var(--glass-border); }
+        .stat-label { letter-spacing: .01em; }
+        .stat-value { font-size: 1.15rem; }
+        .stat-value.highlight { text-shadow: 0 0 14px var(--primary-glow); }
+
+        /* ---- 2D compass: glowing tick-bezel + breathing search glow ---- */
+        /* NB: never put a fill:both entrance animation on #view-2d itself —
+           its final opacity:1 keyframe would override .hidden-view and leave
+           the 2D compass permanently visible over the AR view. The reveal is
+           handled by the .active-view transition when the view actually shows. */
+        .large-compass-wrapper {
+            border: 1px solid rgba(255,255,255,.08);
+            background: radial-gradient(circle, rgba(56,118,158,.10) 0%, rgba(255,255,255,.01) 70%);
+            animation: scanGlow 2.8s ease-in-out infinite;
+        }
+        @keyframes scanGlow {
+            0%,100% { box-shadow: 0 0 70px -30px var(--primary-glow), inset 0 0 42px rgba(0,0,0,.5); }
+            50%     { box-shadow: 0 0 116px -20px var(--primary-glow), inset 0 0 42px rgba(0,0,0,.5); }
+        }
+        body.qibla-aligned .large-compass-wrapper {
+            animation: none; box-shadow: 0 0 130px -14px var(--primary-glow), inset 0 0 42px rgba(0,0,0,.5);
+        }
+        /* fine degree ticks (static reference bezel — does not rotate with the dial) */
+        .large-compass-wrapper::before {
+            content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:0;
+            background: repeating-conic-gradient(from -90deg, rgba(255,255,255,.5) 0deg .5deg, transparent .5deg 6deg);
+            -webkit-mask: radial-gradient(circle, transparent 45.5%, #000 46% 49%, transparent 49.4%);
+                    mask: radial-gradient(circle, transparent 45.5%, #000 46% 49%, transparent 49.4%);
+        }
+        /* major ticks every 30° (accent-coloured, longer, glowing) */
+        .large-compass-wrapper::after {
+            content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none; z-index:0;
+            background: repeating-conic-gradient(from -90deg, var(--primary-glow) 0deg 1deg, transparent 1deg 30deg);
+            -webkit-mask: radial-gradient(circle, transparent 42.5%, #000 43% 49%, transparent 49.4%);
+                    mask: radial-gradient(circle, transparent 42.5%, #000 43% 49%, transparent 49.4%);
+            opacity:.7; filter: drop-shadow(0 0 4px var(--primary-glow));
+        }
+        #large-compass-dial { z-index:1; }
+
+        /* Qibla needle: sleeker + counterweight tail + stronger glow */
+        #large-qibla-arrow::before { border-width: 0 9px 132px 9px; filter: drop-shadow(0 0 18px var(--primary-glow)); }
+        #large-qibla-arrow::after {
+            content:''; position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+            border-width: 42px 7px 0 7px; border-style: solid;
+            border-color: rgba(255,255,255,.22) transparent transparent transparent;
+        }
+        .center-ring { box-shadow: 0 0 22px rgba(0,0,0,.55), 0 0 0 6px rgba(255,255,255,.04); }
+        body.qibla-aligned .center-ring { animation: lockPulse .6s ease; }
+        @keyframes lockPulse { 0%{transform:scale(1);} 50%{transform:scale(1.28); box-shadow:0 0 34px var(--primary-glow);} 100%{transform:scale(1);} }
+
+        /* AR kaaba marker: locking ring when aligned */
+        .qibla-icon-container { position: relative; }
+        body.qibla-aligned .qibla-icon-container::after {
+            content:''; position:absolute; inset:-8px; border-radius:50%;
+            border:2px solid var(--primary-glow); animation: lockRing 1.1s ease-out infinite;
+        }
+        @keyframes lockRing { 0%{opacity:.7; transform:scale(1);} 100%{opacity:0; transform:scale(1.4);} }
+
+        /* Mini-compass polish */
+        #mini-compass-dial { box-shadow: inset 0 0 20px rgba(0,0,0,.5), 0 0 30px -10px var(--primary-glow); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .top-nav, .stats-bar, #view-2d, .large-compass-wrapper,
+            body.qibla-aligned .qibla-icon-container::after, body.qibla-aligned .center-ring { animation: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -815,8 +915,8 @@
                 if (!isAlignedNow) {
                     isAlignedNow = true;
                     document.body.classList.add('qibla-aligned');
-                    gradStop1.setAttribute('stop-color', '#ffd700');
-                    gradStop2.setAttribute('stop-color', '#ffd700');
+                    gradStop1.setAttribute('stop-color', '#38bdf8');
+                    gradStop2.setAttribute('stop-color', '#38bdf8');
                     
                     // Game Changer Haptic Feedback <img src="../img/SVG/zap.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> (فوري وبدون تأخير)
                     if (navigator.vibrate) {
