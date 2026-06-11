@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v43"; // v43: added svg-theme.css for dark mode icon filter
+const CACHE_NAME = "zad-muslim-v44"; // v44: SVG inline injector for theme-aware icons
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -35,6 +35,7 @@ const STATIC_ASSETS = [
   // ===== Styles =====
   "./css/style.css",
   "./css/svg-theme.css",
+  "./js/svg-injector.js",
   "./css/quran-v4.css",
   "./css/tasmee.css",
   "./css/tasmee-pro-v2.css",
