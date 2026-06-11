@@ -242,15 +242,10 @@ body::before {
   align-items:center;
   justify-content:flex-start;
   gap:14px;
-  padding: 4px 40px 170px;
+  padding: 4px 20px 170px;
   overflow-y:auto;
-  overflow-x:visible;
   position: relative;
   z-index: 1;
-}
-.page-wrapper::before{
-  content:""; position:absolute; top:0; left:-40px; right:-40px; bottom:0;
-  pointer-events:none; z-index:-1;
 }
 
 /* --- Zikr Container --- */
@@ -362,7 +357,7 @@ circle {
 
 .fg-circle {
   stroke: var(--accent-main);
-  filter: drop-shadow(0 0 6px var(--ring-a));
+  filter: drop-shadow(0 0 4px var(--accent-main));
 }
 
 .counter-content {
@@ -400,9 +395,9 @@ circle {
 }
 
 @keyframes glowPulse {
-  0% { filter: drop-shadow(0 0 0px var(--ring-a)) drop-shadow(0 0 0px var(--ring-c)); }
-  50% { filter: drop-shadow(0 0 20px var(--ring-a)) drop-shadow(0 0 40px var(--ring-c)); }
-  100% { filter: drop-shadow(0 0 0px var(--ring-a)) drop-shadow(0 0 0px var(--ring-c)); }
+  0% { filter: drop-shadow(0 0 0px var(--accent-main)); }
+  50% { filter: drop-shadow(0 0 25px var(--accent-main)); }
+  100% { filter: drop-shadow(0 0 0px var(--accent-main)); }
 }
 
 /* --- Bottom Stack (controls + mini player) --- */
@@ -891,19 +886,18 @@ input[type="range"]::-moz-range-thumb {
    All existing ids / classes / JS hooks preserved.
    ============================================================ */
 
-/* Emerald→deep blue ring — luxury gradient per theme */
-:root            { --ring-a:#34D399; --ring-b:#059669; --ring-c:#1E3A8A; --gold:#FBBF24; --gold-soft:rgba(251,191,36,.45); }
-[data-theme="light"] { --ring-a:#10B981; --ring-b:#047857; --ring-c:#1E40AF; --gold:#B8860B; --gold-soft:rgba(184,134,11,.40); }
-[data-theme="warm"]  { --ring-a:#6EE7B7; --ring-b:#34D399; --ring-c:#1E3A8A; --gold:#A87F3E; --gold-soft:rgba(168,127,62,.40); }
+/* Emerald→gold ring + soft gold per theme */
+:root            { --ring-a:#34D399; --ring-b:#FBBF24; --gold:#FBBF24; --gold-soft:rgba(251,191,36,.45); }
+[data-theme="light"] { --ring-a:#198754; --ring-b:#C99A2E; --gold:#B8860B; --gold-soft:rgba(184,134,11,.40); }
+[data-theme="warm"]  { --ring-a:#5C6B52; --ring-b:#B08D57; --gold:#A87F3E; --gold-soft:rgba(168,127,62,.40); }
 .ring-stop-1 { stop-color: var(--ring-a); }
 .ring-stop-2 { stop-color: var(--ring-b); }
-.ring-stop-3 { stop-color: var(--ring-c); }
 
 /* Ambient centred glow behind the ring for depth */
 body::after {
   content:''; position:fixed; z-index:-1; left:50%; top:60%;
   width:min(92vw,540px); aspect-ratio:1; transform:translate(-50%,-50%);
-  background:radial-gradient(circle, var(--ambient) 0%, var(--ring-c) 40%, transparent 66%);
+  background:radial-gradient(circle, var(--ambient), transparent 66%);
   pointer-events:none;
 }
 
@@ -941,14 +935,13 @@ body::after {
 [data-theme="light"] .zikr-text, [data-theme="warm"] .zikr-text { text-shadow:none; }
 
 /* Hero counter ring */
-.counter-section { padding:20px 40px 10px; margin:-10px 0 0; overflow:visible; }
 .counter-anchor { width:min(46vw,200px); height:min(46vw,200px); }
 .bg-circle { stroke-width:9; opacity:.45; }
-.fg-circle { stroke:url(#ringGrad); stroke-width:9; filter:drop-shadow(0 0 8px var(--ring-a)) drop-shadow(0 0 16px var(--ring-c)); }
-.progress-wrapper { box-shadow:0 0 90px -30px var(--ring-a); }
+.fg-circle { stroke:url(#ringGrad); stroke-width:9; filter:drop-shadow(0 0 7px var(--gold-soft)); }
+.progress-wrapper { box-shadow:0 0 90px -30px var(--gold); }
 .progress-wrapper::after {           /* per-tap ripple */
   content:''; position:absolute; inset:5%; border-radius:50%;
-  border:2px solid var(--ring-a); opacity:0; pointer-events:none;
+  border:2px solid var(--gold); opacity:0; pointer-events:none;
 }
 .progress-wrapper.tick::after { animation:tapRipple .45s ease-out; }
 @keyframes tapRipple { 0%{opacity:.55; transform:scale(.84);} 100%{opacity:0; transform:scale(1.14);} }
@@ -963,7 +956,7 @@ body::after {
 
 /* Tap-to-count hint */
 .tap-hint {
-  margin-top:35px; text-align:center; font-family:'Tajawal',sans-serif;
+  margin-top:30px; text-align:center; font-family:'Tajawal',sans-serif;
   font-size:11.5px; letter-spacing:.05em; color:var(--text-secondary);
   opacity:.65; animation:hintBreathe 3.2s ease-in-out infinite;
 }
@@ -1025,15 +1018,13 @@ body::after {
     </div>
   </div>
 
-  <div class="counter-section">
-    <div class="counter-anchor">
-      <div class="progress-wrapper" onclick="increment()">
+  <div class="counter-anchor">
+    <div class="progress-wrapper" onclick="increment()">
       <svg viewBox="0 0 200 200">
         <defs>
           <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop class="ring-stop-1" offset="0%"/>
-            <stop class="ring-stop-2" offset="50%"/>
-            <stop class="ring-stop-3" offset="100%"/>
+            <stop class="ring-stop-2" offset="100%"/>
           </linearGradient>
         </defs>
         <circle class="bg-circle" cx="100" cy="100" r="90"/>
@@ -1046,7 +1037,6 @@ body::after {
       </div>
     </div>
     <div class="tap-hint" data-i18n="azkar_tap_hint">اضغط للعدّ</div>
-    </div>
   </div>
 
 </div>
@@ -1119,7 +1109,7 @@ body::after {
         <button class="btn" id="settRuqia" onclick="setAudioSource('ruqia')">📿 <span data-i18n="azkar_ruqyah">الرقية</span></button>
       </div>
       <button class="btn" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="hidePlayerFromOptions(); closeSettings();">
-        <span></span>
+        <span>👁️</span>
         <span data-i18n="azkar_hide_player">إخفاء المشغل (يستمر التشغيل)</span>
       </button>
     </div>
