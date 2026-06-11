@@ -1279,7 +1279,6 @@ function updateMediaSession(item) {
 
 /* ---------- Init ---------- */
 loadPrefs();
-if (window.I18n) I18n.init();
 updateSpeedUI();
 
 // Restore reciter
@@ -1292,7 +1291,6 @@ if (S.reciter) {
 // Restore scope (type + selection)
 document.querySelectorAll('.type-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.type === S.rangeType));
 updateUnitButton();
-renderScopeResolved();
 
 // Restore toggle states
 if (S.rangeEnabled) {
@@ -1307,6 +1305,12 @@ if (S.ayahRepeatEnabled) {
   document.getElementById('ayahSettings').style.display = '';
 }
 document.getElementById('ayahRepeatVal').textContent = S.ayahRepeat;
+
+// Init i18n then render (async — must await dictionary load)
+(async () => {
+  if (window.I18n) await I18n.init();
+  renderScopeResolved();
+})();
 </script>
 </body>
 </html>
