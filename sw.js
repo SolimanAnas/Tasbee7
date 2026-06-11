@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v39"; // v39: quran-t.html promoted to default quran.html, old → quran-old.html
+const CACHE_NAME = "zad-muslim-v40"; // v40: added missing pages, JS, CSS, data for full offline
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -23,6 +23,11 @@ const STATIC_ASSETS = [
   "./pages/about.html",
   "./pages/tasmee-dashboard.html",
   "./pages/tasmee-review.html",
+  "./pages/azkar2.html",
+  "./pages/hadith-viewer.html",
+  "./pages/quran2.html",
+  "./pages/salah.html",
+  "./pages/sleeping.html",
 
   // ===== Config =====
   "./manifest.json",
@@ -32,6 +37,7 @@ const STATIC_ASSETS = [
   "./css/quran-v4.css",
   "./css/tasmee.css",
   "./css/tasmee-pro-v2.css",
+  "./css/_masbaha.css",
 
   // ===== Core JS =====
   "./data/cities.js",
@@ -46,6 +52,14 @@ const STATIC_ASSETS = [
   "./js/tasmee-engine.js",
   "./js/tasmee-matcher.js",
   "./js/tasmee-store.js",
+  "./js/juz-map.js",
+  "./js/masbaha.js",
+  "./js/medina2.data.js",
+  "./js/quran-app.js",
+  "./js/quranpages.data.js",
+  "./js/radio-stations.js",
+  "./js/surah-map.js",
+  "./js/tarteel-worker.js",
 
   // ===== i18n engine + locale dictionaries =====
   "./js/i18n.js",
@@ -72,9 +86,12 @@ const STATIC_ASSETS = [
   "./js/quran/tasmee-pro-v2.js",
   "./js/quran/tasmee-dashboard.js",
   "./js/quran/tasmee-review.js",
+  "./js/quran/local-search.js",
+  "./js/quran/ui-extras.js",
 
   // ===== Offline Quran text (word-by-word Tasmee) =====
   "./data/quran.json",
+  "./data/vocab.json",
 
   // ===== Fonts =====
   "./fonts/Tajawal.ttf",
