@@ -242,10 +242,15 @@ body::before {
   align-items:center;
   justify-content:flex-start;
   gap:14px;
-  padding: 4px 20px 170px;
+  padding: 4px 40px 170px;
   overflow-y:auto;
+  overflow-x:visible;
   position: relative;
   z-index: 1;
+}
+.page-wrapper::before{
+  content:""; position:absolute; top:0; left:-40px; right:-40px; bottom:0;
+  pointer-events:none; z-index:-1;
 }
 
 /* --- Zikr Container --- */
@@ -936,6 +941,7 @@ body::after {
 [data-theme="light"] .zikr-text, [data-theme="warm"] .zikr-text { text-shadow:none; }
 
 /* Hero counter ring */
+.counter-section { padding:20px 40px 10px; margin:-10px 0 0; overflow:visible; }
 .counter-anchor { width:min(46vw,200px); height:min(46vw,200px); }
 .bg-circle { stroke-width:9; opacity:.45; }
 .fg-circle { stroke:url(#ringGrad); stroke-width:9; filter:drop-shadow(0 0 8px var(--ring-a)) drop-shadow(0 0 16px var(--ring-c)); }
@@ -957,7 +963,7 @@ body::after {
 
 /* Tap-to-count hint */
 .tap-hint {
-  margin-top:30px; text-align:center; font-family:'Tajawal',sans-serif;
+  margin-top:35px; text-align:center; font-family:'Tajawal',sans-serif;
   font-size:11.5px; letter-spacing:.05em; color:var(--text-secondary);
   opacity:.65; animation:hintBreathe 3.2s ease-in-out infinite;
 }
@@ -1019,13 +1025,15 @@ body::after {
     </div>
   </div>
 
-  <div class="counter-anchor">
-    <div class="progress-wrapper" onclick="increment()">
+  <div class="counter-section">
+    <div class="counter-anchor">
+      <div class="progress-wrapper" onclick="increment()">
       <svg viewBox="0 0 200 200">
         <defs>
           <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop class="ring-stop-1" offset="0%"/>
-            <stop class="ring-stop-2" offset="100%"/>
+            <stop class="ring-stop-2" offset="50%"/>
+            <stop class="ring-stop-3" offset="100%"/>
           </linearGradient>
         </defs>
         <circle class="bg-circle" cx="100" cy="100" r="90"/>
@@ -1038,6 +1046,7 @@ body::after {
       </div>
     </div>
     <div class="tap-hint" data-i18n="azkar_tap_hint">اضغط للعدّ</div>
+    </div>
   </div>
 
 </div>
