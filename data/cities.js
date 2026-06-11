@@ -1054,6 +1054,38 @@ const cityCoordinatesMap = {
         "lat": 25.3463,
         "lng": 55.4209
     },
+    "Ajman": {
+        "lat": 25.4052,
+        "lng": 55.439
+    },
+    "Al Ain": {
+        "lat": 24.1917,
+        "lng": 55.7606
+    },
+    "Ras Al Khaimah": {
+        "lat": 25.7895,
+        "lng": 55.9432
+    },
+    "Fujairah": {
+        "lat": 25.1288,
+        "lng": 56.3265
+    },
+    "Umm Al Quwain": {
+        "lat": 25.5647,
+        "lng": 55.5552
+    },
+    "Khor Fakkan": {
+        "lat": 25.3347,
+        "lng": 56.3451
+    },
+    "Kalba": {
+        "lat": 25.0767,
+        "lng": 56.3583
+    },
+    "Dibba Al Fujairah": {
+        "lat": 25.6,
+        "lng": 56.2667
+    },
     "Cairo": {
         "lat": 30.0444,
         "lng": 31.2357
