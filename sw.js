@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v40"; // v40: added missing pages, JS, CSS, data for full offline
+const CACHE_NAME = "zad-muslim-v41"; // v41: added 8 missing UAE cities in English
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
