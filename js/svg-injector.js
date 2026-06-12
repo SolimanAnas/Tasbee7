@@ -17,15 +17,19 @@
 
     if (cache[src]) {
       replace(img, cache[src], cls, style);
-    } else if (!pending.has(src)) {
-      pending.set(src, []);
-      fetch(src).then(r => r.text()).then(svg => {
-        cache[src] = svg;
-        pending.get(src).forEach(({ img, cls, style }) => replace(img, svg, cls, style));
-        pending.delete(src);
-      }).catch(() => {});
+    } else {
+      if (!pending.has(src)) {
+        pending.set(src, []);
+        fetch(src).then(r => r.text()).then(svg => {
+          cache[src] = svg;
+          pending.get(src).forEach(({ img, cls, style }) => replace(img, svg, cls, style));
+          pending.delete(src);
+        }).catch(() => { pending.delete(src); });
+      }
+      // Queue only while the fetch is in flight — once cached, the branch
+      // above replaces directly (pending entry no longer exists).
+      pending.get(src).push({ img, cls, style });
     }
-    pending.get(src).push({ img, cls, style });
   }
 
   function replace(img, svgText, cls, style) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v50"; // v50: periodicsync schedule refresh (+v49 audio FIFO eviction)
+const CACHE_NAME = "zad-muslim-v51"; // v51: svg-injector cached-icon crash fix
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -533,4 +533,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v50 loaded");
+console.log("✅ Service Worker v51 loaded");
