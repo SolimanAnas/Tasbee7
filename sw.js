@@ -1,5 +1,10 @@
-const CACHE_NAME = "zad-muslim-v49"; // v49: audio cache FIFO eviction (was unbounded)
+const CACHE_NAME = "zad-muslim-v50"; // v50: periodicsync schedule refresh (+v49 audio FIFO eviction)
 const AUDIO_CACHE = "audio-cache-v1";
+const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
+
+// adhan + the shared schedule builder so periodicsync can rebuild the 7-day
+// push schedule while the app is closed (same code the page runs).
+importScripts("./data/adhan.js", "./js/schedule-builder.js");
 
 // Recitation files are ~1–10 MB each; 120 entries keeps the cache roughly
 // under ~500 MB worst-case instead of growing forever.
@@ -55,6 +60,7 @@ const STATIC_ASSETS = [
   "./js/quran-structure.js",
   "./js/native-init.js",
   "./js/notifications.js",
+  "./js/schedule-builder.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
@@ -329,7 +335,7 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(key => key !== CACHE_NAME && key !== AUDIO_CACHE && !key.startsWith("quran-offline") && !key.startsWith("quran-pages"))
+        keys.filter(key => key !== CACHE_NAME && key !== AUDIO_CACHE && key !== PUSH_CTX_CACHE && !key.startsWith("quran-offline") && !key.startsWith("quran-pages"))
           .map(key => caches.delete(key))
       )
     )
@@ -415,6 +421,47 @@ self.addEventListener("fetch", event => {
   );
 });
 
+// ===== Periodic schedule refresh =====
+// Wakes ~daily (Chromium, installed PWAs) to re-upload a fresh 7-day schedule
+// from the context the page persisted — so pushes keep flowing even if the
+// user doesn't open the app past the schedule horizon.
+self.addEventListener("periodicsync", event => {
+  if (event.tag === "refresh-push-schedule") {
+    event.waitUntil(refreshPushSchedule());
+  }
+});
+
+async function refreshPushSchedule() {
+  try {
+    const cache = await caches.open(PUSH_CTX_CACHE);
+    const res = await cache.match("./__push-ctx");
+    if (!res) return;
+    const ctx = await res.json();
+    if (!ctx || !ctx.serverUrl) return;
+
+    const subscription = await self.registration.pushManager.getSubscription();
+    if (!subscription) return;
+
+    const schedule = (typeof buildNotificationSchedule === "function")
+      ? buildNotificationSchedule(ctx, 7) : [];
+    if (!schedule.length) return; // disabled or no location — nothing to refresh
+
+    await fetch(`${ctx.serverUrl}/subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subscription,
+        userId: ctx.userId,
+        tzOffset: new Date().getTimezoneOffset(),
+        schedule
+      })
+    });
+    console.log(`🔄 periodicsync: schedule refreshed (${schedule.length} events)`);
+  } catch (e) {
+    console.warn("periodicsync refresh failed:", e.message);
+  }
+}
+
 // ===== Push notification receive =====
 self.addEventListener("push", event => {
   let data = {};
@@ -475,4 +522,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v49 loaded");
+console.log("✅ Service Worker v50 loaded");

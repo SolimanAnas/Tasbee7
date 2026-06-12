@@ -219,6 +219,9 @@ const NotificationSystem = {
         this.state.lastScheduleUpload = Date.now();
         this.state.lastScheduleCount = schedule.length;
         this.saveState();
+        // Let the SW refresh this schedule from periodicsync while the app is closed.
+        await this.persistScheduleContext();
+        await this.registerPeriodicSync();
         console.log(`✅ Schedule uploaded to server (${schedule.length} events)`);
       }
     } catch (e) {
@@ -236,78 +239,57 @@ const NotificationSystem = {
            (Date.now() - (this.state.lastScheduleUpload || 0)) < SCHEDULE_HORIZON_MS;
   },
 
-  // Build absolute-time notification events for the next `days` days from the
-  // user's coordinates + current settings. Returns [] if we can't compute prayers
-  // (no location / adhan.js missing) — the server then has nothing to fire.
-  buildSchedule(days = 7) {
-    const events = [];
-    // Master toggle off → upload an empty schedule so the server goes silent too.
-    if (!this.settings.enabled) return events;
-    const lat = localStorage.getItem('prayer_lat');
-    const lng = localStorage.getItem('prayer_lng');
-    const method = this.getAdhanMethod();
-    if (!lat || !lng || !method || typeof adhan === 'undefined') return events;
-
-    method.madhab = adhan.Madhab.Shafi;
-    const coords = new adhan.Coordinates(parseFloat(lat), parseFloat(lng));
-    const now = Date.now();
-    const prayers = [
-      ['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'],
-      ['maghrib', 'المغرب'], ['isha', 'العشاء']
-    ];
-
-    // local wall-clock HH:MM on a given day → absolute epoch ms (client is in user's tz)
-    const localTs = (day, h, m) =>
-      new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m, 0, 0).getTime();
-    const inQuiet = (ts) => {
-      const h = new Date(ts).getHours();
-      return h >= this.config.quietHoursStart || h < this.config.quietHoursEnd;
+  // Snapshot of everything the schedule builder needs. Also persisted to the
+  // push-ctx cache so the service worker can rebuild the schedule from
+  // periodicsync while the app is closed (localStorage is page-only).
+  scheduleContext() {
+    return {
+      settings: this.settings,
+      lat: localStorage.getItem('prayer_lat'),
+      lng: localStorage.getItem('prayer_lng'),
+      calcMethod: localStorage.getItem('calcMethod') || 'UAE',
+      quietHoursStart: this.config.quietHoursStart,
+      quietHoursEnd: this.config.quietHoursEnd,
+      preReminderMinutes: this.config.preReminderMinutes,
+      serverUrl: this.config.serverUrl,
+      userId: this.state.userId
     };
+  },
 
-    for (let d = 0; d < days; d++) {
-      const day = new Date(); day.setDate(day.getDate() + d); day.setHours(0, 0, 0, 0);
-      const pt = new adhan.PrayerTimes(coords, day, method);
+  // Build absolute-time notification events for the next `days` days.
+  // Delegates to the shared builder (js/schedule-builder.js) — the same code
+  // the service worker runs on periodicsync. Returns [] if we can't compute
+  // prayers (no location / adhan.js missing) — the server then has nothing to fire.
+  buildSchedule(days = 7) {
+    if (typeof buildNotificationSchedule !== 'function') return [];
+    return buildNotificationSchedule(this.scheduleContext(), days);
+  },
 
-      if (this.settings.prayerTimes) {
-        for (const [k, name] of prayers) {
-          const t = pt[k];
-          if (!t || isNaN(t.getTime())) continue;
-          // Adhan (prayer time) — bypasses quiet hours so Fajr is never silenced
-          events.push({
-            tag: `prayer-${k}`,
-            title: `🕌 حان وقت ${name}`,
-            body: `الآن وقت صلاة ${name} — حي على الصلاة`,
-            url: './index.html',
-            ts: t.getTime()
-          });
-          // Pre-reminder — respects quiet hours
-          if (this.settings.preReminders) {
-            const preTs = t.getTime() - this.config.preReminderMinutes * 60000;
-            if (!(this.settings.quietHours && inQuiet(preTs))) {
-              events.push({
-                tag: `pre-${k}`,
-                title: `⏰ تذكير: ${name}`,
-                body: `باقي ${this.config.preReminderMinutes} دقائق على أذان ${name}`,
-                url: './index.html',
-                ts: preTs
-              });
-            }
-          }
-        }
-      }
+  // Persist the schedule context where the SW can read it (Cache API is the
+  // only storage both contexts share without IDB ceremony).
+  async persistScheduleContext() {
+    try {
+      const cache = await caches.open('push-ctx-v1');
+      await cache.put('./__push-ctx', new Response(
+        JSON.stringify(this.scheduleContext()),
+        { headers: { 'Content-Type': 'application/json' } }
+      ));
+    } catch (e) { /* cache unavailable — periodicsync refresh just won't run */ }
+  },
 
-      // Azkar / Kahf fire at fixed local times (respect quiet hours)
-      const reminders = [];
-      if (this.settings.azkarMorning) reminders.push({ ts: localTs(day, 6, 0),  tag: 'azkar-morning', title: '🌅 أذكار الصباح', body: 'اللهم بك أصبحنا — ابدأ يومك بالأذكار', url: './pages/azkar.html?type=morning' });
-      if (this.settings.azkarEvening) reminders.push({ ts: localTs(day, 16, 0), tag: 'azkar-evening', title: '🌙 أذكار المساء', body: 'اللهم بك أمسينا — اختتم يومك بالأذكار', url: './pages/azkar.html?type=night' });
-      if (this.settings.fridayKahf && day.getDay() === 5) reminders.push({ ts: localTs(day, 7, 0), tag: 'friday-kahf', title: '🕋 يوم الجمعة المبارك', body: 'لا تنسَ قراءة سورة الكهف اليوم', url: './pages/quran.html?surah=18' });
-      for (const r of reminders) {
-        if (this.settings.quietHours && inQuiet(r.ts)) continue;
-        events.push(r);
-      }
-    }
-
-    return events.filter(e => e.ts > now).sort((a, b) => a.ts - b.ts);
+  // Ask the browser to wake the SW ~daily so it can re-upload a fresh 7-day
+  // schedule even if the user never opens the app (closes the "pushes stop
+  // after 7 days" gap). Chromium-only; silently unsupported elsewhere.
+  async registerPeriodicSync() {
+    try {
+      if (!this.swRegistration || !('periodicSync' in this.swRegistration)) return;
+      const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+      if (status.state !== 'granted') return;
+      await this.swRegistration.periodicSync.register('refresh-push-schedule', {
+        minInterval: 24 * 60 * 60 * 1000
+      });
+      console.log('🔄 Periodic schedule refresh registered');
+    } catch (e) { /* permission API or registration unsupported — fine */ }
   },
 
   urlBase64ToUint8Array(base64String) {
