@@ -8,6 +8,7 @@ concrete action. Numbers were measured from the working tree, not estimated.
 - **Notification system** (commit `b801db7`): RFC 8291/8188 compliance, VAPID validation, push blackout bug fix, server auth. **Remaining manual step:** `cd server && wrangler deploy` and `wrangler secret put ADMIN_TOKEN`.
 - **P0 batch** (commits `9132ac4`, `3637c6d`): image optimization (26.6 MB → 4.3 MB), dead-file cleanup, legacy archival, sitemap corrections, server banner, version metadata.
 - **P1-1** (commit `a117da9`): audio precache diet (63.8 MB → 21.3 MB).
+- **P2-1** (commit `aae8ec0`): deleted 4 duplicate/legacy pages (azkar2, quran2, masbaha2, quran-old).
 
 ---
 
@@ -85,17 +86,11 @@ failed HTML requests.
 ## P2 — Architecture & code health
 
 ### 1. Resolve the duplicate-page situation (~500 KB + maintenance tax)
-Four near-duplicates ship and are precached:
-- `quran-old.html` (85 KB) — calls the obsolete tasmee API; manifest points to `quran.html`
-- `quran2.html` (163 KB) — divergent theme system, old CSS embedded
-- `azkar2.html` (58 KB) — ~99% identical to `azkar.html`, only the color palette differs
-- `masbaha2.html` (46 KB) — theme variant of `masbaha.html`
-- plus `archive/quran.html` (265 KB) with a mojibake-corrupted title
-
-Decide per pair: delete, or document why the variant exists. If the `*2` pages are just
-color schemes, that's one CSS custom-properties file, not a forked page. Then update
-`sw.js` STATIC_ASSETS, `vite.config.js` entries, sitemap, and the Playwright page list
-together.
+**✅ P2-1 DONE (commit `aae8ec0`):** Deleted four dead pages — `quran-old.html`, `quran2.html`,
+`azkar2.html`, `masbaha2.html` — which had no UI linkage, were not in sitemap, and existed
+only as cosmetic variants. Updated `sw.js` STATIC_ASSETS and `test_all.js` page lists.
+No functionality loss: all variants were CSS-only (color themes / metadata), with no incoming
+navigation links from the app UI.
 
 ### 2. Extract inline CSS/JS from pages
 `azkar.html` is ~87% inline code (950 lines CSS + 670 lines JS); `masbaha.html` ~94%;
