@@ -63,6 +63,7 @@ const STATIC_ASSETS = [
   "./js/schedule-builder.js",
   "./js/prayer-service.js",
   "./js/theme-manager.js",
+  "./js/toast.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
