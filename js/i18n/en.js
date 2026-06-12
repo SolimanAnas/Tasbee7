@@ -533,6 +533,7 @@ export default {
   'notif_subtitle': `Full control over your daily reminders and worship`,
   'notif_status_active': `Notifications Active`,
   'notif_status_inactive': `Notifications Stopped`,
+  'notif_blocked': `Notifications blocked — allow them in your browser settings`,
   'notif_day': `day`,
   'notif_streak_label': `consecutive days of worship`,
   'notif_location_title': `Geographic Location (Auto)`,

@@ -355,9 +355,9 @@
     function updateThemeIcon(theme) {
       const themeBtn = document.getElementById('themeToggleBtn');
       if(theme === 'dark') {
-        themeBtn.innerText = '<img src="../img/SVG/sun.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">️';
+        themeBtn.innerHTML = '<img src="../img/SVG/sun.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
       } else {
-        themeBtn.innerText = '<img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+        themeBtn.innerHTML = '<img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
       }
     }
 
@@ -391,6 +391,10 @@
       updateUI();
     });
 
+    // NotificationSystem.init() is async (geolocation + adhan calc) — re-render
+    // once it finishes so prayer times/streak show real values, not defaults.
+    window.addEventListener('notifications:ready', updateUI);
+
     function updateUI() {
       if(typeof NotificationSystem === 'undefined') return;
 
@@ -401,10 +405,13 @@
       // دالة مساعدة تجلب القيمة وتفترض True إذا لم تكن موجودة لتجنب إغلاق الأزرار
       const getVal = (key) => s[key] !== undefined ? s[key] : true;
       
-      // Status
+      // Status — browser-level block trumps the in-app toggle: no notification
+      // can be shown until the user re-allows it in browser/site settings.
       const isEnabled = getVal('enabled');
-      document.getElementById('statusText').textContent = isEnabled ? t('notif_status_active') : t('notif_status_inactive');
-      document.getElementById('statusDot').className = isEnabled ? 'status-dot active' : 'status-dot inactive';
+      const isBlocked = ('Notification' in window) && Notification.permission === 'denied';
+      document.getElementById('statusText').textContent =
+        isBlocked ? t('notif_blocked') : isEnabled ? t('notif_status_active') : t('notif_status_inactive');
+      document.getElementById('statusDot').className = (isEnabled && !isBlocked) ? 'status-dot active' : 'status-dot inactive';
       
       // Streak
       document.getElementById('streakCount').textContent = state.streak || 0;
@@ -484,6 +491,10 @@
       if(Notification.permission === 'default') {
         const result = await Notification.requestPermission();
         if(result !== 'granted') { alert(t('notif_permission_denied')); return; }
+        // Permission just granted — enable background push now instead of
+        // waiting for the next app open.
+        NotificationSystem.subscribeToPush().catch(() => {});
+        updateUI();
       }
       try {
         const result = await NotificationSystem.showNotification(t('notif_test_title'), {

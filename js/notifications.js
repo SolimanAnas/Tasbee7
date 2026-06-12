@@ -6,6 +6,8 @@ const NotificationSystem = {
   // ========== CONFIG ==========
   config: {
     serverUrl: 'https://zad-push-server.solimananas2012.workers.dev',
+    // Offline fallback only — the authoritative key is fetched from
+    // GET /vapidPublicKey at subscribe time and validated (see getVapidKey).
     vapidPublicKey: 'BFBoJ96GEU6t_hIBX_MaWHQRTSdChk2yA78dDNcQuNyXfiL2gFVnyRsrZW5d1kO5aEY2oCkafBQHX7kRU3tS1Y',
     quietHoursStart: 23,
     quietHoursEnd: 5,
@@ -37,7 +39,9 @@ const NotificationSystem = {
     subscribed: false,
     triggers: {},
     streak: 0,
-    lastActive: null
+    lastActive: null,
+    lastScheduleUpload: 0,  // last successful /subscribe upload (epoch ms)
+    lastScheduleCount: 0    // events the server holds from that upload
   },
 
   // Default prayer times (fallback when no location available)
@@ -90,6 +94,10 @@ const NotificationSystem = {
 
     this.updateStreak();
     console.log('✅ Notification System ready');
+
+    // Let UI pages (notifications.html) re-render once async init has real
+    // data — they run their first render before prayer times are computed.
+    try { window.dispatchEvent(new CustomEvent('notifications:ready')); } catch (e) {}
   },
 
   // ========== SERVICE WORKER ==========
@@ -131,18 +139,29 @@ const NotificationSystem = {
   async subscribeToPush() {
     if (!this.swRegistration) throw new Error('no service worker');
 
-    let subscription = await this.swRegistration.pushManager.getSubscription();
-    if (!subscription) {
-      let vapidKey = this.config.vapidPublicKey;
-      try {
-        const vapidRes = await fetch(`${this.config.serverUrl}/vapidPublicKey`);
-        const data = await vapidRes.json();
-        if (data && data.key) vapidKey = data.key;
-      } catch (e) { /* fall back to bundled key */ }
+    const vapidKey = await this.getVapidKey();
+    if (!vapidKey) throw new Error('no usable VAPID key (server unreachable, bundled fallback invalid)');
+    const vapidKeyBytes = this.urlBase64ToUint8Array(vapidKey);
 
+    let subscription = await this.swRegistration.pushManager.getSubscription();
+
+    // A subscription bound to a different VAPID key is dead weight: the push
+    // service rejects everything the server signs (403). Resubscribe cleanly.
+    if (subscription && subscription.options && subscription.options.applicationServerKey) {
+      const current = new Uint8Array(subscription.options.applicationServerKey);
+      const matches = current.length === vapidKeyBytes.length &&
+        current.every((b, i) => b === vapidKeyBytes[i]);
+      if (!matches) {
+        console.warn('⚠️ Existing push subscription uses a stale VAPID key — resubscribing');
+        await subscription.unsubscribe().catch(() => {});
+        subscription = null;
+      }
+    }
+
+    if (!subscription) {
       subscription = await this.swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(vapidKey)
+        applicationServerKey: vapidKeyBytes
       });
     }
 
@@ -150,6 +169,28 @@ const NotificationSystem = {
     this.settings.pushEnabled = true;
     this.saveState();
     await this.uploadSchedule(subscription);
+  },
+
+  // Server key first (authoritative — it's the one the worker signs with),
+  // bundled key as offline fallback. Either way the key must be a valid
+  // uncompressed P-256 point (65 bytes, 0x04 prefix) or subscribe() throws.
+  async getVapidKey() {
+    try {
+      const res = await fetch(`${this.config.serverUrl}/vapidPublicKey`);
+      const data = await res.json();
+      if (data && this.isValidVapidKey(data.key)) return data.key;
+    } catch (e) { /* offline / server down — try the bundled key */ }
+    return this.isValidVapidKey(this.config.vapidPublicKey) ? this.config.vapidPublicKey : null;
+  },
+
+  isValidVapidKey(key) {
+    if (typeof key !== 'string' || !key) return false;
+    try {
+      const bytes = this.urlBase64ToUint8Array(key);
+      return bytes.length === 65 && bytes[0] === 0x04;
+    } catch (e) {
+      return false;
+    }
   },
 
   // Push the current device's subscription + freshly built schedule to the server.
@@ -172,10 +213,27 @@ const NotificationSystem = {
         })
       });
       const result = await res.json().catch(() => ({}));
-      if (result.success) console.log(`✅ Schedule uploaded to server (${schedule.length} events)`);
+      if (result.success) {
+        // Record what the server now holds — checkAndNotify only defers to the
+        // server while this is fresh and non-empty (see serverScheduleActive).
+        this.state.lastScheduleUpload = Date.now();
+        this.state.lastScheduleCount = schedule.length;
+        this.saveState();
+        console.log(`✅ Schedule uploaded to server (${schedule.length} events)`);
+      }
     } catch (e) {
       console.warn('⚠️ Schedule upload failed:', e.message);
     }
+  },
+
+  // True while the server holds a usable schedule for this device: the last
+  // upload succeeded, contained events, and hasn't outlived its 7-day horizon.
+  // If this is false the local scheduler must keep firing — otherwise a failed
+  // or empty upload silences notifications entirely.
+  serverScheduleActive() {
+    const SCHEDULE_HORIZON_MS = 7 * 24 * 3600 * 1000;
+    return (this.state.lastScheduleCount || 0) > 0 &&
+           (Date.now() - (this.state.lastScheduleUpload || 0)) < SCHEDULE_HORIZON_MS;
   },
 
   // Build absolute-time notification events for the next `days` days from the
@@ -183,6 +241,8 @@ const NotificationSystem = {
   // (no location / adhan.js missing) — the server then has nothing to fire.
   buildSchedule(days = 7) {
     const events = [];
+    // Master toggle off → upload an empty schedule so the server goes silent too.
+    if (!this.settings.enabled) return events;
     const lat = localStorage.getItem('prayer_lat');
     const lng = localStorage.getItem('prayer_lng');
     const method = this.getAdhanMethod();
@@ -343,11 +403,16 @@ const NotificationSystem = {
       const calcMethod = this.getAdhanMethod();
       if (!calcMethod) throw new Error('adhan.js not loaded');
       calcMethod.madhab = adhan.Madhab.Shafi;
-      const coords = new adhan.Coordinates(24.7136, 46.6753);
+      // Look the city up in the bundled cities database when available;
+      // otherwise fall back to Cairo (matches the declared default city).
+      const known = (typeof cityCoordinatesMap !== 'undefined' && cityCoordinatesMap[city]) || null;
+      const coords = known
+        ? new adhan.Coordinates(known.lat, known.lng)
+        : new adhan.Coordinates(30.0444, 31.2357);
       const now = new Date();
       const pt = new adhan.PrayerTimes(coords, now, calcMethod);
       this.parseAdhanTimes(pt);
-      console.log('✅ Prayer times calculated via adhan.js (city fallback)');
+      console.log(`✅ Prayer times calculated via adhan.js (${known ? 'city: ' + city : 'Cairo fallback'})`);
     } catch (err) {
       console.warn('⚠️ fetchPrayerTimesByCity failed:', err.message);
     }
@@ -521,10 +586,12 @@ const NotificationSystem = {
     const currentTime = now.getHours() * 60 + now.getMinutes();
     const ctx = this.getContext();
 
-    // When subscribed to push, the server's cron owns prayer/azkar/Kahf delivery
-    // (it works in the background too) — skip them locally to avoid duplicates.
-    // Streak reminders stay local: the server can't know today's activity.
-    const pushActive = this.state.subscribed && this.settings.pushEnabled;
+    // When subscribed to push AND the server actually holds a fresh schedule,
+    // the server's cron owns prayer/azkar/Kahf delivery (it works in the
+    // background too) — skip them locally to avoid duplicates. If the upload
+    // failed or expired, local delivery takes over. Streak reminders always
+    // stay local: the server can't know today's activity.
+    const pushActive = this.state.subscribed && this.settings.pushEnabled && this.serverScheduleActive();
 
     // Prayer time notifications
     if (!pushActive && this.settings.prayerTimes) {

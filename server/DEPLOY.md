@@ -42,12 +42,20 @@ wrangler kv namespace create PUSH_SUBS
 npx web-push generate-vapid-keys
 wrangler secret put VAPID_PUBLIC_KEY     # paste the public key
 wrangler secret put VAPID_PRIVATE_KEY    # paste the private key
+
+# 3) Admin token for the /notify broadcast endpoint (any long random string).
+#    Without it /notify returns 503; with a wrong token it returns 401.
+openssl rand -hex 32
+wrangler secret put ADMIN_TOKEN
 ```
 
 **Important:** the public key you set here must match
 `NotificationSystem.config.vapidPublicKey` in `js/notifications.js` (the client
 uses it as a fallback when `/vapidPublicKey` can't be fetched). The client also
 fetches `/vapidPublicKey` at subscribe time, so the server value is authoritative.
+The client validates the key (65-byte uncompressed P-256 point) and automatically
+unsubscribes/resubscribes any device whose existing subscription was created with
+a different key — so rotating VAPID keys heals itself on next app open.
 
 ## Deploy
 
@@ -68,6 +76,7 @@ wrangler tail
 # Admin broadcast to all devices (test path that doesn't wait for a prayer time):
 curl -X POST https://zad-push-server.solimananas2012.workers.dev/notify \
   -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -d '{"title":"🧪 اختبار","body":"يعمل ✅","tag":"test"}'
 ```
 

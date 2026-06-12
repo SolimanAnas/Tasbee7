@@ -504,6 +504,7 @@ export default {
   'notif_subtitle': `Günlük hatırlatmalarınız ve ibadetleriniz üzerinde tam kontrol`,
   'notif_status_active': `Bildirimler Aktif`,
   'notif_status_inactive': `Bildirimler Durduruldu`,
+  'notif_blocked': `Bildirimler engellendi — tarayıcı ayarlarından izin verin`,
   'notif_day': `gün`,
   'notif_streak_label': `ardışık ibadet günü`,
   'notif_location_title': `Coğrafi Konum (Otomatik)`,

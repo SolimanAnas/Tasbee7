@@ -533,6 +533,7 @@ export default {
   'notif_subtitle': `کۆنترۆڵی تەواو لەسەر ئاگاداری و عیبادەتەکانتی ڕۆژانە`,
   'notif_status_active': `ئاگاداریەکان چالاکن`,
   'notif_status_inactive': `ئاگاداریەکان وەستاوە`,
+  'notif_blocked': `ئاگاداریەکان ڕاگیراون — لە ڕێکخستنەکانی وێبگەڕ ڕێگەیان پێبدە`,
   'notif_day': `ڕۆژ`,
   'notif_streak_label': `ڕۆژی بەستاوەی عیبادەت`,
   'notif_location_title': `شوێنی جوگرافی (خۆکار)`,

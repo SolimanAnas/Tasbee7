@@ -533,6 +533,7 @@ export default {
   'notif_subtitle': `تحكم كامل في تنبيهاتك وعباداتك اليومية`,
   'notif_status_active': `الإشعارات مفعلة`,
   'notif_status_inactive': `الإشعارات متوقفة`,
+  'notif_blocked': `الإشعارات محظورة — اسمح بها من إعدادات المتصفح`,
   'notif_day': `يوم`,
   'notif_streak_label': `يوم متتالي من العبادة`,
   'notif_location_title': `الموقع الجغرافي (تلقائي)`,

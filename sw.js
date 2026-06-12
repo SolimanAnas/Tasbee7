@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v44"; // v44: SVG inline injector for theme-aware icons
+const CACHE_NAME = "zad-muslim-v45"; // v45: notification system fixes (push encryption, VAPID validation, schedule fallback)
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -468,4 +468,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v27 loaded");
+console.log("✅ Service Worker v45 loaded");

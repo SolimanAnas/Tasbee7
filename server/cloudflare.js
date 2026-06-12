@@ -8,19 +8,6 @@ function b64urlDec(s) {
   return Uint8Array.from(atob(s), c => c.charCodeAt(0));
 }
 
-// ====== HKDF context for aes128gcm (RFC 8188 + RFC 8291) ======
-// cek_info  = "Content-Encoding: aes128gcm\0" + sub_pub(65) + server_pub(65)
-// nonce_info = "Content-Encoding: nonce\0"     + sub_pub(65) + server_pub(65)
-
-function hkdfInfo(type, subPub, serverPub) {
-  const name = new TextEncoder().encode(`Content-Encoding: ${type}\0`);
-  const out = new Uint8Array(name.length + subPub.length + serverPub.length);
-  out.set(name, 0);
-  out.set(subPub, name.length);
-  out.set(serverPub, name.length + subPub.length);
-  return out;
-}
-
 // ====== Web Push Encryption (RFC 8291) ======
 
 async function encryptPayload(text, subP256dh, subAuth) {
@@ -43,28 +30,43 @@ async function encryptPayload(text, subP256dh, subAuth) {
   // 4. Salt (16 random bytes)
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
-  // 5. Derive keys via HKDF (RFC 8291 §3.4)
-  // PRK = HKDF-Extract(salt=auth, IKM=shared_secret)
-  // CEK = HKDF-Expand(PRK, cek_info, 16)
-  // NONCE = HKDF-Expand(PRK, nonce_info, 12)
-  const ikmKey = await crypto.subtle.importKey(
+  // 5. Derive keys via HKDF — RFC 8291 §3.3/§3.4 two-stage derivation:
+  //    IKM   = HKDF(salt=auth_secret, ikm=ecdh_secret,
+  //                 info="WebPush: info"||0x00||ua_pub(65)||as_pub(65), 32)
+  //    CEK   = HKDF(salt=salt, ikm=IKM, info="Content-Encoding: aes128gcm"||0x00, 16)
+  //    NONCE = HKDF(salt=salt, ikm=IKM, info="Content-Encoding: nonce"||0x00, 12)
+  //    (Browsers derive exactly this; any other scheme fails decryption silently.)
+  const enc8291 = new TextEncoder();
+  const ecdhKey = await crypto.subtle.importKey(
     'raw', sharedSecret, 'HKDF', false, ['deriveBits']);
 
+  const keyInfo = new Uint8Array([
+    ...enc8291.encode('WebPush: info\0'), ...subRaw, ...serverPub]);
+  const ikm = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: subAuth, info: keyInfo },
+    ecdhKey, 256));
+
+  const ikmKey = await crypto.subtle.importKey(
+    'raw', ikm, 'HKDF', false, ['deriveBits']);
+
   const cek = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt: subAuth,
-      info: hkdfInfo('aes128gcm', subRaw, serverPub) },
+    { name: 'HKDF', hash: 'SHA-256', salt,
+      info: enc8291.encode('Content-Encoding: aes128gcm\0') },
     ikmKey, 128);
 
   const nonce = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt: subAuth,
-      info: hkdfInfo('nonce', subRaw, serverPub) },
+    { name: 'HKDF', hash: 'SHA-256', salt,
+      info: enc8291.encode('Content-Encoding: nonce\0') },
     ikmKey, 96);
 
-  // 6. Pad payload (RFC 8188 §2.1): 2-byte big-endian padding delimiter
+  // 6. Pad payload (RFC 8188 §2): plaintext || delimiter octet.
+  //    0x02 marks the last (here: only) record. The old 2-byte length prefix
+  //    belongs to the legacy "aesgcm" scheme — using it under aes128gcm makes
+  //    browsers fail decryption and silently drop the push.
   const payloadBytes = new TextEncoder().encode(text);
-  const record = new Uint8Array(payloadBytes.length + 2);
-  record[0] = 0; record[1] = 0; // no padding
-  record.set(payloadBytes, 2);
+  const record = new Uint8Array(payloadBytes.length + 1);
+  record.set(payloadBytes, 0);
+  record[payloadBytes.length] = 0x02;
 
   // 7. AES-128-GCM encrypt
   const aesKey = await crypto.subtle.importKey(
@@ -73,15 +75,19 @@ async function encryptPayload(text, subP256dh, subAuth) {
     { name: 'AES-GCM', iv: new Uint8Array(nonce), tagLength: 128 },
     aesKey, record));
 
-  // 8. Build output: salt(16) || recordSize(4) || serverPub(65) || ciphertext
+  // 8. Build output (RFC 8188 §2.1 header + body):
+  //    salt(16) || rs(4) || idlen(1) || keyid(=server public key, 65) || ciphertext
+  //    rs must be >= the record size; 4096 is the conventional value and our
+  //    payloads are far smaller, so the single record is correctly "final".
   const rs = new Uint8Array(4);
-  new DataView(rs.buffer).setUint32(0, ciphertext.length, false);
+  new DataView(rs.buffer).setUint32(0, 4096, false);
 
-  const out = new Uint8Array(16 + 4 + 65 + ciphertext.length);
+  const out = new Uint8Array(16 + 4 + 1 + 65 + ciphertext.length);
   out.set(salt, 0);
   out.set(rs, 16);
-  out.set(serverPub, 20);
-  out.set(ciphertext, 85);
+  out[20] = 65; // idlen: length of the keyid field (uncompressed P-256 point)
+  out.set(serverPub, 21);
+  out.set(ciphertext, 86);
   return out;
 }
 
@@ -149,6 +155,23 @@ async function sendPushToSubscriber(env, subscription, payloadObj) {
   return res.status;
 }
 
+// Subscriber records auto-expire if a device never re-uploads its schedule
+// (each app open refreshes the TTL). Keeps KV free of dead subscriptions.
+const SUB_TTL_SECONDS = 45 * 24 * 3600;
+
+// KV list() returns at most 1000 keys per page — walk the cursor so we never
+// silently skip subscribers once the install base grows.
+async function listAllSubKeys(env) {
+  const keys = [];
+  let cursor;
+  do {
+    const page = await env.PUSH_SUBS.list(cursor ? { cursor } : {});
+    keys.push(...page.keys);
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return keys;
+}
+
 // ====== CRON DISPATCHER ======
 // Each subscriber record holds a client-computed schedule of absolute-time
 // events: { tag, title, body, url, ts }. The client (which already runs adhan.js)
@@ -159,8 +182,8 @@ async function dispatchDue(env) {
   const now = Date.now();
   const MAX_LATE = 15 * 60 * 1000; // don't fire events that are >15 min stale (e.g. after a cron outage)
 
-  const list = await env.PUSH_SUBS.list();
-  await Promise.all(list.keys.map(async ({ name }) => {
+  const keys = await listAllSubKeys(env);
+  await Promise.all(keys.map(async ({ name }) => {
     const raw = await env.PUSH_SUBS.get(name);
     if (!raw) return;
 
@@ -195,7 +218,7 @@ async function dispatchDue(env) {
     rec.subscription = subscription;
     rec.schedule = schedule.filter(e => e.ts > now);
     rec.lastDispatch = now;
-    await env.PUSH_SUBS.put(name, JSON.stringify(rec));
+    await env.PUSH_SUBS.put(name, JSON.stringify(rec), { expirationTtl: SUB_TTL_SECONDS });
   }));
 }
 
@@ -207,7 +230,7 @@ export default {
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
 
     if (request.method === 'OPTIONS') {
@@ -245,7 +268,7 @@ export default {
         lastDispatch,
         updated: Date.now()
       };
-      await env.PUSH_SUBS.put(key, JSON.stringify(rec));
+      await env.PUSH_SUBS.put(key, JSON.stringify(rec), { expirationTtl: SUB_TTL_SECONDS });
 
       return new Response(JSON.stringify({ success: true, events: rec.schedule.length }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -262,8 +285,22 @@ export default {
       });
     }
 
-    // POST /notify — admin broadcast: send one encrypted push to ALL subscribers
+    // POST /notify — admin broadcast: send one encrypted push to ALL subscribers.
+    // Guarded by the ADMIN_TOKEN secret (wrangler secret put ADMIN_TOKEN) —
+    // without a guard, anyone who finds the URL can spam every device.
     if (url.pathname === '/notify' && request.method === 'POST') {
+      if (!env.ADMIN_TOKEN) {
+        return new Response(JSON.stringify({ success: false, error: 'ADMIN_TOKEN not configured' }), {
+          status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+      const auth = request.headers.get('Authorization') || '';
+      if (auth !== `Bearer ${env.ADMIN_TOKEN}`) {
+        return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+          status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+
       const body = await request.json();
 
       const payload = {
@@ -273,10 +310,10 @@ export default {
         data: body.data || { url: './index.html', type: 'default' }
       };
 
-      const allSubs = await env.PUSH_SUBS.list();
+      const allSubs = await listAllSubKeys(env);
       let sent = 0, failed = 0;
 
-      await Promise.all(allSubs.keys.map(async ({ name }) => {
+      await Promise.all(allSubs.map(async ({ name }) => {
         const raw = await env.PUSH_SUBS.get(name);
         if (!raw) { failed++; return; }
         try {

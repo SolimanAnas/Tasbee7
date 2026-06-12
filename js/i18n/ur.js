@@ -504,6 +504,7 @@ export default {
   'notif_subtitle': `اپنی یاد دہانیوں اور عبادات پر مکمل کنٹرول`,
   'notif_status_active': `اطلاعات فعال ہیں`,
   'notif_status_inactive': `اطلاعات بند ہیں`,
+  'notif_blocked': `اطلاعات مسدود ہیں — براؤزر کی ترتیبات سے اجازت دیں`,
   'notif_day': `دن`,
   'notif_streak_label': `مسلسل عبادت کے دن`,
   'notif_location_title': `جغرافیائی مقام (خودکار)`,
