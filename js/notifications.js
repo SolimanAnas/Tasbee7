@@ -350,7 +350,9 @@ const NotificationSystem = {
         const pos = await new Promise((resolve, reject) =>
           navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 })
         );
-        const { latitude: lat, longitude: lon } = pos.coords;
+        // Round to ~1 km: plenty for prayer times, much less of a fingerprint
+        const lat = +pos.coords.latitude.toFixed(2);
+        const lon = +pos.coords.longitude.toFixed(2);
         localStorage.setItem('prayer_lat', lat);
         localStorage.setItem('prayer_lng', lon);
         await this.fetchPrayerTimesByCoords(lat, lon);
