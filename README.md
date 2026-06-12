@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/Featured.png" alt="Zad Al-Muslim — زاد المسلم" width="100%">
+<img src="images/Featured.webp" alt="Zad Al-Muslim — زاد المسلم" width="100%">
 
 <br>
 
@@ -224,9 +224,9 @@ The app uses a custom **glassmorphism** design system with 4 themes:
 
 | Theme | Background | Glass Effect | Accent |
 |---|---|---|---|
-| **Light** | `Background-light.png` | White translucent panels | Emerald `#10B981` |
-| **Dark** | `Background-dark.png` | Slate translucent panels | Emerald `#10B981` |
-| **Sepia** | `background-sepia.png` | Warm parchment panels | Gold `#E0B252` |
+| **Light** | `Background-light.webp` | White translucent panels | Emerald `#10B981` |
+| **Dark** | `Background-dark.webp` | Slate translucent panels | Emerald `#10B981` |
+| **Sepia** | `background-sepia.webp` | Warm parchment panels | Gold `#E0B252` |
 | **OLED Black** | None (pure black `#000000`) | Dark slate translucent panels | Emerald `#10B981` |
 
 Key design tokens:

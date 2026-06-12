@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v47"; // v47: moved azkar audio to runtime cache (azan.mp3, Azkar-morning/night.mp3) — ~43MB lighter first-install
+const CACHE_NAME = "zad-muslim-v48"; // v48: backgrounds + hadith thumbnails + poster converted to WebP (~2.9MB lighter)
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -134,24 +134,24 @@ const STATIC_ASSETS = [
   "./icons/qibla.svg",
 
   // ===== Background images =====
-  "./images/Background-dark.png",
-  "./images/Background-light.png",
-  "./images/background-sepia.png",
+  "./images/Background-dark.webp",
+  "./images/Background-light.webp",
+  "./images/background-sepia.webp",
 
   // ===== Hadith book thumbnails =====
-  "./assets/thumbnails/6/ImamBukhari1.png",
-  "./assets/thumbnails/6/ImamMuslim1.png",
-  "./assets/thumbnails/6/Abu Dawwod.png",
-  "./assets/thumbnails/6/Imam_al-Trimdhi.png",
-  "./assets/thumbnails/6/Nasa'ie.png",
-  "./assets/thumbnails/6/Ibn majah.png",
-  "./assets/thumbnails/others/رياض الصالحين.png",
-  "./assets/thumbnails/others/بلوغ المرام.png",
-  "./assets/thumbnails/others/مشكاة المصابيح2.png",
-  "./assets/thumbnails/others/الادب المفرد2.png",
-  "./assets/thumbnails/others/الشمائل المحمدية.png",
-  "./assets/thumbnails/others/متن الأربعون النووية2.png",
-  "./assets/thumbnails/others/الأربعون القدسية.png",
+  "./assets/thumbnails/6/ImamBukhari1.webp",
+  "./assets/thumbnails/6/ImamMuslim1.webp",
+  "./assets/thumbnails/6/Abu Dawwod.webp",
+  "./assets/thumbnails/6/Imam_al-Trimdhi.webp",
+  "./assets/thumbnails/6/Nasa'ie.webp",
+  "./assets/thumbnails/6/Ibn majah.webp",
+  "./assets/thumbnails/others/رياض الصالحين.webp",
+  "./assets/thumbnails/others/بلوغ المرام.webp",
+  "./assets/thumbnails/others/مشكاة المصابيح2.webp",
+  "./assets/thumbnails/others/الادب المفرد2.webp",
+  "./assets/thumbnails/others/الشمائل المحمدية.webp",
+  "./assets/thumbnails/others/متن الأربعون النووية2.webp",
+  "./assets/thumbnails/others/الأربعون القدسية.webp",
 
   // ===== Quran page images =====
   "./img/text-container.png",
@@ -462,4 +462,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v47 loaded");
+console.log("✅ Service Worker v48 loaded");
