@@ -11,6 +11,28 @@ concrete action. Numbers were measured from the working tree, not estimated.
 - **P2-1** (commit `aae8ec0`): deleted 4 duplicate/legacy pages (azkar2, quran2, masbaha2, quran-old).
 - **P5-1** (commit `a50c627`): CI safety net — typecheck, build, precache + reference guards, Dependabot.
 - **P1-2** (commit `4693119`): WebP conversion of 18 browser-rendered images (~2.9 MB lighter).
+- **P1-4**: audio cache FIFO eviction — 120-entry cap on audio-cache-v1 (was unbounded). SW v49.
+- **P3 batch**: CSP meta on all 21 pages (scripts/styles tight, media/connect pragmatic),
+  GPS coords rounded to ~1 km before storage, noopener on external _blank links.
+- **P4-5**: i18n key-parity guard (scripts/check-i18n.cjs, 637 keys × 5 locales) in CI.
+- **P4-2**: periodic background sync — js/schedule-builder.js shared by page + SW; the SW
+  rebuilds and re-uploads the 7-day push schedule daily while the app is closed. SW v50.
+- **P4-3/P4-4/P2-6**: contextual notification action labels; coi-serviceworker.js deleted
+  (dead — ONNX runs single-threaded); notifications.js logs gated behind localStorage.debug.
+- **P2-4**: tsc green + CI verifies the tasmee .js twins match their .ts sources (transpile + diff).
+- **P2-3a**: js/theme-manager.js — one storage key (themeMode), legacy-key migration; adopted
+  by hadith/takrar/hadith-viewer (the pages whose theme didn't follow the user).
+- **P2-3b**: js/prayer-service.js — single place computing prayer times; index.html,
+  notifications.js, and schedule-builder.js all delegate (home widget and push schedule
+  can no longer disagree).
+- **P2-3c (partial)**: js/toast.js shared snackbar shipped + precached; the 8 per-page
+  copies consolidate onto it as P2-2 extraction touches each page.
+- **P5-2**: ESLint 9 flat config (correctness-only) in CI — 0 errors, warnings advisory.
+
+**Deliberately deferred:** P1-3 font subsetting + P3-4 self-hosted fonts (skipped per
+maintainer), P2-2 inline CSS/JS extraction (largest remaining item; theme/prayer/toast
+groundwork is in place), P4-1 manifest screenshots (needs a browser to capture), P2-5
+(investigated: quran audio/tafsir/qibla already surface failures — no action needed).
 
 ---
 
