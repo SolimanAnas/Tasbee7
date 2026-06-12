@@ -10,6 +10,7 @@ concrete action. Numbers were measured from the working tree, not estimated.
 - **P1-1** (commit `a117da9`): audio precache diet (63.8 MB → 21.3 MB).
 - **P2-1** (commit `aae8ec0`): deleted 4 duplicate/legacy pages (azkar2, quran2, masbaha2, quran-old).
 - **P5-1** (commit `a50c627`): CI safety net — typecheck, build, precache + reference guards, Dependabot.
+- **P1-2** (commit `4693119`): WebP conversion of 18 browser-rendered images (~2.9 MB lighter).
 
 ---
 
@@ -60,10 +61,16 @@ Remaining opportunities (to be prioritized):
 | `assets/husn.pdf` | 2.2 MB | Fetch on demand from hisn page | P1-3 |
 
 ### 2. Image modernization
-No WebP/AVIF anywhere. `og-image.png` is 4.1 MB (social crawlers time out on large OG
-images; aim <300 KB), backgrounds are ~1 MB+ each, `poster.png`/`splash.png` ~1 MB each.
-A one-time `cwebp`/`squoosh` pass over `images/`, `icons/`, and `assets/thumbnails/`
-is probably a 15–20 MB saving repo-wide.
+**✅ P1-2 DONE (commit `4693119`):** Converted 18 browser-rendered images to WebP via
+`scripts/to-webp.cjs` (sharp, q85), saving **~2.9 MB** (the roadmap's 15–20 MB estimate
+predated P0, which had already resized/recompressed everything from 26.6 MB to 4.3 MB):
+- 3 backgrounds (every page): 945 KB → 128 KB (86%)
+- 13 hadith thumbnails: ~2.5 MB → ~0.9 MB
+- `poster.png` manifest screenshot: 386 KB → 59 KB; `Featured.png` README hero: 468 KB → 176 KB
+
+Kept PNG by design: `og-image.png` (social scrapers' WebP support is unreliable) and
+`icons/*` (PWA manifest / iOS). WebP-only, no fallback — safe given the PWA already
+requires SW/web-push/ONNX-era browsers. Also removed dead `BulughAlMaram.jpg`.
 
 ### 3. Font strategy — 3.0 MB across 12 files
 All Quran-script fonts ship even though only one mushaf font is active at a time.
@@ -221,7 +228,7 @@ structure should be regenerated when the duplicate pages are resolved.
 | 2 | ✅ Precache diet (P1-1) | 1 day | first-install 64 MB → 21 MB |
 | 3 | ✅ Duplicate pages decision (P2-1) | ½ day | −500 KB, simpler everything |
 | 4 | ✅ CI: build + tsc + guards + dependabot (P5-1) | ½ day | regression safety net |
-| 5 | Image/WebP pass + font subsetting (P1-2/3) | 1 day | ~20 MB site-wide |
+| 5 | ✅ Image/WebP pass (P1-2) — font subsetting (P1-3) still open | 1 day | −2.9 MB done; fonts next |
 | 6 | Theme/prayer/toast centralization (P2-3) | 2–3 days | kills a recurring bug class |
 | 7 | Inline CSS/JS extraction (P2-2) | 3–5 days | caching, minification, CSP path |
 | 8 | CSP + handler migration (P3-1) | 2 days | XSS hardening |
