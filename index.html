@@ -986,6 +986,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
 <script src="data/cities.js"></script>
 <script src="data/adhan.js"></script>
+<script src="js/prayer-service.js"></script>
 
 <!-- Capacitor plugin loader (must come before notifications.js) -->
 <script src="js/i18n.js"></script>
@@ -1031,14 +1032,9 @@ function startCountdown(nextObj, nameAr) {
   }, 1000);
 }
 
+// Single source of truth: js/prayer-service.js (madhab already set there).
 function getCalculationMethod() {
-  switch(calcMethod) {
-    case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura();
-    case 'Egypt':     return adhan.CalculationMethod.Egyptian();
-    case 'Karachi':   return adhan.CalculationMethod.Karachi();
-    case 'UAE':       return adhan.CalculationMethod.Dubai();
-    default:          return adhan.CalculationMethod.MuslimWorldLeague();
-  }
+  return PrayerService.method(calcMethod);
 }
 
 // Shared computation used by both the home widget and the prayer modal
@@ -1046,7 +1042,6 @@ function computePrayer(lat, lng) {
   if(!window.adhan || !lat || !lng) return null;
   const coords = new adhan.Coordinates(lat, lng);
   const params = getCalculationMethod();
-  params.madhab = adhan.Madhab.Shafi;
   const now = new Date();
   const pt = new adhan.PrayerTimes(coords, now, params);
   let nextEnum = pt.nextPrayer();
@@ -1133,11 +1128,7 @@ function ptFmtGreg(d) { return new Intl.DateTimeFormat('ar', {day:'numeric', mon
 
 // Prayer times for an arbitrary date
 function computePrayerForDate(lat, lng, date) {
-  if(!window.adhan || !lat || !lng) return null;
-  const coords = new adhan.Coordinates(lat, lng);
-  const params = getCalculationMethod();
-  params.madhab = adhan.Madhab.Shafi;
-  return new adhan.PrayerTimes(coords, date, params);
+  return PrayerService.times(lat, lng, date, calcMethod);
 }
 
 function buildDateReel() {

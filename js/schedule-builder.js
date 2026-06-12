@@ -2,7 +2,7 @@
  * (js/notifications.js) and the service worker (sw.js periodicsync).
  *
  * Classic script: defines a single global `buildNotificationSchedule(ctx, days)`.
- * Requires the `adhan` global (data/adhan.js) to be loaded first.
+ * Requires the `adhan` global (data/adhan.js) and js/prayer-service.js first.
  *
  * ctx = {
  *   settings: { enabled, prayerTimes, preReminders, azkarMorning,
@@ -18,16 +18,6 @@
 (function (global) {
   'use strict';
 
-  function adhanMethod(name) {
-    switch (name) {
-      case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura();
-      case 'Egypt':     return adhan.CalculationMethod.Egyptian();
-      case 'Karachi':   return adhan.CalculationMethod.Karachi();
-      case 'UAE':       return adhan.CalculationMethod.Dubai();
-      default:          return adhan.CalculationMethod.MuslimWorldLeague();
-    }
-  }
-
   function buildNotificationSchedule(ctx, days) {
     days = days || 7;
     const events = [];
@@ -36,8 +26,7 @@
     if (!isFinite(lat) || !isFinite(lng) || typeof adhan === 'undefined') return events;
 
     const settings = ctx.settings;
-    const method = adhanMethod(ctx.calcMethod);
-    method.madhab = adhan.Madhab.Shafi;
+    const method = PrayerService.method(ctx.calcMethod); // madhab included
     const coords = new adhan.Coordinates(lat, lng);
     const now = Date.now();
     const prayers = [

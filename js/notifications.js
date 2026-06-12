@@ -359,16 +359,11 @@ const NotificationSystem = {
   },
 
   // Use adhan.js library (same as index.html) for consistent prayer times
+  // Single source of truth for the calculation method: js/prayer-service.js
+  // (madhab already set there).
   getAdhanMethod() {
-    if (typeof adhan === 'undefined') return null;
-    const method = localStorage.getItem('calcMethod') || 'UAE';
-    switch (method) {
-      case 'UmmAlQura': return adhan.CalculationMethod.UmmAlQura();
-      case 'Egypt':     return adhan.CalculationMethod.Egyptian();
-      case 'Karachi':   return adhan.CalculationMethod.Karachi();
-      case 'UAE':       return adhan.CalculationMethod.Dubai();
-      default:          return adhan.CalculationMethod.MuslimWorldLeague();
-    }
+    if (typeof adhan === 'undefined' || typeof PrayerService === 'undefined') return null;
+    return PrayerService.method();
   },
 
   async fetchPrayerTimesByCoords(lat, lng) {

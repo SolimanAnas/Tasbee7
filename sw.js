@@ -4,7 +4,7 @@ const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifica
 
 // adhan + the shared schedule builder so periodicsync can rebuild the 7-day
 // push schedule while the app is closed (same code the page runs).
-importScripts("./data/adhan.js", "./js/schedule-builder.js");
+importScripts("./data/adhan.js", "./js/prayer-service.js", "./js/schedule-builder.js");
 
 // Recitation files are ~1–10 MB each; 120 entries keeps the cache roughly
 // under ~500 MB worst-case instead of growing forever.
@@ -61,6 +61,7 @@ const STATIC_ASSETS = [
   "./js/native-init.js",
   "./js/notifications.js",
   "./js/schedule-builder.js",
+  "./js/prayer-service.js",
   "./js/theme-manager.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
