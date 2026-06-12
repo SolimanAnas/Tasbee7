@@ -539,6 +539,8 @@ input, textarea, select {
   transition: all var(--ease-smooth);
 }
 .pt-icon-btn:active { transform: scale(0.92); background: var(--surface-active); }
+.pt-loc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.pt-loc-btn svg { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pt-icon-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pt-date-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
@@ -935,6 +937,9 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
         <button class="pt-icon-btn" onclick="openDatePicker()" data-i18n-aria="prayer_pick_date" aria-label="اختر تاريخاً">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         </button>
+        <button class="pt-icon-btn" onclick="closePrayerModal()" data-i18n-aria="modal_close" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
         <input type="date" id="ptDatePicker" class="pt-date-input" onchange="onDatePicked(this.value)">
       </div>
       <div class="modal-sub pt-subline" id="prayerModalSub"><span class="pt-city-line">--</span></div>
@@ -951,7 +956,10 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
     <div class="prayer-next-banner" id="prayerNextBanner" data-i18n="prayer_calculating">جاري الحساب…</div>
     <div class="prayer-list" id="prayerModalList"></div>
-    <button class="btn-primary btn-secondary" onclick="changeLocationFromPrayer()" data-i18n-html="prayer_change_location">📍 تغيير الموقع</button>
+    <button class="btn-primary btn-secondary pt-loc-btn" onclick="changeLocationFromPrayer()">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span data-i18n="prayer_change_location">تغيير الموقع</span>
+    </button>
   </div>
 </div>
 
@@ -981,6 +989,24 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <input type="checkbox" id="rememberQuranChoice" style="accent-color:var(--primary);">
       <span data-i18n="quran_display_remember">حفظ اختياري</span>
     </label>
+  </div>
+</div>
+
+<div class="exit-overlay" id="exitOverlay" onclick="if(event.target===this) closeExitModal()">
+  <div class="exit-modal glass-panel">
+    <div class="exit-icon-wrap">
+      <svg viewBox="0 0 24 24">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </div>
+    <div class="exit-title" data-i18n="exit_title">تأكيد الخروج</div>
+    <div class="exit-sub" data-i18n-html="exit_subtitle">هل تريد مغادرة التطبيق؟<br>سيتم إيقاف التلاوة والأذكار.</div>
+    <div class="exit-actions">
+      <button class="btn exit-stay" onclick="closeExitModal()" data-i18n="exit_stay">البقاء</button>
+      <button class="btn exit-leave" onclick="confirmExit()" data-i18n="exit_leave">مغادرة</button>
+    </div>
   </div>
 </div>
 
@@ -1061,7 +1087,8 @@ function updateUIWithPrayerTimes(lat, lng) {
   const chipsContainer = document.getElementById('homePrayerChips');
   if(!window.adhan) return;
   if(!lat || !lng) {
-    document.getElementById('homeCity').innerHTML = t('prayer_set_location');
+    document.getElementById('homeCity').innerHTML =
+      `<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.125em;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${t('prayer_set_location')}`;
     chipsContainer.innerHTML = `<div style="opacity:0.6;font-size:0.85rem;">${t('prayer_no_location_desc')}</div>`;
     return;
   }
@@ -1114,14 +1141,16 @@ function ptToISO(d) {
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
+// Just the day label ("اليوم", "بعد يومين", …) — callers wrap it with
+// prayer_times_for once; nesting it here produced "مواقيت مواقيت …".
 function ptRelLabel(d) {
   const o = ptOffsetFromToday(d);
   if(o === 0) return t('today');
   if(o === 1) return t('tomorrow');
   if(o === -1) return t('yesterday');
-  if(o === 2) return t('prayer_times_for', {day: 'بعد يومين'});
-  if(o === -2) return t('prayer_times_for', {day: 'قبل يومين'});
-  return o > 0 ? t('prayer_times_for', {day: `بعد ${o} أيام`}) : t('prayer_times_for', {day: `قبل ${Math.abs(o)} أيام`});
+  if(o === 2) return 'بعد يومين';
+  if(o === -2) return 'قبل يومين';
+  return o > 0 ? `بعد ${o} أيام` : `قبل ${Math.abs(o)} أيام`;
 }
 function ptFmtHijri(d) { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
 function ptFmtGreg(d) { return new Intl.DateTimeFormat('ar', {day:'numeric', month:'long', year:'numeric'}).format(d); }
@@ -1441,7 +1470,21 @@ window.addEventListener('load', async () => {
 let exitPending = false;
 function openExitModal() { exitPending = true; document.getElementById('exitOverlay').classList.add('active'); }
 function closeExitModal() { exitPending = false; document.getElementById('exitOverlay').classList.remove('active'); }
-function confirmExit() { exitPending = true; document.getElementById('exitOverlay').classList.remove('active'); window.location.assign('about:blank'); }
+function confirmExit() {
+  exitPending = true;
+  document.getElementById('exitOverlay').classList.remove('active');
+  // Native wrappers can really exit; in a plain browser/PWA fall back to
+  // closing the window, then a blank page as last resort.
+  try {
+    const app = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (app && typeof app.exitApp === 'function') { app.exitApp(); return; }
+  } catch (e) {}
+  try {
+    if (navigator.app && typeof navigator.app.exitApp === 'function') { navigator.app.exitApp(); return; }
+  } catch (e) {}
+  try { window.close(); } catch (e) {}
+  try { window.location.assign('about:blank'); } catch (e) {}
+}
 
 // Back-button interception: push a dummy state so popstate fires on back press
 history.pushState({ exit: true }, '');
@@ -1449,7 +1492,10 @@ window.addEventListener('popstate', (e) => {
   // If a modal/sheet is open, let back close it instead of prompting exit
   const anyOpen = document.querySelector('.modal-overlay.active, .bottom-sheet.active');
   if (anyOpen) { closeAllSheets(); history.pushState({ exit: true }, ''); return; }
-  if (!exitPending) { history.pushState({ exit: true }, ''); openExitModal(); }
+  // Back while the exit prompt is showing = confirm (press back twice to exit)
+  if (exitPending) { confirmExit(); return; }
+  history.pushState({ exit: true }, '');
+  openExitModal();
 });
 
 // Service Worker: only for PWA asset caching — NOT for notifications in Capacitor.
@@ -1463,21 +1509,4 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 </body>
-<div class="exit-overlay" id="exitOverlay" onclick="if(event.target===this) closeExitModal()">
-  <div class="exit-modal glass-panel">
-    <div class="exit-icon-wrap">
-      <svg viewBox="0 0 24 24">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-        <polyline points="16 17 21 12 16 7"/>
-        <line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-    </div>
-    <div class="exit-title" data-i18n="exit_title">تأكيد الخروج</div>
-    <div class="exit-sub" data-i18n-html="exit_subtitle">هل تريد مغادرة التطبيق؟<br>سيتم إيقاف التلاوة والأذكار.</div>
-    <div class="exit-actions">
-      <button class="btn exit-stay" onclick="closeExitModal()" data-i18n="exit_stay">البقاء</button>
-      <button class="btn exit-leave" onclick="confirmExit()" data-i18n="exit_leave">مغادرة</button>
-    </div>
-  </div>
-</div>
 </html>
