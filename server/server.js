@@ -1,7 +1,11 @@
+// ⚠️ REFERENCE IMPLEMENTATION ONLY — NOT DEPLOYED.
+// The production push server is the Cloudflare Worker in cloudflare.js
+// (see DEPLOY.md). The VAPID keys below are well-known PLACEHOLDERS from the
+// web-push docs — never use them; generate your own and load from env vars.
+// Requires Node >= 18 (uses the built-in global fetch).
 const express = require('express');
 const webpush = require('web-push');
 const cors = require('cors');
-const fetch = require('node-fetch');
 
 const app = express();
 app.use(cors());
