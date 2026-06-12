@@ -7,7 +7,6 @@ const STATIC_ASSETS = [
   "./index.html",
   "./404.html",
   "./pages/quran.html",
-  "./pages/quran-old.html",
   "./pages/quran-text.html",
   "./pages/audio.html",
   "./pages/radio.html",
@@ -23,9 +22,7 @@ const STATIC_ASSETS = [
   "./pages/about.html",
   "./pages/tasmee-dashboard.html",
   "./pages/tasmee-review.html",
-  "./pages/azkar2.html",
   "./pages/hadith-viewer.html",
-  "./pages/quran2.html",
   "./pages/salah.html",
   "./pages/sleeping.html",
 
