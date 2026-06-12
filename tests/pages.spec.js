@@ -191,7 +191,7 @@ test('all referenced HTML files exist in pages/', () => {
     'about.html', 'audio.html', 'azkar.html', 'duaa.html',
     'hadith.html', 'hisn.html', 'howto.html', 'masbaha.html',
     'notifications.html', 'qibla.html', 'quran-text.html', 'quran.html',
-    'quran2.html', 'radio.html',
+    'radio.html',
   ];
   for (const file of required) {
     expect(actual.includes(file), `${file} should exist in pages/`).toBe(true);

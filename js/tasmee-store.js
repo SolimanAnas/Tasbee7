@@ -82,7 +82,7 @@
         async getAllSessions() { return _reqP((await _store('sessions', 'readonly')).getAll()); },
         async getAllMistakes() { return _reqP((await _store('mistakes', 'readonly')).getAll()); },
         async getRevision(key) { return _reqP((await _store('revisions', 'readonly')).get(key)); },
-        async putRevision(rec) { return _reqP((await _store('revisions', 'readwrite')).put(rec)); },
+        async putRevision(rec) { await _reqP((await _store('revisions', 'readwrite')).put(rec)); },
         async getAllRevisions() { return _reqP((await _store('revisions', 'readonly')).getAll()); },
         async getDueRevisions(now) {
             const all = await this.getAllRevisions();

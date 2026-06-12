@@ -107,7 +107,7 @@
 
     async addSession(rec: Omit<SessionRecord, 'date'>): Promise<number> {
       const os = await _store('sessions', 'readwrite');
-      return _reqP(os.add(Object.assign({ date: Date.now() }, rec)));
+      return _reqP(os.add(Object.assign({ date: Date.now() }, rec)) as IDBRequest<number>);
     },
 
     async addMistakes(arr: MistakeRecord[]): Promise<void> {
@@ -129,7 +129,7 @@
     async getAllMistakes(): Promise<MistakeRecord[]> { return _reqP((await _store('mistakes', 'readonly')).getAll()); },
 
     async getRevision(key: string): Promise<RevisionRecord | undefined> { return _reqP((await _store('revisions', 'readonly')).get(key)); },
-    async putRevision(rec: RevisionRecord): Promise<void> { return _reqP((await _store('revisions', 'readwrite')).put(rec)); },
+    async putRevision(rec: RevisionRecord): Promise<void> { await _reqP((await _store('revisions', 'readwrite')).put(rec)); },
     async getAllRevisions(): Promise<RevisionRecord[]> { return _reqP((await _store('revisions', 'readonly')).getAll()); },
     async getDueRevisions(now?: number): Promise<RevisionRecord[]> {
       const all = await this.getAllRevisions();

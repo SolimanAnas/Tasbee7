@@ -8,6 +8,9 @@ for (const pg of pages) {
   const refs = [...html.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
   for (const r of refs) {
     if (/^(https?:|data:|mailto:|tel:|#|javascript:|blob:)/i.test(r)) continue;
+    // Skip template-literal placeholders (e.g. src="${thumb}") — these are
+    // resolved at runtime from inline JS and can't be checked statically.
+    if (r.includes('${')) continue;
     const clean = r.split('?')[0].split('#')[0];
     if (!clean) continue;
     let resolved = clean.startsWith('/')
@@ -20,3 +23,4 @@ for (const pg of pages) {
 console.log('Pages scanned:', pages.length);
 console.log('Broken local references:', problems.length);
 problems.forEach(p => console.log('  ' + p));
+if (problems.length) process.exit(1);

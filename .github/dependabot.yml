@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Root toolchain (Vite, Playwright, TypeScript)
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        patterns:
+          - "*"
+
+  # Push notification reference server (Express, web-push)
+  - package-ecosystem: npm
+    directory: "/server"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # GitHub Actions versions (checkout, setup-node, etc.)
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
