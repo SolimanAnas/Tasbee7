@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v46"; // v46: recompressed images (thumbnails, backgrounds, icons) — ~9MB lighter precache
+const CACHE_NAME = "zad-muslim-v47"; // v47: moved azkar audio to runtime cache (azan.mp3, Azkar-morning/night.mp3) — ~43MB lighter first-install
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
@@ -112,7 +112,6 @@ const STATIC_ASSETS = [
   // ===== Assets =====
   "./assets/audio.json",
   "./assets/azkar.json",
-  "./assets/azan.mp3",
   "./assets/husn.pdf",
   "./assets/duaa-01.json",
   "./assets/duaa-02.json",
@@ -124,8 +123,6 @@ const STATIC_ASSETS = [
   "./assets/part3.json",
   "./assets/part4.json",
   "./assets/part5.json",
-  "./assets/media/Azkar-morning.mp3",
-  "./assets/media/Azkar-night.mp3",
 
   // ===== Icons =====
   "./icons/icon-192.png",
@@ -468,4 +465,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v45 loaded");
+console.log("✅ Service Worker v47 loaded");
