@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v45"; // v45: notification system fixes (push encryption, VAPID validation, schedule fallback)
+const CACHE_NAME = "zad-muslim-v46"; // v46: recompressed images (thumbnails, backgrounds, icons) — ~9MB lighter precache
 const AUDIO_CACHE = "audio-cache-v1";
 
 const STATIC_ASSETS = [
