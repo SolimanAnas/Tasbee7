@@ -474,6 +474,14 @@ self.addEventListener("push", event => {
   const notificationData = data.data || {};
   const targetUrl = notificationData.url || DEEP_LINKS[notificationData.type] || DEEP_LINKS.default;
 
+  // Contextual primary action — the schedule tags double as the type
+  // (prayer-fajr, pre-asr, azkar-morning, friday-kahf, …).
+  const type = notificationData.type || data.tag || "default";
+  let openTitle = "فتح";
+  if (type.startsWith("azkar")) openTitle = "📿 اقرأ الأذكار";
+  else if (type.startsWith("prayer") || type.startsWith("pre-")) openTitle = "🕌 مواقيت الصلاة";
+  else if (type.includes("kahf")) openTitle = "📖 اقرأ سورة الكهف";
+
   const options = {
     body: data.body || "زاد المسلم",
     icon: "./icons/icon-192.png",
@@ -483,10 +491,10 @@ self.addEventListener("push", event => {
     renotify: true,
     data: {
       url: targetUrl,
-      type: notificationData.type || "default"
+      type: type
     },
     actions: [
-      { action: "open", title: "فتح" },
+      { action: "open", title: openTitle },
       { action: "dismiss", title: "إغلاق" }
     ]
   };

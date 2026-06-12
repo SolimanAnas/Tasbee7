@@ -1,6 +1,14 @@
 // js/notifications.js - FIXED v4.1
 // Islamic Notification System — Local Mode with Push Support
 
+// Verbose logging only when the user opts in: localStorage.setItem('debug', '1').
+// warn/error always pass through.
+const dlog = (() => {
+  let on = false;
+  try { on = localStorage.getItem('debug') === '1'; } catch (e) {}
+  return on ? console.log.bind(console) : () => {};
+})();
+
 const NotificationSystem = {
 
   // ========== CONFIG ==========
@@ -66,7 +74,7 @@ const NotificationSystem = {
   // so the server can deliver admin/broadcast messages — it never replaces the
   // local scheduler and never fires per-event self-broadcasts.
   async init() {
-    console.log('🔔 Initializing Notification System v4.2 (local-first)...');
+    dlog('🔔 Initializing Notification System v4.2 (local-first)...');
 
     // FIX: Initialize prayerTimes here where 'this' is valid
     if (!this.prayerTimes) {
@@ -93,7 +101,7 @@ const NotificationSystem = {
     }
 
     this.updateStreak();
-    console.log('✅ Notification System ready');
+    dlog('✅ Notification System ready');
 
     // Let UI pages (notifications.html) re-render once async init has real
     // data — they run their first render before prayer times are computed.
@@ -124,7 +132,7 @@ const NotificationSystem = {
       const existingSub = await this.swRegistration.pushManager.getSubscription();
       this.state.subscribed = !!existingSub;
 
-      console.log('✅ SW attached, scope:', this.swRegistration.scope);
+      dlog('✅ SW attached, scope:', this.swRegistration.scope);
     } catch (err) {
       console.error('❌ SW attachment failed:', err);
       this.swRegistration = null;
@@ -222,7 +230,7 @@ const NotificationSystem = {
         // Let the SW refresh this schedule from periodicsync while the app is closed.
         await this.persistScheduleContext();
         await this.registerPeriodicSync();
-        console.log(`✅ Schedule uploaded to server (${schedule.length} events)`);
+        dlog(`✅ Schedule uploaded to server (${schedule.length} events)`);
       }
     } catch (e) {
       console.warn('⚠️ Schedule upload failed:', e.message);
@@ -288,7 +296,7 @@ const NotificationSystem = {
       await this.swRegistration.periodicSync.register('refresh-push-schedule', {
         minInterval: 24 * 60 * 60 * 1000
       });
-      console.log('🔄 Periodic schedule refresh registered');
+      dlog('🔄 Periodic schedule refresh registered');
     } catch (e) { /* permission API or registration unsupported — fine */ }
   },
 
@@ -303,7 +311,7 @@ const NotificationSystem = {
 
   // ========== LOCAL MODE ==========
   async initLocalMode() {
-    console.log('📱 Local notification mode active');
+    dlog('📱 Local notification mode active');
 
     // Request permission only if not yet decided (avoid double prompts)
     if (Notification.permission === 'default') {
@@ -372,7 +380,7 @@ const NotificationSystem = {
       const now = new Date();
       const pt = new adhan.PrayerTimes(coords, now, calcMethod);
       this.parseAdhanTimes(pt);
-      console.log('✅ Prayer times calculated via adhan.js (coords)');
+      dlog('✅ Prayer times calculated via adhan.js (coords)');
     } catch (err) {
       console.warn('⚠️ fetchPrayerTimesByCoords failed:', err.message);
       const saved = localStorage.getItem('prayerTimes');
@@ -396,7 +404,7 @@ const NotificationSystem = {
       const now = new Date();
       const pt = new adhan.PrayerTimes(coords, now, calcMethod);
       this.parseAdhanTimes(pt);
-      console.log(`✅ Prayer times calculated via adhan.js (${known ? 'city: ' + city : 'Cairo fallback'})`);
+      dlog(`✅ Prayer times calculated via adhan.js (${known ? 'city: ' + city : 'Cairo fallback'})`);
     } catch (err) {
       console.warn('⚠️ fetchPrayerTimesByCity failed:', err.message);
     }
@@ -469,11 +477,11 @@ const NotificationSystem = {
     this._lastError = null;
 
     if (options.forceEnable) {
-      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
+      if (Notification.permission !== 'granted') { dlog('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
     } else {
-      if (!this.settings.enabled) { console.log('🔇 Notifications disabled in settings'); this._lastError = 'settings_disabled'; return false; }
-      if (this.isQuietHours() && !options.forceQuiet) { console.log('🌙 Quiet hours active, notification blocked'); this._lastError = 'quiet_hours'; return false; }
-      if (Notification.permission !== 'granted') { console.log('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
+      if (!this.settings.enabled) { dlog('🔇 Notifications disabled in settings'); this._lastError = 'settings_disabled'; return false; }
+      if (this.isQuietHours() && !options.forceQuiet) { dlog('🌙 Quiet hours active, notification blocked'); this._lastError = 'quiet_hours'; return false; }
+      if (Notification.permission !== 'granted') { dlog('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
     }
 
     const notifOptions = {
@@ -492,13 +500,13 @@ const NotificationSystem = {
       }
       if (!this.swRegistration) throw new Error('لا يوجد Service Worker مسجل');
       await this.swRegistration.showNotification(title, notifOptions);
-      console.log('🔔 Notification sent via SW:', title);
+      dlog('🔔 Notification sent via SW:', title);
       return true;
     } catch (err) {
       console.warn('⚠️ SW notification failed, using Notification API:', err.message);
       try {
         const n = new Notification(title, notifOptions);
-        console.log('🔔 Notification sent via Notification API:', title);
+        dlog('🔔 Notification sent via Notification API:', title);
         setTimeout(() => n.close(), 5000);
         return true;
       } catch (e2) {
@@ -681,7 +689,7 @@ const NotificationSystem = {
     if (key in this.settings) {
       this.settings[key] = value;
       this.saveState();
-      console.log(`🔧 Setting '${key}' → ${value}`);
+      dlog(`🔧 Setting '${key}' → ${value}`);
       // Settings change what should be pushed — refresh the server's schedule.
       this.uploadSchedule();
     }
