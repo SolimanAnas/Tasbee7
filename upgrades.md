@@ -4,12 +4,10 @@ A full-repo review (frontend, PWA/performance, security, server, tooling, repo h
 compiled 2026-06-12. Items are grouped by priority; each has the evidence behind it and a
 concrete action. Numbers were measured from the working tree, not estimated.
 
-**Already done (commit `b801db7`):** the notification system was rebuilt — the Cloudflare
-worker's Web Push encryption was non-compliant with RFC 8291/8188 (pushes were silently
-dropped by browsers), the bundled VAPID fallback key was corrupt, `/notify` was
-unauthenticated, and the client had a "push blackout" bug. All fixed and verified with an
-RFC round-trip test. **Remaining manual step:** `cd server && wrangler deploy` and
-`wrangler secret put ADMIN_TOKEN`.
+**Already done:**
+- **Notification system** (commit `b801db7`): RFC 8291/8188 compliance, VAPID validation, push blackout bug fix, server auth. **Remaining manual step:** `cd server && wrangler deploy` and `wrangler secret put ADMIN_TOKEN`.
+- **P0 batch** (commits `9132ac4`, `3637c6d`): image optimization (26.6 MB → 4.3 MB), dead-file cleanup, legacy archival, sitemap corrections, server banner, version metadata.
+- **P1-1** (commit `a117da9`): audio precache diet (63.8 MB → 21.3 MB).
 
 ---
 
@@ -45,23 +43,19 @@ there: drop `node-fetch` (Node ≥18 has native fetch) and add `"engines": {"nod
 ## P1 — Performance (the biggest user-facing wins)
 
 ### 1. Shrink the service-worker precache — 72.8 MB today
-Measured: `STATIC_ASSETS` in `sw.js` is **254 entries totalling 72.8 MB**, all fetched on
-first install. On a mid-range phone over 3G that's minutes of background download and a
-large storage hit before the user has done anything. The offenders:
+**✅ P1-1 DONE (commit `a117da9`):** Moved `azan.mp3` (4.5 MB), `Azkar-morning.mp3` (19 MB),
+and `Azkar-night.mp3` (20 MB) to runtime cache. Service Worker's audio fetch handler
+(lines 343–363 in sw.js) detects `.mp3` requests and caches to `AUDIO_CACHE` on first play.
+**Result:** precache reduced from 63.8 MB → 21.3 MB (68% lighter, first-install 43.5 MB smaller).
 
-| Asset | Size | Recommendation |
-|---|---|---|
-| `assets/media/Azkar-night.mp3` | 19.1 MB | Runtime-cache on first play (the `AUDIO_CACHE` path already exists) |
-| `assets/media/Azkar-morning.mp3` | 19.0 MB | Same |
-| `js/quranpages.data.js` | 5.4 MB | Lazy-load only on Quran pages; consider splitting per-juz |
-| `assets/azan.mp3` | 4.4 MB | Runtime-cache; or ship a short clip and fetch full on demand |
-| 7 hadith thumbnail PNGs (`assets/thumbnails/others/`) | ~8.5 MB | Convert to WebP at sane dimensions (likely >90% smaller) |
-| `data/quran.json` | 3.0 MB | Precache only if offline tasmee is a first-run promise; otherwise cache on first Quran open |
-| `assets/husn.pdf` | 2.2 MB | Fetch on demand from hisn page |
+Remaining opportunities (to be prioritized):
 
-Moving just the four audio/data items to runtime caching cuts the install payload by
-**~48 MB (66%)** with zero feature loss — everything still becomes available offline after
-first use, which is when users actually care.
+| Asset | Size | Recommendation | Status |
+|---|---|---|---|
+| `js/quranpages.data.js` | 5.4 MB | Lazy-load only on Quran pages; consider splitting per-juz | P1-3 |
+| 7 hadith thumbnail PNGs (`assets/thumbnails/others/`) | ~8.5 MB | Convert to WebP at sane dimensions (likely >90% smaller) | P1-2 |
+| `data/quran.json` | 3.0 MB | Precache only if offline tasmee is a first-run promise; otherwise cache on first Quran open | P1-3 |
+| `assets/husn.pdf` | 2.2 MB | Fetch on demand from hisn page | P1-3 |
 
 ### 2. Image modernization
 No WebP/AVIF anywhere. `og-image.png` is 4.1 MB (social crawlers time out on large OG
