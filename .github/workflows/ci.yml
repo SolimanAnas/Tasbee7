@@ -36,3 +36,8 @@ jobs:
 
       - name: Verify i18n locale key parity
         run: node scripts/check-i18n.cjs
+
+      - name: Verify tasmee .js twins match their .ts sources
+        run: |
+          node scripts/transpile-tasmee.cjs
+          git diff --exit-code js/tasmee-engine.js js/tasmee-matcher.js js/tasmee-store.js
