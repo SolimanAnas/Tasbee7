@@ -1,5 +1,16 @@
-const CACHE_NAME = "zad-muslim-v48"; // v48: backgrounds + hadith thumbnails + poster converted to WebP (~2.9MB lighter)
+const CACHE_NAME = "zad-muslim-v49"; // v49: audio cache FIFO eviction (was unbounded)
 const AUDIO_CACHE = "audio-cache-v1";
+
+// Recitation files are ~1–10 MB each; 120 entries keeps the cache roughly
+// under ~500 MB worst-case instead of growing forever.
+const AUDIO_CACHE_MAX_ENTRIES = 120;
+
+async function trimAudioCache(cache) {
+  const keys = await cache.keys(); // insertion order → oldest first
+  for (let i = 0; i < keys.length - AUDIO_CACHE_MAX_ENTRIES; i++) {
+    await cache.delete(keys[i]);
+  }
+}
 
 const STATIC_ASSETS = [
   // ===== App Shell (HTML) =====
@@ -345,7 +356,9 @@ self.addEventListener("fetch", event => {
         try {
           const response = await fetch(req);
           if (response && response.ok) {
-            cache.put(req, response.clone());
+            event.waitUntil(
+              cache.put(req, response.clone()).then(() => trimAudioCache(cache)).catch(() => {})
+            );
           }
           return response;
         } catch (_) {
@@ -462,4 +475,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v48 loaded");
+console.log("✅ Service Worker v49 loaded");
