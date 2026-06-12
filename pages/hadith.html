@@ -373,23 +373,11 @@
 </div>
 
 <script src="../js/i18n.js"></script>
+<script src="../js/theme-manager.js"></script>
 <script>
     // ===================== الثيمات =====================
-    const THEMES = ['dark', 'light', 'sepia'];
-    let currentThemeIndex = parseInt(localStorage.getItem('appThemeIndex'), 10) || 0;
-    if (currentThemeIndex < 0 || currentThemeIndex >= THEMES.length) currentThemeIndex = 0;
-
-    function applyTheme() {
-        document.documentElement.setAttribute('data-theme', THEMES[currentThemeIndex]);
-        localStorage.setItem('appThemeIndex', currentThemeIndex);
-        const meta = getComputedStyle(document.documentElement).getPropertyValue('--meta').trim();
-        document.getElementById('metaThemeColor').content = meta;
-    }
-    function cycleTheme() {
-        currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
-        applyTheme();
-    }
-    applyTheme();
+    ThemeManager.init();
+    function cycleTheme() { ThemeManager.cycle(); }
 
     // ===================== الكتب =====================
     const BOOKS_INFO = [

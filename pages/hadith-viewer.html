@@ -434,6 +434,7 @@
   </div>
 </div>
 
+<script src="../js/theme-manager.js"></script>
 <script>
   let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
 
@@ -455,16 +456,14 @@
   const BOOK_NAMES = {};
   [...MAIN_BOOKS, ...OTHER_BOOKS].forEach(b => BOOK_NAMES[b.id] = b.name);
 
-  function applyTheme() {
-    const t = localStorage.getItem('appTheme') || 'light';
-    document.body.setAttribute('data-theme', t);
+  // Theme: shared manager owns storage + data-theme + meta color; the dots are
+  // this page's only chrome, refreshed on every themechange.
+  window.addEventListener('themechange', e => {
+    const t = e.detail.theme;
     document.querySelectorAll('.theme-dock .dot').forEach(d => d.classList.toggle('active', d.dataset.set === t));
-    setTimeout(() => {
-      const meta = getComputedStyle(document.body).getPropertyValue('--meta').trim() || '#0e201b';
-      document.getElementById('metaThemeColor').content = meta;
-    }, 30);
-  }
-  function setTheme(t) { localStorage.setItem('appTheme', t); applyTheme(); }
+  });
+  function applyTheme() { ThemeManager.init(); }
+  function setTheme(t) { ThemeManager.set(t); }
 
   function showToast(msg, duration=2000) {
     const toast = document.getElementById('toastMsg');

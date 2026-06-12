@@ -61,6 +61,7 @@ const STATIC_ASSETS = [
   "./js/native-init.js",
   "./js/notifications.js",
   "./js/schedule-builder.js",
+  "./js/theme-manager.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",

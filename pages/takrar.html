@@ -631,6 +631,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 <script src="../js/i18n.js"></script>
 <script src="../js/quran-structure.js"></script>
+<script src="../js/theme-manager.js"></script>
 <script>
 const RECITERS = [
   { id:'arabassy',  name:'عبد الباسط عبد الصمد', folder:'Abdul_Basit_Murattal_192kbps' },
@@ -784,11 +785,8 @@ function loadPrefs() {
 }
 
 /* ---------- Theme ---------- */
-const THEMES = ['dark', 'light', 'sepia'];
-let tIdx = parseInt(localStorage.getItem('appThemeIdx')) || 0;
-function applyTheme() { document.documentElement.setAttribute('data-theme', THEMES[tIdx]); localStorage.setItem('appThemeIdx', tIdx); }
-function cycleTheme() { tIdx = (tIdx + 1) % THEMES.length; applyTheme(); }
-applyTheme();
+ThemeManager.init();
+function cycleTheme() { ThemeManager.cycle(); }
 
 /* ---------- Helpers ---------- */
 function pad(n) { return String(n).padStart(3, '0'); }
