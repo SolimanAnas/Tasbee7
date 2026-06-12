@@ -9,6 +9,7 @@ concrete action. Numbers were measured from the working tree, not estimated.
 - **P0 batch** (commits `9132ac4`, `3637c6d`): image optimization (26.6 MB → 4.3 MB), dead-file cleanup, legacy archival, sitemap corrections, server banner, version metadata.
 - **P1-1** (commit `a117da9`): audio precache diet (63.8 MB → 21.3 MB).
 - **P2-1** (commit `aae8ec0`): deleted 4 duplicate/legacy pages (azkar2, quran2, masbaha2, quran-old).
+- **P5-1** (commit `a50c627`): CI safety net — typecheck, build, precache + reference guards, Dependabot.
 
 ---
 
@@ -177,13 +178,20 @@ more private, fully offline.
 
 ## P5 — Tooling, CI, repo hygiene
 
-### 1. CI upgrades (`.github/workflows/playwright.yml`)
-Today: sharded Playwright page tests only. Add, in order of value:
-- `npm run build` (Vite build verification — currently a broken build would ship)
-- `tsc --noEmit` (free, TS is already installed)
-- ESLint (no linter exists; even `eslint:recommended` will catch real bugs in 20k+ lines
+### 1. CI upgrades (`.github/workflows/`)
+**✅ P5-1 DONE (commit `a50c627`):** Added `.github/workflows/ci.yml` running on push/PR to main:
+- `vite build` (build verification — a broken build can no longer ship)
+- `tsc --noEmit` (fixed 8 pre-existing type errors so this gate is green)
+- `scripts/verify-precache.cjs` — every `sw.js` STATIC_ASSETS entry must resolve to a real
+  file (catches "deleted page still precached" regressions)
+- `scripts/audit-refs.cjs` — every local `src`/`href` in HTML must resolve (now exits non-zero)
+- `.github/dependabot.yml` — weekly npm (root + server) and github-actions bumps
+
+Remaining for a later pass:
+- **ESLint** (no linter exists; even `eslint:recommended` will catch real bugs in 20k+ lines
   of vanilla JS)
-- `.github/dependabot.yml` for weekly dependency bumps
+- `.gitignore` lists `tests/` — existing specs are tracked, but **new** test files won't be
+  picked up until that rule is narrowed (it's meant to ignore `test-results/`).
 
 ### 2. Test gaps
 - i18n key-parity test across `js/i18n/{ar,en,tr,ckb,ur}.js`
@@ -209,15 +217,15 @@ structure should be regenerated when the duplicate pages are resolved.
 
 | # | Item | Effort | Impact |
 |---|---|---|---|
-| 1 | P0 batch (sitemap, gitignore, dead images, legacy files) | ½ day | hygiene + 8 MB |
-| 2 | Precache diet (P1-1) | 1 day | first-install 73 MB → ~25 MB |
-| 3 | Duplicate pages decision (P2-1) | ½ day | −500 KB, simpler everything |
-| 4 | CI: build + tsc + eslint + dependabot (P5-1) | ½ day | regression safety net |
+| 1 | ✅ P0 batch (sitemap, gitignore, dead images, legacy files) | ½ day | hygiene + 8 MB |
+| 2 | ✅ Precache diet (P1-1) | 1 day | first-install 64 MB → 21 MB |
+| 3 | ✅ Duplicate pages decision (P2-1) | ½ day | −500 KB, simpler everything |
+| 4 | ✅ CI: build + tsc + guards + dependabot (P5-1) | ½ day | regression safety net |
 | 5 | Image/WebP pass + font subsetting (P1-2/3) | 1 day | ~20 MB site-wide |
 | 6 | Theme/prayer/toast centralization (P2-3) | 2–3 days | kills a recurring bug class |
 | 7 | Inline CSS/JS extraction (P2-2) | 3–5 days | caching, minification, CSP path |
 | 8 | CSP + handler migration (P3-1) | 2 days | XSS hardening |
 | 9 | Periodic sync + manifest polish (P4) | 1–2 days | product polish |
 
-Items 1–4 are low-risk and high-leverage; do them before any refactor so the safety net
-exists when 6–8 start moving code around.
+Items 1–4 are done — the safety net now exists, so items 6–8 (which move code around) can
+proceed with CI catching regressions. Item 5 (image/WebP) is the next high-leverage win.
