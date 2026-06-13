@@ -66,12 +66,12 @@ function clean(s) {
     .replace(/[آأإ]/g, 'ا')   // آ أ إ → ا
     .replace(/ة/g, 'ه')                 // ة → ه
     .replace(/ى/g, 'ي')                 // ى → ي
-    .replace(/﻿/g, '')                       // drop BOM
+    .replace(/\uFEFF/g, '')                       // drop BOM
     .replace(/ +/g, ' ')
     .trim();
 }
 
-const stripBOM = (s) => s.replace(/﻿/g, '');
+const stripBOM = (s) => s.replace(/\uFEFF/g, '');
 const startsWithBasmala = (text) => clean(text).startsWith('بسم الله');
 
 // ── Core build (pure, testable): map verse_key→uthmani + the current file → new array
@@ -120,7 +120,7 @@ function validate(out) {
     if (!o.text_clean || !o.text_clean.trim()) errs.push('empty text_clean at ' + key);
     if (!o.surah_name) errs.push('missing surah_name at ' + key);
     if (!o.surah_name_en) errs.push('missing surah_name_en at ' + key);
-    if (/[﻿]/.test(o.text_uthmani)) errs.push('stray BOM in text at ' + key);
+    if (/[\uFEFF]/.test(o.text_uthmani)) errs.push('stray BOM in text at ' + key);
   }
   for (let s = 1; s <= 114; s++) {
     if (counts[s] !== AYAH_COUNTS[s - 1]) {
