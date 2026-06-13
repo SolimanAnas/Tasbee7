@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v52"; // v52: prayer modal close + location icon fixes, exit modal inside body
+const CACHE_NAME = "zad-muslim-v53"; // v53: remove CSP that broke i18n loader + ONNX tasmee worker; re-precache HTML
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
