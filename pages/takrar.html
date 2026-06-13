@@ -24,6 +24,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
+@font-face {
+  font-family: 'Amiri';
+  src: url('../fonts/Amiri.ttf') format('truetype');
+  font-weight: 400 700;
+  font-display: swap;
+}
 :root {
   --bg-image: url('../images/Background-light.webp');
   --bg-surface: rgba(255, 255, 255, 0.45);
@@ -1310,7 +1316,14 @@ document.getElementById('ayahRepeatVal').textContent = S.ayahRepeat;
 (async () => {
   if (window.I18n) await I18n.init();
   renderScopeResolved();
+  if (S.rangeEnabled) renderRangeCard();
 })();
+
+// Re-render translated elements on language change
+window.addEventListener('langchange', () => {
+  renderScopeResolved();
+  if (S.rangeEnabled) renderRangeCard();
+});
 </script>
   <script src="../js/svg-injector.js"></script>
 </body>
