@@ -140,6 +140,10 @@
   }
 
   async function _tarteelStartCapture() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      _tarteelShowError('هذا المتصفح لا يدعم الوصول إلى المايكروفون');
+      return;
+    }
     try {
       _tarteelStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       const chunks = [];
@@ -184,7 +188,7 @@
       document.getElementById('tarteelResultCard').classList.remove('visible');
       document.getElementById('tarteelRetryRow').style.display = 'none';
     } catch (err) {
-      _tarteelShowError('تعذر الوصول للميكروفون: ' + err.message);
+      _tarteelShowError(_tpMicError(err));
     }
   }
 
@@ -645,6 +649,20 @@
   }
 
   function _aiSetProcessing() { _tarteelProcessing = true; document.getElementById('tpMicBtn').className = 'tp-mic-btn processing'; }
+
+  // Map a getUserMedia / capture failure to a clear, actionable Arabic message.
+  // Without this the raw (English) DOMException leaked to the user, so a denied
+  // microphone permission looked like an unknown error.
+  function _tpMicError(err) {
+    const name = (err && err.name) || '';
+    if (name === 'NotAllowedError' || name === 'SecurityError' || name === 'PermissionDeniedError') {
+      return 'تم رفض إذن المايكروفون. اسمح بالوصول للمايكروفون من إعدادات المتصفح أو التطبيق ثم أعد المحاولة';
+    }
+    if (name === 'NotFoundError' || name === 'NotReadableError' || name === 'OverconstrainedError' || name === 'AbortError') {
+      return 'تعذر الوصول للمايكروفون — تأكد من توصيله وعدم استخدامه من تطبيق آخر';
+    }
+    return 'تعذر بدء التسجيل: ' + ((err && err.message) || 'خطأ غير معروف');
+  }
 
   function _tpShowError(msg) {
     _tarteelProcessing = false; _tp.recording = false;

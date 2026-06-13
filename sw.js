@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v54"; // v54: Tasmee' Pro word text → UthmanicHafs (KFGQPC) font, matches data encoding
+const CACHE_NAME = "zad-muslim-v55"; // v55: Tasmee' mic permission — request prompt + clear errors, no silent no-op when model not ready
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 

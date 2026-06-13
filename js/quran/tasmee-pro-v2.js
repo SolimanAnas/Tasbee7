@@ -488,7 +488,16 @@ function _v2MergeBuffer() {
 }
 
 async function tpToggleRecord() {
-  if (!_tarteelReady) return;
+  // The offline recognition model must be downloaded before we can record.
+  // Returning silently here made the mic button look dead — it never asked
+  // for the microphone permission and gave no feedback. Send the user to the
+  // engine setup (where the model download lives) instead.
+  if (!_tarteelReady) {
+    showCustomToast('يجب تجهيز محرك التسميع أولاً — جارٍ فتح الإعداد');
+    closeTasmeePro();
+    setTimeout(() => { if (typeof openTarteelSheet === 'function') openTarteelSheet(); }, 300);
+    return;
+  }
   if (_tp.recording) {
     _tp.recording = false;
     clearInterval(_tp.timerInterval);
@@ -512,6 +521,10 @@ async function tpToggleRecord() {
       document.getElementById('tpRecTimer').textContent = '00:00';
     }
   } else {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      _tpShowError('هذا المتصفح لا يدعم الوصول إلى المايكروفون');
+      return;
+    }
     try {
       _tp.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       _tpAudioCtx = new AudioContext({ sampleRate: 16000 });
@@ -546,7 +559,7 @@ async function tpToggleRecord() {
       document.getElementById('tpMicIcon').style.display = 'none';
       document.getElementById('tpStopIcon').style.display = '';
       document.getElementById('tpRecDot').className = 'tp-rec-dot recording';
-    } catch (err) { _tpShowError(err.message); }
+    } catch (err) { _tpShowError(_tpMicError(err)); }
   }
 }
 
