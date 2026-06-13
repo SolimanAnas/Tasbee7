@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v53"; // v53: remove CSP that broke i18n loader + ONNX tasmee worker; re-precache HTML
+const CACHE_NAME = "zad-muslim-v54"; // v54: Tasmee' Pro word text → UthmanicHafs (KFGQPC) font, matches data encoding
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
