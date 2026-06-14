@@ -198,7 +198,7 @@ test('sw.js v42 includes SVG icon precache entries', async ({ page }) => {
   expect(response.status()).toBe(200);
   const swText = await page.evaluate(() => document.body.textContent);
 
-  expect(swText).toContain('zad-muslim-v55');
+  expect(swText).toContain('zad-muslim-v57');
   expect(swText).toContain('./img/SVG/close.svg');
   expect(swText).toContain('./img/SVG/search.svg');
   expect(swText).toContain('./img/SVG/book.svg');
