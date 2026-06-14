@@ -358,32 +358,43 @@ function extractVideoId(url){
   return m?m[1]:null;
 }
 
-/* ---------- Fetch Video Info (via noembed — no API key) ---------- */
+/* ---------- Fetch Video Info (YouTube oembed → noembed fallback) ---------- */
 async function fetchVideoInfo(url){
   showStatus('جاري تحميل المعلومات...','');
-  try{
-    const r=await fetch('https://noembed.com/embed?url='+encodeURIComponent(url));
-    const d=await r.json();
-    if(d.error) throw new Error(d.error);
+  const vid=extractVideoId(url);
+  if(!vid){hidePreview();showStatus('رابط YouTube غير صالح','error');return;}
 
-    const vid=extractVideoId(url);
-    videoData={
-      title:d.title||'فيديو',
-      channel:d.author_name||'',
-      thumbnail:d.thumbnail_url||`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
-      url:url,
-      id:vid
-    };
-    showPreview(videoData);
-    showStatus('','');
-    document.getElementById('formatCard').style.display='';
-    document.getElementById('qualityCard').style.display='';
-    document.getElementById('downloadBtn').style.display='';
-    updateQualityGrid();
-  }catch(e){
-    hidePreview();
-    showStatus('تعذّر تحميل معلومات الفيديو',true);
+  let data=null;
+  // Try YouTube oembed first (most reliable)
+  try{
+    const r1=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');
+    if(r1.ok){const d=await r1.json();if(!d.error)data=d;}
+  }catch{}
+  // Fallback to noembed
+  if(!data){
+    try{
+      const r2=await fetch('https://noembed.com/embed?url='+encodeURIComponent(url));
+      if(r2.ok){const d=await r2.json();if(!d.error)data=d;}
+    }catch{}
   }
+  // Last resort: construct from video ID (thumbnail always works)
+  if(!data){
+    data={title:'فيديو',author_name:'',thumbnail_url:'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg'};
+  }
+
+  videoData={
+    title:data.title||'فيديو',
+    channel:data.author_name||'',
+    thumbnail:data.thumbnail_url||`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+    url:url,
+    id:vid
+  };
+  showPreview(videoData);
+  showStatus('','');
+  document.getElementById('formatCard').style.display='';
+  document.getElementById('qualityCard').style.display='';
+  document.getElementById('downloadBtn').style.display='';
+  updateQualityGrid();
 }
 
 /* ---------- Preview ---------- */
@@ -439,7 +450,7 @@ function updateQualityGrid(){
 function selectQuality(q){
   selectedQuality=q;
   document.querySelectorAll('.quality-chip').forEach(c=>c.classList.remove('active'));
-  event.target.classList.add('active');
+  event.target.closest('.quality-chip')?.classList.add('active');
 }
 
 /* ---------- Status ---------- */
