@@ -237,9 +237,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
+    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;"><img src="../img/SVG/home.svg" width="20" height="20" alt=""></a>
     <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);">التحميل</div>
-    <button class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</button>
+    <button class="icon-btn" onclick="cycleTheme()" title="المظهر"><img src="../img/SVG/moon.svg" width="20" height="20" alt=""></button>
   </div>
 
   <!-- URL Input -->
@@ -247,7 +247,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <label>رابط الفيديو</label>
     <div class="url-input-wrap">
       <input type="url" class="url-input" id="urlInput" placeholder="الصق رابط YouTube هنا..." oninput="onUrlChange()">
-      <button class="paste-btn" onclick="pasteFromClipboard()">📋 لصق</button>
+      <button class="paste-btn" onclick="pasteFromClipboard()"><img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> لصق</button>
     </div>
   </div>
 
@@ -265,12 +265,12 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <label>صيغة التحميل</label>
     <div class="format-grid">
       <div class="format-card selected" onclick="selectFormat('mp3')" id="fmtMp3">
-        <div class="format-icon">🎵</div>
+        <div class="format-icon"><img src="../img/SVG/music.svg" width="28" height="28" alt=""></div>
         <div class="format-label">MP3</div>
         <div class="format-desc">صوت فقط</div>
       </div>
       <div class="format-card" onclick="selectFormat('mp4')" id="fmtMp4">
-        <div class="format-icon">🎬</div>
+        <div class="format-icon"><img src="../img/SVG/play.svg" width="28" height="28" alt=""></div>
         <div class="format-label">MP4</div>
         <div class="format-desc">فيديو + صوت</div>
       </div>
@@ -288,7 +288,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
   <!-- Fallback Banner -->
   <div class="fallback-banner" id="fallbackBanner">
-    <div class="fallback-banner-text">⚠️ تعذّر التحميل المباشر. يمكنك فتح الرابط في أحد المواقع التالية:</div>
+    <div class="fallback-banner-text"><img src="../img/SVG/alert-triangle.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> تعذّر التحميل المباشر. يمكنك فتح الرابط في أحد المواقع التالية:</div>
     <div class="fallback-actions">
       <button class="fallback-btn fallback-btn-primary" onclick="openCobalt()">↗ Cobalt</button>
       <button class="fallback-btn fallback-btn-secondary" onclick="openY2mate()">↗ Y2mate</button>
@@ -297,7 +297,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
   <!-- Download Button -->
   <button class="download-btn" id="downloadBtn" style="display:none;" onclick="startDownload()">
-    <span class="dl-text">⬇️ تحميل</span>
+    <span class="dl-text"><img src="../img/SVG/download.svg" width="18" height="18" style="vertical-align:middle;margin-left:4px;" alt=""> تحميل</span>
     <span class="spinner"></span>
   </button>
 
@@ -503,7 +503,7 @@ function startDownload() {
     }
 
     if (d.url) {
-      showStatus('تم! بدأ التحميل ✓', 'success');
+      showStatus('تم! بدأ التحميل', 'success');
       const a = document.createElement('a');
       a.href = d.url;
       a.download = '';
@@ -512,15 +512,15 @@ function startDownload() {
       a.click();
       document.body.removeChild(a);
       saveToHistory(videoData, selectedFormat, selectedQuality);
-      showToast('تم بدء التحميل ✓');
+      showToast('تم بدء التحميل');
     } else if (d.status === 'picker') {
       // picker: multiple streams — open first item
       const firstUrl = d.picker?.[0]?.url;
       if (firstUrl) {
-        showStatus('تم! بدأ التحميل ✓', 'success');
+        showStatus('تم! بدأ التحميل', 'success');
         window.open(firstUrl, '_blank');
         saveToHistory(videoData, selectedFormat, selectedQuality);
-        showToast('تم بدء التحميل ✓');
+        showToast('تم بدء التحميل');
       } else {
         showStatus('تعذّر التحميل — جرّب صيغة أخرى', 'error');
         showFallback();
@@ -557,7 +557,7 @@ function renderHistory() {
   const h = getHistory();
   const list = document.getElementById('historyList');
   if (!h.length) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">لا توجد تحميلات بعد</div></div>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon"><img src="../img/SVG/download.svg" width="48" height="48" alt=""></div><div class="empty-text">لا توجد تحميلات بعد</div></div>';
     return;
   }
   list.innerHTML = h.map(item => {
