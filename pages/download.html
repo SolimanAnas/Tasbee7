@@ -17,7 +17,7 @@
   --glass-shadow: 0 8px 32px 0 rgba(31,38,135,0.07);
   --overlay: rgba(255,255,255,0.2); --modal-overlay: rgba(0,0,0,0.3);
   --list-hover: rgba(0,0,0,0.05); --gold: #9a7b1f; --gold-soft: rgba(154,123,31,.12);
-  --danger: #ef4444;
+  --danger: #ef4444; --warn: #f59e0b;
 }
 [data-theme="dark"] {
   --bg-image: url('../images/Background-dark.webp');
@@ -28,7 +28,7 @@
   --glass-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
   --overlay: rgba(15,23,42,0.5); --modal-overlay: rgba(0,0,0,0.7);
   --list-hover: rgba(255,255,255,0.05); --gold: #e6c068; --gold-soft: rgba(230,192,104,.15);
-  --danger: #f87171;
+  --danger: #f87171; --warn: #fbbf24;
 }
 [data-theme="sepia"] {
   --bg-image: url('../images/background-sepia.webp');
@@ -39,7 +39,7 @@
   --glass-shadow: 0 8px 32px 0 rgba(90,60,20,0.1);
   --overlay: rgba(244,236,216,0.2); --modal-overlay: rgba(0,0,0,0.3);
   --list-hover: rgba(122,84,24,0.06); --gold: #9a6b1f; --gold-soft: rgba(154,107,31,.12);
-  --danger: #c0392b;
+  --danger: #c0392b; --warn: #d97706;
 }
 
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -48,7 +48,7 @@ body {
   background-color:var(--bg-surface); background-image:var(--bg-image);
   background-size:cover; background-position:center; background-attachment:fixed;
   color:var(--text-primary); display:flex; justify-content:center;
-  padding:calc(max(12px,env(safe-area-inset-top))+30px) 20px 100px;
+  padding:calc(max(12px,env(safe-area-inset-top)) + 30px) 20px 100px;
   min-height:100dvh; transition:color .4s, background-image .4s;
 }
 body::before { content:''; position:fixed; inset:0; background:var(--overlay); z-index:-1; }
@@ -66,7 +66,8 @@ body::before { content:''; position:fixed; inset:0; background:var(--overlay); z
 .header-title { font-weight:bold; font-size:18px; }
 .icon-btn {
   background:none; border:none; color:var(--text-primary); cursor:pointer;
-  padding:5px; display:flex; align-items:center; justify-content:center; transition:.2s; font-size:18px;
+  padding:5px; display:flex; align-items:center; justify-content:center;
+  transition:.2s; font-size:18px;
 }
 .icon-btn:active { opacity:.7; transform:scale(.9); }
 
@@ -80,15 +81,13 @@ body::before { content:''; position:fixed; inset:0; background:var(--overlay); z
 label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 /* URL Input */
-.url-input-wrap {
-  display:flex; gap:8px; align-items:stretch;
-}
+.url-input-wrap { display:flex; gap:8px; align-items:stretch; }
 .url-input {
   flex:1; padding:14px 16px; border-radius:14px; border:1px solid var(--glass-border);
   background:var(--list-hover); color:var(--text-primary); font-family:inherit;
   font-size:15px; outline:none; transition:.2s; direction:ltr; text-align:left;
 }
-.url-input:focus { border-color:var(--accent-main); }
+.url-input:focus { border-color:var(--accent-main); box-shadow:0 0 0 3px var(--accent-muted); }
 .url-input::placeholder { color:var(--text-secondary); direction:rtl; text-align:right; }
 .paste-btn {
   padding:14px 16px; border-radius:14px; border:1px solid var(--glass-border);
@@ -98,9 +97,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 .paste-btn:active { transform:scale(.95); background:var(--accent-main); color:#fff; }
 
 /* Preview */
-.preview-card {
-  display:none; overflow:hidden;
-}
+.preview-card { display:none; overflow:hidden; }
 .preview-card.visible { display:flex; flex-direction:column; gap:10px; animation:fadeIn .4s ease; }
 @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
 .preview-thumb {
@@ -108,17 +105,11 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   background:var(--list-hover); position:relative;
 }
 .preview-thumb img { width:100%; height:100%; object-fit:cover; }
-.preview-duration {
-  position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,.8);
-  color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px;
-}
 .preview-title {
   font-size:15px; font-weight:700; line-height:1.5;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
-.preview-channel {
-  font-size:12px; color:var(--text-secondary); font-weight:500;
-}
+.preview-channel { font-size:12px; color:var(--text-secondary); font-weight:500; }
 
 /* Format Grid */
 .format-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -127,9 +118,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   background:var(--list-hover); cursor:pointer; transition:.25s; text-align:center;
 }
 .format-card:active { transform:scale(.96); }
-.format-card.selected {
-  border-color:var(--accent-main); background:var(--accent-muted);
-}
+.format-card.selected { border-color:var(--accent-main); background:var(--accent-muted); }
 .format-icon { font-size:28px; margin-bottom:4px; }
 .format-label { font-size:14px; font-weight:700; color:var(--text-primary); }
 .format-desc { font-size:11px; color:var(--text-secondary); margin-top:2px; }
@@ -142,9 +131,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   color:var(--text-secondary); cursor:pointer; transition:.2s;
 }
 .quality-chip:active { transform:scale(.92); }
-.quality-chip.active {
-  background:var(--accent-main); color:#fff; border-color:var(--accent-main);
-}
+.quality-chip.active { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
 
 /* Download Button */
 .download-btn {
@@ -155,7 +142,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   justify-content:center; gap:8px;
 }
 .download-btn:active { transform:scale(.97); }
-.download-btn:disabled { opacity:.4; cursor:default; transform:none; }
+.download-btn:disabled { opacity:.4; cursor:default; transform:none; box-shadow:none; }
 .download-btn .spinner {
   width:20px; height:20px; border:3px solid rgba(255,255,255,.3);
   border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; display:none;
@@ -167,16 +154,37 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 /* Status */
 .status-msg {
   text-align:center; font-size:13px; font-weight:600; color:var(--text-secondary);
-  padding:8px; display:none;
+  padding:8px; display:none; line-height:1.6;
 }
 .status-msg.visible { display:block; animation:fadeIn .3s ease; }
 .status-msg.error { color:var(--danger); }
 .status-msg.success { color:var(--accent-main); }
 
-/* History */
-.history-header {
-  display:flex; justify-content:space-between; align-items:center;
+/* Fallback Banner */
+.fallback-banner {
+  display:none; padding:12px 16px; border-radius:14px;
+  background:var(--gold-soft); border:1px solid var(--gold);
+  flex-direction:column; gap:8px; animation:fadeIn .3s ease;
 }
+.fallback-banner.visible { display:flex; }
+.fallback-banner-text { font-size:13px; color:var(--text-primary); font-weight:500; }
+.fallback-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.fallback-btn {
+  padding:8px 16px; border-radius:10px; border:none; cursor:pointer;
+  font-family:inherit; font-size:13px; font-weight:700; transition:.2s;
+}
+.fallback-btn-primary {
+  background:var(--accent-main); color:#fff;
+}
+.fallback-btn-primary:active { transform:scale(.96); }
+.fallback-btn-secondary {
+  background:var(--list-hover); color:var(--text-primary);
+  border:1px solid var(--glass-border);
+}
+.fallback-btn-secondary:active { transform:scale(.96); }
+
+/* History */
+.history-header { display:flex; justify-content:space-between; align-items:center; }
 .history-clear {
   font-size:12px; color:var(--danger); cursor:pointer; font-weight:600;
   background:none; border:none; font-family:inherit; padding:4px 8px; border-radius:8px;
@@ -189,6 +197,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   border-radius:12px; background:var(--list-hover); border:1px solid var(--glass-border);
   cursor:pointer; transition:.2s;
 }
+.history-item:hover { border-color:var(--accent-main); }
 .history-item:active { transform:scale(.98); }
 .history-thumb {
   width:48px; height:36px; border-radius:6px; overflow:hidden; flex-shrink:0;
@@ -206,19 +215,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 }
 
 /* Empty state */
-.empty-state {
-  text-align:center; padding:30px 20px; color:var(--text-secondary);
-}
+.empty-state { text-align:center; padding:30px 20px; color:var(--text-secondary); }
 .empty-icon { font-size:48px; margin-bottom:8px; opacity:.5; }
 .empty-text { font-size:14px; }
-
-/* Copy button */
-.copy-btn {
-  width:100%; padding:12px; border-radius:14px; border:1px solid var(--glass-border);
-  background:var(--list-hover); color:var(--accent-main); font-family:inherit;
-  font-size:14px; font-weight:700; cursor:pointer; transition:.2s;
-}
-.copy-btn:active { transform:scale(.96); background:var(--accent-muted); }
 
 /* Toast */
 .toast {
@@ -238,9 +237,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;"><img src="../img/SVG/home.svg" width="20" height="20" alt=""></a>
+    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
     <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);">التحميل</div>
-    <button class="icon-btn" onclick="cycleTheme()" title="المظهر"><img src="../img/SVG/moon.svg" width="20" height="20" alt=""></button>
+    <button class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</button>
   </div>
 
   <!-- URL Input -->
@@ -248,7 +247,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <label>رابط الفيديو</label>
     <div class="url-input-wrap">
       <input type="url" class="url-input" id="urlInput" placeholder="الصق رابط YouTube هنا..." oninput="onUrlChange()">
-      <button class="paste-btn" onclick="pasteFromClipboard()"><img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> لصق</button>
+      <button class="paste-btn" onclick="pasteFromClipboard()">📋 لصق</button>
     </div>
   </div>
 
@@ -256,7 +255,6 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <div class="card preview-card" id="previewCard">
     <div class="preview-thumb" id="previewThumb">
       <img id="previewImg" src="" alt="">
-      <span class="preview-duration" id="previewDuration"></span>
     </div>
     <div class="preview-title" id="previewTitle"></div>
     <div class="preview-channel" id="previewChannel"></div>
@@ -267,12 +265,12 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <label>صيغة التحميل</label>
     <div class="format-grid">
       <div class="format-card selected" onclick="selectFormat('mp3')" id="fmtMp3">
-        <div class="format-icon"><img src="../img/SVG/music.svg" width="28" height="28" alt=""></div>
+        <div class="format-icon">🎵</div>
         <div class="format-label">MP3</div>
         <div class="format-desc">صوت فقط</div>
       </div>
       <div class="format-card" onclick="selectFormat('mp4')" id="fmtMp4">
-        <div class="format-icon"><img src="../img/SVG/play.svg" width="28" height="28" alt=""></div>
+        <div class="format-icon">🎬</div>
         <div class="format-label">MP4</div>
         <div class="format-desc">فيديو + صوت</div>
       </div>
@@ -288,14 +286,18 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <!-- Status -->
   <div class="status-msg" id="statusMsg"></div>
 
-  <!-- Copy URL -->
-  <div id="copyRow" style="display:none;">
-    <button class="copy-btn" onclick="copyUrl()"><img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> نسخ الرابط</button>
+  <!-- Fallback Banner -->
+  <div class="fallback-banner" id="fallbackBanner">
+    <div class="fallback-banner-text">⚠️ تعذّر التحميل المباشر. يمكنك فتح الرابط في أحد المواقع التالية:</div>
+    <div class="fallback-actions">
+      <button class="fallback-btn fallback-btn-primary" onclick="openCobalt()">↗ Cobalt</button>
+      <button class="fallback-btn fallback-btn-secondary" onclick="openY2mate()">↗ Y2mate</button>
+    </div>
   </div>
 
   <!-- Download Button -->
   <button class="download-btn" id="downloadBtn" style="display:none;" onclick="startDownload()">
-    <span class="dl-text"><img src="../img/SVG/download.svg" width="18" height="18" style="vertical-align:middle;margin-left:4px;" alt=""> فتح صفحة التحميل</span>
+    <span class="dl-text">⬇️ تحميل</span>
     <span class="spinner"></span>
   </button>
 
@@ -311,232 +313,278 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 <script>
 /* ---------- Theme ---------- */
-const THEMES=['dark','light','sepia'];
-let tIdx=parseInt(localStorage.getItem('appThemeIdx'))||0;
-function applyTheme(){document.documentElement.setAttribute('data-theme',THEMES[tIdx]);localStorage.setItem('appThemeIdx',tIdx);}
-function cycleTheme(){tIdx=(tIdx+1)%THEMES.length;applyTheme();}
+const THEMES = ['dark', 'light', 'sepia'];
+let tIdx = parseInt(localStorage.getItem('appThemeIdx')) || 0;
+function applyTheme() { document.documentElement.setAttribute('data-theme', THEMES[tIdx]); localStorage.setItem('appThemeIdx', tIdx); }
+function cycleTheme() { tIdx = (tIdx + 1) % THEMES.length; applyTheme(); }
 applyTheme();
 
 /* ---------- Toast ---------- */
-function showToast(m,e){const t=document.getElementById('toast');t.textContent=m;t.classList.toggle('error',!!e);t.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(()=>t.classList.remove('show'),3000);}
+function showToast(m, e) {
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.toggle('error', !!e);
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 3000);
+}
 
 /* ---------- State ---------- */
-let selectedFormat='mp3';
-let selectedQuality='192';
-let videoData=null;
+let selectedFormat = 'mp3';
+let selectedQuality = '192';
+let videoData = null;
 
-const MP3_QUALITIES=['128','192','256','320'];
-const MP4_QUALITIES=['360','480','720','1080'];
+const MP3_QUALITIES = ['128', '192', '256', '320'];
+const MP4_QUALITIES = ['360', '480', '720', '1080'];
 
 /* ---------- Paste ---------- */
-async function pasteFromClipboard(){
-  try{
-    const text=await navigator.clipboard.readText();
-    document.getElementById('urlInput').value=text;
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('urlInput').value = text;
     onUrlChange();
-  }catch(e){
-    showToast('الصق الرابط يدوياً',true);
+  } catch (e) {
+    showToast('الصق الرابط يدوياً', true);
   }
 }
 
 /* ---------- URL Change ---------- */
-let fetchTimer=null;
-function onUrlChange(){
+let fetchTimer = null;
+function onUrlChange() {
   clearTimeout(fetchTimer);
-  const url=document.getElementById('urlInput').value.trim();
-  if(!url){hidePreview();return;}
-  if(!isYouTubeUrl(url)){hidePreview();return;}
-  fetchTimer=setTimeout(()=>fetchVideoInfo(url),600);
+  hideFallback();
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { hidePreview(); return; }
+  if (!isYouTubeUrl(url)) { hidePreview(); return; }
+  fetchTimer = setTimeout(() => fetchVideoInfo(url), 600);
 }
 
-function isYouTubeUrl(url){
+function isYouTubeUrl(url) {
   return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
 }
 
-function extractVideoId(url){
-  const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
-  return m?m[1]:null;
+function extractVideoId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
 }
 
-/* ---------- Fetch Video Info (YouTube oembed → noembed fallback) ---------- */
-async function fetchVideoInfo(url){
-  showStatus('جاري تحميل المعلومات...','');
-  const vid=extractVideoId(url);
-  if(!vid){hidePreview();showStatus('رابط YouTube غير صالح','error');return;}
+/* ---------- Fetch Video Info ---------- */
+async function fetchVideoInfo(url) {
+  showStatus('جاري تحميل المعلومات...', '');
+  try {
+    const r = await fetch('https://noembed.com/embed?url=' + encodeURIComponent(url));
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
 
-  let data=null;
-  // Try YouTube oembed first (most reliable)
-  try{
-    const r1=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(url)+'&format=json');
-    if(r1.ok){const d=await r1.json();if(!d.error)data=d;}
-  }catch{}
-  // Fallback to noembed
-  if(!data){
-    try{
-      const r2=await fetch('https://noembed.com/embed?url='+encodeURIComponent(url));
-      if(r2.ok){const d=await r2.json();if(!d.error)data=d;}
-    }catch{}
+    const vid = extractVideoId(url);
+    videoData = {
+      title: d.title || 'فيديو',
+      channel: d.author_name || '',
+      thumbnail: d.thumbnail_url || `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+      url: url,
+      id: vid
+    };
+    showPreview(videoData);
+    showStatus('', '');
+    document.getElementById('formatCard').style.display = '';
+    document.getElementById('qualityCard').style.display = '';
+    document.getElementById('downloadBtn').style.display = '';
+    updateQualityGrid();
+  } catch (e) {
+    hidePreview();
+    showStatus('تعذّر تحميل معلومات الفيديو — تحقق من الرابط', 'error');
   }
-  // Last resort: construct from video ID (thumbnail always works)
-  if(!data){
-    data={title:'فيديو',author_name:'',thumbnail_url:'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg'};
-  }
-
-  videoData={
-    title:data.title||'فيديو',
-    channel:data.author_name||'',
-    thumbnail:data.thumbnail_url||`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
-    url:url,
-    id:vid
-  };
-  showPreview(videoData);
-  showStatus('','');
-  document.getElementById('formatCard').style.display='';
-  document.getElementById('qualityCard').style.display='';
-  document.getElementById('downloadBtn').style.display='';
-  updateQualityGrid();
 }
 
 /* ---------- Preview ---------- */
-function showPreview(v){
-  const card=document.getElementById('previewCard');
+function showPreview(v) {
+  const card = document.getElementById('previewCard');
   card.classList.add('visible');
-  document.getElementById('previewImg').src=v.thumbnail;
-  document.getElementById('previewTitle').textContent=v.title;
-  document.getElementById('previewChannel').textContent=v.channel;
-  document.getElementById('previewDuration').textContent='';
-  document.getElementById('copyRow').style.display='';
+  document.getElementById('previewImg').src = v.thumbnail;
+  document.getElementById('previewTitle').textContent = v.title;
+  document.getElementById('previewChannel').textContent = v.channel;
 }
-function hidePreview(){
+function hidePreview() {
   document.getElementById('previewCard').classList.remove('visible');
-  document.getElementById('formatCard').style.display='none';
-  document.getElementById('qualityCard').style.display='none';
-  document.getElementById('downloadBtn').style.display='none';
-  document.getElementById('copyRow').style.display='none';
-  videoData=null;
-}
-
-/* ---------- Copy URL ---------- */
-function copyUrl(){
-  if(!videoData)return;
-  navigator.clipboard.writeText(videoData.url).then(()=>{
-    showToast('تم نسخ الرابط');
-    const btn=document.querySelector('.copy-btn');
-    btn.innerHTML='<img src="../img/SVG/check.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> تم النسخ';
-    setTimeout(()=>{btn.innerHTML='<img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> نسخ الرابط';},1500);
-  }).catch(()=>{
-    showToast('لم يتم النسخ',true);
-  });
+  document.getElementById('formatCard').style.display = 'none';
+  document.getElementById('qualityCard').style.display = 'none';
+  document.getElementById('downloadBtn').style.display = 'none';
+  videoData = null;
+  showStatus('', '');
 }
 
 /* ---------- Format ---------- */
-function selectFormat(fmt){
-  selectedFormat=fmt;
-  document.getElementById('fmtMp3').classList.toggle('selected',fmt==='mp3');
-  document.getElementById('fmtMp4').classList.toggle('selected',fmt==='mp4');
+function selectFormat(fmt) {
+  selectedFormat = fmt;
+  document.getElementById('fmtMp3').classList.toggle('selected', fmt === 'mp3');
+  document.getElementById('fmtMp4').classList.toggle('selected', fmt === 'mp4');
+  selectedQuality = fmt === 'mp3' ? '192' : '720';
   updateQualityGrid();
+  hideFallback();
 }
 
-function updateQualityGrid(){
-  const quals=selectedFormat==='mp3'?MP3_QUALITIES:MP4_QUALITIES;
-  const grid=document.getElementById('qualityGrid');
-  grid.innerHTML=quals.map(q=>
-    `<div class="quality-chip ${q===selectedQuality?'active':''}" onclick="selectQuality('${q}')">${q}${selectedFormat==='mp3'?'kbps':'p'}</div>`
+function updateQualityGrid() {
+  const quals = selectedFormat === 'mp3' ? MP3_QUALITIES : MP4_QUALITIES;
+  if (!quals.includes(selectedQuality)) selectedQuality = quals[1] || quals[0];
+  const grid = document.getElementById('qualityGrid');
+  grid.innerHTML = quals.map(q =>
+    `<div class="quality-chip${q === selectedQuality ? ' active' : ''}" onclick="selectQuality('${q}', this)">${q}${selectedFormat === 'mp3' ? 'kbps' : 'p'}</div>`
   ).join('');
-  if(!quals.includes(selectedQuality)) selectedQuality=quals[1]||quals[0];
-  grid.querySelector(`.quality-chip:nth-child(${quals.indexOf(selectedQuality)+1})`)?.classList.add('active');
 }
 
-function selectQuality(q){
-  selectedQuality=q;
-  document.querySelectorAll('.quality-chip').forEach(c=>c.classList.remove('active'));
-  event.target.closest('.quality-chip')?.classList.add('active');
+function selectQuality(q, el) {
+  selectedQuality = q;
+  document.querySelectorAll('.quality-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  hideFallback();
 }
 
 /* ---------- Status ---------- */
-function showStatus(msg,type){
-  const el=document.getElementById('statusMsg');
-  el.textContent=msg;
-  el.className='status-msg'+(msg?' visible':'')+(type==='error'?' error':'')+(type==='success'?' success':'');
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status-msg' + (msg ? ' visible' : '') + (type === 'error' ? ' error' : '') + (type === 'success' ? ' success' : '');
+}
+
+/* ---------- Fallback Banner ---------- */
+function showFallback() {
+  document.getElementById('fallbackBanner').classList.add('visible');
+}
+function hideFallback() {
+  document.getElementById('fallbackBanner').classList.remove('visible');
+}
+function openCobalt() {
+  if (!videoData) return;
+  window.open('https://cobalt.tools/?u=' + encodeURIComponent(videoData.url), '_blank');
+}
+function openY2mate() {
+  if (!videoData) return;
+  const vid = extractVideoId(videoData.url);
+  window.open('https://www.y2mate.com/youtube/' + (vid || ''), '_blank');
 }
 
 /* ---------- Download ---------- */
-function startDownload(){
-  if(!videoData)return;
-  const vid=videoData.id;
-  const btn=document.getElementById('downloadBtn');
-  const fmt=selectedFormat;
-
-  // Build download service URL based on format
-  // cobalt.tools is the most reliable free service — opens in new tab
-  const cobaltUrl='https://cobalt.tools/';
-
+function startDownload() {
+  if (!videoData) return;
+  const url = videoData.url;
+  const btn = document.getElementById('downloadBtn');
   btn.classList.add('loading');
-  btn.disabled=true;
-  showStatus('جاري الفتح...','success');
+  btn.disabled = true;
+  hideFallback();
+  showStatus('جاري التحميل...', '');
 
-  // Save to history
-  saveToHistory(videoData,fmt,selectedQuality);
+  const payload = {
+    url: url,
+    downloadMode: selectedFormat === 'mp3' ? 'audio' : 'auto',
+    audioFormat: selectedFormat === 'mp3' ? 'mp3' : undefined,
+    quality: selectedFormat === 'mp4' ? selectedQuality : undefined,
+  };
 
-  // Open cobalt.tools — user pastes the URL there
-  // (cobalt.tools blocks direct API calls from browsers due to bot protection)
-  setTimeout(()=>{
-    window.open(cobaltUrl,'_blank');
+  // Remove undefined fields
+  Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+
+  fetch('https://api.cobalt.tools/', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(d => {
     btn.classList.remove('loading');
-    btn.disabled=false;
-    showToast('الصق الرابط في cobalt.tools وحمّل');
-    showStatus('الصق الرابط في cobalt.tools والصق الصيغة المطلوبة','success');
-  },500);
+    btn.disabled = false;
+
+    if (d.status === 'error') {
+      showStatus('تعذّر التحميل: ' + (d.error?.code || 'خطأ غير معروف'), 'error');
+      showFallback();
+      return;
+    }
+
+    if (d.url) {
+      showStatus('تم! بدأ التحميل ✓', 'success');
+      const a = document.createElement('a');
+      a.href = d.url;
+      a.download = '';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      saveToHistory(videoData, selectedFormat, selectedQuality);
+      showToast('تم بدء التحميل ✓');
+    } else if (d.status === 'picker') {
+      // picker: multiple streams — open first item
+      const firstUrl = d.picker?.[0]?.url;
+      if (firstUrl) {
+        showStatus('تم! بدأ التحميل ✓', 'success');
+        window.open(firstUrl, '_blank');
+        saveToHistory(videoData, selectedFormat, selectedQuality);
+        showToast('تم بدء التحميل ✓');
+      } else {
+        showStatus('تعذّر التحميل — جرّب صيغة أخرى', 'error');
+        showFallback();
+      }
+    } else {
+      showStatus('تعذّر التحميل — جرّب صيغة أخرى', 'error');
+      showFallback();
+    }
+  })
+  .catch(() => {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    showStatus('تعذّر الاتصال بخادم التحميل', 'error');
+    showFallback();
+  });
 }
 
 /* ---------- History ---------- */
-function getHistory(){
-  try{return JSON.parse(localStorage.getItem('dlHistory')||'[]');}catch(e){return[];}
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('dlHistory') || '[]'); } catch (e) { return []; }
 }
-function saveToHistory(video,fmt,qual){
-  const h=getHistory();
-  h.unshift({title:video.title,channel:video.channel,thumbnail:video.thumbnail,url:video.url,format:fmt,quality:qual,time:Date.now()});
-  if(h.length>20)h.length=20;
-  localStorage.setItem('dlHistory',JSON.stringify(h));
+function saveToHistory(video, fmt, qual) {
+  const h = getHistory();
+  h.unshift({ title: video.title, channel: video.channel, thumbnail: video.thumbnail, url: video.url, format: fmt, quality: qual, time: Date.now() });
+  if (h.length > 20) h.length = 20;
+  localStorage.setItem('dlHistory', JSON.stringify(h));
   renderHistory();
 }
-function clearHistory(){
+function clearHistory() {
   localStorage.removeItem('dlHistory');
   renderHistory();
 }
-function renderHistory(){
-  const h=getHistory();
-  const list=document.getElementById('historyList');
-  const card=document.getElementById('historyCard');
-  if(!h.length){
-    list.innerHTML='<div class="empty-state"><div class="empty-icon"><img src="../img/SVG/download.svg" width="48" height="48" alt=""></div><div class="empty-text">لا توجد تحميلات بعد</div></div>';
+function renderHistory() {
+  const h = getHistory();
+  const list = document.getElementById('historyList');
+  if (!h.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">لا توجد تحميلات بعد</div></div>';
     return;
   }
-  list.innerHTML=h.map(item=>{
-    const timeAgo=formatTimeAgo(item.time);
-    return `<div class="history-item" onclick="window.open('${item.url}','_blank')">
-      <div class="history-thumb"><img src="${item.thumbnail}" alt=""></div>
+  list.innerHTML = h.map(item => {
+    const timeAgo = formatTimeAgo(item.time);
+    return `<div class="history-item" onclick="window.open('${escAttr(item.url)}','_blank')">
+      <div class="history-thumb"><img src="${escAttr(item.thumbnail)}" alt="" loading="lazy"></div>
       <div class="history-info">
         <div class="history-title">${escHtml(item.title)}</div>
         <div class="history-meta">${escHtml(item.channel)} · ${timeAgo}</div>
       </div>
-      <div class="history-badge">${item.format.toUpperCase()} ${item.quality}${item.format==='mp3'?'kbps':'p'}</div>
+      <div class="history-badge">${item.format.toUpperCase()} ${item.quality}${item.format === 'mp3' ? 'kbps' : 'p'}</div>
     </div>`;
   }).join('');
 }
 
-function formatTimeAgo(ts){
-  const diff=Date.now()-ts;
-  const m=Math.floor(diff/60000);
-  if(m<1) return 'الآن';
-  if(m<60) return m+' دقيقة';
-  const h=Math.floor(m/60);
-  if(h<24) return h+' ساعة';
-  const d=Math.floor(h/24);
-  return d+' يوم';
+function formatTimeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'الآن';
+  if (m < 60) return m + ' دقيقة';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + ' ساعة';
+  return Math.floor(h / 24) + ' يوم';
 }
 
-function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function escAttr(s) { return s.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
 /* ---------- Init ---------- */
 renderHistory();
