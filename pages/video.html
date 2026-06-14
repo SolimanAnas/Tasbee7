@@ -538,6 +538,11 @@ function updateProgress() {
       document.getElementById('durationTime').innerText = formatTime(duration);
       document.getElementById('progress').style.background =
         `linear-gradient(to right, var(--accent-main) 0%, var(--accent-main) ${(current/duration)*100}%, rgba(255,255,255,0.4) ${(current/duration)*100}%, rgba(255,255,255,0.4) 100%)`;
+      if('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+        try {
+          navigator.mediaSession.setPositionState({ duration, playbackRate: currentSpeed, position: current });
+        } catch(e) {}
+      }
     }
   }, 500);
 }
