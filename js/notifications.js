@@ -9,6 +9,16 @@ const dlog = (() => {
   return on ? console.log.bind(console) : () => {};
 })();
 
+// Resolve asset paths relative to the site root regardless of page depth
+// (handles both root-level index.html and pages/ subdirectory).
+function _assetUrl(path) {
+  if (path.startsWith('/') || path.startsWith('http')) return path;
+  const p = window.location.pathname;
+  if (p.startsWith('/Tasbee7/')) return '/Tasbee7/' + path;
+  if (p.includes('/pages/')) return '../' + path;
+  return './' + path;
+}
+
 const NotificationSystem = {
 
   // ========== CONFIG ==========
@@ -482,9 +492,9 @@ const NotificationSystem = {
     // Only use fields supported by both SW showNotification and Notification constructor
     const notifOptions = {
       body: options.body || '',
-      icon: options.icon || './icons/icon-192.png',
+      icon: options.icon || _assetUrl('icons/icon-192.png'),
       tag: options.tag || 'zad-muslim',
-      data: options.data || { url: './index.html' },
+      data: options.data || { url: _assetUrl('index.html') },
       vibrate: options.vibrate || [200, 100, 200],
     };
 
@@ -610,7 +620,7 @@ const NotificationSystem = {
       this.showNotification('🌅 أذكار الصباح', {
         body: 'اللهم بك أصبحنا — ابدأ يومك بالأذكار',
         tag: 'azkar-morning',
-        data: { url: './pages/azkar.html?type=morning', type: 'azkar' }
+        data: { url: _assetUrl('pages/azkar.html?type=morning'), type: 'azkar' }
       });
       this.markTriggered('azkar-morning');
     }
@@ -620,7 +630,7 @@ const NotificationSystem = {
       this.showNotification('🌙 أذكار المساء', {
         body: 'اللهم بك أمسينا — اختتم يومك بالأذكار',
         tag: 'azkar-evening',
-        data: { url: './pages/azkar.html?type=night', type: 'azkar' }
+        data: { url: _assetUrl('pages/azkar.html?type=night'), type: 'azkar' }
       });
       this.markTriggered('azkar-evening');
     }
@@ -632,7 +642,7 @@ const NotificationSystem = {
       this.showNotification('🕋 يوم الجمعة المبارك', {
         body: 'لا تنسَ قراءة سورة الكهف اليوم',
         tag: 'friday-kahf',
-        data: { url: './pages/quran.html?surah=18', type: 'kahf' }
+        data: { url: _assetUrl('pages/quran.html?surah=18'), type: 'kahf' }
       });
       this.markTriggered('friday-kahf');
     }
@@ -645,7 +655,7 @@ const NotificationSystem = {
       this.showNotification('🔥 حافظ على استمراريتك!', {
         body: `لديك ${this.state.streak} يوم متتالي — لا تكسر السلسلة`,
         tag: 'streak-reminder',
-        data: { url: './index.html', type: 'default' }
+        data: { url: _assetUrl('index.html'), type: 'default' }
       });
       this.markTriggered('streak-reminder');
     }
@@ -663,7 +673,7 @@ const NotificationSystem = {
         this.showNotification(`⏰ تذكير: ${prayer.name}`, {
           body: `باقي ${this.config.preReminderMinutes} دقائق على أذان ${prayer.name}`,
           tag: `pre-${key}`,
-          data: { url: './index.html', type: 'prayer' }
+          data: { url: _assetUrl('index.html'), type: 'prayer' }
         });
         this.markTriggered(`pre-${key}`);
       }
@@ -674,7 +684,7 @@ const NotificationSystem = {
           body: `الآن وقت صلاة ${prayer.name} — حي على الصلاة`,
           tag: `prayer-${key}`,
           forceQuiet: true,
-          data: { url: './index.html', type: 'prayer' }
+          data: { url: _assetUrl('index.html'), type: 'prayer' }
         });
         this.markTriggered(key);
       }
@@ -754,7 +764,7 @@ const NotificationSystem = {
       tag: 'test',
       forceEnable: true,
       forceQuiet: true,
-      data: { url: './index.html', type: 'test' }
+      data: { url: _assetUrl('index.html'), type: 'test' }
     });
   }
 };

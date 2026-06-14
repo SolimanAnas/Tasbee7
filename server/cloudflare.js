@@ -107,23 +107,20 @@ async function signVapid(privateKey32, publicKey65, audience) {
   const key = await crypto.subtle.importKey(
     'jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
 
-  const header = { typ: 'JWT', alg: 'ES256' };
-  const payload = {
+  const enc = new TextEncoder();
+  const headerB64  = b64url(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
+  const payloadB64 = b64url(enc.encode(JSON.stringify({
     aud: audience,
     exp: Math.floor(Date.now() / 1000) + 43200,
     sub: 'mailto:admin@zad-al-muslim.com'
-  };
-
-  const enc = new TextEncoder();
-  const toSign = enc.encode(
-    b64url(enc.encode(JSON.stringify(header))) + '.' +
-    b64url(enc.encode(JSON.stringify(payload))));
+  })));
+  const toSign = enc.encode(`${headerB64}.${payloadB64}`);
 
   const sig = await crypto.subtle.sign(
     { name: 'ECDSA', hash: 'SHA-256' }, key, toSign);
 
-  // Web Crypto returns raw r||s (64 bytes for P-256) — ready to use as-is
-  return b64url(new Uint8Array(sig));
+  // Return the full JWT: base64url(header).base64url(payload).base64url(signature)
+  return `${headerB64}.${payloadB64}.${b64url(new Uint8Array(sig))}`;
 }
 
 // ====== Send one encrypted Web Push to a single subscription ======

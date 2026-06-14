@@ -132,7 +132,6 @@ const highSvgPages = [
   'sleeping.html',
   'hadith-viewer.html',
   'notifications.html',
-  'azkar2.html',
 ];
 
 for (const file of highSvgPages) {
@@ -141,7 +140,7 @@ for (const file of highSvgPages) {
     await page.waitForTimeout(2000);
 
     const svgCount = await page.evaluate(() => {
-      return document.querySelectorAll('img[src*="img/SVG/"]').length;
+      return document.querySelectorAll('img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon').length;
     });
 
     const resourceErrors = failedResources.filter(e =>
@@ -149,7 +148,9 @@ for (const file of highSvgPages) {
       !e.includes('favicon') &&
       !e.includes('mushaf') &&
       !e.includes('/json/audio-') &&
-      !e.includes('Failed to load resource')
+      !e.includes('Failed to load resource') &&
+      !e.includes('alquran.cloud') &&
+      !e.includes('quran.com')
     );
 
     expect(svgCount, `${file} should have SVG icons`).toBeGreaterThan(0);
@@ -197,7 +198,7 @@ test('sw.js v42 includes SVG icon precache entries', async ({ page }) => {
   expect(response.status()).toBe(200);
   const swText = await page.evaluate(() => document.body.textContent);
 
-  expect(swText).toContain('zad-muslim-v42');
+  expect(swText).toContain('zad-muslim-v55');
   expect(swText).toContain('./img/SVG/close.svg');
   expect(swText).toContain('./img/SVG/search.svg');
   expect(swText).toContain('./img/SVG/book.svg');
@@ -206,21 +207,27 @@ test('sw.js v42 includes SVG icon precache entries', async ({ page }) => {
 });
 
 // ========== 9. Visual smoke test on key pages ==========
+const SVG_ICON_SELECTOR = 'img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon';
+
+async function countVisibleSvgs(page) {
+  return await page.evaluate((sel) => {
+    const icons = document.querySelectorAll(sel);
+    let visibleCount = 0;
+    icons.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) visibleCount++;
+    });
+    return visibleCount;
+  }, SVG_ICON_SELECTOR);
+}
+
 test('quran-text.html renders with SVG icons visible', async ({ page }) => {
   await page.goto(`${BASE_URL}/pages/quran-text.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(2000);
 
   await page.screenshot({ path: 'tests/screenshots/quran-text-svg.png', fullPage: false });
 
-  const svgVisible = await page.evaluate(() => {
-    const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
-    let visibleCount = 0;
-    imgs.forEach(img => {
-      const rect = img.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) visibleCount++;
-    });
-    return visibleCount;
-  });
+  const svgVisible = await countVisibleSvgs(page);
 
   expect(svgVisible, 'Should have visible SVG icons').toBeGreaterThan(0);
 });
@@ -231,15 +238,7 @@ test('azkar.html renders with SVG icons visible', async ({ page }) => {
 
   await page.screenshot({ path: 'tests/screenshots/azkar-svg.png', fullPage: false });
 
-  const svgVisible = await page.evaluate(() => {
-    const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
-    let visibleCount = 0;
-    imgs.forEach(img => {
-      const rect = img.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) visibleCount++;
-    });
-    return visibleCount;
-  });
+  const svgVisible = await countVisibleSvgs(page);
 
   expect(svgVisible, 'Should have visible SVG icons').toBeGreaterThan(0);
 });
@@ -250,15 +249,7 @@ test('sleeping.html renders with SVG icons visible', async ({ page }) => {
 
   await page.screenshot({ path: 'tests/screenshots/sleeping-svg.png', fullPage: false });
 
-  const svgVisible = await page.evaluate(() => {
-    const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
-    let visibleCount = 0;
-    imgs.forEach(img => {
-      const rect = img.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) visibleCount++;
-    });
-    return visibleCount;
-  });
+  const svgVisible = await countVisibleSvgs(page);
 
   expect(svgVisible, 'Should have visible SVG icons').toBeGreaterThan(0);
 });

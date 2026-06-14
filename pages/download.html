@@ -238,9 +238,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <div class="app">
   <!-- Header -->
   <div class="header">
-    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;">🏠</a>
+    <a href="/Tasbee7/index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;"><img src="../img/SVG/home.svg" width="20" height="20" alt=""></a>
     <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);">التحميل</div>
-    <button class="icon-btn" onclick="cycleTheme()" title="المظهر">🌗</button>
+    <button class="icon-btn" onclick="cycleTheme()" title="المظهر"><img src="../img/SVG/moon.svg" width="20" height="20" alt=""></button>
   </div>
 
   <!-- URL Input -->
@@ -248,7 +248,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <label>رابط الفيديو</label>
     <div class="url-input-wrap">
       <input type="url" class="url-input" id="urlInput" placeholder="الصق رابط YouTube هنا..." oninput="onUrlChange()">
-      <button class="paste-btn" onclick="pasteFromClipboard()">📋 لصق</button>
+      <button class="paste-btn" onclick="pasteFromClipboard()"><img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> لصق</button>
     </div>
   </div>
 
@@ -267,12 +267,12 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <label>صيغة التحميل</label>
     <div class="format-grid">
       <div class="format-card selected" onclick="selectFormat('mp3')" id="fmtMp3">
-        <div class="format-icon">🎵</div>
+        <div class="format-icon"><img src="../img/SVG/music.svg" width="28" height="28" alt=""></div>
         <div class="format-label">MP3</div>
         <div class="format-desc">صوت فقط</div>
       </div>
       <div class="format-card" onclick="selectFormat('mp4')" id="fmtMp4">
-        <div class="format-icon">🎬</div>
+        <div class="format-icon"><img src="../img/SVG/play.svg" width="28" height="28" alt=""></div>
         <div class="format-label">MP4</div>
         <div class="format-desc">فيديو + صوت</div>
       </div>
@@ -290,12 +290,12 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
   <!-- Copy URL -->
   <div id="copyRow" style="display:none;">
-    <button class="copy-btn" onclick="copyUrl()">📋 نسخ الرابط</button>
+    <button class="copy-btn" onclick="copyUrl()"><img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> نسخ الرابط</button>
   </div>
 
   <!-- Download Button -->
   <button class="download-btn" id="downloadBtn" style="display:none;" onclick="startDownload()">
-    <span class="dl-text">⬇️ فتح صفحة التحميل</span>
+    <span class="dl-text"><img src="../img/SVG/download.svg" width="18" height="18" style="vertical-align:middle;margin-left:4px;" alt=""> فتح صفحة التحميل</span>
     <span class="spinner"></span>
   </button>
 
@@ -409,10 +409,10 @@ function hidePreview(){
 function copyUrl(){
   if(!videoData)return;
   navigator.clipboard.writeText(videoData.url).then(()=>{
-    showToast('تم نسخ الرابط ✓');
+    showToast('تم نسخ الرابط');
     const btn=document.querySelector('.copy-btn');
-    btn.textContent='✅ تم النسخ';
-    setTimeout(()=>{btn.textContent='📋 نسخ الرابط';},1500);
+    btn.innerHTML='<img src="../img/SVG/check.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> تم النسخ';
+    setTimeout(()=>{btn.innerHTML='<img src="../img/SVG/copy.svg" width="16" height="16" style="vertical-align:middle;margin-left:4px;" alt=""> نسخ الرابط';},1500);
   }).catch(()=>{
     showToast('لم يتم النسخ',true);
   });
@@ -473,7 +473,7 @@ function startDownload(){
     window.open(cobaltUrl,'_blank');
     btn.classList.remove('loading');
     btn.disabled=false;
-    showToast('الصق الرابط في cobalt.tools وحمّل ✓');
+    showToast('الصق الرابط في cobalt.tools وحمّل');
     showStatus('الصق الرابط في cobalt.tools والصق الصيغة المطلوبة','success');
   },500);
 }
@@ -498,7 +498,7 @@ function renderHistory(){
   const list=document.getElementById('historyList');
   const card=document.getElementById('historyCard');
   if(!h.length){
-    list.innerHTML='<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">لا توجد تحميلات بعد</div></div>';
+    list.innerHTML='<div class="empty-state"><div class="empty-icon"><img src="../img/SVG/download.svg" width="48" height="48" alt=""></div><div class="empty-text">لا توجد تحميلات بعد</div></div>';
     return;
   }
   list.innerHTML=h.map(item=>{

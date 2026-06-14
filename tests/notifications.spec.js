@@ -84,8 +84,19 @@ test.describe('Notification System', () => {
 
     const errors = [];
     const dialogs = [];
-    page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
-    page.on('pageerror', err => errors.push(err.message));
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        // Chrome emits this in headless/incognito when Push API is used
+        const t = msg.text();
+        if (t.includes('Push API') || t.includes('incognito') || t.includes('crbug.com')) return;
+        errors.push(t);
+      }
+    });
+    page.on('pageerror', err => {
+      const t = err.message || String(err);
+      if (t.includes('Push API') || t.includes('incognito') || t.includes('crbug.com')) return;
+      errors.push(t);
+    });
     page.on('dialog', dialog => { dialogs.push(dialog.message()); dialog.accept(); });
 
     await page.goto('/pages/notifications.html');
