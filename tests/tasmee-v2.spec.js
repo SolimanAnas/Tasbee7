@@ -1,4 +1,4 @@
-// Tasmee' Pro v2 (pages/quran-t.html) — text-rendered masking panel
+// Tasmee' Pro v2 (pages/quran.html) — text-rendered masking panel
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = 'http://localhost:8080';
@@ -11,7 +11,7 @@ const VIEWPORTS = [
 
 // open the page, dismiss first-run modals, wait for the DB, open the panel
 async function openPanel(page, quranPage) {
-  await page.goto(`${BASE_URL}/pages/quran-t.html?page=${quranPage}`, {
+  await page.goto(`${BASE_URL}/pages/quran.html?page=${quranPage}`, {
     waitUntil: 'domcontentloaded', timeout: 20000,
   });
   await page.evaluate(() => {
@@ -155,7 +155,7 @@ for (const vp of VIEWPORTS) {
 }
 
 test('normal reading mode unaffected: mushaf image still renders', async ({ page }) => {
-  await page.goto(`${BASE_URL}/pages/quran-t.html?page=3`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await page.goto(`${BASE_URL}/pages/quran.html?page=3`, { waitUntil: 'domcontentloaded', timeout: 20000 });
   await page.evaluate(() => {
     try { dlSkip(); } catch (e) {}
     const dl = document.getElementById('dlModal');

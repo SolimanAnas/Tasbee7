@@ -30,7 +30,7 @@ for (const { file, name } of THEMED_PAGES) {
     await page.waitForTimeout(1500);
 
     const result = await page.evaluate(() => {
-      const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
+      const imgs = document.querySelectorAll('img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon');
       const icons = [];
       imgs.forEach(img => {
         const rect = img.getBoundingClientRect();
@@ -38,7 +38,7 @@ for (const { file, name } of THEMED_PAGES) {
         const parent = img.parentElement;
         const parentColor = parent ? window.getComputedStyle(parent).color : 'unknown';
         icons.push({
-          src: img.src.split('/').pop(),
+          src: img.getAttribute('src') ? img.getAttribute('src').split('/').pop() : img.className,
           visible: rect.width > 0 && rect.height > 0,
           parentColor: parentColor,
           display: style.display,
@@ -65,7 +65,7 @@ for (const { file, name } of THEMED_PAGES) {
     await page.waitForTimeout(1500);
 
     const result = await page.evaluate(() => {
-      const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
+      const imgs = document.querySelectorAll('img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon');
       const icons = [];
       imgs.forEach(img => {
         const rect = img.getBoundingClientRect();
@@ -73,7 +73,7 @@ for (const { file, name } of THEMED_PAGES) {
         const parent = img.parentElement;
         const parentColor = parent ? window.getComputedStyle(parent).color : 'unknown';
         icons.push({
-          src: img.src.split('/').pop(),
+          src: img.getAttribute('src') ? img.getAttribute('src').split('/').pop() : img.className,
           visible: rect.width > 0 && rect.height > 0,
           parentColor: parentColor,
           display: style.display,
@@ -99,7 +99,7 @@ for (const { file, name } of THEMED_PAGES) {
     await page.evaluate(() => document.body.setAttribute('data-theme', 'light'));
     await page.waitForTimeout(500);
     const light = await page.evaluate(() => {
-      const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
+      const imgs = document.querySelectorAll('img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon');
       const sample = imgs[0];
       if (!sample) return null;
       const parent = sample.parentElement;
@@ -114,7 +114,7 @@ for (const { file, name } of THEMED_PAGES) {
     await page.evaluate(() => document.body.setAttribute('data-theme', 'dark'));
     await page.waitForTimeout(500);
     const dark = await page.evaluate(() => {
-      const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
+      const imgs = document.querySelectorAll('img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon');
       const sample = imgs[0];
       if (!sample) return null;
       const parent = sample.parentElement;
@@ -165,13 +165,13 @@ test('SVG icons inherit currentColor from parent in both themes', async ({ page 
 
   // Check that SVGs use currentColor
   const svgContent = await page.evaluate(() => {
-    const imgs = document.querySelectorAll('img[src*="img/SVG/"]');
+    const imgs = document.querySelectorAll('img[src*="img/SVG/"], svg.action-icon, svg.setting-icon, svg.close-icon, svg.option-icon');
     const results = [];
     imgs.forEach(img => {
       const parent = img.parentElement;
       const parentColor = parent ? window.getComputedStyle(parent).color : null;
       results.push({
-        src: img.src.split('/').pop(),
+        src: img.getAttribute('src') ? img.getAttribute('src').split('/').pop() : img.className,
         parentColor: parentColor,
       });
     });
