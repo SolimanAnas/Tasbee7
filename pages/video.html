@@ -158,13 +158,6 @@ input[type=range]::-webkit-slider-thumb { height:16px; width:16px; border-radius
 .sheet-header h2 { font-size:1.4rem; color:var(--text-primary); margin:0; font-weight:800; }
 .sheet-content { padding:15px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; flex:1; }
 
-.search-container { margin-bottom:5px; flex-shrink:0; }
-.search-input {
-  width:100%; padding:14px; border-radius:14px; border:1px solid var(--glass-border); background:var(--list-hover);
-  color:var(--text-primary); font-family:inherit; font-size:15px; outline:none; transition:.2s;
-}
-.search-input:focus { border-color:var(--accent-main); }
-
 .playlist-item {
   display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px;
   background:var(--list-hover); border:1px solid var(--glass-border); cursor:pointer; transition:.2s;
@@ -215,7 +208,7 @@ input[type=range]::-webkit-slider-thumb { height:16px; width:16px; border-radius
   </div>
 
   <div class="video-container" id="videoContainer">
-    <video id="player" playsinline></video>
+    <div id="player"></div>
   </div>
 
   <div class="card now" id="playerCard" style="display:none;">
@@ -293,14 +286,12 @@ input[type=range]::-webkit-slider-thumb { height:16px; width:16px; border-radius
 </div>
 
 <script>
-/* ---------- Theme ---------- */
 const THEMES = ['light', 'dark', 'sepia'];
 let tIdx = parseInt(localStorage.getItem('appThemeIdx')) || 0;
 function applyTheme() { document.documentElement.setAttribute('data-theme', THEMES[tIdx]); localStorage.setItem('appThemeIdx', tIdx); }
 function cycleTheme() { tIdx = (tIdx + 1) % THEMES.length; applyTheme(); }
 applyTheme();
 
-/* ---------- Utils ---------- */
 function haptic() { if(navigator.vibrate) navigator.vibrate(40); }
 function showToast(m, e) {
   const t = document.getElementById('toast');
@@ -310,7 +301,6 @@ function showToast(m, e) {
 }
 function formatTime(s) { if(isNaN(s)) return '00:00'; const m=Math.floor(s/60), sec=Math.floor(s%60); return `${m<10?'0'+m:m}:${sec<10?'0'+sec:sec}`; }
 
-/* ---------- Bottom Sheets ---------- */
 function openSheet(id) {
   document.getElementById('sheetOverlay').classList.add('active');
   document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('active'));
@@ -321,7 +311,6 @@ function closeAllSheets() {
   document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('active'));
 }
 
-/* ---------- YouTube URL Parsing ---------- */
 function extractVideoId(url) {
   const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([a-zA-Z0-9_-]{11})/);
   return m ? m[1] : null;
@@ -331,17 +320,14 @@ function extractPlaylistId(url) {
   return m ? m[1] : null;
 }
 
-/* ---------- State ---------- */
 let player = null;
 let playerReady = false;
 let playlist = [];
 let currentIdx = -1;
 let currentSpeed = 1;
 let isMuted = false;
-let lastVolume = 100;
 const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
-/* ---------- Paste ---------- */
 async function pasteFromClipboard() {
   try {
     const text = await navigator.clipboard.readText();
@@ -352,7 +338,6 @@ async function pasteFromClipboard() {
   }
 }
 
-/* ---------- URL Change ---------- */
 let fetchTimer = null;
 function onUrlChange() {
   clearTimeout(fetchTimer);
@@ -364,7 +349,6 @@ function onUrlChange() {
 function loadVideo(url) {
   const videoId = extractVideoId(url);
   const playlistId = extractPlaylistId(url);
-
   if(playlistId) {
     loadPlaylist(playlistId);
   } else if(videoId) {
@@ -376,172 +360,130 @@ function loadVideo(url) {
   }
 }
 
-/* ---------- Piped API (ad-free YouTube) ---------- */
-const PIPED_INSTANCES = [
-  'https://pipedapi.kavin.rocks',
-  'https://pipedapi.adminforge.de',
-  'https://api.piped.privacydev.net',
-];
-let pipedApi = PIPED_INSTANCES[0];
-
-async function fetchPiped(videoId) {
-  for(const base of PIPED_INSTANCES) {
-    try {
-      const res = await fetch(`${base}/streams/${videoId}`, { signal: AbortSignal.timeout(8000) });
-      if(!res.ok) continue;
-      const data = await res.json();
-      if(data.error) continue;
-      pipedApi = base;
-      return data;
-    } catch(e) { continue; }
-  }
-  return null;
-}
-
-/* ---------- Player ---------- */
-let player = null;
-let playerReady = false;
-let currentVideoData = null;
-
 function loadPlayer(videoId) {
   document.getElementById('videoContainer').classList.add('active');
   document.getElementById('playerCard').style.display = '';
   document.getElementById('nowTitle').innerText = 'جاري التحميل...';
   document.getElementById('nowChannel').innerText = '—';
+  if(!player) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+    window.onYouTubeIframeAPIReady = () => createPlayer(videoId);
+  } else {
+    player.loadVideoById(videoId);
+  }
+}
 
-  const vid = player || document.getElementById('player');
-  if(!player) player = vid;
-
-  fetchPiped(videoId).then(data => {
-    if(!data) { showToast('خطأ في تحميل الفيديو', true); return; }
-
-    currentVideoData = data;
-    const src = pickStream(data);
-    if(!src) { showToast('لا توجد جودة مناسبة', true); return; }
-
-    vid.src = src;
-    vid.playbackRate = currentSpeed;
-    vid.load();
-    vid.play().catch(() => {});
-
-    playerReady = true;
-    onPlayerReady();
+function createPlayer(videoId) {
+  player = new YT.Player('player', {
+    videoId: videoId,
+    playerVars: {
+      autoplay: 1, controls: 0, modestbranding: 1, rel: 0,
+      showinfo: 0, fs: 0, iv_load_policy: 3, playsinline: 1,
+      enablejsapi: 1, origin: window.location.origin,
+      ad_format: 0,
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError,
+    }
   });
 }
 
-function pickStream(data) {
-  const streams = (data.videoStreams || [])
-    .filter(s => s.mimeType?.startsWith('video/mp4') && s.url)
-    .sort((a, b) => (b.height || 0) - (a.height || 0));
-  if(streams.length) return streams[0].url;
-  const any = (data.videoStreams || []).filter(s => s.url).sort((a, b) => (b.height || 0) - (a.height || 0));
-  return any.length ? any[0].url : null;
-}
-
 function onPlayerReady() {
+  playerReady = true;
   updatePlayerInfo();
   updateProgress();
   setupMediaSession();
 }
 
-function onPlayerStateChange(isPlaying) {
-  updatePlayPauseUI(isPlaying);
+function onPlayerStateChange(e) {
+  const state = e.data;
+  updatePlayPauseUI(state === YT.PlayerState.PLAYING);
   updateMediaSessionState();
-  if(isPlaying) updateProgress();
+  if(state === YT.PlayerState.ENDED) { stopSilentAudio(); playNext(); }
+  if(state === YT.PlayerState.PLAYING) { startSilentAudio(); updateProgress(); }
+  if(state === YT.PlayerState.PAUSED) { stopSilentAudio(); }
 }
 
-/* ---------- Player Controls ---------- */
+function onPlayerError(e) {
+  showToast('خطأ في تشغيل الفيديو', true);
+  console.error('YT Player Error:', e.data);
+}
+
 function togglePlay() {
   if(!player || !playerReady) return;
-  if(player.paused) { player.play(); } else { player.pause(); }
+  if(player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+  else player.playVideo();
 }
 
 function playNext() {
-  if(playlist.length === 0) return;
-  const nextIdx = currentIdx + 1;
-  if(nextIdx < playlist.length) {
-    currentIdx = nextIdx;
-    loadPlayer(playlist[currentIdx].id);
-  } else {
-    currentIdx = 0;
-    loadPlayer(playlist[currentIdx].id);
-  }
+  if(!playlist.length) return;
+  currentIdx = (currentIdx + 1) % playlist.length;
+  loadPlayer(playlist[currentIdx].id);
 }
 
 function playPrev() {
-  if(playlist.length === 0) return;
-  const prevIdx = currentIdx - 1;
-  if(prevIdx >= 0) {
-    currentIdx = prevIdx;
-    loadPlayer(playlist[currentIdx].id);
-  } else {
-    currentIdx = playlist.length - 1;
-    loadPlayer(playlist[currentIdx].id);
-  }
+  if(!playlist.length) return;
+  currentIdx = (currentIdx - 1 + playlist.length) % playlist.length;
+  loadPlayer(playlist[currentIdx].id);
 }
 
 function toggleMute() {
   if(!player || !playerReady) return;
-  player.muted = !player.muted;
-  isMuted = player.muted;
+  if(isMuted) { player.unMute(); isMuted = false; }
+  else { player.mute(); isMuted = true; }
   document.getElementById('volumeIcon').style.display = isMuted ? 'none' : '';
   document.getElementById('muteIcon').style.display = isMuted ? '' : 'none';
 }
 
 function togglePiP() {
-  if(!player) return;
-  if(document.pictureInPictureElement) {
-    document.exitPictureInPicture();
-  } else if(player.requestPictureInPicture) {
-    player.requestPictureInPicture();
-  }
+  const iframe = document.querySelector('#player iframe');
+  if(!iframe) return;
+  if(document.pictureInPictureElement) document.exitPictureInPicture();
+  else if(iframe.requestPictureInPicture) iframe.requestPictureInPicture();
 }
 
 function toggleFullscreen() {
-  const container = document.getElementById('videoContainer');
-  if(document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
-    container.requestFullscreen();
-  }
+  const c = document.getElementById('videoContainer');
+  if(document.fullscreenElement) document.exitFullscreen();
+  else c.requestFullscreen();
 }
 
-/* ---------- Speed ---------- */
 function openSpeedSheet() {
-  const container = document.getElementById('speedOptions');
-  container.innerHTML = speeds.map(s =>
-    `<div class="speed-option${s === currentSpeed ? ' active' : ''}" onclick="setSpeed(${s})">${s}x</div>`
+  document.getElementById('speedOptions').innerHTML = speeds.map(s =>
+    `<div class="speed-option${s===currentSpeed?' active':''}" onclick="setSpeed(${s})">${s}x</div>`
   ).join('');
   openSheet('speedSheet');
 }
 
 function setSpeed(s) {
   currentSpeed = s;
-  if(player) player.playbackRate = s;
+  if(player && playerReady) player.setPlaybackRate(s);
   document.getElementById('speedBtn').innerText = s + 'x';
   document.getElementById('speedBtn').classList.toggle('active', s !== 1);
   closeAllSheets();
   showToast('سرعة التشغيل: ' + s + 'x');
 }
 
-/* ---------- Progress ---------- */
 let progressInterval = null;
 function updateProgress() {
   if(progressInterval) clearInterval(progressInterval);
   progressInterval = setInterval(() => {
     if(!player || !playerReady) return;
-    const current = player.currentTime || 0;
-    const duration = player.duration || 0;
-    if(duration > 0 && isFinite(duration)) {
-      document.getElementById('progress').value = (current / duration) * 100;
-      document.getElementById('currentTime').innerText = formatTime(current);
-      document.getElementById('durationTime').innerText = formatTime(duration);
+    const cur = player.getCurrentTime() || 0;
+    const dur = player.getDuration() || 0;
+    if(dur > 0) {
+      const pct = (cur / dur) * 100;
+      document.getElementById('progress').value = pct;
+      document.getElementById('currentTime').innerText = formatTime(cur);
+      document.getElementById('durationTime').innerText = formatTime(dur);
       document.getElementById('progress').style.background =
-        `linear-gradient(to right, var(--accent-main) 0%, var(--accent-main) ${(current/duration)*100}%, rgba(255,255,255,0.4) ${(current/duration)*100}%, rgba(255,255,255,0.4) 100%)`;
+        `linear-gradient(to right, var(--accent-main) 0%, var(--accent-main) ${pct}%, rgba(255,255,255,0.4) ${pct}%, rgba(255,255,255,0.4) 100%)`;
       if('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
-        try {
-          navigator.mediaSession.setPositionState({ duration, playbackRate: currentSpeed, position: current });
-        } catch(e) {}
+        try { navigator.mediaSession.setPositionState({ duration: dur, playbackRate: currentSpeed, position: cur }); } catch(e) {}
       }
     }
   }, 500);
@@ -549,85 +491,62 @@ function updateProgress() {
 
 document.getElementById('progress').addEventListener('input', (e) => {
   if(!player || !playerReady) return;
-  const duration = player.duration || 0;
-  player.currentTime = (e.target.value / 100) * duration;
+  player.seekTo((e.target.value / 100) * player.getDuration(), true);
 });
 
-/* ---------- Play/Pause UI ---------- */
 function updatePlayPauseUI(isPlaying) {
   document.getElementById('playIcon').style.display = isPlaying ? 'none' : '';
   document.getElementById('pauseIcon').style.display = isPlaying ? '' : 'none';
 }
 
-/* ---------- Player Info ---------- */
 function updatePlayerInfo() {
-  if(!currentVideoData) return;
-  const title = currentVideoData.title || '—';
-  const uploader = currentVideoData.uploader || '—';
-  document.getElementById('nowTitle').innerText = title;
-  document.getElementById('nowChannel').innerText = uploader;
+  if(!player || !playerReady) return;
+  const data = player.getVideoData();
+  if(!data) return;
+  document.getElementById('nowTitle').innerText = data.title || '—';
+  document.getElementById('nowChannel').innerText = data.author || '—';
   if(playlist[currentIdx]) {
-    playlist[currentIdx].title = title;
-    playlist[currentIdx].channel = uploader;
+    playlist[currentIdx].title = data.title || '';
+    playlist[currentIdx].channel = data.author || '';
   }
   setupMediaSession();
-  saveToHistory(playlist[currentIdx]?.id, title, uploader);
+  saveToHistory(playlist[currentIdx]?.id, data.title, data.author);
 }
 
-/* ---------- Playlist ---------- */
 async function loadPlaylist(playlistId) {
   showToast('جاري تحميل القائمة...');
   try {
-    const res = await fetch(`${pipedApi}/playlists/${playlistId}`, { signal: AbortSignal.timeout(10000) });
-    const data = await res.json();
-    const items = data.relatedStreams || [];
-    if(items.length === 0) {
-      showToast('القائمة فارغة أو غير متاحة', true);
-      return;
-    }
-    playlist = items.map(v => ({
-      id: v.url?.split('/').pop() || '',
-      title: v.title || '',
-      channel: v.uploaderName || '',
-    }));
+    const res = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`);
+    const html = await res.text();
+    const ids = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
+    if(!ids.length) { showToast('القائمة فارغة أو غير متاحة', true); return; }
+    playlist = ids.map(m => ({ id: m[1], title: '', channel: '' }));
     currentIdx = 0;
     loadPlayer(playlist[0].id);
     showToast(`تم تحميل ${playlist.length} فيديو`);
-  } catch(e) {
-    showToast('خطأ في تحميل القائمة', true);
-  }
+  } catch(e) { showToast('خطأ في تحميل القائمة', true); }
 }
 
 function openPlaylistSheet() {
-  const content = document.getElementById('playlistContent');
-  if(playlist.length === 0) {
-    content.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">القائمة فارغة</div></div>';
+  const c = document.getElementById('playlistContent');
+  if(!playlist.length) {
+    c.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-text">القائمة فارغة</div></div>';
   } else {
-    content.innerHTML = playlist.map((item, i) => `
-      <div class="playlist-item${i === currentIdx ? ' active' : ''}" onclick="haptic(); playFromPlaylist(${i})">
-        <div class="playlist-thumb">
-          <img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy">
-        </div>
+    c.innerHTML = playlist.map((item, i) => `
+      <div class="playlist-item${i===currentIdx?' active':''}" onclick="haptic(); playFromPlaylist(${i})">
+        <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy"></div>
         <div class="playlist-info">
           <div class="playlist-title">${item.title || item.id}</div>
           <div class="playlist-channel">${item.channel || ''}</div>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
   openSheet('playlistSheet');
 }
 
-function playFromPlaylist(idx) {
-  currentIdx = idx;
-  loadPlayer(playlist[idx].id);
-  closeAllSheets();
-}
+function playFromPlaylist(idx) { currentIdx = idx; loadPlayer(playlist[idx].id); closeAllSheets(); }
 
-/* ---------- History ---------- */
-function getHistory() {
-  try { return JSON.parse(localStorage.getItem('vidHistory') || '[]'); } catch(e) { return []; }
-}
+function getHistory() { try { return JSON.parse(localStorage.getItem('vidHistory') || '[]'); } catch(e) { return []; } }
 function saveToHistory(id, title, channel) {
   if(!id) return;
   const h = getHistory();
@@ -636,77 +555,53 @@ function saveToHistory(id, title, channel) {
   localStorage.setItem('vidHistory', JSON.stringify(h));
   renderHistory();
 }
-function clearHistory() {
-  localStorage.removeItem('vidHistory');
-  renderHistory();
-}
+function clearHistory() { localStorage.removeItem('vidHistory'); renderHistory(); }
 function renderHistory() {
   const h = getHistory();
-  const list = document.getElementById('historyList');
   const card = document.getElementById('historyCard');
   if(!h.length) { card.style.display = 'none'; return; }
   card.style.display = '';
-  list.innerHTML = h.map(item => `
+  document.getElementById('historyList').innerHTML = h.map(item => `
     <div class="playlist-item" onclick="haptic(); loadVideo('https://www.youtube.com/watch?v=${item.id}')">
-      <div class="playlist-thumb">
-        <img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy">
-      </div>
+      <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy"></div>
       <div class="playlist-info">
         <div class="playlist-title">${item.title || item.id}</div>
         <div class="playlist-channel">${item.channel || ''}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-/* ---------- Media Session ---------- */
 function setupMediaSession() {
   if(!('mediaSession' in navigator)) return;
   const vid = playlist[currentIdx]?.id || '';
-  const title = currentVideoData?.title || 'فيديو';
-  const uploader = currentVideoData?.uploader || 'زاد المسلم';
+  const data = player?.getVideoData?.() || {};
   const artwork = vid ? [
     { src: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' },
     { src: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' },
     { src: `https://i.ytimg.com/vi/${vid}/sddefault.jpg`, sizes: '640x480', type: 'image/jpeg' },
   ] : [];
-  navigator.mediaSession.metadata = new MediaMetadata({ title, artist: uploader, album: 'زاد المسلم', artwork });
+  navigator.mediaSession.metadata = new MediaMetadata({ title: data.title || 'فيديو', artist: data.author || 'زاد المسلم', album: 'زاد المسلم', artwork });
   navigator.mediaSession.setActionHandler('play', () => togglePlay());
   navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-  navigator.mediaSession.setActionHandler('stop', () => { if(player) player.pause(); });
+  navigator.mediaSession.setActionHandler('stop', () => { if(player) player.pauseVideo(); });
   navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
   navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
-  navigator.mediaSession.setActionHandler('seekbackward', (e) => {
-    if(player) player.currentTime = player.currentTime - (e.seekOffset || 10);
-  });
-  navigator.mediaSession.setActionHandler('seekforward', (e) => {
-    if(player) player.currentTime = player.currentTime + (e.seekOffset || 10);
-  });
-  navigator.mediaSession.setActionHandler('seekto', (e) => {
-    if(player && e.seekTime !== undefined) player.currentTime = e.seekTime;
-  });
-  if('setPositionState' in navigator.mediaSession) {
-    try {
-      const dur = player.duration || 0;
-      const pos = player.currentTime || 0;
-      if(dur > 0 && isFinite(dur)) navigator.mediaSession.setPositionState({ duration: dur, playbackRate: currentSpeed, position: pos });
-    } catch(e) {}
-  }
+  navigator.mediaSession.setActionHandler('seekbackward', (e) => { if(player) player.seekTo(player.getCurrentTime() - (e.seekOffset || 10), true); });
+  navigator.mediaSession.setActionHandler('seekforward', (e) => { if(player) player.seekTo(player.getCurrentTime() + (e.seekOffset || 10), true); });
+  navigator.mediaSession.setActionHandler('seekto', (e) => { if(player && e.seekTime !== undefined) player.seekTo(e.seekTime, true); });
 }
 
-/* ---------- Background Playback ---------- */
 let bgAudioCtx = null;
 let bgLoopSrc = null;
-
 function startSilentAudio() {
   try {
     if(!bgAudioCtx) bgAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(bgAudioCtx.state === 'suspended') bgAudioCtx.resume();
     if(bgLoopSrc) return;
-    const buffer = bgAudioCtx.createBuffer(1, bgAudioCtx.sampleRate * 2, bgAudioCtx.sampleRate);
+    const buf = bgAudioCtx.createBuffer(1, bgAudioCtx.sampleRate * 2, bgAudioCtx.sampleRate);
     function loop() {
       bgLoopSrc = bgAudioCtx.createBufferSource();
-      bgLoopSrc.buffer = buffer;
+      bgLoopSrc.buffer = buf;
       bgLoopSrc.connect(bgAudioCtx.destination);
       bgLoopSrc.onended = loop;
       bgLoopSrc.start();
@@ -714,40 +609,26 @@ function startSilentAudio() {
     loop();
   } catch(e) {}
 }
-
 function stopSilentAudio() {
   if(bgLoopSrc) { bgLoopSrc.onended = null; try { bgLoopSrc.stop(); } catch(e) {} bgLoopSrc = null; }
 }
 
 function updateMediaSessionState() {
   if(!('mediaSession' in navigator) || !player) return;
-  navigator.mediaSession.playbackState = player.paused ? 'paused' : 'playing';
+  navigator.mediaSession.playbackState = player.getPlayerState?.() === YT?.PlayerState?.PLAYING ? 'playing' : 'paused';
 }
 
 document.addEventListener('visibilitychange', () => {
   if(!player || !playerReady) return;
   if(document.visibilityState === 'hidden') {
-    if(!player.paused) { navigator.mediaSession.playbackState = 'playing'; startSilentAudio(); }
-  } else {
-    stopSilentAudio();
-  }
-});
-
-/* ---------- Init ---------- */
-const vidEl = document.getElementById('player');
-vidEl.addEventListener('play', () => { onPlayerStateChange(true); startSilentAudio(); });
-vidEl.addEventListener('pause', () => { onPlayerStateChange(false); stopSilentAudio(); });
-vidEl.addEventListener('ended', () => { onPlayerStateChange(false); stopSilentAudio(); playNext(); });
-vidEl.addEventListener('loadedmetadata', () => {
-  if('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
-    try { navigator.mediaSession.setPositionState({ duration: vidEl.duration || 0, playbackRate: currentSpeed, position: 0 }); } catch(e) {}
-  }
+    if(player.getPlayerState?.() === YT?.PlayerState?.PLAYING) {
+      navigator.mediaSession.playbackState = 'playing';
+      startSilentAudio();
+    }
+  } else { stopSilentAudio(); }
 });
 
 renderHistory();
-window.addEventListener('load', () => {
-  applyTheme();
-});
 </script>
 <script src="../js/svg-injector.js"></script>
 </body>
