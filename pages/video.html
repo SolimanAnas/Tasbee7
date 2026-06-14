@@ -428,6 +428,7 @@ function onPlayerStateChange(e) {
     playNext();
   }
   if(e.data === YT.PlayerState.PLAYING) {
+    startSilentAudio();
     updateProgress();
   }
 }
@@ -537,6 +538,11 @@ function updateProgress() {
       document.getElementById('durationTime').innerText = formatTime(duration);
       document.getElementById('progress').style.background =
         `linear-gradient(to right, var(--accent-main) 0%, var(--accent-main) ${(current/duration)*100}%, rgba(255,255,255,0.4) ${(current/duration)*100}%, rgba(255,255,255,0.4) 100%)`;
+      if('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+        try {
+          navigator.mediaSession.setPositionState({ duration, playbackRate: currentSpeed, position: current });
+        } catch(e) {}
+      }
     }
   }, 500);
 }
@@ -686,9 +692,35 @@ function setupMediaSession() {
   navigator.mediaSession.setActionHandler('seekforward', (e) => {
     if(player) player.seekTo(player.getCurrentTime() + (e.seekOffset || 10), true);
   });
+  navigator.mediaSession.setActionHandler('seekto', (e) => {
+    if(player && e.seekTime !== undefined) player.seekTo(e.seekTime, true);
+  });
 }
 
 /* ---------- Background Playback ---------- */
+let bgAudioCtx = null;
+let bgLoopSrc = null;
+
+function startSilentAudio() {
+  try {
+    if(!bgAudioCtx) {
+      bgAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(bgAudioCtx.state === 'suspended') bgAudioCtx.resume();
+    if(bgLoopSrc) return;
+    // 2-second empty buffer looped silently — keeps browser from throttling the page
+    const buffer = bgAudioCtx.createBuffer(1, bgAudioCtx.sampleRate * 2, bgAudioCtx.sampleRate);
+    function loop() {
+      bgLoopSrc = bgAudioCtx.createBufferSource();
+      bgLoopSrc.buffer = buffer;
+      bgLoopSrc.connect(bgAudioCtx.destination);
+      bgLoopSrc.onended = loop;
+      bgLoopSrc.start();
+    }
+    loop();
+  } catch(e) {}
+}
+
 function updateMediaSessionState() {
   if(!('mediaSession' in navigator) || !player) return;
   const state = player.getPlayerState?.();
@@ -698,12 +730,14 @@ function updateMediaSessionState() {
     navigator.mediaSession.playbackState = 'paused';
   }
 }
+
 document.addEventListener('visibilitychange', () => {
   if(!player || !playerReady) return;
+  const state = player.getPlayerState?.();
   if(document.visibilityState === 'hidden') {
-    const state = player.getPlayerState?.();
     if(state === YT?.PlayerState?.PLAYING) {
       navigator.mediaSession.playbackState = 'playing';
+      startSilentAudio();
     }
   }
 });
