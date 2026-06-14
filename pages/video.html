@@ -423,6 +423,7 @@ function onPlayerReady(e) {
 
 function onPlayerStateChange(e) {
   updatePlayPauseUI(e.data === YT.PlayerState.PLAYING);
+  updateMediaSessionState();
   if(e.data === YT.PlayerState.ENDED) {
     playNext();
   }
@@ -661,15 +662,22 @@ function renderHistory() {
 /* ---------- Media Session ---------- */
 function setupMediaSession() {
   if(!('mediaSession' in navigator)) return;
+  const vid = playlist[currentIdx]?.id || '';
   const data = player?.getVideoData?.() || {};
+  const artwork = vid ? [
+    { src: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' },
+    { src: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' },
+    { src: `https://i.ytimg.com/vi/${vid}/sddefault.jpg`, sizes: '640x480', type: 'image/jpeg' },
+  ] : [];
   navigator.mediaSession.metadata = new MediaMetadata({
     title: data.title || 'فيديو',
     artist: data.author || 'زاد المسلم',
     album: 'مشغل الفيديو',
-    artwork: [{ src: `https://i.ytimg.com/vi/${playlist[currentIdx]?.id || ''}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }]
+    artwork
   });
   navigator.mediaSession.setActionHandler('play', () => togglePlay());
   navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+  navigator.mediaSession.setActionHandler('stop', () => { if(player) player.pauseVideo(); });
   navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
   navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
   navigator.mediaSession.setActionHandler('seekbackward', (e) => {
@@ -679,6 +687,26 @@ function setupMediaSession() {
     if(player) player.seekTo(player.getCurrentTime() + (e.seekOffset || 10), true);
   });
 }
+
+/* ---------- Background Playback ---------- */
+function updateMediaSessionState() {
+  if(!('mediaSession' in navigator) || !player) return;
+  const state = player.getPlayerState?.();
+  if(state === YT?.PlayerState?.PLAYING) {
+    navigator.mediaSession.playbackState = 'playing';
+  } else {
+    navigator.mediaSession.playbackState = 'paused';
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if(!player || !playerReady) return;
+  if(document.visibilityState === 'hidden') {
+    const state = player.getPlayerState?.();
+    if(state === YT?.PlayerState?.PLAYING) {
+      navigator.mediaSession.playbackState = 'playing';
+    }
+  }
+});
 
 /* ---------- Init ---------- */
 renderHistory();
