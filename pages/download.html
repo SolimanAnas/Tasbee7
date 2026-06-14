@@ -212,6 +212,14 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 .empty-icon { font-size:48px; margin-bottom:8px; opacity:.5; }
 .empty-text { font-size:14px; }
 
+/* Copy button */
+.copy-btn {
+  width:100%; padding:12px; border-radius:14px; border:1px solid var(--glass-border);
+  background:var(--list-hover); color:var(--accent-main); font-family:inherit;
+  font-size:14px; font-weight:700; cursor:pointer; transition:.2s;
+}
+.copy-btn:active { transform:scale(.96); background:var(--accent-muted); }
+
 /* Toast */
 .toast {
   position:fixed; top:20px; left:50%; transform:translate(-50%,-120px);
@@ -280,9 +288,14 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <!-- Status -->
   <div class="status-msg" id="statusMsg"></div>
 
+  <!-- Copy URL -->
+  <div id="copyRow" style="display:none;">
+    <button class="copy-btn" onclick="copyUrl()">📋 نسخ الرابط</button>
+  </div>
+
   <!-- Download Button -->
   <button class="download-btn" id="downloadBtn" style="display:none;" onclick="startDownload()">
-    <span class="dl-text">⬇️ تحميل</span>
+    <span class="dl-text">⬇️ فتح صفحة التحميل</span>
     <span class="spinner"></span>
   </button>
 
@@ -381,13 +394,28 @@ function showPreview(v){
   document.getElementById('previewTitle').textContent=v.title;
   document.getElementById('previewChannel').textContent=v.channel;
   document.getElementById('previewDuration').textContent='';
+  document.getElementById('copyRow').style.display='';
 }
 function hidePreview(){
   document.getElementById('previewCard').classList.remove('visible');
   document.getElementById('formatCard').style.display='none';
   document.getElementById('qualityCard').style.display='none';
   document.getElementById('downloadBtn').style.display='none';
+  document.getElementById('copyRow').style.display='none';
   videoData=null;
+}
+
+/* ---------- Copy URL ---------- */
+function copyUrl(){
+  if(!videoData)return;
+  navigator.clipboard.writeText(videoData.url).then(()=>{
+    showToast('تم نسخ الرابط ✓');
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='✅ تم النسخ';
+    setTimeout(()=>{btn.textContent='📋 نسخ الرابط';},1500);
+  }).catch(()=>{
+    showToast('لم يتم النسخ',true);
+  });
 }
 
 /* ---------- Format ---------- */
@@ -424,57 +452,30 @@ function showStatus(msg,type){
 /* ---------- Download ---------- */
 function startDownload(){
   if(!videoData)return;
-  const url=videoData.url;
+  const vid=videoData.id;
   const btn=document.getElementById('downloadBtn');
+  const fmt=selectedFormat;
+
+  // Build download service URL based on format
+  // cobalt.tools is the most reliable free service — opens in new tab
+  const cobaltUrl='https://cobalt.tools/';
+
   btn.classList.add('loading');
   btn.disabled=true;
-  showStatus('جاري الت preparing...','');
+  showStatus('جاري الفتح...','success');
 
-  // Use cobalt API (free, no key needed)
-  const apiUrl='https://api.cobalt.tools';
-  const payload={
-    url:url,
-    downloadMode: selectedFormat==='mp3'?'audio':'auto',
-    audioFormat: selectedFormat==='mp3'?'mp3':undefined,
-    videoQuality: selectedFormat==='mp4'?selectedQuality+'p':undefined,
-  };
+  // Save to history
+  saveToHistory(videoData,fmt,selectedQuality);
 
-  fetch(apiUrl+'/',{
-    method:'POST',
-    headers:{'Accept':'application/json','Content-Type':'application/json'},
-    body:JSON.stringify(payload)
-  })
-  .then(r=>r.json())
-  .then(d=>{
+  // Open cobalt.tools — user pastes the URL there
+  // (cobalt.tools blocks direct API calls from browsers due to bot protection)
+  setTimeout(()=>{
+    window.open(cobaltUrl,'_blank');
     btn.classList.remove('loading');
     btn.disabled=false;
-    if(d.url){
-      showStatus('جاري التحميل...','success');
-      // Trigger download
-      const a=document.createElement('a');
-      a.href=d.url;
-      a.download='';
-      a.target='_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      // Save to history
-      saveToHistory(videoData,selectedFormat,selectedQuality);
-      showToast('تم بدء التحميل ✓');
-    } else if(d.error){
-      showStatus(d.error.message||'تعذّر التحميل',true);
-    } else {
-      showStatus('تعذّر التحميل — جرّب صيغة أخرى',true);
-    }
-  })
-  .catch(()=>{
-    btn.classList.remove('loading');
-    btn.disabled=false;
-    // Fallback: open in new tab
-    showStatus('جاري الفتح في تبويب جديد...','');
-    window.open('https://www.y2mate.com/youtube/'+extractVideoId(url),'_blank');
-    saveToHistory(videoData,selectedFormat,selectedQuality);
-  });
+    showToast('الصق الرابط في cobalt.tools وحمّل ✓');
+    showStatus('الصق الرابط في cobalt.tools والصق الصيغة المطلوبة','success');
+  },500);
 }
 
 /* ---------- History ---------- */
