@@ -41,6 +41,7 @@ const STATIC_ASSETS = [
   "./pages/hadith-viewer.html",
   "./pages/salah.html",
   "./pages/sleeping.html",
+  "./pages/download.html",
 
   // ===== Config =====
   "./manifest.json",
