@@ -453,6 +453,12 @@ export default {
   'today': 'ئەمڕۆ',
   'tomorrow': 'بەیانی',
   'yesterday': 'دوێن',
+  'day_after_tomorrow': 'دوو ڕۆژ دوای',
+  'day_before_yesterday': 'دوو ڕۆژ پێش',
+  'days_after': 'دوای {count} ڕۆژ',
+  'days_before': '{count} ڕۆژ پێش',
+  'locale_hijri': 'ckb-SA-u-ca-islamic',
+  'locale_gregorian': 'ckb',
 
   // Audio & Radio page strings
   'audio_toast_success': 'بە سەرکەوتوویی کرا',

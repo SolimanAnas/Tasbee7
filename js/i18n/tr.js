@@ -424,6 +424,12 @@ export default {
   'today': 'Bugün',
   'tomorrow': 'Yarın',
   'yesterday': 'Dün',
+  'day_after_tomorrow': 'Yarından sonra',
+  'day_before_yesterday': 'Önceki gün',
+  'days_after': '{count} gün sonra',
+  'days_before': '{count} gün önce',
+  'locale_hijri': 'tr-SA-u-ca-islamic',
+  'locale_gregorian': 'tr',
 
   // Audio & Radio page strings
   'audio_toast_success': 'Başarıyla tamamlandı',

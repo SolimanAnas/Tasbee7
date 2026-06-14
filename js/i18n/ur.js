@@ -424,6 +424,12 @@ export default {
   'today': 'آج',
   'tomorrow': 'کل',
   'yesterday': 'کل',
+  'day_after_tomorrow': 'پرسوں',
+  'day_before_yesterday': 'اتوار',
+  'days_after': '{count} دنوں بعد',
+  'days_before': '{count} دنوں پہلے',
+  'locale_hijri': 'ur-SA-u-ca-islamic',
+  'locale_gregorian': 'ur',
 
   // Audio & Radio page strings
   'audio_toast_success': 'کامیابی سے ہو گیا',

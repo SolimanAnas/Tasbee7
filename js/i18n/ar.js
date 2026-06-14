@@ -453,6 +453,12 @@ export default {
   'today': 'اليوم',
   'tomorrow': 'غداً',
   'yesterday': 'أمس',
+  'day_after_tomorrow': 'بعد يومين',
+  'day_before_yesterday': 'قبل يومين',
+  'days_after': 'بعد {count} أيام',
+  'days_before': 'قبل {count} أيام',
+  'locale_hijri': 'ar-SA-u-ca-islamic',
+  'locale_gregorian': 'ar',
 
   // Audio & Radio page strings
   'audio_toast_success': 'تم الإجراء بنجاح',
