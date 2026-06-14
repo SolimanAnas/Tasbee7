@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v54"; // v54: Tasmee' Pro word text → UthmanicHafs (KFGQPC) font, matches data encoding
+const CACHE_NAME = "zad-muslim-v55"; // v55: notification SW active-state fix, stripHtml in alert
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -533,4 +533,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v52 loaded");
+console.log("✅ Service Worker v55 loaded");
