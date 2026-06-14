@@ -215,7 +215,7 @@ input[type=range]::-webkit-slider-thumb { height:16px; width:16px; border-radius
   </div>
 
   <div class="video-container" id="videoContainer">
-    <div id="player"></div>
+    <video id="player" playsinline></video>
   </div>
 
   <div class="card now" id="playerCard" style="display:none;">
@@ -376,75 +376,84 @@ function loadVideo(url) {
   }
 }
 
-/* ---------- YouTube IFrame API ---------- */
+/* ---------- Piped API (ad-free YouTube) ---------- */
+const PIPED_INSTANCES = [
+  'https://pipedapi.kavin.rocks',
+  'https://pipedapi.adminforge.de',
+  'https://api.piped.privacydev.net',
+];
+let pipedApi = PIPED_INSTANCES[0];
+
+async function fetchPiped(videoId) {
+  for(const base of PIPED_INSTANCES) {
+    try {
+      const res = await fetch(`${base}/streams/${videoId}`, { signal: AbortSignal.timeout(8000) });
+      if(!res.ok) continue;
+      const data = await res.json();
+      if(data.error) continue;
+      pipedApi = base;
+      return data;
+    } catch(e) { continue; }
+  }
+  return null;
+}
+
+/* ---------- Player ---------- */
+let player = null;
+let playerReady = false;
+let currentVideoData = null;
+
 function loadPlayer(videoId) {
   document.getElementById('videoContainer').classList.add('active');
   document.getElementById('playerCard').style.display = '';
+  document.getElementById('nowTitle').innerText = 'جاري التحميل...';
+  document.getElementById('nowChannel').innerText = '—';
 
-  if(!player) {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-    window.onYouTubeIframeAPIReady = () => createPlayer(videoId);
-  } else {
-    player.loadVideoById(videoId);
-  }
-}
+  const vid = player || document.getElementById('player');
+  if(!player) player = vid;
 
-function createPlayer(videoId) {
-  player = new YT.Player('player', {
-    videoId: videoId,
-    playerVars: {
-      autoplay: 1,
-      controls: 0,
-      modestbranding: 1,
-      rel: 0,
-      showinfo: 0,
-      fs: 0,
-      iv_load_policy: 3,
-      playsinline: 1,
-      enablejsapi: 1,
-      origin: window.location.origin,
-    },
-    events: {
-      onReady: onPlayerReady,
-      onStateChange: onPlayerStateChange,
-      onError: onPlayerError,
-    }
+  fetchPiped(videoId).then(data => {
+    if(!data) { showToast('خطأ في تحميل الفيديو', true); return; }
+
+    currentVideoData = data;
+    const src = pickStream(data);
+    if(!src) { showToast('لا توجد جودة مناسبة', true); return; }
+
+    vid.src = src;
+    vid.playbackRate = currentSpeed;
+    vid.load();
+    vid.play().catch(() => {});
+
+    playerReady = true;
+    onPlayerReady();
   });
 }
 
-function onPlayerReady(e) {
-  playerReady = true;
+function pickStream(data) {
+  const streams = (data.videoStreams || [])
+    .filter(s => s.mimeType?.startsWith('video/mp4') && s.url)
+    .sort((a, b) => (b.height || 0) - (a.height || 0));
+  if(streams.length) return streams[0].url;
+  const any = (data.videoStreams || []).filter(s => s.url).sort((a, b) => (b.height || 0) - (a.height || 0));
+  return any.length ? any[0].url : null;
+}
+
+function onPlayerReady() {
   updatePlayerInfo();
   updateProgress();
   setupMediaSession();
 }
 
-function onPlayerStateChange(e) {
-  updatePlayPauseUI(e.data === YT.PlayerState.PLAYING);
+function onPlayerStateChange(isPlaying) {
+  updatePlayPauseUI(isPlaying);
   updateMediaSessionState();
-  if(e.data === YT.PlayerState.ENDED) {
-    playNext();
-  }
-  if(e.data === YT.PlayerState.PLAYING) {
-    updateProgress();
-  }
-}
-
-function onPlayerError(e) {
-  showToast('خطأ في تشغيل الفيديو', true);
-  console.error('YT Player Error:', e.data);
+  if(isPlaying) updateProgress();
 }
 
 /* ---------- Player Controls ---------- */
 function togglePlay() {
   if(!player || !playerReady) return;
-  if(player.getPlayerState() === YT.PlayerState.PLAYING) {
-    player.pauseVideo();
-  } else {
-    player.playVideo();
-  }
+  if(player.paused) { player.play(); } else { player.pause(); }
 }
 
 function playNext() {
@@ -473,26 +482,18 @@ function playPrev() {
 
 function toggleMute() {
   if(!player || !playerReady) return;
-  if(isMuted) {
-    player.unMute();
-    isMuted = false;
-    document.getElementById('volumeIcon').style.display = '';
-    document.getElementById('muteIcon').style.display = 'none';
-  } else {
-    player.mute();
-    isMuted = true;
-    document.getElementById('volumeIcon').style.display = 'none';
-    document.getElementById('muteIcon').style.display = '';
-  }
+  player.muted = !player.muted;
+  isMuted = player.muted;
+  document.getElementById('volumeIcon').style.display = isMuted ? 'none' : '';
+  document.getElementById('muteIcon').style.display = isMuted ? '' : 'none';
 }
 
 function togglePiP() {
-  const iframe = document.querySelector('#player iframe');
-  if(!iframe) return;
+  if(!player) return;
   if(document.pictureInPictureElement) {
     document.exitPictureInPicture();
-  } else if(iframe.requestPictureInPicture) {
-    iframe.requestPictureInPicture();
+  } else if(player.requestPictureInPicture) {
+    player.requestPictureInPicture();
   }
 }
 
@@ -516,7 +517,7 @@ function openSpeedSheet() {
 
 function setSpeed(s) {
   currentSpeed = s;
-  if(player && playerReady) player.setPlaybackRate(s);
+  if(player) player.playbackRate = s;
   document.getElementById('speedBtn').innerText = s + 'x';
   document.getElementById('speedBtn').classList.toggle('active', s !== 1);
   closeAllSheets();
@@ -529,9 +530,9 @@ function updateProgress() {
   if(progressInterval) clearInterval(progressInterval);
   progressInterval = setInterval(() => {
     if(!player || !playerReady) return;
-    const current = player.getCurrentTime() || 0;
-    const duration = player.getDuration() || 0;
-    if(duration > 0) {
+    const current = player.currentTime || 0;
+    const duration = player.duration || 0;
+    if(duration > 0 && isFinite(duration)) {
       document.getElementById('progress').value = (current / duration) * 100;
       document.getElementById('currentTime').innerText = formatTime(current);
       document.getElementById('durationTime').innerText = formatTime(duration);
@@ -543,8 +544,8 @@ function updateProgress() {
 
 document.getElementById('progress').addEventListener('input', (e) => {
   if(!player || !playerReady) return;
-  const duration = player.getDuration() || 0;
-  player.seekTo((e.target.value / 100) * duration, true);
+  const duration = player.duration || 0;
+  player.currentTime = (e.target.value / 100) * duration;
 });
 
 /* ---------- Play/Pause UI ---------- */
@@ -555,41 +556,35 @@ function updatePlayPauseUI(isPlaying) {
 
 /* ---------- Player Info ---------- */
 function updatePlayerInfo() {
-  if(!player || !playerReady) return;
-  const data = player.getVideoData();
-  if(data) {
-    document.getElementById('nowTitle').innerText = data.title || '—';
-    document.getElementById('nowChannel').innerText = data.author || '—';
-    if(playlist[currentIdx]) {
-      playlist[currentIdx].title = data.title || '';
-      playlist[currentIdx].channel = data.author || '';
-    }
-    setupMediaSession();
-    saveToHistory(playlist[currentIdx]?.id, data.title, data.author);
+  if(!currentVideoData) return;
+  const title = currentVideoData.title || '—';
+  const uploader = currentVideoData.uploader || '—';
+  document.getElementById('nowTitle').innerText = title;
+  document.getElementById('nowChannel').innerText = uploader;
+  if(playlist[currentIdx]) {
+    playlist[currentIdx].title = title;
+    playlist[currentIdx].channel = uploader;
   }
+  setupMediaSession();
+  saveToHistory(playlist[currentIdx]?.id, title, uploader);
 }
 
 /* ---------- Playlist ---------- */
 async function loadPlaylist(playlistId) {
   showToast('جاري تحميل القائمة...');
   try {
-    const res = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`);
-    const html = await res.text();
-    const matches = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
-    const titles = [...html.matchAll(/"title":\{"runs":\[\{"text":"([^"]+)"\}/g)];
-    const channels = [...html.matchAll(/"longBylineText":\{"runs":\[\{"text":"([^"]+)"\}/g)];
-
-    if(matches.length === 0) {
+    const res = await fetch(`${pipedApi}/playlists/${playlistId}`, { signal: AbortSignal.timeout(10000) });
+    const data = await res.json();
+    const items = data.relatedStreams || [];
+    if(items.length === 0) {
       showToast('القائمة فارغة أو غير متاحة', true);
       return;
     }
-
-    playlist = matches.map((m, i) => ({
-      id: m[1],
-      title: titles[i] ? titles[i][1] : '',
-      channel: channels[i] ? channels[i][1] : '',
+    playlist = items.map(v => ({
+      id: v.url?.split('/').pop() || '',
+      title: v.title || '',
+      channel: v.uploaderName || '',
     }));
-
     currentIdx = 0;
     loadPlayer(playlist[0].id);
     showToast(`تم تحميل ${playlist.length} فيديو`);
@@ -663,52 +658,87 @@ function renderHistory() {
 function setupMediaSession() {
   if(!('mediaSession' in navigator)) return;
   const vid = playlist[currentIdx]?.id || '';
-  const data = player?.getVideoData?.() || {};
+  const title = currentVideoData?.title || 'فيديو';
+  const uploader = currentVideoData?.uploader || 'زاد المسلم';
   const artwork = vid ? [
     { src: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' },
     { src: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' },
     { src: `https://i.ytimg.com/vi/${vid}/sddefault.jpg`, sizes: '640x480', type: 'image/jpeg' },
   ] : [];
-  navigator.mediaSession.metadata = new MediaMetadata({
-    title: data.title || 'فيديو',
-    artist: data.author || 'زاد المسلم',
-    album: 'مشغل الفيديو',
-    artwork
-  });
+  navigator.mediaSession.metadata = new MediaMetadata({ title, artist: uploader, album: 'زاد المسلم', artwork });
   navigator.mediaSession.setActionHandler('play', () => togglePlay());
   navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-  navigator.mediaSession.setActionHandler('stop', () => { if(player) player.pauseVideo(); });
+  navigator.mediaSession.setActionHandler('stop', () => { if(player) player.pause(); });
   navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
   navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
   navigator.mediaSession.setActionHandler('seekbackward', (e) => {
-    if(player) player.seekTo(player.getCurrentTime() - (e.seekOffset || 10), true);
+    if(player) player.currentTime = player.currentTime - (e.seekOffset || 10);
   });
   navigator.mediaSession.setActionHandler('seekforward', (e) => {
-    if(player) player.seekTo(player.getCurrentTime() + (e.seekOffset || 10), true);
+    if(player) player.currentTime = player.currentTime + (e.seekOffset || 10);
   });
+  navigator.mediaSession.setActionHandler('seekto', (e) => {
+    if(player && e.seekTime !== undefined) player.currentTime = e.seekTime;
+  });
+  if('setPositionState' in navigator.mediaSession) {
+    try {
+      const dur = player.duration || 0;
+      const pos = player.currentTime || 0;
+      if(dur > 0 && isFinite(dur)) navigator.mediaSession.setPositionState({ duration: dur, playbackRate: currentSpeed, position: pos });
+    } catch(e) {}
+  }
 }
 
 /* ---------- Background Playback ---------- */
+let bgAudioCtx = null;
+let bgLoopSrc = null;
+
+function startSilentAudio() {
+  try {
+    if(!bgAudioCtx) bgAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(bgAudioCtx.state === 'suspended') bgAudioCtx.resume();
+    if(bgLoopSrc) return;
+    const buffer = bgAudioCtx.createBuffer(1, bgAudioCtx.sampleRate * 2, bgAudioCtx.sampleRate);
+    function loop() {
+      bgLoopSrc = bgAudioCtx.createBufferSource();
+      bgLoopSrc.buffer = buffer;
+      bgLoopSrc.connect(bgAudioCtx.destination);
+      bgLoopSrc.onended = loop;
+      bgLoopSrc.start();
+    }
+    loop();
+  } catch(e) {}
+}
+
+function stopSilentAudio() {
+  if(bgLoopSrc) { bgLoopSrc.onended = null; try { bgLoopSrc.stop(); } catch(e) {} bgLoopSrc = null; }
+}
+
 function updateMediaSessionState() {
   if(!('mediaSession' in navigator) || !player) return;
-  const state = player.getPlayerState?.();
-  if(state === YT?.PlayerState?.PLAYING) {
-    navigator.mediaSession.playbackState = 'playing';
-  } else {
-    navigator.mediaSession.playbackState = 'paused';
-  }
+  navigator.mediaSession.playbackState = player.paused ? 'paused' : 'playing';
 }
+
 document.addEventListener('visibilitychange', () => {
   if(!player || !playerReady) return;
   if(document.visibilityState === 'hidden') {
-    const state = player.getPlayerState?.();
-    if(state === YT?.PlayerState?.PLAYING) {
-      navigator.mediaSession.playbackState = 'playing';
-    }
+    if(!player.paused) { navigator.mediaSession.playbackState = 'playing'; startSilentAudio(); }
+  } else {
+    stopSilentAudio();
   }
 });
 
 /* ---------- Init ---------- */
+const vidEl = document.getElementById('player');
+vidEl.addEventListener('play', () => { onPlayerStateChange(true); startSilentAudio(); });
+vidEl.addEventListener('pause', () => { onPlayerStateChange(false); stopSilentAudio(); });
+vidEl.addEventListener('ended', () => { onPlayerStateChange(false); stopSilentAudio(); playNext(); });
+vidEl.addEventListener('loadedmetadata', () => {
+  if('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+    try { navigator.mediaSession.setPositionState({ duration: vidEl.duration || 0, playbackRate: currentSpeed, position: 0 }); } catch(e) {}
+  }
+});
+
 renderHistory();
 window.addEventListener('load', () => {
   applyTheme();
