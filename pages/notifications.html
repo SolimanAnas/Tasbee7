@@ -493,33 +493,21 @@
       if(Notification.permission === 'default') {
         const result = await Notification.requestPermission();
         if(result !== 'granted') { alert(t('notif_permission_denied')); return; }
-        // Permission just granted — enable background push now instead of
-        // waiting for the next app open.
         NotificationSystem.subscribeToPush().catch(() => {});
         updateUI();
       }
-      try {
-        const result = await NotificationSystem.showNotification(t('notif_test_title'), {
-          body: t('notif_test_body'),
-          tag: 'test',
-          forceQuiet: true,
-          forceEnable: true,
-          data: { url: './index.html', type: 'test' }
-        });
-        if(result) { alert(t('notif_test_success')); }
-        else {
-          var errMsg = NotificationSystem._lastError || 'غير معروف';
-          alert(t('notif_test_failed') + errMsg);
-        }
-      } catch(e) {
-        alert(t('notif_system_failed') + e.message);
-        alert(t('notif_try_direct'));
-        try {
-          const n = new Notification(t('notif_direct_title'), { body: t('notif_direct_body') });
-          setTimeout(() => n.close(), 5000);
-        } catch(e2) {
-          alert(t('notif_direct_failed') + e2.message);
-        }
+      const stripHtml = (s) => s.replace(/<[^>]*>/g, '').trim();
+      const result = await NotificationSystem.showNotification(stripHtml(t('notif_test_title')), {
+        body: stripHtml(t('notif_test_body')),
+        tag: 'test',
+        forceQuiet: true,
+        forceEnable: true,
+        data: { url: './index.html', type: 'test' }
+      });
+      if(result) { alert(stripHtml(t('notif_test_success'))); }
+      else {
+        var errMsg = NotificationSystem._lastError || 'غير معروف';
+        alert(t('notif_test_failed') + errMsg);
       }
     }
   </script>

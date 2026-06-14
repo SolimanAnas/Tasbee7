@@ -479,34 +479,54 @@ const NotificationSystem = {
       if (Notification.permission !== 'granted') { dlog('🔕 Notification permission not granted'); this._lastError = 'permission_denied'; return false; }
     }
 
+    // Only use fields supported by both SW showNotification and Notification constructor
     const notifOptions = {
-      icon: './icons/icon-192.png',
-      badge: './icons/icon-192.png',
-      vibrate: [200, 100, 200],
-      tag: 'zad-muslim',
-      renotify: true,
-      data: { url: './index.html' },
-      ...options
+      body: options.body || '',
+      icon: options.icon || './icons/icon-192.png',
+      tag: options.tag || 'zad-muslim',
+      data: options.data || { url: './index.html' },
+      vibrate: options.vibrate || [200, 100, 200],
     };
 
+    let swError = null;
+
     try {
-      if (!this.swRegistration) {
-        this.swRegistration = await navigator.serviceWorker.ready;
+      const reg = this.swRegistration || await navigator.serviceWorker.ready;
+      if (!reg) throw new Error('لا يوجد Service Worker مسجل');
+      this.swRegistration = reg;
+
+      // Wait for an active, activated worker. `navigator.serviceWorker.ready`
+      // guarantees this eventually, but there can be a brief race where the
+      // registration exists with no active worker yet. Retry a few times
+      // before giving up.
+      for (let attempt = 0; attempt < 30; attempt++) {
+        if (reg.active && reg.active.state === 'activated') break;
+        await new Promise(r => setTimeout(r, 100));
       }
-      if (!this.swRegistration) throw new Error('لا يوجد Service Worker مسجل');
-      await this.swRegistration.showNotification(title, notifOptions);
-      dlog('🔔 Notification sent via SW:', title);
-      return true;
+
+      if (reg.active) {
+        await reg.showNotification(title, notifOptions);
+        dlog('🔔 Notification sent via SW:', title);
+        return true;
+      }
+      throw new Error('لا يوجد Service Worker نشط');
     } catch (err) {
-      console.warn('⚠️ SW notification failed, using Notification API:', err.message);
+      swError = err.message;
+      console.warn('⚠️ SW notification failed:', err.message);
+
+      // Fallback: use the Notification constructor with only the subset of
+      // properties it actually supports.  Properties like badge, renotify,
+      // actions, and vibrate are SW-only — passing them to new Notification()
+      // throws "Illegal constructor" in some browser contexts.
       try {
-        const n = new Notification(title, notifOptions);
+        const safeOptions = { body: notifOptions.body, icon: notifOptions.icon };
+        const n = new Notification(title, safeOptions);
         dlog('🔔 Notification sent via Notification API:', title);
         setTimeout(() => n.close(), 5000);
         return true;
       } catch (e2) {
         console.error('❌ All notification methods failed:', e2);
-        this._lastError = 'SW: ' + err.message + ' | API: ' + e2.message;
+        this._lastError = swError;
         return false;
       }
     }

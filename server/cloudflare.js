@@ -244,6 +244,34 @@ export default {
       });
     }
 
+    // GET /kvcount — debug endpoint to check KV entries
+    if (url.pathname === '/kvcount' && request.method === 'GET') {
+      const keys = await listAllSubKeys(env);
+      return new Response(JSON.stringify({ count: keys.length, names: keys.map(k => k.name) }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+
+    // POST /kvclean — admin: delete ALL KV entries (for testing)
+    if (url.pathname === '/kvclean' && request.method === 'POST') {
+      if (!env.ADMIN_TOKEN) {
+        return new Response(JSON.stringify({ success: false, error: 'ADMIN_TOKEN not configured' }), {
+          status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+      const auth = request.headers.get('Authorization') || '';
+      if (auth !== `Bearer ${env.ADMIN_TOKEN}`) {
+        return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+          status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+      const keys = await listAllSubKeys(env);
+      await Promise.all(keys.map(k => env.PUSH_SUBS.delete(k.name)));
+      return new Response(JSON.stringify({ success: true, deleted: keys.length }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+
     // POST /subscribe — upsert subscription + its precomputed notification schedule
     if (url.pathname === '/subscribe' && request.method === 'POST') {
       const body = await request.json();
