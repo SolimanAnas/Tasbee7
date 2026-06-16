@@ -1079,8 +1079,9 @@ function computePrayer(lat, lng) {
     nextEnum='fajr'; nextDate=tpt.fajr; nextName=getPrayerName('fajr');
   }
   const city = localStorage.getItem('current_location_name') || t('prayer_saved_location');
+  const _hl = I18n.getLang() + '-SA-u-ca-islamic';
   let hijri;
-  try { hijri = new Intl.DateTimeFormat(t('locale_hijri'), {day:'numeric', month:'long', year:'numeric'}).format(now); }
+  try { hijri = new Intl.DateTimeFormat(_hl, {day:'numeric', month:'long', year:'numeric'}).format(now); }
   catch(e) { hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'}).format(now); }
   return { pt, nextEnum, nextDate, nextName, city, hijri };
 }
@@ -1155,12 +1156,14 @@ function ptRelLabel(d) {
   return o > 0 ? t('days_after', { count: o }) : t('days_before', { count: Math.abs(o) });
 }
 function ptFmtHijri(d) {
-  try { return new Intl.DateTimeFormat(t('locale_hijri'), {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
+  const locale = I18n.getLang() + '-SA-u-ca-islamic';
+  try { return new Intl.DateTimeFormat(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
   catch(e) { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
 }
 function ptFmtGreg(d) {
-  try { return new Intl.DateTimeFormat(t('locale_gregorian'), {day:'numeric', month:'long', year:'numeric'}).format(d); }
-  catch(e) { return new Intl.DateTimeFormat('ar', {day:'numeric', month:'long', year:'numeric'}).format(d); }
+  const locale = I18n.getLang();
+  try { return new Intl.DateTimeFormat(locale, {day:'numeric', month:'long', year:'numeric'}).format(d); }
+  catch(e) { return new Intl.DateTimeFormat('en', {day:'numeric', month:'long', year:'numeric'}).format(d); }
 }
 
 // Prayer times for an arbitrary date
@@ -1172,8 +1175,10 @@ function buildDateReel() {
   const reel = document.getElementById('ptDateReel');
   let html = '';
   const today = ptStripTime(new Date());
-  let loc = 'ar';
-  try { const lang = I18n.getLang(); loc = lang === 'ar' ? 'ar' : lang === 'ckb' ? 'ckb' : lang === 'tr' ? 'tr' : lang === 'ur' ? 'ur' : 'en'; } catch(e) {}
+  const lang = I18n.getLang();
+  const loc = lang === 'ar' ? 'ar' : lang === 'ckb' ? 'ckb' : lang === 'tr' ? 'tr' : lang === 'ur' ? 'ur' : 'en';
+  const todayT = t('today');
+  const todayLabel = todayT !== 'today' ? todayT : null;
   for(let off = -PT_REEL_PAST; off <= PT_REEL_FUTURE; off++) {
     const d = new Date(today); d.setDate(d.getDate() + off);
     const dow = new Intl.DateTimeFormat(loc, {weekday:'short'}).format(d);
@@ -1181,7 +1186,7 @@ function buildDateReel() {
     const mon = new Intl.DateTimeFormat(loc, {month:'short'}).format(d);
     const isToday = off === 0;
     html += `<div class="pt-day${isToday ? ' today' : ''}" data-off="${off}" onclick="selectDateByOffset(${off})">
-      <span class="pt-dow">${isToday ? t('today') : dow}</span>
+      <span class="pt-dow">${isToday ? (todayLabel || dow) : dow}</span>
       <span class="pt-dom">${dom}</span>
       <span class="pt-mon">${mon}</span>
     </div>`;
