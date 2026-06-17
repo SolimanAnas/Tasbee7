@@ -391,30 +391,17 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
    ============================================================ */
 .sel-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sel-card{
-  padding:12px 10px;border-radius:18px;
+  padding:8px 10px;border-radius:16px;
   display:flex;align-items:center;gap:10px;cursor:pointer;
   transition:transform .18s,background .2s,box-shadow .2s;
-  min-height:66px;min-width:0;overflow:hidden;
+  min-height:52px;min-width:0;overflow:hidden;
 }
 .sel-card:active{transform:scale(.96);background:rgba(var(--accent-rgb),.07)}
-.sel-avatar{
-  width:40px;height:40px;border-radius:50%;background:var(--accent-main);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Amiri',serif;font-size:18px;font-weight:700;color:#fff;
-  flex-shrink:0;box-shadow:0 2px 10px var(--accent-glow);
-}
-.sel-num-badge{
-  width:40px;height:40px;border-radius:14px;
-  background:var(--accent-muted);border:1.5px solid rgba(var(--accent-rgb),.25);
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;font-weight:800;color:var(--accent-main);
-  flex-shrink:0;font-variant-numeric:tabular-nums;letter-spacing:-.01em;
-}
 .sel-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
 .sel-label{font-size:11px;color:var(--text-secondary);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-.sel-value-wrap{overflow:hidden;width:100%;min-width:0;min-height:1.6em;line-height:1.6}
+.sel-value-wrap{overflow:hidden;width:100%;min-width:0;min-height:1.8em;line-height:1.8}
 .sel-value{
-  font-size:14px;font-weight:800;color:var(--text-primary);
+  font-size:15px;font-weight:900;color:var(--text-primary);
   white-space:nowrap;display:inline-block;min-width:100%;
 }
 .sel-value:not(.ticker-active){overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -829,7 +816,6 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   <div class="sel-row">
     <!-- Reciter Card -->
     <div class="sel-card card" onclick="haptic();openReciterSheet()">
-      <div class="sel-avatar" id="reciterAvatarBadge">م</div>
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_reciter">القارئ</span>
         <div class="sel-value-wrap"><span class="sel-value" id="reciterSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -838,7 +824,6 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
     </div>
     <!-- Surah Card -->
     <div class="sel-card card" onclick="haptic();openJuzSheet()">
-      <div class="sel-num-badge" id="surahNumBadge">—</div>
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_surah">السورة</span>
         <div class="sel-value-wrap"><span class="sel-value" id="juzSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -890,7 +875,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
           <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </span>
         <span class="theme-swatch" data-theme-swatch="sepia" style="color:#B8860B" title="بني">
-          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         </span>
       </div>
     </div>
@@ -1174,6 +1159,7 @@ function setSelTicker(elId,text){
   el.classList.remove('ticker-active');
   el.style.removeProperty('--ticker-dur');
   el.textContent=text;
+  if(elId==='reciterSelectBtn')return;
   requestAnimationFrame(()=>{
     const wrap=el.parentElement;if(!wrap)return;
     if(el.scrollWidth>wrap.offsetWidth+2){
@@ -1190,13 +1176,6 @@ function setSelTicker(elId,text){
 //  VISUAL HELPERS (new in audio3)
 // ============================================================
 function updateVisuals(reciterDisp,juzDisp){
-  // Reciter avatar initial in selector card
-  const initial=reciterDisp?reciterDisp.charAt(0):'م';
-  const rab=document.getElementById('reciterAvatarBadge');
-  if(rab)rab.textContent=initial;
-  // Surah number badge
-  const snb=document.getElementById('surahNumBadge');
-  if(snb){const m=(juzDisp||'').match(/^(\d+)/);snb.textContent=m?m[1]:'✦'}
 }
 
 function triggerMandalaChange(){
