@@ -6,11 +6,12 @@
 <title>سورة آل عمران كاملة — المنشاوي المصحف المرتل النادر 1967م | زاد المسلم</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
 <meta name="description" content="سورة آل عمران كاملة بصوت الشيخ محمد صديق المنشاوي من المصحف المرتل النادر 1967م. استمع لأكثر من 200 قارئ.">
+<meta name="keywords" content="سورة آل عمران كاملة, آل عمران المنشاوي, المنشاوي آل عمران, المنشاوي, محمد صديق المنشاوي, المصحف المرتل النادر, المنشاوي مرتل, المصحف المجود, تلاوة نادرة, إذاعة القرآن الكريم المصرية 1967, المنشاوي mp3, استماع قرآن, قرآن كريم, تلاوة تاريخية">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/audio.html">
 <meta property="og:type" content="website">
-<meta property="og:title" content="القرآن الكريم — استماع وتلاوة | زاد المسلم">
-<meta property="og:description" content="استمع للقرآن الكريم بأصوات أشهر القراء. اختر السورة والقارئ واستمع للتلاوة مباشرة.">
+<meta property="og:title" content="سورة آل عمران كاملة — المنشاوي المصحف المرتل النادر 1967م | زاد المسلم">
+<meta property="og:description" content="سورة آل عمران كاملة بصوت الشيخ محمد صديق المنشاوي من المصحف المرتل النادر 1967م. استمع للقرآن الكريم بأصوات أشهر القراء.">
 <meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/audio.html">
 <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
 <meta property="og:locale" content="ar_AR">
@@ -499,39 +500,118 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 }
 
 /* ============================================================
-   SETTINGS SHEET ROWS
+   SETTINGS SHEET — REDESIGNED
    ============================================================ */
-.setting-row{
-  display:flex;justify-content:space-between;align-items:center;
-  width:100%;padding:17px 14px;border-radius:14px;
+.settings-body{
+  flex:1;overflow-y:auto;padding:6px 16px 28px;
+  display:flex;flex-direction:column;gap:20px;
+  scrollbar-width:none;
+}
+.settings-body::-webkit-scrollbar{display:none}
+.settings-section{display:flex;flex-direction:column;gap:4px}
+.settings-section-label{
+  font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-secondary);padding:0 4px 6px;opacity:.7;
+}
+
+/* ── THEME PILL SELECTOR ── */
+.theme-pill-selector{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;
+  padding:5px;background:var(--list-hover);
+  border-radius:18px;border:1px solid var(--glass-border);
+}
+.theme-pill{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:12px 6px 10px;border-radius:14px;
+  border:none;background:transparent;
+  color:var(--text-secondary);
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;transition:.25s cubic-bezier(.22,1,.36,1);
+  -webkit-tap-highlight-color:transparent;
+}
+.theme-pill-icon{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--glass-border);transition:.25s;
+}
+.theme-pill-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.theme-pill.active{color:var(--accent-main)}
+.theme-pill.active .theme-pill-icon{
+  background:var(--accent-main);box-shadow:0 4px 14px var(--accent-glow);
+}
+.theme-pill.active .theme-pill-icon svg{stroke:#fff}
+.theme-pill:active{transform:scale(.93)}
+
+/* ── SETTINGS ROW ── */
+.settings-row{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 12px;border-radius:16px;
   background:var(--list-hover);border:1px solid var(--glass-border);
-  font-size:1rem;font-weight:600;cursor:pointer;transition:.2s;
-  color:var(--text-primary);
+  cursor:pointer;transition:.2s;position:relative;overflow:hidden;
 }
-.setting-row:active{transform:scale(.98);opacity:.85}
-.theme-swatches{display:flex;gap:8px;align-items:center}
-.theme-swatch{
-  width:34px;height:34px;border-radius:50%;cursor:pointer;
-  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
-  flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;
-  background:var(--list-hover);border:1.5px solid var(--glass-border);
+.settings-row::before{
+  content:'';position:absolute;inset-inline-end:0;top:20%;bottom:20%;
+  width:3px;border-radius:2px 0 0 2px;
+  background:var(--accent-main);
+  transform:scaleY(0);transform-origin:center;
+  transition:transform .22s cubic-bezier(.22,1,.36,1);
 }
-.theme-swatch svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.theme-swatch::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;transition:border-color .3s cubic-bezier(.2,.9,.4,1)}
-.theme-swatch.active{transform:scale(1.2);border-color:transparent}
-.theme-swatch.active::after{border-color:var(--accent-main)}
-.theme-swatch:active{transform:scale(1.05)}
+.settings-row:active::before{transform:scaleY(1)}
+.settings-row:active{background:rgba(16,185,129,.07);transform:scale(.99)}
+.settings-row-icon{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:transform .2s;
+}
+.settings-row:active .settings-row-icon{transform:scale(.9)}
+.settings-row-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.settings-row-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.settings-row-title{font-size:14.5px;font-weight:700;color:var(--text-primary);line-height:1.3}
+.settings-row-sub{font-size:11.5px;color:var(--text-secondary);font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.settings-chevron{color:var(--text-secondary);opacity:.4;flex-shrink:0;transition:transform .2s}
+.settings-row:active .settings-chevron{transform:translateX(-3px)}
+.timer-badge{
+  font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;
+  background:var(--accent-muted);color:var(--accent-main);
+  border:1px solid rgba(16,185,129,.2);white-space:nowrap;flex-shrink:0;
+}
+.timer-badge.timer-on{background:rgba(99,102,241,.1);color:#818cf8;border-color:rgba(99,102,241,.22)}
+
+/* Danger row */
+.settings-row-danger .settings-row-title{color:var(--danger)}
+.settings-row-danger{border-color:rgba(239,68,68,.15)}
+.settings-row-danger:active{background:rgba(239,68,68,.07)}
+.settings-row-danger::before{background:var(--danger)}
+
+/* Stagger animation */
+@keyframes settingsIn{
+  from{opacity:0;transform:translateX(14px)}
+  to{opacity:1;transform:translateX(0)}
+}
+#settingsSheet.active .settings-section{
+  animation:settingsIn .38s cubic-bezier(.22,1,.36,1) both;
+}
+#settingsSheet.active .settings-section:nth-child(1){animation-delay:.05s}
+#settingsSheet.active .settings-section:nth-child(2){animation-delay:.10s}
+#settingsSheet.active .settings-section:nth-child(3){animation-delay:.15s}
+#settingsSheet.active .settings-section:nth-child(4){animation-delay:.20s}
+
+/* Toggle */
 .toggle-switch{
-  width:48px;height:26px;background:rgba(150,150,150,.3);border-radius:32px;
-  position:relative;cursor:pointer;transition:.3s;flex-shrink:0;
+  width:50px;height:28px;background:rgba(150,150,150,.25);border-radius:32px;
+  position:relative;cursor:pointer;transition:.35s;flex-shrink:0;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.12);
 }
-.toggle-switch.active{background:var(--accent-main)}
+.toggle-switch.active{background:var(--accent-main);box-shadow:0 2px 10px var(--accent-glow)}
 .toggle-switch::after{
-  content:'';width:20px;height:20px;background:#fff;border-radius:50%;
-  position:absolute;top:3px;left:3px;transition:transform .3s;
-  box-shadow:0 1px 4px rgba(0,0,0,.25);
+  content:'';width:22px;height:22px;background:#fff;border-radius:50%;
+  position:absolute;top:3px;left:3px;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 1px 6px rgba(0,0,0,.22);
 }
 .toggle-switch.active::after{transform:translateX(22px)}
+
+/* Legacy row kept hidden for JS compat */
+.setting-row{display:none}
 .danger-btn{
   background:rgba(239,68,68,.1);color:var(--danger);border:none;
   padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700;
@@ -678,6 +758,37 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 .pwa-install-btn-primary{background:var(--accent-main);color:#fff}
 .pwa-install-btn-skip{background:var(--list-hover);color:var(--text-secondary)}
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "الاستماع للقرآن — زاد المسلم",
+  "alternateName": "Tasbee7 Quran Audio",
+  "description": "استمع للقرآن الكريم بأكثر من 200 قارئ. يشمل المصحف الجديد للشيخ محمد صديق المنشاوي (تسجيل نادر بعد 60 سنة) وتلاوات كبار القراء.",
+  "url": "https://solimananas.github.io/Tasbee7/pages/audio.html",
+  "applicationCategory": "Multimedia",
+  "operatingSystem": "Web",
+  "inLanguage": ["ar", "en"],
+  "author": { "@type": "Person", "name": "Anas Soliman" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "audio": [
+    {
+      "@type": "AudioObject",
+      "name": "سورة آل عمران كاملة — الشيخ محمد صديق المنشاوي | المصحف المرتل النادر 1967م",
+      "description": "سورة آل عمران كاملة بصوت الشيخ محمد صديق المنشاوي الفقرات مجمعة من المصحف المرتل النادر إذاعة القرآن الكريم المصرية 1967م. تلاوة تاريخية ونادرة لأول مرة.",
+      "inLanguage": "ar",
+      "genre": ["Quran Recitation", "ترتيل", "تجويد", "مرتل"]
+    },
+    {
+      "@type": "AudioObject",
+      "name": "المصحف الجديد — الشيخ محمد صديق المنشاوي",
+      "description": "المصحف المرتل الجديد للشيخ محمد صديق المنشاوي، تسجيل نادر يذاع لأول مرة بعد 60 سنة.",
+      "inLanguage": "ar",
+      "genre": ["Quran Recitation", "ترتيل", "تجويد"]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -864,41 +975,97 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-  <div class="sheet-content">
-    <div class="setting-row" onclick="haptic();toggleThemeUI()">
-      <span data-i18n="audio_dark_mode">المظهر</span>
-      <div class="theme-swatches">
-        <span class="theme-swatch" data-theme-swatch="light" style="color:#F59E0B" title="فاتح">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
-        </span>
-        <span class="theme-swatch" data-theme-swatch="dark" style="color:#64748B" title="مظلم">
-          <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </span>
-        <span class="theme-swatch" data-theme-swatch="sepia" style="color:#B8860B" title="بني">
-          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        </span>
+  <div class="settings-body">
+
+    <!-- ── THEME ── -->
+    <div class="settings-section">
+      <div class="settings-section-label" data-i18n="audio_dark_mode">المظهر</div>
+      <div class="theme-pill-selector">
+        <button class="theme-pill" data-theme-swatch="light" onclick="haptic();setTheme('light')">
+          <div class="theme-pill-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+          </div>
+          <span>فاتح</span>
+        </button>
+        <button class="theme-pill" data-theme-swatch="dark" onclick="haptic();setTheme('dark')">
+          <div class="theme-pill-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </div>
+          <span>مظلم</span>
+        </button>
+        <button class="theme-pill" data-theme-swatch="sepia" onclick="haptic();setTheme('sepia')">
+          <div class="theme-pill-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <span>بُنّي</span>
+        </button>
       </div>
     </div>
-    <div class="setting-row" onclick="haptic();toggleAutoPlayUI()">
-      <span data-i18n="audio_autoplay">التشغيل التلقائي للتالي</span>
-      <div class="toggle-switch active" id="autoplayToggle"></div>
+
+    <!-- ── PLAYBACK ── -->
+    <div class="settings-section">
+      <div class="settings-section-label">التشغيل</div>
+      <div class="settings-row" onclick="haptic();toggleAutoPlayUI()">
+        <div class="settings-row-icon" style="background:rgba(16,185,129,.12);color:var(--accent-main)">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/><line x1="19" y1="3" x2="19" y2="21"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="audio_autoplay">التشغيل التلقائي</div>
+          <div class="settings-row-sub">الانتقال تلقائياً للسورة التالية</div>
+        </div>
+        <div class="toggle-switch active" id="autoplayToggle"></div>
+      </div>
     </div>
-    <div class="setting-row" onclick="haptic();openSheet('timerSheet',false)">
-      <span data-i18n="audio_sleep_timer">مؤقت النوم 🌙</span>
-      <span style="color:var(--text-secondary);font-size:.9rem" id="timerStatusText">إيقاف ›</span>
+
+    <!-- ── TOOLS ── -->
+    <div class="settings-section">
+      <div class="settings-section-label">أدوات</div>
+      <div class="settings-row" onclick="haptic();openSheet('timerSheet',false)">
+        <div class="settings-row-icon" style="background:rgba(99,102,241,.11);color:#818cf8">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="audio_sleep_timer">مؤقت النوم</div>
+          <div class="settings-row-sub" id="timerStatusText">إيقاف</div>
+        </div>
+        <div class="timer-badge" id="timerBadge">إيقاف</div>
+        <svg class="settings-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="settings-row" onclick="haptic();openFavSheet()">
+        <div class="settings-row-icon" style="background:rgba(245,158,11,.11);color:var(--gold)">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="audio_favorites">المفضلة</div>
+          <div class="settings-row-sub">التلاوات المحفوظة</div>
+        </div>
+        <svg class="settings-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div class="settings-row" onclick="haptic();window.location.href='about.html'">
+        <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:var(--accent-main)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="audio_about">عن التطبيق</div>
+          <div class="settings-row-sub">الإصدار والمطوّر</div>
+        </div>
+        <svg class="settings-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
     </div>
-    <div class="setting-row" onclick="haptic();openFavSheet()">
-      <span data-i18n="audio_favorites">المقاطع المفضلة ♡</span>
-      <span style="color:var(--text-secondary)">›</span>
+
+    <!-- ── DANGER ── -->
+    <div class="settings-section">
+      <div class="settings-row settings-row-danger" onclick="haptic();openClearCacheModal()">
+        <div class="settings-row-icon" style="background:rgba(239,68,68,.11);color:var(--danger)">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="audio_clear_cache">مسح الذاكرة المؤقتة</div>
+          <div class="settings-row-sub">حذف التفضيلات وآخر مقطع</div>
+        </div>
+      </div>
     </div>
-    <div class="setting-row" onclick="haptic();window.location.href='about.html'">
-      <span data-i18n="audio_about">عن التطبيق ℹ️</span>
-      <span style="color:var(--text-secondary)">›</span>
-    </div>
-    <div class="setting-row" onclick="haptic();openClearCacheModal()" style="color:var(--danger)">
-      <span data-i18n="audio_clear_cache">مسح الذاكرة المؤقتة</span>
-      <span style="color:var(--text-secondary)">›</span>
-    </div>
+
   </div>
 </div>
 
@@ -1048,19 +1215,19 @@ function applySettingsUI(){
   document.getElementById('autoplayToggle').classList.toggle('active',isAutoPlay);
 }
 function updateThemeIcon(theme){
-  document.querySelectorAll('.theme-swatch').forEach(el=>{
+  document.querySelectorAll('[data-theme-swatch]').forEach(el=>{
     el.classList.toggle('active',el.getAttribute('data-theme-swatch')===theme);
   });
 }
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  localStorage.setItem('themeMode',theme);
+  updateThemeIcon(theme);
+}
 function toggleThemeUI(){
-  const html=document.documentElement;
   const themes=['light','dark','sepia'];
-  const cur=html.getAttribute('data-theme')||'light';
-  const idx=themes.indexOf(cur);
-  const next=themes[(idx+1)%themes.length];
-  html.setAttribute('data-theme',next);
-  localStorage.setItem('themeMode',next);
-  updateThemeIcon(next);
+  const cur=document.documentElement.getAttribute('data-theme')||'light';
+  setTheme(themes[(themes.indexOf(cur)+1)%themes.length]);
 }
 function toggleAutoPlayUI(){
   isAutoPlay=!isAutoPlay;
@@ -1105,7 +1272,9 @@ function startCustomTimer(){
   sleepCountdownId=setInterval(updateTimerDisplay,1000);
   sleepTimerId=setTimeout(()=>{audio.pause();cancelSleepTimer(false);showToast(t('audio_timer_stopped'))},ms);
   let totalMins=Math.round(ms/60000);
-  document.getElementById('timerStatusText').innerText=t('audio_timer_active',{n:totalMins});
+  const activeTxt=t('audio_timer_active',{n:totalMins});
+  document.getElementById('timerStatusText').innerText=activeTxt;
+  const tb=document.getElementById('timerBadge');if(tb){tb.textContent=totalMins+'د';tb.classList.add('timer-on')}
   showToast(t('audio_timer_started',{n:totalMins}));
   document.getElementById('rollerPicker').style.display='none';
   document.getElementById('timerGrid').style.display='none';
@@ -1117,6 +1286,7 @@ function cancelSleepTimer(showMsg=true){
   if(sleepCountdownId)clearInterval(sleepCountdownId);
   sleepTimerId=null;sleepCountdownId=null;sleepEndTime=0;
   document.getElementById('timerStatusText').innerText=t('audio_timer_off');
+  const tb2=document.getElementById('timerBadge');if(tb2){tb2.textContent='إيقاف';tb2.classList.remove('timer-on')}
   document.getElementById('rollerPicker').style.display='flex';
   document.getElementById('timerGrid').style.display='grid';
   document.getElementById('activeTimerDisplay').style.display='none';
@@ -1208,6 +1378,18 @@ const juzSelectBtn=document.getElementById('juzSelectBtn');
 const surahNames=["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
 function reciterDisplay(r){return r?(window.I18n?I18n.name('reciters',r.id,r.name):r.name):''}
+function reciterShortDisplay(r){
+  if(!r)return'';
+  let name=window.I18n?I18n.name('reciters',r.id,r.name):r.name;
+  if(!name.includes('('))return name;
+  let main=name.split('(')[0].trim();
+  let suffix=name.split('(')[1].replace(')','').trim();
+  let simp={'المصحف الجديد':'جديد','المصحف المعلم':'معلم','رواية ورش':'ورش'};
+  let ss=simp[suffix]||suffix;
+  let words=main.split(' ');
+  let surname=words.filter(w=>/^ال/.test(w)).pop()||words[0];
+  return surname+' - '+ss;
+}
 function juzDisplay(j){
   if(!j)return'';
   if(j.number&&window.I18n)return j.number+' - '+I18n.name('surahs',j.number,j.originalName||j.name);
@@ -1240,7 +1422,7 @@ function initData(){
     });
     if(fi!==-1)selectedReciterIndex=fi;
   }
-  const rd=reciterDisplay(appData.reciters[selectedReciterIndex]);
+  const rd=reciterShortDisplay(appData.reciters[selectedReciterIndex]);
   setSelTicker('reciterSelectBtn',rd);
   buildJuzData();
   if(lastTrack&&lastTrack.startsWith('http')){
@@ -1285,7 +1467,7 @@ function renderReciterList(filterText=''){
     div.innerText=reciterDisplay(r);
     div.onclick=()=>{
       haptic();selectedReciterIndex=oi;
-      const rd=reciterDisplay(r);setSelTicker('reciterSelectBtn',rd);
+      const rd=reciterShortDisplay(r);setSelTicker('reciterSelectBtn',rd);
       errorRetryCount=0;
       let prevJuzName=currentJuzData[selectedJuzIndex]?.name;
       buildJuzData();
@@ -1346,7 +1528,7 @@ function prepareTrack(userInitiated=false){
   let juzDisp=juzDisplay(currentJuzData[selectedJuzIndex]);
   if(currentTrackUrl!==url){
     audio.src=url;currentTrackUrl=url;
-    setSelTicker('reciterSelectBtn',reciterDisp);
+    setSelTicker('reciterSelectBtn',reciterShortDisplay(appData.reciters[selectedReciterIndex]));
     setSelTicker('juzSelectBtn',juzDisp);
     setHeroTicker(juzDisp);
     document.getElementById('nowReciter').innerText=reciterDisp;
@@ -1529,7 +1711,7 @@ function playFromFav(url,surah,reciter){
   let reciterDisp=rObj?reciterDisplay(rObj):reciter;let surahDisp=surah;
   let fri=appData.reciters.findIndex(r=>r.name===reciter);
   if(fri!==-1){
-    selectedReciterIndex=fri;setSelTicker('reciterSelectBtn',reciterDisp);buildJuzData();
+    selectedReciterIndex=fri;setSelTicker('reciterSelectBtn',reciterShortDisplay(rObj));buildJuzData();
     let fji=currentJuzData.findIndex(j=>j.url===url);
     if(fji!==-1){selectedJuzIndex=fji;surahDisp=juzDisplay(currentJuzData[fji]);setSelTicker('juzSelectBtn',surahDisp)}
   }
@@ -1554,7 +1736,7 @@ window.addEventListener('load',()=>{
 window.addEventListener('langchange',()=>{
   if(!appData.reciters.length)return;
   const r=appData.reciters[selectedReciterIndex];const j=currentJuzData[selectedJuzIndex];
-  if(r)setSelTicker('reciterSelectBtn',reciterDisplay(r));
+  if(r)setSelTicker('reciterSelectBtn',reciterShortDisplay(r));
   if(j)setSelTicker('juzSelectBtn',juzDisplay(j));
   if(currentTrackUrl&&r&&j){
     const jd=juzDisplay(j);const rd=reciterDisplay(r);

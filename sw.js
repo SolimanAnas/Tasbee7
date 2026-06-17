@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v57"; // v57: removed download page
+const CACHE_NAME = "zad-muslim-v58"; // v58: short reciter names in selector
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
