@@ -844,12 +844,17 @@ async function loadMultipleJSONs() {
     // 404s for the full 1..20 range when only a few files exist.
     for (let i = 1; i <= 20; i++) {
       let fileNum = i < 10 ? '0' + i : i;
-      let res;
+      let data;
       try {
-        res = await fetch(`../json/audio-${fileNum}.json?v=${new Date().getTime()}`);
-      } catch (_) { break; }
-      if (!res.ok) break;
-      let data = await res.json();
+        const mod = await import('../json/audio-' + fileNum + '.js?v=' + new Date().getTime());
+        data = mod.default;
+      } catch (_) {
+        try {
+          let res = await fetch('../json/audio-' + fileNum + '.json?v=' + new Date().getTime());
+          if (!res.ok) break;
+          data = await res.json();
+        } catch (_) { break; }
+      }
       if (data && data.reciters) appData.reciters.push(...data.reciters);
     }
     if (appData.reciters.length > 0) initData();

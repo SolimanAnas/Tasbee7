@@ -26,14 +26,9 @@ const I18n = (() => {
   async function loadLang(lang) {
     if (translations[lang]) return translations[lang];
     try {
-      const resp = await fetch(`${_I18N_BASE}${lang}.js`);
-      const text = await resp.text();
-      // Extract the object from "export default { ... }"
-      const match = text.match(/export\s+default\s+(\{[\s\S]*\})/);
-      if (match) {
-        translations[lang] = (new Function('return ' + match[1]))();
-      }
-      return translations[lang] || {};
+      const mod = await import(`${_I18N_BASE}${lang}.js`);
+      translations[lang] = mod.default || {};
+      return translations[lang];
     } catch (e) {
       console.warn(`Failed to load lang: ${lang}`, e);
       if (lang !== DEFAULT_LANG) return loadLang(DEFAULT_LANG);
