@@ -29,8 +29,9 @@
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --accent-main: #10B981;
-  --accent-muted: rgba(16,185,129,0.13);
-  --accent-glow: rgba(16,185,129,0.28);
+  --accent-rgb: 16,185,129;
+  --accent-muted: rgba(var(--accent-rgb),0.13);
+  --accent-glow: rgba(var(--accent-rgb),0.28);
   --glass: rgba(255,255,255,0.58);
   --glass-border: rgba(255,255,255,0.65);
   --glass-shadow: 0 8px 32px rgba(31,38,135,0.08);
@@ -47,8 +48,9 @@
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --accent-main: #10B981;
-  --accent-muted: rgba(16,185,129,0.16);
-  --accent-glow: rgba(16,185,129,0.38);
+  --accent-rgb: 16,185,129;
+  --accent-muted: rgba(var(--accent-rgb),0.16);
+  --accent-glow: rgba(var(--accent-rgb),0.38);
   --glass: rgba(15,23,42,0.62);
   --glass-border: rgba(255,255,255,0.09);
   --glass-shadow: 0 8px 32px rgba(0,0,0,0.35);
@@ -58,6 +60,25 @@
   --list-hover: rgba(255,255,255,0.06);
   --gold: #FBBF24;
   --danger: #f87171;
+}
+[data-theme="sepia"] {
+  --bg-image: url('../images/background-sepia.webp');
+  --bg-surface: rgba(235,220,195,0.45);
+  --text-primary: #3D2B1F;
+  --text-secondary: #8B7355;
+  --accent-main: #B8860B;
+  --accent-rgb: 184,134,11;
+  --accent-muted: rgba(184,134,11,0.15);
+  --accent-glow: rgba(184,134,11,0.28);
+  --glass: rgba(250,242,226,0.58);
+  --glass-border: rgba(210,180,140,0.40);
+  --glass-shadow: 0 8px 32px rgba(100,70,40,0.10);
+  --overlay: rgba(180,140,100,0.18);
+  --modal-overlay: rgba(60,40,20,0.35);
+  --track-bg: rgba(60,40,20,0.08);
+  --list-hover: rgba(184,134,11,0.07);
+  --gold: #D4A843;
+  --danger: #C0392B;
 }
 
 /* ============================================================
@@ -121,7 +142,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--overlay);z-index
    HERO PLAYER CARD
    ============================================================ */
 .hero-card{
-  padding:18px 16px 16px;
+  padding:12px 14px 10px;
   display:flex;flex-direction:column;align-items:center;gap:0;
   position:relative;overflow:hidden;
   border-radius:28px;
@@ -129,8 +150,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--overlay);z-index
 
 /* Glowing border when playing */
 body.is-playing .hero-card{
-  box-shadow:var(--glass-shadow),0 0 0 1.5px rgba(16,185,129,.35),0 0 40px rgba(16,185,129,.12);
-  border-color:rgba(16,185,129,.3);
+  box-shadow:var(--glass-shadow),0 0 0 1.5px rgba(var(--accent-rgb),.35),0 0 40px rgba(var(--accent-rgb),.12);
+  border-color:rgba(var(--accent-rgb),.3);
 }
 
 /* ============================================================
@@ -141,7 +162,7 @@ body.is-playing .hero-card{
   display:flex;align-items:center;gap:6px;
   padding:4px 11px;border-radius:100px;
   background:var(--accent-muted);
-  border:1px solid rgba(16,185,129,.22);
+  border:1px solid rgba(var(--accent-rgb),.22);
   font-size:10.5px;font-weight:700;color:var(--accent-main);
   letter-spacing:.07em;text-transform:uppercase;
   opacity:0;transform:translateY(-6px);
@@ -216,12 +237,12 @@ body.is-playing .m-dot{opacity:.9;width:6px;height:6px;box-shadow:0 0 6px var(--
   width:152px;height:152px;border-radius:50%;z-index:2;
   overflow:hidden;
   box-shadow:0 6px 28px var(--accent-glow);
-  border:2.5px solid rgba(16,185,129,.28);
+  border:2.5px solid rgba(var(--accent-rgb),.28);
   transition:box-shadow .5s,border-color .5s;
 }
 body.is-playing .m-album-wrap{
   box-shadow:0 6px 40px var(--accent-glow),0 0 0 4px var(--accent-muted);
-  border-color:rgba(16,185,129,.55);
+  border-color:rgba(var(--accent-rgb),.55);
 }
 .m-album{width:100%;height:100%;object-fit:cover;display:block}
 
@@ -327,7 +348,7 @@ body.is-playing .play-pause-btn{box-shadow:0 4px 28px var(--accent-glow),0 0 0 4
 /* Spinning ring around play button when playing */
 .play-ring{
   position:absolute;inset:-5px;border-radius:50%;
-  border:2px dashed rgba(16,185,129,.4);
+  border:2px dashed rgba(var(--accent-rgb),.4);
   opacity:0;transition:opacity .4s;
 }
 body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
@@ -337,7 +358,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   background:var(--accent-muted);border:1px solid var(--glass-border);color:var(--text-primary);
   display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;
 }
-.skip-btn:active{transform:scale(.88);background:rgba(16,185,129,.22)}
+.skip-btn:active{transform:scale(.88);background:rgba(var(--accent-rgb),.22)}
 .skip-btn svg{width:24px;height:24px;fill:currentColor}
 
 /* ============================================================
@@ -375,7 +396,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   transition:transform .18s,background .2s,box-shadow .2s;
   min-height:66px;min-width:0;overflow:hidden;
 }
-.sel-card:active{transform:scale(.96);background:rgba(16,185,129,.07)}
+.sel-card:active{transform:scale(.96);background:rgba(var(--accent-rgb),.07)}
 .sel-avatar{
   width:40px;height:40px;border-radius:50%;background:var(--accent-main);
   display:flex;align-items:center;justify-content:center;
@@ -384,7 +405,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 }
 .sel-num-badge{
   width:40px;height:40px;border-radius:14px;
-  background:var(--accent-muted);border:1.5px solid rgba(16,185,129,.25);
+  background:var(--accent-muted);border:1.5px solid rgba(var(--accent-rgb),.25);
   display:flex;align-items:center;justify-content:center;
   font-size:15px;font-weight:800;color:var(--accent-main);
   flex-shrink:0;font-variant-numeric:tabular-nums;letter-spacing:-.01em;
@@ -501,6 +522,10 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   color:var(--text-primary);
 }
 .setting-row:active{transform:scale(.98);opacity:.85}
+.theme-swatches{display:flex;gap:8px;align-items:center}
+.theme-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;transition:transform .2s,box-shadow .2s;flex-shrink:0}
+.theme-swatch.active{transform:scale(1.35);box-shadow:0 0 0 2px var(--bg-surface),0 0 0 3.5px var(--accent-main)!important}
+.theme-swatch:active{transform:scale(1.15)}
 .toggle-switch{
   width:48px;height:26px;background:rgba(150,150,150,.3);border-radius:32px;
   position:relative;cursor:pointer;transition:.3s;flex-shrink:0;
@@ -565,8 +590,8 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   background:var(--glass);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
   border-top:1px solid var(--glass-border);
   box-shadow:0 -4px 24px rgba(0,0,0,.12);
-  padding:10px 18px;padding-bottom:max(10px,env(safe-area-inset-bottom));
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:6px 14px;padding-bottom:max(6px,env(safe-area-inset-bottom));
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
   transform:translateY(100%);transition:transform .4s,background .3s;z-index:50;
 }
 .mini.show{transform:translateY(0)}
@@ -617,7 +642,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 .ps-rating{font-size:.68rem;color:#fbbf24;margin-top:2px}
 .ps-btn{
   flex:0 0 auto;padding:8px 16px;border-radius:100px;
-  background:#10b981;color:#fff;font-family:inherit;font-size:.82rem;font-weight:700;
+  background:var(--accent-main);color:#fff;font-family:inherit;font-size:.82rem;font-weight:700;
   border:none;cursor:pointer;text-decoration:none;white-space:nowrap;transition:.2s;
 }
 .ps-btn:active{transform:scale(.93)}
@@ -848,9 +873,12 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   </div>
   <div class="sheet-content">
     <div class="setting-row" onclick="haptic();toggleThemeUI()">
-      <span data-i18n="audio_dark_mode">الوضع الليلي</span>
-      <svg id="sunIcon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg id="moonIcon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <span data-i18n="audio_dark_mode">المظهر</span>
+      <div class="theme-swatches">
+        <span class="theme-swatch" data-theme-swatch="light" style="background:#F59E0B;box-shadow:0 0 0 2px var(--bg-surface),0 0 0 3px rgba(0,0,0,0.1)"></span>
+        <span class="theme-swatch" data-theme-swatch="dark" style="background:#1E293B;box-shadow:0 0 0 2px var(--bg-surface),0 0 0 3px rgba(0,0,0,0.1)"></span>
+        <span class="theme-swatch" data-theme-swatch="sepia" style="background:#B8860B;box-shadow:0 0 0 2px var(--bg-surface),0 0 0 3px rgba(0,0,0,0.1)"></span>
+      </div>
     </div>
     <div class="setting-row" onclick="haptic();toggleAutoPlayUI()">
       <span data-i18n="audio_autoplay">التشغيل التلقائي للتالي</span>
@@ -950,7 +978,7 @@ function showToast(msg,duration=2500,showProgress=false){
   const toast=document.getElementById('toast');
   const toastText=document.getElementById('toastText');
   const progressBar=document.getElementById('downloadProgressBar');
-  toastText.innerText=msg;
+  toastText.innerHTML=msg;
   progressBar.style.display=showProgress?'block':'none';
   if(!showProgress)document.getElementById('downloadProgressFill').style.width='0%';
   toast.classList.add('show');
@@ -1021,15 +1049,19 @@ function applySettingsUI(){
   document.getElementById('autoplayToggle').classList.toggle('active',isAutoPlay);
 }
 function updateThemeIcon(theme){
-  document.getElementById('sunIcon').style.display=theme==='dark'?'block':'none';
-  document.getElementById('moonIcon').style.display=theme==='dark'?'none':'block';
+  document.querySelectorAll('.theme-swatch').forEach(el=>{
+    el.classList.toggle('active',el.getAttribute('data-theme-swatch')===theme);
+  });
 }
 function toggleThemeUI(){
   const html=document.documentElement;
-  const newTheme=html.getAttribute('data-theme')==='light'?'dark':'light';
-  html.setAttribute('data-theme',newTheme);
-  localStorage.setItem('themeMode',newTheme);
-  updateThemeIcon(newTheme);
+  const themes=['light','dark','sepia'];
+  const cur=html.getAttribute('data-theme')||'light';
+  const idx=themes.indexOf(cur);
+  const next=themes[(idx+1)%themes.length];
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('themeMode',next);
+  updateThemeIcon(next);
 }
 function toggleAutoPlayUI(){
   isAutoPlay=!isAutoPlay;

@@ -85,7 +85,7 @@ const I18n = (() => {
     // Text content
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
-      if (key && dict[key]) el.textContent = dict[key];
+      if (key && dict[key]) el.innerHTML = dict[key];
     });
 
     // innerHTML (for elements with mixed content)
