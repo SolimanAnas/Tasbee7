@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v59"; // v59: removed سورة آل عمران from title/OG
+const CACHE_NAME = "zad-muslim-v60"; // v59: removed سورة آل عمران from title/OG
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
