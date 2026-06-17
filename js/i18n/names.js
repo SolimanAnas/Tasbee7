@@ -58,6 +58,7 @@
     minshawi_murattal: 'Mohamed Siddiq Al-Minshawi (Murattal)',
     minshawi_mujawwad: 'Mohamed Siddiq Al-Minshawi (Mujawwad)',
     minshawi_molim: "Mohamed Siddiq Al-Minshawi (Mu'allim)",
+    minshawi_new: "Mohamed Siddiq Al-Minshawi (New Recitation)",
     banna_murattal: 'Mahmoud Ali Al-Banna (Murattal)',
     jibreel: 'Muhammad Jibreel', mustafa_ismail: 'Mustafa Ismail',
     sudais: 'Abdul Rahman Al-Sudais', shuraim: 'Saud Al-Shuraim',
