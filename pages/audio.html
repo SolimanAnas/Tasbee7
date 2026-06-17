@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>سورة آل عمران كاملة — المنشاوي المصحف المرتل النادر 1967م | زاد المسلم</title>
+<title>القرآن الكريم — استمع لأكثر من 200 قارئ | زاد المسلم</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
-<meta name="description" content="سورة آل عمران كاملة بصوت الشيخ محمد صديق المنشاوي من المصحف المرتل النادر 1967م. استمع لأكثر من 200 قارئ.">
-<meta name="keywords" content="سورة آل عمران كاملة, آل عمران المنشاوي, المنشاوي آل عمران, المنشاوي, محمد صديق المنشاوي, المصحف المرتل النادر, المنشاوي مرتل, المصحف المجود, تلاوة نادرة, إذاعة القرآن الكريم المصرية 1967, المنشاوي mp3, استماع قرآن, قرآن كريم, تلاوة تاريخية">
+<meta name="description" content="استمع للقرآن الكريم بأصوات أكثر من 200 قارئ من أشهر القراء: المنشاوي، عبدالباسط، الحصري، السديس، ماهر المعيقلي، وغيرهم. تلاوات نادرة وتاريخية.">
+<meta name="keywords" content="القرآن الكريم, استماع قرآن, قرآن كريم, المنشاوي, محمد صديق المنشاوي, المصحف المرتل النادر, المنشاوي مرتل, المصحف المجود, تلاوة نادرة, إذاعة القرآن الكريم المصرية 1967, المنشاوي mp3, أكثر من 200 قارئ, عبدالباسط, الحصري, السديس, ماهر المعيقلي, تلاوة تاريخية">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/audio.html">
 <meta property="og:type" content="website">
-<meta property="og:title" content="سورة آل عمران كاملة — المنشاوي المصحف المرتل النادر 1967م | زاد المسلم">
-<meta property="og:description" content="سورة آل عمران كاملة بصوت الشيخ محمد صديق المنشاوي من المصحف المرتل النادر 1967م. استمع للقرآن الكريم بأصوات أشهر القراء.">
+<meta property="og:title" content="القرآن الكريم — استمع لأكثر من 200 قارئ | زاد المسلم">
+<meta property="og:description" content="استمع للقرآن الكريم بأصوات أكثر من 200 قارئ من أشهر القراء: المنشاوي، عبدالباسط، الحصري، السديس، وغيرهم. تلاوات نادرة وتاريخية.">
 <meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/audio.html">
 <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
 <meta property="og:locale" content="ar_AR">
@@ -454,6 +454,163 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 .custom-alert-btn:active{transform:scale(.95)}
 
 /* ============================================================
+   DOWNLOAD ALL — STRIP BUTTON
+   ============================================================ */
+.download-all-strip{
+  display:flex;align-items:center;gap:9px;
+  width:100%;margin-top:8px;
+  padding:10px 14px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.1),rgba(var(--accent-rgb),.04));
+  border:1px solid rgba(var(--accent-rgb),.22);
+  cursor:pointer;transition:.2s;direction:rtl;
+  color:var(--accent-main);
+}
+.download-all-strip:active{transform:scale(.98);background:rgba(var(--accent-rgb),.16)}
+.dls-icon{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:var(--accent-main);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px var(--accent-glow);
+}
+.dls-icon svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dls-label{flex:1;font-size:12.5px;font-weight:800;letter-spacing:.01em}
+.dls-count{
+  font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:100px;
+  background:rgba(var(--accent-rgb),.14);border:1px solid rgba(var(--accent-rgb),.2);
+  white-space:nowrap;
+}
+
+/* ============================================================
+   DOWNLOAD ALL — MODAL
+   ============================================================ */
+.dlall-overlay{
+  position:fixed;inset:0;z-index:12000;
+  background:var(--modal-overlay);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;
+  padding:0 12px calc(24px + env(safe-area-inset-bottom));
+}
+.dlall-overlay.active{opacity:1;visibility:visible}
+.dlall-box{
+  width:100%;max-width:440px;
+  background:var(--glass);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);
+  border:1px solid var(--glass-border);border-radius:28px;
+  box-shadow:0 -4px 40px rgba(0,0,0,.18),0 24px 60px rgba(0,0,0,.22);
+  overflow:hidden;
+  transform:translateY(48px);transition:transform .42s cubic-bezier(.22,1,.36,1);
+}
+.dlall-overlay.active .dlall-box{transform:translateY(0)}
+
+/* Modal header strip */
+.dlall-header{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 18px 16px;
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.13) 0%,rgba(var(--accent-rgb),.04) 100%);
+  border-bottom:1px solid rgba(var(--accent-rgb),.15);
+}
+.dlall-icon-ring{
+  width:50px;height:50px;border-radius:50%;flex-shrink:0;
+  background:var(--accent-main);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px var(--accent-glow);
+}
+.dlall-icon-ring svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+body.dlall-active .dlall-icon-ring{animation:dlPulse 1.8s ease-in-out infinite}
+@keyframes dlPulse{0%,100%{box-shadow:0 4px 20px var(--accent-glow)}50%{box-shadow:0 4px 30px var(--accent-glow),0 0 0 8px rgba(var(--accent-rgb),.1)}}
+.dlall-head-text h3{margin:0 0 3px;font-size:1.1rem;font-weight:800;color:var(--text-primary)}
+.dlall-head-text p{margin:0;font-size:12px;color:var(--text-secondary)}
+
+/* Reciter chip */
+.dlall-reciter-chip{
+  display:flex;align-items:center;gap:10px;
+  margin:14px 18px 0;
+  padding:11px 14px;border-radius:14px;
+  background:var(--list-hover);border:1px solid var(--glass-border);
+}
+.dlall-chip-letter{
+  width:34px;height:34px;border-radius:50%;background:var(--accent-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Amiri',serif;font-size:16px;font-weight:700;color:#fff;
+  box-shadow:0 2px 10px var(--accent-glow);flex-shrink:0;
+}
+.dlall-chip-name{font-size:13px;font-weight:700;color:var(--text-primary);flex:1}
+.dlall-chip-badge{
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;
+  background:rgba(var(--accent-rgb),.12);color:var(--accent-main);
+  border:1px solid rgba(var(--accent-rgb),.2);white-space:nowrap;
+}
+
+/* Warning */
+.dlall-warning{
+  display:flex;align-items:flex-start;gap:9px;
+  margin:12px 18px 0;padding:11px 13px;border-radius:12px;
+  background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.22);
+  font-size:12px;color:var(--text-secondary);line-height:1.55;
+}
+.dlall-warning-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* Progress ring */
+.dlall-progress-wrap{
+  display:none;flex-direction:column;align-items:center;gap:10px;
+  margin:16px 18px 0;padding:16px;border-radius:16px;
+  background:var(--list-hover);border:1px solid var(--glass-border);
+}
+.dlall-ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
+.dlall-ring{width:110px;height:110px}
+.dlall-ring-bg{fill:none;stroke:var(--glass-border);stroke-width:8}
+.dlall-ring-fill{
+  fill:none;stroke:var(--accent-main);stroke-width:8;stroke-linecap:round;
+  stroke-dasharray:295.31;stroke-dashoffset:295.31;
+  transform:rotate(-90deg);transform-origin:55px 55px;
+  transition:stroke-dashoffset .55s cubic-bezier(.22,1,.36,1);
+}
+.dlall-ring-text{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;direction:ltr;
+}
+.dlall-ring-cur{font-size:22px;font-weight:800;color:var(--text-primary);line-height:1;font-variant-numeric:tabular-nums}
+.dlall-ring-sep{font-size:11px;color:var(--text-secondary);font-weight:600;margin-top:1px}
+.dlall-track-label{
+  font-size:12px;color:var(--text-secondary);text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.dlall-bar{width:100%;height:4px;border-radius:4px;background:var(--track-bg);overflow:hidden}
+.dlall-bar-fill{height:100%;border-radius:4px;background:var(--accent-main);width:0%;transition:width .55s ease}
+
+/* Actions */
+.dlall-actions{display:flex;gap:10px;margin:14px 18px 18px}
+.dlall-btn{
+  flex:1;padding:14px;border-radius:14px;font-family:'Tajawal',sans-serif;
+  font-size:14px;font-weight:800;cursor:pointer;transition:.2s;border:none;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.dlall-btn:active{transform:scale(.96)}
+.dlall-btn-cancel{background:var(--list-hover);color:var(--text-secondary)}
+.dlall-btn-start{
+  background:var(--accent-main);color:#fff;
+  box-shadow:0 4px 18px var(--accent-glow);flex:2;
+}
+.dlall-btn-start svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dlall-btn-start:disabled{opacity:.6;cursor:default;box-shadow:none}
+
+/* Done state */
+.dlall-done{
+  display:none;flex-direction:column;align-items:center;gap:8px;
+  margin:10px 18px 22px;padding:20px;
+  background:rgba(var(--accent-rgb),.08);border-radius:18px;
+  border:1px solid rgba(var(--accent-rgb),.18);
+}
+.dlall-done-icon{
+  width:52px;height:52px;border-radius:50%;background:var(--accent-main);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px var(--accent-glow);
+  animation:dlDoneIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes dlDoneIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.dlall-done-icon svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.dlall-done-text{font-size:13.5px;font-weight:700;color:var(--text-primary);text-align:center}
+
+/* ============================================================
    BOTTOM SHEETS
    ============================================================ */
 .sheet-overlay{
@@ -774,8 +931,8 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   "audio": [
     {
       "@type": "AudioObject",
-      "name": "سورة آل عمران كاملة — الشيخ محمد صديق المنشاوي | المصحف المرتل النادر 1967م",
-      "description": "سورة آل عمران كاملة بصوت الشيخ محمد صديق المنشاوي الفقرات مجمعة من المصحف المرتل النادر إذاعة القرآن الكريم المصرية 1967م. تلاوة تاريخية ونادرة لأول مرة.",
+      "name": "المصحف المرتل النادر — الشيخ محمد صديق المنشاوي 1967م",
+      "description": "المصحف المرتل النادر للشيخ محمد صديق المنشاوي من إذاعة القرآن الكريم المصرية 1967م. تلاوة تاريخية ونادرة.",
       "inLanguage": "ar",
       "genre": ["Quran Recitation", "ترتيل", "تجويد", "مرتل"]
     },
@@ -797,6 +954,78 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   <span id="toastText"></span>
   <div class="download-progress-bar" id="downloadProgressBar">
     <div class="download-progress-fill" id="downloadProgressFill"></div>
+  </div>
+</div>
+
+<!-- ── DOWNLOAD ALL MODAL ── -->
+<div class="dlall-overlay" id="downloadAllModal">
+  <div class="dlall-box">
+
+    <!-- Header -->
+    <div class="dlall-header">
+      <div class="dlall-icon-ring">
+        <svg viewBox="0 0 24 24"><path d="M6 4h4v8a2 2 0 0 0 4 0V4h4v8a6 6 0 0 1-12 0V4z"/><line x1="8" y1="20" x2="11" y2="20"/><line x1="13" y1="20" x2="16" y2="20"/></svg>
+      </div>
+      <div class="dlall-head-text">
+        <h3>تحميل المصحف كاملاً</h3>
+        <p id="dlallSubtitle">القرآن الكريم كاملاً</p>
+      </div>
+      <button class="icon-btn" onclick="closeDlAllModal()" style="margin-inline-start:auto;width:34px;height:34px">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Reciter chip -->
+    <div class="dlall-reciter-chip">
+      <div class="dlall-chip-letter" id="dlallChipLetter">م</div>
+      <span class="dlall-chip-name" id="dlallReciterName">—</span>
+      <span class="dlall-chip-badge" id="dlallCountBadge">—</span>
+    </div>
+
+    <!-- Warning (idle) -->
+    <div class="dlall-warning" id="dlallWarning">
+      <span class="dlall-warning-icon">⚠️</span>
+      <span>سيتم تحميل الملفات الصوتية تباعاً على جهازك. قد يطلب المتصفح الإذن بتحميل ملفات متعددة.</span>
+    </div>
+
+    <!-- Progress ring (downloading) -->
+    <div class="dlall-progress-wrap" id="dlallProgressWrap">
+      <div class="dlall-ring-wrap">
+        <svg class="dlall-ring" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="47" class="dlall-ring-bg"/>
+          <circle cx="55" cy="55" r="47" class="dlall-ring-fill" id="dlallRingFill"/>
+        </svg>
+        <div class="dlall-ring-text">
+          <span class="dlall-ring-cur" id="dlallRingCur">0</span>
+          <span class="dlall-ring-sep" id="dlallRingTotal">/0</span>
+        </div>
+      </div>
+      <div class="dlall-track-label" id="dlallTrackLabel">—</div>
+      <div class="dlall-bar"><div class="dlall-bar-fill" id="dlallBarFill"></div></div>
+    </div>
+
+    <!-- Done -->
+    <div class="dlall-done" id="dlallDone">
+      <div class="dlall-done-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="dlall-done-text" id="dlallDoneText">تم التحميل بنجاح</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="dlall-actions" id="dlallActions">
+      <button class="dlall-btn dlall-btn-cancel" id="dlallCancelBtn" onclick="closeDlAllModal()">إلغاء</button>
+      <button class="dlall-btn dlall-btn-start" id="dlallStartBtn" onclick="startDownloadAll()">
+        <svg viewBox="0 0 24 24"><path d="M6 4h4v8a2 2 0 0 0 4 0V4h4v8a6 6 0 0 1-12 0V4z"/><line x1="8" y1="20" x2="11" y2="20"/><line x1="13" y1="20" x2="16" y2="20"/></svg>
+        تحميل الكل
+      </button>
+    </div>
+
+    <!-- Close btn shown after done -->
+    <div style="display:none;padding:0 18px 18px" id="dlallDoneActions">
+      <button class="dlall-btn dlall-btn-start" style="width:100%" onclick="closeDlAllModal()">تم</button>
+    </div>
+
   </div>
 </div>
 
@@ -920,6 +1149,15 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
         <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
       </button>
       <button class="action-btn" id="speedBtn" onclick="haptic();toggleSpeed()">1x</button>
+    </div>
+
+    <!-- Download All Strip -->
+    <div class="download-all-strip" onclick="haptic();openDownloadAllModal()">
+      <div class="dls-icon">
+        <svg viewBox="0 0 24 24"><path d="M6 4h4v8a2 2 0 0 0 4 0V4h4v8a6 6 0 0 1-12 0V4z"/><line x1="8" y1="20" x2="11" y2="20"/><line x1="13" y1="20" x2="16" y2="20"/></svg>
+      </div>
+      <span class="dls-label">تحميل المصحف كاملاً</span>
+      <span class="dls-count" id="dlsCount">—</span>
     </div>
   </section>
 
@@ -1453,6 +1691,9 @@ function buildJuzData(){
       currentJuzData.push({name:`${num} - سورة ${name}`,url:reciter.baseUrl+sn+'.mp3',originalName:'سورة '+name,number:num});
     });
   }
+  // Sync strip badge
+  const dlsCount=document.getElementById('dlsCount');
+  if(dlsCount)dlsCount.textContent=currentJuzData.length?currentJuzData.length+' ملف':'—';
 }
 
 function renderReciterList(filterText=''){
@@ -1647,6 +1888,113 @@ function formatTime(s){if(isNaN(s))return'00:00';const m=Math.floor(s/60),sec=Ma
 // ============================================================
 //  DOWNLOAD
 // ============================================================
+// ============================================================
+//  DOWNLOAD ALL
+// ============================================================
+let _dlAll={running:false,cancelled:false,current:0,total:0};
+const _DL_CIRCUMFERENCE=295.31; // 2π×47, matches SVG r=47
+
+function openDownloadAllModal(){
+  if(currentJuzData.length===0)return showToast('اختر قارئاً أولاً');
+  const reciterDisp=reciterDisplay(appData.reciters[selectedReciterIndex]);
+  document.getElementById('dlallReciterName').textContent=reciterDisp;
+  document.getElementById('dlallChipLetter').textContent=reciterDisp.charAt(0)||'م';
+  document.getElementById('dlallCountBadge').textContent=currentJuzData.length+' سورة';
+  document.getElementById('dlallSubtitle').textContent=reciterDisp;
+  _setDlAllPhase('idle');
+  document.getElementById('downloadAllModal').classList.add('active');
+  document.getElementById('sheetOverlay').classList.add('active');
+}
+
+function closeDlAllModal(){
+  if(_dlAll.running){_dlAll.cancelled=true;_dlAll.running=false}
+  document.getElementById('downloadAllModal').classList.remove('active');
+  document.getElementById('sheetOverlay').classList.remove('active');
+  document.body.classList.remove('dlall-active');
+}
+
+function _setDlAllPhase(phase){
+  const progressWrap=document.getElementById('dlallProgressWrap');
+  const warning=document.getElementById('dlallWarning');
+  const actions=document.getElementById('dlallActions');
+  const startBtn=document.getElementById('dlallStartBtn');
+  const cancelBtn=document.getElementById('dlallCancelBtn');
+  const done=document.getElementById('dlallDone');
+  const doneActions=document.getElementById('dlallDoneActions');
+  if(phase==='idle'){
+    progressWrap.style.display='none';warning.style.display='';
+    actions.style.display='';done.style.display='none';doneActions.style.display='none';
+    startBtn.disabled=false;
+    startBtn.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h4v8a2 2 0 0 0 4 0V4h4v8a6 6 0 0 1-12 0V4z"/><line x1="8" y1="20" x2="11" y2="20"/><line x1="13" y1="20" x2="16" y2="20"/></svg> تحميل الكل';
+    cancelBtn.textContent='إلغاء';cancelBtn.onclick=closeDlAllModal;
+    document.body.classList.remove('dlall-active');
+  }else if(phase==='downloading'){
+    progressWrap.style.display='flex';warning.style.display='none';
+    done.style.display='none';doneActions.style.display='none';
+    startBtn.disabled=true;
+    startBtn.innerHTML='جارٍ التحميل...';
+    cancelBtn.textContent='إيقاف';cancelBtn.onclick=()=>{_dlAll.cancelled=true;_dlAll.running=false;_setDlAllPhase('idle')};
+    document.body.classList.add('dlall-active');
+  }else if(phase==='done'){
+    progressWrap.style.display='none';warning.style.display='none';
+    actions.style.display='none';done.style.display='flex';doneActions.style.display='';
+    document.body.classList.remove('dlall-active');
+  }
+}
+
+function _updateDlRing(current,total,trackName){
+  const pct=total>0?current/total:0;
+  const offset=_DL_CIRCUMFERENCE*(1-pct);
+  document.getElementById('dlallRingFill').style.strokeDashoffset=offset;
+  document.getElementById('dlallRingCur').textContent=current;
+  document.getElementById('dlallRingTotal').textContent='/'+total;
+  document.getElementById('dlallTrackLabel').textContent=trackName||'—';
+  document.getElementById('dlallBarFill').style.width=(pct*100)+'%';
+}
+
+async function startDownloadAll(){
+  if(_dlAll.running||currentJuzData.length===0)return;
+  const tracks=[...currentJuzData];
+  const reciterName=reciterDisplay(appData.reciters[selectedReciterIndex]);
+  const total=tracks.length;
+  _dlAll={running:true,cancelled:false,current:0,total};
+  _setDlAllPhase('downloading');
+  _updateDlRing(0,total,'');
+
+  for(let i=0;i<tracks.length;i++){
+    if(_dlAll.cancelled)break;
+    _dlAll.current=i;
+    const track=tracks[i];
+    const displayName=juzDisplay(track);
+    _updateDlRing(i+1,total,displayName);
+    try{
+      const resp=await fetch(track.url);
+      if(!resp.ok)throw new Error('HTTP '+resp.status);
+      const blob=await resp.blob();
+      const blobUrl=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=blobUrl;
+      a.download=`${reciterName} - ${displayName}.mp3`;
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{URL.revokeObjectURL(blobUrl);document.body.removeChild(a)},2000);
+    }catch(e){
+      console.error('dl-all track',i,e);
+      // fallback: direct link (opens tab, but at least something happens)
+      const a=document.createElement('a');
+      a.href=track.url;a.target='_blank';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+    }
+    // Wait for the download to start before fetching the next file
+    await new Promise(r=>setTimeout(r,1200));
+  }
+
+  _dlAll.running=false;
+  if(!_dlAll.cancelled){
+    document.getElementById('dlallDoneText').textContent='تم تحميل '+total+' ملف صوتي';
+    _setDlAllPhase('done');
+  }
+}
+
 async function downloadTrack(){
   if(!currentTrackUrl)return;
   const btn=document.getElementById('downloadBtn');if(btn.disabled)return;btn.disabled=true;
