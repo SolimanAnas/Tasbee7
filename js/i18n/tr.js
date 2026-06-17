@@ -689,4 +689,9 @@ export default {
   // Sleeping adhkar
   'azkar_sleeping': `Uyku Zikirleri`,
   'azkar_open_sleeping': `Uyku Zikirlerini Aç`,
+
+  // PWA install
+  'pwa_install_desc': `Hızlı erişim için uygulamayı yükleyin`,
+  'pwa_install': `Yükle`,
+  'pwa_later': `Sonra`,
 };

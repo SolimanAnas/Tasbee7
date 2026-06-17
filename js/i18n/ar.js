@@ -718,4 +718,9 @@ export default {
   // Sleeping adhkar
   'azkar_sleeping': `أذكار النوم`,
   'azkar_open_sleeping': `فتح أذكار النوم`,
+
+  // PWA install
+  'pwa_install_desc': `حمّل التطبيق للوصول السريع`,
+  'pwa_install': `تثبيت`,
+  'pwa_later': `لاحقاً`,
 };

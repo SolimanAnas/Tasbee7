@@ -718,4 +718,9 @@ export default {
   // Sleeping adhkar
   'azkar_sleeping': `بیرخسینەوە زیکرەکان`,
   'azkar_open_sleeping': `بیرخسینەوە زیکرەکان بیکەرەوە`,
+
+  // PWA install
+  'pwa_install_desc': `داگرتنی ئەپ بۆ چوونەژوورەوەی خێرا`,
+  'pwa_install': `داگرتن`,
+  'pwa_later': `دواتر`,
 };

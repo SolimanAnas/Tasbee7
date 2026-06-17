@@ -718,4 +718,9 @@ export default {
   // Sleeping adhkar
   'azkar_sleeping': `Sleep Adhkar`,
   'azkar_open_sleeping': `Open Sleep Adhkar`,
+
+  // PWA install
+  'pwa_install_desc': `Install the app for quick access`,
+  'pwa_install': `Install`,
+  'pwa_later': `Later`,
 };

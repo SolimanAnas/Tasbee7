@@ -689,4 +689,9 @@ export default {
   // Sleeping adhkar
   'azkar_sleeping': `سوتے کے اذکار`,
   'azkar_open_sleeping': `سوتے کے اذکار کھولیں`,
+
+  // PWA install
+  'pwa_install_desc': `فوری رسائی کے لیے ایپ انسٹال کریں`,
+  'pwa_install': `انسٹال`,
+  'pwa_later': `بعد میں`,
 };
