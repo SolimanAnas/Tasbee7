@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v63"; // v59: removed سورة آل عمران from title/OG
+const CACHE_NAME = "zad-muslim-v64"; // v64: hijri date fix (English uses Islamic month names)
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
