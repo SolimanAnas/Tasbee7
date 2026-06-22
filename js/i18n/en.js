@@ -68,7 +68,13 @@ export default {
   // Quran Hero
   'quran_hero_title': 'The Noble Quran',
   'quran_hero_sub': 'Uthmani Script · Text',
-  'quran_hero_continue': 'Continue reading · page {page}',
+  'quran_hero_continue_label': 'Continue Reading',
+  'quran_hero_page': 'Page {page}',
+  'quran_hero_just_now': 'Just now',
+  'quran_hero_mins_ago': '{n}m ago',
+  'quran_hero_hrs_ago': '{n}h ago',
+  'quran_hero_days_ago': '{n}d ago',
+  'quran_hero_long_ago': 'Long ago',
 
   // Settings
   'settings_title': 'Settings',

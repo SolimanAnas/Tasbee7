@@ -63,7 +63,13 @@ export default {
 
   'quran_hero_title': 'Mukaddes Kuran',
   'quran_hero_sub': 'Osmanlı Harfleri · Metin',
-  'quran_hero_continue': 'Okumaya devam et · sayfa {page}',
+  'quran_hero_continue_label': 'Okumaya Devam Et',
+  'quran_hero_page': 'sayfa {page}',
+  'quran_hero_just_now': 'Şimdi',
+  'quran_hero_mins_ago': '{n} dk önce',
+  'quran_hero_hrs_ago': '{n} sa önce',
+  'quran_hero_days_ago': '{n} g önce',
+  'quran_hero_long_ago': 'Uzun zaman önce',
 
   'settings_title': 'Ayarlar',
   'theme_light': 'Aydınlık',

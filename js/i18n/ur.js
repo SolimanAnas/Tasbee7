@@ -63,7 +63,13 @@ export default {
 
   'quran_hero_title': 'قرآن پاک',
   'quran_hero_sub': 'عثمانی خط · متن',
-  'quran_hero_continue': 'پڑھنا جاری رکھیں · صفحہ {page}',
+  'quran_hero_continue_label': 'پڑھنا جاری رکھیں',
+  'quran_hero_page': 'صفحہ {page}',
+  'quran_hero_just_now': 'ابھی',
+  'quran_hero_mins_ago': '{n} منٹ پہلے',
+  'quran_hero_hrs_ago': '{n} گھنٹے پہلے',
+  'quran_hero_days_ago': '{n} دن پہلے',
+  'quran_hero_long_ago': 'بہت عرصہ پہلے',
 
   'settings_title': 'ترتیبات',
   'theme_light': 'روشن',

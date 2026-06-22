@@ -205,6 +205,7 @@ function navigateTo(newPage, direction) {
     currentPage = newPage;
     updateContent(); // mode-specific rendering
     localStorage.setItem('lastPage', currentPage);
+    if (typeof localStorage !== 'undefined') localStorage.setItem('lastPageTime', Date.now());
 
     frame.style.transition = 'none';
     frame.style.transform  = `translateX(${enterX})`;

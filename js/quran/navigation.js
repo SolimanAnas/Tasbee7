@@ -97,6 +97,7 @@
       img.onerror = () => { img.style.opacity = '1'; };
       if(typeof updateMeta === 'function') updateMeta();
       localStorage.setItem('lastPage', currentPage);
+      localStorage.setItem('lastPageTime', Date.now());
       updateBookmarkStar();
       updatePageLabels();
       trackQuranReading();

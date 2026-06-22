@@ -188,7 +188,8 @@
   color: #2A1B0A;
   box-shadow: 0 8px 24px rgba(124, 82, 26, 0.4);
 }
-[data-theme="sepia"] .quran-hero::before {
+[data-theme="sepia"] .quran-hero::before,
+[data-theme="sepia"] .quran-hero::after {
   background: radial-gradient(circle, rgba(255,248,230,0.35) 0%, transparent 70%);
 }
 [data-theme="sepia"] .quran-hero-icon {
@@ -305,13 +306,14 @@ input, textarea, select {
   margin: 0 var(--spacing-md) var(--spacing-md);
   background: linear-gradient(135deg, var(--primary), var(--primary-grad-end));
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 20px 24px;
   color: white;
   display: flex; justify-content: space-between; align-items: center;
   cursor: pointer;
   box-shadow: 0 8px 24px var(--primary-container);
   position: relative; overflow: hidden;
-  transition: transform var(--ease-smooth);
+  transition: transform var(--ease-smooth), box-shadow var(--ease-smooth);
+  min-height: 88px;
 }
 .quran-hero:active { transform: scale(0.97); }
 .quran-hero::before {
@@ -320,11 +322,37 @@ input, textarea, select {
   background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
   border-radius: 50%; pointer-events: none;
 }
-.quran-hero-text { display: flex; flex-direction: column; gap: 6px; z-index: 1; }
-.quran-hero-title { font-family: 'Tajawal-Local', sans-serif; font-size: 1.6rem; font-weight: 700; }
-.quran-hero-sub { font-size: 0.85rem; font-weight: 500; opacity: 0.9; }
+.quran-hero::after {
+  content: '';
+  position: absolute;
+  left: 10%; bottom: -30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.quran-hero-text { display: flex; flex-direction: column; gap: 4px; z-index: 1; flex: 1; }
+.quran-hero-continue {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.78rem; font-weight: 600;
+  opacity: 0.85; letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.quran-hero-arrow { stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.quran-hero-title {
+  font-family: 'Tajawal-Local', sans-serif;
+  font-size: 1.35rem; font-weight: 700;
+  line-height: 1.3;
+}
+.quran-hero-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; font-weight: 500;
+  opacity: 0.85;
+  flex-wrap: wrap;
+}
+.quran-hero-sep { opacity: 0.5; }
 .quran-hero-icon {
-  width: 48px; height: 48px;
+  width: 48px; height: 48px; flex-shrink: 0;
   background: rgba(255,255,255,0.2);
   border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center;
@@ -637,8 +665,16 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 
   <div class="quran-hero" onclick="handleQuranClick()">
     <div class="quran-hero-text">
-      <span class="quran-hero-title" data-i18n="quran_hero_title">المصحف الشريف</span>
-      <span class="quran-hero-sub" id="quranHeroSub" data-i18n="quran_hero_sub">الرسم العثماني · النصي</span>
+      <span class="quran-hero-continue" id="quranHeroContinue">
+        <svg class="quran-hero-arrow" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        <span data-i18n="quran_hero_continue_label">Continue Reading</span>
+      </span>
+      <span class="quran-hero-title" id="quranHeroTitle" data-i18n="quran_hero_title">المصحف الشريف</span>
+      <div class="quran-hero-meta" id="quranHeroMeta">
+        <span class="quran-hero-page" id="quranHeroPage" data-i18n="quran_hero_sub">الرسم العثماني · النصي</span>
+        <span class="quran-hero-sep">·</span>
+        <span class="quran-hero-time" id="quranHeroTime"></span>
+      </div>
     </div>
     <div class="quran-hero-icon">
       <svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
@@ -1045,10 +1081,46 @@ function formatTimeArabic12h(d) {
   return `${h}:${m < 10 ? '0'+m : m} ${ap}`;
 }
 
+const _SP=[1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,477,483,489,496,499,502,507,511,515,518,520,523,526,528,531,534,537,542,545,549,551,553,554,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,585,586,587,587,589,590,591,591,592,593,594,595,595,596,596,597,597,598,598,599,599,600,600,601,601,601,602,602,602,603,603,603,604,604,604];
+const _SE=['Al-Fatihah','Al-Baqarah','Aal-E-Imran','An-Nisa',"Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal","At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha","Al-Anbiya'","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba'","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah","As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddaththir","Al-Qiyamah","Al-Insan","Al-Mursalat",'An-Naba','An-Nazi\'at','Abasa','At-Takwir','Al-Infitar','Al-Mutaffifin','Al-Inshiqaq','Al-Buruj','At-Tariq',"Al-A'la",'Al-Ghashiyah','Al-Fajr','Al-Balad','Ash-Shams','Al-Layl','Ad-Duha','Ash-Sharh','At-Tin','Al-Alaq','Al-Qadr','Al-Bayyinah','Az-Zalzalah',"Al-'Adiyat","Al-Qari'ah",'At-Takathur',"Al-'Asr",'Al-Humazah','Al-Fil','Quraysh',"Al-Ma'un",'Al-Kawthar','Al-Kafirun','An-Nasr','Al-Masad','Al-Ikhlas','Al-Falaq','An-Nas'];
+const _SA=['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
+function pageSurah(p) { let i=_SP.length; while(i-->0){if(_SP[i]<=p)return i+1}return 1; }
+function surahName(n) { const d=document.documentElement; return (d.dir==='rtl'||d.lang==='ar')? _SA[n-1] : _SE[n-1]; }
+
+function relativeTime(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return t('quran_hero_just_now');
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return t('quran_hero_mins_ago', {n: mins});
+  const hrs = Math.floor(diff / 3600000);
+  if (hrs < 24) return t('quran_hero_hrs_ago', {n: hrs});
+  const days = Math.floor(diff / 86400000);
+  if (days < 7) return t('quran_hero_days_ago', {n: days});
+  return t('quran_hero_long_ago');
+}
+
 function initQuranHero() {
   const lastPage = localStorage.getItem('lastPage');
-  const sub = document.getElementById('quranHeroSub');
-  if (lastPage && sub) sub.innerText = t('quran_hero_continue', {page: lastPage});
+  const lastTime = localStorage.getItem('lastPageTime');
+  const title = document.getElementById('quranHeroTitle');
+  const cont = document.getElementById('quranHeroContinue');
+  const meta = document.getElementById('quranHeroMeta');
+  const pageEl = document.getElementById('quranHeroPage');
+  const timeEl = document.getElementById('quranHeroTime');
+  if (!lastPage) {
+    if (title) title.textContent = t('quran_hero_title');
+    if (pageEl) pageEl.textContent = t('quran_hero_sub');
+    if (cont) cont.style.display = 'none';
+    if (meta) meta.style.display = 'none';
+    return;
+  }
+  const surahNum = pageSurah(parseInt(lastPage));
+  const name = surahName(surahNum);
+  if (title) title.textContent = name;
+  if (pageEl) pageEl.textContent = t('quran_hero_page', {page: lastPage});
+  if (cont) cont.style.display = 'inline-flex';
+  if (timeEl && lastTime) timeEl.textContent = relativeTime(parseInt(lastTime));
+  if (meta) meta.style.display = 'flex';
 }
 
 function startCountdown(nextObj, nameAr) {

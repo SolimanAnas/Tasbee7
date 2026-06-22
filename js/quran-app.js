@@ -45,6 +45,7 @@ function renderPage() {
 
     img.src = `mushaf pages/madina-1421/${currentPage.toString().padStart(3, '0')}.webp`;
     localStorage.setItem("lastPage", currentPage);
+    localStorage.setItem("lastPageTime", Date.now());
 
     updateMeta();
     updateBookmarkUI();

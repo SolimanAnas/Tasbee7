@@ -69,7 +69,13 @@ export default {
   // Quran Hero
   'quran_hero_title': 'قورئانی پاک',
   'quran_hero_sub': 'نوسینی عثمانی · دەق',
-  'quran_hero_continue': 'بەردەوامبوون بخوێنە · پەڕە {page}',
+  'quran_hero_continue_label': 'بەردەوامبوون بخوێنە',
+  'quran_hero_page': 'پەڕە {page}',
+  'quran_hero_just_now': 'ئێستا',
+  'quran_hero_mins_ago': 'پێش {n} خ',
+  'quran_hero_hrs_ago': 'پێش {n} ک',
+  'quran_hero_days_ago': 'پێش {n} ر',
+  'quran_hero_long_ago': 'پێش زوو',
 
   // Settings
   'settings_title': 'ڕێکخستنەکان',

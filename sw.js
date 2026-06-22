@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v64"; // v64: hijri date fix (English uses Islamic month names)
+const CACHE_NAME = "zad-muslim-v65"; // v65: quran hero continue-reading card
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 

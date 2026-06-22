@@ -68,7 +68,13 @@ export default {
   // Quran Hero
   'quran_hero_title': 'المصحف الشريف',
   'quran_hero_sub': 'الرسم العثماني · النصي',
-  'quran_hero_continue': 'مواصلة القراءة · صفحة {page}',
+  'quran_hero_continue_label': 'مواصلة القراءة',
+  'quran_hero_page': 'صفحة {page}',
+  'quran_hero_just_now': 'الآن',
+  'quran_hero_mins_ago': 'قبل {n} د',
+  'quran_hero_hrs_ago': 'قبل {n} س',
+  'quran_hero_days_ago': 'قبل {n} ي',
+  'quran_hero_long_ago': 'منذ فترة',
 
   // Settings
   'settings_title': 'الإعدادات',
