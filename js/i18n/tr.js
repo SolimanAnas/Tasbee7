@@ -61,9 +61,11 @@ export default {
   'share_copied': 'Uygulama bağlantısı başarıyla kopyalandı!',
   'prayer_error': 'Namaz vakitleri hesaplanamadı',
 
+  // Quran Hero
   'quran_hero_title': 'Mukaddes Kuran',
   'quran_hero_sub': 'Osmanlı Harfleri · Metin',
-  'quran_hero_continue_label': 'Okumaya Devam Et',
+  'quran_hero_continue_label': "Kuran'ı terk etme, okumaya devam et",
+  'quran_hero_surah': '{name} Suresi',
   'quran_hero_page': 'sayfa {page}',
   'quran_hero_just_now': 'Şimdi',
   'quran_hero_mins_ago': '{n} dk önce',

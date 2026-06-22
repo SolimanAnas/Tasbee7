@@ -61,9 +61,11 @@ export default {
   'share_copied': 'ایپ لنک کامیابی سے کاپی ہو گیا!',
   'prayer_error': 'نماز کے اوقات کا حساب نہیں ہو سکا',
 
+  // Quran Hero
   'quran_hero_title': 'قرآن پاک',
   'quran_hero_sub': 'عثمانی خط · متن',
-  'quran_hero_continue_label': 'پڑھنا جاری رکھیں',
+  'quran_hero_continue_label': 'قرآن کو نہ چھوڑیں ، پڑھنا جاری رکھیں',
+  'quran_hero_surah': 'سورة {name}',
   'quran_hero_page': 'صفحہ {page}',
   'quran_hero_just_now': 'ابھی',
   'quran_hero_mins_ago': '{n} منٹ پہلے',
