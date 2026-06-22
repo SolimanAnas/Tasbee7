@@ -1378,7 +1378,9 @@
       checkDailyResetKhatma(); // التأكد من الإحصائيات عند الفتح
 
       if (initP) { currentPage = initP; updateContent(); }
-      else { currentPage = parseInt(localStorage.getItem('lastPageText')) || 1; updateContent(); }
+      else { currentPage = parseInt(localStorage.getItem('lastPageText') || localStorage.getItem('lastPage')) || 1; updateContent(); }
+      localStorage.setItem('lastPage', currentPage);
+      if (typeof localStorage !== 'undefined') localStorage.setItem('lastPageTime', Date.now());
       updateToggleLink(); 
       setupScrollListener();
     };
