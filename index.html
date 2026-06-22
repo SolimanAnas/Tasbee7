@@ -1082,10 +1082,7 @@ function computePrayer(lat, lng) {
     nextEnum='fajr'; nextDate=tpt.fajr; nextName=getPrayerName('fajr');
   }
   const city = localStorage.getItem('current_location_name') || t('prayer_saved_location');
-  const _hl = I18n.getLang() + '-SA-u-ca-islamic';
-  let hijri;
-  try { hijri = new Intl.DateTimeFormat(_hl, {day:'numeric', month:'long', year:'numeric'}).format(now); }
-  catch(e) { hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'}).format(now); }
+  const hijri = formatHijriDate(now, false);
   return { pt, nextEnum, nextDate, nextName, city, hijri };
 }
 
@@ -1158,11 +1155,37 @@ function ptRelLabel(d) {
   if(o === -2) return t('day_before_yesterday');
   return o > 0 ? t('days_after', { count: o }) : t('days_before', { count: Math.abs(o) });
 }
-function ptFmtHijri(d) {
-  const locale = I18n.getLang() + '-SA-u-ca-islamic';
-  try { return new Intl.DateTimeFormat(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
-  catch(e) { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d); }
+const ISLAMIC_MONTHS_EN = [
+  'Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Thani",
+  'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', "Sha'ban",
+  'Ramadan', 'Shawwal', "Dhu al-Qi'dah", 'Dhu al-Hijjah"
+];
+function formatHijriDate(d, includeWeekday) {
+  const lang = I18n.getLang();
+  if (lang === 'en') {
+    const fmt = new Intl.DateTimeFormat('en-u-ca-islamic', {day:'numeric', month:'numeric', year:'numeric'});
+    const parts = fmt.formatToParts(d);
+    let day = '', monthNum = 0, year = '';
+    for (const p of parts) {
+      if (p.type === 'day') day = p.value;
+      else if (p.type === 'month') monthNum = parseInt(p.value, 10);
+      else if (p.type === 'year') year = p.value;
+    }
+    const monthName = ISLAMIC_MONTHS_EN[monthNum - 1] || '';
+    if (includeWeekday) {
+      const weekday = new Intl.DateTimeFormat('en', {weekday:'long'}).format(d);
+      return `${weekday}, ${day} ${monthName} ${year}`;
+    }
+    return `${day} ${monthName} ${year}`;
+  }
+  const locale = lang + '-SA-u-ca-islamic';
+  const opts = includeWeekday
+    ? {weekday:'long', day:'numeric', month:'long', year:'numeric'}
+    : {day:'numeric', month:'long', year:'numeric'};
+  try { return new Intl.DateTimeFormat(locale, opts).format(d); }
+  catch(e) { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', opts).format(d); }
 }
+function ptFmtHijri(d) { return formatHijriDate(d, true); }
 function ptFmtGreg(d) {
   const locale = I18n.getLang();
   try { return new Intl.DateTimeFormat(locale, {day:'numeric', month:'long', year:'numeric'}).format(d); }
