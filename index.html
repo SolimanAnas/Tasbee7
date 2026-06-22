@@ -184,16 +184,39 @@
 
 /* عسلي — premium gold hero with dark engraved text */
 [data-theme="sepia"] .quran-hero {
-  background: linear-gradient(135deg, #E6B95A 0%, #B5832A 55%, #7E521A 100%);
+  background: linear-gradient(135deg, #E6B95A 0%, #C9942E 40%, #A07120 70%, #7E521A 100%);
   color: #2A1B0A;
-  box-shadow: 0 8px 24px rgba(124, 82, 26, 0.4);
+  box-shadow: 0 8px 28px rgba(124, 82, 26, 0.45);
 }
-[data-theme="sepia"] .quran-hero::before,
+[data-theme="sepia"] .quran-hero::before {
+  background-image:
+    linear-gradient(45deg, rgba(42,27,10,0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(42,27,10,0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(42,27,10,0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(42,27,10,0.04) 75%);
+}
 [data-theme="sepia"] .quran-hero::after {
-  background: radial-gradient(circle, rgba(255,248,230,0.35) 0%, transparent 70%);
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,248,230,0.15) 45%,
+    rgba(255,248,230,0.22) 50%,
+    rgba(255,248,230,0.15) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+}
+[data-theme="sepia"] .quran-hero .quran-hero-glow {
+  background: radial-gradient(circle, rgba(255,248,230,0.3) 0%, transparent 70%);
+}
+[data-theme="sepia"] .quran-hero .quran-hero-accent {
+  background: linear-gradient(90deg, transparent, rgba(42,27,10,0.4), transparent);
 }
 [data-theme="sepia"] .quran-hero-icon {
-  background: rgba(42, 27, 10, 0.18);
+  background: rgba(42, 27, 10, 0.14);
+}
+[data-theme="sepia"] .quran-hero:hover .quran-hero-icon {
+  background: rgba(42, 27, 10, 0.22);
 }
 [data-theme="sepia"] .quran-hero-icon svg { stroke: #2A1B0A; }
 [data-theme="sepia"] .section-title {
@@ -304,45 +327,87 @@ input, textarea, select {
 /* ======================== QURAN HERO CARD ======================== */
 .quran-hero {
   margin: 0 var(--spacing-md) var(--spacing-md);
-  background: linear-gradient(135deg, var(--primary), var(--primary-grad-end));
+  background: linear-gradient(135deg, var(--primary), #047857 50%, var(--primary-grad-end));
   border-radius: var(--radius-lg);
-  padding: 20px 24px;
+  padding: 22px 24px;
   color: white;
   display: flex; justify-content: space-between; align-items: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px var(--primary-container);
+  box-shadow: 0 8px 28px var(--primary-container);
   position: relative; overflow: hidden;
   transition: transform var(--ease-smooth), box-shadow var(--ease-smooth);
-  min-height: 88px;
+  min-height: 96px;
+  isolation: isolate;
 }
 .quran-hero:active { transform: scale(0.97); }
+/* Subtle geometric pattern overlay */
 .quran-hero::before {
-  content: ''; position: absolute; right: -20px; top: -20px;
-  width: 120px; height: 120px;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-  border-radius: 50%; pointer-events: none;
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%);
+  background-size: 32px 32px;
+  background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+  pointer-events: none; z-index: 0;
 }
+/* Shimmer sweep animation */
 .quran-hero::after {
   content: '';
-  position: absolute;
-  left: 10%; bottom: -30px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
-  border-radius: 50%; pointer-events: none;
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,0.08) 45%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(255,255,255,0.08) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: heroShimmer 6s ease-in-out infinite;
+  pointer-events: none; z-index: 0;
+  opacity: 0.6;
 }
-.quran-hero-text { display: flex; flex-direction: column; gap: 4px; z-index: 1; flex: 1; }
+@keyframes heroShimmer {
+  0%, 100% { background-position: 200% 0; }
+  50% { background-position: -200% 0; }
+}
+/* Glow blob in the corner */
+.quran-hero .quran-hero-glow {
+  position: absolute; right: -20px; top: -20px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none; z-index: 0;
+}
+/* Decorative top border accent */
+.quran-hero .quran-hero-accent {
+  position: absolute; top: 0; left: 24px; right: 24px; height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  border-radius: 0 0 2px 2px; pointer-events: none; z-index: 0;
+}
+.quran-hero-text { display: flex; flex-direction: column; gap: 3px; z-index: 1; flex: 1; }
 .quran-hero-continue {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 0.78rem; font-weight: 600;
-  opacity: 0.85; letter-spacing: 0.02em;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 700;
+  opacity: 0.8; letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
+  transition: opacity var(--ease-smooth);
 }
-.quran-hero-arrow { stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.quran-hero-continue:hover { opacity: 1; }
+.quran-hero-arrow {
+  stroke: currentColor; fill: none; stroke-width: 2.2;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--ease-spring);
+}
+.quran-hero:hover .quran-hero-arrow { transform: translateX(3px); }
 .quran-hero-title {
   font-family: 'Tajawal-Local', sans-serif;
   font-size: 1.35rem; font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
 }
 .quran-hero-meta {
   display: flex; align-items: center; gap: 6px;
@@ -352,13 +417,15 @@ input, textarea, select {
 }
 .quran-hero-sep { opacity: 0.5; }
 .quran-hero-icon {
-  width: 48px; height: 48px; flex-shrink: 0;
-  background: rgba(255,255,255,0.2);
+  width: 52px; height: 52px; flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
   border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: background var(--ease-smooth), transform var(--ease-spring);
 }
-.quran-hero-icon svg { width: 24px; height: 24px; stroke: white; stroke-width: 1.8; fill: none; }
+.quran-hero:hover .quran-hero-icon { background: rgba(255,255,255,0.22); transform: scale(1.05); }
+.quran-hero-icon svg { width: 26px; height: 26px; stroke: white; stroke-width: 1.6; fill: none; }
 
 /* ======================== CONTENT GRID ======================== */
 .section-title {
@@ -664,6 +731,8 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
   </div>
 
   <div class="quran-hero" onclick="handleQuranClick()">
+    <div class="quran-hero-glow"></div>
+    <div class="quran-hero-accent"></div>
     <div class="quran-hero-text">
       <span class="quran-hero-continue" id="quranHeroContinue">
         <svg class="quran-hero-arrow" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1489,7 +1558,10 @@ function selectQuran(t) {
   closeQuranChoiceModal(); 
 }
 function go(page) { document.body.classList.add('fade-out'); setTimeout(()=>window.location.assign(page), 200); }
-window.addEventListener('pageshow', () => document.body.classList.remove('fade-out'));
+window.addEventListener('pageshow', () => {
+  document.body.classList.remove('fade-out');
+  initQuranHero();
+});
 
 function attachSheetDrag(id) {
   const sheet = document.getElementById(id); if(!sheet) return;
