@@ -434,6 +434,7 @@
 </div>
 
 <script src="../js/theme-manager.js"></script>
+<script src="../js/back-close.js"></script>
 <script>
   let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
 
@@ -772,8 +773,14 @@
     render();
   }
 
-  function openMenu() { document.getElementById('menuModal').classList.add('active'); }
-  function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
+  function openMenu() {
+    document.getElementById('menuModal').classList.add('active');
+    if (window.BackClose) BackClose.opened(closeMenu);
+  }
+  function closeMenu() {
+    if (window.BackClose) BackClose.closed();
+    document.getElementById('menuModal').classList.remove('active');
+  }
 
   function openBookmarkModal() {
     const list = document.getElementById('bookmarkList');
@@ -792,8 +799,12 @@
       }).join('');
     }
     document.getElementById('bookmarkModal').classList.add('active');
+    if (window.BackClose) BackClose.opened(closeBookmarkModal);
   }
-  function closeBookmarkModal() { document.getElementById('bookmarkModal').classList.remove('active'); }
+  function closeBookmarkModal() {
+    if (window.BackClose) BackClose.closed();
+    document.getElementById('bookmarkModal').classList.remove('active');
+  }
   function goToBookmark(sIdx, iIdx) {
     App.currentIdx = sIdx;
     App.isSearchMode = false;

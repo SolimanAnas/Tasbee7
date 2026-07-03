@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
   <title>الدعاء من الكتاب والسنة — زاد المسلم | Duaa Collection</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
   <meta name="description" content="أدعية من القرآن الكريم والسنة النبوية مرتبة حسب الموضوعات — دعاء الصباح والمساء والنوم والسفر والمرض والكرب والاستخارة وغيرها. Duaa collection from Quran and Sunnah by topic.">
@@ -601,6 +602,7 @@
 
   <script src="../js/i18n.js"></script>
   <script>if (window.I18n) I18n.init();</script>
+  <script src="../js/back-close.js"></script>
   <script>
     // ---------- DATA FOR "الدعاء من الكتاب والسنة" ----------
     const DEFAULT_DUAA_DATA = [
@@ -860,18 +862,21 @@
         }
       });
       document.getElementById('menuModal').classList.add('active');
+      if (window.BackClose) BackClose.opened(closeMenu);
     }
-    
-    function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
-    function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
-    function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+
+    function closeMenu() { if (window.BackClose) BackClose.closed(); document.getElementById('menuModal').classList.remove('active'); }
+    function openSettings() { document.getElementById('settingsModal').classList.add('active'); if (window.BackClose) BackClose.opened(closeSettings); }
+    function closeSettings() { if (window.BackClose) BackClose.closed(); document.getElementById('settingsModal').classList.remove('active'); }
 
     // NEW About Functions
     function openAbout() {
       closeSettings();
       document.getElementById('aboutModal').classList.add('active');
+      if (window.BackClose) BackClose.opened(closeAbout);
     }
     function closeAbout() {
+      if (window.BackClose) BackClose.closed();
       document.getElementById('aboutModal').classList.remove('active');
     }
 
