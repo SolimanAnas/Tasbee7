@@ -96,6 +96,7 @@ export default {
   'setting_share': 'هاوبەشکردنی ئەپەکە',
   'setting_share_desc': 'هەوڵدەری خێر هاوبەشەی پاداشتە',
   'setting_about': 'دەربارەی ئەپەکە',
+  'setting_privacy': 'سیاسەتی تایبەتێتی',
   'setting_reset': 'گەڕانەوە بۆ ڕێکخستنی کارخانە',
 
   // Stats

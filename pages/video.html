@@ -575,10 +575,10 @@ function openPlaylistSheet() {
   } else {
     c.innerHTML = playlist.map((item, i) => `
       <div class="playlist-item${i===currentIdx?' active':''}" onclick="haptic(); playFromPlaylist(${i})">
-        <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy"></div>
+        <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${encodeURIComponent(item.id)}/mqdefault.jpg" alt="" loading="lazy"></div>
         <div class="playlist-info">
-          <div class="playlist-title">${item.title || item.id}</div>
-          <div class="playlist-channel">${item.channel || ''}</div>
+          <div class="playlist-title">${escapeHTML(item.title || item.id)}</div>
+          <div class="playlist-channel">${escapeHTML(item.channel || '')}</div>
         </div>
       </div>`).join('');
   }
@@ -586,6 +586,10 @@ function openPlaylistSheet() {
 }
 
 function playFromPlaylist(idx) { currentIdx = idx; loadPlayer(playlist[idx].id); closeAllSheets(); }
+
+// YouTube titles/channels are attacker-controlled (any video uploader) and are
+// persisted in localStorage — always escape before interpolating into HTML.
+function escapeHTML(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function getHistory() { try { return JSON.parse(localStorage.getItem('vidHistory') || '[]'); } catch(e) { return []; } }
 function saveToHistory(id, title, channel) {
@@ -603,11 +607,11 @@ function renderHistory() {
   if(!h.length) { card.style.display = 'none'; return; }
   card.style.display = '';
   document.getElementById('historyList').innerHTML = h.map(item => `
-    <div class="playlist-item" onclick="haptic(); loadVideo('https://www.youtube.com/watch?v=${item.id}')">
-      <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy"></div>
+    <div class="playlist-item" onclick="haptic(); loadVideo('https://www.youtube.com/watch?v=${encodeURIComponent(item.id)}')">
+      <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${encodeURIComponent(item.id)}/mqdefault.jpg" alt="" loading="lazy"></div>
       <div class="playlist-info">
-        <div class="playlist-title">${item.title || item.id}</div>
-        <div class="playlist-channel">${item.channel || ''}</div>
+        <div class="playlist-title">${escapeHTML(item.title || item.id)}</div>
+        <div class="playlist-channel">${escapeHTML(item.channel || '')}</div>
       </div>
     </div>`).join('');
 }

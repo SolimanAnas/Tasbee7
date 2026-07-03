@@ -90,6 +90,7 @@ export default {
   'setting_share': 'ایپ شیئر کریں',
   'setting_share_desc': 'نیکی کی رہنمائی کرنے والا اس کا شریک ہوتا ہے',
   'setting_about': 'ایپ کے بارے میں',
+  'setting_privacy': 'رازداری کی پالیسی',
   'setting_reset': 'فیکٹری ری سیٹ',
 
   'stats_title': 'میری روزانہ کامیابیاں',

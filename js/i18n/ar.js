@@ -95,6 +95,7 @@ export default {
   'setting_share': 'مشاركة التطبيق',
   'setting_share_desc': 'الدال على الخير كفاعله',
   'setting_about': 'عن التطبيق',
+  'setting_privacy': 'سياسة الخصوصية',
   'setting_reset': 'إعادة ضبط المصنع',
 
   // Stats
