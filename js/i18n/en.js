@@ -95,6 +95,7 @@ export default {
   'setting_share': 'Share App',
   'setting_share_desc': 'Whoever guides to good shares the reward',
   'setting_about': 'About',
+  'setting_privacy': 'Privacy Policy',
   'setting_reset': 'Factory Reset',
 
   // Stats

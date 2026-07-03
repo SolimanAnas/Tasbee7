@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v65"; // v65: quran hero continue-reading card
+const CACHE_NAME = "zad-muslim-v66"; // v66: privacy page, back-close module, protect user mushaf/model caches on activate
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -36,6 +36,7 @@ const STATIC_ASSETS = [
   "./pages/takrar.html",
   "./pages/howto.html",
   "./pages/about.html",
+  "./pages/privacy.html",
   "./pages/tasmee-dashboard.html",
   "./pages/tasmee-review.html",
   "./pages/hadith-viewer.html",
@@ -64,6 +65,7 @@ const STATIC_ASSETS = [
   "./js/prayer-service.js",
   "./js/theme-manager.js",
   "./js/toast.js",
+  "./js/back-close.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
@@ -338,7 +340,7 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(key => key !== CACHE_NAME && key !== AUDIO_CACHE && key !== PUSH_CTX_CACHE && !key.startsWith("quran-offline") && !key.startsWith("quran-pages"))
+        keys.filter(key => key !== CACHE_NAME && key !== AUDIO_CACHE && key !== PUSH_CTX_CACHE && !key.startsWith("quran-offline") && !key.startsWith("quran-pages") && !key.startsWith("quran-mushaf") && !key.startsWith("tarteel-model"))
           .map(key => caches.delete(key))
       )
     )
@@ -533,4 +535,4 @@ self.addEventListener("notificationclick", event => {
   );
 });
 
-console.log("✅ Service Worker v55 loaded");
+console.log("✅ Service Worker " + CACHE_NAME + " loaded");

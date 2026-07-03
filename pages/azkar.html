@@ -1156,6 +1156,7 @@ body::after {
 
 <script src="../js/i18n.js"></script>
 <script>if (window.I18n) I18n.init();</script>
+<script src="../js/back-close.js"></script>
 <script>
 let currentIndex = 0;
 let currentCount = 0;
@@ -1186,8 +1187,10 @@ fetch(dataFile)
 function openImageModal() {
   document.getElementById('posterFrame').src = `../pages/salah.html`;
   document.getElementById('imageModal').classList.add('active');
+  if (window.BackClose) BackClose.opened(closeImageModal);
 }
 function closeImageModal() {
+  if (window.BackClose) BackClose.closed();
   document.getElementById('posterFrame').src = '';
   document.getElementById('imageModal').classList.remove('active');
 }
@@ -1408,15 +1411,18 @@ function autoLoop() {
 /* Translation Modal */
 function openTranslation() {
   document.getElementById("translationModal").classList.add("active");
+  if (window.BackClose) BackClose.opened(closeTranslation);
 }
 
 function closeTranslation() {
+  if (window.BackClose) BackClose.closed();
   document.getElementById("translationModal").classList.remove("active");
 }
 
 /* Settings Modal */
 function openSettings() {
   document.getElementById("settingsModal").classList.add("active");
+  if (window.BackClose) BackClose.opened(closeSettings);
   const savedSize = localStorage.getItem("zikrFontSize") || 28;
   document.getElementById("fontSizeSlider").value = savedSize;
   document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
@@ -1441,6 +1447,7 @@ function updateAudioSourceUI() {
 }
 
 function closeSettings() {
+  if (window.BackClose) BackClose.closed();
   document.getElementById("settingsModal").classList.remove("active");
 }
 
@@ -1678,10 +1685,13 @@ function openSoundOptions() {
   if (navigator.vibrate) navigator.vibrate(30);
   updateAudioSourceUI();
   document.getElementById('soundOptions').classList.add('active');
+  if (window.BackClose) BackClose.opened(closeSoundOptions);
 }
 
 function closeSoundOptions() {
-  document.getElementById('soundOptions').classList.remove('active');
+  const el = document.getElementById('soundOptions');
+  if (el.classList.contains('active') && window.BackClose) BackClose.closed();
+  el.classList.remove('active');
 }
 
 function setAudioSource(src) {

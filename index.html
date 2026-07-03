@@ -20,7 +20,7 @@
 <meta property="og:title" content="زاد المسلم — Zad Al-Muslim | Islamic Companion App">
 <meta property="og:description" content="زاد المسلم - تطبيق إسلامي شامل يحتوي على المصحف الشريف، الأذكار، حصن المسلم، البخاري، مسبحة، اتجاه القبلة، وأوقات الصلاة. Your all-in-one Islamic companion.">
 <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
-<meta property="og:locale" content="ar_AR">
+<meta property="og:locale" content="ar_SA">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:site_name" content="زاد المسلم">
 
@@ -1022,6 +1022,15 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       </div>
     </div>
 
+    <div class="setting-item" onclick="go('pages/privacy.html'); closeAllSheets();">
+      <div class="setting-info">
+        <div class="s-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <div class="s-text"><div class="s-title" data-i18n="setting_privacy">سياسة الخصوصية</div></div>
+      </div>
+    </div>
+
     <div class="setting-item danger" onclick="resetData()">
       <div class="setting-info">
         <div class="s-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
@@ -1630,7 +1639,29 @@ function shareApp() {
   closeAllSheets(); 
 }
 
+// Daily streak: counts consecutive days with any worship activity (tasbih,
+// azkar, or Quran pages). The *_today counters reset lazily on their own
+// pages, so a counter only proves activity for TODAY when its *_last_date
+// stamp is today.
+function updateDailyStreak() {
+  const today = new Date().toDateString();
+  const yest = new Date(); yest.setDate(yest.getDate() - 1);
+  const yesterday = yest.toDateString();
+  const last = localStorage.getItem('streak_last_date');
+  const activeToday = ['masbaha', 'azkar', 'khatma'].some(k =>
+    localStorage.getItem(k + '_last_date') === today &&
+    parseInt(localStorage.getItem(k + '_today') || '0') > 0);
+  if (activeToday && last !== today) {
+    const streak = (last === yesterday) ? parseInt(localStorage.getItem('streakDays') || '0') + 1 : 1;
+    localStorage.setItem('streakDays', String(streak));
+    localStorage.setItem('streak_last_date', today);
+  } else if (!activeToday && last && last !== today && last !== yesterday) {
+    localStorage.setItem('streakDays', '0');   // streak broken
+  }
+}
+
 function updateStats() {
+  updateDailyStreak();
   document.getElementById('statMasbaha').innerText = parseInt(localStorage.getItem('masbaha_today')||'0');
   document.getElementById('statAzkar').innerText   = parseInt(localStorage.getItem('azkar_today')||'0');
   document.getElementById('statKhatma').innerText  = parseInt(localStorage.getItem('khatma_today')||'0');
@@ -1654,6 +1685,7 @@ window.addEventListener('load', async () => {
 
   initQuranHero();
   refreshPrayerTimes();
+  updateDailyStreak();
 
   const saved2 = localStorage.getItem('calcMethod');
   if(saved2) { calcMethod=saved2; const sel=document.getElementById('calcMethod'); if(sel) sel.value=calcMethod; }
@@ -1673,11 +1705,11 @@ window.addEventListener('langchange', () => {
 let exitPending = false;
 function openExitModal() { exitPending = true; document.getElementById('exitOverlay').classList.add('active'); }
 function closeExitModal() { exitPending = false; document.getElementById('exitOverlay').classList.remove('active'); }
+let exitTrapArmed = true;
 function confirmExit() {
-  exitPending = true;
+  exitPending = false;
   document.getElementById('exitOverlay').classList.remove('active');
-  // Native wrappers can really exit; in a plain browser/PWA fall back to
-  // closing the window, then a blank page as last resort.
+  // Native wrappers can really exit.
   try {
     const app = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
     if (app && typeof app.exitApp === 'function') { app.exitApp(); return; }
@@ -1685,13 +1717,18 @@ function confirmExit() {
   try {
     if (navigator.app && typeof navigator.app.exitApp === 'function') { navigator.app.exitApp(); return; }
   } catch (e) {}
+  // TWA/browser: disarm the back trap and unwind our sentinel state so the
+  // system back button exits naturally. Never navigate to about:blank — that
+  // strands TWA users on a blank white page inside the app.
+  exitTrapArmed = false;
+  if (history.state && history.state.exit) history.back();
   try { window.close(); } catch (e) {}
-  try { window.location.assign('about:blank'); } catch (e) {}
 }
 
 // Back-button interception: push a dummy state so popstate fires on back press
 history.pushState({ exit: true }, '');
 window.addEventListener('popstate', (e) => {
+  if (!exitTrapArmed) return;   // exiting: let history unwind untouched
   // If a modal/sheet is open, let back close it instead of prompting exit
   const anyOpen = document.querySelector('.modal-overlay.active, .bottom-sheet.active');
   if (anyOpen) { closeAllSheets(); history.pushState({ exit: true }, ''); return; }

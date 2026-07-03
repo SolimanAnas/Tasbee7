@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0F172A">
 <title>إذاعة القرآن الكريم — زاد المسلم | Live Quran Radio</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
 <meta name="description" content="إذاعة القرآن الكريم مباشرة بدون إعلانات — أكثر من 100 محطة قرآنية من مكة المكرمة والمدينة المنورة ومصر والسعودية وغيرها.">
@@ -17,7 +18,9 @@
 <link rel="icon" href="../icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- Pinned exact version: @latest auto-updates third-party code with full DOM
+     access (supply-chain risk + spontaneous breakage). Bump deliberately. -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
 <script src="../js/radio-stations.js"></script>
 <style>
 /* ============================================================
@@ -578,6 +581,7 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
   </div>
 </div>
 
+<script src="../js/back-close.js"></script>
 <script>
 // ── helpers ───────────────────────────────────────────────
 function t(key,fb){return(window.I18n&&window.I18n.t(key))||fb||key}
@@ -609,13 +613,20 @@ function updateThemeIcon(theme){
 
 // ── sheets ────────────────────────────────────────────────
 function openSheet(id){
-  document.getElementById('sheetOverlay').classList.add('active');
+  const overlay=document.getElementById('sheetOverlay');
+  const wasOpen=overlay.classList.contains('active');
+  overlay.classList.add('active');
   document.querySelectorAll('.bottom-sheet').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(!wasOpen&&window.BackClose)BackClose.opened(hideAllSheets);
 }
-function closeAllSheets(){
+function hideAllSheets(){
   document.getElementById('sheetOverlay').classList.remove('active');
   document.querySelectorAll('.bottom-sheet').forEach(s=>s.classList.remove('active'));
+}
+function closeAllSheets(){
+  if(document.getElementById('sheetOverlay').classList.contains('active')&&window.BackClose)BackClose.closed();
+  hideAllSheets();
 }
 
 // ── station name ticker ───────────────────────────────────

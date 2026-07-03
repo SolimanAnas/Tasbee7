@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
     <title>اتجاه القبلة — زاد المسلم | Qibla Compass</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
     <meta name="description" content="تحديد اتجاه القبلة بدقة باستخدام GPS والبوصلة في أي مكان بالعالم. بوصلة القبلة تعمل بدون إنترنت. Qibla direction finder with GPS compass for accurate prayer direction anywhere in the world, works offline.">
@@ -624,6 +625,7 @@
     <meta name="i18n-title" content="qibla_title">
     <script src="../js/i18n.js"></script>
     <script>if (window.I18n) I18n.init();</script>
+    <script src="../js/back-close.js"></script>
     <script>
         // ================= CONFIGURATION & STORAGE =================
         const KAABA_LAT = 21.422487;
@@ -686,22 +688,39 @@
         const gradStop2 = document.getElementById('grad-stop-2');
 
         // ================= MODAL LOGIC =================
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m.classList.contains('active')) return;
+            m.classList.add('active');
+            if (window.BackClose) BackClose.opened(() => m.classList.remove('active'));
+        }
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m.classList.contains('active') && window.BackClose) BackClose.closed();
+            m.classList.remove('active');
+        }
         function openCalibration() { closeSettingsSheet(); openModal('calibration-modal'); }
 
         // ================= BOTTOM SHEET LOGIC =================
         function openSettingsSheet() {
+            const sheet = document.getElementById('settings-sheet');
+            const wasOpen = sheet.classList.contains('active');
             document.getElementById('sheetOverlay').classList.add('active');
-            document.getElementById('settings-sheet').classList.add('active');
+            sheet.classList.add('active');
             attachSheetDrag('settings-sheet');
+            if (!wasOpen && window.BackClose) BackClose.opened(hideSettingsSheet);
         }
 
-        function closeSettingsSheet() {
+        function hideSettingsSheet() {
             document.getElementById('sheetOverlay').classList.remove('active');
             const sheet = document.getElementById('settings-sheet');
             sheet.style.transform = '';
             sheet.classList.remove('active');
+        }
+
+        function closeSettingsSheet() {
+            if (document.getElementById('settings-sheet').classList.contains('active') && window.BackClose) BackClose.closed();
+            hideSettingsSheet();
         }
 
         function attachSheetDrag(sheetId) {

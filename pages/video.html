@@ -4,6 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F8FAFC">
 <title>تلاوات المنشاوي المرئية — مشغل الفيديو | زاد المسلم</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
 <meta name="description" content="تلاوات نادرة ومرئية للشيخ محمد صديق المنشاوي — المصحف الجديد وتسجيلات نادرة بعد 60 سنة. وفيديوهات كبار القراء: عبدالباسط عبدالصمد، الحصري، السديس، ماهر المعيقلي، مشاري العفاسي. Rare video recitations of Sheikh Minshawi New Mushaf and top Quran reciters.">
@@ -326,6 +327,7 @@ input[type=range]::-webkit-slider-thumb { height:16px; width:16px; border-radius
   </div>
 </div>
 
+<script src="../js/back-close.js"></script>
 <script>
 const THEMES = ['light', 'dark', 'sepia'];
 let tIdx = parseInt(localStorage.getItem('appThemeIdx')) || 0;
@@ -343,11 +345,14 @@ function showToast(m, e) {
 function formatTime(s) { if(isNaN(s)) return '00:00'; const m=Math.floor(s/60), sec=Math.floor(s%60); return `${m<10?'0'+m:m}:${sec<10?'0'+sec:sec}`; }
 
 function openSheet(id) {
+  const wasOpen = document.getElementById('sheetOverlay').classList.contains('active');
   document.getElementById('sheetOverlay').classList.add('active');
   document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (!wasOpen && window.BackClose) BackClose.opened(closeAllSheets);
 }
 function closeAllSheets() {
+  if (window.BackClose) BackClose.closed();
   document.getElementById('sheetOverlay').classList.remove('active');
   document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('active'));
 }
@@ -575,10 +580,10 @@ function openPlaylistSheet() {
   } else {
     c.innerHTML = playlist.map((item, i) => `
       <div class="playlist-item${i===currentIdx?' active':''}" onclick="haptic(); playFromPlaylist(${i})">
-        <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy"></div>
+        <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${encodeURIComponent(item.id)}/mqdefault.jpg" alt="" loading="lazy"></div>
         <div class="playlist-info">
-          <div class="playlist-title">${item.title || item.id}</div>
-          <div class="playlist-channel">${item.channel || ''}</div>
+          <div class="playlist-title">${escapeHTML(item.title || item.id)}</div>
+          <div class="playlist-channel">${escapeHTML(item.channel || '')}</div>
         </div>
       </div>`).join('');
   }
@@ -586,6 +591,10 @@ function openPlaylistSheet() {
 }
 
 function playFromPlaylist(idx) { currentIdx = idx; loadPlayer(playlist[idx].id); closeAllSheets(); }
+
+// YouTube titles/channels are attacker-controlled (any video uploader) and are
+// persisted in localStorage — always escape before interpolating into HTML.
+function escapeHTML(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function getHistory() { try { return JSON.parse(localStorage.getItem('vidHistory') || '[]'); } catch(e) { return []; } }
 function saveToHistory(id, title, channel) {
@@ -603,11 +612,11 @@ function renderHistory() {
   if(!h.length) { card.style.display = 'none'; return; }
   card.style.display = '';
   document.getElementById('historyList').innerHTML = h.map(item => `
-    <div class="playlist-item" onclick="haptic(); loadVideo('https://www.youtube.com/watch?v=${item.id}')">
-      <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${item.id}/mqdefault.jpg" alt="" loading="lazy"></div>
+    <div class="playlist-item" onclick="haptic(); loadVideo('https://www.youtube.com/watch?v=${encodeURIComponent(item.id)}')">
+      <div class="playlist-thumb"><img src="https://i.ytimg.com/vi/${encodeURIComponent(item.id)}/mqdefault.jpg" alt="" loading="lazy"></div>
       <div class="playlist-info">
-        <div class="playlist-title">${item.title || item.id}</div>
-        <div class="playlist-channel">${item.channel || ''}</div>
+        <div class="playlist-title">${escapeHTML(item.title || item.id)}</div>
+        <div class="playlist-channel">${escapeHTML(item.channel || '')}</div>
       </div>
     </div>`).join('');
 }

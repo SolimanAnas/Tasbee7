@@ -392,6 +392,7 @@
 
 <script src="../js/i18n.js"></script>
 <script src="../js/theme-manager.js"></script>
+<script src="../js/back-close.js"></script>
 <script>
     // ===================== الثيمات =====================
     ThemeManager.init();
@@ -575,7 +576,12 @@
         });
     }
     function toggleModal(show) {
-        document.getElementById('booksModal').classList.toggle('active', show);
+        const el = document.getElementById('booksModal');
+        if (window.BackClose) {
+            if (show && !el.classList.contains('active')) BackClose.opened(function () { toggleModal(false); });
+            else if (!show && el.classList.contains('active')) BackClose.closed();
+        }
+        el.classList.toggle('active', show);
     }
 
     function downloadDatabase() {

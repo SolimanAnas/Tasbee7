@@ -547,6 +547,7 @@
     </div>
 </div>
 
+<script src="../js/back-close.js"></script>
 <script>
     // --- Data ---
     const defaultTargets = {
@@ -731,12 +732,22 @@
     }
 
     function toggleSettings() {
-        document.getElementById("settingsModal").classList.toggle("open");
-        if(document.getElementById("settingsModal").classList.contains("open")) renderStats();
+        const m = document.getElementById("settingsModal");
+        const opening = !m.classList.contains("open");
+        if (!opening && window.BackClose) BackClose.closed();
+        m.classList.toggle("open");
+        if (opening) {
+            renderStats();
+            if (window.BackClose) BackClose.opened(() => m.classList.remove("open"));
+        }
     }
 
     function toggleMeanings() {
-        document.getElementById("meaningsModal").classList.toggle("open");
+        const m = document.getElementById("meaningsModal");
+        const opening = !m.classList.contains("open");
+        if (!opening && window.BackClose) BackClose.closed();
+        m.classList.toggle("open");
+        if (opening && window.BackClose) BackClose.opened(() => m.classList.remove("open"));
     }
 
     // --- Power Saving Mode ---
@@ -891,10 +902,15 @@
     // ===== Reset current counter =====
     function openResetModal(e) {
         if(e) e.stopPropagation();
-        document.getElementById("confirmResetModal").classList.add("active");
+        const m = document.getElementById("confirmResetModal");
+        if (m.classList.contains("active")) return;
+        m.classList.add("active");
+        if (window.BackClose) BackClose.opened(() => m.classList.remove("active"));
     }
     function closeResetModal() {
-        document.getElementById("confirmResetModal").classList.remove("active");
+        const m = document.getElementById("confirmResetModal");
+        if (m.classList.contains("active") && window.BackClose) BackClose.closed();
+        m.classList.remove("active");
     }
     function confirmResetCounter() {
         localStorage.setItem(cKey(), 0);
@@ -907,10 +923,15 @@
 
     // ===== Reset lifetime stats =====
     function openResetStatsModal() {
-        document.getElementById("confirmResetStatsModal").classList.add("active");
+        const m = document.getElementById("confirmResetStatsModal");
+        if (m.classList.contains("active")) return;
+        m.classList.add("active");
+        if (window.BackClose) BackClose.opened(() => m.classList.remove("active"));
     }
     function closeResetStatsModal() {
-        document.getElementById("confirmResetStatsModal").classList.remove("active");
+        const m = document.getElementById("confirmResetStatsModal");
+        if (m.classList.contains("active") && window.BackClose) BackClose.closed();
+        m.classList.remove("active");
     }
     function confirmResetStats() {
         const select = document.getElementById("dhikrSelect");

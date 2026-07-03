@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2c3e50">
   <title>حصن المسلم — زاد المسلم | Hisn Al-Muslim</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
   <meta name="description" content="حصن المسلم — 132 فصلاً من الأذكار والأدعية اليومية من القرآن الكريم والسنة النبوية. أذكار الصباح والمساء والنوم والسفر والأكل والشرب ودخول المسجد وغيرها. Hisn Al-Muslim (Fortress of the Muslim) — 132 chapters of daily supplications from Quran and Sunnah.">
@@ -569,6 +570,7 @@
 
   <script src="../js/i18n.js"></script>
   <script>if (window.I18n) I18n.init();</script>
+  <script src="../js/back-close.js"></script>
   <script>
     const svgCopy = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
     const svgStarOutline = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
@@ -813,17 +815,19 @@
         }
       });
       document.getElementById('menuModal').classList.add('active');
+      if (window.BackClose) BackClose.opened(closeMenu);
     }
-    
-    function closeMenu() { document.getElementById('menuModal').classList.remove('active'); }
-    function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
-    function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+
+    function closeMenu() { if (window.BackClose) BackClose.closed(); document.getElementById('menuModal').classList.remove('active'); }
+    function openSettings() { document.getElementById('settingsModal').classList.add('active'); if (window.BackClose) BackClose.opened(closeSettings); }
+    function closeSettings() { if (window.BackClose) BackClose.closed(); document.getElementById('settingsModal').classList.remove('active'); }
 
     function openAbout() {
       closeSettings();
       document.getElementById('aboutModal').classList.add('active');
+      if (window.BackClose) BackClose.opened(closeAbout);
     }
-    function closeAbout() { document.getElementById('aboutModal').classList.remove('active'); }
+    function closeAbout() { if (window.BackClose) BackClose.closed(); document.getElementById('aboutModal').classList.remove('active'); }
 
     function selectSection(idx) {
       App.currentIdx = idx;

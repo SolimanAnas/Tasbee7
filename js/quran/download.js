@@ -175,6 +175,11 @@
       dlRunning = false;
       localStorage.setItem(DL_KEY, '1');
 
+      // Ask the browser to protect this origin's storage from eviction —
+      // without it, Safari/Chrome may silently discard the 100+ MB the user
+      // just downloaded when the device runs low on space.
+      try { navigator.storage?.persist?.(); } catch (e) {}
+
       // Switch to a downloaded variant: keep current if it was downloaded, else use first downloaded
       const downloadedList = variants;
       const targetVariant  = downloadedList.includes(currentMushafVariant)

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F8FAFC">
 <title>التكرار — زاد المسلم | Ayah Repetition Tool</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
 <meta name="description" content="أداة تكرار الآيات القرآنية مع التحكم الكامل في عدد التكرار واختيار القارئ والسرعة — الطريقة المثلى لحفظ القرآن الكريم. Quran ayah repetition tool with custom count, reciter choice, and speed control for memorization.">
@@ -640,6 +641,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <script src="../js/i18n.js"></script>
 <script src="../js/quran-structure.js"></script>
 <script src="../js/theme-manager.js"></script>
+<script src="../js/back-close.js"></script>
 <script>
 const RECITERS = [
   { id:'arabassy',  name:'عبد الباسط عبد الصمد', folder:'Abdul_Basit_Murattal_192kbps' },
@@ -804,6 +806,7 @@ function showToast(m, isErr) { const t = document.getElementById('toast'); t.tex
 /* ---------- Sheets ---------- */
 let curSheet = null;
 function openSheet(type) {
+  if (!curSheet && window.BackClose) BackClose.opened(closeSheet);
   curSheet = type;
   document.getElementById('sheetOverlay').classList.add('active');
   document.getElementById(type + 'Sheet').classList.add('active');
@@ -812,6 +815,7 @@ function openSheet(type) {
   else if (type === 'unit') { document.getElementById('unitSearch').value = ''; renderUnitSheet(); }
 }
 function closeSheet() {
+  if (window.BackClose) BackClose.closed();
   document.getElementById('sheetOverlay').classList.remove('active');
   if (curSheet) document.getElementById(curSheet + 'Sheet').classList.remove('active');
   curSheet = null;

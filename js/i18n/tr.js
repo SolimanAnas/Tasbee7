@@ -90,6 +90,7 @@ export default {
   'setting_share': 'Uygulamayı Paylaş',
   'setting_share_desc': 'İyiliğe yönlendiren, onun sevabına ortak olur',
   'setting_about': 'Hakkında',
+  'setting_privacy': 'Gizlilik Politikası',
   'setting_reset': 'Fabrika Ayarlarına Dön',
 
   'stats_title': 'Günlük Başarılarım',
