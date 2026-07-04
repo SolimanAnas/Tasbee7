@@ -15,7 +15,7 @@
 
   function t(key, fallback) {
     try { return (window.I18n && window.I18n.t) ? window.I18n.t(key) : fallback; }
-    catch (e) { return fallback; }
+    catch { return fallback; }
   }
 
   function showBanner() {
