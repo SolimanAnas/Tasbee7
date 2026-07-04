@@ -480,6 +480,8 @@ export default {
   'audio_timer_off': 'وەستاوە ›',
   'audio_timer_cancelled': 'کاتژمێر هەڵوێسترا',
   'audio_load_error': 'بارکردنی داتا سەرنەکەوتووبوو',
+  'azkar_load_error': 'بارکردنی ئەزکار سەرنەکەوتووبوو — کرتە بکە بۆ هەوڵدانەوە',
+  'hisn_load_error': 'بارکردنی حیسنولموسلیم سەرنەکەوتووبوو — کرتە بکە بۆ هەوڵدانەوە',
   'audio_no_results': 'هەنووکچ ئەنجام نییە',
   'audio_choose_reciter_sheet': 'قورئانخوێن هەڵبژێرە',
   'audio_choose_surah_sheet': 'سورە / جزء هەڵبژێرە',

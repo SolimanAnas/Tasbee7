@@ -480,6 +480,8 @@ export default {
   'audio_timer_off': 'Off ›',
   'audio_timer_cancelled': 'Timer cancelled',
   'audio_load_error': 'Failed to load data',
+  'azkar_load_error': 'Failed to load azkar — tap to retry',
+  'hisn_load_error': 'Failed to load Hisn al-Muslim — tap to retry',
   'audio_no_results': 'No results',
   'audio_choose_reciter_sheet': 'Choose Reciter',
   'audio_choose_surah_sheet': 'Choose Surah / Juz',

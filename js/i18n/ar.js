@@ -480,6 +480,8 @@ export default {
   'audio_timer_off': 'إيقاف ›',
   'audio_timer_cancelled': 'تم إلغاء المؤقت',
   'audio_load_error': 'تعذر تحميل البيانات',
+  'azkar_load_error': 'تعذر تحميل الأذكار — اضغط للمحاولة مجدداً',
+  'hisn_load_error': 'تعذر تحميل حصن المسلم — اضغط للمحاولة مجدداً',
   'audio_no_results': 'لا توجد نتائج',
   'audio_choose_reciter_sheet': 'اختر القارئ',
   'audio_choose_surah_sheet': 'اختر السورة / الجزء',

@@ -178,5 +178,5 @@
       });
     };
 
-    function goHome() { window.location.href = '/Tasbee7/index.html'; }
+    function goHome() { window.location.href = '../index.html'; }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js').catch(console.warn);

@@ -452,6 +452,8 @@ export default {
   'audio_timer_off': 'بند ›',
   'audio_timer_cancelled': 'ٹائمر منسوخ ہو گیا',
   'audio_load_error': 'ڈیٹا لوڈ نہیں ہو سکا',
+  'azkar_load_error': 'اذکار لوڈ نہیں ہو سکے — دوبارہ کوشش کے لیے تھپتھپائیں',
+  'hisn_load_error': 'حصن المسلم لوڈ نہیں ہو سکا — دوبارہ کوشش کے لیے تھپتھپائیں',
   'audio_no_results': 'کوئی نتائج نہیں',
   'audio_choose_reciter_sheet': 'قارئ منتخب کریں',
   'audio_choose_surah_sheet': 'سورہ / جزء منتخب کریں',
