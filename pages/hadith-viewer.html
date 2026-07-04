@@ -6,6 +6,20 @@
   <meta name="theme-color" content="#0e201b" id="metaThemeColor">
   <title>قراءة الكتاب | زاد المسلم</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
+<meta name="description" content="قراءة كتب الحديث الشريف كاملة مع الفهرسة حسب الأبواب، حفظ العلامات المرجعية، ونسخ الأحاديث. Read complete hadith books with chapter indexing, bookmarks, and copy support.">
+<meta name="author" content="Anas Soliman">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/hadith-viewer.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="قراءة الكتاب | زاد المسلم">
+<meta property="og:description" content="قراءة كتب الحديث الشريف كاملة مع الفهرسة والعلامات المرجعية.">
+<meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/hadith-viewer.html">
+<meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+<meta property="og:locale" content="ar_SA">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:title" content="قراءة الكتاب | زاد المسلم">
+<meta property="twitter:description" content="قراءة كتب الحديث الشريف كاملة مع الفهرسة والعلامات المرجعية.">
+<meta property="twitter:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
   <style>
     @font-face{ font-family:'Tajawal'; src:url('../fonts/Tajawal.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
     @font-face{ font-family:'Tajawal'; src:url('../fonts/Tajawal.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
@@ -838,12 +852,18 @@
       document.getElementById('scroll-progress').style.width = pct + '%';
     });
 
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+    let touchStartX = 0, touchStartY = 0;
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
     document.addEventListener('touchend', e => {
-      const diff = e.changedTouches[0].screenX - touchStartX;
-      if (Math.abs(diff) > 80) nav(diff < 0 ? 'next' : 'prev');
-    });
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      const dy = e.changedTouches[0].screenY - touchStartY;
+      // Require the swipe to be clearly horizontal — otherwise vertical
+      // scrolling (reading a long hadith) accidentally jumps chapters.
+      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) nav(dx < 0 ? 'next' : 'prev');
+    }, {passive: true});
   });
 </script>
   <script src="../js/svg-injector.js"></script>
