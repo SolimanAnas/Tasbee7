@@ -323,14 +323,33 @@ const NotificationSystem = {
   async initLocalMode() {
     dlog('📱 Local notification mode active');
 
-    // Request permission only if not yet decided (avoid double prompts)
-    if (Notification.permission === 'default') {
-      await Notification.requestPermission();
-    }
+    // Do NOT request permission here — this runs on every page load (e.g. the
+    // home page) with no user gesture, and browsers auto-suppress /
+    // permanently embargo non-gesture prompts. showNotification() below
+    // already no-ops until permission is 'granted', so it's safe to skip the
+    // prompt entirely; call NotificationSystem.enableNotifications() from a
+    // real button click (see pages/notifications.html) to ask for it.
 
     await this.initAutoPrayerTimes();
     this._timesDate = new Date().toDateString(); // times are fresh for today; skip the first-tick recompute
     this.scheduleChecks();
+  },
+
+  // Gesture-gated permission request — call this ONLY from a click/tap
+  // handler (e.g. the "enable notifications" toggle). Returns the resulting
+  // Notification.permission value.
+  async enableNotifications() {
+    if (!this.isSupported) return 'unsupported';
+    if (Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+    if (Notification.permission === 'granted') {
+      // Mirror init()'s best-effort push subscribe now that we're allowed to.
+      if (this.config.serverUrl && this.swRegistration) {
+        this.subscribeToPush().catch(err => console.warn('⚠️ Push subscribe skipped:', err.message));
+      }
+    }
+    return Notification.permission;
   },
 
   // ========== PRAYER TIMES ==========
