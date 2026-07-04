@@ -6,6 +6,20 @@
   <meta name="theme-color" content="#0e201b" id="metaThemeColor">
   <title>قراءة الكتاب | زاد المسلم</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
+<meta name="description" content="قراءة كتب الحديث الشريف كاملة مع الفهرسة حسب الأبواب، حفظ العلامات المرجعية، ونسخ الأحاديث. Read complete hadith books with chapter indexing, bookmarks, and copy support.">
+<meta name="author" content="Anas Soliman">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/hadith-viewer.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="قراءة الكتاب | زاد المسلم">
+<meta property="og:description" content="قراءة كتب الحديث الشريف كاملة مع الفهرسة والعلامات المرجعية.">
+<meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/hadith-viewer.html">
+<meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+<meta property="og:locale" content="ar_SA">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:title" content="قراءة الكتاب | زاد المسلم">
+<meta property="twitter:description" content="قراءة كتب الحديث الشريف كاملة مع الفهرسة والعلامات المرجعية.">
+<meta property="twitter:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
   <style>
     @font-face{ font-family:'Tajawal'; src:url('../fonts/Tajawal.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
     @font-face{ font-family:'Tajawal'; src:url('../fonts/Tajawal.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
@@ -380,7 +394,7 @@
 
 <header>
   <div class="toolbar">
-    <a href="/Tasbee7/index.html" class="home-btn" title="العودة للبحث"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
+    <a href="../index.html" class="home-btn" title="العودة للبحث"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
     <div class="search-box">
       <input type="text" id="search-input" placeholder="ابحث في هذا الكتاب...">
     </div>
@@ -474,7 +488,7 @@
 
   function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => showToast('<img src="../img/SVG/copy.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تم النسخ بنجاح')).catch(() => fallbackCopy(text));
+      navigator.clipboard.writeText(text).then(() => showToast('تم النسخ بنجاح')).catch(() => fallbackCopy(text));
     } else { fallbackCopy(text); }
   }
   function fallbackCopy(text) {
@@ -483,8 +497,8 @@
       ta.value = text; ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.focus(); ta.select();
       const ok = document.execCommand('copy'); document.body.removeChild(ta);
-      showToast(ok ? '<img src="../img/SVG/copy.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تم النسخ بنجاح' : '<img src="../img/SVG/x-circle.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تعذّر النسخ');
-    } catch (e) { showToast('<img src="../img/SVG/x-circle.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تعذّر النسخ'); }
+      showToast(ok ? 'تم النسخ بنجاح' : 'تعذّر النسخ');
+    } catch (e) { showToast('تعذّر النسخ'); }
   }
 
   function getBookmarkKey() { return 'hadith_bookmarks_' + App.bookId; }
@@ -494,8 +508,8 @@
   function toggleBookmark(s, i) {
     if (isBookmarked(s, i)) {
       App.bookmarks = App.bookmarks.filter(b => !(b.sectionIdx === s && b.itemIdx === i));
-      showToast('<img src="../img/SVG/x-circle.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تمت الإزالة من المحفوظات');
-    } else { App.bookmarks.push({ sectionIdx:s, itemIdx:i }); showToast('<img src="../img/SVG/star.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> أُضيف إلى المحفوظات'); }
+      showToast('تمت الإزالة من المحفوظات');
+    } else { App.bookmarks.push({ sectionIdx:s, itemIdx:i }); showToast('أُضيف إلى المحفوظات'); }
     saveBookmarks(); render();
   }
 
@@ -825,7 +839,7 @@
 
     document.getElementById('readingModeBtn').addEventListener('click', () => {
       document.body.classList.toggle('reading-mode');
-      showToast(document.body.classList.contains('reading-mode') ? '<img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> وضع القراءة' : '<img src="../img/SVG/file-text.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> الوضع العادي');
+      showToast(document.body.classList.contains('reading-mode') ? 'وضع القراءة' : 'الوضع العادي');
     });
 
     document.getElementById('bookmarkListBtn').addEventListener('click', openBookmarkModal);
@@ -838,12 +852,18 @@
       document.getElementById('scroll-progress').style.width = pct + '%';
     });
 
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+    let touchStartX = 0, touchStartY = 0;
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
     document.addEventListener('touchend', e => {
-      const diff = e.changedTouches[0].screenX - touchStartX;
-      if (Math.abs(diff) > 80) nav(diff < 0 ? 'next' : 'prev');
-    });
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      const dy = e.changedTouches[0].screenY - touchStartY;
+      // Require the swipe to be clearly horizontal — otherwise vertical
+      // scrolling (reading a long hadith) accidentally jumps chapters.
+      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) nav(dx < 0 ? 'next' : 'prev');
+    }, {passive: true});
   });
 </script>
   <script src="../js/svg-injector.js"></script>

@@ -96,6 +96,9 @@ export default {
   'setting_share_desc': 'الدال على الخير كفاعله',
   'setting_about': 'عن التطبيق',
   'setting_privacy': 'سياسة الخصوصية',
+  'sw_update_available': 'نسخة جديدة متاحة',
+  'sw_update_reload': 'تحديث',
+  'sw_update_dismiss': 'لاحقاً',
   'setting_reset': 'إعادة ضبط المصنع',
 
   // Stats
@@ -480,6 +483,8 @@ export default {
   'audio_timer_off': 'إيقاف ›',
   'audio_timer_cancelled': 'تم إلغاء المؤقت',
   'audio_load_error': 'تعذر تحميل البيانات',
+  'azkar_load_error': 'تعذر تحميل الأذكار — اضغط للمحاولة مجدداً',
+  'hisn_load_error': 'تعذر تحميل حصن المسلم — اضغط للمحاولة مجدداً',
   'audio_no_results': 'لا توجد نتائج',
   'audio_choose_reciter_sheet': 'اختر القارئ',
   'audio_choose_surah_sheet': 'اختر السورة / الجزء',

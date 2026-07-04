@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v66"; // v66: privacy page, back-close module, protect user mushaf/model caches on activate
+const CACHE_NAME = "zad-muslim-v68"; // v68: precache hisn/salah/sleeping/hadith-index JSON, SW update banner, shortcut-page SW registration
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -66,6 +66,7 @@ const STATIC_ASSETS = [
   "./js/theme-manager.js",
   "./js/toast.js",
   "./js/back-close.js",
+  "./js/sw-update.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
@@ -132,6 +133,9 @@ const STATIC_ASSETS = [
   "./assets/audio.json",
   "./assets/azkar.json",
   "./assets/husn.pdf",
+  "./assets/hisn_complete.json",
+  "./assets/salah.json",
+  "./assets/sleeping-zikr.json",
   "./assets/duaa-01.json",
   "./assets/duaa-02.json",
   "./assets/duaa-03.json",
@@ -142,6 +146,7 @@ const STATIC_ASSETS = [
   "./assets/part3.json",
   "./assets/part4.json",
   "./assets/part5.json",
+  "./assets/hadith/Index-translated.json",
 
   // ===== Icons =====
   "./icons/icon-192.png",
@@ -391,22 +396,31 @@ self.addEventListener("fetch", event => {
   if (req.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
-        const cached = await cache.match(req);
-        const networkFetch = fetch(req).then(res => {
-          if (res && res.ok) {
-            cache.put(req, res.clone());
-          }
-          return res;
-        }).catch(() => cached);
+        // Exact match first, then ignoring the query string — notification
+        // deep links like "pages/azkar.html?type=morning" would otherwise
+        // miss the cache offline even though the page itself is precached.
+        let cached = await cache.match(req);
+        if (!cached) cached = await cache.match(req, { ignoreSearch: true });
 
-        // Return cached immediately if available, update in background
         if (cached) {
-          fetch(req).then(res => {
-            if (res && res.ok) cache.put(req, res);
-          }).catch(() => {});
+          // Serve the cached copy immediately; revalidate in the background
+          // with a single fetch (previously this path issued two).
+          event.waitUntil(
+            fetch(req).then(res => { if (res && res.ok) cache.put(req, res); }).catch(() => {})
+          );
           return cached;
         }
-        return networkFetch;
+
+        try {
+          const res = await fetch(req);
+          if (res && res.ok) cache.put(req, res.clone());
+          return res;
+        } catch (e) {
+          // Fully offline with nothing cached for this URL — show the
+          // styled offline/404 page instead of a bare browser error.
+          return (await cache.match("./404.html")) ||
+            new Response("Offline", { status: 503, statusText: "Service Unavailable", headers: { "Content-Type": "text/plain" } });
+        }
       })
     );
     return;

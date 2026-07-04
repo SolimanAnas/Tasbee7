@@ -531,22 +531,22 @@ function togglePlay(btn, src) {
     sleepAudio = new Audio();
     sleepAudio.addEventListener('ended', () => {
       document.querySelectorAll('.audio-btn.playing').forEach(b => {
-        b.textContent = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'; b.classList.remove('playing');
+        b.innerHTML = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'; b.classList.remove('playing');
       });
     });
   }
   if (!sleepAudio.paused && sleepAudio.src.endsWith(src)) {
     sleepAudio.pause();
-    btn.textContent = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+    btn.innerHTML = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
     btn.classList.remove('playing');
     return;
   }
   document.querySelectorAll('.audio-btn.playing').forEach(b => {
-    b.textContent = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'; b.classList.remove('playing');
+    b.innerHTML = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'; b.classList.remove('playing');
   });
   sleepAudio.src = src;
   sleepAudio.play();
-  btn.textContent = '<img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+  btn.innerHTML = '<img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
   btn.classList.add('playing');
 }
 
@@ -559,7 +559,7 @@ document.querySelectorAll('.dhikr[data-audio]').forEach(el => {
   head.className = 'dhikr-head';
   const btn = document.createElement('span');
   btn.className = 'audio-btn';
-  btn.textContent = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
+  btn.innerHTML = '<img src="../img/SVG/play.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
   btn.addEventListener('click', e => { e.stopPropagation(); togglePlay(btn, src); });
   head.appendChild(btn);
   firstText.parentNode.insertBefore(head, firstText);

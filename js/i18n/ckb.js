@@ -97,6 +97,9 @@ export default {
   'setting_share_desc': 'هەوڵدەری خێر هاوبەشەی پاداشتە',
   'setting_about': 'دەربارەی ئەپەکە',
   'setting_privacy': 'سیاسەتی تایبەتێتی',
+  'sw_update_available': 'وەشانێکی نوێ بەردەستە',
+  'sw_update_reload': 'نوێکردنەوە',
+  'sw_update_dismiss': 'دواتر',
   'setting_reset': 'گەڕانەوە بۆ ڕێکخستنی کارخانە',
 
   // Stats
@@ -480,6 +483,8 @@ export default {
   'audio_timer_off': 'وەستاوە ›',
   'audio_timer_cancelled': 'کاتژمێر هەڵوێسترا',
   'audio_load_error': 'بارکردنی داتا سەرنەکەوتووبوو',
+  'azkar_load_error': 'بارکردنی ئەزکار سەرنەکەوتووبوو — کرتە بکە بۆ هەوڵدانەوە',
+  'hisn_load_error': 'بارکردنی حیسنولموسلیم سەرنەکەوتووبوو — کرتە بکە بۆ هەوڵدانەوە',
   'audio_no_results': 'هەنووکچ ئەنجام نییە',
   'audio_choose_reciter_sheet': 'قورئانخوێن هەڵبژێرە',
   'audio_choose_surah_sheet': 'سورە / جزء هەڵبژێرە',

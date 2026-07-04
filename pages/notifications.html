@@ -143,7 +143,7 @@
 <body data-theme="light">
 
   <header class="top-bar">
-    <button class="icon-btn" onclick="window.location.href='/Tasbee7/index.html'" title="الرئيسية"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    <button class="icon-btn" onclick="window.location.href='../index.html'" title="الرئيسية"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
     <h1 data-i18n="notif_title">الإشعارات الذكية</h1>
     <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تغيير المظهر"><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
   </header>
@@ -451,11 +451,25 @@
       }
     }
 
-    function toggleSetting(key, value) {
-      if(typeof NotificationSystem !== 'undefined') {
-        NotificationSystem.toggleSetting(key, value);
-        updateUI();
+    async function toggleSetting(key, value) {
+      if(typeof NotificationSystem === 'undefined') return;
+
+      // Flipping the master toggle ON is the user's explicit gesture to allow
+      // notifications — request permission here (not on page load, see
+      // js/notifications.js initLocalMode()).
+      if (key === 'enabled' && value === true && Notification.permission !== 'granted') {
+        const result = await NotificationSystem.enableNotifications();
+        if (result !== 'granted') {
+          alert(t('notif_permission_denied'));
+          document.getElementById('toggleEnabled').checked = false;
+          NotificationSystem.toggleSetting('enabled', false);
+          updateUI();
+          return;
+        }
       }
+
+      NotificationSystem.toggleSetting(key, value);
+      updateUI();
     }
 
     async function refreshTimes() {

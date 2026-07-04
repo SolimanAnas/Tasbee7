@@ -91,6 +91,9 @@ export default {
   'setting_share_desc': 'نیکی کی رہنمائی کرنے والا اس کا شریک ہوتا ہے',
   'setting_about': 'ایپ کے بارے میں',
   'setting_privacy': 'رازداری کی پالیسی',
+  'sw_update_available': 'ایک نیا ورژن دستیاب ہے',
+  'sw_update_reload': 'ریلوڈ کریں',
+  'sw_update_dismiss': 'بعد میں',
   'setting_reset': 'فیکٹری ری سیٹ',
 
   'stats_title': 'میری روزانہ کامیابیاں',
@@ -452,6 +455,8 @@ export default {
   'audio_timer_off': 'بند ›',
   'audio_timer_cancelled': 'ٹائمر منسوخ ہو گیا',
   'audio_load_error': 'ڈیٹا لوڈ نہیں ہو سکا',
+  'azkar_load_error': 'اذکار لوڈ نہیں ہو سکے — دوبارہ کوشش کے لیے تھپتھپائیں',
+  'hisn_load_error': 'حصن المسلم لوڈ نہیں ہو سکا — دوبارہ کوشش کے لیے تھپتھپائیں',
   'audio_no_results': 'کوئی نتائج نہیں',
   'audio_choose_reciter_sheet': 'قارئ منتخب کریں',
   'audio_choose_surah_sheet': 'سورہ / جزء منتخب کریں',

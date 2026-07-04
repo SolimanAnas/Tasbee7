@@ -487,7 +487,7 @@
 
   <header>
     <div class="toolbar">
-      <a href="/Tasbee7/index.html" class="header-btn"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
+      <a href="../index.html" class="header-btn"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
       <div class="search-box">
         <input type="text" id="search-input" placeholder="ابحث في الأدعية والعناوين..." data-i18n-placeholder="duaa_search_placeholder">
       </div>
@@ -961,11 +961,17 @@
       document.getElementById('search-input').oninput = handleSearch;
     }
 
-    let touchX = 0;
-    document.addEventListener('touchstart', e => touchX = e.changedTouches[0].screenX, {passive: true});
+    let touchX = 0, touchY = 0;
+    document.addEventListener('touchstart', e => {
+      touchX = e.changedTouches[0].screenX;
+      touchY = e.changedTouches[0].screenY;
+    }, {passive: true});
     document.addEventListener('touchend', e => {
-      const diff = touchX - e.changedTouches[0].screenX;
-      if (Math.abs(diff) > 80) diff > 0 ? nav('prev') : nav('next');
+      const dx = touchX - e.changedTouches[0].screenX;
+      const dy = touchY - e.changedTouches[0].screenY;
+      // Require the swipe to be clearly horizontal — otherwise vertical
+      // scrolling (reading the page) accidentally jumps chapters.
+      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) dx > 0 ? nav('prev') : nav('next');
     }, {passive: true});
 
     window.openMenu = openMenu;

@@ -1176,12 +1176,20 @@ const isPoster = isSalah || isSleeping;
 
 const dataFile = isSalah ? "../assets/salah.json" : isSleeping ? "../assets/sleeping-zikr.json" : "../assets/azkar.json";
 
-fetch(dataFile)
-.then(res => res.json())
-.then(data => {
-  azkarData = isPoster ? data : data[type];
-  loadZikr();
-});
+function loadAzkarData() {
+  fetch(dataFile)
+  .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+  .then(data => {
+    azkarData = isPoster ? data : data[type];
+    loadZikr();
+  })
+  .catch(err => {
+    console.error('Failed to load azkar data:', err);
+    const el = document.getElementById('arabicText');
+    if (el) el.innerHTML = `<span style="cursor:pointer;text-decoration:underline;opacity:.85" onclick="loadAzkarData()">${t('azkar_load_error')}</span>`;
+  });
+}
+loadAzkarData();
 
 /* --- Image Modal for salah type --- */
 function openImageModal() {
@@ -1469,7 +1477,7 @@ function setTheme(mode) {
 
 /* Home */
 function goHome() {
-  window.location.href = "/Tasbee7/index.html";
+  window.location.href = "../index.html";
 }
 
 /* --- Audio Mini Player --- */
@@ -1840,5 +1848,14 @@ window.addEventListener("load", () => {
 </script>
 
   <script src="../js/svg-injector.js"></script>
+  <script>
+    // Register the SW here too — this page is a manifest shortcut target, so
+    // it can be the very first page a user opens (no prior index.html visit
+    // to have registered it), which would otherwise mean no offline layer.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js').catch(console.warn);
+    }
+  </script>
+  <script src="../js/sw-update.js"></script>
 </body>
 </html>

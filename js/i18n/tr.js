@@ -91,6 +91,9 @@ export default {
   'setting_share_desc': 'İyiliğe yönlendiren, onun sevabına ortak olur',
   'setting_about': 'Hakkında',
   'setting_privacy': 'Gizlilik Politikası',
+  'sw_update_available': 'Yeni bir sürüm mevcut',
+  'sw_update_reload': 'Yenile',
+  'sw_update_dismiss': 'Daha sonra',
   'setting_reset': 'Fabrika Ayarlarına Dön',
 
   'stats_title': 'Günlük Başarılarım',
@@ -452,6 +455,8 @@ export default {
   'audio_timer_off': 'Kapalı ›',
   'audio_timer_cancelled': 'Zamanlayıcı iptal edildi',
   'audio_load_error': 'Veri yüklenemedi',
+  'azkar_load_error': 'Zikirler yüklenemedi — tekrar denemek için dokunun',
+  'hisn_load_error': 'Hısnu\'l-Müslim yüklenemedi — tekrar denemek için dokunun',
   'audio_no_results': 'Sonuç yok',
   'audio_choose_reciter_sheet': 'Okuyucu Seç',
   'audio_choose_surah_sheet': 'Sure / Cüz Seç',
