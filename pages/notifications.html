@@ -451,11 +451,25 @@
       }
     }
 
-    function toggleSetting(key, value) {
-      if(typeof NotificationSystem !== 'undefined') {
-        NotificationSystem.toggleSetting(key, value);
-        updateUI();
+    async function toggleSetting(key, value) {
+      if(typeof NotificationSystem === 'undefined') return;
+
+      // Flipping the master toggle ON is the user's explicit gesture to allow
+      // notifications — request permission here (not on page load, see
+      // js/notifications.js initLocalMode()).
+      if (key === 'enabled' && value === true && Notification.permission !== 'granted') {
+        const result = await NotificationSystem.enableNotifications();
+        if (result !== 'granted') {
+          alert(t('notif_permission_denied'));
+          document.getElementById('toggleEnabled').checked = false;
+          NotificationSystem.toggleSetting('enabled', false);
+          updateUI();
+          return;
+        }
       }
+
+      NotificationSystem.toggleSetting(key, value);
+      updateUI();
     }
 
     async function refreshTimes() {
