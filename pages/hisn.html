@@ -457,7 +457,7 @@
 
   <header id="header">
     <div class="toolbar">
-      <a href="/Tasbee7/index.html" class="header-btn"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
+      <a href="../index.html" class="header-btn"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
       <div class="search-box">
         <input type="text" id="search-input" placeholder="ابحث في الأذكار والعناوين..." data-i18n-placeholder="hisn_search_placeholder">
       </div>
@@ -642,9 +642,17 @@
         document.documentElement.style.setProperty('--dynamic-font-color', savedColor);
       }
 
-      const res = await fetch('../assets/hisn_complete.json');
-      App.data = res.ok ? await res.json() : [];
-      
+      try {
+        const res = await fetch('../assets/hisn_complete.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        App.data = await res.json();
+      } catch (err) {
+        console.error('Failed to load hisn data:', err);
+        document.getElementById('content-area').innerHTML =
+          `<div class="cards-container"><div class="card" style="text-align:center;cursor:pointer;" onclick="init()">${t('hisn_load_error')}</div></div>`;
+        return;
+      }
+
       const cachedIdx = parseInt(localStorage.getItem('hisnCurrentIdx'));
       if (!isNaN(cachedIdx) && cachedIdx >= 0 && cachedIdx < App.data.length) {
         App.currentIdx = cachedIdx;

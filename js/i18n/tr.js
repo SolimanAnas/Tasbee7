@@ -452,6 +452,8 @@ export default {
   'audio_timer_off': 'Kapalı ›',
   'audio_timer_cancelled': 'Zamanlayıcı iptal edildi',
   'audio_load_error': 'Veri yüklenemedi',
+  'azkar_load_error': 'Zikirler yüklenemedi — tekrar denemek için dokunun',
+  'hisn_load_error': 'Hısnu\'l-Müslim yüklenemedi — tekrar denemek için dokunun',
   'audio_no_results': 'Sonuç yok',
   'audio_choose_reciter_sheet': 'Okuyucu Seç',
   'audio_choose_surah_sheet': 'Sure / Cüz Seç',
