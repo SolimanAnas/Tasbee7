@@ -192,13 +192,15 @@ test('icon CSS classes are defined', async ({ page }) => {
   }
 });
 
-// ========== 8. SW v42 has SVG precache entries ==========
-test('sw.js v42 includes SVG icon precache entries', async ({ page }) => {
+// ========== 8. SW has SVG precache entries ==========
+test('sw.js includes a cache version and SVG icon precache entries', async ({ page }) => {
   const response = await page.goto(`${BASE_URL}/sw.js`, { waitUntil: 'domcontentloaded' });
   expect(response.status()).toBe(200);
   const swText = await page.evaluate(() => document.body.textContent);
 
-  expect(swText).toContain('zad-muslim-v65');
+  // Match the pattern, not an exact version — this asserts a versioned cache
+  // name exists without breaking on every legitimate version bump.
+  expect(swText).toMatch(/zad-muslim-v\d+/);
   expect(swText).toContain('./img/SVG/close.svg');
   expect(swText).toContain('./img/SVG/search.svg');
   expect(swText).toContain('./img/SVG/book.svg');
