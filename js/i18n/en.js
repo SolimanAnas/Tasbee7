@@ -96,6 +96,9 @@ export default {
   'setting_share_desc': 'Whoever guides to good shares the reward',
   'setting_about': 'About',
   'setting_privacy': 'Privacy Policy',
+  'sw_update_available': 'A new version is available',
+  'sw_update_reload': 'Reload',
+  'sw_update_dismiss': 'Later',
   'setting_reset': 'Factory Reset',
 
   // Stats

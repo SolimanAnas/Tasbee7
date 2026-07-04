@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v67"; // v67: offline 404 fallback, ignoreSearch for deep links, fix HTML double-fetch
+const CACHE_NAME = "zad-muslim-v68"; // v68: precache hisn/salah/sleeping/hadith-index JSON, SW update banner, shortcut-page SW registration
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -66,6 +66,7 @@ const STATIC_ASSETS = [
   "./js/theme-manager.js",
   "./js/toast.js",
   "./js/back-close.js",
+  "./js/sw-update.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
@@ -132,6 +133,9 @@ const STATIC_ASSETS = [
   "./assets/audio.json",
   "./assets/azkar.json",
   "./assets/husn.pdf",
+  "./assets/hisn_complete.json",
+  "./assets/salah.json",
+  "./assets/sleeping-zikr.json",
   "./assets/duaa-01.json",
   "./assets/duaa-02.json",
   "./assets/duaa-03.json",
@@ -142,6 +146,7 @@ const STATIC_ASSETS = [
   "./assets/part3.json",
   "./assets/part4.json",
   "./assets/part5.json",
+  "./assets/hadith/Index-translated.json",
 
   // ===== Icons =====
   "./icons/icon-192.png",

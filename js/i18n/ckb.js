@@ -97,6 +97,9 @@ export default {
   'setting_share_desc': 'هەوڵدەری خێر هاوبەشەی پاداشتە',
   'setting_about': 'دەربارەی ئەپەکە',
   'setting_privacy': 'سیاسەتی تایبەتێتی',
+  'sw_update_available': 'وەشانێکی نوێ بەردەستە',
+  'sw_update_reload': 'نوێکردنەوە',
+  'sw_update_dismiss': 'دواتر',
   'setting_reset': 'گەڕانەوە بۆ ڕێکخستنی کارخانە',
 
   // Stats

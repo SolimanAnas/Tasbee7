@@ -91,6 +91,9 @@ export default {
   'setting_share_desc': 'İyiliğe yönlendiren, onun sevabına ortak olur',
   'setting_about': 'Hakkında',
   'setting_privacy': 'Gizlilik Politikası',
+  'sw_update_available': 'Yeni bir sürüm mevcut',
+  'sw_update_reload': 'Yenile',
+  'sw_update_dismiss': 'Daha sonra',
   'setting_reset': 'Fabrika Ayarlarına Dön',
 
   'stats_title': 'Günlük Başarılarım',

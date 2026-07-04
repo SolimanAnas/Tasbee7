@@ -96,6 +96,9 @@ export default {
   'setting_share_desc': 'الدال على الخير كفاعله',
   'setting_about': 'عن التطبيق',
   'setting_privacy': 'سياسة الخصوصية',
+  'sw_update_available': 'نسخة جديدة متاحة',
+  'sw_update_reload': 'تحديث',
+  'sw_update_dismiss': 'لاحقاً',
   'setting_reset': 'إعادة ضبط المصنع',
 
   // Stats

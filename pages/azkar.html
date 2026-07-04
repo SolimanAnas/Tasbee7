@@ -1848,5 +1848,14 @@ window.addEventListener("load", () => {
 </script>
 
   <script src="../js/svg-injector.js"></script>
+  <script>
+    // Register the SW here too — this page is a manifest shortcut target, so
+    // it can be the very first page a user opens (no prior index.html visit
+    // to have registered it), which would otherwise mean no offline layer.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js').catch(console.warn);
+    }
+  </script>
+  <script src="../js/sw-update.js"></script>
 </body>
 </html>
