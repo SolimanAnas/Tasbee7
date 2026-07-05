@@ -18,7 +18,7 @@
 (function (global: typeof globalThis) {
   'use strict';
 
-  const TASHKEEL_RE = /[ؐ-ًؚ-ٰٟۖ-ۜ۟-۪ۤۧۨ-ۭ]/g;
+  const TASHKEEL_RE = /[\u064B-\u065F\u0610-\u061A\u06D6-\u06DC\u06DF-\u06EA\u06E4\u06E7\u06E8-\u06ED]/g;  // diacritics ONLY — \u escapes because an RTL-edited literal class once corrupted the ranges to eat all letters
   const ZEROWIDTH_RE = /[​‌‍﻿]/g;
   const NUM_MARK_RE = /[٠-٩۰-۹۝࣢]/g;
   const WAQF_RE = /[ۖ-ۭ]/g;
@@ -132,6 +132,20 @@
       return variants;
     }
 
+    /* Public variant builder: tajweed variants + dagger-alif alternative.
+     * Uthmani dagger alif (\u0670) is normalised to a full alif so that
+     * سُبْحَٰنَ matches ASR "سبحان" — but words like ذَٰلِكَ then
+     * normalise to "ذالك" while ASR says "ذلك". Accept the dagger-DELETED
+     * form as a variant so both spellings match exactly. */
+    variantsFor(raw: string, norm: string, nextNorm: string): Set<string> {
+      const v = this._tajweedVariants(norm, nextNorm);
+      if (raw && String(raw).indexOf('\u0670') >= 0) {
+        const alt = this.normArabic(String(raw).replace(/\u0670/g, ''));
+        if (alt) v.add(alt);
+      }
+      return v;
+    }
+
     buildFromAyahs(ayahDataArray: AyahData[]): Token[] {
       const tokens: Token[] = [];
       (ayahDataArray || []).forEach(a => {
@@ -153,7 +167,7 @@
         });
       });
       for (let i = 0; i < tokens.length; i++) {
-        const v = this._tajweedVariants(tokens[i].norm, tokens[i + 1] ? tokens[i + 1].norm : '');
+        const v = this.variantsFor(tokens[i].raw, tokens[i].norm, tokens[i + 1] ? tokens[i + 1].norm : '');
         if (tokens[i].altNorm && tokens[i].altNorm !== tokens[i].norm) v.add(tokens[i].altNorm!);
         tokens[i].variants = v;
       }
@@ -294,7 +308,9 @@
       let aS = -1, aE = -1;
       for (let s = 0; s < spoken.length && aS < 0; s++) {
         for (let e = lo; e <= hi; e++) {
-          if (this._isMatch(spoken[s], T[e])) { aS = s; aE = e; break; }
+          // merged check too: a fused pair (مِن رَّبهم → مربهم) must anchor at
+          // its FIRST token, or the pair's first word is falsely marked missed
+          if (this._isMatch(spoken[s], T[e]) || this._matchMergedAt(spoken[s], e)) { aS = s; aE = e; break; }
         }
       }
       if (aS < 0) return;

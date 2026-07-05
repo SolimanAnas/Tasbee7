@@ -10,6 +10,44 @@ about what the code currently does.
 
 ---
 
+## Implementation status (2026-07-05)
+
+Executed as a **parallel v3 page** so `pages/quran.html` stays untouched and shippable
+while the upgrade is validated:
+
+- ✅ **Phase 0 #1 — wasted `matchVerse()` removed** from `js/tarteel-worker.js`
+  `recognizeStream()`. It no longer runs a 6,236-verse Levenshtein scan on every 1.5s
+  streaming tick (the result was never read). Benefits **both** v2 and v3 since they share
+  the worker.
+- ✅ **New `pages/quran_v2.html`** — byte-identical to `quran.html` except two script lines
+  (adds `js/tasmee-matcher.js`, swaps `tasmee-pro-v2.js` → `tasmee-pro-v3.js`). Everything
+  else — reader, audio, tafsir, search, download, themes — is unchanged.
+- ✅ **New `js/quran/tasmee-pro-v3.js`** — the v2 panel's rendering/recording layer with two
+  upgrades: (1) the matching brain is now the shared **`TasmeeMatcher`** (tajweed variants,
+  Levenshtein-DP fuzzy, idgham two-word fusion, lookahead skip detection, extra-word
+  tracking) instead of the old inline prefix/1-edit matcher — with a graceful fallback to
+  the inline matcher if the shared module fails to load; (2) **sessions persist** — word
+  states accumulate into a last-wins map and are saved via `TasmeeStore` (session +
+  typed missing/wrong/extra mistakes) on page-switch and panel close, so the Tasmee
+  dashboard finally sees Pro-panel usage (previously it saved nothing).
+- ✅ **`TasmeeMatcher` resurrected from dead code** and hardened: fixed a corrupted
+  diacritics regex in `js/tasmee-matcher.ts` (an RTL-edited character class had silently
+  grown to eat *all* Arabic letters — now `\u`-escaped); added `variantsFor()` for the
+  Uthmani dagger-alif spelling (`ذَٰلِكَ` ↔ ASR `ذلك`); and taught `feedTranscript`'s
+  re-anchor scan to recognise idgham-fused pairs at their first token.
+- ✅ **Tests** — new `tests/node/tasmee-matcher.test.cjs` (8 cases, run in CI-free Node:
+  spec-parity skip/overlap/idempotence + iqlab/idgham/extra-word + the exact token-build
+  path v3 uses) and `tests/tasmee-v3.spec.js` (mirrors `tasmee-v2.spec.js` against
+  `quran_v2.html`, plus an IndexedDB persistence assertion). `sw.js` precache + reference
+  guards updated; SW bumped to v69.
+
+**Not yet done** (unchanged from the roadmap below): wiring the *other* surfaces
+(`quran-text.html`, `tasmee-review.html`) onto the shared matcher/store, the offline
+word-level ASR research (Phase 2), and cross-surface polish/i18n (Phase 3). `quran.html`
+itself is deliberately left on v2 until `quran_v2.html`/v3 is validated in the field.
+
+---
+
 ## 0. The one-paragraph version
 
 You already built most of the *hard* half of a Tarteel-level app — a genuinely
