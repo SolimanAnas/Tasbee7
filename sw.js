@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v68"; // v68: precache hisn/salah/sleeping/hadith-index JSON, SW update banner, shortcut-page SW registration
+const CACHE_NAME = "zad-muslim-v69"; // v69: Tasmee' Pro v3 panel (quran_v2.html) — shared TasmeeMatcher brain + session persistence
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -23,6 +23,7 @@ const STATIC_ASSETS = [
   "./index.html",
   "./404.html",
   "./pages/quran.html",
+  "./pages/quran_v2.html",
   "./pages/quran-text.html",
   "./pages/audio.html",
   "./pages/radio.html",
@@ -106,6 +107,7 @@ const STATIC_ASSETS = [
   "./js/quran/init.js",
   "./js/quran/tasmee.js",
   "./js/quran/tasmee-pro-v2.js",
+  "./js/quran/tasmee-pro-v3.js",
   "./js/quran/tasmee-dashboard.js",
   "./js/quran/tasmee-review.js",
   "./js/quran/local-search.js",

@@ -317,8 +317,10 @@ async function recognizeStream(audio) {
     const vocabSize = logprobs.dims[2];
     const rawData = logprobs.data.subarray(0, T * vocabSize);
     const transcript = ctcDecode(rawData, T);
-    const match = matchVerse(transcript);
-    self.postMessage({ type: 'stream_result', transcript, match });
+    // No matchVerse() here: word-level alignment against the EXPECTED text is
+    // done on the page (TasmeeMatcher). Scanning all 6,236 verses per 1.5s
+    // tick was pure waste — no live consumer ever read the stream `match`.
+    self.postMessage({ type: 'stream_result', transcript });
   } catch (_) { /* silent */ }
   _streamBusy = false;
 }
