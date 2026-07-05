@@ -1,5 +1,12 @@
 <div align="center">
 
+<img src="https://github.com/SolimanAnas/quran-data-library/blob/main/line-by-line/1/6.png" alt="بسم الله الرحمن الرحيم" width="80%">
+<br>
+<img src="https://github.com/SolimanAnas/quran-data-library/blob/main/line-by-line/1/7.png" alt="الحمد لله رب العالمين" width="80%">
+
+<br>
+<br>
+
 <img src="images/Featured.webp" alt="Zad Al-Muslim — زاد المسلم" width="100%">
 
 <br>
