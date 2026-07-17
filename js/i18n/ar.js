@@ -713,6 +713,8 @@ export default {
   'duaa_loading': `جاري التحميل ...`,
   'duaa_menu_title': `فهرس الأدعية`,
   'duaa_select_chapter': `اختر الباب`,
+  'duaa_toc_label': `الفهرس`,
+  'duaa_toc_hint': `اضغط هنا لفتح فهرس الأدعية`,
   'duaa_settings': `الإعدادات`,
   'duaa_show_favorites': `عرض المفضلة`,
   'duaa_source': `هذا المحتوى مأخوذ من:`,

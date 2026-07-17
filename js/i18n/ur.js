@@ -685,6 +685,8 @@ export default {
   'duaa_loading': `لوڈ ہو رہا ہے ...`,
   'duaa_menu_title': `دعاؤں کی فہرست`,
   'duaa_select_chapter': `باب منتخب کریں`,
+  'duaa_toc_label': `فہرست`,
+  'duaa_toc_hint': `دعاؤں کی فہرست کھولنے کے لیے یہاں دبائیں`,
   'duaa_settings': `ترتیبات`,
   'duaa_show_favorites': `پسندیدہ دکھائیں`,
   'duaa_source': `یہ مواد یہاں سے لیا گیا ہے:`,

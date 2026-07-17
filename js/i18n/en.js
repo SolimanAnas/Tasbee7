@@ -713,6 +713,8 @@ export default {
   'duaa_loading': `Loading ...`,
   'duaa_menu_title': `Table of Du'as`,
   'duaa_select_chapter': `Select Chapter`,
+  'duaa_toc_label': `Contents`,
+  'duaa_toc_hint': `Tap here to open the duaa index`,
   'duaa_settings': `Settings`,
   'duaa_show_favorites': `Show Favorites`,
   'duaa_source': `This content is taken from:`,

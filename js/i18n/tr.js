@@ -685,6 +685,8 @@ export default {
   'duaa_loading': `Yükleniyor ...`,
   'duaa_menu_title': `Dua Dizini`,
   'duaa_select_chapter': `Bölüm Seç`,
+  'duaa_toc_label': `İçindekiler`,
+  'duaa_toc_hint': `Dua dizinini açmak için buraya dokunun`,
   'duaa_settings': `Ayarlar`,
   'duaa_show_favorites': `Favorileri Göster`,
   'duaa_source': `Bu içerik şuradan alınmıştır:`,
