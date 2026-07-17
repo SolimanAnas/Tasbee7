@@ -713,6 +713,8 @@ export default {
   'duaa_loading': `بارکردن ...`,
   'duaa_menu_title': `فێرستی دوعاکان`,
   'duaa_select_chapter': `بابەت هەلبژێرە`,
+  'duaa_toc_label': `پێڕست`,
+  'duaa_toc_hint': `بۆ کردنەوەی پێڕستی دوعاکان لێرە دابگرە`,
   'duaa_settings': `ڕێکخستنەکان`,
   'duaa_show_favorites': `دڵخوازەکان پیشان بدە`,
   'duaa_source': `ئەم ناوەڕۆکە لە ئێرەوە وەرگری:`,

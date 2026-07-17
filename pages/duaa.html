@@ -65,6 +65,7 @@
       --text-muted: #666;
       --accent: #3498db;
       --accent-bg: rgba(52, 152, 219, 0.1);
+      --on-accent: #ffffff;
       --border: #e1e8ed;
       --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
       --glass-bg: rgba(255, 255, 255, 0.85);
@@ -82,6 +83,7 @@
       --border: #e6dfcc;
       --accent: #b87333;
       --accent-bg: rgba(184, 115, 51, 0.1);
+      --on-accent: #ffffff;
       --glass-bg: rgba(253, 246, 227, 0.85);
       --glass-border: rgba(255, 255, 255, 0.3);
     }
@@ -95,6 +97,7 @@
       --header-bg: #1a1a1a;
       --accent: #34D399;
       --accent-bg: rgba(52, 211, 153, 0.1);
+      --on-accent: #04281a;
       --glass-bg: rgba(30, 30, 30, 0.85);
       --glass-border: rgba(255, 255, 255, 0.05);
     }
@@ -208,20 +211,80 @@
     }
     
     .custom-select-btn {
-      flex: 1; 
-      background: transparent; 
-      border: none; 
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
       color: var(--text);
-      font-family: 'Amiri', 'Scheherazade', serif !important; 
-      font-size: 1.15rem; 
-      font-weight: bold;
-      text-align: center; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis;
-      cursor: pointer; 
-      padding: 5px;
+      font-family: 'Amiri', 'Scheherazade', serif !important;
+      text-align: center;
+      cursor: pointer;
+      padding: 2px 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
     }
+    .toc-label {
+      background: var(--accent);
+      color: var(--on-accent);
+      font-weight: bold;
+      font-size: 1rem;
+      line-height: 1.4;
+      padding: 3px 16px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 2px 10px var(--accent-bg);
+    }
+    .toc-burger { font-size: 0.9em; }
+    .toc-chapter {
+      max-width: 100%;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    /* First-run coach mark pointing at the الفهرس button */
+    .toc-hint {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      z-index: 998;
+      max-width: 85%;
+      text-align: center;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .toc-hint::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 8px solid transparent;
+      border-top-color: var(--text);
+    }
+    .toc-hint.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+    @keyframes tocNudge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+    .custom-select-btn.nudge .toc-label { animation: tocNudge 1.2s ease-in-out 3; }
 
     .section-title,
     .search-result-title,
@@ -504,9 +567,14 @@
     </div>
   </main>
 
+  <div class="toc-hint" id="tocHint" onclick="openMenu()" data-i18n="duaa_toc_hint">اضغط هنا لفتح فهرس الأدعية</div>
+
   <nav class="bottom-nav">
     <button class="nav-btn" onclick="nav('prev')">‹</button>
-    <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()" data-i18n="duaa_select_chapter">اختر الباب</button>
+    <button class="custom-select-btn" id="customSelectBtn" onclick="openMenu()" aria-haspopup="dialog">
+      <span class="toc-label"><span class="toc-burger">☰</span><span data-i18n="duaa_toc_label">الفهرس</span></span>
+      <span class="toc-chapter" id="tocChapter" data-i18n="duaa_select_chapter">اختر الباب</span>
+    </button>
     <button class="nav-btn" onclick="nav('next')">›</button>
   </nav>
 
@@ -759,7 +827,7 @@
       if (!section) return;
       
       document.getElementById('main-title').textContent = section.title;
-      document.getElementById('customSelectBtn').textContent = section.title;
+      document.getElementById('tocChapter').textContent = section.title;
       
       // Update: Checking for specific bullet sections
       const titleStr = section.title;
@@ -813,7 +881,7 @@
     function viewBookmarks() {
       closeSettings();
       App.isSearchMode = true;
-      document.getElementById('customSelectBtn').textContent = t('duaa_favorites');
+      document.getElementById('tocChapter').textContent = t('duaa_favorites');
       document.getElementById('main-title').textContent = t('duaa_favorites_count', { n: bookmarks.length });
       
       if(bookmarks.length === 0) {
@@ -851,7 +919,30 @@
       localStorage.removeItem('duaFontColor');
     }
 
+    // ----- First-run hint: users kept missing that the الفهرس lives here -----
+    function maybeShowTocHint() {
+      try {
+        if (localStorage.getItem('duaaTocOpened')) return;            // already discovered it
+        const shown = +(localStorage.getItem('duaaTocHintShown') || 0);
+        if (shown >= 2) return;                                       // don't nag forever
+        setTimeout(() => {
+          if (localStorage.getItem('duaaTocOpened')) return;
+          localStorage.setItem('duaaTocHintShown', shown + 1);
+          document.getElementById('tocHint').classList.add('show');
+          document.getElementById('customSelectBtn').classList.add('nudge');
+          setTimeout(hideTocHint, 8000);
+        }, 1200);
+      } catch (e) { /* storage unavailable — skip the hint */ }
+    }
+
+    function hideTocHint() {
+      document.getElementById('tocHint').classList.remove('show');
+      document.getElementById('customSelectBtn').classList.remove('nudge');
+    }
+
     function openMenu() {
+      try { localStorage.setItem('duaaTocOpened', '1'); } catch (e) {}
+      hideTocHint();
       const items = document.querySelectorAll('.menu-item');
       items.forEach((item, idx) => {
         if (idx === App.currentIdx && !App.isSearchMode) {
@@ -866,7 +957,7 @@
     }
 
     function closeMenu() { if (window.BackClose) BackClose.closed(); document.getElementById('menuModal').classList.remove('active'); }
-    function openSettings() { document.getElementById('settingsModal').classList.add('active'); if (window.BackClose) BackClose.opened(closeSettings); }
+    function openSettings() { hideTocHint(); document.getElementById('settingsModal').classList.add('active'); if (window.BackClose) BackClose.opened(closeSettings); }
     function closeSettings() { if (window.BackClose) BackClose.closed(); document.getElementById('settingsModal').classList.remove('active'); }
 
     // NEW About Functions
@@ -905,7 +996,7 @@
       }
 
       App.isSearchMode = true;
-      document.getElementById('customSelectBtn').textContent = t('duaa_search_results');
+      document.getElementById('tocChapter').textContent = t('duaa_search_results');
       
       const results = App.searchIndex.filter(x => 
         x.norm.includes(query) || x.titleNorm.includes(query)
@@ -957,6 +1048,7 @@
 
       buildMenuAndSearchIndex();
       render();
+      maybeShowTocHint();
       
       document.getElementById('search-input').oninput = handleSearch;
     }
