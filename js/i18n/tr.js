@@ -668,6 +668,8 @@ export default {
   'hisn_favorites': `Favoriler`,
   'hisn_menu_title': `Bölüm Dizini`,
   'hisn_select_chapter': `Bölüm Seç`,
+  'hisn_toc_label': `İçindekiler`,
+  'hisn_toc_hint': `Bölüm dizinini açmak için buraya dokunun`,
   'hisn_settings': `Ayarlar`,
   'hisn_show_favorites': `Favorileri Göster`,
   'hisn_source': `Bu içerik şuradan alınmıştır:`,
