@@ -696,6 +696,8 @@ export default {
   'hisn_favorites': `Favorites`,
   'hisn_menu_title': `Table of Chapters`,
   'hisn_select_chapter': `Select Chapter`,
+  'hisn_toc_label': `Contents`,
+  'hisn_toc_hint': `Tap here to open the table of chapters`,
   'hisn_settings': `Settings`,
   'hisn_show_favorites': `Show Favorites`,
   'hisn_source': `This content is taken from:`,

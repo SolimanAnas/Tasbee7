@@ -696,6 +696,8 @@ export default {
   'hisn_favorites': `المفضلة`,
   'hisn_menu_title': `فهرس الأبواب`,
   'hisn_select_chapter': `اختر الباب`,
+  'hisn_toc_label': `الفهرس`,
+  'hisn_toc_hint': `اضغط هنا لفتح فهرس الأبواب`,
   'hisn_settings': `الإعدادات`,
   'hisn_show_favorites': `عرض المفضلة`,
   'hisn_source': `هذا المحتوى مأخوذ من:`,

@@ -696,6 +696,8 @@ export default {
   'hisn_favorites': `دڵخوازەکان`,
   'hisn_menu_title': `فێرستی بابەتەکان`,
   'hisn_select_chapter': `بابەت هەلبژێرە`,
+  'hisn_toc_label': `پێڕست`,
+  'hisn_toc_hint': `بۆ کردنەوەی پێڕستی بابەتەکان لێرە دابگرە`,
   'hisn_settings': `ڕێکخستنەکان`,
   'hisn_show_favorites': `دڵخوازەکان پیشان بدە`,
   'hisn_source': `ئەم ناوەڕۆکە لە ئێرەوە وەرگری:`,

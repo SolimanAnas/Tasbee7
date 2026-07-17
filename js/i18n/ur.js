@@ -668,6 +668,8 @@ export default {
   'hisn_favorites': `پسندیدہ`,
   'hisn_menu_title': `ابواب کی فہرست`,
   'hisn_select_chapter': `باب منتخب کریں`,
+  'hisn_toc_label': `فہرست`,
+  'hisn_toc_hint': `ابواب کی فہرست کھولنے کے لیے یہاں دبائیں`,
   'hisn_settings': `ترتیبات`,
   'hisn_show_favorites': `پسندیدہ دکھائیں`,
   'hisn_source': `یہ مواد یہاں سے لیا گیا ہے:`,
