@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v69"; // v69: Tasmee' Pro v3 panel (quran_v2.html) — shared TasmeeMatcher brain + session persistence
+const CACHE_NAME = "zad-muslim-v70"; // v70: expanded cities database (639 cities) + prayer coordinate fixes
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
