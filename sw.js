@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v70"; // v70: expanded cities database (639 cities) + prayer coordinate fixes
+const CACHE_NAME = "zad-muslim-v71"; // v71: precache missing deps (pwa-install, album art, SVGs, manifest icons/screenshots, medina coords) + cache CDN libs/fonts for full offline
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -68,6 +68,7 @@ const STATIC_ASSETS = [
   "./js/toast.js",
   "./js/back-close.js",
   "./js/sw-update.js",
+  "./js/pwa-install.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
   "./js/plugins/local-notifications.js",
@@ -116,6 +117,7 @@ const STATIC_ASSETS = [
   // ===== Offline Quran text (word-by-word Tasmee) =====
   "./data/quran.json",
   "./data/vocab.json",
+  "./json/medina2_coords.json",
 
   // ===== Fonts =====
   "./fonts/Tajawal.ttf",
@@ -150,9 +152,11 @@ const STATIC_ASSETS = [
   "./assets/part5.json",
   "./assets/hadith/Index-translated.json",
 
-  // ===== Icons =====
+  // ===== Icons (incl. every size/purpose referenced by manifest.json) =====
   "./icons/icon-192.png",
   "./icons/icon_512.png",
+  "./icons/icon-512-maskable.png",
+  "./icons/icon_1024.png",
   "./icons/duaa.png",
   "./icons/duaa.svg",
   "./icons/settings.svg",
@@ -166,6 +170,11 @@ const STATIC_ASSETS = [
   "./images/Background-dark.webp",
   "./images/Background-light.webp",
   "./images/background-sepia.webp",
+  "./images/album.png",
+
+  // ===== PWA install / splash screenshots (manifest.json) =====
+  "./poster.webp",
+  "./poster-wide.webp",
 
   // ===== Hadith book thumbnails =====
   "./assets/thumbnails/6/ImamBukhari1.webp",
@@ -202,6 +211,7 @@ const STATIC_ASSETS = [
   "./img/SVG/bell.svg",
   "./img/SVG/book-open.svg",
   "./img/SVG/book.svg",
+  "./img/SVG/books.svg",
   "./img/SVG/bookmark.svg",
   "./img/SVG/calendar-check.svg",
   "./img/SVG/calendar-minus.svg",
@@ -306,8 +316,26 @@ const STATIC_ASSETS = [
   "./img/SVG/wifi-off.svg",
   "./img/SVG/wifi.svg",
   "./img/SVG/x.svg",
+  "./img/SVG/x-circle.svg",
   "./img/SVG/zap.svg"
 ];
+
+// ===== Cross-origin runtime dependencies =====
+// The app pulls a few libraries and web-fonts from CDNs. These can't be
+// listed in STATIC_ASSETS the same way (opaque/cors), and the previous
+// fetch handler only cached same-origin ("basic") responses — so anything
+// from these hosts silently failed offline. We now cache them at runtime
+// (cache-first) so every important page works fully offline after one visit.
+const CACHEABLE_CDN_HOSTS = [
+  "fonts.googleapis.com",   // @font-face CSS (Tajawal / Amiri)
+  "fonts.gstatic.com",      // the actual font files referenced by that CSS
+  "cdnjs.cloudflare.com",   // sql.js (offline Quran / tafsir / mushaf DBs)
+  "cdn.jsdelivr.net"        // hls.js (radio player)
+];
+
+function isCacheableCrossOrigin(url) {
+  return CACHEABLE_CDN_HOSTS.some(h => url.hostname === h || url.hostname.endsWith("." + h));
+}
 
 const DEEP_LINKS = {
   prayer: "./pages/quran.html",
@@ -432,7 +460,14 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(req).then(cacheRes => cacheRes ||
       fetch(req).then(networkRes => {
-        if (networkRes && networkRes.status === 200 && networkRes.type === "basic") {
+        // Cache same-origin assets (basic) AND the allow-listed CDN/font
+        // hosts. CDN <script>/<link>/font requests are no-cors, so they come
+        // back "opaque" (status 0) — cache those too so the app's libraries
+        // and web-fonts survive going offline after the first visit.
+        const cacheable = networkRes && (
+          (networkRes.status === 200 && networkRes.type === "basic") ||
+          (isCacheableCrossOrigin(url) && (networkRes.ok || networkRes.type === "opaque")));
+        if (cacheable) {
           const copy = networkRes.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
