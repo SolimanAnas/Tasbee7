@@ -696,7 +696,77 @@
               </select>
           </div></div>
           
-          <button class="offline-btn" id="offlineDownloadBtn" onclick="downloadOfflineData()"><img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تحميل القرآن كاملاً (بدون إنترنت)</button>
+          <div class="offline-cache-section">
+            <div class="offline-cache-header">
+              <img src="../img/SVG/download.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
+              <span>الوضع بدون إنترنت</span>
+            </div>
+            <div class="offline-cache-desc">حمّل المحتوى للعمل بدون إنترنت</div>
+            
+            <div class="offline-cache-categories">
+              <div class="offline-cache-category" data-category="pages">
+                <div class="category-info">
+                  <span class="category-name">الصفحات</span>
+                  <span class="category-size">~2.5 ميجابايت</span>
+                </div>
+                <div class="category-status" id="pagesStatus">
+                  <span class="status-text">غير محمل</span>
+                  <div class="status-indicator"></div>
+                </div>
+              </div>
+              
+              <div class="offline-cache-category" data-category="hadith">
+                <div class="category-info">
+                  <span class="category-name">كتب الحديث</span>
+                  <span class="category-size">~8 ميجابايت</span>
+                </div>
+                <div class="category-status" id="hadithStatus">
+                  <span class="status-text">غير محمل</span>
+                  <div class="status-indicator"></div>
+                </div>
+              </div>
+              
+              <div class="offline-cache-category" data-category="audio">
+                <div class="category-info">
+                  <span class="category-name">بيانات الصوتيات</span>
+                  <span class="category-size">~0.5 ميجابايت</span>
+                </div>
+                <div class="category-status" id="audioStatus">
+                  <span class="status-text">غير محمل</span>
+                  <div class="status-indicator"></div>
+                </div>
+              </div>
+              
+              <div class="offline-cache-category" data-category="quran">
+                <div class="category-info">
+                  <span class="category-name">القرآن كاملاً</span>
+                  <span class="category-size">~120 ميجابايت</span>
+                </div>
+                <div class="category-status" id="quranStatus">
+                  <span class="status-text">غير محمل</span>
+                  <div class="status-indicator"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="offline-cache-progress" id="offlineProgress" style="display: none;">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+              <div class="progress-text" id="progressText">جاري التحميل...</div>
+            </div>
+            
+            <div class="offline-cache-actions">
+              <button class="offline-btn" id="downloadAllBtn" onclick="downloadAllOffline()">
+                <img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
+                تحميل الكل
+              </button>
+              <button class="offline-btn offline-btn-secondary" id="downloadSelectedBtn" onclick="downloadSelectedOffline()" disabled>
+                <img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
+                تحميل المحدد
+              </button>
+            </div>
+          </div>
       </div>
   </div>
   
@@ -913,27 +983,159 @@
         });
     }
 
-    async function downloadOfflineData() {
-        const btn = document.getElementById('offlineDownloadBtn');
-        btn.disabled = true;
-        try {
-            const cache = await caches.open('quran-offline-v1');
-            for (let i = 1; i <= 604; i++) {
-                btn.innerText = `جاري التحميل... صفحة ${i} من 604`;
-                await cache.addAll([
-                    `https://api.alquran.cloud/v1/page/${i}/${selectedReciter}`,
-                    `https://api.quran.com/api/v4/verses/by_page/${i}?words=false&fields=text_qpc_hafs,text_uthmani&per_page=50`
-                ]);
+    const OFFLINE_CACHE = {
+        pages: [
+            './index.html', './404.html',
+            './pages/quran.html', './pages/quran_v2.html', './pages/quran-text.html',
+            './pages/audio.html', './pages/radio.html', './pages/azkar.html',
+            './pages/masbaha.html', './pages/hisn.html', './pages/duaa.html',
+            './pages/hadith.html', './pages/qibla.html', './pages/notifications.html',
+            './pages/takrar.html', './pages/howto.html', './pages/about.html',
+            './pages/privacy.html', './pages/tasmee-dashboard.html', './pages/tasmee-review.html',
+            './pages/hadith-viewer.html', './pages/salah.html', './pages/sleeping.html',
+            './pages/audio-download.html', './pages/audio2.html', './pages/audio3.html',
+            './pages/quran-v2.html', './pages/radio2.html', './pages/video.html'
+        ],
+        hadith: [
+            './assets/hadith/Index-translated.json', './assets/hadith/bukhari.json',
+            './assets/hadith/muslim.json', './assets/hadith/abudawud.json',
+            './assets/hadith/tirmidhi.json', './assets/hadith/nasai.json',
+            './assets/hadith/ibnmajah.json', './assets/hadith/riyad_assalihin.json',
+            './assets/hadith/bulugh_almaram.json', './assets/hadith/mishkat_almasabih.json',
+            './assets/hadith/aladab_almufrad.json', './assets/hadith/shamail_muhammadiyah.json',
+            './assets/hadith/nawawi40.json', './assets/hadith/qudsi40.json',
+            './assets/hadith/rand-hadith.json'
+        ],
+        audio: [
+            './json/audio-01.json', './json/audio-02.json', './json/radio-01.json'
+        ]
+    };
+
+    let offlineSelected = new Set();
+    let offlineRunning = false;
+
+    function initOfflineCache() {
+        document.querySelectorAll('.offline-cache-category').forEach(cat => {
+            const category = cat.dataset.category;
+            cat.addEventListener('click', () => {
+                if (offlineRunning) return;
+                if (offlineSelected.has(category)) {
+                    offlineSelected.delete(category);
+                    cat.classList.remove('selected');
+                } else {
+                    offlineSelected.add(category);
+                    cat.classList.add('selected');
+                }
+                updateDownloadButtons();
+            });
+        });
+        checkOfflineStatus();
+    }
+
+    async function checkOfflineStatus() {
+        const cache = await caches.open('zad-offline-v1');
+        for (const [category, urls] of Object.entries(OFFLINE_CACHE)) {
+            const statusEl = document.getElementById(category + 'Status');
+            if (!statusEl) continue;
+            const allCached = await Promise.all(urls.map(url => cache.match(url)));
+            const cachedCount = allCached.filter(Boolean).length;
+            if (cachedCount === urls.length) {
+                statusEl.querySelector('.status-text').textContent = 'محمل بالكامل';
+                statusEl.closest('.offline-cache-category').classList.add('downloaded');
+            } else if (cachedCount > 0) {
+                statusEl.querySelector('.status-text').textContent = `${cachedCount}/${urls.length}`;
+                statusEl.closest('.offline-cache-category').classList.remove('downloaded');
             }
-            btn.innerHTML = 'تم التحميل بنجاح <img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
-            btn.style.background = "#10b981";
-            setTimeout(() => { btn.disabled = false; btn.innerHTML = '<img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> تحديث بيانات الأوفلاين'; }, 3000);
-        } catch(err) {
-            btn.innerText = "حدث خطأ. يرجى المحاولة لاحقاً.";
-            btn.style.background = "#ef4444";
-            setTimeout(() => { btn.disabled = false; btn.innerHTML = '<img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> إعادة المحاولة'; }, 3000);
         }
     }
+
+    function updateDownloadButtons() {
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
+        downloadSelectedBtn.disabled = offlineSelected.size === 0;
+    }
+
+    async function downloadAllOffline() {
+        offlineSelected = new Set(['pages', 'hadith', 'audio']);
+        document.querySelectorAll('.offline-cache-category').forEach(cat => {
+            cat.classList.add('selected');
+        });
+        await downloadSelectedOffline();
+    }
+
+    async function downloadSelectedOffline() {
+        if (offlineRunning || offlineSelected.size === 0) return;
+        offlineRunning = true;
+        
+        const progressEl = document.getElementById('offlineProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
+        
+        progressEl.style.display = 'block';
+        downloadAllBtn.disabled = true;
+        downloadSelectedBtn.disabled = true;
+
+        const cache = await caches.open('zad-offline-v1');
+        let totalItems = 0;
+        let doneItems = 0;
+
+        for (const category of offlineSelected) {
+            totalItems += OFFLINE_CACHE[category].length;
+        }
+
+        for (const category of offlineSelected) {
+            const urls = OFFLINE_CACHE[category];
+            const statusEl = document.getElementById(category + 'Status');
+            
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    const response = await fetch(urls[i]);
+                    if (response.ok) {
+                        await cache.put(urls[i], response);
+                    }
+                } catch (err) {
+                    console.warn(`Failed to cache ${urls[i]}:`, err);
+                }
+                doneItems++;
+                const pct = Math.round((doneItems / totalItems) * 100);
+                progressFill.style.width = pct + '%';
+                progressText.textContent = `جاري تحميل ${category}... ${pct}%`;
+                
+                if (statusEl) {
+                    statusEl.querySelector('.status-text').textContent = `${i + 1}/${urls.length}`;
+                }
+            }
+            
+            if (statusEl) {
+                statusEl.querySelector('.status-text').textContent = 'محمل بالكامل';
+                statusEl.closest('.offline-cache-category').classList.add('downloaded');
+            }
+        }
+
+        try { await navigator.storage?.persist?.(); } catch (e) {}
+        
+        offlineRunning = false;
+        offlineSelected.clear();
+        document.querySelectorAll('.offline-cache-category').forEach(cat => {
+            cat.classList.remove('selected');
+        });
+        
+        progressText.textContent = 'تم التحميل بنجاح!';
+        progressFill.style.background = '#10b981';
+        
+        downloadAllBtn.disabled = false;
+        downloadSelectedBtn.disabled = true;
+        
+        setTimeout(() => {
+            progressEl.style.display = 'none';
+            progressFill.style.width = '0%';
+            progressFill.style.background = '';
+        }, 2000);
+    }
+
+    document.addEventListener('DOMContentLoaded', initOfflineCache);
 
     let globalPressTimer = null;
     function cancelPress() { clearTimeout(globalPressTimer); }

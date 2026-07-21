@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v71"; // v71: precache missing deps (pwa-install, album art, SVGs, manifest icons/screenshots, medina coords) + cache CDN libs/fonts for full offline
+const CACHE_NAME = "zad-muslim-v72"; // v72: add missing pages, hadith book JSONs, audio JSONs for full offline
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -43,6 +43,12 @@ const STATIC_ASSETS = [
   "./pages/hadith-viewer.html",
   "./pages/salah.html",
   "./pages/sleeping.html",
+  "./pages/audio-download.html",
+  "./pages/audio2.html",
+  "./pages/audio3.html",
+  "./pages/quran-v2.html",
+  "./pages/radio2.html",
+  "./pages/video.html",
 
   // ===== Config =====
   "./manifest.json",
@@ -151,6 +157,7 @@ const STATIC_ASSETS = [
   "./assets/part4.json",
   "./assets/part5.json",
   "./assets/hadith/Index-translated.json",
+  "./assets/hadith/rand-hadith.json",
 
   // ===== Icons (incl. every size/purpose referenced by manifest.json) =====
   "./icons/icon-192.png",
