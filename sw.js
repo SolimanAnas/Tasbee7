@@ -46,7 +46,6 @@ const STATIC_ASSETS = [
   "./pages/audio-download.html",
   "./pages/audio2.html",
   "./pages/audio3.html",
-  "./pages/quran-v2.html",
   "./pages/radio2.html",
   "./pages/video.html",
 
