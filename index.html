@@ -465,10 +465,10 @@ input, textarea, select {
 .grid .feature-card:nth-child(8) { animation-delay: 0.32s; }
 @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-.feature-card { background: rgba(255, 255, 255, 0.12); }
-[data-theme="dark"] .feature-card { background: rgba(255, 255, 255, 0.12); }
-[data-theme="sepia"] .feature-card { background: rgba(140, 100, 40, 0.12); }
-[data-theme="oled"] .feature-card { background: rgba(255, 255, 255, 0.12); }
+.feature-card { background: rgba(255, 255, 255, 0.40); }
+[data-theme="dark"] .feature-card { background: rgba(255, 255, 255, 0.40); }
+[data-theme="sepia"] .feature-card { background: rgba(140, 100, 40, 0.40); }
+[data-theme="oled"] .feature-card { background: rgba(255, 255, 255, 0.40); }
 .feature-card:active { transform: scale(0.96); background: var(--surface-raised); }
 
 .fc-icon-wrap {
@@ -1001,6 +1001,19 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       </div>
     </div>
 
+    <div class="setting-item" onclick="openOfflineModal()">
+      <div class="setting-info">
+        <div class="s-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </div>
+        <div class="s-text">
+          <div class="s-title" data-i18n="setting_offline">التحميل للعمل بدون إنترنت</div>
+          <div class="s-desc" data-i18n="setting_offline_desc">حفظ كل الصفحات والملفات للاستخدام دون اتصال</div>
+        </div>
+      </div>
+      <div class="setting-control"><span style="font-size:1.5rem; color:var(--on-surface-variant);">›</span></div>
+    </div>
+
     <div class="setting-item" onclick="shareApp()">
       <div class="setting-info">
         <div class="s-icon">
@@ -1135,6 +1148,78 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <button class="btn exit-stay" onclick="closeExitModal()" data-i18n="exit_stay">البقاء</button>
       <button class="btn exit-leave" onclick="confirmExit()" data-i18n="exit_leave">مغادرة</button>
     </div>
+  </div>
+</div>
+
+<!-- ======================== OFFLINE DOWNLOAD MODAL ======================== -->
+<style>
+  #offlineModal .modal-content { max-width: 400px; }
+  .ofl-hero { margin:0 auto 12px; width:56px; height:56px; border-radius:18px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(16,185,129,.20), rgba(16,185,129,.05)); color:var(--primary,#10b981); }
+  .ofl-hero svg { width:28px; height:28px; }
+  .ofl-pill { display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--surface-variant, rgba(255,255,255,0.05)); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:11px 14px; margin-bottom:14px; font-size:.85rem; }
+  .ofl-pill-lbl { color:var(--on-surface-variant); }
+  .ofl-pill-val { display:flex; align-items:center; gap:7px; font-weight:700; color:var(--on-surface); }
+  .ofl-dot { width:9px; height:9px; border-radius:50%; background:var(--on-surface-variant); flex:0 0 auto; transition:background .3s; }
+  .ofl-dot.ok { background:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.18); }
+  .ofl-dot.partial { background:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.15); }
+  .ofl-list { display:flex; flex-direction:column; margin-bottom:16px; border-radius:14px; overflow:hidden; background:var(--surface-variant, rgba(255,255,255,.03)); }
+  .ofl-item { display:flex; align-items:center; gap:11px; padding:10px 12px; font-size:.85rem; color:var(--on-surface); border-bottom:1px solid rgba(255,255,255,.05); }
+  .ofl-item:last-child { border-bottom:none; }
+  .ofl-item .ofl-ic { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(16,185,129,.12); color:var(--primary,#10b981); flex:0 0 auto; }
+  .ofl-item .ofl-ic svg { width:17px; height:17px; }
+  .ofl-item .ofl-txt { flex:1; }
+  .ofl-item .ofl-sz { font-size:.72rem; color:var(--on-surface-variant); font-weight:600; }
+  .ofl-progress { margin-bottom:14px; }
+  .ofl-track { height:12px; border-radius:999px; background:var(--surface-variant, rgba(255,255,255,.08)); overflow:hidden; }
+  .ofl-fill { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); border-radius:999px; transition:width .25s ease; }
+  .ofl-pmeta { display:flex; justify-content:space-between; margin-top:8px; font-size:.75rem; color:var(--on-surface-variant); }
+  .ofl-pmeta b { color:var(--on-surface); font-weight:700; }
+  .ofl-storage { text-align:center; font-size:.72rem; color:var(--on-surface-variant); margin-top:10px; min-height:1em; }
+  #offlineDownloadBtn.is-done { background:rgba(16,185,129,.15); color:var(--primary,#10b981); box-shadow:none; }
+</style>
+<div class="modal-overlay" id="offlineModal" onclick="if(event.target===this) closeOfflineModal()">
+  <div class="modal-content glass-panel">
+    <div class="modal-head">
+      <div class="ofl-hero">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </div>
+      <div class="modal-title" data-i18n="offline_title">التحميل للعمل بدون إنترنت</div>
+      <div class="modal-sub" data-i18n="offline_subtitle">حمّل كل الصفحات والملفات لاستخدام التطبيق كاملاً بدون اتصال</div>
+    </div>
+
+    <div class="ofl-pill">
+      <span class="ofl-pill-lbl" data-i18n="offline_status_label">حالة التحميل</span>
+      <span class="ofl-pill-val"><span class="ofl-dot" id="offlineDot"></span><span id="offlineStatusText">…</span></span>
+    </div>
+
+    <div class="ofl-list">
+      <div class="ofl-item">
+        <span class="ofl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+        <span class="ofl-txt" data-i18n="offline_item_app">الواجهة وجميع الصفحات</span>
+      </div>
+      <div class="ofl-item">
+        <span class="ofl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+        <span class="ofl-txt" data-i18n="offline_item_quran">المصحف النصي والتفسير</span>
+      </div>
+      <div class="ofl-item">
+        <span class="ofl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span>
+        <span class="ofl-txt" data-i18n="offline_item_azkar">الأذكار والأدعية</span>
+      </div>
+      <div class="ofl-item">
+        <span class="ofl-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+        <span class="ofl-txt" data-i18n="offline_item_hadith">كتب الحديث كاملة</span>
+        <span class="ofl-sz">~58 MB</span>
+      </div>
+    </div>
+
+    <div class="ofl-progress" id="offlineProgressWrap" style="display:none;">
+      <div class="ofl-track"><div class="ofl-fill" id="offlineProgressFill"></div></div>
+      <div class="ofl-pmeta"><b id="offlineProgressPct">0%</b><span id="offlineProgressText"></span></div>
+    </div>
+
+    <button class="btn-primary" id="offlineDownloadBtn" onclick="startOfflineDownload()" data-i18n="offline_download_all">تحميل كل شيء للعمل بدون إنترنت</button>
+    <div class="ofl-storage" id="offlineStorage"></div>
+    <button class="btn-primary btn-secondary" onclick="closeOfflineModal()" data-i18n="close" style="margin-top:12px;">إغلاق</button>
   </div>
 </div>
 
@@ -1599,6 +1684,14 @@ function closeAllSheets() {
   if(prayerModalInterval) { clearInterval(prayerModalInterval); prayerModalInterval = null; }
 }
 
+// ===== Offline download modal =====
+// The controller lives in js/offline-download.js (shared with the Quran pages so
+// there is one offline mechanism and one cache). These thin wrappers keep the
+// existing onclick handlers working and close the settings sheet first.
+function openOfflineModal() { closeAllSheets(); window.OfflineDownload && OfflineDownload.open(); }
+function closeOfflineModal() { window.OfflineDownload && OfflineDownload.close(); }
+function startOfflineDownload() { window.OfflineDownload && OfflineDownload.start(); }
+
 const VALID_THEMES = ['light', 'dark', 'sepia', 'plain-dark'];
 // Map any foreign theme (e.g. azkar's "warm", which shares the themeMode key)
 // to a valid index theme so the page never renders with no background / broken colors.
@@ -1749,6 +1842,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="js/sw-update.js"></script>
+<script src="js/offline-download.js"></script>
 <script src="js/pwa-install.js"></script>
 
 <!-- Install prompt (PWA / Play Store / iOS) rendered by js/pwa-install.js -->
