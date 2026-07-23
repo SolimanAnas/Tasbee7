@@ -696,80 +696,76 @@
               </select>
           </div></div>
           
-          <div class="offline-cache-section">
-            <div class="offline-cache-header">
-              <img src="../img/SVG/download.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
-              <span>الوضع بدون إنترنت</span>
-            </div>
-            <div class="offline-cache-desc">حمّل المحتوى للعمل بدون إنترنت</div>
-            
-            <div class="offline-cache-categories">
-              <div class="offline-cache-category" data-category="pages">
-                <div class="category-info">
-                  <span class="category-name">الصفحات</span>
-                  <span class="category-size">~2.5 ميجابايت</span>
-                </div>
-                <div class="category-status" id="pagesStatus">
-                  <span class="status-text">غير محمل</span>
-                  <div class="status-indicator"></div>
-                </div>
-              </div>
-              
-              <div class="offline-cache-category" data-category="hadith">
-                <div class="category-info">
-                  <span class="category-name">كتب الحديث</span>
-                  <span class="category-size">~8 ميجابايت</span>
-                </div>
-                <div class="category-status" id="hadithStatus">
-                  <span class="status-text">غير محمل</span>
-                  <div class="status-indicator"></div>
-                </div>
-              </div>
-              
-              <div class="offline-cache-category" data-category="audio">
-                <div class="category-info">
-                  <span class="category-name">بيانات الصوتيات</span>
-                  <span class="category-size">~0.5 ميجابايت</span>
-                </div>
-                <div class="category-status" id="audioStatus">
-                  <span class="status-text">غير محمل</span>
-                  <div class="status-indicator"></div>
-                </div>
-              </div>
-              
-              <div class="offline-cache-category" data-category="quran">
-                <div class="category-info">
-                  <span class="category-name">القرآن كاملاً</span>
-                  <span class="category-size">~120 ميجابايت</span>
-                </div>
-                <div class="category-status" id="quranStatus">
-                  <span class="status-text">غير محمل</span>
-                  <div class="status-indicator"></div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="offline-cache-progress" id="offlineProgress" style="display: none;">
-              <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-              </div>
-              <div class="progress-text" id="progressText">جاري التحميل...</div>
-            </div>
-            
-            <div class="offline-cache-actions">
-              <button class="offline-btn" id="downloadAllBtn" onclick="downloadAllOffline()">
-                <img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
-                تحميل الكل
-              </button>
-              <button class="offline-btn offline-btn-secondary" id="downloadSelectedBtn" onclick="downloadSelectedOffline()" disabled>
-                <img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
-                تحميل المحدد
-              </button>
-            </div>
+          <div class="setting-row" style="cursor: pointer;" onclick="closeModal(settingsModal); OfflineDownload.open();">
+            <div class="setting-label"><img src="../img/SVG/download.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> الوضع بدون إنترنت</div>
+            <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
           </div>
       </div>
   </div>
-  
+
+  <!-- ===================== OFFLINE DOWNLOAD MODAL ===================== -->
+  <style>
+    #offlineModal .modal-content { width: min(400px, 94vw); }
+    #offlineModal .ofl-hero { margin:0 auto 12px; width:56px; height:56px; border-radius:18px; display:flex; align-items:center; justify-content:center; background:rgba(16,185,129,.14); color:var(--accent,#10b981); }
+    #offlineModal .ofl-hero img { width:28px; height:28px; }
+    #offlineModal .modal-head { text-align:center; margin-bottom:16px; }
+    #offlineModal .ofl-title { font-size:1.2rem; font-weight:700; }
+    #offlineModal .ofl-sub { font-size:.85rem; color:var(--text-muted); margin-top:4px; }
+    #offlineModal .ofl-pill { display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(128,128,128,.08); border:1px solid var(--glass-border); border-radius:14px; padding:11px 14px; margin-bottom:14px; font-size:.85rem; }
+    #offlineModal .ofl-pill-lbl { color:var(--text-muted); }
+    #offlineModal .ofl-pill-val { display:flex; align-items:center; gap:7px; font-weight:700; }
+    #offlineModal .ofl-dot { width:9px; height:9px; border-radius:50%; background:var(--text-muted); flex:0 0 auto; transition:background .3s; }
+    #offlineModal .ofl-dot.ok { background:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.18); }
+    #offlineModal .ofl-dot.partial { background:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.15); }
+    #offlineModal .ofl-list { display:flex; flex-direction:column; margin-bottom:16px; border-radius:14px; overflow:hidden; border:1px solid var(--glass-border); }
+    #offlineModal .ofl-item { display:flex; align-items:center; gap:11px; padding:10px 12px; font-size:.85rem; border-bottom:1px solid var(--glass-border); }
+    #offlineModal .ofl-item:last-child { border-bottom:none; }
+    #offlineModal .ofl-item .ofl-ic { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(16,185,129,.12); flex:0 0 auto; }
+    #offlineModal .ofl-item .ofl-ic img { width:17px; height:17px; }
+    #offlineModal .ofl-item .ofl-txt { flex:1; }
+    #offlineModal .ofl-item .ofl-sz { font-size:.72rem; color:var(--text-muted); font-weight:600; }
+    #offlineModal .ofl-progress { margin-bottom:14px; }
+    #offlineModal .ofl-track { height:12px; border-radius:999px; background:rgba(128,128,128,.15); overflow:hidden; }
+    #offlineModal .ofl-fill { height:100%; width:0%; background:linear-gradient(90deg,#10b981,#34d399); border-radius:999px; transition:width .25s ease; }
+    #offlineModal .ofl-pmeta { display:flex; justify-content:space-between; margin-top:8px; font-size:.75rem; color:var(--text-muted); }
+    #offlineModal .ofl-pmeta b { color:inherit; font-weight:700; }
+    #offlineModal .ofl-storage { text-align:center; font-size:.72rem; color:var(--text-muted); margin-top:10px; min-height:1em; }
+    #offlineModal .offline-btn.is-done { background:rgba(16,185,129,.15); color:var(--accent,#10b981); }
+  </style>
+  <div class="modal-overlay" id="offlineModal" onclick="handleOverlayClick(event,'offlineModal')">
+    <div class="modal-content">
+      <div class="modal-head">
+        <div class="ofl-hero"><img src="../img/SVG/download.svg" alt=""></div>
+        <div class="ofl-title">التحميل للعمل بدون إنترنت</div>
+        <div class="ofl-sub">حمّل كل الصفحات والملفات لاستخدام التطبيق كاملاً بدون اتصال</div>
+      </div>
+
+      <div class="ofl-pill">
+        <span class="ofl-pill-lbl">حالة التحميل</span>
+        <span class="ofl-pill-val"><span class="ofl-dot" id="offlineDot"></span><span id="offlineStatusText">…</span></span>
+      </div>
+
+      <div class="ofl-list">
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/grid.svg" alt=""></span><span class="ofl-txt">الواجهة وجميع الصفحات</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/book-open.svg" alt=""></span><span class="ofl-txt">المصحف النصي والتفسير</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/azkar.svg" alt=""></span><span class="ofl-txt">الأذكار والأدعية</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/hadith.svg" alt=""></span><span class="ofl-txt">كتب الحديث كاملة</span><span class="ofl-sz">~58 MB</span></div>
+      </div>
+
+      <div class="ofl-progress" id="offlineProgressWrap" style="display:none;">
+        <div class="ofl-track"><div class="ofl-fill" id="offlineProgressFill"></div></div>
+        <div class="ofl-pmeta"><b id="offlineProgressPct">0%</b><span id="offlineProgressText"></span></div>
+      </div>
+
+      <button class="offline-btn" id="offlineDownloadBtn" onclick="OfflineDownload.start()">
+        <img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
+        تحميل كل شيء للعمل بدون إنترنت
+      </button>
+      <div class="ofl-storage" id="offlineStorage"></div>
+      <button class="offline-btn offline-btn-secondary" onclick="closeModal('offlineModal')" style="margin-top:10px; background:transparent; color:var(--text-muted); border:1px solid var(--glass-border);">إغلاق</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')"><div class="modal-content"><div class="modal-header"><span>الذهاب لصفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div><div class="manual-input-group"><input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة" oninput="syncPickerWithInput()" onkeydown="if(event.key==='Enter') confirmPageSelection()"><button class="btn-go" onclick="confirmPageSelection()">انتقال</button></div></div></div>
   <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')"><div class="modal-content"><div class="modal-header"><span>المفضلة</span><button class="close-btn" onclick="closeModal('bookmarksModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="selector-scroll" id="bookmarksList"></div></div></div>
   <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')"><div class="modal-content"><div class="modal-header"><span>فهرس السور</span><button class="close-btn" onclick="closeModal('surahSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><input class="search-input" id="surahSearch" type="search" placeholder="ابحث عن سورة..." oninput="filterSurahs(this.value)" autocomplete="off"><div class="selector-scroll" id="surahList"></div></div></div>
@@ -983,159 +979,8 @@
         });
     }
 
-    const OFFLINE_CACHE = {
-        pages: [
-            './index.html', './404.html',
-            './pages/quran.html', './pages/quran_v2.html', './pages/quran-text.html',
-            './pages/audio.html', './pages/radio.html', './pages/azkar.html',
-            './pages/masbaha.html', './pages/hisn.html', './pages/duaa.html',
-            './pages/hadith.html', './pages/qibla.html', './pages/notifications.html',
-            './pages/takrar.html', './pages/howto.html', './pages/about.html',
-            './pages/privacy.html', './pages/tasmee-dashboard.html', './pages/tasmee-review.html',
-            './pages/hadith-viewer.html', './pages/salah.html', './pages/sleeping.html',
-            './pages/audio-download.html', './pages/audio2.html', './pages/audio3.html',
-            './pages/quran-v2.html', './pages/radio2.html', './pages/video.html'
-        ],
-        hadith: [
-            './assets/hadith/Index-translated.json', './assets/hadith/bukhari.json',
-            './assets/hadith/muslim.json', './assets/hadith/abudawud.json',
-            './assets/hadith/tirmidhi.json', './assets/hadith/nasai.json',
-            './assets/hadith/ibnmajah.json', './assets/hadith/riyad_assalihin.json',
-            './assets/hadith/bulugh_almaram.json', './assets/hadith/mishkat_almasabih.json',
-            './assets/hadith/aladab_almufrad.json', './assets/hadith/shamail_muhammadiyah.json',
-            './assets/hadith/nawawi40.json', './assets/hadith/qudsi40.json',
-            './assets/hadith/rand-hadith.json'
-        ],
-        audio: [
-            './json/audio-01.json', './json/audio-02.json', './json/radio-01.json'
-        ]
-    };
-
-    let offlineSelected = new Set();
-    let offlineRunning = false;
-
-    function initOfflineCache() {
-        document.querySelectorAll('.offline-cache-category').forEach(cat => {
-            const category = cat.dataset.category;
-            cat.addEventListener('click', () => {
-                if (offlineRunning) return;
-                if (offlineSelected.has(category)) {
-                    offlineSelected.delete(category);
-                    cat.classList.remove('selected');
-                } else {
-                    offlineSelected.add(category);
-                    cat.classList.add('selected');
-                }
-                updateDownloadButtons();
-            });
-        });
-        checkOfflineStatus();
-    }
-
-    async function checkOfflineStatus() {
-        const cache = await caches.open('zad-offline-v1');
-        for (const [category, urls] of Object.entries(OFFLINE_CACHE)) {
-            const statusEl = document.getElementById(category + 'Status');
-            if (!statusEl) continue;
-            const allCached = await Promise.all(urls.map(url => cache.match(url)));
-            const cachedCount = allCached.filter(Boolean).length;
-            if (cachedCount === urls.length) {
-                statusEl.querySelector('.status-text').textContent = 'محمل بالكامل';
-                statusEl.closest('.offline-cache-category').classList.add('downloaded');
-            } else if (cachedCount > 0) {
-                statusEl.querySelector('.status-text').textContent = `${cachedCount}/${urls.length}`;
-                statusEl.closest('.offline-cache-category').classList.remove('downloaded');
-            }
-        }
-    }
-
-    function updateDownloadButtons() {
-        const downloadAllBtn = document.getElementById('downloadAllBtn');
-        const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
-        downloadSelectedBtn.disabled = offlineSelected.size === 0;
-    }
-
-    async function downloadAllOffline() {
-        offlineSelected = new Set(['pages', 'hadith', 'audio']);
-        document.querySelectorAll('.offline-cache-category').forEach(cat => {
-            cat.classList.add('selected');
-        });
-        await downloadSelectedOffline();
-    }
-
-    async function downloadSelectedOffline() {
-        if (offlineRunning || offlineSelected.size === 0) return;
-        offlineRunning = true;
-        
-        const progressEl = document.getElementById('offlineProgress');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const downloadAllBtn = document.getElementById('downloadAllBtn');
-        const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
-        
-        progressEl.style.display = 'block';
-        downloadAllBtn.disabled = true;
-        downloadSelectedBtn.disabled = true;
-
-        const cache = await caches.open('zad-offline-v1');
-        let totalItems = 0;
-        let doneItems = 0;
-
-        for (const category of offlineSelected) {
-            totalItems += OFFLINE_CACHE[category].length;
-        }
-
-        for (const category of offlineSelected) {
-            const urls = OFFLINE_CACHE[category];
-            const statusEl = document.getElementById(category + 'Status');
-            
-            for (let i = 0; i < urls.length; i++) {
-                try {
-                    const response = await fetch(urls[i]);
-                    if (response.ok) {
-                        await cache.put(urls[i], response);
-                    }
-                } catch (err) {
-                    console.warn(`Failed to cache ${urls[i]}:`, err);
-                }
-                doneItems++;
-                const pct = Math.round((doneItems / totalItems) * 100);
-                progressFill.style.width = pct + '%';
-                progressText.textContent = `جاري تحميل ${category}... ${pct}%`;
-                
-                if (statusEl) {
-                    statusEl.querySelector('.status-text').textContent = `${i + 1}/${urls.length}`;
-                }
-            }
-            
-            if (statusEl) {
-                statusEl.querySelector('.status-text').textContent = 'محمل بالكامل';
-                statusEl.closest('.offline-cache-category').classList.add('downloaded');
-            }
-        }
-
-        try { await navigator.storage?.persist?.(); } catch (e) {}
-        
-        offlineRunning = false;
-        offlineSelected.clear();
-        document.querySelectorAll('.offline-cache-category').forEach(cat => {
-            cat.classList.remove('selected');
-        });
-        
-        progressText.textContent = 'تم التحميل بنجاح!';
-        progressFill.style.background = '#10b981';
-        
-        downloadAllBtn.disabled = false;
-        downloadSelectedBtn.disabled = true;
-        
-        setTimeout(() => {
-            progressEl.style.display = 'none';
-            progressFill.style.width = '0%';
-            progressFill.style.background = '';
-        }, 2000);
-    }
-
-    document.addEventListener('DOMContentLoaded', initOfflineCache);
+    // Offline download is handled by the shared js/offline-download.js controller
+    // (window.OfflineDownload), driven from the "الوضع بدون إنترنت" settings row.
 
     let globalPressTimer = null;
     function cancelPress() { clearTimeout(globalPressTimer); }
@@ -1821,5 +1666,16 @@
   </script>
   <script src="../js/tasmee-engine.js"></script>
   <script src="../js/svg-injector.js"></script>
+  <script src="../js/offline-download.js"></script>
+  <script>
+    // Register the service worker so offline caching works even when this page
+    // is the first one the user opens (e.g. a direct bookmark). Same scope as
+    // the app, so it shares the single zad-muslim cache.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('../sw.js').catch(function (e) { console.log('SW error', e); });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v72"; // v72: add missing pages, hadith book JSONs, audio JSONs for full offline
+const CACHE_NAME = "zad-muslim-v76"; // v76: harden offline modal — reply timeouts + graceful recovery when an old SW still controls after update; v75: drop ?v= cache-buster from audio pages, strip dead CSS; v74: unified offline-download.js controller; v73: precache quran-v2 + audio/radio JSONs, hadith books on-demand, ZAD_CACHE_ALL handler
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
   "./404.html",
   "./pages/quran.html",
   "./pages/quran_v2.html",
+  "./pages/quran-v2.html",
   "./pages/quran-text.html",
   "./pages/audio.html",
   "./pages/radio.html",
@@ -73,6 +74,7 @@ const STATIC_ASSETS = [
   "./js/toast.js",
   "./js/back-close.js",
   "./js/sw-update.js",
+  "./js/offline-download.js",
   "./js/pwa-install.js",
   "./js/plugins/capacitor-core.js",
   "./js/plugins/capacitor-shim.js",
@@ -123,6 +125,11 @@ const STATIC_ASSETS = [
   "./data/quran.json",
   "./data/vocab.json",
   "./json/medina2_coords.json",
+
+  // ===== Audio / radio track indexes (small JSON — needed by audio & radio pages) =====
+  "./json/audio-01.json",
+  "./json/audio-02.json",
+  "./json/radio-01.json",
 
   // ===== Fonts =====
   "./fonts/Tajawal.ttf",
@@ -326,6 +333,33 @@ const STATIC_ASSETS = [
   "./img/SVG/zap.svg"
 ];
 
+// ===== Optional heavy content (NOT precached on install) =====
+// The full hadith books total ~58 MB. Forcing every visitor to download that
+// on first load would make the SW install slow and waste storage for users who
+// never open the hadith section. Instead they are fetched on demand — either
+// lazily when a book is first opened (the fetch handler caches them), or in bulk
+// via the "Download for offline" modal in index.html (ZAD_CACHE_ALL message).
+const OPTIONAL_ASSETS = [
+  "./assets/hadith/bukhari.json",
+  "./assets/hadith/muslim.json",
+  "./assets/hadith/abudawud.json",
+  "./assets/hadith/tirmidhi.json",
+  "./assets/hadith/nasai.json",
+  "./assets/hadith/ibnmajah.json",
+  "./assets/hadith/riyad_assalihin.json",
+  "./assets/hadith/bulugh_almaram.json",
+  "./assets/hadith/mishkat_almasabih.json",
+  "./assets/hadith/aladab_almufrad.json",
+  "./assets/hadith/shamail_muhammadiyah.json",
+  "./assets/hadith/nawawi40.json",
+  "./assets/hadith/qudsi40.json"
+];
+
+// Everything the "Download for offline" modal pulls: the full app shell plus the
+// heavy books. Kept here so sw.js stays the single source of truth for what a
+// complete offline install contains.
+const FULL_OFFLINE_ASSETS = STATIC_ASSETS.concat(OPTIONAL_ASSETS);
+
 // ===== Cross-origin runtime dependencies =====
 // The app pulls a few libraries and web-fonts from CDNs. These can't be
 // listed in STATIC_ASSETS the same way (opaque/cors), and the previous
@@ -464,7 +498,12 @@ self.addEventListener("fetch", event => {
 
   // --- Static assets: cache-first, network fallback ---
   event.respondWith(
-    caches.match(req).then(cacheRes => cacheRes ||
+    // Exact match first, then ignore the query string. Some pages request
+    // assets with a cache-busting suffix (e.g. json/audio-01.json?v=169…),
+    // which would otherwise never match the precached copy and would fail
+    // hard when offline.
+    caches.match(req).then(exact => exact || caches.match(req, { ignoreSearch: true }))
+      .then(cacheRes => cacheRes ||
       fetch(req).then(networkRes => {
         // Cache same-origin assets (basic) AND the allow-listed CDN/font
         // hosts. CDN <script>/<link>/font requests are no-cors, so they come
@@ -482,6 +521,87 @@ self.addEventListener("fetch", event => {
     )
   );
 });
+
+// ===== Bulk offline download (driven by the modal in index.html) =====
+// The page opens a MessageChannel and posts { type: "ZAD_CACHE_ALL" } (or
+// "ZAD_CACHE_STATUS"). Progress and completion are reported back on the same
+// port so the UI can render a live progress bar. Doing the fetching here keeps
+// the full asset list in one place (sw.js) and lets downloads continue briefly
+// even while the user navigates between the app's pages.
+self.addEventListener("message", event => {
+  const msg = event.data || {};
+  const reply = m => {
+    if (event.ports && event.ports[0]) event.ports[0].postMessage(m);
+  };
+
+  if (msg.type === "ZAD_CACHE_STATUS") {
+    event.waitUntil(reportCacheStatus(reply));
+    return;
+  }
+
+  if (msg.type === "ZAD_CACHE_ALL") {
+    event.waitUntil(cacheAllOffline(reply));
+    return;
+  }
+
+  // Legacy hook kept for any caller still asking the SW to activate immediately.
+  if (msg.type === "SKIP_WAITING") self.skipWaiting();
+});
+
+async function reportCacheStatus(reply) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const results = await Promise.all(
+      FULL_OFFLINE_ASSETS.map(async url => {
+        const m = (await cache.match(url)) || (await cache.match(url, { ignoreSearch: true }));
+        return m ? 1 : 0;
+      })
+    );
+    const cached = results.reduce((a, b) => a + b, 0);
+    reply({ type: "ZAD_CACHE_STATUS_RESULT", cached, total: FULL_OFFLINE_ASSETS.length });
+  } catch (e) {
+    reply({ type: "ZAD_CACHE_STATUS_RESULT", cached: 0, total: FULL_OFFLINE_ASSETS.length, error: e.message });
+  }
+}
+
+async function cacheAllOffline(reply) {
+  const cache = await caches.open(CACHE_NAME);
+  const assets = FULL_OFFLINE_ASSETS;
+  const total = assets.length;
+  let done = 0;
+  let failed = 0;
+  let bytes = 0;
+
+  reply({ type: "ZAD_CACHE_PROGRESS", done, total, failed, bytes });
+
+  for (const url of assets) {
+    try {
+      // Reuse an already-cached copy instead of re-downloading it.
+      let res = await cache.match(url);
+      if (!res) {
+        res = await fetch(url, { cache: "no-cache" });
+        if (res && res.ok) {
+          await cache.put(url, res.clone());
+        } else {
+          failed++;
+        }
+      }
+      if (res) {
+        const len = Number(res.headers.get("content-length"));
+        if (!Number.isNaN(len) && len > 0) bytes += len;
+      }
+    } catch (_) {
+      failed++;
+    }
+    done++;
+    reply({ type: "ZAD_CACHE_PROGRESS", done, total, failed, bytes, url });
+  }
+
+  // Note: storage persistence must be requested from the page (Window context),
+  // which the modal does before starting — StorageManager.persist() is not
+  // available inside a service worker.
+  reply({ type: "ZAD_CACHE_DONE", done, total, failed, bytes });
+}
 
 // ===== Periodic schedule refresh =====
 // Wakes ~daily (Chromium, installed PWAs) to re-upload a fresh 7-day schedule

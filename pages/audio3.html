@@ -846,11 +846,11 @@ async function loadMultipleJSONs() {
       let fileNum = i < 10 ? '0' + i : i;
       let data;
       try {
-        const mod = await import('../json/audio-' + fileNum + '.js?v=' + new Date().getTime());
+        const mod = await import('../json/audio-' + fileNum + '.js');
         data = mod.default;
       } catch (_) {
         try {
-          let res = await fetch('../json/audio-' + fileNum + '.json?v=' + new Date().getTime());
+          let res = await fetch('../json/audio-' + fileNum + '.json');
           if (!res.ok) break;
           data = await res.json();
         } catch (_) { break; }
