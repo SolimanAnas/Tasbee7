@@ -585,7 +585,7 @@
     }
 
     function downloadDatabase() {
-        if (localDatabase.length === 0) { showToast(t('hadith_db_loading')); return; }
+        if (localDatabase.length === 0) { showToast(t('hadith_loading_db')); return; }
         showToast(t('hadith_preparing'));
         // لا نُصدّر الحقل المطبّع المؤقت
         const exportData = localDatabase.map(({ normalized, ...rest }) => rest);
@@ -629,15 +629,15 @@
     // ===================== الحكم على الحديث =====================
     function getHadithGrade(bookId, grades) {
         if (bookId === 'bukhari' || bookId === 'muslim') return { text: t('hadith_grade_sahih'), isOk: true };
-        if (!grades || grades.length === 0) return { text: t('hadith_grade_undefined'), isOk: true };
+        if (!grades || grades.length === 0) return { text: t('hadith_grade_undetermined'), isOk: true };
         const albani = grades.find(g => (g && g.name || '').toLowerCase().includes('albani'));
         const raw = (((albani ? albani.grade : grades[0].grade) || '') + '').toLowerCase();
         const isOk = !raw.includes('daif') && !raw.includes("da'if") && !raw.includes('mawdu');
-        let arGrade = raw || t('hadith_grade_undefined');
+        let arGrade = raw || t('hadith_grade_undetermined');
         if (raw.includes('sahih')) arGrade = t('hadith_grade_sahih');
         else if (raw.includes('hasan')) arGrade = t('hadith_grade_hasan');
-        else if (raw.includes('daif') || raw.includes("da'if")) arGrade = t('hadith_grade_daif');
-        else if (raw.includes('mawdu')) arGrade = t('hadith_grade_mawdu');
+        else if (raw.includes('daif') || raw.includes("da'if")) arGrade = t('hadith_grade_weak');
+        else if (raw.includes('mawdu')) arGrade = t('hadith_grade_fabricated');
         return { text: arGrade, isOk };
     }
 
