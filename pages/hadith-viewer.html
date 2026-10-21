@@ -103,6 +103,8 @@
     }
     .search-box input:focus{ box-shadow:0 0 0 3px rgba(230,192,104,.35); }
     .search-box input:disabled{ opacity:.6; }
+    .search-box input{ -webkit-appearance:none; appearance:none; }
+    .search-box input::-webkit-search-cancel-button{ cursor:pointer; }
 
     .theme-dock{ display:flex; gap:7px; }
     .dot{
@@ -396,7 +398,7 @@
   <div class="toolbar">
     <a href="../index.html" class="home-btn" title="العودة للبحث"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
     <div class="search-box">
-      <input type="text" id="search-input" placeholder="ابحث في هذا الكتاب...">
+      <input type="search" id="search-input" placeholder="ابحث في هذا الكتاب..." enterkeyhint="search" autocomplete="off">
     </div>
     <div class="theme-dock">
       <div class="dot" data-set="light" style="background:#fbf3df;" onclick="setTheme('light')"></div>
@@ -532,19 +534,23 @@
   const ORDINALS = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون','الحادي والثلاثون','الثاني والثلاثون','الثالث والثلاثون','الرابع والثلاثون','الخامس والثلاثون','السادس والثلاثون','السابع والثلاثون','الثامن والثلاثون','التاسع والأربعون','الأربعون'];
   function toArabicOrdinal(n) { return ORDINALS[n-1] || n; }
 
+  // Invisible bidi/format marks — the book JSON carries ~300k U+200F (RLM)
+  // inside the text, which broke phrase matches and highlighting.
+  const INVISIBLE_STR = "\\u200B-\\u200F\\u202A-\\u202E\\u2066-\\u2069\\uFEFF";
+  const INVISIBLE_REGEX = new RegExp("[" + INVISIBLE_STR + "]", "g");
   function normalizeText(text) {
-    return (text || "").replace(TASHKEEL_REGEX, '').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'');
+    return (text || "").replace(TASHKEEL_REGEX, '').replace(INVISIBLE_REGEX, '').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'').replace(/\s+/g,' ');
   }
   function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   function buildHighlightRegex(rawQuery) {
     let clean = normalizeText(rawQuery), pattern = "";
     for (let ch of clean) {
-      if (/[اأإآ]/.test(ch)) pattern += "[أإآا]";
+      if (/[اأإآ]/.test(ch)) pattern += "[أإآاٱ]";
       else if (/[ةه]/.test(ch)) pattern += "[ةه]";
       else if (/[ىي]/.test(ch)) pattern += "[ىي]";
-      else if (ch === ' ') pattern += "\\s+";
+      else if (ch === ' ') pattern += "[\\s" + INVISIBLE_STR + "]+";
       else pattern += escapeRegex(ch);
-      if (ch !== ' ') pattern += "[" + TASHKEEL_STR + "]*";
+      if (ch !== ' ') pattern += "[" + TASHKEEL_STR + INVISIBLE_STR + "ـ]*";
     }
     return new RegExp('(' + pattern + ')', 'g');
   }
@@ -739,13 +745,31 @@
 
       App.isSearchMode = true;
       document.getElementById('customSelectBtn').textContent = "نتائج البحث";
-      const results = App.searchIndex.filter(x => x.norm.includes(query)).slice(0, 50);
-      document.getElementById('main-title').textContent = `نتائج البحث (${results.length})`;
+      App.searchResults = App.searchIndex.filter(x => x.norm.includes(query));
+      App.searchShown = 0;
+      App.searchRegex = buildHighlightRegex(rawInput);
+      document.getElementById('main-title').textContent = `نتائج البحث (${App.searchResults.length.toLocaleString('ar-EG')})`;
 
-      if (results.length === 0) {
+      if (App.searchResults.length === 0) {
         document.getElementById('content-area').innerHTML = '<div class="empty-note"><span class="icn"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>لا توجد نتائج مطابقة في هذا الكتاب.</div>';
       } else {
-        const highlightRegex = buildHighlightRegex(rawInput);
+        document.getElementById('content-area').innerHTML = '<div class="cards-container" id="searchResults"></div>';
+        showMoreResults();
+        window.scrollTo(0, 0);
+      }
+    }, 300);
+  }
+
+  const SEARCH_PAGE = 50;
+  function showMoreResults() {
+    const box = document.getElementById('searchResults');
+    if (!box) return;
+    const old = document.getElementById('moreResultsBtn');
+    if (old) old.remove();
+    const results = App.searchResults.slice(App.searchShown, App.searchShown + SEARCH_PAGE);
+    App.searchShown += results.length;
+    {
+        const highlightRegex = App.searchRegex;
         const html = results.map(r => {
           const badgeClass = r.gradeText === 'غير محدد' ? "badge-neutral" : (r.isOk ? "badge-ok" : "badge-warn");
           const highlighted = r.ar.replace(highlightRegex, '<mark>$1</mark>');
@@ -757,9 +781,17 @@
             </div>
           </div>`;
         }).join('');
-        document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
-      }
-    }, 300);
+        box.insertAdjacentHTML('beforeend', html);
+    }
+    const left = App.searchResults.length - App.searchShown;
+    if (left > 0) {
+      box.insertAdjacentHTML('beforeend', `<button class="advanced-search-btn" id="moreResultsBtn" onclick="showMoreResults()"><span>عرض المزيد (${left.toLocaleString('ar-EG')} متبقية)</span></button>`);
+    }
+  }
+
+  function exitSearch() {
+    document.getElementById('search-input').value = '';
+    App.isSearchMode = false;
   }
 
   function goToResult(sIdx, iIdx) {
@@ -782,6 +814,9 @@
 
   function nav(dir) {
     if (App.data.length === 0) return;
+    // In search mode the chapter isn't on screen: go back to it rather than
+    // silently changing the index behind the results list.
+    if (App.isSearchMode) { exitSearch(); render(); return; }
     if (dir === 'prev') App.currentIdx = Math.max(0, App.currentIdx - 1);
     else App.currentIdx = Math.min(App.data.length - 1, App.currentIdx + 1);
     render();
@@ -835,7 +870,9 @@
     const ok = await loadHadithData();
     if (ok) { loadBookmarks(); buildMenuAndSearchIndex(); render(); }
 
-    document.getElementById('search-input').addEventListener('input', handleSearch);
+    const searchEl = document.getElementById('search-input');
+    searchEl.addEventListener('input', handleSearch);
+    searchEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchEl.blur(); } });
 
     document.getElementById('readingModeBtn').addEventListener('click', () => {
       document.body.classList.toggle('reading-mode');
@@ -860,9 +897,13 @@
     document.addEventListener('touchend', e => {
       const dx = e.changedTouches[0].screenX - touchStartX;
       const dy = e.changedTouches[0].screenY - touchStartY;
+      // Ignore swipes over open dialogs, inputs and during search.
+      if (App.isSearchMode || document.querySelector('.modal-overlay.active') || e.target.closest('input, textarea, .modal-overlay')) return;
       // Require the swipe to be clearly horizontal — otherwise vertical
       // scrolling (reading a long hadith) accidentally jumps chapters.
-      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) nav(dx < 0 ? 'next' : 'prev');
+      // RTL book: finger moving right (dx > 0) turns to the next chapter,
+      // same as duaa.html / hisn.html.
+      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) nav(dx > 0 ? 'next' : 'prev');
     }, {passive: true});
   });
 </script>
