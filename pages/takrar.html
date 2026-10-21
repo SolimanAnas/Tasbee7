@@ -44,6 +44,7 @@
   --list-hover: rgba(0, 0, 0, 0.05); --gold: #9a7b1f; --gold-soft: rgba(154,123,31,.12);
   --danger: #ef4444;
   --play-glow: rgba(16, 185, 129, 0.45);
+  --dock-bg: rgba(255, 255, 255, 0.86);
 }
 [data-theme="dark"] {
   --bg-image: url('../images/Background-dark.webp');
@@ -56,6 +57,7 @@
   --list-hover: rgba(255, 255, 255, 0.05); --gold: #e6c068; --gold-soft: rgba(230,192,104,.15);
   --danger: #f87171;
   --play-glow: rgba(16, 185, 129, 0.5);
+  --dock-bg: rgba(22, 32, 50, 0.9);
 }
 [data-theme="sepia"] {
   --bg-image: url('../images/background-sepia.webp');
@@ -68,6 +70,7 @@
   --list-hover: rgba(122, 84, 24, 0.06); --gold: #9a6b1f; --gold-soft: rgba(154,107,31,.12);
   --danger: #c0392b;
   --play-glow: rgba(138, 90, 28, 0.45);
+  --dock-bg: rgba(250, 244, 228, 0.92);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -76,7 +79,7 @@ body {
   background-color: var(--bg-surface); background-image: var(--bg-image);
   background-size: cover; background-position: center; background-attachment: fixed;
   color: var(--text-primary); display: flex; justify-content: center;
-  padding: calc(max(12px, env(safe-area-inset-top)) + 30px) 20px 100px;
+  padding: calc(max(12px, env(safe-area-inset-top)) + 18px) 16px calc(var(--dock-h, 90px) + 24px);
   min-height: 100dvh; transition: color 0.4s, background-image 0.4s;
 }
 body::before { content:''; position:fixed; inset:0; background:var(--overlay); z-index:-1; }
@@ -195,65 +198,74 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 }
 .ayah-loading { color:var(--text-secondary); font-size:14px; padding:20px; }
 
+/* ===== Player dock (fixed bottom, like the audio page's mini player) ===== */
+.dock {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%); z-index:50;
+  width:100%; max-width:480px;
+  background:var(--dock-bg); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+  border:1px solid var(--glass-border); border-bottom:none; border-radius:24px 24px 0 0;
+  box-shadow:0 -6px 28px rgba(0,0,0,.14);
+  padding:10px 14px max(10px, env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:6px;
+}
+.dock-row { display:flex; align-items:center; gap:12px; }
+.dock-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+
 /* Status */
 .status-bar {
-  text-align:center; padding:8px 16px; border-radius:30px;
-  background:var(--list-hover); border:1px solid var(--glass-border);
-  font-size:12px; font-weight:700; color:var(--text-secondary);
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:.3s;
+  display:flex; align-items:center; gap:7px; min-width:0;
+  font-size:13px; font-weight:700; color:var(--text-secondary); transition:color .3s;
 }
-.status-bar.playing { background:var(--accent-muted); border-color:var(--accent-main); color:var(--accent-main); }
-.status-bar.error { background:rgba(239,68,68,.12); border-color:var(--danger); color:var(--danger); }
-.status-dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.status-bar #statusText { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.status-bar.playing { color:var(--accent-main); }
+.status-bar.error { color:var(--danger); }
+.status-dot { width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
 .status-bar.playing .status-dot { animation:pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.dock-sub { font-size:11.5px; color:var(--text-secondary); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* Progress */
 .progress-wrap { display:none; width:100%; }
 .progress-wrap.visible { display:block; }
-.progress-container { display:flex; align-items:center; gap:12px; width:100%; direction:ltr; }
-.time { font-size:12px; color:var(--text-secondary); width:45px; text-align:center; font-variant-numeric:tabular-nums; }
-.progress-bar { flex:1; height:18px; display:flex; align-items:center; position:relative; cursor:pointer; }
-.progress-track { width:100%; height:6px; background:rgba(128,128,128,.25); border-radius:3px; overflow:hidden; }
+.progress-container { display:flex; align-items:center; gap:10px; width:100%; direction:ltr; }
+.time { font-size:11px; color:var(--text-secondary); width:36px; text-align:center; font-variant-numeric:tabular-nums; }
+.progress-bar { flex:1; height:22px; display:flex; align-items:center; position:relative; cursor:pointer; touch-action:none; }
+.progress-track { width:100%; height:5px; background:rgba(128,128,128,.25); border-radius:3px; overflow:hidden; }
 .progress-fill { height:100%; background:var(--accent-main); border-radius:3px; width:0%; transition:width .15s linear; }
 
-/* Play */
-.play-area { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:8px; }
-.play-controls { display:flex; align-items:center; justify-content:center; gap:16px; }
+/* Play controls */
+.play-controls { display:flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; direction:rtl; }
 .play-pause-btn {
-  width:72px; height:72px; border-radius:50%; background:var(--accent-main); color:#fff; border:none;
-  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  width:58px; height:58px; border-radius:50%; background:var(--accent-main); color:#fff; border:none;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
   box-shadow:0 6px 20px var(--play-glow, rgba(16,185,129,.45)); transition:transform .2s, box-shadow .3s;
 }
 .play-pause-btn:active { transform:scale(.92); }
-.play-pause-btn svg { width:30px; height:30px; fill:currentColor; }
+.play-pause-btn svg { width:26px; height:26px; fill:currentColor; }
 .ctrl-btn {
-  width:44px; height:44px; border-radius:50%; background:var(--glass);
+  width:38px; height:38px; border-radius:50%; background:var(--list-hover); flex-shrink:0;
   border:1px solid var(--glass-border); color:var(--text-secondary);
-  display:flex; align-items:center; justify-content:center; cursor:pointer;
-  transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1), background .25s, color .25s, border-color .25s;
-  opacity:0; pointer-events:none; transform:scale(.65);
+  display:none; align-items:center; justify-content:center; cursor:pointer;
+  transition:transform .25s cubic-bezier(.22,1,.36,1), background .25s, color .25s, border-color .25s;
 }
-.ctrl-btn.visible { opacity:1; pointer-events:auto; transform:scale(1); }
-.ctrl-btn svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.ctrl-btn.visible { display:flex; animation:fadeIn .3s ease; }
+.ctrl-btn svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 .ctrl-btn:active { transform:scale(.88) !important; }
 .nav-btn:hover { background:var(--accent-muted); color:var(--accent-main); border-color:var(--accent-main); }
 .nav-btn:active { background:var(--accent-main) !important; color:#fff !important; }
-.spinner { width:28px; height:28px; border:3px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
+.stop-btn svg { fill:currentColor; stroke:none; }
+.spinner { width:26px; height:26px; border:3px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
 @keyframes spin { to{ transform:rotate(360deg); } }
 
 /* Repeat Counter */
-.repeat-counter {
-  font-size:13px; font-weight:700; color:var(--gold);
-  background:var(--gold-soft); padding:6px 16px; border-radius:20px;
-  display:none; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;
-}
+.repeat-counter { display:none; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
 .repeat-counter.visible { display:flex; }
+.repeat-counter > span { display:contents; }
 .repeat-badge {
-  padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700;
+  padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; white-space:nowrap;
   background:var(--accent-muted); color:var(--accent-main);
 }
+.repeat-badge.gold { background:var(--gold-soft); color:var(--gold); }
 
 /* Toast */
 .toast {
@@ -433,6 +445,71 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 }
 .range-unit-note b { font-variant-numeric:tabular-nums; }
 .range-unit-note svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; flex-shrink:0; }
+
+/* Card heading row: label on one side, a compact control or value on the other */
+.card-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.card-head-val { font-size:13px; font-weight:800; color:var(--text-secondary); direction:ltr; font-variant-numeric:tabular-nums; }
+
+/* ===== Reciter picker ===== */
+.reciter-btn { justify-content:flex-start; padding:10px 14px; min-height:60px; }
+.reciter-btn:after { margin-inline-start:auto; }
+.rc-avatar {
+  width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--accent-muted); color:var(--accent-main);
+  font-family:'Amiri', serif; font-size:19px; font-weight:700; line-height:1;
+}
+.rc-text { display:flex; flex-direction:column; gap:3px; min-width:0; text-align:start; }
+.rc-name { font-size:15px; font-weight:700; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rc-placeholder { font-size:15px; font-weight:500; color:var(--text-secondary); }
+.rc-style {
+  align-self:flex-start; font-size:10.5px; font-weight:700; padding:1px 8px; border-radius:8px;
+  background:var(--gold-soft); color:var(--gold);
+}
+.reciter-filter { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex-shrink:0; }
+.reciter-filter::-webkit-scrollbar { display:none; }
+.filter-chip {
+  padding:7px 14px; border-radius:20px; font-size:12.5px; font-weight:700; font-family:inherit; white-space:nowrap;
+  background:var(--list-hover); border:1px solid var(--glass-border); color:var(--text-secondary); cursor:pointer; transition:.2s;
+}
+.filter-chip.active { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
+.sheet-item.reciter-row { display:flex; align-items:center; gap:12px; padding:10px 12px; }
+.sheet-item.reciter-row .rc-name { font-size:15px; }
+.sheet-item.selected .rc-name { color:#fff; }
+.sheet-item.selected .rc-avatar { background:rgba(255,255,255,.22); color:#fff; }
+.sheet-item.selected .rc-style { background:rgba(255,255,255,.2); color:#fff; }
+.sheet-empty { text-align:center; color:var(--text-secondary); padding:24px; font-weight:600; }
+
+/* ===== Infinite range loop toggle ===== */
+.inf-toggle {
+  margin-top:10px; width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:14px; border:1.5px dashed var(--glass-border); background:transparent;
+  color:var(--text-secondary); font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer;
+  transition:background .2s, color .2s, border-color .2s, transform .12s;
+}
+.inf-toggle:active { transform:scale(.97); }
+.inf-sym { font-size:22px; line-height:1; font-weight:400; }
+.inf-toggle.active { border-style:solid; border-color:var(--accent-main); background:var(--accent-main); color:#fff; box-shadow:0 4px 14px var(--play-glow); }
+.range-stepper.off { opacity:.4; pointer-events:none; }
+
+/* Speed presets on one row */
+.speed-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:6px; margin-top:2px; direction:ltr; }
+.speed-chip { padding:9px 0; text-align:center; min-height:38px; font-family:inherit; }
+.mini-stepper { display:flex; align-items:center; gap:8px; }
+.mini-stepper .range-stepper-btn { width:32px; height:32px; font-size:16px; }
+.mini-stepper .card-head-val { min-width:44px; text-align:center; color:var(--text-primary); font-size:16px; }
+
+/* Bigger touch targets on phones */
+.switch { width:52px; height:30px; }
+.switch::after { width:24px; height:24px; }
+.switch.active::after { transform:translateX(22px); }
+@media (max-width:380px) {
+  body { padding-left:12px; padding-right:12px; }
+  .card { padding:13px; border-radius:18px; }
+  .type-seg-btn { font-size:12.5px; }
+  .ayah-arabic { font-size:23px; }
+  .speed-chip { font-size:11px; }
+}
 </style>
 </head>
 <body>
@@ -444,7 +521,17 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <div class="bottom-sheet" id="reciterSheet">
   <div class="drag-handle"></div>
   <div class="sheet-header"><h2 data-i18n="takrar_choose_reciter">اختر القارئ</h2><button class="icon-btn" onclick="closeSheet()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div>
-  <div class="sheet-content" id="reciterList"></div>
+  <div class="sheet-content">
+    <input type="text" class="sheet-search" id="reciterSearch" placeholder="ابحث عن قارئ..." oninput="renderReciters()" data-i18n-placeholder="takrar_search_reciter">
+    <div class="reciter-filter" id="reciterFilter">
+      <button class="filter-chip" data-style="all" onclick="setReciterFilter('all')" data-i18n="takrar_style_all">الكل</button>
+      <button class="filter-chip" data-style="murattal" onclick="setReciterFilter('murattal')" data-i18n="takrar_style_murattal">مرتل</button>
+      <button class="filter-chip" data-style="mujawwad" onclick="setReciterFilter('mujawwad')" data-i18n="takrar_style_mujawwad">مجوّد</button>
+      <button class="filter-chip" data-style="muallim" onclick="setReciterFilter('muallim')" data-i18n="takrar_style_muallim">معلّم</button>
+      <button class="filter-chip" data-style="warsh" onclick="setReciterFilter('warsh')" data-i18n="takrar_style_warsh">ورش</button>
+    </div>
+    <div id="reciterList" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
 </div>
 
 <!-- Surah Sheet -->
@@ -475,11 +562,17 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <button class="icon-btn" onclick="cycleTheme()" title="المظهر"><img src="../img/SVG/moon.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
   </div>
 
+  <!-- Ayah Text Display (top while playing) -->
+  <div class="ayah-display" id="ayahDisplay">
+    <div class="ayah-arabic" id="ayahText"></div>
+    <div class="ayah-ref" id="ayahRef"></div>
+  </div>
+
   <!-- Reciter -->
   <div class="card">
     <label data-i18n="takrar_reciter">القارئ</label>
-    <button class="custom-select-btn" id="reciterBtn" onclick="openSheet('reciter')">
-      <span data-i18n="takrar_select_reciter">اختر القارئ...</span>
+    <button class="custom-select-btn reciter-btn" id="reciterBtn" onclick="openSheet('reciter')">
+      <span class="rc-placeholder" data-i18n="takrar_select_reciter">اختر القارئ...</span>
     </button>
   </div>
 
@@ -546,12 +639,15 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
           <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
           <span data-i18n="takrar_repeat_count">عدد مرات التكرار</span>
         </div>
-        <div class="range-stepper">
-          <button class="range-stepper-btn" onclick="adjustRangeRepeat(-1)">−</button>
+        <div class="range-stepper" id="rangeStepper">
+          <button class="range-stepper-btn" data-hold="adjustRangeRepeat" data-step="-1" aria-label="−">−</button>
           <div class="range-stepper-val" id="rangeRepeatVal">3</div>
-          <button class="range-stepper-btn" onclick="adjustRangeRepeat(1)">+</button>
+          <button class="range-stepper-btn" data-hold="adjustRangeRepeat" data-step="1" aria-label="+">+</button>
         </div>
       </div>
+      <button class="inf-toggle" id="rangeInfBtn" onclick="toggleRangeInfinite()" aria-pressed="false">
+        <span class="inf-sym">∞</span><span data-i18n="takrar_infinite_loop">تكرار بلا توقف</span>
+      </button>
     </div>
   </div>
 
@@ -567,20 +663,22 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     <div id="ayahSettings" style="display:none;">
       <label data-i18n="takrar_verse_count">عدد تكرار الآية</label>
       <div class="stepper">
-        <button class="stepper-btn" onclick="adjustAyahRepeat(-1)">−</button>
+        <button class="stepper-btn" data-hold="adjustAyahRepeat" data-step="-1" aria-label="−">−</button>
         <div><div class="stepper-val" id="ayahRepeatVal">3</div><div class="stepper-lbl" data-i18n="takrar_times">مرة</div></div>
-        <button class="stepper-btn" onclick="adjustAyahRepeat(1)">+</button>
+        <button class="stepper-btn" data-hold="adjustAyahRepeat" data-step="1" aria-label="+">+</button>
       </div>
     </div>
   </div>
 
   <!-- Speed -->
   <div class="card">
-    <label data-i18n="takrar_speed">سرعة التلاوة</label>
-    <div class="stepper">
-      <button class="stepper-btn" onclick="adjustSpeed(-0.1)">−</button>
-      <div><div class="stepper-val" id="speedVal">1.0x</div><div class="stepper-lbl" data-i18n="takrar_speed_label">سرعة</div></div>
-      <button class="stepper-btn" onclick="adjustSpeed(0.1)">+</button>
+    <div class="card-head">
+      <label data-i18n="takrar_speed">سرعة التلاوة</label>
+      <div class="mini-stepper">
+        <button class="range-stepper-btn" data-hold="adjustSpeed" data-step="-0.1" aria-label="−">−</button>
+        <div class="card-head-val" id="speedVal">1.0x</div>
+        <button class="range-stepper-btn" data-hold="adjustSpeed" data-step="0.1" aria-label="+">+</button>
+      </div>
     </div>
     <div class="speed-grid" id="speedGrid">
       <button class="speed-chip" data-speed="0.5" onclick="setSpeed(0.5)">0.5x</button>
@@ -592,19 +690,11 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
     </div>
   </div>
 
-  <!-- Status -->
-  <div class="status-bar" id="statusBar">
-    <span class="status-dot"></span>
-    <span id="statusText" data-i18n="takrar_ready">جاهز للتشغيل</span>
-  </div>
+</div>
 
-  <!-- Ayah Text Display -->
-  <div class="ayah-display" id="ayahDisplay">
-    <div class="ayah-arabic" id="ayahText"></div>
-    <div class="ayah-ref" id="ayahRef"></div>
-  </div>
-
-  <!-- Progress -->
+<!-- Player dock: always within thumb reach -->
+<div class="dock" id="dock">
+  <div class="repeat-counter" id="repeatCounter"><span id="repeatText"></span></div>
   <div class="progress-wrap" id="progressWrap">
     <div class="progress-container">
       <span class="time" id="curTime">0:00</span>
@@ -614,11 +704,13 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
       <span class="time" id="durTime">0:00</span>
     </div>
   </div>
-
-  <!-- Play -->
-  <div class="play-area">
-    <div class="repeat-counter" id="repeatCounter">
-      <span id="repeatText"></span>
+  <div class="dock-row">
+    <div class="dock-info">
+      <div class="status-bar" id="statusBar">
+        <span class="status-dot"></span>
+        <span id="statusText" data-i18n="takrar_ready">جاهز للتشغيل</span>
+      </div>
+      <div class="dock-sub" id="dockSub"></div>
     </div>
     <div class="play-controls">
       <button class="ctrl-btn nav-btn" id="prevBtn" onclick="prevAyah()" title="الآية السابقة" data-i18n-title="previous">
@@ -632,6 +724,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
       <button class="ctrl-btn nav-btn" id="nextBtn" onclick="nextAyah()" title="الآية التالية" data-i18n-title="next">
         <svg viewBox="0 0 24 24"><polyline points="13 18 7 12 13 6"/><line x1="18" y1="6" x2="18" y2="18"/></svg>
       </button>
+      <button class="ctrl-btn nav-btn stop-btn" id="stopBtn" onclick="stopPlay()" title="إيقاف" data-i18n-title="takrar_stop">
+        <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      </button>
     </div>
   </div>
 </div>
@@ -643,26 +738,56 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 <script src="../js/theme-manager.js"></script>
 <script src="../js/back-close.js"></script>
 <script>
+// Per-ayah audio folders on everyayah.com. style: murattal | mujawwad | muallim | warsh
 const RECITERS = [
-  { id:'arabassy',  name:'عبد الباسط عبد الصمد', folder:'Abdul_Basit_Murattal_192kbps' },
-  { id:'husary',    name:'محمود خليل الحصري',    folder:'Husary_128kbps' },
-  { id:'minshawi',  name:'محمد صديق المنشاوي',   folder:'Minshawy_Murattal_128kbps' },
-  { id:'afasy',     name:'مشاري العفاسي',        folder:'Alafasy_128kbps' },
-  { id:'jibreel',   name:'محمد جبريل',           folder:'Muhammad_Jibreel_128kbps' },
-  { id:'ayyoub',    name:'محمد أيوب',            folder:'Muhammad_Ayyoub_128kbps' },
-  { id:'shuraym',   name:'سعود الشريم',          folder:'Saood_ash-Shuraym_128kbps' },
-  { id:'sudais',    name:'عبد الرحمن السديس',    folder:'Abdurrahmaan_As-Sudais_192kbps' },
-  { id:'ghamdi',    name:'سعد الغامدي',          folder:'Ghamadi_40kbps' },
-  { id:'ajamy',     name:'أحمد العجمي',          folder:'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net' },
-  { id:'muaiqly',   name:'ماهر المعيقلي',        folder:'MaherAlMuaiqly128kbps' },
-  { id:'dosary',    name:'ياسر الدوسري',         folder:'Yasser_Ad-Dussary_128kbps' },
-  { id:'shatiri',   name:'أبو بكر الشاطري',      folder:'Abu_Bakr_Ash-Shaatree_128kbps' },
-  { id:'bukhatyr',  name:'صلاح بوخاطر',          folder:'Salaah_AbdulRahman_Bukhatir_128kbps' },
-  { id:'basfar',    name:'عبد الله بصفر',        folder:'Abdullah_Basfar_192kbps' },
-  { id:'qatami',    name:'ناصر القطامي',         folder:'Nasser_Alqatami_128kbps' },
-  { id:'hudhaify',  name:'علي الحذيفي',          folder:'Hudhaify_128kbps' },
-  { id:'budair',    name:'صلاح البدير',          folder:'Salah_Al_Budair_128kbps' },
+  { id:'arabassy',  name:'عبد الباسط عبد الصمد', en:'Abdul Basit Abdul Samad', style:'murattal', folder:'Abdul_Basit_Murattal_192kbps' },
+  { id:'husary',    name:'محمود خليل الحصري',    en:'Mahmoud Khalil Al-Hussary', style:'murattal', folder:'Husary_128kbps' },
+  { id:'minshawi',  name:'محمد صديق المنشاوي',   en:'Mohamed Siddiq Al-Minshawi', style:'murattal', folder:'Minshawy_Murattal_128kbps' },
+  { id:'afasy',     name:'مشاري العفاسي',        en:'Mishary Alafasy', style:'murattal', folder:'Alafasy_128kbps' },
+  { id:'jibreel',   name:'محمد جبريل',           en:'Muhammad Jibreel', style:'murattal', folder:'Muhammad_Jibreel_128kbps' },
+  { id:'ayyoub',    name:'محمد أيوب',            en:'Muhammad Ayyoub', style:'murattal', folder:'Muhammad_Ayyoub_128kbps' },
+  { id:'shuraym',   name:'سعود الشريم',          en:'Saud Al-Shuraim', style:'murattal', folder:'Saood_ash-Shuraym_128kbps' },
+  { id:'sudais',    name:'عبد الرحمن السديس',    en:'Abdul Rahman Al-Sudais', style:'murattal', folder:'Abdurrahmaan_As-Sudais_192kbps' },
+  { id:'ghamdi',    name:'سعد الغامدي',          en:'Saad Al-Ghamdi', style:'murattal', folder:'Ghamadi_40kbps' },
+  { id:'ajamy',     name:'أحمد العجمي',          en:'Ahmed Al-Ajamy', style:'murattal', folder:'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net' },
+  { id:'muaiqly',   name:'ماهر المعيقلي',        en:'Maher Al-Muaiqly', style:'murattal', folder:'MaherAlMuaiqly128kbps' },
+  { id:'dosary',    name:'ياسر الدوسري',         en:'Yasser Al-Dosari', style:'murattal', folder:'Yasser_Ad-Dussary_128kbps' },
+  { id:'shatiri',   name:'أبو بكر الشاطري',      en:'Abu Bakr Al-Shatri', style:'murattal', folder:'Abu_Bakr_Ash-Shaatree_128kbps' },
+  { id:'bukhatyr',  name:'صلاح بوخاطر',          en:'Salah Bukhatir', style:'murattal', folder:'Salaah_AbdulRahman_Bukhatir_128kbps' },
+  { id:'basfar',    name:'عبد الله بصفر',        en:'Abdullah Basfar', style:'murattal', folder:'Abdullah_Basfar_192kbps' },
+  { id:'qatami',    name:'ناصر القطامي',         en:'Nasser Al-Qatami', style:'murattal', folder:'Nasser_Alqatami_128kbps' },
+  { id:'hudhaify',  name:'علي الحذيفي',          en:'Ali Al-Hudhaify', style:'murattal', folder:'Hudhaify_128kbps' },
+  { id:'budair',    name:'صلاح البدير',          en:'Salah Al-Budair', style:'murattal', folder:'Salah_Al_Budair_128kbps' },
+  { id:'tablawi',   name:'محمد محمود الطبلاوي',  en:'Mohamed Al-Tablawi', style:'murattal', folder:'Mohammad_al_Tablaway_128kbps' },
+  { id:'banna',     name:'محمود علي البنا',      en:'Mahmoud Ali Al-Banna', style:'murattal', folder:'mahmoud_ali_al_banna_32kbps' },
+  { id:'rifai',     name:'هاني الرفاعي',         en:'Hani Ar-Rifai', style:'murattal', folder:'Hani_Rifai_192kbps' },
+  { id:'akhdar',    name:'إبراهيم الأخضر',       en:'Ibrahim Al-Akhdar', style:'murattal', folder:'Ibrahim_Akhdar_32kbps' },
+  { id:'qasim',     name:'محسن القاسم',          en:'Muhsin Al-Qasim', style:'murattal', folder:'Muhsin_Al_Qasim_192kbps' },
+  { id:'juhany',    name:'عبد الله عواد الجهني', en:'Abdullah Awad Al-Juhany', style:'murattal', folder:'Abdullaah_3awwaad_Al-Juhaynee_128kbps' },
+  { id:'matroud',   name:'عبد الله المطرود',     en:'Abdullah Al-Matroud', style:'murattal', folder:'Abdullah_Matroud_128kbps' },
+  { id:'neana',     name:'أحمد نعينع',           en:'Ahmed Neana', style:'murattal', folder:'Ahmed_Neana_128kbps' },
+  { id:'abdulkareem', name:'محمد عبد الكريم',    en:'Muhammad Abdul Kareem', style:'murattal', folder:'Muhammad_AbdulKareem_128kbps' },
+  { id:'tunaiji',   name:'خليفة الطنيجي',        en:'Khalifa Al-Tunaiji', style:'murattal', folder:'khalefa_al_tunaiji_64kbps' },
+  { id:'qahtani',   name:'خالد القحطاني',        en:'Khalid Al-Qahtani', style:'murattal', folder:'Khaalid_Abdullaah_al-Qahtaanee_192kbps' },
+  { id:'suesy',     name:'علي حجاج السويسي',     en:'Ali Hajjaj Al-Suesy', style:'murattal', folder:'Ali_Hajjaj_AlSuesy_128kbps' },
+  { id:'sahl',      name:'سهل ياسين',            en:'Sahl Yassin', style:'murattal', folder:'Sahl_Yassin_128kbps' },
+  { id:'alili',     name:'عزيز عليلي',           en:'Aziz Alili', style:'murattal', folder:'aziz_alili_128kbps' },
+  { id:'salamah',   name:'ياسر سلامة',           en:'Yaser Salamah', style:'murattal', folder:'Yaser_Salamah_128kbps' },
+  { id:'alaqimy',   name:'أكرم العلاقمي',        en:'Akram Al-Alaqimy', style:'murattal', folder:'Akram_AlAlaqimy_128kbps' },
+  { id:'alijaber',  name:'علي جابر',             en:'Ali Jaber', style:'murattal', folder:'Ali_Jaber_64kbps' },
+  { id:'fares',     name:'فارس عباد',            en:'Fares Abbad', style:'murattal', folder:'Fares_Abbad_64kbps' },
+  { id:'sowaid',    name:'أيمن سويد',            en:'Ayman Suwaid', style:'murattal', folder:'Ayman_Sowaid_64kbps' },
+  { id:'mansoori',  name:'كريم منصوري',          en:'Karim Mansoori', style:'murattal', folder:'Karim_Mansoori_40kbps' },
+  { id:'parhizgar', name:'شهريار برهيزكار',      en:'Shahriar Parhizgar', style:'murattal', folder:'Parhizgar_48kbps' },
+  { id:'basit_mujawwad',    name:'عبد الباسط عبد الصمد', en:'Abdul Basit Abdul Samad', style:'mujawwad', folder:'Abdul_Basit_Mujawwad_128kbps' },
+  { id:'husary_mujawwad',   name:'محمود خليل الحصري',    en:'Mahmoud Khalil Al-Hussary', style:'mujawwad', folder:'Husary_128kbps_Mujawwad' },
+  { id:'minshawi_mujawwad', name:'محمد صديق المنشاوي',   en:'Mohamed Siddiq Al-Minshawi', style:'mujawwad', folder:'Minshawy_Mujawwad_192kbps' },
+  { id:'husary_muallim',    name:'محمود خليل الحصري',    en:'Mahmoud Khalil Al-Hussary', style:'muallim', folder:'Husary_Muallim_128kbps' },
+  { id:'warsh_dosary',      name:'إبراهيم الدوسري',      en:'Ibrahim Al-Dosary', style:'warsh', folder:'warsh/warsh_ibrahim_aldosary_128kbps' },
+  { id:'warsh_jazaery',     name:'ياسين الجزائري',       en:'Yassin Al-Jazaery', style:'warsh', folder:'warsh/warsh_yassin_al_jazaery_64kbps' },
+  { id:'warsh_basit',       name:'عبد الباسط عبد الصمد', en:'Abdul Basit Abdul Samad', style:'warsh', folder:'warsh/warsh_Abdul_Basit_128kbps' },
 ];
+const RECITER_STYLES = ['murattal', 'mujawwad', 'muallim', 'warsh'];
 
 const SURAH_NAMES = [
   'الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس',
@@ -698,6 +823,8 @@ let S = {
   unitByType: {},            // { juz: n, hizb: n, rub: n, page: n } — last picked per type
   rangeEnabled: false,
   rangeRepeat: 3,
+  rangeInfinite: false,      // loop the range until stopped
+  reciterFilter: 'all',      // reciter sheet style filter
   ayahRepeatEnabled: false,
   ayahRepeat: 3,
   speed: 1,
@@ -758,7 +885,7 @@ function getSelectedAyahs() {
   return n ? unitAyahs(S.rangeType, n) : [];
 }
 // state: 'idle' | 'loading' | 'playing' | 'paused'
-let queue = [], qIdx = 0, errCount = 0;
+let queue = [], qIdx = 0, errCount = 0, loopRound = 1;
 const audio = document.getElementById('audio');
 
 /* ---------- Persistence ---------- */
@@ -768,7 +895,8 @@ function savePrefs() {
       reciter: S.reciter ? S.reciter.id : null,
       rangeType: S.rangeType, surah: S.surah,
       ayahFrom: S.ayahFrom, ayahTo: S.ayahTo, unitByType: S.unitByType,
-      rangeEnabled: S.rangeEnabled, rangeRepeat: S.rangeRepeat,
+      rangeEnabled: S.rangeEnabled, rangeRepeat: S.rangeRepeat, rangeInfinite: S.rangeInfinite,
+      reciterFilter: S.reciterFilter,
       ayahRepeatEnabled: S.ayahRepeatEnabled, ayahRepeat: S.ayahRepeat,
       speed: S.speed
     }));
@@ -789,6 +917,8 @@ function loadPrefs() {
     if (p.rangeRepeat) S.rangeRepeat = Math.max(1, Math.min(99, p.rangeRepeat));
     if (p.ayahRepeat) S.ayahRepeat = Math.max(1, Math.min(99, p.ayahRepeat));
     if (p.rangeEnabled !== undefined) S.rangeEnabled = !!p.rangeEnabled;
+    if (p.rangeInfinite !== undefined) S.rangeInfinite = !!p.rangeInfinite;
+    if (RECITER_STYLES.includes(p.reciterFilter)) S.reciterFilter = p.reciterFilter;
     if (p.ayahRepeatEnabled !== undefined) S.ayahRepeatEnabled = !!p.ayahRepeatEnabled;
     if (p.speed) S.speed = Math.max(0.5, Math.min(3, p.speed));
   } catch(e) {}
@@ -810,7 +940,12 @@ function openSheet(type) {
   curSheet = type;
   document.getElementById('sheetOverlay').classList.add('active');
   document.getElementById(type + 'Sheet').classList.add('active');
-  if (type === 'reciter') renderReciters();
+  if (type === 'reciter') {
+    document.getElementById('reciterSearch').value = '';
+    renderReciters();
+    const sel = document.querySelector('#reciterList .selected');
+    if (sel) sel.scrollIntoView({ block: 'center' });
+  }
   else if (type === 'surah') { document.getElementById('surahSearch').value = ''; renderSurahs(); }
   else if (type === 'unit') { document.getElementById('unitSearch').value = ''; renderUnitSheet(); }
 }
@@ -822,17 +957,44 @@ function closeSheet() {
 }
 
 /* ---------- Reciters ---------- */
+// Latin names for en/tr (the app's other Latin-script locales use them too).
+function reciterName(r) {
+  const lang = window.I18n ? I18n.getLang() : 'ar';
+  return (lang === 'en' || lang === 'tr') && r.en ? r.en : r.name;
+}
+function reciterStyleLabel(r) { return t('takrar_style_' + r.style); }
+function reciterInitial(r) { return r.name.replace(/^(عبد ال|أبو |ال)/, '').trim().charAt(0); }
+function reciterRowHtml(r) {
+  return `<span class="rc-avatar" aria-hidden="true">${reciterInitial(r)}</span>`
+    + `<span class="rc-text"><span class="rc-name">${reciterName(r)}</span>`
+    + `<span class="rc-style">${reciterStyleLabel(r)}</span></span>`;
+}
 function renderReciters() {
-  document.getElementById('reciterList').innerHTML = RECITERS.map(r =>
-    `<div class="sheet-item ${S.reciter && S.reciter.id === r.id ? 'selected' : ''}" onclick="pickReciter('${r.id}')">${r.name}</div>`
-  ).join('');
+  const q = normalize(document.getElementById('reciterSearch').value.trim()).toLowerCase();
+  document.querySelectorAll('#reciterFilter .filter-chip').forEach(b => b.classList.toggle('active', b.dataset.style === S.reciterFilter));
+  const list = RECITERS.filter(r =>
+    (S.reciterFilter === 'all' || r.style === S.reciterFilter) &&
+    (!q || normalize(r.name).includes(q) || r.en.toLowerCase().includes(q)));
+  document.getElementById('reciterList').innerHTML = list.map(r =>
+    `<div class="sheet-item reciter-row ${S.reciter && S.reciter.id === r.id ? 'selected' : ''}" onclick="pickReciter('${r.id}')">${reciterRowHtml(r)}</div>`
+  ).join('') || `<div class="sheet-empty">${t('takrar_no_results')}</div>`;
+}
+function setReciterFilter(style) {
+  S.reciterFilter = style;
+  renderReciters();
+  savePrefs();
+}
+function renderReciterBtn() {
+  const btn = document.getElementById('reciterBtn');
+  if (!S.reciter) return;
+  btn.classList.add('has-value');
+  btn.innerHTML = reciterRowHtml(S.reciter);
 }
 function pickReciter(id) {
   if (S.state !== 'idle') stopPlay();
   S.reciter = RECITERS.find(r => r.id === id);
-  const btn = document.getElementById('reciterBtn');
-  btn.classList.add('has-value');
-  btn.querySelector('span').textContent = S.reciter.name;
+  renderReciterBtn();
+  renderDockSub();
   savePrefs();
   closeSheet();
 }
@@ -882,6 +1044,14 @@ function updateUnitButton() {
     if (n) { btn.classList.add('has-value'); span.textContent = `${info.name} ${n}`; }
     else { btn.classList.remove('has-value'); span.textContent = t('takrar_select_unit', {name: info.name}); }
   }
+  renderDockSub();
+}
+// Idle subtitle in the player dock: what will play when ▶ is pressed.
+function renderDockSub() {
+  const parts = [];
+  if (S.reciter) parts.push(reciterName(S.reciter));
+  if (hasScopeSelection()) parts.push(document.querySelector('#unitBtn span').textContent);
+  document.getElementById('dockSub').textContent = parts.join(' · ');
 }
 function openUnitSheet() {
   if (S.rangeType === 'surah') { openSheet('surah'); return; }
@@ -1079,9 +1249,43 @@ function updateRangeUI() {
 
 /* ---------- Repeat Adjusters ---------- */
 function adjustRangeRepeat(d) {
+  if (S.rangeInfinite) return;
   S.rangeRepeat = Math.max(1, Math.min(99, S.rangeRepeat + d));
-  document.getElementById('rangeRepeatVal').textContent = S.rangeRepeat;
+  renderRangeRepeat();
   savePrefs();
+}
+function toggleRangeInfinite() {
+  S.rangeInfinite = !S.rangeInfinite;
+  renderRangeRepeat();
+  savePrefs();
+  // A running queue was built for the old mode; let the current pass finish
+  // and decide at its end (see playItem) rather than restarting playback.
+  if (S.state !== 'idle' && queue[qIdx]) updateRepeatDisplay(queue[qIdx]);
+}
+function renderRangeRepeat() {
+  document.getElementById('rangeRepeatVal').textContent = S.rangeInfinite ? '∞' : S.rangeRepeat;
+  document.getElementById('rangeStepper').classList.toggle('off', S.rangeInfinite);
+  const b = document.getElementById('rangeInfBtn');
+  b.classList.toggle('active', S.rangeInfinite);
+  b.setAttribute('aria-pressed', S.rangeInfinite);
+}
+
+/* Press-and-hold on +/− buttons keeps stepping (faster after a moment). */
+function bindHoldButtons() {
+  document.querySelectorAll('[data-hold]').forEach(btn => {
+    const step = () => window[btn.dataset.hold](parseFloat(btn.dataset.step));
+    let timer = null;
+    const stop = () => { clearTimeout(timer); timer = null; };
+    btn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      step();
+      let delay = 380;
+      const tick = () => { step(); delay = Math.max(60, delay * 0.8); timer = setTimeout(tick, delay); };
+      timer = setTimeout(tick, delay);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+    btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); step(); } });
+  });
 }
 function adjustAyahRepeat(d) {
   S.ayahRepeat = Math.max(1, Math.min(99, S.ayahRepeat + d));
@@ -1131,7 +1335,8 @@ showAyahText._t = 0;
 function buildQueue() {
   const L = getSelectedAyahs();
   if (!L.length) return [];
-  const rangeReps = S.rangeEnabled ? S.rangeRepeat : 1;
+  // Infinite mode builds a single pass; playItem wraps it around forever.
+  const rangeReps = S.rangeEnabled && !S.rangeInfinite ? S.rangeRepeat : 1;
   const ayahReps  = S.ayahRepeatEnabled ? S.ayahRepeat : 1;
   const q = [];
   for (let r = 0; r < rangeReps; r++) {
@@ -1163,14 +1368,16 @@ function togglePlay() {
     const lbl = S.rangeType === 'surah' ? 'السورة' : UNIT_INFO[S.rangeType].name;
     showToast(t('takrar_choose_first', {label: lbl})); return;
   }
-  errCount = 0; queue = buildQueue(); qIdx = 0;
+  errCount = 0; queue = buildQueue(); qIdx = 0; loopRound = 1;
   if (queue.length === 0) { showToast(t('takrar_no_ayahs_in_range')); return; }
   document.getElementById('progressWrap').classList.add('visible');
   document.getElementById('repeatCounter').classList.add('visible');
-  document.getElementById('prevBtn').classList.add('visible');
-  document.getElementById('nextBtn').classList.add('visible');
+  document.getElementById('dockSub').style.display = 'none';
+  ['prevBtn', 'nextBtn', 'stopBtn'].forEach(id => document.getElementById(id).classList.add('visible'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });   // bring the ayah card into view
   playItem();
 }
+function isLooping() { return S.rangeEnabled && S.rangeInfinite; }
 
 function stopPlay() {
   setState('idle'); audio.pause();
@@ -1178,8 +1385,8 @@ function stopPlay() {
   queue = []; qIdx = 0;
   document.getElementById('progressWrap').classList.remove('visible');
   document.getElementById('repeatCounter').classList.remove('visible');
-  document.getElementById('prevBtn').classList.remove('visible');
-  document.getElementById('nextBtn').classList.remove('visible');
+  document.getElementById('dockSub').style.display = '';
+  ['prevBtn', 'nextBtn', 'stopBtn'].forEach(id => document.getElementById(id).classList.remove('visible'));
   document.getElementById('ayahDisplay').classList.remove('visible');
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('curTime').textContent = '0:00';
@@ -1189,7 +1396,8 @@ function stopPlay() {
 
 function updateRepeatDisplay(item) {
   let parts = [];
-  if (item.round)     parts.push(`<span class="repeat-badge">${t('takrar_range_repeat_badge', {current: item.round, total: S.rangeRepeat})}</span>`);
+  if (isLooping())    parts.push(`<span class="repeat-badge gold">${t('takrar_loop_badge', {current: loopRound})}</span>`);
+  else if (item.round) parts.push(`<span class="repeat-badge">${t('takrar_range_repeat_badge', {current: item.round, total: S.rangeRepeat})}</span>`);
   if (item.ayahRound) parts.push(`<span class="repeat-badge">${t('takrar_ayah_repeat_badge', {current: item.ayahRound, total: S.ayahRepeat})}</span>`);
   if (parts.length === 0) parts.push(`<span>${qIdx + 1} / ${queue.length}</span>`);
   document.getElementById('repeatText').innerHTML = parts.join('');
@@ -1197,7 +1405,12 @@ function updateRepeatDisplay(item) {
 
 function playItem() {
   if (qIdx >= queue.length) {
-    stopPlay(); showToast(t('takrar_recitation_ended')); return;
+    if (isLooping()) {
+      // Rebuild in case the scope was a finite multi-pass queue before ∞ was turned on.
+      queue = buildQueue(); qIdx = 0; loopRound++;
+    } else {
+      stopPlay(); showToast(t('takrar_recitation_ended')); return;
+    }
   }
   const item = queue[qIdx];
   updateRepeatDisplay(item);
@@ -1216,11 +1429,12 @@ function playItem() {
 function prevAyah() {
   if (S.state === 'idle' || queue.length === 0) return;
   if (qIdx > 0) { qIdx--; playItem(); }
+  else if (isLooping() && loopRound > 1) { loopRound--; qIdx = queue.length - 1; playItem(); }
   else showToast(t('takrar_first_ayah'));
 }
 function nextAyah() {
   if (S.state === 'idle' || queue.length === 0) return;
-  if (qIdx < queue.length - 1) { qIdx++; playItem(); }
+  if (qIdx < queue.length - 1 || isLooping()) { qIdx++; playItem(); }
   else showToast(t('takrar_last_ayah'));
 }
 
@@ -1278,7 +1492,7 @@ function updateMediaSession(item) {
   try {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: t('takrar_surah_ayah', {surah: SURAH_NAMES[item.surah - 1], ayah: item.ayah}),
-      artist: S.reciter ? S.reciter.name : '',
+      artist: S.reciter ? reciterName(S.reciter) : '',
       album: 'التكرار — زاد المسلم'
     });
     navigator.mediaSession.setActionHandler('play', () => togglePlay());
@@ -1290,15 +1504,16 @@ function updateMediaSession(item) {
 }
 
 /* ---------- Init ---------- */
+// The dock grows while playing (badges + progress); keep content clear of it.
+if ('ResizeObserver' in window) {
+  new ResizeObserver(([e]) => document.body.style.setProperty('--dock-h', e.target.offsetHeight + 'px'))
+    .observe(document.getElementById('dock'));
+}
 loadPrefs();
 updateSpeedUI();
 
 // Restore reciter
-if (S.reciter) {
-  const btn = document.getElementById('reciterBtn');
-  btn.classList.add('has-value');
-  btn.querySelector('span').textContent = S.reciter.name;
-}
+renderReciterBtn();
 
 // Restore scope (type + selection)
 document.querySelectorAll('.type-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.type === S.rangeType));
@@ -1310,7 +1525,8 @@ if (S.rangeEnabled) {
   document.getElementById('rangeSettings').style.display = '';
   renderRangeCard();
 }
-document.getElementById('rangeRepeatVal').textContent = S.rangeRepeat;
+renderRangeRepeat();
+bindHoldButtons();
 
 if (S.ayahRepeatEnabled) {
   document.getElementById('ayahSwitch').classList.add('active');
@@ -1321,12 +1537,17 @@ document.getElementById('ayahRepeatVal').textContent = S.ayahRepeat;
 // Init i18n then render (async — must await dictionary load)
 (async () => {
   if (window.I18n) await I18n.init();
+  renderReciterBtn();
+  updateUnitButton();
   renderScopeResolved();
   if (S.rangeEnabled) renderRangeCard();
 })();
 
 // Re-render translated elements on language change
 window.addEventListener('langchange', () => {
+  renderReciterBtn();
+  updateUnitButton();
+  if (curSheet === 'reciter') renderReciters();
   renderScopeResolved();
   if (S.rangeEnabled) renderRangeCard();
 });

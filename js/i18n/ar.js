@@ -368,6 +368,15 @@ export default {
   'takrar_error_load_audio': 'تعذّر تحميل التلاوة',
   'takrar_press_to_play': 'اضغط للتشغيل',
   'takrar_surah_ayah': '{surah} • آية {ayah}',
+  'takrar_search_reciter': 'ابحث عن قارئ...',
+  'takrar_style_all': 'الكل',
+  'takrar_style_murattal': 'مرتل',
+  'takrar_style_mujawwad': 'مجوّد',
+  'takrar_style_muallim': 'معلّم',
+  'takrar_style_warsh': 'ورش',
+  'takrar_infinite_loop': 'تكرار بلا توقف',
+  'takrar_loop_badge': 'الدورة {current} · ∞',
+  'takrar_stop': 'إيقاف',
 
   // Salah (Post-Prayer)
   'salah_title': 'الأذكار بعد الصلاة — زاد المسلم',
