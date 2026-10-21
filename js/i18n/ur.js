@@ -384,7 +384,7 @@ export default {
   'takrar_reset_desc': 'قاری، حصہ اور ترجیحات صاف کریں',
   'takrar_reset_confirm': 'ڈیفالٹ ترتیبات بحال کریں؟',
   'takrar_welcome_title': 'آپ کی ترجیحات',
-  'takrar_welcome_desc': 'جو مناسب ہو منتخب کریں — بعد میں ⚙️ سے بدل سکتے ہیں',
+  'takrar_welcome_desc': 'جو مناسب ہو منتخب کریں — بعد میں ترتیبات سے بدل سکتے ہیں',
   'takrar_welcome_start': 'شروع کریں',
 
   'salah_title': 'نماز کے بعد کے اذکار — زاد المسلم',

@@ -384,7 +384,7 @@ export default {
   'takrar_reset_desc': 'Kâri, bölüm ve tercihleri temizle',
   'takrar_reset_confirm': 'Varsayılan ayarlara dönülsün mü?',
   'takrar_welcome_title': 'Tercihleriniz',
-  'takrar_welcome_desc': 'Size uygun olanı seçin — daha sonra ⚙️ üzerinden değiştirebilirsiniz',
+  'takrar_welcome_desc': "Size uygun olanı seçin — daha sonra Ayarlar'dan değiştirebilirsiniz",
   'takrar_welcome_start': 'Başla',
 
   'salah_title': 'Namaz Sonrası Zikirler — Zad Al-Muslim',

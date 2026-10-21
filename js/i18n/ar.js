@@ -403,7 +403,7 @@ export default {
   'takrar_reset_desc': 'مسح القارئ والمقطع والتفضيلات',
   'takrar_reset_confirm': 'هل تريد استعادة الإعدادات الافتراضية؟',
   'takrar_welcome_title': 'تفضيلاتك',
-  'takrar_welcome_desc': 'اختر ما يناسبك، ويمكنك تغييره لاحقاً من ⚙️',
+  'takrar_welcome_desc': 'اختر ما يناسبك، ويمكنك تغييره لاحقاً من الإعدادات',
   'takrar_welcome_start': 'ابدأ',
 
   // Salah (Post-Prayer)
