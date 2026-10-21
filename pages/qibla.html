@@ -764,7 +764,17 @@
             if (m.classList.contains('active') && window.BackClose) BackClose.closed();
             m.classList.remove('active');
         }
-        function openCalibration() { closeSettingsSheet(); openModal('calibration-modal'); }
+        function openCalibration() {
+            // Reuse the sheet's back-button entry for the dialog instead of
+            // closed()+opened() back-to-back, which raced and made the dialog's
+            // "done" button navigate away from the page.
+            const sheetOpen = document.getElementById('settings-sheet').classList.contains('active');
+            if (!sheetOpen || !window.BackClose) { closeSettingsSheet(); openModal('calibration-modal'); return; }
+            hideSettingsSheet();
+            const m = document.getElementById('calibration-modal');
+            m.classList.add('active');
+            BackClose.swap(() => m.classList.remove('active'));
+        }
 
         // ================= BOTTOM SHEET LOGIC =================
         function openSettingsSheet() {
@@ -975,16 +985,52 @@
             distanceTextAR.innerText = distNum + ' ' + unitStrEn;
         }
 
+        // Compass heading (0° = north, clockwise) of the direction the user is
+        // pointing, from the W3C Euler angles (Z-X'-Y''):
+        //  - phone flat: the top edge  → 360 - alpha
+        //  - phone tilted up (AR): the back camera, which needs beta+gamma too;
+        //    360 - alpha alone drifts badly once the phone is upright and the
+        //    hand rolls it slightly sideways.
+        // Both agree when gamma = 0, so switching between them is seamless.
+        function headingFromEuler(alpha, beta, gamma) {
+            const d = Math.PI / 180;
+            const sA = Math.sin(alpha * d), cA = Math.cos(alpha * d);
+            const sB = Math.sin(beta * d),  cB = Math.cos(beta * d);
+            const sG = Math.sin(gamma * d), cG = Math.cos(gamma * d);
+            // back-camera (-Z) direction projected on the ground (east, north)
+            const bx = -cA * sG - sA * sB * cG;
+            const by = -sA * sG + cA * sB * cG;
+            if (Math.hypot(bx, by) > 0.5) {               // tilted > ~30° from flat
+                return (Math.atan2(bx, by) / d + 360) % 360;
+            }
+            // top-edge (+Y) direction projected on the ground
+            return (Math.atan2(-sA * cB, cA * cB) / d + 360) % 360;
+        }
+
+        function screenAngle() {
+            const a = (screen.orientation && screen.orientation.angle != null) ? screen.orientation.angle : (window.orientation || 0);
+            return (a + 360) % 360;
+        }
+
         function handleOrientation(event) {
             if(isManualMode) return; 
 
-            if (event.webkitCompassHeading != null || event.alpha != null) hasSensor = true;
+            let heading = null;
             if (event.webkitCompassHeading != null) {
-                rawHeading = event.webkitCompassHeading;
-            } else if (event.absolute && event.alpha != null) {
-                rawHeading = 360 - event.alpha;
-            } else if (event.alpha != null && rawHeading === 0) {
-                rawHeading = 360 - event.alpha;
+                // iOS: already tilt-compensated, relative to the screen's top edge
+                heading = event.webkitCompassHeading + screenAngle();
+            } else if (event.alpha != null && (event.absolute || event.type === 'deviceorientationabsolute')) {
+                heading = headingFromEuler(event.alpha, event.beta || 0, event.gamma || 0);
+                // the flat (top-edge) result is portrait-based → rotate in landscape
+                if (Math.hypot(event.beta || 0, event.gamma || 0) < 30) heading += screenAngle();
+            }
+            // Relative-only events (absolute:false) aren't north-referenced, so
+            // they can't give a Qibla bearing (previously the first one was used
+            // and the heading then froze). Ignore them; after 3s the status pill
+            // offers manual mode instead of showing a wrong direction.
+            if (heading != null) {
+                hasSensor = true;
+                rawHeading = (heading + 360) % 360;
             }
             
             if (event.beta != null) {
