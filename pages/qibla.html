@@ -217,6 +217,12 @@
         body.qibla-aligned .qibla-icon-container { transform: scale(1.15); box-shadow: 0 0 60px var(--primary-glow), inset 0 0 30px var(--primary-glow); }
 
         .qibla-icon-container img { width: 50px; height: 50px; object-fit: contain; filter: invert(0.88) sepia(0.12) drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+        /* svg-injector inlines qibla.svg (hard-coded fill="#000000"), so the img filter above never applies — colour the inline svg directly */
+        .qibla-icon-container svg {
+            width: 50px; height: 50px; fill: var(--primary-glow);
+            filter: drop-shadow(0 0 6px var(--primary-glow)) drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+            transition: fill 0.3s, filter 0.3s;
+        }
 
         .distance-bubble {
             color: #ffffff; padding: 8px 24px; font-weight: 800; font-size: 1.2rem;
@@ -309,6 +315,7 @@
             box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); border: 2px solid rgba(255,255,255,0.2);
         }
         .logo-box img { width: 50px; filter: invert(0.88) sepia(0.12); }
+        .logo-box svg { width: 50px; height: 50px; fill: #ffffff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
         
         .btn-primary {
             background: var(--text-main); color: var(--bg-dark-top); border: none; padding: 15px; width: 100%;
