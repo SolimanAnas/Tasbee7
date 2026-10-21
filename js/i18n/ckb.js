@@ -403,7 +403,7 @@ export default {
   'takrar_reset_desc': 'سڕینەوەی قورئانخوێن و بەش و ھەڵبژاردنەکان',
   'takrar_reset_confirm': 'ڕێکخستنە بنەڕەتییەکان بگەڕێنرێنەوە؟',
   'takrar_welcome_title': 'ھەڵبژاردنەکانت',
-  'takrar_welcome_desc': 'ئەوەی گونجاوە ھەڵبژێرە — دواتر لە ⚙️ دەتوانیت بیگۆڕیت',
+  'takrar_welcome_desc': 'ئەوەی گونجاوە ھەڵبژێرە — دواتر لە ڕێکخستنەکان دەتوانیت بیگۆڕیت',
   'takrar_welcome_start': 'دەست پێبکە',
 
   // Salah (Post-Prayer)
