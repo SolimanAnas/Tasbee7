@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v77"; // v77: Minshawi new murattal tracks moved to GitHub release + clean track names; v76: harden offline modal — reply timeouts + graceful recovery when an old SW still controls after update; v75: drop ?v= cache-buster from audio pages, strip dead CSS; v74: unified offline-download.js controller; v73: precache quran-v2 + audio/radio JSONs, hadith books on-demand, ZAD_CACHE_ALL handler
+const CACHE_NAME = "zad-muslim-v78"; // v78: let GitHub release audio bypass the SW (range requests via SW broke seeking); v77: Minshawi new murattal tracks moved to GitHub release + clean track names; v76: harden offline modal — reply timeouts + graceful recovery when an old SW still controls after update; v75: drop ?v= cache-buster from audio pages, strip dead CSS; v74: unified offline-download.js controller; v73: precache quran-v2 + audio/radio JSONs, hadith books on-demand, ZAD_CACHE_ALL handler
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -430,6 +430,16 @@ self.addEventListener("fetch", event => {
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
+
+  // --- GitHub release audio: leave to the browser ---
+  // Release downloads redirect to short-lived signed URLs on the asset hosts,
+  // and the browser then sends range requests to those directly. Answered from
+  // the SW they come back opaque (so never cached) and seeking breaks playback.
+  if ((url.hostname === "github.com" && url.pathname.includes("/releases/download/")) ||
+      url.hostname === "release-assets.githubusercontent.com" ||
+      url.hostname === "objects.githubusercontent.com") {
+    return;
+  }
 
   // --- Audio files: cache-first with audio-cache-v1 ---
   if (url.pathname.endsWith(".mp3") ||
