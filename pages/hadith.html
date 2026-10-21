@@ -204,6 +204,10 @@
     :root[data-theme="dark"] .book-label:has(input:checked){ color:var(--text); }
 
     /* مفتاح التشكيل */
+    /* type="search" (keyboard search key) — keep our own clear button only */
+    .search-input{ -webkit-appearance:none; appearance:none; }
+    .search-wrapper{ scroll-margin-top:12px; }
+    .search-input::-webkit-search-cancel-button{ display:none; }
     .tashkeel-toggle{
         display:flex; align-items:center; justify-content:space-between; gap:10px;
         font-size:13px; color:var(--muted); margin-bottom:16px; background:var(--surface);
@@ -365,7 +369,7 @@
 
         <div class="search-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="ابحث في السُنّة النبوية..." data-i18n-placeholder="hadith_search_placeholder" disabled>
+            <input type="search" id="searchInput" class="search-input" enterkeyhint="search" autocomplete="off" placeholder="ابحث في السُنّة النبوية..." data-i18n-placeholder="hadith_search_placeholder" disabled>
             <button class="clear-input-btn" id="clearInputBtn" onclick="clearSearchField()" aria-label="مسح"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
         </div>
 
@@ -418,10 +422,17 @@
     const TASHKEEL_STR = "\\u064B-\\u065F\\u0670";
     const TASHKEEL_REGEX = new RegExp("[" + TASHKEEL_STR + "]", "g");
 
+    // Invisible bidi/format marks — the books carry ~300k U+200F (RLM)
+    // inside the text, which broke phrase matches and highlighting.
+    const INVISIBLE_STR = "\\u200B-\\u200F\\u202A-\\u202E\\u2066-\\u2069\\uFEFF";
+    const INVISIBLE_REGEX = new RegExp("[" + INVISIBLE_STR + "]", "g");
+
     function normalizeText(text) {
         return (text || "")
             .replace(TASHKEEL_REGEX, '')
-            .replace(/[أإآ]/g, 'ا')
+            .replace(INVISIBLE_REGEX, '')
+            .replace(/\s+/g, ' ')
+            .replace(/[أإآٱ]/g, 'ا')
             .replace(/ة/g, 'ه')
             .replace(/ى/g, 'ي')
             .replace(/ـ/g, '');   // إزالة التطويل (الكشيدة)
@@ -432,12 +443,12 @@
     function buildRegex(query) {
         let clean = normalizeText(query), pattern = "";
         for (let char of clean) {
-            if (/[اأإآ]/.test(char)) pattern += "[أإآا]";
+            if (/[اأإآ]/.test(char)) pattern += "[أإآاٱ]";
             else if (/[ةه]/.test(char)) pattern += "[ةه]";
             else if (/[ىي]/.test(char)) pattern += "[ىي]";
-            else if (char === ' ') pattern += "\\s+";
+            else if (char === ' ') pattern += "[\\s" + INVISIBLE_STR + "]+";
             else pattern += escapeRegex(char);
-            if (char !== ' ') pattern += "[" + TASHKEEL_STR + "]*";
+            if (char !== ' ') pattern += "[" + TASHKEEL_STR + INVISIBLE_STR + "ـ]*";
         }
         return new RegExp('(' + pattern + ')', 'g');
     }
@@ -698,10 +709,20 @@
     let typingTimer;
     const searchInput = document.getElementById('searchInput');
 
+    function clearResults() {
+        currentSearchResults = [];
+        if (scrollObserver) scrollObserver.disconnect();
+        document.getElementById('resultsContainer').innerHTML = '';
+        document.getElementById('resultsSummary').style.display = 'none';
+        document.getElementById('scrollTrigger').style.display = 'none';
+    }
+
     searchInput.addEventListener('input', () => {
         document.getElementById('clearInputBtn').style.display = searchInput.value ? 'flex' : 'none';
         clearTimeout(typingTimer);
+        // Erasing the query must not leave the previous query's results behind
         if (searchInput.value.trim().length >= 3) typingTimer = setTimeout(initiateSearch, 450);
+        else clearResults();
     });
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -715,9 +736,7 @@
     function clearSearchField() {
         searchInput.value = '';
         document.getElementById('clearInputBtn').style.display = 'none';
-        document.getElementById('resultsContainer').innerHTML = '';
-        document.getElementById('resultsSummary').style.display = 'none';
-        document.getElementById('scrollTrigger').style.display = 'none';
+        clearResults();
         searchInput.focus();
     }
 
@@ -748,6 +767,7 @@
         if (currentSearchResults.length === 0) {
             container.innerHTML = `<div class="empty-state"><span class="icn"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span>${t('hadith_no_results')}</div>`;
             document.getElementById('scrollTrigger').style.display = 'none';
+            revealResults();
             return;
         }
 
@@ -760,6 +780,20 @@
 
         renderNextChunk();
         setupIntersectionObserver();
+        revealResults();
+    }
+
+    // The results sit below the daily hadith + filters, i.e. off-screen on a
+    // phone (and under the keyboard): bring the search box to the top so the
+    // summary and first results are visible right under it.
+    function revealResults() {
+        const box = document.querySelector('.search-wrapper');
+        if (!box) return;
+        const top = box.getBoundingClientRect().top;
+        // scrollIntoView: the page scrolls inside .main-area, not the window
+        if (top > 120 || top < 0) {
+            box.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        }
     }
 
     function renderNextChunk() {
