@@ -368,6 +368,15 @@ export default {
   'takrar_error_load_audio': 'بارکردنی تلاوت سەرنەکەوتووبوو',
   'takrar_press_to_play': 'بۆ لێدان دابگرە',
   'takrar_surah_ayah': '{surah} • ئایەت {ayah}',
+  'takrar_search_reciter': 'گەڕان بۆ قورئانخوێن...',
+  'takrar_style_all': 'هەموو',
+  'takrar_style_murattal': 'مورەتتەل',
+  'takrar_style_mujawwad': 'موجەووەد',
+  'takrar_style_muallim': 'فێرکار',
+  'takrar_style_warsh': 'وەرش',
+  'takrar_infinite_loop': 'دووبارەکردنەوەی بێ کۆتایی',
+  'takrar_loop_badge': 'خولی {current} · ∞',
+  'takrar_stop': 'وەستاندن',
 
   // Salah (Post-Prayer)
   'salah_title': 'ئێکاری دوای نوێژ — زادالمسلم',

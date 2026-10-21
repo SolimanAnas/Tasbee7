@@ -368,6 +368,15 @@ export default {
   'takrar_error_load_audio': 'Failed to load recitation',
   'takrar_press_to_play': 'Tap to play',
   'takrar_surah_ayah': '{surah} • verse {ayah}',
+  'takrar_search_reciter': 'Search reciter...',
+  'takrar_style_all': 'All',
+  'takrar_style_murattal': 'Murattal',
+  'takrar_style_mujawwad': 'Mujawwad',
+  'takrar_style_muallim': "Mu'allim",
+  'takrar_style_warsh': 'Warsh',
+  'takrar_infinite_loop': 'Loop forever',
+  'takrar_loop_badge': 'Loop {current} · ∞',
+  'takrar_stop': 'Stop',
 
   // Salah (Post-Prayer)
   'salah_title': 'Post-Prayer Adhkar — Zad Al-Muslim',
