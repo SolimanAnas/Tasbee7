@@ -1571,7 +1571,25 @@ function playPrevTrack(){
 }
 
 audio.addEventListener('ended',()=>{if(isRepeat){audio.currentTime=0;audio.play()}else{playNextTrack(false)}});
+// Some hosts (e.g. GitHub release assets) redirect to signed URLs that expire
+// after ~30 min, and the browser keeps using the signed URL for later range
+// requests. When a track fails mid-way, reload the original URL once and
+// resume from the same position before treating it as a broken track.
+// The element is already paused when 'error' fires, but its 'pause' event
+// comes after, so playIntent still says whether playback was wanted.
+let lastPos={url:null,time:0},resumeUrl=null,playIntent=false;
+audio.addEventListener('play',()=>{playIntent=true});
+audio.addEventListener('pause',()=>{playIntent=false});
+audio.addEventListener('timeupdate',()=>{if(audio.currentTime>0)lastPos={url:currentTrackUrl,time:audio.currentTime}});
 audio.addEventListener('error',()=>{
+  const time=audio.currentTime>0?audio.currentTime:(lastPos.url===currentTrackUrl?lastPos.time:0);
+  if(currentTrackUrl&&time>0&&resumeUrl!==currentTrackUrl){
+    const url=currentTrackUrl,wasPlaying=playIntent;resumeUrl=url;
+    // Unique query so the browser's media cache doesn't reuse the stale redirect.
+    audio.src=url+(url.includes('?')?'&':'?')+'_r='+Date.now();
+    audio.addEventListener('loadedmetadata',()=>{if(currentTrackUrl!==url)return;audio.currentTime=time;if(wasPlaying)audio.play().catch(()=>{})},{once:true});
+    return;
+  }
   if(currentTrackUrl){
     updatePlayPauseUI(false);
     if(errorRetryCount<3){showToast(t('audio_track_error'));errorRetryCount++;setTimeout(()=>playNextTrack(true),1500)}
@@ -1579,7 +1597,7 @@ audio.addEventListener('error',()=>{
   }
 });
 audio.addEventListener('playing',()=>{
-  errorRetryCount=0;updatePlayPauseUI(true);
+  errorRetryCount=0;resumeUrl=null;updatePlayPauseUI(true);
   document.getElementById('miniPlayer').classList.add('show');
   document.dispatchEvent(new CustomEvent('_audioPlaying'));
   updateMediaSession(currentJuzData[selectedJuzIndex]?juzDisplay(currentJuzData[selectedJuzIndex]):'',document.getElementById('nowReciter').innerText);
