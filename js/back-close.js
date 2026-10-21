@@ -36,6 +36,16 @@
       stack.push(closeFn);
       try { history.pushState({ backClose: stack.length }, ''); } catch (e) { stack.pop(); }
     },
+    /**
+     * Hand the topmost history sentinel to another modal (e.g. a sheet that
+     * closes itself to open a dialog). Avoids closed()+opened() in the same
+     * tick: the async history.back() would land after the new pushState and
+     * strip the page's own entry, so the next close navigates away.
+     */
+    swap: function (closeFn) {
+      if (!stack.length) { this.opened(closeFn); return; }
+      stack[stack.length - 1] = closeFn;
+    },
     /** Call at the START of a UI-initiated close (button/backdrop tap). */
     closed: function () {
       if (!stack.length) return;
