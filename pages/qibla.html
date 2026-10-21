@@ -217,6 +217,12 @@
         body.qibla-aligned .qibla-icon-container { transform: scale(1.15); box-shadow: 0 0 60px var(--primary-glow), inset 0 0 30px var(--primary-glow); }
 
         .qibla-icon-container img { width: 50px; height: 50px; object-fit: contain; filter: invert(0.88) sepia(0.12) drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+        /* svg-injector inlines qibla.svg (hard-coded fill="#000000"), so the img filter above never applies — colour the inline svg directly */
+        .qibla-icon-container svg {
+            width: 64px; height: 64px; fill: var(--primary-glow);
+            filter: drop-shadow(0 0 6px var(--primary-glow)) drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+            transition: fill 0.3s, filter 0.3s;
+        }
 
         .distance-bubble {
             color: #ffffff; padding: 8px 24px; font-weight: 800; font-size: 1.2rem;
@@ -283,7 +289,7 @@
 
         /* ================= MANUAL MODE SLIDER ================= */
         #manual-slider-container {
-            position: absolute; bottom: 130px; left: 20px; right: 20px; padding: 15px;
+            position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 175px); left: 20px; right: 20px; padding: 15px;
             z-index: 100; text-align: center; display: none; opacity: 0; transition: opacity 0.3s;
         }
         input[type=range] { width: 100%; direction: ltr; margin-top: 10px; accent-color: var(--primary-glow); }
@@ -309,6 +315,7 @@
             box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); border: 2px solid rgba(255,255,255,0.2);
         }
         .logo-box img { width: 50px; filter: invert(0.88) sepia(0.12); }
+        .logo-box svg { width: 50px; height: 50px; fill: #ffffff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
         
         .btn-primary {
             background: var(--text-main); color: var(--bg-dark-top); border: none; padding: 15px; width: 100%;
@@ -462,7 +469,31 @@
         /* Mini-compass polish */
         #mini-compass-dial { box-shadow: inset 0 0 20px rgba(0,0,0,.5), 0 0 30px -10px var(--primary-glow); }
 
+        /* Guidance pill: tells the user which way to turn / that they're aligned */
+        .qibla-status {
+            position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 118px);
+            transform: translateX(-50%); z-index: 30; max-width: calc(100% - 40px);
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+            border-radius: 999px; border: 1px solid var(--glass-border);
+            font-size: 1rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: var(--text-main); font-variant-numeric: tabular-nums;
+            transition: background .3s, color .3s, border-color .3s, opacity .3s;
+            opacity: 0; pointer-events: none;
+        }
+        .qibla-status.show { opacity: 1; }
+        .qibla-status.is-aligned {
+            background: var(--primary-glow); color: #04121f; border-color: transparent;
+            box-shadow: 0 0 30px -4px var(--primary-glow); animation: statusPop .35s cubic-bezier(.2,1.4,.4,1);
+        }
+        .qibla-status.is-aligned::before {
+            content: ""; width: 1.1em; height: 1.1em; flex: none; background: currentColor;
+            -webkit-mask: url(../img/SVG/check.svg) center / contain no-repeat; mask: url(../img/SVG/check.svg) center / contain no-repeat;
+        }
+        .qibla-status.is-warning { border-color: #f59e0b; color: #fcd34d; pointer-events: auto; cursor: pointer; white-space: normal; text-align: center; font-size: .9rem; }
+        @keyframes statusPop { 0% { transform: translateX(-50%) scale(.9); } 100% { transform: translateX(-50%) scale(1); } }
+
         @media (prefers-reduced-motion: reduce) {
+            .qibla-status.is-aligned,
             .top-nav, .stats-bar, #view-2d, .large-compass-wrapper,
             body.qibla-aligned .qibla-icon-container::after, body.qibla-aligned .center-ring { animation: none !important; }
         }
@@ -474,15 +505,15 @@
     <video id="camera-video" autoplay playsinline muted></video>
 
     <div class="top-nav">
-        <button class="icon-btn glass-panel" onclick="window.location.href='../index.html'" title="العودة للرئيسية">
+        <button class="icon-btn glass-panel" onclick="window.location.href='../index.html'" title="العودة للرئيسية" aria-label="العودة للرئيسية">
             <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
         <div class="top-nav-group">
-            <button class="icon-btn glass-panel" id="camera-toggle-btn" title="الكاميرا">
+            <button class="icon-btn glass-panel" id="camera-toggle-btn" title="الكاميرا" aria-label="الكاميرا" aria-pressed="false">
                 <svg id="cam-off-icon" viewBox="0 0 24 24"><path d="M1 1l22 22"></path><path d="M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34m-7.72-2.06a4 4 0 1 1-5.56-5.56"></path></svg>
                 <svg id="cam-on-icon" viewBox="0 0 24 24" style="display:none;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
             </button>
-            <button class="icon-btn glass-panel" onclick="openSettingsSheet()" title="الإعدادات">
+            <button class="icon-btn glass-panel" onclick="openSettingsSheet()" title="الإعدادات" aria-label="الإعدادات">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
         </div>
@@ -569,6 +600,8 @@
         </div>
     </div>
 
+    <div id="qibla-status" class="qibla-status glass-panel" role="status" aria-live="polite"></div>
+
     <div id="setup-modal" class="overlay-modal active">
         <div class="modal-box glass-panel" style="background: rgba(15,23,42,0.8); border:none;">
             <div class="logo-box"><img src="../icons/qibla.svg" alt="Kaaba"></div>
@@ -649,6 +682,9 @@
         let smoothingFactor = parseFloat(localStorage.getItem('qibla_sens')) || 0.15;
         let isManualMode = false;
         let isAlignedNow = false;
+        let hasSensor = false;
+        let launchedAt = 0;
+        let lastStatusKey = '';
 
         document.getElementById('unit-select').value = useMiles ? 'mi' : 'km';
         document.getElementById('sens-slider').value = Math.round(smoothingFactor * 30);
@@ -687,6 +723,34 @@
 
         const gradStop1 = document.getElementById('grad-stop-1');
         const gradStop2 = document.getElementById('grad-stop-2');
+        const statusPill = document.getElementById('qibla-status');
+
+        statusPill.addEventListener('click', () => {
+            if (!statusPill.classList.contains('is-warning')) return;
+            document.getElementById('manual-toggle').checked = true;
+            toggleManualMode(true);
+        });
+
+        // Guidance text — only touches the DOM when the message changes
+        function updateStatus(relAngle) {
+            let key, text, cls = '';
+            if (!isManualMode && !hasSensor && performance.now() - launchedAt > 3000) {
+                key = 'nosensor'; text = t('qibla_no_sensor'); cls = 'is-warning';
+            } else if (!isManualMode && !hasSensor) {
+                key = ''; text = '';
+            } else if (Math.abs(relAngle) <= 3) {
+                key = 'aligned'; text = t('qibla_facing'); cls = 'is-aligned';
+            } else {
+                const n = Math.round(Math.abs(relAngle));
+                key = (relAngle > 0 ? 'r' : 'l') + n;
+                // LRI…PDI keeps "18°" together in RTL text (otherwise it renders as "°18")
+                text = t(relAngle > 0 ? 'qibla_turn_right' : 'qibla_turn_left', { n: '\u2066' + n + '°\u2069' });
+            }
+            if (key === lastStatusKey) return;
+            lastStatusKey = key;
+            statusPill.textContent = text;
+            statusPill.className = 'qibla-status glass-panel' + (cls ? ' ' + cls : '') + (key ? ' show' : '');
+        }
 
         // ================= MODAL LOGIC =================
         function openModal(id) {
@@ -830,6 +894,7 @@
             calculateDistance();
             
             closeModal('setup-modal');
+            launchedAt = performance.now();
 
             isCameraEnabled = localStorage.getItem('qibla_cam') === 'true';
             updateCameraIcon();
@@ -872,6 +937,7 @@
             } else {
                 camOnIcon.style.display = 'none'; camOffIcon.style.display = 'block';
             }
+            camToggleBtn.setAttribute('aria-pressed', String(isCameraEnabled));
         }
 
         // ================= MATH & SENSORS =================
@@ -906,12 +972,13 @@
             
             const distNum = Math.round(R * c).toLocaleString('en-US');
             valDist.innerText = distNum + ' ' + unitStr;
-            distanceTextAR.innerText = unitStrEn + ' ' + distNum; 
+            distanceTextAR.innerText = distNum + ' ' + unitStrEn;
         }
 
         function handleOrientation(event) {
             if(isManualMode) return; 
 
+            if (event.webkitCompassHeading != null || event.alpha != null) hasSensor = true;
             if (event.webkitCompassHeading != null) {
                 rawHeading = event.webkitCompassHeading;
             } else if (event.absolute && event.alpha != null) {
@@ -945,7 +1012,8 @@
             smoothedHeading += diff * smoothingFactor;
             smoothedHeading = (smoothedHeading + 360) % 360;
             
-            valHeading.innerText = Math.round(smoothedHeading) + '°';
+            const headingKnown = hasSensor || isManualMode;
+            valHeading.innerText = headingKnown ? Math.round(smoothedHeading) + '°' : '--°';
 
             let relAngle = qiblaAngle - smoothedHeading;
             relAngle = ((relAngle + 540) % 360) - 180;
@@ -971,8 +1039,10 @@
                 }
             }
 
-            if (isARMode) updateARScene(relAngle);
+            if (isARMode && headingKnown) updateARScene(relAngle);
+            else if (isARMode) { hintLeft.style.opacity = '0'; hintRight.style.opacity = '0'; }
             else update2DScene();
+            updateStatus(relAngle);
 
             requestAnimationFrame(renderEngine);
         }
