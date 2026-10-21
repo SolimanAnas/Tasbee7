@@ -177,6 +177,10 @@
       white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
     .tasmee-saved-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .tasmee-saved-toast::before {
+      content: ""; display: inline-block; width: 1em; height: 1em; margin-inline-end: 6px; vertical-align: -0.15em;
+      background: currentColor; -webkit-mask: url(../img/SVG/check.svg) center / contain no-repeat; mask: url(../img/SVG/check.svg) center / contain no-repeat;
+    }
     /* Hesitation bar */
     #tasmeeHesitationBar { font-family: "Tajawal", sans-serif; }
     .tpv2-stage.has-hesitation .tpv2-page { box-shadow: inset 0 0 0 2px rgba(245,158,11,0.3); }
@@ -184,7 +188,7 @@
 </head>
 <body>
   <!-- v2 SESSION SAVED TOAST -->
-  <div id="tasmeeSavedToast" class="tasmee-saved-toast" data-i18n="tasmee_session_saved">✓ تم حفظ الجلسة</div>
+  <div id="tasmeeSavedToast" class="tasmee-saved-toast" data-i18n="tasmee_session_saved">تم حفظ الجلسة</div>
 
   <!-- ════════ TOP BAR ════════ -->
   <div class="q-top-bar">
@@ -527,7 +531,7 @@
       tasmee_weak_words: "الكلمات الضعيفة",
       tasmee_weak_words_title: "الكلمات الضعيفة — تمرين",
       tasmee_weak_empty: "لا توجد كلمات ضعيفة بعد! استمر في التسميع.",
-      tasmee_session_saved: "✓ تم حفظ الجلسة",
+      tasmee_session_saved: "تم حفظ الجلسة",
       tasmee_share_session: "مشاركة النتيجة",
       tasmee_share_title: "نتيجة التسميع",
       tasmee_share_text: "حصلت على {score}% في التسميع!",
@@ -587,7 +591,7 @@
       tasmee_weak_words: "Weak words",
       tasmee_weak_words_title: "Weak Words — Drill",
       tasmee_weak_empty: "No weak words yet! Keep practicing.",
-      tasmee_session_saved: "✓ Session saved",
+      tasmee_session_saved: "Session saved",
       tasmee_share_session: "Share result",
       tasmee_share_title: "Tasmee Result",
       tasmee_share_text: "I scored {score}% in recitation!",
@@ -1090,7 +1094,7 @@
         navigator.clipboard.writeText(shareText).then(function(){
           var toast = DOM.tasmeeSavedToast;
           if (toast) {
-            toast.textContent = lang === "en" ? "✓ Copied!" : "✓ تم النسخ";
+            toast.textContent = lang === "en" ? "Copied!" : "تم النسخ";
             toast.classList.add("show");
             setTimeout(function(){ toast.classList.remove("show"); }, 2000);
           }
@@ -1308,7 +1312,7 @@
       var toast = DOM.tasmeeSavedToast;
       if (toast) {
         var lang = localStorage.getItem("tasmee_lang") || "ar";
-        toast.textContent = lang === "en" ? "✓ Session saved" : "✓ تم حفظ الجلسة";
+        toast.textContent = lang === "en" ? "Session saved" : "تم حفظ الجلسة";
         toast.classList.add("show");
         setTimeout(function(){ toast.classList.remove("show"); }, 2000);
       }
