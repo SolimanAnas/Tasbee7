@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#F8FAFC">
 <title>التكرار — زاد المسلم | Ayah Repetition Tool</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
@@ -189,7 +189,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 .ayah-display.visible { display:block; animation:fadeIn .4s ease; }
 @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
 .ayah-arabic {
-  font-family:'Amiri', serif; font-size:26px; line-height:2;
+  font-family:'Amiri', serif; font-size:var(--ayah-fs, 26px); line-height:2;
   color:var(--text-primary); word-spacing:2px;
 }
 .ayah-ref {
@@ -234,7 +234,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 .progress-fill { height:100%; background:var(--accent-main); border-radius:3px; width:0%; transition:width .15s linear; }
 
 /* Play controls */
-.play-controls { display:flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; direction:rtl; }
+.play-controls { display:flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; }
+/* prev/next glyphs are drawn for RTL; mirror them when the UI is LTR */
+[dir="ltr"] .nav-btn:not(.stop-btn) svg { transform:scaleX(-1); }
 .play-pause-btn {
   width:58px; height:58px; border-radius:50%; background:var(--accent-main); color:#fff; border:none;
   display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
@@ -284,7 +286,8 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 }
 .sheet-overlay.active { opacity:1; pointer-events:all; }
 .bottom-sheet {
-  position:fixed; bottom:0; left:50%; right:auto; width:100%; max-width:480px; max-height:85vh;
+  position:fixed; bottom:var(--kb, 0px); left:50%; right:auto; width:100%; max-width:480px;
+  max-height:min(85vh, calc(var(--vvh, 100dvh) - 24px));
   background:var(--glass); backdrop-filter:blur(35px); -webkit-backdrop-filter:blur(35px);
   border-top:1px solid var(--glass-border); border-radius:30px 30px 0 0;
   transform:translate(-50%,100%); transition:transform .4s cubic-bezier(.2,.9,.4,1.1);
@@ -451,14 +454,8 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 .card-head-val { font-size:13px; font-weight:800; color:var(--text-secondary); direction:ltr; font-variant-numeric:tabular-nums; }
 
 /* ===== Reciter picker ===== */
-.reciter-btn { justify-content:flex-start; padding:10px 14px; min-height:60px; }
+.reciter-btn { justify-content:flex-start; padding:10px 16px; min-height:58px; }
 .reciter-btn:after { margin-inline-start:auto; }
-.rc-avatar {
-  width:40px; height:40px; border-radius:50%; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--accent-muted); color:var(--accent-main);
-  font-family:'Amiri', serif; font-size:19px; font-weight:700; line-height:1;
-}
 .rc-text { display:flex; flex-direction:column; gap:3px; min-width:0; text-align:start; }
 .rc-name { font-size:15px; font-weight:700; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .rc-placeholder { font-size:15px; font-weight:500; color:var(--text-secondary); }
@@ -473,10 +470,9 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   background:var(--list-hover); border:1px solid var(--glass-border); color:var(--text-secondary); cursor:pointer; transition:.2s;
 }
 .filter-chip.active { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
-.sheet-item.reciter-row { display:flex; align-items:center; gap:12px; padding:10px 12px; }
+.sheet-item.reciter-row { display:flex; align-items:center; gap:12px; padding:11px 14px; }
 .sheet-item.reciter-row .rc-name { font-size:15px; }
 .sheet-item.selected .rc-name { color:#fff; }
-.sheet-item.selected .rc-avatar { background:rgba(255,255,255,.22); color:#fff; }
 .sheet-item.selected .rc-style { background:rgba(255,255,255,.2); color:#fff; }
 .sheet-empty { text-align:center; color:var(--text-secondary); padding:24px; font-weight:600; }
 
@@ -507,15 +503,153 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   body { padding-left:12px; padding-right:12px; }
   .card { padding:13px; border-radius:18px; }
   .type-seg-btn { font-size:12.5px; }
-  .ayah-arabic { font-size:23px; }
   .speed-chip { font-size:11px; }
 }
+/* While typing in a sheet's search box, let the sheet take the space above the keyboard */
+.bottom-sheet.searching { height:calc(var(--vvh, 100dvh) - 24px); }
+
+/* Unit rows: the opening words of the first ayah */
+.unit-text {
+  font-family:'Amiri', serif; font-size:16px; font-weight:400; color:var(--text-secondary);
+  direction:rtl; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; text-align:end;
+}
+.sheet-item.selected .unit-text { color:rgba(255,255,255,.9); }
+.unit-row > span:first-child { flex-shrink:0; }
+
+/* ===== Settings sheet (same pattern as the audio page) ===== */
+.settings-body { flex:1; overflow-y:auto; padding:6px 16px 28px; display:flex; flex-direction:column; gap:20px; scrollbar-width:none; }
+.settings-body::-webkit-scrollbar { display:none; }
+.settings-section { display:flex; flex-direction:column; gap:6px; }
+.settings-section-label { font-size:10.5px; font-weight:800; letter-spacing:.1em; color:var(--text-secondary); padding:0 4px 4px; opacity:.75; }
+.theme-pill-selector { display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; padding:5px; background:var(--list-hover); border-radius:18px; border:1px solid var(--glass-border); }
+.theme-pill {
+  display:flex; flex-direction:column; align-items:center; gap:5px; padding:12px 6px 10px; border-radius:14px;
+  border:none; background:transparent; color:var(--text-secondary); font-family:inherit; font-size:12px; font-weight:700;
+  cursor:pointer; transition:.25s cubic-bezier(.22,1,.36,1);
+}
+.theme-pill-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--glass-border); transition:.25s; }
+.theme-pill-icon svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.theme-pill.active { color:var(--accent-main); }
+.theme-pill.active .theme-pill-icon { background:var(--accent-main); box-shadow:0 4px 14px var(--play-glow); }
+.theme-pill.active .theme-pill-icon svg { stroke:#fff; }
+.theme-pill:active { transform:scale(.93); }
+.settings-row {
+  display:flex; align-items:center; gap:13px; padding:12px; border-radius:16px;
+  background:var(--list-hover); border:1px solid var(--glass-border); cursor:pointer; transition:.2s;
+}
+.settings-row.stack { flex-direction:column; align-items:stretch; gap:10px; cursor:default; }
+.settings-row.stack > .settings-row-top { display:flex; align-items:center; gap:13px; }
+.settings-row:not(.stack):active { background:var(--accent-muted); transform:scale(.99); }
+.settings-row-icon { width:40px; height:40px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--accent-muted); color:var(--accent-main); }
+.settings-row-icon svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.settings-row-content { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.settings-row-title { font-size:14.5px; font-weight:700; color:var(--text-primary); line-height:1.3; }
+.settings-row-sub { font-size:11.5px; color:var(--text-secondary); font-weight:500; line-height:1.4; }
+.settings-chevron { width:18px; height:18px; stroke:var(--text-secondary); fill:none; stroke-width:2; opacity:.5; flex-shrink:0; }
+[dir="rtl"] .settings-chevron { transform:scaleX(-1); }
+.settings-row-danger .settings-row-title { color:var(--danger); }
+.settings-row-danger .settings-row-icon { background:rgba(239,68,68,.1); color:var(--danger); }
+/* Segmented choice inside a settings row */
+.opt-seg { display:flex; gap:4px; background:var(--bg-surface); border:1px solid var(--glass-border); border-radius:12px; padding:3px; }
+.opt-seg button {
+  flex:1; min-height:36px; padding:6px 4px; border:none; border-radius:9px; background:transparent; cursor:pointer;
+  font-family:inherit; font-size:12.5px; font-weight:700; color:var(--text-secondary); transition:background .2s, color .2s;
+}
+.opt-seg button.active { background:var(--accent-main); color:#fff; box-shadow:0 3px 10px var(--play-glow); }
+.opt-seg .opt-ayah { font-family:'Amiri', serif; font-size:14px; font-weight:400; }
+@keyframes settingsIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.bottom-sheet.active .settings-section { animation:settingsIn .38s cubic-bezier(.22,1,.36,1) both; }
+.bottom-sheet.active .settings-section:nth-child(2) { animation-delay:.05s; }
+.bottom-sheet.active .settings-section:nth-child(3) { animation-delay:.1s; }
+.bottom-sheet.active .settings-section:nth-child(4) { animation-delay:.15s; }
+.bottom-sheet.active .settings-section:nth-child(5) { animation-delay:.2s; }
+
+/* Header action group */
+.header-actions { display:flex; align-items:center; gap:4px; }
+.header-actions .icon-btn { width:38px; height:38px; border-radius:12px; }
+.header-actions .icon-btn:active { background:var(--list-hover); }
+
+/* First-open preferences sheet */
+.welcome-intro { font-size:13px; color:var(--text-secondary); line-height:1.7; padding:0 4px; }
+.welcome-done {
+  min-height:50px; border:none; border-radius:16px; background:var(--accent-main); color:#fff; cursor:pointer;
+  font-family:inherit; font-size:15px; font-weight:800; box-shadow:0 6px 18px var(--play-glow);
+}
+.welcome-done:active { transform:scale(.97); }
 </style>
 </head>
 <body>
 
 <div class="toast" id="toast"></div>
 <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+
+<!-- Settings Sheet -->
+<div class="bottom-sheet" id="settingsSheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2 data-i18n="settings">الإعدادات</h2><button class="icon-btn" onclick="closeSheet()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-section-label" data-i18n="takrar_set_appearance">المظهر</div>
+      <div class="theme-pill-selector">
+        <button class="theme-pill" data-theme-swatch="light" onclick="setThemeMode('light')"><div class="theme-pill-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg></div><span data-i18n="takrar_theme_light">فاتح</span></button>
+        <button class="theme-pill" data-theme-swatch="dark" onclick="setThemeMode('dark')"><div class="theme-pill-icon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><span data-i18n="takrar_theme_dark">داكن</span></button>
+        <button class="theme-pill" data-theme-swatch="sepia" onclick="setThemeMode('sepia')"><div class="theme-pill-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span data-i18n="takrar_theme_sepia">بُنّي</span></button>
+      </div>
+      <div class="settings-row" onclick="openLanguage()">
+        <div class="settings-row-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="settings-row-content"><div class="settings-row-title" data-i18n="nav_language">اللغة</div><div class="settings-row-sub" data-lang-label></div></div>
+        <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label" data-i18n="takrar_set_display">العرض</div>
+      <div class="settings-row stack" data-pref-group="unitLabel"></div>
+      <div class="settings-row" onclick="setPref('showAyah', !P.showAyah)">
+        <div class="settings-row-icon"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="settings-row-content"><div class="settings-row-title" data-i18n="takrar_show_ayah">إظهار نص الآية</div><div class="settings-row-sub" data-i18n="takrar_show_ayah_desc">عرض الآية أعلى الصفحة أثناء التلاوة</div></div>
+        <div class="switch" data-pref-switch="showAyah"></div>
+      </div>
+      <div class="settings-row stack" data-pref-group="fontSize"></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label" data-i18n="takrar_set_playback">التشغيل</div>
+      <div class="settings-row stack" data-pref-group="gap"></div>
+      <div class="settings-row" onclick="setPref('keepAwake', !P.keepAwake)">
+        <div class="settings-row-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+        <div class="settings-row-content"><div class="settings-row-title" data-i18n="takrar_keep_awake">إبقاء الشاشة مضاءة</div><div class="settings-row-sub" data-i18n="takrar_keep_awake_desc">أثناء التشغيل فقط</div></div>
+        <div class="switch" data-pref-switch="keepAwake"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-row settings-row-danger" onclick="resetTakrar()">
+        <div class="settings-row-icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></div>
+        <div class="settings-row-content"><div class="settings-row-title" data-i18n="takrar_reset">استعادة الإعدادات الافتراضية</div><div class="settings-row-sub" data-i18n="takrar_reset_desc">مسح القارئ والمقطع والتفضيلات</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- First-open preferences sheet -->
+<div class="bottom-sheet" id="welcomeSheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2 data-i18n="takrar_welcome_title">تفضيلاتك</h2><button class="icon-btn" onclick="finishWelcome()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div>
+  <div class="settings-body">
+    <div class="welcome-intro" data-i18n="takrar_welcome_desc">اختر ما يناسبك، ويمكنك تغييره لاحقاً من ⚙️</div>
+    <div class="settings-section">
+      <div class="settings-row stack" data-pref-group="unitLabel"></div>
+      <div class="settings-row stack" data-pref-group="gap"></div>
+      <div class="settings-row" onclick="openLanguage()">
+        <div class="settings-row-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="settings-row-content"><div class="settings-row-title" data-i18n="nav_language">اللغة</div><div class="settings-row-sub" data-lang-label></div></div>
+        <svg class="settings-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <button class="welcome-done" onclick="finishWelcome()" data-i18n="takrar_welcome_start">ابدأ</button>
+  </div>
+</div>
 
 <!-- Reciter Sheet -->
 <div class="bottom-sheet" id="reciterSheet">
@@ -559,7 +693,12 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   <div class="header">
     <a href="../index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;" data-i18n-title="home"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></a>
     <div class="header-title" style="position:absolute;left:50%;transform:translateX(-50%);" data-i18n="takrar_header">التكرار</div>
-    <button class="icon-btn" onclick="cycleTheme()" title="المظهر"><img src="../img/SVG/moon.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openLanguage()" title="اللغة" data-i18n-title="nav_language" aria-label="Language">
+        <svg class="action-icon" viewBox="0 0 24 24" style="width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </button>
+      <button class="icon-btn" onclick="openSheet('settings')" title="الإعدادات" data-i18n-title="settings" aria-label="Settings"><img src="../img/SVG/settings.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></button>
+    </div>
   </div>
 
   <!-- Ayah Text Display (top while playing) -->
@@ -926,7 +1065,150 @@ function loadPrefs() {
 
 /* ---------- Theme ---------- */
 ThemeManager.init();
-function cycleTheme() { ThemeManager.cycle(); }
+function setThemeMode(m) { ThemeManager.set(m); renderPrefs(); }
+
+/* ---------- Page settings (⚙️) ----------
+   Kept apart from takrarPrefs (what to play) so "reset" and the first-open
+   sheet deal with display/playback preferences only. */
+const P_DEFAULTS = { unitLabel: 'text', showAyah: true, fontSize: 'm', gap: 0, keepAwake: false };
+const P = Object.assign({}, P_DEFAULTS);
+try { Object.assign(P, JSON.parse(localStorage.getItem('takrarSettings') || '{}')); } catch (e) {}
+const FONT_SIZES = { s: '22px', m: '26px', l: '32px' };
+const PREF_GROUPS = {
+  unitLabel: {
+    title: 'takrar_unit_label', desc: 'takrar_unit_label_desc',
+    icon: '<path d="M4 6h16M4 12h10M4 18h7"/>',
+    options: () => [['text', `<span class="opt-ayah">وَإِذِ ٱسْتَسْقَىٰ…</span>`], ['ref', t('takrar_unit_label_ref')]]
+  },
+  fontSize: {
+    title: 'takrar_font_size', icon: '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
+    options: () => [['s', t('takrar_font_s')], ['m', t('takrar_font_m')], ['l', t('takrar_font_l')]]
+  },
+  gap: {
+    title: 'takrar_gap', desc: 'takrar_gap_desc',
+    icon: '<circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 14 15"/><line x1="10" y1="2" x2="14" y2="2"/>',
+    options: () => [[0, t('takrar_gap_off')], ...[1, 2, 3, 5].map(n => [n, t('takrar_seconds', {n})])]
+  }
+};
+function setPref(k, v) {
+  P[k] = v;
+  try { localStorage.setItem('takrarSettings', JSON.stringify(P)); } catch (e) {}
+  applyPrefs();
+  renderPrefs();
+}
+function applyPrefs() {
+  document.documentElement.style.setProperty('--ayah-fs', FONT_SIZES[P.fontSize] || FONT_SIZES.m);
+  if (!P.showAyah) document.getElementById('ayahDisplay').classList.remove('visible');
+  else if (S.state !== 'idle' && queue[qIdx]) showAyahText(queue[qIdx].surah, queue[qIdx].ayah);
+  if (curSheet === 'unit') renderUnitSheet(document.getElementById('unitSearch').value.trim());
+  syncWakeLock();
+}
+const LANG_LABELS = { ar: 'العربية', en: 'English', tr: 'Türkçe', ckb: 'کوردی', ur: 'اردو' };
+function renderPrefs() {
+  document.querySelectorAll('[data-pref-group]').forEach(row => {
+    const k = row.dataset.prefGroup, g = PREF_GROUPS[k];
+    row.innerHTML = `<div class="settings-row-top"><div class="settings-row-icon"><svg viewBox="0 0 24 24">${g.icon}</svg></div>`
+      + `<div class="settings-row-content"><div class="settings-row-title">${t(g.title)}</div>`
+      + (g.desc ? `<div class="settings-row-sub">${t(g.desc)}</div>` : '') + `</div></div>`
+      + `<div class="opt-seg">` + g.options().map(([v, lbl]) =>
+        `<button class="${P[k] === v ? 'active' : ''}" onclick='setPref("${k}", ${JSON.stringify(v)})'>${lbl}</button>`).join('') + `</div>`;
+  });
+  document.querySelectorAll('[data-pref-switch]').forEach(sw => sw.classList.toggle('active', !!P[sw.dataset.prefSwitch]));
+  const mode = ThemeManager.get();
+  document.querySelectorAll('.theme-pill').forEach(b => b.classList.toggle('active', b.dataset.themeSwatch === mode));
+  const lang = window.I18n ? I18n.getLang() : 'ar';
+  document.querySelectorAll('[data-lang-label]').forEach(el => { el.textContent = LANG_LABELS[lang] || lang; });
+}
+
+/* ---------- Language ---------- */
+function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
+// Unit names follow the UI language; Quran text and surah names stay Arabic.
+const UNIT_NAMES_AR = { juz: 'الجزء', hizb: 'الحزب', rub: 'الربع', page: 'الصفحة' };
+function localizeUnitNames() {
+  const ar = !window.I18n || I18n.getLang() === 'ar';
+  for (const k in UNIT_NAMES_AR) UNIT_INFO[k].name = ar ? UNIT_NAMES_AR[k] : t('takrar_scope_' + k);
+}
+
+/* ---------- First open ---------- */
+function maybeShowWelcome() {
+  let seen = false;
+  try { seen = !!localStorage.getItem('takrarWelcomeSeen'); } catch (e) {}
+  if (!seen) openSheet('welcome');
+}
+function markWelcomeSeen() { try { localStorage.setItem('takrarWelcomeSeen', '1'); } catch (e) {} }
+function finishWelcome() { markWelcomeSeen(); closeSheet(); }
+
+function resetTakrar() {
+  if (!confirm(t('takrar_reset_confirm'))) return;
+  try { localStorage.removeItem('takrarPrefs'); localStorage.removeItem('takrarSettings'); } catch (e) {}
+  location.reload();
+}
+
+/* ---------- Local Quran text (precached data/quran.json) ---------- */
+let QURAN = null, _quranLoading = null;
+function loadQuran() {
+  if (QURAN) return Promise.resolve(QURAN);
+  if (!_quranLoading) {
+    _quranLoading = fetch('../data/quran.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(list => {
+      const m = new Map();
+      for (const x of list) m.set(x.surah * 1000 + x.ayah, x.text_uthmani);
+      return (QURAN = m);
+    }).catch(e => { _quranLoading = null; throw e; });
+  }
+  return _quranLoading;
+}
+const BASMALA = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+function localAyah(s, a) {
+  let x = QURAN && QURAN.get(s * 1000 + a);
+  if (!x) return '';
+  x = x.replace(/^\uFEFF/, '');
+  // The data prefixes ayah 1 of each surah (except al-Fatiha) with the basmala.
+  if (a === 1 && s !== 1 && x.startsWith(BASMALA)) x = x.slice(BASMALA.length).trim();
+  return x;
+}
+function ayahOpening(s, a, words = 4) {
+  const w = localAyah(s, a).replace(/^۞\s*/, '').split(/\s+/).filter(Boolean);
+  if (!w.length) return '';
+  return w.slice(0, words).join(' ') + (w.length > words ? ' …' : '');
+}
+
+/* ---------- Keep the screen on while playing ---------- */
+let wakeLock = null;
+async function syncWakeLock() {
+  const want = P.keepAwake && S.state !== 'idle' && S.state !== 'paused' && document.visibilityState === 'visible';
+  try {
+    if (want && !wakeLock && 'wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch (e) { wakeLock = null; }
+}
+document.addEventListener('visibilitychange', syncWakeLock);
+
+/* ---------- On-screen keyboard ----------
+   Keep bottom sheets above the keyboard and let a sheet grow while its
+   search box is focused, so results aren't hidden behind the keys. */
+function syncViewport() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+  document.documentElement.style.setProperty('--vvh', vv.height + 'px');
+  document.documentElement.style.setProperty('--kb', kb + 'px');
+}
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', syncViewport);
+  visualViewport.addEventListener('scroll', syncViewport);
+  syncViewport();
+}
+document.addEventListener('focusin', e => {
+  if (e.target.classList && e.target.classList.contains('sheet-search')) e.target.closest('.bottom-sheet').classList.add('searching');
+});
+document.addEventListener('focusout', e => {
+  if (e.target.classList && e.target.classList.contains('sheet-search')) {
+    const sheet = e.target.closest('.bottom-sheet');
+    setTimeout(() => { if (!sheet.contains(document.activeElement)) sheet.classList.remove('searching'); }, 150);
+  }
+});
 
 /* ---------- Helpers ---------- */
 function pad(n) { return String(n).padStart(3, '0'); }
@@ -948,11 +1230,13 @@ function openSheet(type) {
   }
   else if (type === 'surah') { document.getElementById('surahSearch').value = ''; renderSurahs(); }
   else if (type === 'unit') { document.getElementById('unitSearch').value = ''; renderUnitSheet(); }
+  else if (type === 'settings' || type === 'welcome') renderPrefs();
 }
 function closeSheet() {
   if (window.BackClose) BackClose.closed();
   document.getElementById('sheetOverlay').classList.remove('active');
-  if (curSheet) document.getElementById(curSheet + 'Sheet').classList.remove('active');
+  if (curSheet) document.getElementById(curSheet + 'Sheet').classList.remove('active', 'searching');
+  if (curSheet === 'welcome') markWelcomeSeen();
   curSheet = null;
 }
 
@@ -963,10 +1247,8 @@ function reciterName(r) {
   return (lang === 'en' || lang === 'tr') && r.en ? r.en : r.name;
 }
 function reciterStyleLabel(r) { return t('takrar_style_' + r.style); }
-function reciterInitial(r) { return r.name.replace(/^(عبد ال|أبو |ال)/, '').trim().charAt(0); }
 function reciterRowHtml(r) {
-  return `<span class="rc-avatar" aria-hidden="true">${reciterInitial(r)}</span>`
-    + `<span class="rc-text"><span class="rc-name">${reciterName(r)}</span>`
+  return `<span class="rc-text"><span class="rc-name">${reciterName(r)}</span>`
     + `<span class="rc-style">${reciterStyleLabel(r)}</span></span>`;
 }
 function renderReciters() {
@@ -974,7 +1256,7 @@ function renderReciters() {
   document.querySelectorAll('#reciterFilter .filter-chip').forEach(b => b.classList.toggle('active', b.dataset.style === S.reciterFilter));
   const list = RECITERS.filter(r =>
     (S.reciterFilter === 'all' || r.style === S.reciterFilter) &&
-    (!q || normalize(r.name).includes(q) || r.en.toLowerCase().includes(q)));
+    (!q || normalize(r.name).includes(q) || (r.en + ' ' + r.folder).toLowerCase().includes(q)));
   document.getElementById('reciterList').innerHTML = list.map(r =>
     `<div class="sheet-item reciter-row ${S.reciter && S.reciter.id === r.id ? 'selected' : ''}" onclick="pickReciter('${r.id}')">${reciterRowHtml(r)}</div>`
   ).join('') || `<div class="sheet-empty">${t('takrar_no_results')}</div>`;
@@ -1067,10 +1349,16 @@ function renderUnitSheet(filter = '') {
     if (filter && !String(n).includes(filter)) continue;
     const st = starts[n - 1];
     const sel = S.unitByType[type] === n ? 'selected' : '';
+    const opening = P.unitLabel === 'text' ? ayahOpening(st[0], st[1]) : '';
     html += `<div class="sheet-item unit-row ${sel}" onclick="pickUnit(${n})">`
       + `<span style="color:var(--accent-main);font-weight:800;">${info.name} ${n}</span>`
-      + `<span class="unit-meta">${t('takrar_starts_at', {surah: SURAH_NAMES[st[0] - 1], ayah: st[1]})}</span></div>`;
+      + (opening
+        ? `<span class="unit-text" title="${SURAH_NAMES[st[0] - 1]} ${st[1]}">${opening}</span>`
+        : `<span class="unit-meta">${t('takrar_starts_at', {surah: SURAH_NAMES[st[0] - 1], ayah: st[1]})}</span>`)
+      + `</div>`;
   }
+  // Text mode needs the local Quran text; render refs now and re-render once it loads.
+  if (P.unitLabel === 'text' && !QURAN) loadQuran().then(() => { if (curSheet === 'unit') renderUnitSheet(filter); });
   document.getElementById('unitList').innerHTML = html
     || `<div style="text-align:center;color:var(--text-secondary);padding:24px;">${t('takrar_no_results')}</div>`;
 }
@@ -1317,13 +1605,14 @@ async function fetchAyahText(surah, ayah) {
 }
 async function showAyahText(surah, ayah) {
   const disp = document.getElementById('ayahDisplay');
+  if (!P.showAyah) { disp.classList.remove('visible'); return; }
   const txt = document.getElementById('ayahText');
   const ref = document.getElementById('ayahRef');
   disp.classList.add('visible');
   txt.innerHTML = `<div class="ayah-loading">${t('takrar_loading_ayah')}</div>`;
   ref.textContent = t('takrar_ayah_ref', {surah: SURAH_NAMES[surah - 1], ayah});
   const myToken = ++showAyahText._t;
-  const text = await fetchAyahText(surah, ayah);
+  const text = (await loadQuran().catch(() => null) && localAyah(surah, ayah)) || await fetchAyahText(surah, ayah);
   if (myToken !== showAyahText._t) return;
   txt.textContent = text || t('takrar_ayah_load_error');
 }
@@ -1355,17 +1644,19 @@ function buildQueue() {
 
 function togglePlay() {
   if (S.state === 'playing') {
+    if (gapTimer) { clearGap(); gapPending = true; }   // paused during the gap: advance on resume
     audio.pause(); setState('paused');
     setStatus(t('takrar_paused')); return;
   }
   if (S.state === 'paused') {
+    if (gapPending) { gapPending = false; qIdx++; playItem(); return; }
     audio.play().then(() => setState('playing')).catch(() => showToast(t('takrar_tap_to_play_again')));
     return;
   }
   // idle -> start
   if (!S.reciter) { showToast(t('takrar_choose_reciter_first')); return; }
   if (!hasScopeSelection()) {
-    const lbl = S.rangeType === 'surah' ? 'السورة' : UNIT_INFO[S.rangeType].name;
+    const lbl = S.rangeType === 'surah' ? (I18n.getLang() === 'ar' ? 'السورة' : t('takrar_scope_surah')) : UNIT_INFO[S.rangeType].name;
     showToast(t('takrar_choose_first', {label: lbl})); return;
   }
   errCount = 0; queue = buildQueue(); qIdx = 0; loopRound = 1;
@@ -1380,6 +1671,7 @@ function togglePlay() {
 function isLooping() { return S.rangeEnabled && S.rangeInfinite; }
 
 function stopPlay() {
+  clearGap(); gapPending = false;
   setState('idle'); audio.pause();
   try { audio.removeAttribute('src'); audio.load(); } catch(e) {}
   queue = []; qIdx = 0;
@@ -1404,6 +1696,7 @@ function updateRepeatDisplay(item) {
 }
 
 function playItem() {
+  clearGap(); gapPending = false;
   if (qIdx >= queue.length) {
     if (isLooping()) {
       // Rebuild in case the scope was a finite multi-pass queue before ∞ was turned on.
@@ -1441,7 +1734,19 @@ function nextAyah() {
 /* ---------- Audio events ---------- */
 audio.addEventListener('playing', () => { if (S.state !== 'idle') { setState('playing'); const it = queue[qIdx]; if (it) setStatus(t('takrar_surah_ayah', {surah: SURAH_NAMES[it.surah - 1], ayah: it.ayah})); } });
 audio.addEventListener('waiting', () => { if (S.state === 'playing') setState('loading'); });
-audio.addEventListener('ended', () => { if (S.state === 'idle') return; errCount = 0; qIdx++; playItem(); });
+// Optional pause after each ayah so the listener can recite it back.
+let gapTimer = null, gapPending = false;
+function clearGap() { clearTimeout(gapTimer); gapTimer = null; }
+audio.addEventListener('ended', () => {
+  if (S.state === 'idle') return;
+  errCount = 0;
+  if (P.gap > 0) {
+    setStatus(t('takrar_gap_wait'));
+    gapTimer = setTimeout(() => { gapTimer = null; qIdx++; playItem(); }, P.gap * 1000);
+    return;
+  }
+  qIdx++; playItem();
+});
 audio.addEventListener('error', () => {
   if (S.state === 'idle' || !audio.src) return;
   errCount++;
@@ -1470,6 +1775,7 @@ function seek(e) {
 /* ---------- UI state ---------- */
 function setState(s) {
   S.state = s;
+  syncWakeLock();
   const p = document.getElementById('iconPlay');
   const pa = document.getElementById('iconPause');
   const sp = document.getElementById('iconSpin');
@@ -1510,6 +1816,7 @@ if ('ResizeObserver' in window) {
     .observe(document.getElementById('dock'));
 }
 loadPrefs();
+applyPrefs();
 updateSpeedUI();
 
 // Restore reciter
@@ -1537,14 +1844,20 @@ document.getElementById('ayahRepeatVal').textContent = S.ayahRepeat;
 // Init i18n then render (async — must await dictionary load)
 (async () => {
   if (window.I18n) await I18n.init();
+  localizeUnitNames();
   renderReciterBtn();
   updateUnitButton();
   renderScopeResolved();
   if (S.rangeEnabled) renderRangeCard();
+  renderPrefs();
+  maybeShowWelcome();
 })();
 
 // Re-render translated elements on language change
 window.addEventListener('langchange', () => {
+  localizeUnitNames();
+  renderPrefs();
+  if (curSheet === 'unit') renderUnitSheet();
   renderReciterBtn();
   updateUnitButton();
   if (curSheet === 'reciter') renderReciters();
