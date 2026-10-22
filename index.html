@@ -1014,6 +1014,19 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       <div class="setting-control"><span style="font-size:1.5rem; color:var(--on-surface-variant);">›</span></div>
     </div>
 
+    <div class="setting-item" id="continuousAudioRow" onclick="toggleContinuousAudio()">
+      <div class="setting-info">
+        <div class="s-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"></rect><rect x="12" y="11" width="8" height="5" rx="1"></rect></svg>
+        </div>
+        <div class="s-text">
+          <div class="s-title" data-i18n="setting_continuous_audio">التشغيل المستمر أثناء التنقل</div>
+          <div class="s-desc" data-i18n="setting_continuous_audio_desc">يستمر الاستماع للقرآن مع مشغّل عائم أثناء تصفح صفحات التطبيق الأخرى</div>
+        </div>
+      </div>
+      <div class="setting-control"><div class="switch active" id="continuousAudioSwitch" role="switch" aria-checked="true"></div></div>
+    </div>
+
     <div class="setting-item" onclick="shareApp()">
       <div class="setting-info">
         <div class="s-icon">
@@ -1818,9 +1831,31 @@ function confirmExit() {
   try { window.close(); } catch (e) {}
 }
 
+// Continuous audio (shared with pages/audio.html via js/continuous-player.js):
+// keep the recitation playing in a floating player while browsing. Default on.
+function continuousAudioOn() { try { return localStorage.getItem('continuousAudio') !== 'false'; } catch (e) { return true; } }
+function renderContinuousAudio() {
+  const sw = document.getElementById('continuousAudioSwitch');
+  if (!sw) return;
+  const on = continuousAudioOn();
+  sw.classList.toggle('active', on);
+  sw.setAttribute('aria-checked', String(on));
+  // needs the Navigation API (Chromium / the Play Store app)
+  if (typeof window.navigation === 'undefined') document.getElementById('continuousAudioRow').style.display = 'none';
+}
+function toggleContinuousAudio() {
+  try { localStorage.setItem('continuousAudio', continuousAudioOn() ? 'false' : 'true'); } catch (e) {}
+  renderContinuousAudio();
+}
+renderContinuousAudio();
+
+// Shown inside the continuous player's frame (audio.html is the host): the
+// host owns the back button, so no exit trap here.
+const isFramed = (() => { try { return window.top !== window && !!window.top.ZadShell; } catch (e) { return false; } })();
+
 // Back-button interception: push a dummy state so popstate fires on back press
-history.pushState({ exit: true }, '');
-window.addEventListener('popstate', (e) => {
+if (!isFramed) history.pushState({ exit: true }, '');
+if (!isFramed) window.addEventListener('popstate', (e) => {
   if (!exitTrapArmed) return;   // exiting: let history unwind untouched
   // If a modal/sheet is open, let back close it instead of prompting exit
   const anyOpen = document.querySelector('.modal-overlay.active, .bottom-sheet.active');

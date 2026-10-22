@@ -817,7 +817,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 
   <!-- ── HEADER ── -->
   <header class="header card">
-    <button class="icon-btn" onclick="haptic();window.location.href='../index.html'" data-i18n-title="home">
+    <button class="icon-btn" onclick="haptic();appNavigate('../index.html')" data-i18n-title="home" aria-label="الرئيسية">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </button>
     <div class="header-title" data-i18n="audio_header">الاستماع للقرآن</div>
@@ -1025,6 +1025,16 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         </div>
         <div class="toggle-switch active" id="autoplayToggle"></div>
       </div>
+      <div class="settings-row" id="continuousRow" onclick="haptic();toggleContinuousUI()">
+        <div class="settings-row-icon" style="background:rgba(16,185,129,.12);color:var(--accent-main)">
+          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><rect x="12" y="11" width="8" height="5" rx="1"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="setting_continuous_audio">التشغيل المستمر أثناء التنقل</div>
+          <div class="settings-row-sub" data-i18n="setting_continuous_audio_desc">يستمر الاستماع للقرآن مع مشغّل عائم أثناء تصفح صفحات التطبيق الأخرى</div>
+        </div>
+        <div class="toggle-switch active" id="continuousToggle"></div>
+      </div>
     </div>
 
     <!-- ── TOOLS ── -->
@@ -1051,7 +1061,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         </div>
         <svg class="settings-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       </div>
-      <div class="settings-row" onclick="haptic();window.location.href='about.html'">
+      <div class="settings-row" onclick="haptic();appNavigate('about.html')">
         <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:var(--accent-main)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </div>
@@ -1143,6 +1153,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 </div>
 
 <script src="../js/back-close.js"></script>
+<script src="../js/continuous-player.js"></script>
 <script>
 // ============================================================
 //  UTILS
@@ -1241,6 +1252,10 @@ function applySettingsUI(){
   document.documentElement.setAttribute('data-theme',savedTheme);
   updateThemeIcon(savedTheme);
   document.getElementById('autoplayToggle').classList.toggle('active',isAutoPlay);
+  if(window.ZadShell){
+    document.getElementById('continuousToggle').classList.toggle('active',ZadShell.enabled());
+    if(!ZadShell.supported)document.getElementById('continuousRow').style.display='none';
+  }
 }
 function updateThemeIcon(theme){
   document.querySelectorAll('[data-theme-swatch]').forEach(el=>{
@@ -1256,6 +1271,11 @@ function toggleThemeUI(){
   const themes=['light','dark','sepia'];
   const cur=document.documentElement.getAttribute('data-theme')||'light';
   setTheme(themes[(themes.indexOf(cur)+1)%themes.length]);
+}
+function toggleContinuousUI(){
+  const on=!ZadShell.enabled();
+  try{localStorage.setItem(ZadShell.KEY,on?'true':'false')}catch(e){}
+  document.getElementById('continuousToggle').classList.toggle('active',on);
 }
 function toggleAutoPlayUI(){
   isAutoPlay=!isAutoPlay;
@@ -1919,6 +1939,64 @@ function playFromFav(url,surah,reciter){
   errorRetryCount=0;audio.play().catch(()=>{});closeAllSheets();
 }
 function removeFav(index,e){e.stopPropagation();let favs=readFavs();favs.splice(index,1);localStorage.setItem('favorites',JSON.stringify(favs));openFavSheet();checkFavStatus()}
+
+// ============================================================
+//  CONTINUOUS PLAYBACK (js/continuous-player.js)
+// ============================================================
+// Other pages open in a frame over this one while a recitation is active,
+// so the audio keeps playing; a floating island mini player controls it.
+function appNavigate(url){
+  if(window.ZadShell)ZadShell.navigate(url);else location.href=url;
+}
+function homeUrl(){
+  try{
+    const r=document.referrer&&new URL(document.referrer);
+    if(r&&r.origin===location.origin&&r.pathname!==location.pathname)return r.href;
+  }catch(e){}
+  return '../index.html';
+}
+function syncIsland(){
+  if(!window.ZadShell)return;
+  const err=document.getElementById('trackError');
+  ZadShell.update({
+    title:document.getElementById('miniSurah').innerText||document.getElementById('nowSurah').innerText,
+    subtitle:err&&!err.hidden?document.getElementById('trackErrorText').textContent:document.getElementById('miniReciter').innerText,
+    playing:!audio.paused,
+    progress:audio.duration?audio.currentTime/audio.duration*100:0,
+    art:document.getElementById('albumArt').src
+  });
+}
+let lastIslandSync=0;
+audio.addEventListener('timeupdate',()=>{const n=Date.now();if(n-lastIslandSync>1000){lastIslandSync=n;syncIsland()}});
+['play','pause','playing','emptied','error','loadedmetadata'].forEach(ev=>audio.addEventListener(ev,()=>setTimeout(syncIsland,0)));
+// After playback starts, answer one back press with the previous page
+// (normally home) in the frame instead of leaving and cutting the audio.
+audio.addEventListener('playing',()=>{
+  if(!window.ZadShell||!ZadShell.shouldFrame())return;
+  setTimeout(()=>{
+    if(document.getElementById('sheetOverlay').classList.contains('active'))return;
+    if(!ZadShell.isOpen())ZadShell.armLeave(homeUrl());
+  },800);
+});
+// keep the island's colours in step when another page changes the theme
+window.addEventListener('storage',e=>{if(e.key==='themeMode'&&e.newValue)setTheme(e.newValue)});
+
+if(window.ZadShell){
+  ZadShell.init({
+    isActive:()=>hasStartedPlayback&&!!currentTrackUrl,
+    isPlaying:()=>!audio.paused,
+    pause:()=>audio.pause(),
+    toggle:()=>{haptic();if(audio.paused)ZadShell.pauseFrameMedia();togglePlay()},
+    next:()=>{haptic();ZadShell.pauseFrameMedia();playNextTrack(true)},
+    beforeOpen:()=>{
+      const sheet=document.getElementById('sheetOverlay').classList.contains('active');
+      const modal=document.getElementById('clearCacheModal').classList.contains('active');
+      if(modal)closeClearCacheModal();
+      if(sheet)closeAllSheets();
+      return (sheet||modal)?350:0;
+    }
+  });
+}
 
 // ============================================================
 //  INIT
