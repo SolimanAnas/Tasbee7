@@ -86,7 +86,8 @@ body{
   background-size:cover;background-position:center;
   background-attachment:fixed;background-repeat:no-repeat;
   color:var(--text-primary);display:flex;justify-content:center;
-  padding:calc(max(12px,env(safe-area-inset-top)) + 28px) 16px 90px;
+  /* no bottom bar on this page: the old 90px bottom reserve only caused scrolling */
+  padding:calc(max(10px,env(safe-area-inset-top)) + 14px) 16px calc(16px + env(safe-area-inset-bottom));
   min-height:100dvh;
   transition:color .4s,background-image .4s;
 }
@@ -513,15 +514,15 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 .skip-btn svg{width:20px;height:20px}
 .controls-secondary{margin-top:12px;gap:12px;align-items:center}
 .controls-secondary .action-btn{width:42px;height:42px}
-.stations-pill{display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 16px;border-radius:999px;border:1px solid var(--glass-border);
-  background:var(--accent-muted);color:var(--text-primary);font:inherit;font-weight:800;font-size:.86rem;cursor:pointer}
-.stations-pill small{font-size:.72rem;font-weight:800;color:var(--accent-main);font-variant-numeric:tabular-nums}
-.stations-pill:active{transform:scale(.95)}
 /* short screens: shrink the art a bit more */
 @media (max-height:700px){
   .live-badge{margin-bottom:6px}
   .track-info{margin-bottom:8px}
 }
+/* station selector card below the player (compact) */
+.sel-card{padding:10px 14px}
+.sel-count{font-size:.68rem;font-weight:800;padding:0 7px;border-radius:999px;background:var(--accent-muted);color:var(--accent-main);font-variant-numeric:tabular-nums}
+.sel-count:empty{display:none}
 /* tap the art to pause / resume the decorative motion */
 body.calm .m-ring,body.calm .m-dots,body.calm .mandala-glow,body.calm .bar,body.calm .play-ring,
 body.calm .waveform::before{animation-play-state:paused!important}
@@ -649,12 +650,31 @@ body.calm .waveform::before{animation-play-state:paused!important}
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <span class="sleep-badge" id="sleepBadge" hidden></span>
       </button>
-      <button class="stations-pill" onclick="openStationSheet()" aria-label="قائمة الإذاعات" data-i18n-title="radio_stations_list">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        <span data-i18n="radio_stations_short">الإذاعات</span><small id="stationsPillCount"></small>
-      </button>
     </div>
 
+  </div>
+
+  <!-- Station Selector -->
+  <div class="sel-card" role="button" tabindex="0" onclick="openStationSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStationSheet()}">
+    <div class="sel-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="8" width="20" height="13" rx="2"/>
+        <polyline points="16 8 12 3 8 8"/>
+        <circle cx="8.5" cy="13.5" r="2"/>
+        <line x1="14" y1="11" x2="19.5" y2="11"/>
+        <line x1="14" y1="14.5" x2="19.5" y2="14.5"/>
+      </svg>
+    </div>
+    <div class="sel-text">
+      <div class="sel-label"><span data-i18n="radio_choose">اختر الإذاعة</span> <small class="sel-count" id="stationsCount"></small></div>
+      <div class="sel-value-wrap">
+        <!-- filled by JS: a data-i18n placeholder here was re-applied by I18n.init() after a station loaded -->
+        <span class="sel-value" id="stationSelectBtn"></span>
+      </div>
+    </div>
+    <svg class="sel-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
   </div>
 
   <audio id="audio" preload="none" playsinline></audio>
@@ -775,6 +795,7 @@ function ticker(el,text,speed,minDur){
   });
 }
 function setHeroTicker(text){ticker(document.getElementById('nowStation'),text,80,5)}
+function setSelTicker(text){ticker(document.getElementById('stationSelectBtn'),text,70,4)}
 
 // ── mandala dots (generate once) ─────────────────────────
 // orbit radius follows the art size (it shrinks on short screens)
@@ -1080,7 +1101,7 @@ function selectStation(st,opts={}){
   const changed=!current||current.url!==st.url;
   current=stationByUrl(st.url)||Object.assign({cat:categorize(st.name)},st);
   const disp=displayName(current);
-  setHeroTicker(disp);
+  setHeroTicker(disp);setSelTicker(disp);
   document.getElementById('nowCategory').textContent=catLabel(current.cat);
   try{localStorage.setItem('lastStation',JSON.stringify({name:current.name,url:current.url}))}catch(e){}
   checkFavStatus();
@@ -1281,13 +1302,13 @@ document.addEventListener('keydown',e=>{
 // ── init ──────────────────────────────────────────────────
 function init(){
   buildStations();
-  document.getElementById('stationsPillCount').textContent=allStations.length;
+  document.getElementById('stationsCount').textContent=allStations.length;
   const last=readJSON('lastStation',null);
   const st=last&&last.url&&(stationByUrl(last.url)||last.name&&last);
   selectStation(st||allStations[0]);
 }
 window.addEventListener('langchange',()=>{
-  if(current){const d=displayName(current);setHeroTicker(d);document.getElementById('nowCategory').textContent=catLabel(current.cat);setState(state);updateMediaSession()}
+  if(current){const d=displayName(current);setHeroTicker(d);setSelTicker(d);document.getElementById('nowCategory').textContent=catLabel(current.cat);setState(state);updateMediaSession()}
   if(document.getElementById('stationSheet').classList.contains('active'))renderStationSheet();
 });
 window.addEventListener('load',()=>{
