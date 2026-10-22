@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zad Al-Muslim — Poster</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="frame">
+  <canvas id="bg"></canvas>
+  <div id="world" class="layer"><div id="anchor" class="anchor"></div></div>
+  <canvas id="glow"></canvas>
+  <div id="type" class="layer"></div>
+  <div id="vignette" class="layer"></div>
+  <canvas id="grain"></canvas>
+</div>
+<script src="lib.js"></script>
+<script src="phone.js"></script>
+<script src="fx.js"></script>
+<script>
+// Cover artwork: ?fmt=landscape (1920×1080) or vertical (1080×1920).
+(async function () {
+  const { el, set, makeText, playText } = K;
+  const fmt = new URLSearchParams(location.search).get('fmt') || 'landscape';
+  const V = fmt === 'vertical';
+  const [W, H] = V ? [1080, 1920] : [1920, 1080];
+  const u = 1;
+  const L = { W, H, u, v: V, arch: { cx: W / 2, top: 0, w: 200, h: 400 }, beamTo: { x: 0, y: H, spread: 300 }, floorY: H };
+  const frame = document.getElementById('frame');
+  frame.style.width = W + 'px'; frame.style.height = H + 'px';
+  const ctx = {};
+  ['bg', 'glow', 'grain'].forEach(id => { const c = document.getElementById(id); c.width = W; c.height = H; ctx[id] = c.getContext('2d'); });
+  Object.assign(document.getElementById('grain').style, { mixBlendMode: 'overlay', opacity: 0.35 });
+  await document.fonts.load('500 40px Cormorant'); await document.fonts.load('italic 400 40px Cormorant');
+  await document.fonts.load('600 40px Manrope'); await document.fonts.load('700 40px Amiri', 'زاد المسلم');
+  FX.init(L, {});
+
+  const anchor = document.getElementById('anchor'), type = document.getElementById('type');
+  const ph = V ? 0.4 * H : 0.78 * H;
+  const gx = V ? 0 : 0.2 * W, gy = V ? 0.03 * H : 0.03 * H;
+  const back1 = makePhone(anchor, ph * 0.94, ['masbaha-33']);
+  const back2 = makePhone(anchor, ph * 0.94, ['audio']);
+  const hero = makePhone(anchor, ph, ['quran-p1']);
+  const sp = V ? 0.29 * W : 0.165 * W;
+
+  // type
+  const place = (e, x, y, align) => {
+    Object.assign(e.style, align === 'center' ? { left: 0, width: W + 'px', textAlign: 'center', top: y + 'px' } : { left: x + 'px', top: y + 'px' });
+    e.style.visibility = 'visible'; e.style.opacity = 1;
+  };
+  const head = makeText(type, 'Make space<br>for <em>what matters.</em>');
+  head.style.fontSize = (V ? 112 : 108) + 'px';
+  place(head, 0.065 * W, V ? 0.06 * H : 0.17 * H, V ? 'center' : 'left');
+  const tag = el('div', 'label', type, 'Your All-in-One Islamic Companion');
+  tag.style.fontSize = (V ? 27 : 23) + 'px'; tag.style.color = 'var(--ivory)';
+  place(tag, 0.068 * W, V ? 0.205 * H : 0.5 * H, V ? 'center' : 'left');
+  const ben = el('div', 'label', type, 'Free&nbsp;&nbsp;•&nbsp;&nbsp;Ad-Free&nbsp;&nbsp;•&nbsp;&nbsp;Works Offline');
+  ben.style.fontSize = (V ? 27 : 23) + 'px';
+  place(ben, 0.068 * W, V ? 0.232 * H : 0.56 * H, V ? 'center' : 'left');
+
+  // brand row: icon + names + badge
+  const row = el('div', '', type);
+  Object.assign(row.style, { position: 'absolute', display: 'flex', alignItems: 'center', gap: '28px', visibility: 'visible' });
+  row.innerHTML = `
+    <div style="width:${V ? 150 : 128}px;height:${V ? 150 : 128}px;border-radius:22.5%;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 1px rgba(230,207,156,.35)">
+      <img src="../assets/brand/app-icon-1024.png" style="width:100%;height:100%;display:block"></div>
+    <div>
+      <div style="font-family:Cormorant;font-weight:600;font-size:${V ? 74 : 64}px;color:var(--ivory);line-height:1">Zad Al-Muslim</div>
+      <div style="font-family:Amiri;font-weight:700;font-size:${V ? 46 : 40}px;color:var(--gold-soft);line-height:1.5;direction:rtl;text-align:left">زاد المسلم</div>
+    </div>`;
+  const badge = el('div', '', type, '<img src="../assets/brand/google-play-badge-cropped.png" style="width:100%;display:block">');
+  Object.assign(badge.style, { position: 'absolute', width: (V ? 380 : 300) + 'px', visibility: 'visible' });
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  if (V) {
+    row.style.left = (W - row.offsetWidth) / 2 + 'px'; row.style.top = 0.79 * H + 'px';
+    badge.style.left = (W - 380) / 2 + 'px'; badge.style.top = 0.895 * H + 'px';
+  } else {
+    row.style.left = 0.065 * W + 'px'; row.style.top = 0.68 * H + 'px';
+    badge.style.left = 0.065 * W + 'px'; badge.style.top = 0.86 * H + 'px';
+  }
+
+  // phones
+  back1.pose({ x: gx - sp, y: gy + 0.02 * H, z: -260, ry: 16, rx: 2, bright: 0.8 });
+  back2.pose({ x: gx + sp, y: gy + 0.02 * H, z: -260, ry: -16, rx: 2, bright: 0.8 });
+  hero.pose({ x: gx, y: gy, z: 60, ry: -4, rx: 2 });
+  back1.show({ 'masbaha-33': { o: 1 } }); back2.show({ audio: { o: 1 } }); hero.show({ 'quran-p1': { o: 1 } });
+
+  const S = { dawn: 0, storm: 0, black: 0, point: 0, studio: 1, lightX: 0.5 + gx / W, lightY: 0.05, spot: 1.2, archEcho: 1.2,
+    echoX: 0.5 + gx / W, camX: 0, bokeh: 0.8, mushaf: 0, rings: 0, motes: 0.8, brand: 0 };
+  FX.drawBg(ctx.bg, 3.0, L, S);
+  FX.drawGlow(ctx.glow, 3.0, L, S);
+  FX.drawGrain(ctx.grain, 1, L);
+  window.posterReady = true;
+})();
+</script>
+</body>
+</html>
