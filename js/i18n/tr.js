@@ -567,6 +567,10 @@ export default {
   'radio_count': `{n} istasyon`,
   'radio_recent_empty': `Henüz hiçbir istasyon dinlemediniz`,
   'radio_stations_list': `İstasyon listesi`,
+  'radio_motion_toggle': `Hareketi durdur / sürdür`,
+  'radio_motion_off': `Hareket durduruldu`,
+  'radio_motion_on': `Hareket sürdürüldü`,
+  'radio_stations_short': `İstasyonlar`,
 
   // About, Howto, Notifications, Qibla, Tasmee page strings
   'about_title': `Uygulama Hakkında`,
