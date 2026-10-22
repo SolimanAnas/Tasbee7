@@ -595,6 +595,10 @@ export default {
   'radio_count': `{n} إذاعة`,
   'radio_recent_empty': `لم تستمع لأي إذاعة بعد`,
   'radio_stations_list': `قائمة الإذاعات`,
+  'radio_motion_toggle': `إيقاف / تشغيل الحركة`,
+  'radio_motion_off': `تم إيقاف الحركة`,
+  'radio_motion_on': `تم تشغيل الحركة`,
+  'radio_stations_short': `الإذاعات`,
 
   // About, Howto, Notifications, Qibla, Tasmee page strings
   'about_title': `عن التطبيق`,

@@ -595,6 +595,10 @@ export default {
   'radio_count': `{n} stations`,
   'radio_recent_empty': `You haven’t listened to any station yet`,
   'radio_stations_list': `Station list`,
+  'radio_motion_toggle': `Pause / resume motion`,
+  'radio_motion_off': `Motion paused`,
+  'radio_motion_on': `Motion resumed`,
+  'radio_stations_short': `Stations`,
 
   // About, Howto, Notifications, Qibla, Tasmee page strings
   'about_title': `About the App`,

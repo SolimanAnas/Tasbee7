@@ -595,6 +595,10 @@ export default {
   'radio_count': `{n} ڕادیۆ`,
   'radio_recent_empty': `هێشتا گوێت لە هیچ ڕادیۆیەک نەگرتووە`,
   'radio_stations_list': `لیستی ڕادیۆکان`,
+  'radio_motion_toggle': `وەستاندن / دەستپێکردنەوەی جووڵە`,
+  'radio_motion_off': `جووڵە وەستێندرا`,
+  'radio_motion_on': `جووڵە دەستیپێکردەوە`,
+  'radio_stations_short': `ڕادیۆکان`,
 
   // About, Howto, Notifications, Qibla, Tasmee page strings
   'about_title': `دەربارەی ئەپەکە`,

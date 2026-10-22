@@ -567,6 +567,10 @@ export default {
   'radio_count': `{n} ریڈیو`,
   'radio_recent_empty': `آپ نے ابھی تک کوئی ریڈیو نہیں سنا`,
   'radio_stations_list': `ریڈیو کی فہرست`,
+  'radio_motion_toggle': `حرکت روکیں / چلائیں`,
+  'radio_motion_off': `حرکت روک دی گئی`,
+  'radio_motion_on': `حرکت دوبارہ شروع`,
+  'radio_stations_short': `ریڈیو`,
 
   // About, Howto, Notifications, Qibla, Tasmee page strings
   'about_title': `ایپ کے بارے میں`,
