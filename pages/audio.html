@@ -710,6 +710,53 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   pointer-events:none;
 }
 
+/* ============================================================
+   UX POLISH — feedback, lists, error state
+   ============================================================ */
+/* toast sits under the header instead of covering it */
+.toast{top:calc(env(safe-area-inset-top,0px) + 84px);opacity:0;pointer-events:none;transition:transform .4s,opacity .3s}
+.toast.show{opacity:1}
+.toast.error{background:var(--danger)}
+
+/* buffering spinner around the play button */
+.buffer-ring{position:absolute;inset:-6px;border-radius:50%;border:3px solid transparent;border-top-color:var(--accent-main);border-left-color:var(--accent-main);opacity:0;transition:opacity .2s;pointer-events:none}
+body.is-buffering .buffer-ring{opacity:1;animation:bufSpin .8s linear infinite}
+@keyframes bufSpin{to{transform:rotate(360deg)}}
+
+/* inline track error with retry */
+.track-error{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding:9px 12px;border-radius:14px;
+  background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);color:var(--danger);font-size:13px;font-weight:700;text-align:center}
+.track-error[hidden]{display:none}
+.track-error svg{flex:none}
+.track-error-retry{border:none;border-radius:999px;padding:6px 14px;background:var(--danger);color:#fff;font:inherit;font-size:12.5px;cursor:pointer}
+.track-error-retry:active{transform:scale(.95)}
+
+/* richer selection rows: number badge · title · subtitle · now-playing bars */
+.selection-item{display:flex;align-items:center;gap:12px;text-align:start;padding:11px 12px}
+.sel-num{flex:none;min-width:36px;height:36px;padding:0 6px;border-radius:11px;display:grid;place-items:center;
+  font-size:13px;font-weight:800;background:var(--accent-muted);color:var(--accent-main);font-variant-numeric:tabular-nums}
+.selection-item.active .sel-num{background:rgba(255,255,255,.22);color:#fff}
+.sel-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sel-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sel-sub{font-size:12px;font-weight:600;color:var(--text-secondary)}
+.selection-item.active .sel-sub{color:rgba(255,255,255,.85)}
+.sel-eq{flex:none;display:none;align-items:flex-end;gap:2px;height:16px}
+.sel-eq i{width:3px;background:currentColor;border-radius:2px;height:40%;animation:eqBar .9s ease-in-out infinite}
+.sel-eq i:nth-child(2){animation-delay:.2s}.sel-eq i:nth-child(3){animation-delay:.4s}
+body.is-playing .selection-item.active .sel-eq{display:flex}
+@keyframes eqBar{0%,100%{height:30%}50%{height:100%}}
+.sheet-count{display:inline-block;margin-inline-start:8px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:800;vertical-align:middle;
+  background:var(--accent-muted);color:var(--accent-main)}
+.search-input{-webkit-appearance:none;appearance:none}
+.fav-remove{flex:none;border:none;border-radius:10px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;
+  background:rgba(239,68,68,.12);color:var(--danger)}
+.selection-item.active .fav-remove{background:rgba(255,255,255,.2);color:#fff}
+.sel-card:focus-visible,.selection-item:focus-visible{outline:2px solid var(--accent-main);outline-offset:2px}
+
+@media (prefers-reduced-motion: reduce){
+  body.is-buffering .buffer-ring,.sel-eq i{animation:none}
+}
+
 /* Install prompt rendered by ../js/pwa-install.js */
 </style>
 <script type="application/ld+json">
@@ -835,6 +882,13 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
       <div id="nowReciter">—</div>
     </div>
 
+    <!-- Inline track error (replaces the old silent auto-skip) -->
+    <div class="track-error" id="trackError" role="alert" hidden>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="trackErrorText"></span>
+      <button type="button" class="track-error-retry" onclick="haptic();retryTrack()" data-i18n="audio_retry">إعادة المحاولة</button>
+    </div>
+
     <!-- Progress Bar -->
     <div class="progress-section">
       <div class="progress-container">
@@ -846,34 +900,35 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 
     <!-- Main Controls -->
     <div class="controls-main">
-      <button class="skip-btn" onclick="haptic();playPrevTrack()" data-i18n-title="previous">
+      <button class="skip-btn" onclick="haptic();playPrevTrack()" data-i18n-title="previous" aria-label="السابق">
         <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-      <button class="play-pause-btn" id="mainPlayBtn" onclick="haptic();togglePlay()">
+      <button class="play-pause-btn" id="mainPlayBtn" onclick="haptic();togglePlay()" aria-label="تشغيل / إيقاف">
         <div class="play-ring"></div>
+        <div class="buffer-ring" aria-hidden="true"></div>
         <svg id="playIcon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
       </button>
-      <button class="skip-btn" onclick="haptic();playNextTrack(true)" data-i18n-title="next">
+      <button class="skip-btn" onclick="haptic();playNextTrack(true)" data-i18n-title="next" aria-label="التالي">
         <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
       </button>
     </div>
 
     <!-- Secondary Controls -->
     <div class="controls-secondary">
-      <button class="action-btn" id="repeatBtn" onclick="haptic();toggleRepeat()" title="تكرار">
+      <button class="action-btn" id="repeatBtn" onclick="haptic();toggleRepeat()" title="تكرار" aria-label="تكرار">
         <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
       </button>
-      <button class="action-btn" id="downloadBtn" onclick="haptic();downloadTrack()" title="تحميل">
+      <button class="action-btn" id="downloadBtn" onclick="haptic();downloadTrack()" title="تحميل" aria-label="تحميل">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
-      <button class="action-btn fill-icon" id="favBtn" onclick="haptic();toggleFavorite()" title="مفضلة">
+      <button class="action-btn fill-icon" id="favBtn" onclick="haptic();toggleFavorite()" title="مفضلة" aria-label="مفضلة">
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
-      <button class="action-btn" id="shuffleBtn" onclick="haptic();toggleShuffle()" title="عشوائي">
+      <button class="action-btn" id="shuffleBtn" onclick="haptic();toggleShuffle()" title="عشوائي" aria-label="عشوائي">
         <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
       </button>
-      <button class="action-btn" id="speedBtn" onclick="haptic();toggleSpeed()">1x</button>
+      <button class="action-btn" id="speedBtn" onclick="haptic();toggleSpeed()" aria-label="سرعة التلاوة">1x</button>
     </div>
 
   </section>
@@ -881,7 +936,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   <!-- ── SELECTION ROW ── -->
   <div class="sel-row">
     <!-- Reciter Card -->
-    <div class="sel-card card" onclick="haptic();openReciterSheet()">
+    <div class="sel-card card" role="button" tabindex="0" onclick="haptic();openReciterSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openReciterSheet()}">
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_reciter">القارئ</span>
         <div class="sel-value-wrap"><span class="sel-value" id="reciterSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -889,7 +944,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
       <svg class="sel-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <!-- Surah Card -->
-    <div class="sel-card card" onclick="haptic();openJuzSheet()">
+    <div class="sel-card card" role="button" tabindex="0" onclick="haptic();openJuzSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openJuzSheet()}">
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_surah">السورة</span>
         <div class="sel-value-wrap"><span class="sel-value" id="juzSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -915,7 +970,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
   </div>
   <div class="sheet-content">
     <div id="searchContainer" class="search-container" style="display:none">
-      <input type="text" id="reciterSearchInput" class="search-input" placeholder="ابحث..." autocomplete="off" data-i18n-placeholder="audio_search_placeholder">
+      <input type="search" id="reciterSearchInput" class="search-input" placeholder="ابحث..." autocomplete="off" enterkeyhint="search" data-i18n-placeholder="audio_search_placeholder">
     </div>
     <div class="selection-list" id="selectionList"></div>
   </div>
@@ -977,7 +1032,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
       <div class="settings-section-label">أدوات</div>
       <div class="settings-row" onclick="haptic();openSheet('timerSheet',false)">
         <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:#10b981">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </div>
         <div class="settings-row-content">
           <div class="settings-row-title" data-i18n="audio_sleep_timer">مؤقت النوم</div>
@@ -1011,7 +1066,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
     <!-- ── DANGER ── -->
     <div class="settings-section">
       <div class="settings-row settings-row-danger" onclick="haptic();openClearCacheModal()">
-        <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:#10b981">
+        <div class="settings-row-icon" style="background:rgba(239,68,68,.11);color:var(--danger)">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </div>
         <div class="settings-row-content">
@@ -1077,7 +1132,7 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
     <button class="mini-skip" onclick="haptic();playPrevTrack()">
       <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
     </button>
-    <button class="mini-play-btn" id="miniPlayBtn" onclick="event.stopPropagation();haptic();togglePlay()">
+    <button class="mini-play-btn" id="miniPlayBtn" onclick="event.stopPropagation();haptic();togglePlay()" aria-label="تشغيل / إيقاف">
       <svg id="miniPlayIcon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       <svg id="miniPauseIcon" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
     </button>
@@ -1095,9 +1150,10 @@ body.is-playing .play-ring{opacity:1;animation:spin 6s linear infinite}
 function haptic(){if(navigator.vibrate)navigator.vibrate(40)}
 
 let toastTimeout;
-function showToast(msg,duration=2500,showProgress=false){
+function showToast(msg,duration=2500,showProgress=false,isError=false){
   clearTimeout(toastTimeout);
   const toast=document.getElementById('toast');
+  toast.classList.toggle('error',!!isError);
   const toastText=document.getElementById('toastText');
   const progressBar=document.getElementById('downloadProgressBar');
   toastText.innerHTML=msg;
@@ -1341,8 +1397,13 @@ function updateMiniProgress(){
 // ============================================================
 let appData={reciters:[]},selectedReciterIndex=0,currentJuzData=[],selectedJuzIndex=0,
     currentTrackUrl='',isShuffle=false,isRepeat=false;
-let errorRetryCount=0,currentSpeedIndex=0;
-const speeds=[1,1.25,1.5,2];
+let errorRetryCount=0,currentSpeedIndex=1;
+const speeds=[0.75,1,1.25,1.5,2];
+// autoAdvancing: the current track was reached by continuous playback
+// (previous one ended). Only then may a broken track be skipped — a track
+// the user picked themselves shows an inline error with retry instead of
+// silently jumping to another surah.
+let autoAdvancing=false;
 const audio=document.getElementById('audio');
 const reciterSelectBtn=document.getElementById('reciterSelectBtn');
 const juzSelectBtn=document.getElementById('juzSelectBtn');
@@ -1409,7 +1470,7 @@ function initData(){
     document.getElementById('miniReciter').innerText=rd2;
     updateVisuals(rd2,jd);
     checkFavStatus();
-  }else{prepareTrack(false)}
+  }else{prepareTrack(false,false)}
 }
 
 function buildJuzData(){
@@ -1422,7 +1483,9 @@ function buildJuzData(){
     surahNames.forEach((name,index)=>{
       let num=index+1;
       let sn=num<10?'00'+num:num<100?'0'+num:num;
-      currentJuzData.push({name:`${num} - سورة ${name}`,url:reciter.baseUrl+sn+'.mp3',originalName:'سورة '+name,number:num});
+      // overrides: per-surah URL for the odd file a host names differently
+      const url=(reciter.overrides&&reciter.overrides[sn])||reciter.baseUrl+sn+'.mp3';
+      currentJuzData.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});
     });
   }
   // Sync strip badge
@@ -1430,72 +1493,135 @@ function buildJuzData(){
   if(dlsCount)dlsCount.textContent=currentJuzData.length?currentJuzData.length+' ملف':'—';
 }
 
+// Arabic-insensitive matching: ignores tashkeel, hamza forms, ة/ه, ى/ي,
+// tatweel and spaces — so "عبد الباسط" finds "عبدالباسط" and "الاسراء"
+// finds "الإسراء".
+function normAr(s){
+  return String(s||'').toLowerCase()
+    .replace(/[\u064B-\u065F\u0670\u0640]/g,'')
+    .replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي')
+    .replace(/[\s\-_()·.،,]+/g,'');
+}
+function makeSelRow({num,title,sub,active,onPick}){
+  const div=document.createElement('div');
+  div.className='selection-item'+(active?' active':'');
+  div.setAttribute('role','option');div.tabIndex=0;
+  if(active)div.setAttribute('aria-selected','true');
+  if(num!=null){const n=document.createElement('span');n.className='sel-num';n.textContent=num;div.appendChild(n)}
+  const main=document.createElement('div');main.className='sel-main';
+  const ti=document.createElement('span');ti.className='sel-title';ti.textContent=title;main.appendChild(ti);
+  if(sub){const su=document.createElement('span');su.className='sel-sub';su.textContent=sub;main.appendChild(su)}
+  div.appendChild(main);
+  const eq=document.createElement('span');eq.className='sel-eq';eq.setAttribute('aria-hidden','true');eq.innerHTML='<i></i><i></i><i></i>';div.appendChild(eq);
+  div.onclick=onPick;
+  div.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick()}};
+  return div;
+}
+function reciterSubtitle(r){
+  if(r.type==='surah')return t('audio_n_surahs',{n:114});
+  const n=(r.items||r.juz||[]).length;
+  return r.type==='juz'?t('audio_n_parts',{n}):t('audio_n_clips',{n});
+}
+function setSheetTitle(text,count){
+  const h=document.getElementById('selectionSheetTitle');
+  h.textContent=text;
+  if(count!=null){const c=document.createElement('span');c.className='sheet-count';c.textContent=count;h.appendChild(c)}
+}
+function emptyRow(){return `<div class="selection-item" style="justify-content:center">${t('audio_no_results')}</div>`}
+
 function renderReciterList(filterText=''){
   const list=document.getElementById('selectionList');list.innerHTML='';
-  const ft=filterText.toLowerCase();
-  const filtered=appData.reciters.filter(r=>r.name.toLowerCase().includes(ft)||reciterDisplay(r).toLowerCase().includes(ft));
-  if(filtered.length===0){list.innerHTML=`<div class="selection-item">${t('audio_no_results')}</div>`;return}
-  filtered.forEach((r)=>{
-    const oi=appData.reciters.findIndex(orig=>orig.name===r.name);
-    let div=document.createElement('div');
-    div.className='selection-item'+(oi===selectedReciterIndex?' active':'');
-    div.innerText=reciterDisplay(r);
-    div.onclick=()=>{
+  const q=normAr(filterText);
+  const filtered=[];
+  appData.reciters.forEach((r,oi)=>{if(!q||normAr(r.name).includes(q)||normAr(reciterDisplay(r)).includes(q)||normAr(r.englishName).includes(q))filtered.push([r,oi])});
+  if(filtered.length===0){list.innerHTML=emptyRow();return}
+  const frag=document.createDocumentFragment();
+  filtered.forEach(([r,oi])=>{
+    const pick=()=>{
       haptic();selectedReciterIndex=oi;
       const rd=reciterShortDisplay(r);setSelTicker('reciterSelectBtn',rd);
       errorRetryCount=0;
-      let prevJuzName=currentJuzData[selectedJuzIndex]?.name;
+      let prevJuzName=currentJuzData[selectedJuzIndex]?.name,prevNum=surahNum(currentJuzData[selectedJuzIndex]);
       buildJuzData();
       let ni=currentJuzData.findIndex(j=>j.name===prevJuzName);
+      // keep the same surah across reciters even when the labels differ
+      if(ni===-1&&prevNum)ni=currentJuzData.findIndex(j=>surahNum(j)===prevNum);
       selectedJuzIndex=ni!==-1?ni:0;
       setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[selectedJuzIndex]));
       closeAllSheets();prepareTrack(true);
     };
-    list.appendChild(div);
+    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r),active:oi===selectedReciterIndex,onPick:pick}));
   });
+  list.appendChild(frag);
 }
+
+// One search listener for the shared sheet (the old code added a new one on
+// every open and never removed it, so they piled up).
+let sheetMode=null;
+document.getElementById('reciterSearchInput').addEventListener('input',e=>{
+  if(sheetMode==='reciter')renderReciterList(e.target.value);
+  else if(sheetMode==='juz')renderJuzList(e.target.value);
+});
+document.getElementById('reciterSearchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}});
 
 function openReciterSheet(){
   if(appData.reciters.length===0)return;
-  document.getElementById('selectionSheetTitle').innerText=t('audio_choose_reciter_sheet');
+  sheetMode='reciter';
+  setSheetTitle(t('audio_choose_reciter_sheet'),appData.reciters.length);
   document.getElementById('searchContainer').style.display='block';
   const si=document.getElementById('reciterSearchInput');si.value='';
   renderReciterList('');
-  const handler=(e)=>renderReciterList(e.target.value);
-  si.removeEventListener('input',handler);si.addEventListener('input',handler);
   openSheet('selectionSheet',false);
   setTimeout(()=>{const a=document.getElementById('selectionList').querySelector('.active');if(a)a.scrollIntoView({behavior:'smooth',block:'center'})},100);
 }
 
+function juzTitle(j){
+  // number goes in the badge, so show the bare (localized) surah name
+  if(j.number&&window.I18n)return I18n.name('surahs',j.number,j.originalName||j.name);
+  if(j.number&&j.originalName)return j.originalName;
+  const d=juzDisplay(j);
+  return LEAD_NUM.test(d)?d.replace(LEAD_NUM,''):d;
+}
+// Custom lists name items "4 - سورة النساء": use that number for the badge
+// (instead of the list position) and drop it from the title.
+const LEAD_NUM=/^(\d+)\s*-\s*/;
+function surahNum(j){if(j&&j.number)return j.number;const m=LEAD_NUM.exec((j&&j.name)||'');return m?+m[1]:null}
+function itemNum(j,oi){return surahNum(j)||oi+1}
 function renderJuzList(filterText=''){
   const list=document.getElementById('selectionList');list.innerHTML='';
-  const ft=filterText.toLowerCase();
-  const filtered=currentJuzData.filter(j=>j.name.toLowerCase().includes(ft)||juzDisplay(j).toLowerCase().includes(ft));
-  if(filtered.length===0){list.innerHTML=`<div class="selection-item">${t('audio_no_results')}</div>`;return}
-  filtered.forEach((j)=>{
-    const oi=currentJuzData.findIndex(orig=>orig.name===j.name);
-    let div=document.createElement('div');
-    div.className='selection-item'+(oi===selectedJuzIndex?' active':'');
-    div.innerText=juzDisplay(j);
-    div.onclick=()=>{haptic();selectedJuzIndex=oi;setSelTicker('juzSelectBtn',juzDisplay(j));errorRetryCount=0;closeAllSheets();prepareTrack(true)};
-    list.appendChild(div);
+  const raw=String(filterText).trim();
+  const q=normAr(raw);
+  const isNum=/^\d+$/.test(raw);
+  const filtered=[];
+  currentJuzData.forEach((j,oi)=>{
+    const num=itemNum(j,oi);
+    if(!q||(isNum&&String(num)===raw)||normAr(j.name).includes(q)||normAr(juzDisplay(j)).includes(q))filtered.push([j,oi,num]);
   });
+  if(filtered.length===0){list.innerHTML=emptyRow();return}
+  if(isNum)filtered.sort((a,b)=>(String(b[2])===raw)-(String(a[2])===raw)); // exact number first
+  const frag=document.createDocumentFragment();
+  filtered.forEach(([j,oi,num])=>{
+    const pick=()=>{haptic();selectedJuzIndex=oi;setSelTicker('juzSelectBtn',juzDisplay(j));errorRetryCount=0;closeAllSheets();prepareTrack(true)};
+    frag.appendChild(makeSelRow({num,title:juzTitle(j),active:oi===selectedJuzIndex,onPick:pick}));
+  });
+  list.appendChild(frag);
 }
 
 function openJuzSheet(){
   if(currentJuzData.length===0)return;
-  document.getElementById('selectionSheetTitle').innerText=t('audio_choose_surah_sheet');
+  sheetMode='juz';
+  setSheetTitle(t('audio_choose_surah_sheet'),currentJuzData.length);
   document.getElementById('searchContainer').style.display='block';
   const si=document.getElementById('reciterSearchInput');si.value='';
   renderJuzList('');
-  const handler=(e)=>renderJuzList(e.target.value);
-  si.removeEventListener('input',handler);si.addEventListener('input',handler);
   openSheet('selectionSheet',false);
   setTimeout(()=>{const a=document.getElementById('selectionList').querySelector('.active');if(a)a.scrollIntoView({behavior:'smooth',block:'center'})},100);
 }
 
-function prepareTrack(userInitiated=false){
+function prepareTrack(userInitiated=false,allowAuto=true){
   if(currentJuzData.length===0)return;
+  hideTrackError();
+  if(userInitiated)autoAdvancing=false;
   let url=currentJuzData[selectedJuzIndex].url;
   let reciterName=appData.reciters[selectedReciterIndex].name;
   let juzName=currentJuzData[selectedJuzIndex].name;
@@ -1520,7 +1646,7 @@ function prepareTrack(userInitiated=false){
     updateVisuals(reciterDisp,juzDisp);
     triggerMandalaChange();
   }
-  if(userInitiated||isAutoPlay){
+  if(userInitiated||(allowAuto&&isAutoPlay)){
     audio.load();
     const p=audio.play();
     if(p!==undefined)p.catch(e=>console.log('Autoplay prevented',e));
@@ -1547,21 +1673,66 @@ function updateMediaSession(title,artist){
     navigator.mediaSession.setActionHandler('pause',()=>togglePlay());
     navigator.mediaSession.setActionHandler('previoustrack',()=>{haptic();playPrevTrack()});
     navigator.mediaSession.setActionHandler('nexttrack',()=>{haptic();playNextTrack(true)});
+    try{
+      navigator.mediaSession.setActionHandler('seekbackward',d=>seekBy(-((d&&d.seekOffset)||10)));
+      navigator.mediaSession.setActionHandler('seekforward',d=>seekBy((d&&d.seekOffset)||10));
+      navigator.mediaSession.setActionHandler('seekto',d=>{if(d&&d.seekTime!=null&&audio.duration){audio.currentTime=d.seekTime;updatePositionState()}});
+    }catch(e){}
   }
 }
+function seekBy(sec){
+  if(!audio.duration)return;
+  audio.currentTime=Math.max(0,Math.min(audio.duration-0.5,audio.currentTime+sec));
+  updateProgressBar();updatePositionState();
+}
+let lastPositionUpdate=0;
+function updatePositionState(){
+  if(!('mediaSession'in navigator)||!navigator.mediaSession.setPositionState||!isFinite(audio.duration))return;
+  try{navigator.mediaSession.setPositionState({duration:audio.duration,playbackRate:audio.playbackRate,position:Math.min(audio.currentTime,audio.duration)})}catch(e){}
+}
+audio.addEventListener('timeupdate',()=>{const now=Date.now();if(now-lastPositionUpdate>5000){lastPositionUpdate=now;updatePositionState()}});
+audio.addEventListener('loadedmetadata',updatePositionState);
+
+// Desktop / Bluetooth-keyboard shortcuts (ignored while typing)
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select,[contenteditable]')||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key===' '||e.key==='k'){e.preventDefault();togglePlay()}
+  else if(e.key==='ArrowRight'){e.preventDefault();seekBy(10)}
+  else if(e.key==='ArrowLeft'){e.preventDefault();seekBy(-10)}
+  else if(e.key==='n'||e.key==='N'){playNextTrack(true)}
+  else if(e.key==='p'||e.key==='P'){playPrevTrack()}
+});
 
 function togglePlay(){
-  if(!currentTrackUrl)return;errorRetryCount=0;
-  if(audio.paused)audio.play().catch(()=>showToast(t('audio_play_error')));
+  if(!currentTrackUrl)return;errorRetryCount=0;autoAdvancing=false;
+  if(audio.error){retryTrack();return}
+  if(audio.paused)audio.play().catch(e=>{if(e&&e.name!=='AbortError')showToast(t('audio_play_error'),2500,false,true)});
   else audio.pause();
 }
+
+function retryTrack(){
+  if(!currentTrackUrl)return;
+  hideTrackError();errorRetryCount=0;autoAdvancing=false;
+  const url=currentTrackUrl;
+  audio.src=url+(url.includes('?')?'&':'?')+'_r='+Date.now();
+  audio.play().catch(()=>{});
+}
+
+function showTrackError(msg){
+  const box=document.getElementById('trackError');if(!box)return;
+  document.getElementById('trackErrorText').textContent=msg;
+  box.hidden=false;
+}
+function hideTrackError(){const box=document.getElementById('trackError');if(box)box.hidden=true}
+function setBuffering(on){document.body.classList.toggle('is-buffering',!!on)}
 
 function playNextTrack(userInitiated=false){
   if(currentJuzData.length===0)return;
   let ni=selectedJuzIndex+1;
   if(isShuffle)ni=Math.floor(Math.random()*currentJuzData.length);
   else if(ni>=currentJuzData.length)ni=0;
-  selectedJuzIndex=ni;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[ni]));prepareTrack(userInitiated||isAutoPlay);
+  // prepareTrack plays when userInitiated, or on auto-advance if autoplay is on
+  selectedJuzIndex=ni;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[ni]));prepareTrack(userInitiated);
 }
 
 function playPrevTrack(){
@@ -1570,7 +1741,7 @@ function playPrevTrack(){
   selectedJuzIndex=pi;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[pi]));prepareTrack(true);
 }
 
-audio.addEventListener('ended',()=>{if(isRepeat){audio.currentTime=0;audio.play()}else{playNextTrack(false)}});
+audio.addEventListener('ended',()=>{if(isRepeat){audio.currentTime=0;audio.play()}else{autoAdvancing=true;playNextTrack(false)}});
 // Some hosts (e.g. GitHub release assets) redirect to signed URLs that expire
 // after ~30 min, and the browser keeps using the signed URL for later range
 // requests. When a track fails mid-way, reload the original URL once and
@@ -1591,18 +1762,40 @@ audio.addEventListener('error',()=>{
     return;
   }
   if(currentTrackUrl){
-    updatePlayPauseUI(false);
-    if(errorRetryCount<3){showToast(t('audio_track_error'));errorRetryCount++;setTimeout(()=>playNextTrack(true),1500)}
-    else{showToast(t('audio_server_down'))}
+    updatePlayPauseUI(false);setBuffering(false);
+    if(!navigator.onLine){showTrackError(t('audio_offline'));return}
+    // Continuous listening: skip a broken track (max 3 in a row).
+    if(autoAdvancing&&isAutoPlay&&errorRetryCount<3){
+      showToast(t('audio_track_error'),2500,false,true);errorRetryCount++;
+      setTimeout(()=>{autoAdvancing=true;playNextTrack(false)},1500);
+      return;
+    }
+    // A track the user chose (or the one restored on page load): stay on it.
+    showTrackError(errorRetryCount>=3?t('audio_server_down'):t('audio_track_unavailable'));
   }
 });
+audio.addEventListener('waiting',()=>{if(!audio.paused)setBuffering(true)});
+audio.addEventListener('stalled',()=>{if(!audio.paused&&audio.readyState<3)setBuffering(true)});
+['canplay','canplaythrough','pause','emptied'].forEach(ev=>audio.addEventListener(ev,()=>setBuffering(false)));
+window.addEventListener('online',()=>{if(audio.error&&currentTrackUrl)hideTrackError()});
 audio.addEventListener('playing',()=>{
-  errorRetryCount=0;resumeUrl=null;updatePlayPauseUI(true);
-  document.getElementById('miniPlayer').classList.add('show');
+  errorRetryCount=0;resumeUrl=null;updatePlayPauseUI(true);setBuffering(false);hideTrackError();
+  hasStartedPlayback=true;syncMiniPlayer();
   document.dispatchEvent(new CustomEvent('_audioPlaying'));
   updateMediaSession(currentJuzData[selectedJuzIndex]?juzDisplay(currentJuzData[selectedJuzIndex]):'',document.getElementById('nowReciter').innerText);
 });
 audio.addEventListener('pause',()=>updatePlayPauseUI(false));
+
+// Mini player only when the main controls are scrolled out of view —
+// otherwise the same controls were shown twice on one screen.
+let hasStartedPlayback=false,mainControlsVisible=true;
+function syncMiniPlayer(){
+  document.getElementById('miniPlayer').classList.toggle('show',hasStartedPlayback&&!mainControlsVisible);
+}
+if('IntersectionObserver'in window){
+  new IntersectionObserver(es=>{mainControlsVisible=es[0].isIntersecting;syncMiniPlayer()},{threshold:0.2})
+    .observe(document.querySelector('.controls-main'));
+}else{mainControlsVisible=false}
 
 function updatePlayPauseUI(isPlaying){
   document.getElementById('playIcon').style.display=isPlaying?'none':'block';
@@ -1672,37 +1865,43 @@ async function downloadTrack(){
 // ============================================================
 //  FAVORITES
 // ============================================================
+function readFavs(){try{const f=JSON.parse(localStorage.getItem('favorites')||'[]');return Array.isArray(f)?f:[]}catch(e){return[]}}
 function openFavSheet(){
-  document.getElementById('selectionSheetTitle').innerText=t('audio_fav_sheet_title');
+  sheetMode=null;
+  const favs=readFavs();
+  setSheetTitle(t('audio_fav_sheet_title'),favs.length||null);
   document.getElementById('searchContainer').style.display='none';
   const list=document.getElementById('selectionList');
-  let favs=JSON.parse(localStorage.getItem('favorites')||'[]');
-  list.innerHTML=favs.length===0?`<div style="text-align:center;padding:30px;opacity:.5">${t('audio_no_favorites')}</div>`:'';
+  list.innerHTML=favs.length===0?`<div style="text-align:center;padding:30px;opacity:.6">${t('audio_no_favorites')}</div>`:'';
   favs.forEach((fav,index)=>{
-    let div=document.createElement('div');div.className='selection-item';
-    div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:12px 14px';
     const rObj=appData.reciters.find(r=>r.name===fav.reciter);
     const rDisp=rObj?reciterDisplay(rObj):fav.reciter;
     let sDisp=fav.surah;
     const mnum=/^(\d+)/.exec(fav.surah||'');
     if(mnum&&window.I18n)sDisp=mnum[1]+' - '+I18n.name('surahs',+mnum[1],(fav.surah||'').replace(/^\d+\s*-\s*/,''));
-    div.innerHTML=`<div style="cursor:pointer;width:80%;text-align:right" onclick="haptic();playFromFav('${fav.url}','${fav.surah}','${fav.reciter}')"><div style="font-weight:700;color:var(--text-primary)">${sDisp}</div><div style="font-size:12px;color:var(--accent-main)">${rDisp}</div></div><button class="danger-btn" onclick="haptic();removeFav(${index},event)" style="padding:7px 11px">✕</button>`;
-    list.appendChild(div);
+    const row=makeSelRow({title:sDisp,sub:rDisp,active:fav.url===currentTrackUrl,onPick:()=>{haptic();playFromFav(fav.url,fav.surah,fav.reciter)}});
+    const del=document.createElement('button');
+    del.type='button';del.className='fav-remove';del.setAttribute('aria-label',t('audio_fav_removed'));
+    del.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    del.onclick=e=>{haptic();removeFav(index,e)};
+    row.appendChild(del);
+    list.appendChild(row);
   });
   openSheet('selectionSheet',false);
 }
 function toggleFavorite(){
   if(!currentTrackUrl)return;
-  let favs=JSON.parse(localStorage.getItem('favorites')||'[]'),exists=favs.findIndex(f=>f.url===currentTrackUrl);
+  let favs=readFavs(),exists=favs.findIndex(f=>f.url===currentTrackUrl);
   if(exists===-1){favs.push({reciter:appData.reciters[selectedReciterIndex].name,surah:currentJuzData[selectedJuzIndex].name,url:currentTrackUrl});showToast(t('audio_fav_added'))}
   else{favs.splice(exists,1);showToast(t('audio_fav_removed'))}
   localStorage.setItem('favorites',JSON.stringify(favs));checkFavStatus();
 }
 function checkFavStatus(){
-  let favs=JSON.parse(localStorage.getItem('favorites')||'[]');
+  let favs=readFavs();
   document.getElementById('favBtn').classList.toggle('active',favs.some(f=>f.url===currentTrackUrl));
 }
 function playFromFav(url,surah,reciter){
+  hideTrackError();autoAdvancing=false;
   audio.src=url;currentTrackUrl=url;
   const rObj=appData.reciters.find(r=>r.name===reciter);
   let reciterDisp=rObj?reciterDisplay(rObj):reciter;let surahDisp=surah;
@@ -1719,7 +1918,7 @@ function playFromFav(url,surah,reciter){
   updateVisuals(reciterDisp,surahDisp);
   errorRetryCount=0;audio.play().catch(()=>{});closeAllSheets();
 }
-function removeFav(index,e){e.stopPropagation();let favs=JSON.parse(localStorage.getItem('favorites')||'[]');favs.splice(index,1);localStorage.setItem('favorites',JSON.stringify(favs));openFavSheet();checkFavStatus()}
+function removeFav(index,e){e.stopPropagation();let favs=readFavs();favs.splice(index,1);localStorage.setItem('favorites',JSON.stringify(favs));openFavSheet();checkFavStatus()}
 
 // ============================================================
 //  INIT

@@ -1692,7 +1692,8 @@ function buildJuzData(){
     surahNames.forEach((name,index)=>{
       let num=index+1;
       let sn=num<10?'00'+num:num<100?'0'+num:num;
-      currentJuzData.push({name:`${num} - سورة ${name}`,url:reciter.baseUrl+sn+'.mp3',originalName:'سورة '+name,number:num});
+      const url=(reciter.overrides&&reciter.overrides[sn])||reciter.baseUrl+sn+'.mp3';
+      currentJuzData.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});
     });
   }
   // Sync strip badge
