@@ -9,7 +9,12 @@ const RADIO_STATIONS = [
   },
   {
     "name": "إذاعة القرآن الكريم - الشارقة",
-    "url": "https://quran-stream-proxy.solimananas2012.workers.dev/smcquranlive/quranradiolive/playlist.m3u8"
+    "url": "https://l3.itworkscdn.net/smcquranlive/quranradiolive/icecast.audio",
+    "fallbacks": [
+      "https://svs.itworkscdn.net/smcquranlive/quranradiolive/icecast.audio",
+      "https://quran-stream-proxy.solimananas2012.workers.dev/smcquranlive/quranradiolive/playlist.m3u8",
+      "https://svs.itworkscdn.net/smcquranlive/quranradiolive/playlist.m3u8"
+    ]
   },
   {
     "name": "-الإذاعة العامة - اذاعة متنوعة لمختلف القراء",
