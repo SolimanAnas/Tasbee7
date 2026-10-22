@@ -20,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <!-- Pinned exact version: @latest auto-updates third-party code with full DOM
      access (supply-chain risk + spontaneous breakage). Bump deliberately. -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
 <script src="../js/radio-stations.js"></script>
 <style>
 /* ============================================================
@@ -821,7 +821,7 @@ function buildStations(){
   const seen=new Set();allStations=[];
   (typeof RADIO_STATIONS!=='undefined'?RADIO_STATIONS:[]).forEach(s=>{
     const k=s.name+'|'+s.url;if(seen.has(k))return;seen.add(k);
-    allStations.push({name:s.name,url:s.url,cat:categorize(s.name)});
+    allStations.push({name:s.name,url:s.url,fallbacks:s.fallbacks,cat:categorize(s.name)});
   });
 }
 function stationByUrl(url){return allStations.find(s=>s.url===url)}
@@ -832,7 +832,7 @@ function stationByUrl(url){return allStations.find(s=>s.url===url)}
 const audio=document.getElementById('audio');
 const playBtn=document.getElementById('playBtn');
 let hls=null,current=null,userWantsPlay=false,hasStartedPlayback=false;
-let state='stopped',reconnectTries=0,reconnectTimer=null,stallTimer=null,useAltHost=false,internalPause=false;
+let state='stopped',reconnectTries=0,reconnectTimer=null,stallTimer=null,candIdx=0,internalPause=false;
 let listenStart=0,clockTimer=null;
 let loadSeq=0,handledSeq=-1;   // a failed load fires both play() rejection and 'error'; count it once
 const MAX_RECONNECT=5,RECONNECT_DELAYS=[600,1500,3000,6000,10000];
@@ -848,7 +848,22 @@ function altHostUrl(url){
   if(url.includes('://qurango.net/'))return url.replace('://qurango.net/','://backup.qurango.net/');
   return url;
 }
-function streamUrl(){return useAltHost?altHostUrl(current.url):current.url}
+// Ordered stream candidates for a station; reconnects walk this list.
+//  - explicit `fallbacks` (e.g. Sharjah: audio-only AAC on two CDN hosts, then HLS)
+//  - qurango stations: the same path on both hosts
+// URLs this browser can't decode are skipped up front.
+function canPlayUrl(u){
+  if(/\.m3u8(\?|$)/.test(u))return supportsNativeHLS()||!!(window.Hls&&Hls.isSupported());
+  if(/icecast\.audio|\.aac(\?|$)/.test(u))return audio.canPlayType('audio/aac')!==''||audio.canPlayType('audio/aacp')!=='';
+  return true;
+}
+function candidates(st){
+  let list=[st.url].concat(st.fallbacks||[]);
+  if(!st.fallbacks&&/qurango\.net/.test(st.url))list=[st.url,altHostUrl(st.url)];
+  const ok=list.filter(canPlayUrl);
+  return ok.length?ok:list;
+}
+function streamUrl(){const c=candidates(current);return c[candIdx%c.length]}
 
 function teardown(){
   internalPause=true;
@@ -863,9 +878,16 @@ function loadStream(url){
   if(url.includes('.m3u8')){
     if(supportsNativeHLS()){audio.src=url}
     else if(window.Hls&&Hls.isSupported()){
-      hls=new Hls({enableWorker:true,lowLatencyMode:true});
+      // Not an LL-HLS stream: stay a few segments behind live for stability.
+      hls=new Hls({enableWorker:true,lowLatencyMode:false,liveSyncDurationCount:3,
+        manifestLoadingMaxRetry:3,levelLoadingMaxRetry:3,fragLoadingMaxRetry:3});
+      let recovered=false;
       hls.loadSource(url);hls.attachMedia(audio);
-      hls.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal)onStreamFailure()});
+      hls.on(Hls.Events.ERROR,(_,d)=>{
+        if(!d.fatal)return;
+        if(d.type===Hls.ErrorTypes.MEDIA_ERROR&&!recovered){recovered=true;hls.recoverMediaError();return}
+        onStreamFailure();
+      });
     }else{showToast(rt('radio_hls_not_supported','المتصفح لا يدعم البث'),true);return false}
   }else{audio.src=url}
   audio.dataset.loadedUrl=url;
@@ -899,7 +921,7 @@ function togglePlay(force){
   const want=force!=null?force:!userWantsPlay;
   if(want)startPlayback();else stopPlayback();
 }
-function retryStation(){reconnectTries=0;useAltHost=!useAltHost;audio.dataset.loadedUrl='';startPlayback()}
+function retryStation(){reconnectTries=0;candIdx++;audio.dataset.loadedUrl='';startPlayback()}
 
 function onStreamFailure(seq){
   if(!userWantsPlay||!current)return;
@@ -915,7 +937,7 @@ function onStreamFailure(seq){
   }
   const delay=RECONNECT_DELAYS[reconnectTries];
   reconnectTries++;
-  if(/qurango\.net/.test(current.url))useAltHost=!useAltHost;
+  candIdx++;                                   // next host / format
   setState('reconnecting');
   reconnectTimer=setTimeout(()=>{if(userWantsPlay){audio.dataset.loadedUrl='';startPlayback()}},delay);
 }
@@ -1028,7 +1050,7 @@ function selectStation(st,opts={}){
   checkFavStatus();
   if(changed){
     clearTimeout(reconnectTimer);clearTimeout(stallTimer);
-    reconnectTries=0;useAltHost=false;listenStart=0;hideRadioError();teardown();
+    reconnectTries=0;candIdx=0;listenStart=0;hideRadioError();teardown();
   }
   updateMediaSession();
   if(opts.play)startPlayback();
