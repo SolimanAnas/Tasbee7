@@ -23,7 +23,11 @@
 (function () {
   'use strict';
   const KEY = 'continuousAudio';
-  const supported = typeof window.navigation !== 'undefined';
+  // A page shown inside another host's frame (e.g. audio.html while the radio
+  // is the host) must not become a nested host: its links simply navigate the
+  // frame, which the outer host intercepts.
+  const framedByShell = (() => { try { return window.top !== window && !!window.top.ZadShell; } catch { return false; } })();
+  const supported = typeof window.navigation !== 'undefined' && !framedByShell;
 
   function enabled() {
     try { return localStorage.getItem(KEY) !== 'false'; } catch { return true; }
@@ -359,5 +363,6 @@ html.zad-frame-open, html.zad-frame-open body { overflow: hidden !important; }
   }
 
   window.ZadShell = { init, navigate, openFrame, closeFrame, shouldFrame, armLeave, update, pauseFrameMedia,
-    isOpen: () => !!frame, supported, enabled, KEY };
+    isOpen: () => !!frame, supported, enabled, KEY,
+    available: typeof window.navigation !== 'undefined' };   // for showing the setting
 })();

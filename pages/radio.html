@@ -416,6 +416,82 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
 }
 .fav-del:active{background:rgba(239,68,68,.2);transform:scale(.95)}
 
+/* ============================================================
+   UX UPLIFT — transport, status, categories, sleep timer
+   ============================================================ */
+.controls-main{gap:22px;direction:ltr}
+.skip-btn{width:52px;height:52px;border-radius:50%;border:1px solid var(--glass-border);background:var(--accent-muted);color:var(--text-primary);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s,background .2s;flex-shrink:0}
+.skip-btn svg{width:22px;height:22px;fill:currentColor}
+.skip-btn:active{transform:scale(.88)}
+.controls-secondary{display:flex;justify-content:center;gap:18px;margin-top:14px}
+.controls-secondary .action-btn{width:46px;height:46px;position:relative}
+.controls-secondary .action-btn svg{width:20px;height:20px}
+.sleep-btn svg{fill:none}
+.sleep-btn.on{background:rgba(var(--accent-rgb),.18);border-color:rgba(var(--accent-rgb),.4);color:var(--accent-main)}
+.sleep-badge{position:absolute;top:-6px;inset-inline-end:-8px;min-width:22px;padding:1px 6px;border-radius:999px;font-size:.68rem;font-weight:800;
+  background:var(--accent-main);color:#fff;line-height:1.5;font-variant-numeric:tabular-nums}
+.sleep-badge[hidden]{display:none}
+/* connecting / reconnecting */
+body.is-connecting .live-badge{background:rgba(245,158,11,.14);color:#d97706;border-color:rgba(245,158,11,.3)}
+body.is-connecting .live-dot{background:#f59e0b;animation:livePulse .8s ease-in-out infinite}
+.live-time{font-variant-numeric:tabular-nums;letter-spacing:.04em;opacity:.85}
+.live-time:empty{display:none}
+.live-time::before{content:'·';margin-inline-end:5px}
+.now-cat{font-size:.8rem;font-weight:700;color:var(--accent-main);margin-top:4px;min-height:1em}
+.radio-error{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:-4px 0 12px;padding:9px 12px;border-radius:14px;
+  background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);color:var(--live-color);font-size:.82rem;font-weight:700;text-align:center;width:100%}
+.radio-error[hidden]{display:none}
+.radio-error-retry{border:none;border-radius:999px;padding:6px 14px;background:var(--live-color);color:#fff;font:inherit;font-size:.78rem;cursor:pointer}
+/* station sheet */
+.sheet-header h2{display:flex;align-items:center;gap:8px}
+.sheet-count{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.75rem;font-weight:800;background:var(--accent-muted);color:var(--accent-main)}
+.sheet-count:empty{display:none}
+.search-input{-webkit-appearance:none;appearance:none;flex-shrink:0}
+.cat-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cat-chips::-webkit-scrollbar{display:none}
+.cat-chip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;border:1px solid var(--glass-border);
+  background:var(--list-hover);color:var(--text-primary);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
+.cat-chip small{font-size:.7rem;font-weight:800;opacity:.65;font-variant-numeric:tabular-nums}
+.cat-chip.active{background:var(--accent-main);border-color:var(--accent-main);color:#fff;box-shadow:0 3px 12px rgba(var(--accent-rgb),.3)}
+.cat-chip.active small{opacity:.9}
+.selection-item{display:flex;align-items:center;gap:12px;text-align:start;padding:10px 12px}
+.st-ico{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--accent-muted);color:var(--accent-main)}
+.st-ico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.selection-item.active .st-ico{background:rgba(255,255,255,.22);color:#fff}
+.st-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.st-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-sub{font-size:.74rem;font-weight:600;color:var(--text-secondary)}
+.selection-item.active .st-sub{color:rgba(255,255,255,.85)}
+.st-fav{flex:none;width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--text-secondary);display:grid;place-items:center;cursor:pointer}
+.st-fav svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+.st-fav.on{color:var(--live-color)}
+.st-fav.on svg{fill:currentColor}
+.selection-item.active .st-fav{color:#fff}
+.st-fav:active{transform:scale(.85)}
+.sel-eq{flex:none;display:none;align-items:flex-end;gap:2px;height:16px}
+.sel-eq i{width:3px;background:currentColor;border-radius:2px;height:40%;animation:eqBar .9s ease-in-out infinite}
+.sel-eq i:nth-child(2){animation-delay:.2s}.sel-eq i:nth-child(3){animation-delay:.4s}
+body.is-playing .selection-item.active .sel-eq{display:flex}
+@keyframes eqBar{0%,100%{height:30%}50%{height:100%}}
+.list-empty{text-align:center;padding:30px 10px;color:var(--text-secondary);font-weight:600}
+.selection-item:focus-visible,.cat-chip:focus-visible,.sel-card:focus-visible{outline:2px solid var(--accent-main);outline-offset:2px}
+/* sleep sheet */
+.bottom-sheet.sheet-compact{height:auto;max-height:75vh}
+.sleep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sleep-opt{padding:16px 8px;border-radius:16px;border:1px solid var(--glass-border);background:var(--list-hover);color:var(--text-primary);
+  font:inherit;font-weight:800;font-size:1rem;cursor:pointer;transition:.2s}
+.sleep-opt small{display:block;font-size:.72rem;font-weight:600;color:var(--text-secondary)}
+.sleep-opt.active{background:var(--accent-main);border-color:var(--accent-main);color:#fff}
+.sleep-opt.active small{color:rgba(255,255,255,.85)}
+.sleep-remaining{text-align:center;font-size:2rem;font-weight:800;color:var(--accent-main);font-variant-numeric:tabular-nums;direction:ltr}
+.sleep-remaining[hidden],.sleep-cancel[hidden]{display:none}
+.sleep-cancel{margin-top:6px;padding:13px;border-radius:14px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:var(--live-color);font:inherit;font-weight:800;cursor:pointer}
+.toast{max-width:90vw;text-align:center;top:calc(env(safe-area-inset-top,0px) + 84px);opacity:0;pointer-events:none;transition:transform .4s,opacity .3s}
+.toast.show{opacity:1}
+.toast.error{background:var(--live-color)}
+@media (prefers-reduced-motion: reduce){.sel-eq i,body.is-connecting .live-dot{animation:none}}
+
 /* Install prompt */
 #install-prompt{display:none}
 </style>
@@ -429,12 +505,12 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
   <!-- Header -->
   <div class="header">
     <div style="display:flex;gap:4px">
-      <button class="icon-btn" onclick="window.location.href='../index.html'" title="الرئيسية" data-i18n-title="home">
+      <button class="icon-btn" onclick="haptic();appNavigate('../index.html')" title="الرئيسية" data-i18n-title="home" aria-label="الرئيسية">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
       </button>
-      <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" title="تغيير المظهر">
+      <button class="icon-btn" id="themeBtn" onclick="cycleTheme()" title="تغيير المظهر" aria-label="تغيير المظهر">
         <svg id="themeIconSun" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
           <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
           <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
@@ -448,12 +524,12 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
           <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.36 5.64l1.41-1.41"/>
         </svg>
       </button>
-      <button class="icon-btn" onclick="if(window.I18n)I18n.openLangSheet()" title="اللغة">
+      <button class="icon-btn" onclick="if(window.I18n)I18n.openLangSheet()" title="اللغة" aria-label="اللغة">
         <div style="width:22px;height:22px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
       </button>
     </div>
     <div class="header-title" data-i18n="radio_header">راديو القرآن</div>
-    <button class="icon-btn" onclick="openFavSheet()" title="المفضلة">
+    <button class="icon-btn" onclick="openStationSheet('fav')" title="المفضلة" aria-label="المفضلة" data-i18n-title="radio_fav_title">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
@@ -467,6 +543,7 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
     <div class="live-badge" id="liveBadge">
       <div class="live-dot"></div>
       <span id="liveText" data-i18n="radio_stopped">متوقف</span>
+      <span class="live-time" id="liveTime"></span>
     </div>
 
     <!-- Mandala + album art -->
@@ -495,17 +572,22 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
       <div class="hero-station-wrap">
         <span id="nowStation" data-i18n="radio_default">اختر إذاعة للبدء</span>
       </div>
+      <div class="now-cat" id="nowCategory"></div>
+    </div>
+
+    <!-- Inline stream error with retry -->
+    <div class="radio-error" id="radioError" role="alert" hidden>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="radioErrorText"></span>
+      <button type="button" class="radio-error-retry" onclick="haptic();retryStation()" data-i18n="radio_retry">إعادة المحاولة</button>
     </div>
 
     <!-- Controls -->
     <div class="controls-main">
-      <button class="action-btn" id="favBtn" onclick="toggleFavorite()" title="مفضلة">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
+      <button class="skip-btn" onclick="haptic();playAdjacent(-1)" aria-label="الإذاعة السابقة" data-i18n-title="radio_prev">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
       </button>
-
-      <button class="play-pause-btn" id="playBtn" onclick="togglePlay()">
+      <button class="play-pause-btn" id="playBtn" onclick="haptic();togglePlay()" aria-label="تشغيل / إيقاف">
         <div class="play-ring"></div>
         <div class="play-loader"></div>
         <svg id="playIcon" viewBox="0 0 24 24" width="30" height="30" fill="white">
@@ -515,15 +597,28 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
           <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
         </svg>
       </button>
+      <button class="skip-btn" onclick="haptic();playAdjacent(1)" aria-label="الإذاعة التالية" data-i18n-title="radio_next">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+    </div>
 
-      <!-- placeholder for symmetric layout -->
-      <div style="width:50px;height:50px;flex-shrink:0"></div>
+    <div class="controls-secondary">
+      <button class="action-btn" id="favBtn" onclick="toggleFavorite()" aria-label="إضافة للمفضلة" data-i18n-title="radio_add_fav">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <button class="action-btn sleep-btn" id="sleepBtn" onclick="haptic();openSheet('sleepSheet')" aria-label="مؤقت النوم" data-i18n-title="radio_sleep_title">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="sleep-badge" id="sleepBadge" hidden></span>
+      </button>
+      <button class="action-btn" onclick="openStationSheet()" aria-label="قائمة الإذاعات" data-i18n-title="radio_stations_list">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
     </div>
 
   </div>
 
   <!-- Station Selector -->
-  <div class="sel-card" onclick="openStationSheet()">
+  <div class="sel-card" role="button" tabindex="0" onclick="openStationSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openStationSheet()}">
     <div class="sel-icon">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="8" width="20" height="13" rx="2"/>
@@ -554,51 +649,68 @@ body.is-playing .play-ring{opacity:1;animation:spinRing 6s linear infinite}
 <div id="stationSheet" class="bottom-sheet">
   <div class="drag-handle"></div>
   <div class="sheet-header">
-    <h2 data-i18n="radio_choose">اختر الإذاعة</h2>
-    <button class="icon-btn" onclick="closeAllSheets()" style="width:34px;height:34px">
+    <h2><span data-i18n="radio_choose">اختر الإذاعة</span> <span class="sheet-count" id="stationCount"></span></h2>
+    <button class="icon-btn" onclick="closeAllSheets()" style="width:34px;height:34px" aria-label="إغلاق">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
   <div class="sheet-content">
-    <input type="text" class="search-input" id="stationSearch"
+    <input type="search" class="search-input" id="stationSearch" enterkeyhint="search"
            placeholder="ابحث عن إذاعة..." data-i18n-placeholder="radio_search_placeholder"
-           autocomplete="off" oninput="filterStations(this.value)">
-    <div class="selection-list" id="stationList"></div>
+           autocomplete="off">
+    <div class="cat-chips" id="catChips" role="tablist"></div>
+    <div class="selection-list" id="stationList" role="listbox"></div>
   </div>
 </div>
 
-<!-- Favorites sheet -->
-<div id="favSheet" class="bottom-sheet">
+<!-- Sleep timer sheet -->
+<div id="sleepSheet" class="bottom-sheet sheet-compact">
   <div class="drag-handle"></div>
   <div class="sheet-header">
-    <h2 data-i18n="radio_fav_title">المفضلة</h2>
-    <button class="icon-btn" onclick="closeAllSheets()" style="width:34px;height:34px">
+    <h2 data-i18n="radio_sleep_title">مؤقت النوم</h2>
+    <button class="icon-btn" onclick="closeAllSheets()" style="width:34px;height:34px" aria-label="إغلاق">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
   <div class="sheet-content">
-    <div class="selection-list" id="favList"></div>
+    <div class="sleep-remaining" id="sleepRemaining" hidden></div>
+    <div class="sleep-grid" id="sleepGrid"></div>
+    <button type="button" class="sleep-cancel" id="sleepCancel" onclick="haptic();cancelSleep(true)" hidden data-i18n="radio_sleep_cancel">إلغاء المؤقت</button>
   </div>
 </div>
 
 <script src="../js/back-close.js"></script>
+<script src="../js/continuous-player.js"></script>
 <script>
 // ── helpers ───────────────────────────────────────────────
-function t(key,fb){return(window.I18n&&window.I18n.t(key))||fb||key}
+// Not named t(): js/i18n.js defines a global t(key, params) after this script.
+function rt(key,fb,params){
+  let s=(window.I18n&&window.I18n.t(key))||fb||key;
+  if(s===key&&fb)s=fb;
+  if(params)Object.keys(params).forEach(k=>{s=s.split('{'+k+'}').join(params[k])});
+  return s;
+}
 function haptic(){if(navigator.vibrate)navigator.vibrate(40)}
-
-function showToast(msg){
+let toastTimer;
+function showToast(msg,isError){
   const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2500);
+  el.textContent=msg;el.classList.toggle('error',!!isError);el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
+}
+function readJSON(key,fb){try{const v=JSON.parse(localStorage.getItem(key)||'null');return v==null?fb:v}catch(e){return fb}}
+// Arabic-insensitive matching (tashkeel, hamza forms, ة/ه, ى/ي, spaces)
+function normAr(s){
+  return String(s||'').toLowerCase()
+    .replace(/[ً-ٰٟـ]/g,'')
+    .replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي')
+    .replace(/[\s\-_()*·.،,]+/g,'');
 }
 
 // ── theme ─────────────────────────────────────────────────
 const THEMES=['dark','light','sepia'];
 function cycleTheme(){
   const cur=document.documentElement.getAttribute('data-theme')||'dark';
-  const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];
-  setTheme(next);
+  setTheme(THEMES[(THEMES.indexOf(cur)+1)%THEMES.length]);
 }
 function setTheme(theme){
   document.documentElement.setAttribute('data-theme',theme);
@@ -610,6 +722,7 @@ function updateThemeIcon(theme){
   document.getElementById('themeIconMoon').style.display=theme==='dark'?'block':'none';
   document.getElementById('themeIconSepia').style.display=theme==='sepia'?'block':'none';
 }
+window.addEventListener('storage',e=>{if(e.key==='themeMode'&&e.newValue)setTheme(e.newValue)});
 
 // ── sheets ────────────────────────────────────────────────
 function openSheet(id){
@@ -618,6 +731,7 @@ function openSheet(id){
   overlay.classList.add('active');
   document.querySelectorAll('.bottom-sheet').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==='sleepSheet')renderSleep();
   if(!wasOpen&&window.BackClose)BackClose.opened(hideAllSheets);
 }
 function hideAllSheets(){
@@ -629,260 +743,496 @@ function closeAllSheets(){
   hideAllSheets();
 }
 
-// ── station name ticker ───────────────────────────────────
-function setHeroTicker(text){
-  const el=document.getElementById('nowStation');if(!el)return;
-  el.classList.remove('ticker-active');
-  el.style.removeProperty('--ticker-dur');
-  el.textContent=text;
+// ── ticker helpers ────────────────────────────────────────
+function ticker(el,text,speed,minDur){
+  if(!el)return;
+  el.classList.remove('ticker-active');el.style.removeProperty('--ticker-dur');el.textContent=text;
   requestAnimationFrame(()=>{
     const wrap=el.parentElement;if(!wrap)return;
     if(el.scrollWidth>wrap.offsetWidth+2){
-      const sep='        ';
-      el.textContent=text+sep+text+sep;
-      const dur=Math.max(5,el.scrollWidth/80);
-      el.style.setProperty('--ticker-dur',dur.toFixed(1)+'s');
+      const sep='        ';el.textContent=text+sep+text+sep;
+      el.style.setProperty('--ticker-dur',Math.max(minDur,el.scrollWidth/speed).toFixed(1)+'s');
       el.classList.add('ticker-active');
     }
   });
 }
-function setSelTicker(text){
-  const el=document.getElementById('stationSelectBtn');if(!el)return;
-  el.classList.remove('ticker-active');
-  el.style.removeProperty('--ticker-dur');
-  el.textContent=text;
-  requestAnimationFrame(()=>{
-    const wrap=el.parentElement;if(!wrap)return;
-    if(el.scrollWidth>wrap.offsetWidth+2){
-      const sep='      ';
-      el.textContent=text+sep+text+sep;
-      const dur=Math.max(4,el.scrollWidth/70);
-      el.style.setProperty('--ticker-dur',dur.toFixed(1)+'s');
-      el.classList.add('ticker-active');
-    }
-  });
-}
+function setHeroTicker(text){ticker(document.getElementById('nowStation'),text,80,5)}
+function setSelTicker(text){ticker(document.getElementById('stationSelectBtn'),text,70,4)}
 
 // ── mandala dots (generate once) ─────────────────────────
 (function buildDots(){
   const wrap=document.getElementById('mDots');if(!wrap)return;
   const R=108,count=12;
   for(let i=0;i<count;i++){
-    const angle=(360/count)*i*(Math.PI/180);
-    const x=R*Math.cos(angle),y=R*Math.sin(angle);
-    const d=document.createElement('div');
-    d.className='m-dot';
-    d.style.cssText=`margin-left:${x}px;margin-top:${y}px`;
+    const a=(360/count)*i*(Math.PI/180);
+    const d=document.createElement('div');d.className='m-dot';
+    d.style.cssText=`margin-left:${R*Math.cos(a)}px;margin-top:${R*Math.sin(a)}px`;
     wrap.appendChild(d);
   }
 })();
 
-// ── audio & HLS ───────────────────────────────────────────
+// ============================================================
+//  STATIONS — clean names + categories
+// ============================================================
+const CATS=[
+  {id:'all',key:'radio_cat_all',fb:'الكل'},
+  {id:'fav',key:'radio_cat_fav',fb:'المفضلة'},
+  {id:'recent',key:'radio_cat_recent',fb:'الأخيرة'},
+  {id:'general',key:'radio_cat_general',fb:'إذاعات عامة'},
+  {id:'reciters',key:'radio_cat_reciters',fb:'القرّاء'},
+  {id:'tafsir',key:'radio_cat_tafsir',fb:'تفسير ودروس'},
+  {id:'adhkar',key:'radio_cat_adhkar',fb:'أذكار ورقية'},
+  {id:'translations',key:'radio_cat_translations',fb:'ترجمات المعاني'}
+];
+const CAT_ICON={
+  general:'<svg viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="13" rx="2"/><polyline points="16 8 12 3 8 8"/><circle cx="8.5" cy="14.5" r="2"/><line x1="14" y1="12" x2="19" y2="12"/><line x1="14" y1="16" x2="19" y2="16"/></svg>',
+  reciters:'<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+  tafsir:'<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  adhkar:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+  translations:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'
+};
+const HEART_SVG='<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+function categorize(name){
+  if(/^ترجمة/.test(name))return 'translations';
+  if(/أذكار|الرقية|تكبيرات|السكينة/.test(name))return 'adhkar';
+  if(/تفسير|السيرة|قصص|صور من حياة|رياض الصالحين|صحيح|الفتاوى|كتاب|فضل شهر|في ظلال/.test(name))return 'tafsir';
+  if(/القرآن الكريم -|الإذاعة العامة|تلاوات|تراتيل|سورة/.test(name))return 'general';
+  return 'reciters';
+}
+// The source names carry decoration ("---سورة البقرة---", "***قصص***", "-تلاوات-").
+function cleanName(n){
+  return String(n||'').replace(/\*+/g,' ').replace(/-{2,}/g,' ')
+    .replace(/(^|\s)-(?=\S)/g,'$1').replace(/(\S)-(?=\s|$)/g,'$1')
+    .replace(/^أذاعة/,'إذاعة').replace(/\s+/g,' ').trim();
+}
+function catLabel(id){const c=CATS.find(x=>x.id===id);return c?rt(c.key,c.fb):''}
+function displayName(st){
+  if(!st)return'';
+  const tr=window.I18n&&I18n.getLang&&I18n.getLang()!=='ar'?I18n.name('stations',st.name,''):'';
+  if(tr&&tr!==st.name)return tr;
+  let n=cleanName(st.name);
+  if(st.cat==='reciters')n=n.replace(/^إذاعة\s+/,'');   // the list already says "reciters"
+  return n;
+}
+
+let allStations=[];
+function buildStations(){
+  const seen=new Set();allStations=[];
+  (typeof RADIO_STATIONS!=='undefined'?RADIO_STATIONS:[]).forEach(s=>{
+    const k=s.name+'|'+s.url;if(seen.has(k))return;seen.add(k);
+    allStations.push({name:s.name,url:s.url,cat:categorize(s.name)});
+  });
+}
+function stationByUrl(url){return allStations.find(s=>s.url===url)}
+
+// ============================================================
+//  PLAYBACK — connection states + auto-reconnect
+// ============================================================
 const audio=document.getElementById('audio');
 const playBtn=document.getElementById('playBtn');
-let hls=null,currentStation=null,userWantsPlay=false;
-let allStations=[];
-
+let hls=null,current=null,userWantsPlay=false,hasStartedPlayback=false;
+let state='stopped',reconnectTries=0,reconnectTimer=null,stallTimer=null,useAltHost=false,internalPause=false;
+let listenStart=0,clockTimer=null;
+let loadSeq=0,handledSeq=-1;   // a failed load fires both play() rejection and 'error'; count it once
+const MAX_RECONNECT=5,RECONNECT_DELAYS=[600,1500,3000,6000,10000];
 const _mediaBase=window.location.origin+window.location.pathname.replace(/\/[^/]+\/[^/]*$/,'');
 
 function supportsNativeHLS(){
-  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&
-         audio.canPlayType('application/vnd.apple.mpegurl');
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&audio.canPlayType('application/vnd.apple.mpegurl');
 }
+// qurango.net and backup.qurango.net serve the same streams, and either one
+// intermittently answers 500 — so reconnect attempts alternate between them.
+function altHostUrl(url){
+  if(url.includes('://backup.qurango.net/'))return url.replace('://backup.qurango.net/','://qurango.net/');
+  if(url.includes('://qurango.net/'))return url.replace('://qurango.net/','://backup.qurango.net/');
+  return url;
+}
+function streamUrl(){return useAltHost?altHostUrl(current.url):current.url}
 
-function loadStream(url,name){
-  audio.pause();
-  if(hls){hls.destroy();hls=null;}
+function teardown(){
+  internalPause=true;
+  try{audio.pause()}catch(e){}
+  if(hls){hls.destroy();hls=null}
+  audio.removeAttribute('src');audio.dataset.loadedUrl='';
+  try{audio.load()}catch(e){}
+  setTimeout(()=>{internalPause=false},0);
+}
+function loadStream(url){
+  teardown();
   if(url.includes('.m3u8')){
-    if(supportsNativeHLS()){
-      audio.src=url;
-    }else if(Hls.isSupported()){
+    if(supportsNativeHLS()){audio.src=url}
+    else if(window.Hls&&Hls.isSupported()){
       hls=new Hls({enableWorker:true,lowLatencyMode:true});
       hls.loadSource(url);hls.attachMedia(audio);
-      hls.on(Hls.Events.ERROR,(_,d)=>{
-        if(d.fatal){hls.destroy();hls=null;showToast(t('radio_stream_error','خطأ في البث'));updateUI(false);}
-      });
-    }else{showToast(t('radio_hls_not_supported','المتصفح لا يدعم البث'));}
-  }else{
-    audio.src=url;
-  }
-  updateMediaSession(name);
+      hls.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal)onStreamFailure()});
+    }else{showToast(rt('radio_hls_not_supported','المتصفح لا يدعم البث'),true);return false}
+  }else{audio.src=url}
   audio.dataset.loadedUrl=url;
+  return true;
 }
 
-function togglePlay(forcePlay=null){
-  if(!currentStation){showToast(t('radio_select_first','اختر إذاعة أولاً'));return;}
-  const shouldPlay=forcePlay!==null?forcePlay:audio.paused;
-  if(shouldPlay){
-    userWantsPlay=true;
-    if(audio.dataset.loadedUrl!==currentStation.url)loadStream(currentStation.url,currentStation.name);
-    playBtn.classList.add('loading');
-    const p=audio.play();
-    if(p){p.then(()=>{playBtn.classList.remove('loading');updateUI(true);}).catch(err=>{
-      console.error('Play failed:',err);playBtn.classList.remove('loading');
-      showToast(t('radio_play_error','تعذّر التشغيل'));userWantsPlay=false;updateUI(false);
-    });}else{updateUI(true);}
-  }else{
-    userWantsPlay=false;audio.pause();updateUI(false);
+function startPlayback(){
+  if(!current){showToast(rt('radio_select_first','اختر إذاعة أولاً'));return}
+  userWantsPlay=true;hideRadioError();clearTimeout(reconnectTimer);
+  if(state!=='reconnecting')setState('connecting');
+  const url=streamUrl();
+  if(audio.dataset.loadedUrl!==url&&!loadStream(url)){userWantsPlay=false;setState('stopped');return}
+  const seq=++loadSeq;
+  armStallWatch();
+  const p=audio.play();
+  if(p)p.catch(err=>{
+    if(!userWantsPlay)return;
+    if(err&&err.name==='NotAllowedError'){userWantsPlay=false;setState('stopped');return}
+    if(err&&err.name==='AbortError')return;
+    onStreamFailure(seq);
+  });
+}
+function stopPlayback(){
+  userWantsPlay=false;clearTimeout(reconnectTimer);clearTimeout(stallTimer);
+  internalPause=true;audio.pause();setTimeout(()=>{internalPause=false},0);
+  // drop a live stream instead of letting it buffer stale audio behind a pause
+  if(hls){hls.destroy();hls=null;audio.dataset.loadedUrl=''}
+  setState('stopped');
+}
+function togglePlay(force){
+  const want=force!=null?force:!userWantsPlay;
+  if(want)startPlayback();else stopPlayback();
+}
+function retryStation(){reconnectTries=0;useAltHost=!useAltHost;audio.dataset.loadedUrl='';startPlayback()}
+
+function onStreamFailure(seq){
+  if(!userWantsPlay||!current)return;
+  if(seq==null)seq=loadSeq;
+  if(seq!==loadSeq||seq===handledSeq)return;   // stale or already handled
+  handledSeq=seq;
+  clearTimeout(reconnectTimer);clearTimeout(stallTimer);
+  if(!navigator.onLine){setState('offline');return}               // resumes on 'online'
+  if(reconnectTries>=MAX_RECONNECT){
+    userWantsPlay=false;teardown();setState('stopped');
+    showRadioError(rt('radio_unavailable','تعذّر الاتصال بهذه الإذاعة حالياً'));
+    return;
   }
+  const delay=RECONNECT_DELAYS[reconnectTries];
+  reconnectTries++;
+  if(/qurango\.net/.test(current.url))useAltHost=!useAltHost;
+  setState('reconnecting');
+  reconnectTimer=setTimeout(()=>{if(userWantsPlay){audio.dataset.loadedUrl='';startPlayback()}},delay);
 }
-
-function updateUI(isPlaying){
-  document.getElementById('playIcon').style.display=isPlaying?'none':'block';
-  document.getElementById('pauseIcon').style.display=isPlaying?'block':'none';
-  document.getElementById('liveText').textContent=isPlaying?t('radio_live','بث مباشر'):t('radio_stopped','متوقف');
-  document.body.classList.toggle('is-playing',isPlaying);
-  if('mediaSession' in navigator)
-    navigator.mediaSession.playbackState=isPlaying?'playing':'paused';
+// a live stream that stops delivering data without an error event
+function armStallWatch(){
+  clearTimeout(stallTimer);
+  stallTimer=setTimeout(()=>{if(userWantsPlay&&(audio.paused||audio.readyState<3))onStreamFailure()},15000);
 }
 
 audio.addEventListener('playing',()=>{
-  playBtn.classList.remove('loading');updateUI(true);
+  clearTimeout(stallTimer);reconnectTries=0;hideRadioError();
+  if(!listenStart)listenStart=Date.now();
+  hasStartedPlayback=true;
+  setState('live');addRecent(current);
   document.dispatchEvent(new CustomEvent('_audioPlaying'));
+  armLeaveSoon();
 });
-audio.addEventListener('pause',()=>{playBtn.classList.remove('loading');updateUI(false);});
-audio.addEventListener('waiting',()=>playBtn.classList.add('loading'));
-audio.addEventListener('error',e=>{
-  playBtn.classList.remove('loading');updateUI(false);
-  if(!userWantsPlay)return;
-  console.error('Audio error:',e);showToast(t('radio_playback_error','انتهى الاتصال بالبث'));
+audio.addEventListener('timeupdate',()=>{if(state==='live')clearTimeout(stallTimer)});
+audio.addEventListener('waiting',()=>{if(userWantsPlay&&state==='live'){setState('connecting');armStallWatch()}});
+audio.addEventListener('stalled',()=>{if(userWantsPlay)armStallWatch()});
+audio.addEventListener('error',()=>{if(userWantsPlay&&audio.getAttribute('src'))onStreamFailure()});
+audio.addEventListener('ended',()=>{if(userWantsPlay)onStreamFailure()});
+audio.addEventListener('pause',()=>{
+  // Our own teardown (reconnect / station change) also pauses; its event can
+  // arrive after internalPause is reset, so only a pause while live counts.
+  if(internalPause||!userWantsPlay||state!=='live')return;
+  // Backgrounded by the OS: try to keep the stream going.
+  if(document.visibilityState==='hidden'){setTimeout(()=>{if(userWantsPlay&&audio.paused)audio.play().catch(()=>{})},500);return}
+  // Paused from outside (headphones unplugged, lock screen, another page): respect it.
+  userWantsPlay=false;clearTimeout(stallTimer);setState('stopped');
 });
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&userWantsPlay&&audio.paused)audio.play().catch(()=>{});
 });
-audio.addEventListener('pause',()=>{
-  if(userWantsPlay&&document.visibilityState==='hidden')
-    setTimeout(()=>{if(audio.paused)audio.play().catch(()=>{});},500);
-});
+window.addEventListener('online',()=>{if(userWantsPlay){reconnectTries=0;audio.dataset.loadedUrl='';startPlayback()}});
+window.addEventListener('offline',()=>{if(userWantsPlay)setState('offline')});
 
-// ── media session ─────────────────────────────────────────
-function updateMediaSession(name){
-  if(!('mediaSession' in navigator))return;
+function setState(s){
+  state=s;
+  const live=s==='live',busy=s==='connecting'||s==='reconnecting';
+  document.body.classList.toggle('is-playing',live);
+  document.body.classList.toggle('is-connecting',busy||s==='offline');
+  playBtn.classList.toggle('loading',busy);
+  const showPause=userWantsPlay&&s!=='stopped';
+  document.getElementById('playIcon').style.display=showPause?'none':'block';
+  document.getElementById('pauseIcon').style.display=showPause?'block':'none';
+  const txt={
+    stopped:rt('radio_stopped','متوقف'),
+    connecting:rt('radio_connecting','جارٍ الاتصال…'),
+    reconnecting:rt('radio_reconnecting','جارٍ إعادة الاتصال ({n}/5)…',{n:reconnectTries}),
+    offline:rt('radio_offline','لا يوجد اتصال بالإنترنت'),
+    live:rt('radio_live','مباشر')
+  }[s];
+  document.getElementById('liveText').textContent=txt;
+  if(live)startClock();else if(s==='stopped')stopClock();
+  if('mediaSession'in navigator)navigator.mediaSession.playbackState=showPause?'playing':'paused';
+  syncIsland();
+}
+function fmtElapsed(ms){
+  const sec=Math.floor(ms/1000),h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),ss=sec%60;
+  const p=n=>String(n).padStart(2,'0');
+  return (h?h+':'+p(m):m)+':'+p(ss);
+}
+function startClock(){
+  clearInterval(clockTimer);
+  const tick=()=>{document.getElementById('liveTime').textContent=listenStart?fmtElapsed(Date.now()-listenStart):''};
+  tick();clockTimer=setInterval(tick,1000);
+}
+function stopClock(){clearInterval(clockTimer);document.getElementById('liveTime').textContent=''}
+
+function showRadioError(msg){
+  document.getElementById('radioErrorText').textContent=msg;
+  document.getElementById('radioError').hidden=false;
+}
+function hideRadioError(){document.getElementById('radioError').hidden=true}
+
+// ── media session (lock screen / headset / car) ─────────
+function updateMediaSession(){
+  if(!('mediaSession'in navigator)||!current)return;
   navigator.mediaSession.metadata=new MediaMetadata({
-    title:name||t('radio_title','إذاعة القرآن الكريم'),
-    artist:t('radio_live_artist','بث مباشر'),
-    album:'زاد المسلم',
+    title:displayName(current),
+    artist:catLabel(current.cat)+' · '+rt('radio_live_artist','البث المباشر'),
+    album:rt('radio_media_artist','زاد المسلم'),
     artwork:[
       {src:`${_mediaBase}/icons/icon-192.png`,sizes:'192x192',type:'image/png'},
       {src:`${_mediaBase}/icons/icon_512.png`,sizes:'512x512',type:'image/png'}
     ]
   });
-  navigator.mediaSession.setActionHandler('play',()=>togglePlay(true));
-  navigator.mediaSession.setActionHandler('pause',()=>togglePlay(false));
-  navigator.mediaSession.setActionHandler('stop',()=>{audio.pause();updateUI(false);});
-  navigator.mediaSession.setActionHandler('seekbackward',null);
-  navigator.mediaSession.setActionHandler('seekforward',null);
-  navigator.mediaSession.setActionHandler('previoustrack',null);
-  navigator.mediaSession.setActionHandler('nexttrack',null);
+  const set=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch(e){}};
+  set('play',()=>togglePlay(true));
+  set('pause',()=>togglePlay(false));
+  set('stop',()=>togglePlay(false));
+  set('previoustrack',()=>playAdjacent(-1));
+  set('nexttrack',()=>playAdjacent(1));
+  set('seekbackward',null);set('seekforward',null);
 }
 
-// ── station list ──────────────────────────────────────────
-function openStationSheet(){
-  haptic();
-  document.getElementById('stationSearch').value='';
-  renderList(allStations);
-  openSheet('stationSheet');
-  setTimeout(()=>document.getElementById('stationSearch').focus(),300);
-}
-function filterStations(q){
-  const term=q.toLowerCase();
-  const filtered=allStations.filter(s=>
-    s.name.toLowerCase().includes(term)||
-    (window.I18n&&I18n.name('stations',s.name,s.name).toLowerCase().includes(term))
-  );
-  renderList(filtered);
-}
-function renderList(list){
-  const el=document.getElementById('stationList');el.innerHTML='';
-  if(!list.length){
-    el.innerHTML='<div class="selection-item">'+t('radio_no_results','لا نتائج')+'</div>';return;
+// ============================================================
+//  SELECTION / NAVIGATION
+// ============================================================
+let ctxList=null;   // the list the station was picked from (prev/next walk it)
+function selectStation(st,opts={}){
+  if(!st)return;
+  const changed=!current||current.url!==st.url;
+  current=stationByUrl(st.url)||Object.assign({cat:categorize(st.name)},st);
+  const disp=displayName(current);
+  setHeroTicker(disp);setSelTicker(disp);
+  document.getElementById('nowCategory').textContent=catLabel(current.cat);
+  try{localStorage.setItem('lastStation',JSON.stringify({name:current.name,url:current.url}))}catch(e){}
+  checkFavStatus();
+  if(changed){
+    clearTimeout(reconnectTimer);clearTimeout(stallTimer);
+    reconnectTries=0;useAltHost=false;listenStart=0;hideRadioError();teardown();
   }
-  list.forEach(s=>{
-    const div=document.createElement('div');
-    div.className='selection-item'+(currentStation&&currentStation.url===s.url?' active':'');
-    div.textContent=window.I18n?I18n.name('stations',s.name,s.name):s.name;
-    div.onclick=()=>{haptic();selectStation(s);closeAllSheets();};
-    el.appendChild(div);
+  updateMediaSession();
+  if(opts.play)startPlayback();
+  else if(changed){userWantsPlay=false;setState('stopped')}
+  syncIsland();
+}
+function playAdjacent(dir){
+  const list=(ctxList&&ctxList.length?ctxList:allStations);
+  if(!list.length)return;
+  let i=current?list.findIndex(s=>s.url===current.url):-1;
+  i=i===-1?0:(i+dir+list.length)%list.length;
+  selectStation(list[i],{play:true});
+}
+
+// ── favorites & recents ──────────────────────────────────
+function favs(){const f=readJSON('favRadios',[]);return Array.isArray(f)?f:[]}
+function isFav(url){return favs().some(f=>f.url===url)}
+function setFav(st,on){
+  let f=favs().filter(x=>x.url!==st.url);
+  if(on)f.push({name:st.name,url:st.url});
+  localStorage.setItem('favRadios',JSON.stringify(f));
+}
+function checkFavStatus(){
+  const on=!!current&&isFav(current.url);
+  const b=document.getElementById('favBtn');
+  b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));
+}
+function toggleFavorite(st){
+  st=st||current;if(!st)return;
+  haptic();
+  const on=!isFav(st.url);setFav(st,on);
+  showToast(on?rt('radio_fav_added','أُضيفت للمفضلة'):rt('radio_fav_removed','حُذفت من المفضلة'));
+  checkFavStatus();
+  if(document.getElementById('stationSheet').classList.contains('active'))renderStationSheet();
+}
+function recents(){const r=readJSON('recentRadios',[]);return Array.isArray(r)?r:[]}
+function addRecent(st){
+  if(!st)return;
+  const r=recents().filter(u=>u!==st.url);r.unshift(st.url);
+  try{localStorage.setItem('recentRadios',JSON.stringify(r.slice(0,12)))}catch(e){}
+}
+
+// ============================================================
+//  STATION SHEET — chips, search, rows
+// ============================================================
+let sheetCat='all';
+function listFor(cat){
+  if(cat==='all')return allStations;
+  if(cat==='fav')return favs().map(f=>stationByUrl(f.url)||Object.assign({cat:categorize(f.name)},f));
+  if(cat==='recent')return recents().map(stationByUrl).filter(Boolean);
+  return allStations.filter(s=>s.cat===cat);
+}
+function openStationSheet(cat){
+  haptic();
+  sheetCat=cat||'all';
+  const si=document.getElementById('stationSearch');si.value='';
+  renderStationSheet();
+  openSheet('stationSheet');
+  setTimeout(()=>{
+    const a=document.querySelector('#stationList .selection-item.active');if(a)a.scrollIntoView({block:'center'});
+    if(matchMedia('(pointer:fine)').matches)si.focus();   // no surprise keyboard on phones
+  },120);
+}
+function renderChips(){
+  const box=document.getElementById('catChips');box.innerHTML='';
+  CATS.forEach(c=>{
+    const n=listFor(c.id).length;
+    if((c.id==='fav'||c.id==='recent')&&!n&&sheetCat!==c.id)return;   // hide empty personal tabs
+    const b=document.createElement('button');
+    b.type='button';b.className='cat-chip'+(c.id===sheetCat?' active':'');
+    b.setAttribute('role','tab');b.setAttribute('aria-selected',String(c.id===sheetCat));
+    b.innerHTML=`<span></span><small>${n}</small>`;b.firstChild.textContent=rt(c.key,c.fb);
+    b.onclick=()=>{haptic();sheetCat=c.id;renderStationSheet();b.scrollIntoView({inline:'center',block:'nearest'})};
+    box.appendChild(b);
+  });
+}
+function renderStationSheet(){
+  renderChips();
+  const q=normAr(document.getElementById('stationSearch').value);
+  const base=listFor(q?'all':sheetCat);            // search always spans every station
+  const items=q?base.filter(s=>normAr(s.name).includes(q)||normAr(displayName(s)).includes(q)):base;
+  document.getElementById('stationCount').textContent=items.length;
+  const el=document.getElementById('stationList');el.innerHTML='';
+  if(!items.length){
+    const msg=q?rt('radio_no_results','لا نتائج'):sheetCat==='fav'?rt('radio_fav_empty','لا توجد محطات مفضلة بعد'):sheetCat==='recent'?rt('radio_recent_empty','لم تستمع لأي إذاعة بعد'):rt('radio_no_results','لا نتائج');
+    el.innerHTML='<div class="list-empty"></div>';el.firstChild.textContent=msg;return;
+  }
+  const frag=document.createDocumentFragment();
+  items.forEach(st=>{
+    const row=document.createElement('div');
+    const active=!!current&&current.url===st.url;
+    row.className='selection-item'+(active?' active':'');
+    row.setAttribute('role','option');row.tabIndex=0;if(active)row.setAttribute('aria-selected','true');
+    row.innerHTML=`<span class="st-ico">${CAT_ICON[st.cat]||CAT_ICON.reciters}</span><div class="st-main"><span class="st-title"></span><span class="st-sub"></span></div><span class="sel-eq" aria-hidden="true"><i></i><i></i><i></i></span>`;
+    row.querySelector('.st-title').textContent=displayName(st);
+    row.querySelector('.st-sub').textContent=catLabel(st.cat);
+    const fav=document.createElement('button');
+    fav.type='button';fav.className='st-fav'+(isFav(st.url)?' on':'');fav.innerHTML=HEART_SVG;
+    fav.setAttribute('aria-label',rt('radio_add_fav','إضافة للمفضلة'));fav.setAttribute('aria-pressed',String(isFav(st.url)));
+    fav.onclick=e=>{e.stopPropagation();toggleFavorite(st)};
+    row.appendChild(fav);
+    const pick=()=>{haptic();ctxList=items.slice();selectStation(st,{play:true});closeAllSheets()};
+    row.onclick=pick;
+    row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}};
+    frag.appendChild(row);
+  });
+  el.appendChild(frag);
+}
+document.getElementById('stationSearch').addEventListener('input',renderStationSheet);
+document.getElementById('stationSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}});
+
+// ============================================================
+//  SLEEP TIMER (fades out, then stops)
+// ============================================================
+const SLEEP_OPTS=[15,30,45,60,90,120];
+let sleepEnd=0,sleepTick=null,sleepMins=0;
+function renderSleep(){
+  const grid=document.getElementById('sleepGrid');grid.innerHTML='';
+  SLEEP_OPTS.forEach(m=>{
+    const b=document.createElement('button');b.type='button';
+    b.className='sleep-opt'+(sleepEnd&&sleepMins===m?' active':'');
+    b.innerHTML=`${m}<small></small>`;b.querySelector('small').textContent=rt('radio_min_short','{n} د',{n:''}).trim()||'د';
+    b.onclick=()=>{haptic();startSleep(m)};
+    grid.appendChild(b);
+  });
+  document.getElementById('sleepCancel').hidden=!sleepEnd;
+  document.getElementById('sleepRemaining').hidden=!sleepEnd;
+  updateSleepUI();
+}
+function startSleep(m){
+  sleepMins=m;sleepEnd=Date.now()+m*60000;
+  clearInterval(sleepTick);sleepTick=setInterval(updateSleepUI,1000);
+  showToast(rt('radio_sleep_set','سيتوقف البث بعد {n} دقيقة',{n:m}));
+  renderSleep();
+  setTimeout(closeAllSheets,350);
+}
+function cancelSleep(announce){
+  sleepEnd=0;sleepMins=0;clearInterval(sleepTick);audio.volume=1;
+  if(announce)showToast(rt('radio_sleep_cancelled','تم إلغاء مؤقت النوم'));
+  renderSleep();
+}
+function updateSleepUI(){
+  const left=sleepEnd?sleepEnd-Date.now():0;
+  const badge=document.getElementById('sleepBadge'),btn=document.getElementById('sleepBtn');
+  btn.classList.toggle('on',!!sleepEnd);
+  if(!sleepEnd){badge.hidden=true;audio.volume=1;return}
+  if(left<=0){
+    stopPlayback();cancelSleep(false);showToast(rt('radio_sleep_ended','انتهى مؤقت النوم'));return;
+  }
+  audio.volume=left<10000?Math.max(0,left/10000):1;      // gentle fade over the last 10 s
+  badge.hidden=false;badge.textContent=rt('radio_min_short','{n} د',{n:Math.ceil(left/60000)});
+  const rem=document.getElementById('sleepRemaining');
+  if(!rem.hidden)rem.textContent=fmtElapsed(left);
+}
+
+// ============================================================
+//  CONTINUOUS PLAYBACK (js/continuous-player.js)
+// ============================================================
+function appNavigate(url){if(window.ZadShell)ZadShell.navigate(url);else location.href=url}
+function homeUrl(){
+  try{const r=document.referrer&&new URL(document.referrer);if(r&&r.origin===location.origin&&r.pathname!==location.pathname)return r.href}catch(e){}
+  return '../index.html';
+}
+function syncIsland(){
+  if(!window.ZadShell||!current)return;
+  ZadShell.update({title:displayName(current),subtitle:document.getElementById('liveText').textContent,
+    playing:userWantsPlay&&state!=='stopped',progress:0,art:document.querySelector('.m-album').src});
+}
+function armLeaveSoon(){
+  if(!window.ZadShell||!ZadShell.shouldFrame())return;
+  setTimeout(()=>{if(!document.getElementById('sheetOverlay').classList.contains('active')&&!ZadShell.isOpen())ZadShell.armLeave(homeUrl())},800);
+}
+if(window.ZadShell){
+  ZadShell.init({
+    isActive:()=>hasStartedPlayback&&!!current,
+    isPlaying:()=>userWantsPlay,
+    pause:()=>stopPlayback(),
+    toggle:()=>{haptic();if(!userWantsPlay)ZadShell.pauseFrameMedia();togglePlay()},
+    next:()=>{haptic();ZadShell.pauseFrameMedia();playAdjacent(1)},
+    beforeOpen:()=>{const open=document.getElementById('sheetOverlay').classList.contains('active');if(open)closeAllSheets();return open?350:0}
   });
 }
 
-function selectStation(station){
-  currentStation=station;
-  const disp=window.I18n?I18n.name('stations',station.name,station.name):station.name;
-  setHeroTicker(disp);
-  setSelTicker(disp);
-  localStorage.setItem('lastStation',JSON.stringify(station));
-  const wasPlaying=userWantsPlay;
-  audio.pause();if(hls){hls.destroy();hls=null;}
-  audio.dataset.loadedUrl='';
-  checkFavStatus(station.url);
-  playBtn.classList.remove('loading');
-  if(wasPlaying)togglePlay(true);else updateUI(false);
-}
-
-// ── favorites ─────────────────────────────────────────────
-function checkFavStatus(url){
-  const favs=JSON.parse(localStorage.getItem('favRadios')||'[]');
-  document.getElementById('favBtn').classList.toggle('active',favs.some(f=>f.url===url));
-}
-function toggleFavorite(){
-  if(!currentStation)return;
-  haptic();
-  let favs=JSON.parse(localStorage.getItem('favRadios')||'[]');
-  const idx=favs.findIndex(f=>f.url===currentStation.url);
-  if(idx===-1){favs.push(currentStation);showToast(t('radio_fav_added','أُضيفت للمفضلة'))}
-  else{favs.splice(idx,1);showToast(t('radio_fav_removed','حُذفت من المفضلة'))}
-  localStorage.setItem('favRadios',JSON.stringify(favs));
-  checkFavStatus(currentStation.url);
-}
-function openFavSheet(){
-  haptic();
-  const list=document.getElementById('favList');
-  const favs=JSON.parse(localStorage.getItem('favRadios')||'[]');
-  list.innerHTML='';
-  if(!favs.length){
-    list.innerHTML='<div class="selection-item" style="opacity:.6">'+t('radio_fav_empty','لا توجد محطات مفضلة بعد')+'</div>';
-  }else{
-    favs.forEach(fav=>{
-      const div=document.createElement('div');
-      div.className='fav-item';
-      const nm=window.I18n?I18n.name('stations',fav.name,fav.name):fav.name;
-      div.innerHTML=`<span class="fav-item-name">${nm}</span>
-        <button class="fav-del" onclick="event.stopPropagation();removeFav('${fav.url.replace(/'/g,"\\'")}')">${t('radio_fav_delete','حذف')}</button>`;
-      div.onclick=()=>{selectStation(fav);closeAllSheets();};
-      list.appendChild(div);
-    });
-  }
-  openSheet('favSheet');
-}
-function removeFav(url){
-  let favs=JSON.parse(localStorage.getItem('favRadios')||'[]');
-  favs=favs.filter(f=>f.url!==url);
-  localStorage.setItem('favRadios',JSON.stringify(favs));
-  if(currentStation&&currentStation.url===url)checkFavStatus(url);
-  openFavSheet();
-  showToast(t('radio_fav_deleted','حُذفت'));
-}
+// keyboard (desktop / Bluetooth keyboards)
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select,[contenteditable]')||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key===' '||e.key==='k'){e.preventDefault();togglePlay()}
+  else if(e.key==='n'||e.key==='N')playAdjacent(1);
+  else if(e.key==='p'||e.key==='P')playAdjacent(-1);
+});
 
 // ── init ──────────────────────────────────────────────────
 function init(){
-  allStations=typeof RADIO_STATIONS!=='undefined'?RADIO_STATIONS:[];
-  const last=JSON.parse(localStorage.getItem('lastStation')||'null');
-  if(last&&last.name&&last.url){selectStation(last);}
-  else if(allStations.length){selectStation(allStations[0]);}
+  buildStations();
+  const last=readJSON('lastStation',null);
+  const st=last&&last.url&&(stationByUrl(last.url)||last.name&&last);
+  selectStation(st||allStations[0]);
 }
-
 window.addEventListener('langchange',()=>{
-  renderList(allStations);
-  if(currentStation){
-    const dn=window.I18n?I18n.name('stations',currentStation.name,currentStation.name):currentStation.name;
-    setHeroTicker(dn);setSelTicker(dn);
-  }
+  if(current){const d=displayName(current);setHeroTicker(d);setSelTicker(d);document.getElementById('nowCategory').textContent=catLabel(current.cat);setState(state);updateMediaSession()}
+  if(document.getElementById('stationSheet').classList.contains('active'))renderStationSheet();
 });
-
 window.addEventListener('load',()=>{
-  const saved=localStorage.getItem('themeMode')||'dark';
-  setTheme(saved);
+  setTheme(localStorage.getItem('themeMode')||'dark');
   init();
 });
 </script>
