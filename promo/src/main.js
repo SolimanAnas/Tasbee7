@@ -11,7 +11,7 @@
   const u = Math.min(W, H) / 1080;
 
   const L = {
-    fmt, W, H, u, v, sq, lang, rtl: lang === 'ar',
+    fmt, W, H, u, v, sq, lang, rtl: lang === 'ar', play: qs.get('play') === '1',
     arch: v ? { cx: 0.5 * W, top: 0.11 * H, w: 0.36 * W, h: 0.37 * H }
       : sq ? { cx: 0.7 * W, top: 0.12 * H, w: 0.25 * W, h: 0.55 * H }
         : { cx: 0.7 * W, top: 0.15 * H, w: 0.17 * W, h: 0.6 * H },

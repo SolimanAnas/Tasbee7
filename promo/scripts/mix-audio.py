@@ -16,9 +16,10 @@ from pathlib import Path
 A = Path(__file__).resolve().parent.parent / "audio"
 ambient = "--ambient" in sys.argv
 ar = "--ar" in sys.argv
+play = "--play" in sys.argv  # Google Play preview narration
 bed = A / ("ambience.wav" if ambient else "score.wav")
-vo = A / ("vo-ar.flac" if ar else "vo.flac")
-out = A / (("mix-ambient" if ambient else "mix") + ("-ar" if ar else "") + ".flac")
+vo = A / (("vo-ar" if ar else "vo") + ("-play" if play else "") + ".flac")
+out = A / (("mix-ambient" if ambient else "mix") + ("-ar" if ar else "") + ("-play" if play else "") + ".flac")
 
 # VO: clean low end, gentle compression, a touch of presence and room.
 # Bed: ducked ~6 dB under the voice, then everything summed.

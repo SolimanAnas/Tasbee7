@@ -38,6 +38,10 @@ scripts/verify.py     ← QA report
 
 Every frame is a pure function of time: `renderFrame(t)` sets all state from `t`. Frames can therefore be rendered in any order, split across workers, and re-rendered one at a time. To preview any moment in a browser, serve `promo/` and open `src/index.html?fmt=vertical&t=12.5`.
 
+## Google Play listing (Arabic)
+
+`output/google-play/ar/` holds the Play Console assets for the Arabic store listing: the app icon (512×512), the feature graphic (1024×500), 8 phone screenshots (1080×1920), and the no-music promo video cut to Play's preview guidelines, with Arabic captions. The upload steps and the spec check are in `output/google-play/README.md`.
+
 ## Arabic cut
 
 The same engine renders an Arabic version with `?lang=ar`. Everything else in the pipeline is unchanged.

@@ -17,6 +17,10 @@
     const pick = o => (V ? o.v : SQ ? (o.s ?? o.v) : o.l);
     // Arabic cut (?lang=ar): Arabic copy and app UI, composition mirrored for RTL.
     const AR = L.lang === 'ar', M = AR ? -1 : 1;
+    // Google Play preview cut (?play=1): no store badge, QR, URL, "download"
+    // CTA or pricing on the end card (Play preview-asset guidelines); the app
+    // itself takes the CTA column instead.
+    const PLAY = !!L.play;
     const tx = (en, ar) => (AR ? ar : en);
     const AR_SCREENS = ['audio', 'azkar', 'hisn', 'masbaha-30', 'masbaha-31', 'masbaha-32', 'masbaha-33', 'hadith', 'radio', 'takrar', 'sleeping'];
     const sn = n => (!AR ? n : n === 'home-en' ? 'home-ar' : n === 'qibla-compass' ? 'qibla-ar' : AR_SCREENS.includes(n) ? n + '-ar' : n);
@@ -111,8 +115,10 @@
     const pAnchor = el('div', 'anchor', plane);
     pAnchor.style.left = PW / 2 + dpX + 'px'; pAnchor.style.top = PH / 2 + 'px';
     const desk = makePhone(pAnchor, hDesk, [sn('home-en'), sn('sleeping')]);
+    const hEnd = pick({ l: 0.68 * H, v: 0.4 * H, s: 0.6 * H });
+    const endPhone = makePhone(anchor, hEnd, [sn('home-en')]);
     // mirror every phone's placement and yaw for RTL
-    if (AR) [hero, audio, ...car, ...more, ...langs, desk].forEach(ph => {
+    if (AR) [hero, audio, ...car, ...more, ...langs, desk, endPhone].forEach(ph => {
       const pose = ph.pose.bind(ph);
       ph.pose = p => pose(Object.assign({}, p, { x: -(p.x || 0), ry: -(p.ry || 0), rz: -(p.rz || 0) }));
     });
@@ -201,7 +207,8 @@
     ben.style.fontSize = B.benS * u * (AR ? 1.3 : 1) + 'px';
     ben.style.color = 'var(--gold-soft)';
     if (AR) ben.style.direction = 'rtl';
-    const benItems = (AR ? ['مَجّاني', 'بلا إعلانات', 'يعمل دون إنترنت'] : ['Free', 'Ad-Free', 'Works Offline']).map((s, i) => {
+    const benList = AR ? ['مَجّاني', 'بلا إعلانات', 'يعمل دون إنترنت'] : ['Free', 'Ad-Free', 'Works Offline'];
+    const benItems = (PLAY ? benList.slice(1) : benList).map((s, i) => {
       if (i) el('span', 'sep', ben, '&nbsp;&nbsp;•&nbsp;&nbsp;');
       return el('span', '', ben, s);
     });
@@ -460,16 +467,31 @@
       at(tag, lx, B.tagY * H + offY, ease.inOut(prog(t, 37.35, 38.2)));
       // (Arabic must never be letter-spaced: it breaks the joining)
       if (!AR) tag.style.letterSpacing = lerp(0.5, 0.3, ease.out(prog(t, 37.35, 38.6))).toFixed(3) + 'em';
-      at(ben, lx, B.benY * H + offY, t > 39.6 ? 1 : 0);
-      [39.7, 40.4, 41.25].forEach((t0, i) => {
+      const benT = PLAY ? [39.45, 40.45] : [39.7, 40.4, 41.25];
+      at(ben, lx, B.benY * H + offY, t > benT[0] - 0.1 ? 1 : 0);
+      benT.forEach((t0, i) => {
         const p = ease.out(prog(t, t0, t0 + 0.7));
         benItems[i].style.opacity = p.toFixed(3);
         benItems[i].style.filter = p < 1 ? `blur(${((1 - p) * 6).toFixed(2)}px)` : 'none';
         if (i) benSeps[i - 1].style.opacity = p.toFixed(3);
       });
-      ben.style.visibility = t > 39.6 ? 'visible' : 'hidden';
+      ben.style.visibility = t > benT[0] - 0.1 ? 'visible' : 'hidden';
       // right column (or lower block in vertical)
       const rx = B.rx * W;
+      if (PLAY) {
+        // in landscape/square the app screen sits beside the centred brand early
+        // (keeps the preview ≥ 80 % app experience); vertical waits for the slide
+        const e0 = pick({ l: 36.3, v: 40.3, s: 36.3 });
+        const ep = ease.outQuint(prog(t, e0, e0 + 1.6));
+        const ey = pick({ l: 0.5, v: 0.72, s: 0.5 }) * H;
+        endPhone.pose(t < e0 ? { o: 0 } : {
+          x: (rx - W / 2) * M, y: ey - H / 2 + (1 - ep) * 0.08 * H + Math.sin(t * 0.7) * 4 * u,
+          z: lerp(-300, 0, ep), ry: -10, rx: 2, o: ease.inOut(prog(t, e0, e0 + 0.6)), blur: (1 - ep) * 10,
+        });
+        endPhone.show({ [sn('home-en')]: { o: 1 } });
+        return S;
+      }
+      endPhone.pose({ o: 0 });
       at(cta, rx, B.ctaY * H, t > 40.35 ? 1 : 0);
       playText(ctaT, t, 40.4, undefined, { stagger: 0.12, dur: 1.0 });
       const qp = ease.outQuint(prog(t, 40.6, 41.8));

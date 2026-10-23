@@ -49,6 +49,10 @@ LINES = [
     (39.35, "مَجّاني، بلا إعلانات، ويعمل دون إنترنت."),  # final ي without shadda, else read as "majjāniyya"
     (42.90, "حمِّلْه الآن من جوجل بلاي."),
 ]
+# Google Play preview cut (--play): no pricing and no "download" call to action
+# (Play preview-asset guidelines), so the narration ends on the feature line.
+PLAY_LINES = LINES[:9] + [(39.35, "بلا إعلانات، ويعمل دون إنترنت.")]
+
 # a line may run until this many seconds before the next one starts
 GAP = 0.25
 
@@ -88,9 +92,12 @@ def main():
     ap.add_argument("--takes", type=int, default=3)
     ap.add_argument("--whisper", default="small")
     ap.add_argument("--reuse", action="store_true", help="re-use takes already in build/vo-ar (re-place and re-score only)")
+    ap.add_argument("--play", action="store_true", help="Google Play preview cut (outputs *-play files)")
     ap.add_argument("--redo", default="", help="with --reuse: comma-separated line numbers to regenerate (e.g. after a script edit)")
     args = ap.parse_args()
     redo = {int(n) for n in args.redo.split(",") if n.strip()}
+    lines = PLAY_LINES if args.play else LINES
+    suffix = "-play" if args.play else ""
 
     import torch
     from faster_whisper import WhisperModel
@@ -108,7 +115,10 @@ def main():
         segs, _ = asr.transcribe(a16, language="ar", beam_size=5)
         return " ".join(s.text for s in segs)
 
-    work = ROOT / "build" / "vo-ar"
+    work = ROOT / "build" / ("vo-ar" + suffix)
+    if args.play and not work.exists():  # start from the main cut's takes; the edited line is redone
+        import shutil
+        shutil.copytree(ROOT / "build" / "vo-ar", work, ignore=shutil.ignore_patterns("line09-*", "line10-*"))
     work.mkdir(parents=True, exist_ok=True)
     anchor_wav = work / "anchor.wav"
     if not anchor_wav.exists():
@@ -118,8 +128,8 @@ def main():
 
     track = np.zeros(int(DURATION * SR), dtype=np.float32)
     timing, qa = [], []
-    for k, (start, text) in enumerate(LINES):
-        limit = (LINES[k + 1][0] - GAP if k + 1 < len(LINES) else DURATION - 0.4) - start
+    for k, (start, text) in enumerate(lines):
+        limit = (lines[k + 1][0] - GAP if k + 1 < len(lines) else DURATION - 0.4) - start
         best = None
         regen = not args.reuse or k in redo
         if regen:  # drop stale takes of an edited line
@@ -171,9 +181,9 @@ def main():
         with wave.open(str(tmp), "wb") as w:
             w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
             w.writeframes((track * 32767).astype(np.int16).tobytes())
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), str(ROOT / "audio" / "vo-ar.flac")], check=True)
-    (ROOT / "audio" / "vo-timing-ar.json").write_text(json.dumps(timing, ensure_ascii=False, indent=2))
-    (ROOT / "audio" / "vo-ar-qa.json").write_text(json.dumps(qa, ensure_ascii=False, indent=2))
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), str(ROOT / "audio" / f"vo-ar{suffix}.flac")], check=True)
+    (ROOT / "audio" / f"vo-timing-ar{suffix}.json").write_text(json.dumps(timing, ensure_ascii=False, indent=2))
+    (ROOT / "audio" / f"vo-ar{suffix}-qa.json").write_text(json.dumps(qa, ensure_ascii=False, indent=2))
     print("mean CER", round(sum(q["cer"] for q in qa) / len(qa), 4))
 
 
