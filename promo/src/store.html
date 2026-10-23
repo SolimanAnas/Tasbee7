@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Zad Al-Muslim — Google Play listing graphics</title>
+<!--
+  Google Play listing graphics (Arabic), rendered by scripts/store-assets.cjs:
+    ?asset=shot&i=0..7  phone screenshot 1080×1920
+    ?asset=feature      feature graphic 1024×500
+  Follows Play's preview-asset guidelines: genuine app UI, no device frame,
+  tagline band ≤ 20 % of the image, no store badge / CTA / pricing / rankings.
+-->
+<link rel="stylesheet" href="styles.css">
+<style>
+  html, body { margin: 0; background: #0a3d2f; }
+  #c { position: relative; overflow: hidden; direction: rtl;
+       background:
+         radial-gradient(ellipse 80% 55% at 50% 38%, rgba(32, 150, 108, 0.75), rgba(32, 150, 108, 0) 70%),
+         radial-gradient(ellipse 60% 40% at 15% 100%, rgba(201, 166, 107, 0.22), rgba(201, 166, 107, 0) 70%),
+         linear-gradient(180deg, #0e5a43 0%, #0a4434 55%, #083a2c 100%); }
+  #c svg.arch { position: absolute; pointer-events: none; }
+  .head { position: absolute; left: 0; right: 0; text-align: center; color: var(--ivory); }
+  .head h1 { margin: 0; font-family: 'Amiri', serif; font-weight: 400; line-height: 1.25; }
+  .head h1 em { font-style: normal; color: var(--gold-soft); }
+  .head p { margin: 0; font-family: 'Tajawal', sans-serif; font-weight: 500; color: rgba(244, 237, 223, 0.78); }
+  .shot { position: absolute; overflow: hidden; background: #000;
+          box-shadow: 0 40px 90px rgba(0, 20, 14, 0.55), 0 0 0 2px rgba(230, 207, 156, 0.35); }
+  .shot img { display: block; width: 100%; }
+  .rule { position: absolute; height: 2px; background: linear-gradient(90deg, rgba(230,207,156,0), rgba(230,207,156,0.85), rgba(230,207,156,0)); }
+</style>
+</head>
+<body>
+<div id="c"></div>
+<script>
+(async function () {
+  const qs = new URLSearchParams(location.search);
+  const asset = qs.get('asset') || 'shot';
+  const c = document.getElementById('c');
+  // A faint pointed-arch outline — the campaign's architectural motif.
+  const arch = (x, y, w, h, op) => `<svg class="arch" style="left:${x}px;top:${y}px" width="${w}" height="${h}" viewBox="0 0 100 160" preserveAspectRatio="none">
+      <path d="M2 160 V62 C2 30 32 12 50 2 C68 12 98 30 98 62 V160" fill="none" stroke="#e6cf9c" stroke-opacity="${op}" stroke-width="0.6" vector-effect="non-scaling-stroke"/></svg>`;
+
+  // [screen, headline (Amiri; <em> in gold), subline (Tajawal)]
+  const SHOTS = [
+    ['home-ar', 'كلُّ ما <em>تَحْتاجُهُ</em>', 'القرآن والأذكار والحديث في تطبيقٍ واحد'],
+    ['quran-p1', 'صِلَتُكَ <em>بالقرآنِ الكريم</em>', '٥ أنماط للمصحف مع التفاسير والعلامات'],
+    ['audio-ar', 'أجملُ <em>التلاوات</em>', 'قرّاء متعدّدون وتشغيل في الخلفية'],
+    ['azkar-ar', 'أذكارُ <em>يَوْمِكَ</em>', 'الصباح والمساء وبعد الصلاة'],
+    ['masbaha-33-ar', 'المِسْبَحةُ <em>الذكيّة</em>', 'أهداف يومية وإحصاءات دائمة'],
+    ['hadith-ar', 'كتبُ السنّة <em>بين يَدَيْكَ</em>', 'ابحث في الأحاديث بسهولة'],
+    ['radio-ar', 'إذاعةُ <em>القرآنِ الكريم</em>', 'بثّ مباشر على مدار الساعة'],
+    ['takrar-ar', 'رَفِيقُكَ <em>في الحفظ</em>', 'تكرار الآيات بالسورة أو الجزء أو الصفحة'],
+  ];
+
+  let W, H;
+  if (asset === 'feature') {
+    [W, H] = [1024, 500];
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    c.innerHTML = arch(412, -20, 200, 560, 0.18) + `
+      <div class="shot" style="width:178px;left:60px;top:70px;border-radius:22px;transform:rotate(-6deg)"><img src="../assets/screens/quran-p1.png"></div>
+      <div class="shot" style="width:178px;right:60px;top:70px;border-radius:22px;transform:rotate(6deg)"><img src="../assets/screens/masbaha-33-ar.png"></div>
+      <div style="position:absolute;left:0;right:0;top:58px;text-align:center">
+        <img src="../assets/brand/app-icon-1024.png" style="width:132px;height:132px;border-radius:24%;box-shadow:0 18px 40px rgba(0,0,0,.4),0 0 0 1.5px rgba(230,207,156,.5)">
+      </div>
+      <div class="head" style="top:200px"><h1 style="font-size:84px">زادُ المسلم</h1></div>
+      <div class="rule" style="width:220px;left:402px;top:328px"></div>
+      <div class="head" style="top:346px"><p style="font-size:30px;color:var(--ivory)">رَفِيقُكَ الإسلاميّ المتكامل</p></div>
+      <div class="head" style="top:396px"><p style="font-size:23px;color:var(--gold-soft);font-weight:700">القرآن · الأذكار · الحديث · القبلة</p></div>`;
+  } else {
+    [W, H] = [1080, 1920];
+    const i = +(qs.get('i') || 0);
+    const [scr, h1, sub] = SHOTS[i];
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    // headline band: top 19 % (365 px) of the canvas
+    c.innerHTML = arch(140, 250, 800, 1900, 0.16) + `
+      <div class="head" style="top:96px"><h1 style="font-size:96px">${h1}</h1></div>
+      <div class="head" style="top:262px"><p style="font-size:40px">${sub}</p></div>
+      <div class="shot" style="width:860px;left:110px;top:430px;border-radius:56px 56px 0 0"><img src="../assets/screens/${scr}.png"></div>`;
+  }
+  await document.fonts.load('400 40px Amiri', 'زاد');
+  await document.fonts.load('500 40px Tajawal', 'زاد');
+  await document.fonts.load('700 40px Tajawal', 'زاد');
+  await Promise.all([...document.images].map(im => im.decode().catch(() => {})));
+  window.assetReady = { W, H };
+})();
+</script>
+</body>
+</html>
