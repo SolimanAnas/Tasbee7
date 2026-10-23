@@ -204,11 +204,13 @@ def build_music(buf):
         place(buf, piano(m, 0.48, 6.0), 43.62 + k * 0.08, 0.6, -0.35 + k * 0.11)
 
 
-def build_sfx(buf):
+def build_sfx(buf, tonal=True):
+    """tonal=False drops the drone pad and the shimmer chord (the no-music mix)."""
     t = t_axis(N)
     # dawn: low drone + air, swelling in, ducked away by the hush
     drone = pad([26, 38], 4.6, attack=1.5, release=0.3, bright=260)
-    place(buf, drone, 0.0, 0.32)
+    if tonal:
+        place(buf, drone, 0.0, 0.32)
     air = lp(hp(noise(int(4.4 * SR)), 900), 5000)
     env = np.minimum(t_axis(len(air)) / 1.8, 1.0) * np.clip((4.25 - t_axis(len(air))) / 0.05, 0, 1)
     place(buf, air * env * 0.018, 0.0, 1.0, -0.2)
@@ -238,7 +240,8 @@ def build_sfx(buf):
     place(buf, bloom, 35.2, 0.28)
     shimmer = sum(np.sin(2 * np.pi * f * bt + rng.uniform(0, 6)) for f in (2349.3, 2793.8, 3520.0, 4698.6))
     shimmer *= np.minimum(bt / 1.2, 1) * np.exp(-bt * 0.9) * 0.012
-    place(buf, shimmer, 34.8, 1.0, 0.0)
+    if tonal:
+        place(buf, shimmer, 34.8, 1.0, 0.0)
     place(buf, whoosh(1.6, 200, 6000, 0.75), 33.9, 0.32, 0.0)
 
 
@@ -247,7 +250,7 @@ def main():
     buf = np.zeros((2, N))
     if not no_music:
         build_music(buf)
-    build_sfx(buf)
+    build_sfx(buf, tonal=not no_music)
     # Ambience-only mix keeps a soft room tone under the whole piece.
     if no_music:
         room = lp(noise(N), 400) * 0.006

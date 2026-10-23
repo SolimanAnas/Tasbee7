@@ -12,6 +12,7 @@ This folder holds a code-generated 45-second commercial for **Zad Al-Muslim**, w
 | `zad-al-muslim-poster.png` | Cover artwork, 1920×1080 |
 | `zad-al-muslim-poster-vertical.png` | Cover artwork, 1080×1920 |
 | `zad-al-muslim-hero-ar.mp4` | **Arabic cut**: 1920×1080 with Arabic voiceover, Arabic on-screen copy, the app's Arabic UI and a mirrored right-to-left composition |
+| `zad-al-muslim-hero-ar-no-music.mp4` | Arabic cut **without music**: narration plus non-tonal sound design only (air, whooshes, a low impact at the reveal, notification sound effects in the opening). No instruments, pads or melodic tones |
 | `zad-al-muslim-storyboard.md` | Final timings, voiceover, on-screen text and visual direction |
 | `qa-report.md` | Automated checks of the files above (resolution, fps, codecs, loudness, QR decoded from the video) |
 
@@ -47,6 +48,8 @@ The same engine renders an Arabic version with `?lang=ar`. Everything else in th
 - **End card:** leads with **زادُ المسلم** and uses the official Arabic Google Play badge ("احصل عليه من Google Play").
 - **Narration:** VoxCPM2 (open weights, Apache-2.0). The narrator is created by *voice design*, from a text description of a "mature Arab male narrator, warm, deep and calm…". No real person's voice is cloned. One anchor phrase fixes the voice, and every line is then generated in that voice. Measured median pitch is 89 Hz.
 - **Pronunciation QA:** each line is generated in up to 3 takes. Every take is transcribed back with Whisper and scored by character error rate (CER) against the script, and the best take is kept. The final mean CER is **1.9%**, with per-line results in `audio/vo-ar-qa.json`. The finished MP4 was also transcribed end-to-end over the music.
+- **Diacritics:** the second-person words carry full tashkeel on screen and in the script: صِلَتُكَ / صِلَتَكَ, بِلُغَتِكَ, قَلْبَكَ, رَفِيقُكَ, تُعِينُكَ. The lines containing صِلَتَكَ, بِلُغَتِكَ and مَجّاني are fully voweled for the TTS, with pausal endings at the pauses. «مَجّاني» deliberately has **no shadda on the final yāʾ**: with it («مجانيّ») the model said "majjāniyya", and Whisper heard «مجانية» in 4 of 4 takes. Without it, all takes come out as «مجاني».
+- **Limit of the automatic check:** Whisper confirms the words, but it does not reliably report short vowels, so a native speaker should listen to the ‑ka endings before paid placement. They fall at about 8.4 s, 15.3 s, 27 s and 29.4 s.
 
 ```bash
 python -m venv .venv-ar && .venv-ar/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu \

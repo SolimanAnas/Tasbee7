@@ -129,17 +129,17 @@
     // ---- headlines ----------------------------------------------------------
     const T1 = headline(tx("Among life's<br><em>endless distractions…</em>", 'وسطَ مشاغلِ الحياةِ<br><em>التي لا تنتهي…</em>'),
       pick({ l: { x: 0.07, y: 0.38, size: 92 }, v: { align: 'center', y: 0.575, size: 92 }, s: { x: 0.07, y: 0.73, size: 70 } }));
-    const T2 = headline(tx('Make space<br>for <em>what matters.</em>', 'اِمنحْ قلبَك مساحةً<br><em>لما يهمُّ حقًّا.</em>'),
+    const T2 = headline(tx('Make space<br>for <em>what matters.</em>', 'اِمنحْ قَلْبَكَ مساحةً<br><em>لما يهمُّ حقًّا.</em>'),
       pick({ l: { x: 0.08, y: 0.37, size: 110 }, v: { align: 'center', y: 0.075, size: 104 }, s: { align: 'center', y: 0.05, size: 76 } }));
-    const T3 = headline(tx('Your connection<br>with <em>the Quran.</em>', 'صِلتُك<br><em>بالقرآنِ الكريم.</em>'),
+    const T3 = headline(tx('Your connection<br>with <em>the Quran.</em>', 'صِلَتُكَ<br><em>بالقرآنِ الكريم.</em>'),
       pick({ l: { x: 0.07, y: 0.3, size: 104 }, v: { align: 'center', y: 0.075, size: 100 }, s: { align: 'center', y: 0.05, size: 74 } }));
     const T4 = headline(tx('Remember. Reflect. <em>Grow.</em>', 'تذكَّرْ. تأمَّلْ. <em>اِرتقِ.</em>'),
       pick({ l: { align: 'center', y: 0.075, size: 92 }, v: { align: 'center', y: 0.085, size: 86 }, s: { align: 'center', y: 0.06, size: 74 } }));
     const T5 = headline(tx('More ways to<br><em>stay connected.</em>', 'طرقٌ أكثرُ<br><em>لتبقى قريبًا.</em>'),
       pick({ l: { x: 0.07, y: 0.36, size: 100 }, v: { align: 'center', y: 0.075, size: 96 }, s: { align: 'center', y: 0.05, size: 72 } }));
-    const T5b = headline(tx('In your <em>own language.</em>', 'بلغتِك <em>المفضّلة.</em>'),
+    const T5b = headline(tx('In your <em>own language.</em>', 'بِلُغَتِكَ <em>المفضّلة.</em>'),
       pick({ l: { align: 'center', y: 0.07, size: 84 }, v: { align: 'center', y: 0.14, size: 88 }, s: { align: 'center', y: 0.07, size: 70 } }));
-    const T6 = headline(tx('Made for your<br><em>everyday journey.</em>', 'رفيقُك<br><em>في كلِّ يوم.</em>'),
+    const T6 = headline(tx('Made for your<br><em>everyday journey.</em>', 'رَفِيقُكَ<br><em>في كلِّ يوم.</em>'),
       pick({ l: { x: 0.07, y: 0.34, size: 100 }, v: { align: 'center', y: 0.075, size: 96 }, s: { align: 'center', y: 0.05, size: 72 } }));
 
     // ---- labels / chips -----------------------------------------------------
@@ -194,14 +194,14 @@
     nameAr.style.fontSize = B.arS * u + 'px';
     const rule = el('div', 'rule', type);
     rule.style.width = 380 * u * (SQ ? 0.75 : 1) + 'px';
-    const tag = el('div', 'label', type, tx('Your All-in-One Islamic Companion', 'رفيقُك الإسلاميّ المتكامل'));
+    const tag = el('div', 'label', type, tx('Your All-in-One Islamic Companion', 'رَفِيقُكَ الإسلاميّ المتكامل'));
     tag.style.fontSize = B.tagS * u * (AR ? 1.45 : 1) + 'px';
     tag.style.color = 'var(--ivory)';
     const ben = el('div', 'label', type);
     ben.style.fontSize = B.benS * u * (AR ? 1.3 : 1) + 'px';
     ben.style.color = 'var(--gold-soft)';
     if (AR) ben.style.direction = 'rtl';
-    const benItems = (AR ? ['مجانيّ', 'بلا إعلانات', 'يعمل دون إنترنت'] : ['Free', 'Ad-Free', 'Works Offline']).map((s, i) => {
+    const benItems = (AR ? ['مَجّاني', 'بلا إعلانات', 'يعمل دون إنترنت'] : ['Free', 'Ad-Free', 'Works Offline']).map((s, i) => {
       if (i) el('span', 'sep', ben, '&nbsp;&nbsp;•&nbsp;&nbsp;');
       return el('span', '', ben, s);
     });
