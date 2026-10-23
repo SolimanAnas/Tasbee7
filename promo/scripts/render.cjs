@@ -17,6 +17,8 @@ const PROMO = path.resolve(__dirname, '..');
 const OUT = path.join(PROMO, 'output');
 const arg = (k, d) => { const a = process.argv.find(x => x.startsWith(`--${k}=`)); return a ? a.slice(k.length + 3) : d; };
 const FMT = arg('fmt', 'landscape');
+const LANG = arg('lang', 'en');
+const TAG = FMT + (LANG === 'en' ? '' : `-${LANG}`);
 const WORKERS = parseInt(arg('workers', String(Math.max(1, Math.min(3, os.cpus().length - 1)))), 10);
 const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.ttf': 'font/ttf', '.json': 'application/json' };
 
@@ -38,7 +40,7 @@ async function openPage(browser, port) {
   const page = await browser.newPage({ viewport: { width: 100, height: 100 }, deviceScaleFactor: 1 });
   page.on('pageerror', e => console.error('[page error]', e.message));
   page.on('console', m => { if (m.type() === 'error') console.error('[console]', m.text()); });
-  await page.goto(`http://127.0.0.1:${port}/src/index.html?fmt=${FMT}`);
+  await page.goto(`http://127.0.0.1:${port}/src/index.html?fmt=${FMT}&lang=${LANG}`);
   const meta = await page.evaluate(() => window.ready);
   await page.setViewportSize({ width: meta.W, height: meta.H });
   const cdp = await page.context().newCDPSession(page);
@@ -75,7 +77,7 @@ async function renderSegment(browser, port, f0, f1, file, idx) {
 
   const stills = arg('stills');
   if (stills) {
-    const dir = path.join(PROMO, 'build', 'stills', FMT);
+    const dir = path.join(PROMO, 'build', 'stills', TAG);
     fs.mkdirSync(dir, { recursive: true });
     const { page, cdp } = await openPage(browser, port);
     for (const s of stills.split(',')) {
@@ -104,7 +106,7 @@ async function renderSegment(browser, port, f0, f1, file, idx) {
   await browser.close(); server.close();
   const list = path.join(tmp, 'list.txt');
   fs.writeFileSync(list, segs.map(s => `file '${s}'`).join('\n'));
-  const silent = path.join(PROMO, 'build', `video-${FMT}${arg('from') ? '-partial' : ''}.mp4`);
+  const silent = path.join(PROMO, 'build', `video-${TAG}${arg('from') ? '-partial' : ''}.mp4`);
   fs.mkdirSync(path.dirname(silent), { recursive: true });
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', silent]);
   fs.rmSync(tmp, { recursive: true, force: true });

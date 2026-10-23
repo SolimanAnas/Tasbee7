@@ -4,13 +4,14 @@
   const FPS = 30, DURATION = 45;
   const qs = new URLSearchParams(location.search);
   const fmt = qs.get('fmt') || 'landscape';
+  const lang = qs.get('lang') === 'ar' ? 'ar' : 'en';
   const SIZES = { landscape: [1920, 1080], vertical: [1080, 1920], square: [1080, 1080] };
   const [W, H] = SIZES[fmt];
   const v = fmt === 'vertical', sq = fmt === 'square';
   const u = Math.min(W, H) / 1080;
 
   const L = {
-    fmt, W, H, u, v, sq,
+    fmt, W, H, u, v, sq, lang, rtl: lang === 'ar',
     arch: v ? { cx: 0.5 * W, top: 0.11 * H, w: 0.36 * W, h: 0.37 * H }
       : sq ? { cx: 0.7 * W, top: 0.12 * H, w: 0.25 * W, h: 0.55 * H }
         : { cx: 0.7 * W, top: 0.15 * H, w: 0.17 * W, h: 0.6 * H },
@@ -20,7 +21,11 @@
     floorY: v ? 0.5 * H : sq ? 0.69 * H : 0.75 * H,
   };
 
+  // RTL: mirror the dawn window and its beam
+  if (L.rtl) { L.arch.cx = W - L.arch.cx; L.beamTo.x = W - L.beamTo.x; }
+
   const frame = document.getElementById('frame');
+  if (L.rtl) { frame.classList.add('ar'); document.documentElement.lang = 'ar'; }
   frame.style.width = W + 'px'; frame.style.height = H + 'px';
   const cv = {};
   ['bg', 'glow', 'grain'].forEach(id => {
@@ -40,7 +45,9 @@
     await document.fonts.load('500 40px Cormorant');
     await document.fonts.load('italic 400 40px Cormorant');
     await document.fonts.load('600 40px Manrope');
-    await document.fonts.load('700 40px Amiri', 'زاد المسلم');
+    await document.fonts.load('400 40px Amiri', 'زاد المسلم');
+    await document.fonts.load('700 40px Tajawal', 'زاد المسلم');
+    await document.fonts.load('500 40px Tajawal', 'زاد المسلم');
     const images = { 'quran-p2': await loadImage('../assets/screens/quran-p2.png') };
     FX.init(L, images);
     render = buildScenes(L);

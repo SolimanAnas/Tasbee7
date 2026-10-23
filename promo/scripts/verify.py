@@ -22,6 +22,7 @@ EXPECT = {
     "zad-al-muslim-hero.mp4": (1920, 1080),
     "zad-al-muslim-reel.mp4": (1080, 1920),
     "zad-al-muslim-square.mp4": (1080, 1080),
+    "zad-al-muslim-hero-ar.mp4": (1920, 1080),
 }
 
 

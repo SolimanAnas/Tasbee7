@@ -149,7 +149,7 @@
   };
 
   // Desk surface (warm stone with fine grain) + prayer beads, baked into a texture.
-  FX.deskTexture = function (w, h, phoneRect) {
+  FX.deskTexture = function (w, h, phoneRect, side = 1) {
     const c0 = canvas(w, h), c = c0.getContext('2d');
     const r = rng(77);
     const g = c.createRadialGradient(w * 0.45, h * 0.4, 0, w * 0.5, h * 0.5, w * 0.75);
@@ -173,7 +173,7 @@
 
     // prayer beads (misbaha) resting beside the phone: 33 beads on a soft loop
     const { x: px, y: py, w: pw, h: ph } = phoneRect;
-    const cx = px + pw + pw * 0.62, cy = py + ph * 0.58, R = pw * 0.42;
+    const cx = side > 0 ? px + pw + pw * 0.62 : px - pw * 0.62, cy = py + ph * 0.58, R = pw * 0.42;
     const pts = [];
     for (let i = 0; i < 33; i++) {
       const a = (i / 33) * Math.PI * 2;
@@ -277,7 +277,7 @@
       ctx.drawImage(m, -m.width * s / 2, -m.height * s / 2 + S.mushafDrift * H, m.width * s, m.height * s);
       ctx.restore();
       // darken toward the text side for legibility
-      const sh = L.v ? ctx.createLinearGradient(0, 0, 0, H) : ctx.createLinearGradient(0, 0, W, 0);
+      const sh = L.v ? ctx.createLinearGradient(0, 0, 0, H) : L.rtl ? ctx.createLinearGradient(W, 0, 0, 0) : ctx.createLinearGradient(0, 0, W, 0);
       sh.addColorStop(0, `rgba(1, 8, 6, ${0.75 * S.mushaf})`); sh.addColorStop(0.6, 'rgba(1,8,6,0)');
       ctx.fillStyle = sh; ctx.fillRect(0, 0, W, H);
     }

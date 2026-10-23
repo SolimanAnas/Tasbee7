@@ -63,6 +63,15 @@ const SHOTS = [
   { id: 'sleeping', url: '/pages/sleeping.html', lang: 'en' },
 ];
 
+// Arabic-UI twins of every feature screen (used by the Arabic cut: ?lang=ar).
+SHOTS.push(...SHOTS
+  .filter(s => s.lang === 'en' && !s.id.startsWith('home') && !s.id.startsWith('quran') && s.id !== 'qibla-compass')
+  .map(s => ({ ...s, id: `${s.id}-ar`, lang: 'ar' })));
+// In Arabic the running compass is shifted by an app layout bug (#qibla-marker
+// overflows the right edge → RTL page offset), so the Arabic cut uses the
+// Qibla start screen instead.
+SHOTS.push({ id: 'qibla-ar', url: '/pages/qibla.html', lang: 'ar' });
+
 function serve() {
   return http.createServer((req, res) => {
     const p = decodeURIComponent(req.url.split('?')[0].split('#')[0]);

@@ -32,3 +32,19 @@ These are not crops. Each scene has its own 9:16 and 1:1 layout (`pick({l, v, s}
 - *5 Mushaf styles, tafsir, bookmarks*, *multi-reciter audio with background playback*, *Takrar verse repetition*, *Hisn Al-Muslim*, *24/7 radio*: from the README feature tables.
 - *Daily targets and lifetime statistics* (Tasbeeh): from the app's own Google Play screenshot captions (`scripts/google-play-shots.cjs`).
 - No ratings, download counts or testimonials are shown.
+
+## Arabic cut (`zad-al-muslim-hero-ar.mp4`)
+
+The beats and timings are the same as the English cut. The composition is mirrored right-to-left, and every screen is the app's Arabic UI. The narrator is VoxCPM2 with a designed voice (Apache-2.0).
+
+| # | On-screen text | Voiceover (start s) |
+|---|---|---|
+| 1 | وسطَ مشاغلِ الحياةِ / *التي لا تنتهي…* | 0.70 الحياةُ تمضي سريعًا. · 2.55 لكنَّ بعضَ اللحظاتِ تستحقُّ كلَّ اهتمامِنا. |
+| 2 | اِمنحْ قلبَك مساحةً / *لما يهمُّ حقًّا.* | 5.45 امنحْ قلبَك مساحةً لما يهمُّ حقًّا. |
+| 3 | صِلتُك / *بالقرآنِ الكريم.* · ٥ أنماط للمصحف · التفاسير والعلامات · قرّاء متعدّدون · تشغيل في الخلفية | 8.40 جدِّدْ صلتَك بكتابِ الله، · 11.40 واستمعْ إلى أجملِ التلاوات. |
+| 4 | تذكَّرْ. تأمَّلْ. *اِرتقِ.* · أذكار اليوم · حصن المسلم · المسبحة الذكية · الحفظ | 15.25 اجعلِ الذِّكرَ رفيقَك: أذكارُ اليوم، ومسبحةٌ ذكيّة، وأدواتٌ تُعينُك على الحفظ. |
+| 5 | طرقٌ أكثرُ / *لتبقى قريبًا.* → بلغتِك *المفضّلة.* · الحديث · القبلة · إذاعة القرآن · يعمل دون إنترنت | 22.30 تصفّحِ الأحاديث، واعرفِ اتجاهَ القبلة، واستمعْ إلى إذاعةِ القرآن، بلغتِك المفضّلة. |
+| 6 | رفيقُك / *في كلِّ يوم.* · الفجر: مواقيت الصلاة وأذكار الصباح · الليل: أذكار النوم | 29.40 رفيقُك في كلِّ يوم، من الفجرِ حتى الليل. |
+| 7 | زادُ المسلم · Zad Al-Muslim · رفيقُك الإسلاميّ المتكامل · مجانيّ • بلا إعلانات • يعمل دون إنترنت · حمِّله الآن من *Google Play* · امسح الرمز للتثبيت · Arabic Google Play badge · QR | 35.50 زادُ المسلم. رفيقُك الإسلاميُّ المتكامل. · 39.35 مجانيّ، بلا إعلانات، ويعمل دون إنترنت. · 42.90 حمِّلْه الآن من جوجل بلاي. |
+
+In scene 5 the Qibla is shown on its Arabic start screen (see README: "Qibla in the Arabic cut").

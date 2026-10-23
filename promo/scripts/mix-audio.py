@@ -2,6 +2,7 @@
 
     python scripts/mix-audio.py                 -> audio/mix.flac          (VO + score)
     python scripts/mix-audio.py --ambient       -> audio/mix-ambient.flac  (VO + sound design, no instruments)
+    python scripts/mix-audio.py --ar [--ambient] -> audio/mix-ar.flac / mix-ambient-ar.flac (Arabic narration)
 
 Two-pass EBU R128 loudnorm to -14 LUFS integrated, -1.5 dBTP (social platforms).
 Requires ffmpeg on PATH.
@@ -14,8 +15,10 @@ from pathlib import Path
 
 A = Path(__file__).resolve().parent.parent / "audio"
 ambient = "--ambient" in sys.argv
+ar = "--ar" in sys.argv
 bed = A / ("ambience.wav" if ambient else "score.wav")
-out = A / ("mix-ambient.flac" if ambient else "mix.flac")
+vo = A / ("vo-ar.flac" if ar else "vo.flac")
+out = A / (("mix-ambient" if ambient else "mix") + ("-ar" if ar else "") + ".flac")
 
 # VO: clean low end, gentle compression, a touch of presence and room.
 # Bed: ducked ~6 dB under the voice, then everything summed.
@@ -32,7 +35,7 @@ target = "I=-14:TP=-1.5:LRA=11"
 
 
 def run(extra_filter, dest):
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-i", str(A / "vo.flac"), "-i", str(bed),
+    cmd = ["ffmpeg", "-y", "-hide_banner", "-i", str(vo), "-i", str(bed),
            "-filter_complex", graph + extra_filter, "-t", "45", "-ar", "48000"] + dest
     return subprocess.run(cmd, capture_output=True, text=True, check=True)
 

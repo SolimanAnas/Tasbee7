@@ -5,6 +5,7 @@
 | zad-al-muslim-hero.mp4 | 1920×1080 | 30 fps | 44.96 s | h264 / aac | 46.8 MB | -14.0 LUFS / -1.3 dBFS | ✅ exact URL | PASS |
 | zad-al-muslim-reel.mp4 | 1080×1920 | 30 fps | 44.96 s | h264 / aac | 46.5 MB | -14.0 LUFS / -1.3 dBFS | ✅ exact URL | PASS |
 | zad-al-muslim-square.mp4 | 1080×1080 | 30 fps | 44.96 s | h264 / aac | 29.6 MB | -14.0 LUFS / -1.3 dBFS | ✅ exact URL | PASS |
+| zad-al-muslim-hero-ar.mp4 | 1920×1080 | 30 fps | 44.96 s | h264 / aac | 46.8 MB | -14.0 LUFS / -1.0 dBFS | ✅ exact URL | PASS |
 
 Expected QR target: `https://play.google.com/store/apps/details?id=io.github.solimananas.twa`
 
