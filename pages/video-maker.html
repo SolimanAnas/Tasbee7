@@ -20,13 +20,15 @@
 <meta property="og:site_name" content="زاد المسلم">
 <link rel="icon" href="../icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
 /* Local copies so the canvas can draw offline (canvas text never falls back gracefully). */
-/* Same Quran face as takrar.html (Amiri) — renders quran.json's marks correctly. */
+/* Scheherazade: mushaf-style naskh with full support for quran.json's Quranic marks
+   (۫ ۬ ۭ, pause marks, dagger alif) and an ayah medallion for U+06DD. Amiri and the
+   KFGQPC Hafs fonts misplace or box several of those marks. */
 @font-face {
-  font-family: 'QuranAmiri';
-  src: url('../fonts/Amiri.ttf') format('truetype');
+  font-family: 'QuranFont';
+  src: url('../fonts/Scheherazade.ttf') format('truetype');
   font-display: block;
 }
 @font-face {
@@ -38,33 +40,45 @@
   --bg-image: url('../images/Background-light.webp');
   --bg-surface: rgba(255, 255, 255, 0.45);
   --text-primary: #0F172A; --text-secondary: #475569;
-  --accent-main: #10B981; --accent-muted: rgba(16, 185, 129, 0.15);
-  --glass: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.6);
+  --accent-main: #10B981; --accent-strong: #059669; --accent-muted: rgba(16, 185, 129, 0.15);
+  --glass: rgba(255, 255, 255, 0.62); --glass-border: rgba(255, 255, 255, 0.6);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   --overlay: rgba(255, 255, 255, 0.2);
-  --field-bg: rgba(255, 255, 255, 0.7);
+  --field-bg: rgba(255, 255, 255, 0.75);
+  --bar-bg: rgba(255, 255, 255, 0.86);
+  --sheet-bg: rgba(248, 250, 252, 0.97);
+  --list-hover: rgba(0, 0, 0, 0.05); --modal-overlay: rgba(0, 0, 0, 0.3);
+  --gold: #9a7b1f; --gold-soft: rgba(154,123,31,.12);
   --danger: #ef4444;
 }
 [data-theme="dark"] {
   --bg-image: url('../images/Background-dark.webp');
   --bg-surface: rgba(15, 23, 42, 0.5);
   --text-primary: #F8FAFC; --text-secondary: #CBD5E1;
-  --accent-main: #10B981; --accent-muted: rgba(255, 255, 255, 0.1);
-  --glass: rgba(30, 41, 59, 0.6); --glass-border: rgba(255, 255, 255, 0.1);
+  --accent-main: #10B981; --accent-strong: #34d399; --accent-muted: rgba(16, 185, 129, 0.16);
+  --glass: rgba(30, 41, 59, 0.62); --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   --overlay: rgba(15, 23, 42, 0.5);
   --field-bg: rgba(15, 23, 42, 0.55);
+  --bar-bg: rgba(22, 32, 50, 0.9);
+  --sheet-bg: rgba(17, 24, 39, 0.98);
+  --list-hover: rgba(255, 255, 255, 0.05); --modal-overlay: rgba(0, 0, 0, 0.7);
+  --gold: #e6c068; --gold-soft: rgba(230,192,104,.15);
   --danger: #f87171;
 }
 [data-theme="sepia"] {
   --bg-image: url('../images/background-sepia.webp');
   --bg-surface: rgba(244, 236, 216, 0.55);
   --text-primary: #3c2a18; --text-secondary: #7a6244;
-  --accent-main: #8a5a1c; --accent-muted: rgba(138, 90, 28, 0.12);
-  --glass: rgba(252, 247, 234, 0.65); --glass-border: rgba(244, 236, 216, 0.7);
+  --accent-main: #8a5a1c; --accent-strong: #6f4714; --accent-muted: rgba(138, 90, 28, 0.12);
+  --glass: rgba(252, 247, 234, 0.66); --glass-border: rgba(244, 236, 216, 0.7);
   --glass-shadow: 0 8px 32px 0 rgba(90, 60, 20, 0.1);
   --overlay: rgba(244, 236, 216, 0.2);
-  --field-bg: rgba(252, 247, 234, 0.8);
+  --field-bg: rgba(252, 247, 234, 0.85);
+  --bar-bg: rgba(250, 244, 228, 0.92);
+  --sheet-bg: rgba(250, 244, 228, 0.98);
+  --list-hover: rgba(122, 84, 24, 0.06); --modal-overlay: rgba(0, 0, 0, 0.3);
+  --gold: #9a6b1f; --gold-soft: rgba(154,107,31,.12);
   --danger: #c0392b;
 }
 
@@ -75,131 +89,332 @@ body {
   background-color: var(--bg-surface); background-image: var(--bg-image);
   background-size: cover; background-position: center; background-attachment: fixed;
   color: var(--text-primary); display: flex; justify-content: center;
-  padding: calc(max(12px, env(safe-area-inset-top)) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  padding: calc(max(12px, env(safe-area-inset-top)) + 14px) 16px calc(env(safe-area-inset-bottom) + 104px);
   min-height: 100dvh;
 }
 body::before { content:''; position:fixed; inset:0; background:var(--overlay); z-index:-1; }
+button { font-family: inherit; }
 
-.app { width:100%; max-width:980px; display:flex; flex-direction:column; gap:12px; }
-.layout { display:grid; grid-template-columns:1fr; gap:12px; align-items:start; }
-@media (min-width: 860px) {
-  .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+.app { width:100%; max-width:1040px; display:flex; flex-direction:column; gap:14px; }
+.layout { display:grid; grid-template-columns:1fr; gap:14px; align-items:start; }
+@media (min-width: 880px) {
+  .layout { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); }
   .preview-col { position:sticky; top:16px; }
 }
-.controls-col { display:flex; flex-direction:column; gap:12px; min-width:0; }
+.controls-col { display:flex; flex-direction:column; gap:14px; min-width:0; }
 
 /* Header */
 .header {
-  position:relative;
-  display:flex; align-items:center; justify-content:space-between;
+  position:relative; display:flex; align-items:center; justify-content:space-between;
   background:var(--glass); border:1px solid var(--glass-border);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-  box-shadow:var(--glass-shadow); border-radius:16px; padding:12px 16px;
+  box-shadow:var(--glass-shadow); border-radius:18px; padding:12px 16px;
 }
-.header-title { font-weight:bold; font-size:18px; position:absolute; left:50%; transform:translateX(-50%); white-space:nowrap; }
+.header-title { font-weight:800; font-size:18px; position:absolute; left:50%; transform:translateX(-50%); white-space:nowrap; }
 .icon-btn {
   background:none; border:none; color:var(--text-primary); cursor:pointer;
-  padding:5px; display:flex; align-items:center; justify-content:center; transition:.2s;
+  width:36px; height:36px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center; transition:background .2s, transform .15s;
   font-size:18px;
 }
-.icon-btn:active { opacity:.7; transform:scale(.9); }
+.icon-btn:hover { background:var(--accent-muted); }
+.icon-btn:active { transform:scale(.92); }
 
 .card {
   background:var(--glass); border:1px solid var(--glass-border);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-  box-shadow:var(--glass-shadow); border-radius:20px; padding:15px;
-  display:flex; flex-direction:column; gap:10px; min-width:0;
+  box-shadow:var(--glass-shadow); border-radius:22px; padding:16px;
+  display:flex; flex-direction:column; gap:12px; min-width:0;
 }
-label, .label { font-size:14px; color:var(--accent-main); font-weight:bold; }
+
+/* Section headers: numbered steps guide the flow top to bottom */
+.step-head { display:flex; align-items:center; gap:10px; }
+.step-num {
+  width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--accent-main); color:#fff; font-size:13px; font-weight:800;
+}
+.step-title { font-size:16px; font-weight:800; }
+.label { font-size:13px; color:var(--text-secondary); font-weight:700; }
+.field { display:flex; flex-direction:column; gap:6px; min-width:0; }
 .row { display:flex; gap:10px; }
 .row > * { flex:1; min-width:0; }
-.field { display:flex; flex-direction:column; gap:6px; }
 
 select, input[type="number"] {
   width:100%; font-family:inherit; font-size:15px; color:var(--text-primary);
-  background:var(--field-bg); border:1px solid var(--glass-border); border-radius:12px;
-  padding:10px 12px; outline:none;
+  background:var(--field-bg); border:1px solid var(--glass-border); border-radius:14px;
+  padding:11px 12px; outline:none; transition:border-color .2s, box-shadow .2s;
 }
-select:focus, input[type="number"]:focus { border-color:var(--accent-main); }
+select:focus, input[type="number"]:focus { border-color:var(--accent-main); box-shadow:0 0 0 3px var(--accent-muted); }
 
-/* Preview */
+/* Surah / reciter picker buttons (open the glass sheets below, like takrar.html) */
+.picker-btn {
+  width:100%; display:flex; align-items:center; gap:10px; min-height:50px; cursor:pointer;
+  padding:10px 14px; border-radius:14px; border:1px solid var(--accent-main);
+  background:var(--field-bg); color:var(--text-primary); font-size:15px; font-weight:700; text-align:start;
+  transition:box-shadow .2s, transform .12s;
+}
+.picker-btn:active { transform:scale(.99); }
+.picker-btn:focus-visible { box-shadow:0 0 0 3px var(--accent-muted); outline:none; }
+.picker-btn::after { content:'\25BC'; font-size:11px; opacity:.55; margin-inline-start:auto; flex-shrink:0; }
+.picker-btn:disabled { opacity:.5; }
+.picker-main { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.picker-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.item-num { color:var(--accent-main); font-weight:800; margin-inline-end:6px; }
+.rc-style {
+  align-self:flex-start; font-size:10.5px; font-weight:700; padding:1px 8px; border-radius:8px;
+  background:var(--gold-soft); color:var(--gold);
+}
+
+.pick-overlay {
+  position:fixed; inset:0; background:var(--modal-overlay);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  z-index:9998; opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.pick-overlay.active { opacity:1; pointer-events:all; }
+.bottom-sheet {
+  position:fixed; bottom:var(--kb, 0px); left:50%; width:100%; max-width:480px;
+  max-height:min(85vh, calc(var(--vvh, 100dvh) - 24px));
+  background:var(--glass); backdrop-filter:blur(35px); -webkit-backdrop-filter:blur(35px);
+  border-top:1px solid var(--glass-border); border-radius:30px 30px 0 0;
+  transform:translate(-50%,100%); transition:transform .4s cubic-bezier(.2,.9,.4,1.1);
+  z-index:10000; display:flex; flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom, 20px); box-shadow:0 -10px 40px rgba(0,0,0,.2);
+}
+.bottom-sheet.active { transform:translate(-50%,0); }
+.bottom-sheet.searching { height:calc(var(--vvh, 100dvh) - 24px); }
+.drag-handle { width:40px; height:5px; background:rgba(150,150,150,.4); border-radius:10px; margin:12px auto; flex-shrink:0; }
+.sheet-header { display:flex; justify-content:space-between; align-items:center; padding:6px 20px 14px; border-bottom:1px solid var(--glass-border); flex-shrink:0; }
+.sheet-header h2 { font-size:1.3rem; margin:0; font-weight:800; }
+.sheet-content { padding:15px 20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; flex:1; }
+.sheet-search {
+  width:100%; padding:14px; border-radius:14px; border:1px solid var(--glass-border);
+  background:var(--list-hover); color:var(--text-primary); font-family:inherit;
+  font-size:15px; outline:none; transition:border-color .2s; flex-shrink:0;
+}
+.sheet-search:focus { border-color:var(--accent-main); }
+.sheet-list { display:flex; flex-direction:column; gap:8px; }
+.sheet-item {
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:14px 15px; border-radius:16px; background:var(--list-hover);
+  border:1px solid var(--glass-border); color:var(--text-primary); font-size:16px; font-family:inherit;
+  font-weight:700; cursor:pointer; transition:transform .15s, background .2s; text-align:start;
+}
+.sheet-item:active { transform:scale(.98); }
+.sheet-item.selected { background:var(--accent-main); color:#fff; border-color:var(--accent-main); box-shadow:0 4px 15px rgba(16,185,129,.3); }
+.sheet-item.selected .item-num { color:#fff; }
+.sheet-item.selected .rc-style { background:rgba(255,255,255,.2); color:#fff; }
+/* Reciter name with its style badge underneath — in the picker button and the sheet rows. */
+.rc-text { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.rc-name { font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sheet-empty { text-align:center; color:var(--text-secondary); padding:24px; font-weight:600; }
+.reciter-filter { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex-shrink:0; }
+.reciter-filter::-webkit-scrollbar { display:none; }
+.filter-chip {
+  padding:7px 14px; border-radius:20px; font-size:12.5px; font-weight:700; font-family:inherit; white-space:nowrap;
+  background:var(--list-hover); border:1px solid var(--glass-border); color:var(--text-secondary); cursor:pointer; transition:.2s;
+}
+.filter-chip.active { background:var(--accent-main); color:#fff; border-color:var(--accent-main); }
+@media (prefers-reduced-motion:reduce) { .bottom-sheet, .pick-overlay { transition:none; } }
+
+/* Ayah number stepper: big tap targets for − / + */
+.stepper {
+  display:flex; align-items:stretch; background:var(--field-bg);
+  border:1px solid var(--glass-border); border-radius:14px; overflow:hidden;
+}
+.stepper input {
+  border:none; background:none; border-radius:0; text-align:center; font-weight:800; font-size:17px;
+  padding:10px 0; -moz-appearance:textfield; min-width:0; box-shadow:none !important;
+}
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.stepper button {
+  flex:0 0 42px; border:none; background:none; color:var(--accent-main);
+  font-size:22px; font-weight:700; cursor:pointer; transition:background .15s;
+}
+.stepper button:active { background:var(--accent-muted); }
+
+/* Switch rows (title + description + toggle) */
+.switch-row {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:10px 12px; border-radius:14px; background:var(--accent-muted); cursor:pointer;
+}
+.switch-row .sw-text { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.switch-row .sw-title { font-size:14px; font-weight:700; }
+.switch-row .sw-desc { font-size:12px; color:var(--text-secondary); }
+.switch {
+  -webkit-appearance:none; appearance:none; margin:0; flex-shrink:0; cursor:pointer;
+  position:relative; width:48px; height:28px; border-radius:28px;
+  background:rgba(150,150,150,.35); transition:background .25s;
+}
+.switch::after {
+  content:''; position:absolute; top:3px; inset-inline-start:3px; width:22px; height:22px;
+  border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .25s;
+}
+.switch:checked { background:var(--accent-main); }
+.switch:checked::after { transform:translateX(-20px); }
+[dir="ltr"] .switch:checked::after { transform:translateX(20px); }
+.switch:focus-visible { outline:2px solid var(--accent-main); outline-offset:2px; }
+
+/* Preview stage */
 .stage {
   position:relative; display:flex; align-items:center; justify-content:center;
-  height:min(62vh, 640px); border-radius:16px; overflow:hidden;
-  background:rgba(0,0,0,.25);
+  height:min(60vh, 620px); border-radius:18px; overflow:hidden;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,.18), rgba(0,0,0,.32));
+  cursor:pointer; user-select:none;
 }
 .stage canvas {
-  max-width:100%; max-height:100%; border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35); background:#000;
+  max-width:100%; max-height:100%; border-radius:14px;
+  box-shadow:0 14px 34px rgba(0,0,0,.4); background:#000;
 }
+/* Pinned by layoutStage() to the video's bottom corner, clear of the centred ayah text. */
+.stage-play {
+  position:absolute; width:52px; height:52px; border-radius:50%;
+  border:none; background:rgba(0,0,0,.45); color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  transition:transform .2s, opacity .2s; box-shadow:0 6px 20px rgba(0,0,0,.35);
+}
+.stage-play svg { width:24px; height:24px; margin-left:3px; }
+/* Full-screen toggle, pinned by layoutStage() to the video's bottom-right corner. */
+.stage-fs {
+  position:absolute; width:40px; height:40px; border-radius:12px; border:none; cursor:pointer;
+  background:rgba(0,0,0,.45); color:#fff; display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:transform .15s;
+}
+.stage-fs:active { transform:scale(.9); }
+.stage-fs svg { width:20px; height:20px; }
+.stage-fs .fs-exit { display:none; }
+.stage.is-fs .stage-fs .fs-enter { display:none; }
+.stage.is-fs .stage-fs .fs-exit { display:block; }
+/* Real full screen, or the fixed fallback where element full screen isn't supported (iPhone). */
+.stage:fullscreen { height:100vh; border-radius:0; background:#000; }
+.stage:-webkit-full-screen { height:100vh; border-radius:0; background:#000; }
+.stage.pseudo-fs {
+  position:fixed; inset:0; z-index:10001; height:100dvh; border-radius:0; background:#000;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.stage.is-fs canvas { border-radius:0; box-shadow:none; }
+/* A backdrop-filter or sticky ancestor would trap the fixed stage inside the card
+   (containing block / stacking context), so neutralise them while it's full screen. */
+body.vm-pseudo-fs .preview-col { position:static; }
+body.vm-pseudo-fs .preview-col .card { backdrop-filter:none; -webkit-backdrop-filter:none; }
+body.vm-pseudo-fs .action-bar { display:none; }
+.stage:hover .stage-play { transform:scale(1.08); }
 .stage-badge {
-  position:absolute; top:10px; inset-inline-start:10px;
-  background:rgba(0,0,0,.55); color:#fff; font-size:12px; padding:4px 10px; border-radius:20px;
+  position:absolute; top:12px; inset-inline-start:12px;
+  background:rgba(0,0,0,.6); color:#fff; font-size:12px; font-weight:700; padding:5px 11px; border-radius:20px;
+  display:flex; align-items:center; gap:6px;
 }
-.stage-badge.rec::before { content:''; display:inline-block; width:8px; height:8px; margin-inline-end:6px; border-radius:50%; background:#ef4444; animation:blink 1s infinite; }
+.stage-badge.rec::before { content:''; width:8px; height:8px; border-radius:50%; background:#ef4444; animation:blink 1s infinite; }
 @keyframes blink { 50% { opacity:.2; } }
+.stage-progress { position:absolute; left:0; right:0; bottom:0; height:4px; background:rgba(255,255,255,.15); }
+.stage-progress > div { height:100%; width:0; background:var(--accent-main); transition:width .15s linear; }
+
+.meta-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.chip {
+  font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:20px;
+  background:var(--accent-muted); color:var(--text-primary);
+}
+.status { font-size:13px; color:var(--text-secondary); min-height:1.2em; text-align:center; }
+.status.error { color:var(--danger); font-weight:700; }
+.progress { height:6px; border-radius:6px; background:var(--accent-muted); overflow:hidden; }
+.progress > div { height:100%; width:0; background:var(--accent-main); transition:width .2s linear; }
 
 /* Background thumbnails */
-.bg-strip { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 6px; scroll-snap-type:x proximity; }
+.bg-strip { display:flex; gap:10px; overflow-x:auto; padding:4px 2px 8px; scroll-snap-type:x proximity; scrollbar-width:thin; }
 .bg-thumb {
-  flex:0 0 auto; width:58px; height:92px; border-radius:10px; cursor:pointer;
-  border:2px solid transparent; background-size:cover; background-position:center;
-  scroll-snap-align:start; transition:transform .15s, border-color .15s; padding:0;
+  position:relative; flex:0 0 auto; width:64px; height:100px; border-radius:12px; cursor:pointer;
+  border:2px solid transparent; background-size:cover; background-position:center; padding:0;
+  scroll-snap-align:start; transition:transform .15s, border-color .15s, box-shadow .15s;
 }
 .bg-thumb:active { transform:scale(.94); }
-.bg-thumb.active { border-color:var(--accent-main); box-shadow:0 0 0 2px var(--accent-muted); }
-.bg-thumb.is-video { position:relative; }
+.bg-thumb.active { border-color:var(--accent-main); box-shadow:0 0 0 3px var(--accent-muted); }
+.bg-thumb.active::before {
+  content:'✓'; position:absolute; top:4px; inset-inline-start:4px; width:18px; height:18px; border-radius:50%;
+  background:var(--accent-main); color:#fff; font-size:11px; font-weight:800; line-height:18px; text-align:center;
+}
 .bg-thumb.is-video::after {
-  content:'▶'; position:absolute; bottom:4px; inset-inline-end:6px;
+  content:'▶'; position:absolute; bottom:5px; inset-inline-end:6px;
   color:#fff; font-size:12px; text-shadow:0 1px 3px #000;
 }
 
-/* Segmented control */
-.seg { display:flex; gap:6px; background:var(--accent-muted); padding:4px; border-radius:12px; }
-.seg button {
-  flex:1; font-family:inherit; font-size:13px; font-weight:700; color:var(--text-secondary);
-  background:none; border:none; padding:8px 4px; border-radius:9px; cursor:pointer;
+/* Format picker with aspect-shaped icons */
+.formats { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+.formats button {
+  display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;
+  padding:10px 4px; border-radius:14px; border:1.5px solid var(--glass-border);
+  background:var(--field-bg); color:var(--text-secondary); font-size:12.5px; font-weight:700;
+  transition:border-color .2s, color .2s, background .2s;
 }
-.seg button.active { background:var(--field-bg); color:var(--accent-main); box-shadow:0 2px 8px rgba(0,0,0,.08); }
-.seg small { display:block; font-weight:400; font-size:11px; opacity:.8; direction:ltr; }
+.formats button.active { border-color:var(--accent-main); color:var(--accent-main); background:var(--accent-muted); }
+.formats .shape { border:2px solid currentColor; border-radius:4px; }
+.formats [data-fmt="story"] .shape { width:16px; height:28px; }
+.formats [data-fmt="square"] .shape { width:24px; height:24px; }
+.formats [data-fmt="wide"] .shape { width:30px; height:17px; margin-block:5px; }
+.formats small { font-weight:500; opacity:.75; direction:ltr; }
 
+/* Font size slider with small/large glyph hints */
+.range-row { display:flex; align-items:center; gap:10px; }
+.range-row .a-sm { font-size:13px; font-weight:800; color:var(--text-secondary); }
+.range-row .a-lg { font-size:20px; font-weight:800; color:var(--text-secondary); }
 input[type="range"] { width:100%; accent-color:var(--accent-main); }
-.color-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+.color-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 .swatch {
-  width:30px; height:30px; border-radius:50%; border:2px solid var(--glass-border); cursor:pointer; padding:0;
+  width:32px; height:32px; border-radius:50%; border:2px solid rgba(0,0,0,.12); cursor:pointer; padding:0;
+  transition:transform .15s;
 }
-.swatch.active { outline:2px solid var(--accent-main); outline-offset:2px; }
-input[type="color"] { width:34px; height:34px; border:none; background:none; padding:0; cursor:pointer; }
+.swatch:active { transform:scale(.9); }
+.swatch.active { outline:2.5px solid var(--accent-main); outline-offset:2px; }
+.custom-color { position:relative; width:32px; height:32px; border-radius:50%; overflow:hidden;
+  background:conic-gradient(red, yellow, lime, cyan, blue, magenta, red); border:2px solid rgba(0,0,0,.12); }
+.custom-color input { position:absolute; inset:-8px; width:48px; height:48px; opacity:0; cursor:pointer; }
 
-.check-row { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; font-weight:600; }
-.check-row input { width:20px; height:20px; accent-color:var(--accent-main); }
-
-/* Actions */
-.actions { display:flex; gap:10px; }
+/* Fixed action bar */
+.action-bar {
+  position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; justify-content:center;
+  padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);
+  background:var(--bar-bg); border-top:1px solid var(--glass-border);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+}
+.action-inner { width:100%; max-width:1040px; display:flex; gap:10px; }
 .btn {
-  flex:1; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;
-  border-radius:14px; padding:13px 10px; border:1px solid var(--glass-border);
-  background:var(--field-bg); color:var(--text-primary); transition:transform .15s, opacity .15s;
+  flex:1; font-size:16px; font-weight:800; cursor:pointer;
+  border-radius:16px; padding:14px 10px; border:1px solid var(--glass-border);
+  background:var(--field-bg); color:var(--text-primary); transition:transform .15s, opacity .15s, box-shadow .2s;
   display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;
 }
+.btn svg { width:18px; height:18px; flex-shrink:0; }
 .btn:active { transform:scale(.97); }
-.btn.primary { background:var(--accent-main); color:#fff; border-color:transparent; }
+.btn.primary { flex:1.4; background:var(--accent-main); color:#fff; border-color:transparent; box-shadow:0 8px 20px rgba(16,185,129,.35); }
 .btn:disabled { opacity:.5; pointer-events:none; }
 .btn.danger { color:var(--danger); }
 
-.progress { height:8px; border-radius:8px; background:var(--accent-muted); overflow:hidden; }
-.progress > div { height:100%; width:0; background:var(--accent-main); transition:width .2s linear; }
-.status { font-size:13px; color:var(--text-secondary); min-height:1.2em; text-align:center; }
-.status.error { color:var(--danger); font-weight:700; }
+/* Result bottom sheet */
+.sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; animation:fadeIn .2s ease; }
+.sheet {
+  position:fixed; left:0; right:0; bottom:0; z-index:41; margin:0 auto; max-width:560px;
+  background:var(--sheet-bg); border-radius:24px 24px 0 0; box-shadow:0 -12px 40px rgba(0,0,0,.3);
+  padding:10px 18px calc(env(safe-area-inset-bottom) + 18px);
+  display:flex; flex-direction:column; gap:12px; max-height:92dvh; overflow-y:auto;
+  animation:sheetUp .3s cubic-bezier(.22,1,.36,1);
+}
+.sheet-handle { width:42px; height:5px; border-radius:5px; background:rgba(150,150,150,.45); margin:0 auto 4px; }
+.sheet-head { display:flex; align-items:center; justify-content:space-between; }
+.sheet-title { font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
+.sheet-title::before { content:'✓'; width:24px; height:24px; border-radius:50%; background:var(--accent-main); color:#fff; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.sheet video { width:100%; max-height:56dvh; border-radius:14px; background:#000; }
 .hint { font-size:12px; color:var(--text-secondary); text-align:center; }
-
-.result video { width:100%; max-height:60vh; border-radius:12px; background:#000; }
+.share-note { font-size:12px; color:var(--text-secondary); text-align:center; direction:ltr; }
+@keyframes fadeIn { from { opacity:0; } }
+@keyframes sheetUp { from { transform:translateY(100%); } }
+@media (prefers-reduced-motion:reduce) { .sheet, .sheet-overlay { animation:none; } }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <a href="../index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;" data-i18n-title="home"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></a>
+    <a href="../index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;" data-i18n-title="home"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;" alt=""></a>
     <div class="header-title" data-i18n="vm_title">صانع فيديو الآيات</div>
     <button class="icon-btn" onclick="openLanguage()" title="اللغة" data-i18n-title="nav_language" aria-label="Language">
       <svg class="action-icon" viewBox="0 0 24 24" style="width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -209,85 +424,98 @@ input[type="color"] { width:34px; height:34px; border:none; background:none; pad
   <div class="layout">
     <div class="preview-col">
       <div class="card">
-        <div class="stage" id="vmStage">
+        <div class="stage" id="vmStage" role="button" tabindex="0" data-i18n-aria="vm_preview" aria-label="معاينة">
           <canvas id="vmCanvas" width="1080" height="1920"></canvas>
-          <div class="stage-badge" id="vmBadge" hidden></div>
-        </div>
-        <div class="actions">
-          <button class="btn" id="vmPreview" type="button">
-            <span id="vmPreviewIcon">▶</span><span id="vmPreviewLabel" data-i18n="vm_preview">معاينة</span>
+          <div class="stage-play" id="vmStagePlay" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+          </div>
+          <button type="button" class="stage-fs" id="vmFullscreen" data-i18n-title="vm_fullscreen" title="ملء الشاشة" data-i18n-aria="vm_fullscreen" aria-label="ملء الشاشة">
+            <svg class="fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+            <svg class="fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
           </button>
-          <button class="btn primary" id="vmExport" type="button" data-i18n="vm_export">إنشاء الفيديو</button>
+          <div class="stage-badge" id="vmBadge" hidden></div>
+          <div class="stage-progress"><div id="vmStageBar"></div></div>
+        </div>
+        <div class="meta-row">
+          <span class="chip" id="vmSummary"></span>
         </div>
         <div class="progress" id="vmProgress" hidden><div id="vmProgressBar"></div></div>
         <div class="status" id="vmStatus" aria-live="polite"></div>
-        <button class="btn danger" id="vmCancel" type="button" hidden data-i18n="cancel">إلغاء</button>
-      </div>
-
-      <div class="card result" id="vmResult" hidden>
-        <div class="label" data-i18n="vm_done">الفيديو جاهز</div>
-        <video id="vmVideo" controls playsinline></video>
-        <div class="hint" id="vmFormatNote"></div>
-        <div class="actions">
-          <button class="btn primary" id="vmShare" type="button" data-i18n="vm_share">مشاركة</button>
-          <a class="btn" id="vmDownload" data-i18n="vm_download">تنزيل</a>
-        </div>
       </div>
     </div>
 
     <div class="controls-col">
-      <div class="card">
+      <section class="card">
+        <div class="step-head"><span class="step-num">1</span><span class="step-title" data-i18n="vm_step_ayat">الآيات</span></div>
         <div class="field">
-          <label for="vmSurah" data-i18n="vm_surah">السورة</label>
-          <select id="vmSurah"></select>
+          <span class="label" data-i18n="vm_surah">السورة</span>
+          <button type="button" class="picker-btn" id="vmSurahBtn" aria-haspopup="dialog">
+            <span class="picker-main"><span class="picker-name" id="vmSurahLabel"></span></span>
+          </button>
+          <select id="vmSurah" hidden aria-hidden="true" tabindex="-1"></select>
         </div>
         <div class="row">
           <div class="field">
-            <label for="vmFrom" data-i18n="vm_from">من آية</label>
-            <input type="number" id="vmFrom" min="1" value="1" inputmode="numeric">
+            <label class="label" for="vmFrom" data-i18n="vm_from">من آية</label>
+            <div class="stepper">
+              <button type="button" data-step="1" data-for="vmFrom" aria-label="+">+</button>
+              <input type="number" id="vmFrom" min="1" value="1" inputmode="numeric">
+              <button type="button" data-step="-1" data-for="vmFrom" aria-label="−">−</button>
+            </div>
           </div>
           <div class="field">
-            <label for="vmTo" data-i18n="vm_to">إلى آية</label>
-            <input type="number" id="vmTo" min="1" value="1" inputmode="numeric">
+            <label class="label" for="vmTo" data-i18n="vm_to">إلى آية</label>
+            <div class="stepper">
+              <button type="button" data-step="1" data-for="vmTo" aria-label="+">+</button>
+              <input type="number" id="vmTo" min="1" value="1" inputmode="numeric">
+              <button type="button" data-step="-1" data-for="vmTo" aria-label="−">−</button>
+            </div>
           </div>
         </div>
-        <div class="check-row" id="vmBasmalaRow">
-          <span data-i18n="vm_basmala">البدء بالبسملة</span>
-          <input type="checkbox" id="vmBasmala" checked>
-        </div>
-      </div>
+        <label class="switch-row" id="vmBasmalaRow">
+          <span class="sw-text"><span class="sw-title" data-i18n="vm_basmala">البدء بالبسملة</span></span>
+          <input type="checkbox" class="switch" id="vmBasmala" checked>
+        </label>
+      </section>
 
-      <div class="card">
-        <div class="field">
-          <label for="vmReciter" data-i18n="vm_reciter">القارئ</label>
-          <select id="vmReciter"></select>
-        </div>
-      </div>
+      <section class="card">
+        <div class="step-head"><span class="step-num">2</span><span class="step-title" data-i18n="vm_reciter">القارئ</span></div>
+        <button type="button" class="picker-btn" id="vmReciterBtn" aria-haspopup="dialog">
+          <span class="picker-main" id="vmReciterLabel"></span>
+        </button>
+        <select id="vmReciter" hidden aria-hidden="true" tabindex="-1"></select>
+      </section>
 
-      <div class="card">
-        <div class="label" data-i18n="vm_background">الخلفية</div>
+      <section class="card">
+        <div class="step-head"><span class="step-num">3</span><span class="step-title" data-i18n="vm_background">الخلفية</span></div>
         <div class="bg-strip" id="vmBgs"></div>
-        <div class="label" data-i18n="vm_motion">حركة الخلفية</div>
-        <div class="seg" id="vmMotion">
-          <button type="button" data-motion="none"><span data-i18n="vm_motion_none">ثابتة</span><small>■</small></button>
-          <button type="button" data-motion="zoomIn" class="active"><span data-i18n="vm_motion_zoom_in">تقريب</span><small>⤢</small></button>
-          <button type="button" data-motion="zoomOut"><span data-i18n="vm_motion_zoom_out">تبعيد</span><small>⤡</small></button>
-          <button type="button" data-motion="panLeft"><span data-i18n="vm_motion_pan_left">تحريك</span><small>←</small></button>
-          <button type="button" data-motion="panRight"><span data-i18n="vm_motion_pan_right">تحريك</span><small>→</small></button>
-        </div>
-      </div>
+        <label class="switch-row">
+          <span class="sw-text">
+            <span class="sw-title" data-i18n="vm_motion">حركة الخلفية</span>
+            <span class="sw-desc" data-i18n="vm_motion_desc">تقريب وتحريك عشوائي للخلفية في كل فيديو</span>
+          </span>
+          <input type="checkbox" class="switch" id="vmMotion" checked>
+        </label>
+      </section>
 
-      <div class="card">
-        <div class="label" data-i18n="vm_format">المقاس</div>
-        <div class="seg" id="vmFormat">
-          <button type="button" data-fmt="story" class="active"><span data-i18n="vm_format_story">حالة / ستوري</span><small>9:16</small></button>
-          <button type="button" data-fmt="square"><span data-i18n="vm_format_square">مربع</span><small>1:1</small></button>
-          <button type="button" data-fmt="wide"><span data-i18n="vm_format_wide">عريض</span><small>16:9</small></button>
+      <section class="card">
+        <div class="step-head"><span class="step-num">4</span><span class="step-title" data-i18n="vm_step_style">التنسيق</span></div>
+        <div class="field">
+          <div class="label" data-i18n="vm_format">المقاس</div>
+          <div class="formats" id="vmFormat">
+            <button type="button" data-fmt="story" class="active"><span class="shape"></span><span data-i18n="vm_format_story">حالة / ستوري</span><small>9:16</small></button>
+            <button type="button" data-fmt="square"><span class="shape"></span><span data-i18n="vm_format_square">مربع</span><small>1:1</small></button>
+            <button type="button" data-fmt="wide"><span class="shape"></span><span data-i18n="vm_format_wide">عريض</span><small>16:9</small></button>
+          </div>
         </div>
 
         <div class="field">
-          <label for="vmFont" data-i18n="vm_font_size">حجم الخط</label>
-          <input type="range" id="vmFont" min="0.7" max="1.4" step="0.05" value="1">
+          <label class="label" for="vmFont" data-i18n="vm_font_size">حجم الخط</label>
+          <div class="range-row">
+            <span class="a-sm">ع</span>
+            <input type="range" id="vmFont" min="0.7" max="1.4" step="0.05" value="1">
+            <span class="a-lg">ع</span>
+          </div>
         </div>
 
         <div class="field">
@@ -297,22 +525,84 @@ input[type="color"] { width:34px; height:34px; border:none; background:none; pad
             <button type="button" class="swatch" data-color="#f5e6b8" style="background:#f5e6b8" aria-label="#f5e6b8"></button>
             <button type="button" class="swatch" data-color="#e6c068" style="background:#e6c068" aria-label="#e6c068"></button>
             <button type="button" class="swatch" data-color="#a7f3d0" style="background:#a7f3d0" aria-label="#a7f3d0"></button>
-            <input type="color" id="vmColor" value="#ffffff" aria-label="Custom color">
+            <button type="button" class="swatch" data-color="#bfdbfe" style="background:#bfdbfe" aria-label="#bfdbfe"></button>
+            <span class="custom-color" title="Custom"><input type="color" id="vmColor" value="#ffffff" aria-label="Custom color"></span>
           </div>
         </div>
 
-        <div class="check-row">
-          <span data-i18n="vm_caption">إظهار اسم السورة والقارئ</span>
-          <input type="checkbox" id="vmCaption" checked>
-        </div>
-
-        <div class="check-row">
-          <span data-i18n="vm_branding">إظهار شعار التطبيق</span>
-          <input type="checkbox" id="vmBranding" checked>
-        </div>
-      </div>
+        <label class="switch-row">
+          <span class="sw-text"><span class="sw-title" data-i18n="vm_text_panel">لوحة شفافة خلف الآيات</span></span>
+          <input type="checkbox" class="switch" id="vmPanel" checked>
+        </label>
+        <label class="switch-row">
+          <span class="sw-text"><span class="sw-title" data-i18n="vm_caption">إظهار اسم السورة والقارئ</span></span>
+          <input type="checkbox" class="switch" id="vmCaption" checked>
+        </label>
+        <label class="switch-row">
+          <span class="sw-text"><span class="sw-title" data-i18n="vm_branding">إظهار شعار التطبيق</span></span>
+          <input type="checkbox" class="switch" id="vmBranding" checked>
+        </label>
+      </section>
     </div>
   </div>
+</div>
+
+<div class="action-bar">
+  <div class="action-inner">
+    <button class="btn" id="vmPreview" type="button">
+      <span id="vmPreviewIcon">▶</span><span id="vmPreviewLabel" data-i18n="vm_preview">معاينة</span>
+    </button>
+    <button class="btn danger" id="vmCancel" type="button" hidden data-i18n="cancel">إلغاء</button>
+    <button class="btn primary" id="vmExport" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>
+      <span data-i18n="vm_export">إنشاء الفيديو</span>
+    </button>
+  </div>
+</div>
+
+<div class="pick-overlay" id="vmPickOverlay"></div>
+<div class="bottom-sheet" id="vmSurahSheet" role="dialog" aria-modal="true">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2 data-i18n="takrar_choose_surah">اختر السورة</h2><button class="icon-btn" type="button" data-close-pick aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
+  <div class="sheet-content">
+    <input type="text" class="sheet-search" id="vmSurahSearch" placeholder="ابحث عن سورة..." data-i18n-placeholder="takrar_search_surah" autocomplete="off">
+    <div class="sheet-list" id="vmSurahList"></div>
+  </div>
+</div>
+<div class="bottom-sheet" id="vmReciterSheet" role="dialog" aria-modal="true">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2 data-i18n="takrar_choose_reciter">اختر القارئ</h2><button class="icon-btn" type="button" data-close-pick aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
+  <div class="sheet-content">
+    <input type="text" class="sheet-search" id="vmReciterSearch" placeholder="ابحث عن قارئ..." data-i18n-placeholder="takrar_search_reciter" autocomplete="off">
+    <div class="reciter-filter" id="vmReciterFilter">
+      <button type="button" class="filter-chip active" data-style="all" data-i18n="takrar_style_all">الكل</button>
+      <button type="button" class="filter-chip" data-style="murattal" data-i18n="takrar_style_murattal">مرتل</button>
+      <button type="button" class="filter-chip" data-style="mujawwad" data-i18n="takrar_style_mujawwad">مجوّد</button>
+    </div>
+    <div class="sheet-list" id="vmReciterList"></div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="vmSheetOverlay" hidden></div>
+<div class="sheet" id="vmResult" hidden role="dialog" aria-modal="true">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <div class="sheet-title" data-i18n="vm_done">الفيديو جاهز</div>
+    <button class="icon-btn" id="vmResultClose" type="button" data-i18n-title="close" title="إغلاق" aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button>
+  </div>
+  <video id="vmVideo" controls playsinline></video>
+  <div class="hint" id="vmFormatNote"></div>
+  <div class="actions" style="display:flex;gap:10px;">
+    <button class="btn primary" id="vmShare" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+      <span data-i18n="vm_share">مشاركة</span>
+    </button>
+    <a class="btn" id="vmDownload">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+      <span data-i18n="vm_download">تنزيل</span>
+    </a>
+  </div>
+  <div class="share-note" id="vmShareNote"></div>
 </div>
 
 <script src="../js/i18n.js"></script>
@@ -320,6 +610,7 @@ input[type="color"] { width:34px; height:34px; border:none; background:none; pad
 <script src="../js/theme-manager.js"></script>
 <script src="../js/back-close.js"></script>
 <script src="../js/reciters.js"></script>
+<script src="../js/surah-map.js"></script>
 <script src="../js/video-maker.js"></script>
 <script>
 function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
