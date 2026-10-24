@@ -1,15 +1,23 @@
 /**
  * offline-download.js — unified "Download for offline" controller.
  *
- * Drives the service worker's ZAD_CACHE_ALL / ZAD_CACHE_STATUS handlers over a
- * MessageChannel so the whole app (app shell + every page + dependent files +
- * the full hadith books) is cached into the single SW cache (zad-muslim-vNN).
+ * Caches the whole app (app shell + every page + dependent files + the full
+ * hadith books) into the single service-worker cache so it all works offline.
  *
- * Shared by index.html and pages/*.html so there is ONE offline mechanism and
- * ONE cache — no per-page duplicate asset lists that drift out of sync, and no
- * separate "zad-offline-v1" cache.
+ * IMPORTANT: the download runs ENTIRELY IN THE PAGE via the CacheStorage API —
+ * it does NOT depend on the service worker answering postMessage. That message
+ * path was unreliable in the real world: right after an app update (or inside a
+ * wrapped PWA / TWA on Android) the *controlling* SW can be an older build with
+ * no message handler, so the request got no reply and the progress bar never
+ * moved. Reading + writing the cache directly from the page avoids that class of
+ * bug entirely and behaves identically in desktop Chrome, mobile Chrome, and a
+ * PWABuilder/TWA webview.
  *
- * The host page must provide these element IDs (any it omits is simply skipped):
+ * The asset list + cache name are read straight from the deployed sw.js, so
+ * sw.js stays the single source of truth (no duplicated, drift-prone lists).
+ *
+ * Shared by index.html and pages/*.html. The host page must provide these
+ * element IDs (any it omits is simply skipped):
  *   offlineModal            — the .modal-overlay wrapper (toggled with .active)
  *   offlineDot              — small status dot (gets .ok / .partial)
  *   offlineStatusText       — status label text
@@ -37,7 +45,7 @@
     offline_done: 'تم التحميل بنجاح',
     offline_downloading: 'جاري التحميل…',
     offline_storage_used: 'المساحة المستخدمة: {used}',
-    offline_needs_reopen: 'يتم تحديث التطبيق. أعد فتحه ثم حاول مرة أخرى.'
+    offline_error: 'تعذّر التحميل. تحقق من الاتصال ثم حاول مرة أخرى.'
   };
 
   function T(key, params) {
@@ -61,63 +69,7 @@
   function $(id) { return document.getElementById(id); }
 
   var downloading = false;
-
-  // Resolve the service worker to talk to. Prefer a waiting/new worker (it has
-  // the latest ZAD_CACHE_* handlers) over the current controller, which right
-  // after an update may still be the OLD build that has no message handler.
-  // Never hangs: if nothing is ready within 5s (e.g. a WebView where the SW
-  // never takes control), resolves null so the UI can report "unavailable"
-  // instead of spinning forever.
-  function swActive() {
-    if (!('serviceWorker' in navigator)) return Promise.resolve(null);
-
-    var pick = navigator.serviceWorker.getRegistration()
-      .then(function (reg) {
-        if (!reg) {
-          // No registration yet — resolve via ready (the page registers on load).
-          return navigator.serviceWorker.ready.then(function (r) { return r.active; });
-        }
-        // waiting = new build installed & ready; installing may not be ready to
-        // receive messages, so fall back to active/controller for those.
-        return reg.waiting || reg.active || navigator.serviceWorker.controller ||
-          navigator.serviceWorker.ready.then(function (r) { return r.active; });
-      })
-      .catch(function () { return navigator.serviceWorker.controller || null; });
-
-    var timeout = new Promise(function (res) { setTimeout(function () { res(null); }, 5000); });
-    return Promise.race([pick, timeout]);
-  }
-
-  // Post a message to the SW over a MessageChannel and forward every reply to
-  // onMessage. If the FIRST reply doesn't arrive within firstMs, onTimeout fires
-  // once — this is how we detect a stale/old controlling SW (no handler) or a
-  // WebView with no working SW, instead of hanging the UI. After the first
-  // reply the watchdog uses nextMs (larger) so a slow single-file fetch during a
-  // long download never trips it.
-  function postToSW(sw, message, onMessage, onTimeout, firstMs, nextMs) {
-    var settled = false, seen = false;
-    var timer = setTimeout(fail, firstMs || 7000);
-    var ch = new MessageChannel();
-    function fail() {
-      if (settled) return;
-      settled = true;
-      try { ch.port1.onmessage = null; } catch (_) {}
-      onTimeout && onTimeout();
-    }
-    ch.port1.onmessage = function (e) {
-      if (settled) return;
-      seen = true;
-      clearTimeout(timer);
-      timer = setTimeout(fail, nextMs || 60000); // generous between-message window
-      onMessage(e.data || {});
-    };
-    try {
-      sw.postMessage(message, [ch.port2]);
-    } catch (_) {
-      clearTimeout(timer);
-      fail();
-    }
-  }
+  var manifestCache = null; // { cacheName, urls } — parsed once from sw.js
 
   function fmtBytes(n) {
     if (!n || n < 0) return '0 MB';
@@ -143,16 +95,54 @@
     } catch (_) {}
   }
 
-  // Nudge the browser to activate a freshly-installed SW, so the next attempt
-  // reaches a worker that actually has the ZAD_CACHE_* handlers.
-  function nudgeUpdate() {
+  // Locate the deployed sw.js from the SW registration scope (works regardless
+  // of how deep the current page is), falling back to a path relative to the
+  // page. Returns null only when service workers are entirely unavailable.
+  async function swScriptUrl() {
+    if (!('serviceWorker' in navigator)) return null;
     try {
-      navigator.serviceWorker.getRegistration().then(function (reg) {
-        if (!reg) return;
-        if (reg.waiting) { try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (_) {} }
-        reg.update();
-      });
+      var reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        var w = reg.active || reg.waiting || reg.installing;
+        if (w && w.scriptURL) return w.scriptURL;
+        if (reg.scope) return new URL('sw.js', reg.scope).href;
+      }
     } catch (_) {}
+    // No registration yet: guess based on page location (index at root, or a
+    // page under /pages/). Both resolve to the same sw.js at the app root.
+    try { return new URL(/\/pages\//.test(location.pathname) ? '../sw.js' : './sw.js', location.href).href; }
+    catch (_) { return null; }
+  }
+
+  // Read the full offline manifest (cache name + absolute asset URLs) straight
+  // from sw.js so there is a single source of truth. Cached after first parse.
+  async function loadManifest() {
+    if (manifestCache) return manifestCache;
+    var swUrl = await swScriptUrl();
+    if (!swUrl) return null;
+    var res;
+    try { res = await fetch(swUrl, { cache: 'no-cache' }); }
+    catch (_) { return null; }
+    if (!res || !res.ok) return null;
+    var txt = await res.text();
+
+    var cacheName = (txt.match(/CACHE_NAME\s*=\s*["']([^"']+)["']/) || [])[1] || 'zad-muslim-offline';
+    var base = new URL(swUrl, location.href);
+    var seen = {};
+    var urls = [];
+    ['STATIC_ASSETS', 'OPTIONAL_ASSETS'].forEach(function (name) {
+      var block = txt.match(new RegExp('(?:const|let|var)\\s+' + name + '\\s*=\\s*\\[([\\s\\S]*?)\\];'));
+      if (!block) return;
+      var strs = block[1].match(/["'](\.\/[^"']*)["']/g) || [];
+      strs.forEach(function (s) {
+        var rel = s.slice(1, -1);
+        var abs = new URL(rel, base).href;
+        if (!seen[abs]) { seen[abs] = 1; urls.push(abs); }
+      });
+    });
+    if (!urls.length) return null;
+    manifestCache = { cacheName: cacheName, urls: urls };
+    return manifestCache;
   }
 
   async function refresh() {
@@ -160,18 +150,26 @@
     if (!statusEl) return;
     showStorage();
     var btn = $('offlineDownloadBtn');
-    var sw = await swActive();
-    if (!sw) { statusEl.textContent = T('offline_status_unavailable'); setDot('none'); return; }
+    if (!('caches' in window)) { statusEl.textContent = T('offline_status_unavailable'); setDot('none'); return; }
     statusEl.textContent = '…';
 
-    postToSW(sw, { type: 'ZAD_CACHE_STATUS' }, function (d) {
-      if (d.type !== 'ZAD_CACHE_STATUS_RESULT') return;
-      if (d.total > 0 && d.cached >= d.total) {
+    var mf = await loadManifest();
+    if (!mf) { statusEl.textContent = T('offline_status_unavailable'); setDot('none'); return; }
+
+    try {
+      var cache = await caches.open(mf.cacheName);
+      var matches = await Promise.all(mf.urls.map(function (u) {
+        return cache.match(u).then(function (m) { return m || cache.match(u, { ignoreSearch: true }); });
+      }));
+      var cached = matches.filter(Boolean).length;
+      var total = mf.urls.length;
+
+      if (cached >= total) {
         statusEl.textContent = T('offline_status_complete');
         setDot('ok');
         if (btn && !downloading) { btn.textContent = T('offline_redownload'); btn.classList.add('is-done'); }
-      } else if (d.cached > 0) {
-        statusEl.textContent = d.cached + ' / ' + d.total;
+      } else if (cached > 0) {
+        statusEl.textContent = cached + ' / ' + total;
         setDot('partial');
         if (btn) btn.classList.remove('is-done');
       } else {
@@ -179,32 +177,30 @@
         setDot('none');
         if (btn) btn.classList.remove('is-done');
       }
-    }, function () {
-      // No reply → the controlling SW is likely mid-update (old build still in
-      // charge). Show a neutral dash, keep the button usable, and hasten the
-      // new worker so a retry (or controllerchange) succeeds.
-      statusEl.textContent = '—';
+    } catch (_) {
+      statusEl.textContent = T('offline_status_unavailable');
       setDot('none');
-      nudgeUpdate();
-    }, 6000);
+    }
   }
 
   async function start() {
     if (downloading) return;
     var statusEl = $('offlineStatusText');
-    var sw = await swActive();
-    if (!sw) { if (statusEl) statusEl.textContent = T('offline_status_unavailable'); return; }
-
-    downloading = true;
-    // Keep this cache from being evicted under storage pressure. Must run in the
-    // page (Window) context — StorageManager.persist() is unavailable in the SW.
-    try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (_) {}
-
     var btn = $('offlineDownloadBtn');
     var wrap = $('offlineProgressWrap');
     var fill = $('offlineProgressFill');
     var pctEl = $('offlineProgressPct');
     var ptext = $('offlineProgressText');
+
+    if (!('caches' in window)) { if (statusEl) statusEl.textContent = T('offline_status_unavailable'); return; }
+
+    var mf = await loadManifest();
+    if (!mf) { if (statusEl) statusEl.textContent = T('offline_error'); return; }
+
+    downloading = true;
+    // Keep this cache from being evicted under storage pressure (Window context).
+    try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (_) {}
+
     if (btn) { btn.disabled = true; btn.classList.remove('is-done'); }
     if (wrap) wrap.style.display = 'block';
     if (fill) fill.style.width = '0%';
@@ -213,35 +209,56 @@
     if (statusEl) statusEl.textContent = T('offline_downloading');
     setDot('partial');
 
-    postToSW(sw, { type: 'ZAD_CACHE_ALL' }, function (d) {
-      if (d.type === 'ZAD_CACHE_PROGRESS') {
-        var p = d.total ? Math.round(d.done / d.total * 100) : 0;
-        if (fill) fill.style.width = p + '%';
-        if (pctEl) pctEl.textContent = p + '%';
-        if (ptext) ptext.textContent = d.done + ' / ' + d.total + (d.bytes ? ' · ' + fmtBytes(d.bytes) : '');
-      } else if (d.type === 'ZAD_CACHE_DONE') {
-        if (fill) fill.style.width = '100%';
-        if (pctEl) pctEl.textContent = '100%';
-        if (ptext) ptext.textContent = d.failed ? (T('offline_done') + ' — ' + d.failed + ' ✗') : T('offline_done');
-        downloading = false;
-        if (btn) { btn.disabled = false; btn.textContent = T('offline_redownload'); btn.classList.add('is-done'); }
-        if (statusEl) statusEl.textContent = T('offline_status_complete');
-        setDot('ok');
-        showStorage();
-        setTimeout(function () { if (wrap) wrap.style.display = 'none'; if (fill) fill.style.width = '0%'; }, 3500);
+    var total = mf.urls.length;
+    var done = 0, failed = 0, bytes = 0;
+
+    function render() {
+      var p = total ? Math.round(done / total * 100) : 0;
+      if (fill) fill.style.width = p + '%';
+      if (pctEl) pctEl.textContent = p + '%';
+      if (ptext) ptext.textContent = done + ' / ' + total + (bytes ? ' · ' + fmtBytes(bytes) : '');
+    }
+    render();
+
+    try {
+      var cache = await caches.open(mf.cacheName);
+      for (var i = 0; i < mf.urls.length; i++) {
+        var url = mf.urls[i];
+        try {
+          // Reuse an already-cached copy (the SW precached most on install) so
+          // we only actually download what's missing (mainly the hadith books).
+          var res = await cache.match(url);
+          if (!res) {
+            res = await fetch(url, { cache: 'no-cache' });
+            if (res && res.ok) { await cache.put(url, res.clone()); }
+            else { failed++; res = null; }
+          }
+          if (res) {
+            var len = Number(res.headers.get('content-length'));
+            if (!isNaN(len) && len > 0) bytes += len;
+          }
+        } catch (_) { failed++; }
+        done++;
+        render();
       }
-    }, function () {
-      // No reply from the SW — almost always because an old build is still the
-      // active controller right after an update (it has no ZAD_CACHE_ALL
-      // handler). Recover gracefully instead of hanging: re-enable, tell the
-      // user to reopen, and hasten the new worker.
+    } catch (e) {
       downloading = false;
       if (btn) btn.disabled = false;
       if (wrap) wrap.style.display = 'none';
-      if (statusEl) statusEl.textContent = T('offline_needs_reopen');
+      if (statusEl) statusEl.textContent = T('offline_error');
       setDot('none');
-      nudgeUpdate();
-    }, 8000);
+      return;
+    }
+
+    downloading = false;
+    if (fill) fill.style.width = '100%';
+    if (pctEl) pctEl.textContent = '100%';
+    if (ptext) ptext.textContent = failed ? (T('offline_done') + ' — ' + failed + ' ✗') : T('offline_done');
+    if (btn) { btn.disabled = false; btn.textContent = T('offline_redownload'); btn.classList.add('is-done'); }
+    if (statusEl) statusEl.textContent = T('offline_status_complete');
+    setDot('ok');
+    showStorage();
+    setTimeout(function () { if (wrap) wrap.style.display = 'none'; if (fill) fill.style.width = '0%'; }, 3500);
   }
 
   function open() {
@@ -253,16 +270,6 @@
   function close() {
     var m = $('offlineModal');
     if (m) m.classList.remove('active');
-  }
-
-  // When a new service worker takes control (e.g. the updated build finished
-  // activating after the app was reopened), re-sync the modal so a status that
-  // was stuck on "—" / "reopen" recovers automatically without user action.
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('controllerchange', function () {
-      var m = $('offlineModal');
-      if (m && m.classList.contains('active') && !downloading) refresh();
-    });
   }
 
   window.OfflineDownload = { open: open, close: close, start: start, refresh: refresh };

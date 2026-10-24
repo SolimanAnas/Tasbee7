@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F8FAFC">
+<title>صانع فيديو الآيات — زاد المسلم | Quran Ayah Video Maker</title>
+<meta name="i18n-title" content="vm_meta_title">
+<link rel="stylesheet" href="../css/svg-theme.css">
+<meta name="description" content="اصنع فيديو قصير لآيات القرآن الكريم بصوت قارئك المفضل وخلفية جميلة — جاهز للحالة وإنستغرام وتيك توك. Create short Quran ayah videos with recitation and beautiful backgrounds for status and social media.">
+<meta name="author" content="Anas Soliman">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/video-maker.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="صانع فيديو الآيات — زاد المسلم">
+<meta property="og:description" content="اصنع فيديو قصير لآيات القرآن بصوت قارئك المفضل وخلفية جميلة للحالة ووسائل التواصل.">
+<meta property="og:url" content="https://solimananas.github.io/Tasbee7/pages/video-maker.html">
+<meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:site_name" content="زاد المسلم">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Local copies so the canvas can draw offline (canvas text never falls back gracefully). */
+@font-face {
+  font-family: 'QuranHafs';
+  src: url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
+  font-display: block;
+}
+@font-face {
+  font-family: 'VMTajawal';
+  src: url('../fonts/Tajawal-Bold.ttf') format('truetype');
+  font-display: block;
+}
+:root {
+  --bg-image: url('../images/Background-light.webp');
+  --bg-surface: rgba(255, 255, 255, 0.45);
+  --text-primary: #0F172A; --text-secondary: #475569;
+  --accent-main: #10B981; --accent-muted: rgba(16, 185, 129, 0.15);
+  --glass: rgba(255, 255, 255, 0.6); --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --overlay: rgba(255, 255, 255, 0.2);
+  --field-bg: rgba(255, 255, 255, 0.7);
+  --danger: #ef4444;
+}
+[data-theme="dark"] {
+  --bg-image: url('../images/Background-dark.webp');
+  --bg-surface: rgba(15, 23, 42, 0.5);
+  --text-primary: #F8FAFC; --text-secondary: #CBD5E1;
+  --accent-main: #10B981; --accent-muted: rgba(255, 255, 255, 0.1);
+  --glass: rgba(30, 41, 59, 0.6); --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --overlay: rgba(15, 23, 42, 0.5);
+  --field-bg: rgba(15, 23, 42, 0.55);
+  --danger: #f87171;
+}
+[data-theme="sepia"] {
+  --bg-image: url('../images/background-sepia.webp');
+  --bg-surface: rgba(244, 236, 216, 0.55);
+  --text-primary: #3c2a18; --text-secondary: #7a6244;
+  --accent-main: #8a5a1c; --accent-muted: rgba(138, 90, 28, 0.12);
+  --glass: rgba(252, 247, 234, 0.65); --glass-border: rgba(244, 236, 216, 0.7);
+  --glass-shadow: 0 8px 32px 0 rgba(90, 60, 20, 0.1);
+  --overlay: rgba(244, 236, 216, 0.2);
+  --field-bg: rgba(252, 247, 234, 0.8);
+  --danger: #c0392b;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; font-family: 'Tajawal', sans-serif;
+  background-color: var(--bg-surface); background-image: var(--bg-image);
+  background-size: cover; background-position: center; background-attachment: fixed;
+  color: var(--text-primary); display: flex; justify-content: center;
+  padding: calc(max(12px, env(safe-area-inset-top)) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  min-height: 100dvh;
+}
+body::before { content:''; position:fixed; inset:0; background:var(--overlay); z-index:-1; }
+
+.app { width:100%; max-width:980px; display:flex; flex-direction:column; gap:12px; }
+.layout { display:grid; grid-template-columns:1fr; gap:12px; align-items:start; }
+@media (min-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+  .preview-col { position:sticky; top:16px; }
+}
+.controls-col { display:flex; flex-direction:column; gap:12px; min-width:0; }
+
+/* Header */
+.header {
+  position:relative;
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--glass); border:1px solid var(--glass-border);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  box-shadow:var(--glass-shadow); border-radius:16px; padding:12px 16px;
+}
+.header-title { font-weight:bold; font-size:18px; position:absolute; left:50%; transform:translateX(-50%); white-space:nowrap; }
+.icon-btn {
+  background:none; border:none; color:var(--text-primary); cursor:pointer;
+  padding:5px; display:flex; align-items:center; justify-content:center; transition:.2s;
+  font-size:18px;
+}
+.icon-btn:active { opacity:.7; transform:scale(.9); }
+
+.card {
+  background:var(--glass); border:1px solid var(--glass-border);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  box-shadow:var(--glass-shadow); border-radius:20px; padding:15px;
+  display:flex; flex-direction:column; gap:10px; min-width:0;
+}
+label, .label { font-size:14px; color:var(--accent-main); font-weight:bold; }
+.row { display:flex; gap:10px; }
+.row > * { flex:1; min-width:0; }
+.field { display:flex; flex-direction:column; gap:6px; }
+
+select, input[type="number"] {
+  width:100%; font-family:inherit; font-size:15px; color:var(--text-primary);
+  background:var(--field-bg); border:1px solid var(--glass-border); border-radius:12px;
+  padding:10px 12px; outline:none;
+}
+select:focus, input[type="number"]:focus { border-color:var(--accent-main); }
+
+/* Preview */
+.stage {
+  position:relative; display:flex; align-items:center; justify-content:center;
+  height:min(62vh, 640px); border-radius:16px; overflow:hidden;
+  background:rgba(0,0,0,.25);
+}
+.stage canvas {
+  max-width:100%; max-height:100%; border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35); background:#000;
+}
+.stage-badge {
+  position:absolute; top:10px; inset-inline-start:10px;
+  background:rgba(0,0,0,.55); color:#fff; font-size:12px; padding:4px 10px; border-radius:20px;
+}
+.stage-badge.rec::before { content:''; display:inline-block; width:8px; height:8px; margin-inline-end:6px; border-radius:50%; background:#ef4444; animation:blink 1s infinite; }
+@keyframes blink { 50% { opacity:.2; } }
+
+/* Background thumbnails */
+.bg-strip { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 6px; scroll-snap-type:x proximity; }
+.bg-thumb {
+  flex:0 0 auto; width:58px; height:92px; border-radius:10px; cursor:pointer;
+  border:2px solid transparent; background-size:cover; background-position:center;
+  scroll-snap-align:start; transition:transform .15s, border-color .15s; padding:0;
+}
+.bg-thumb:active { transform:scale(.94); }
+.bg-thumb.active { border-color:var(--accent-main); box-shadow:0 0 0 2px var(--accent-muted); }
+.bg-thumb.is-video { position:relative; }
+.bg-thumb.is-video::after {
+  content:'▶'; position:absolute; bottom:4px; inset-inline-end:6px;
+  color:#fff; font-size:12px; text-shadow:0 1px 3px #000;
+}
+
+/* Segmented control */
+.seg { display:flex; gap:6px; background:var(--accent-muted); padding:4px; border-radius:12px; }
+.seg button {
+  flex:1; font-family:inherit; font-size:13px; font-weight:700; color:var(--text-secondary);
+  background:none; border:none; padding:8px 4px; border-radius:9px; cursor:pointer;
+}
+.seg button.active { background:var(--field-bg); color:var(--accent-main); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.seg small { display:block; font-weight:400; font-size:11px; opacity:.8; direction:ltr; }
+
+input[type="range"] { width:100%; accent-color:var(--accent-main); }
+.color-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.swatch {
+  width:30px; height:30px; border-radius:50%; border:2px solid var(--glass-border); cursor:pointer; padding:0;
+}
+.swatch.active { outline:2px solid var(--accent-main); outline-offset:2px; }
+input[type="color"] { width:34px; height:34px; border:none; background:none; padding:0; cursor:pointer; }
+
+.check-row { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; font-weight:600; }
+.check-row input { width:20px; height:20px; accent-color:var(--accent-main); }
+
+/* Actions */
+.actions { display:flex; gap:10px; }
+.btn {
+  flex:1; font-family:inherit; font-size:16px; font-weight:700; cursor:pointer;
+  border-radius:14px; padding:13px 10px; border:1px solid var(--glass-border);
+  background:var(--field-bg); color:var(--text-primary); transition:transform .15s, opacity .15s;
+  display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;
+}
+.btn:active { transform:scale(.97); }
+.btn.primary { background:var(--accent-main); color:#fff; border-color:transparent; }
+.btn:disabled { opacity:.5; pointer-events:none; }
+.btn.danger { color:var(--danger); }
+
+.progress { height:8px; border-radius:8px; background:var(--accent-muted); overflow:hidden; }
+.progress > div { height:100%; width:0; background:var(--accent-main); transition:width .2s linear; }
+.status { font-size:13px; color:var(--text-secondary); min-height:1.2em; text-align:center; }
+.status.error { color:var(--danger); font-weight:700; }
+.hint { font-size:12px; color:var(--text-secondary); text-align:center; }
+
+.result video { width:100%; max-height:60vh; border-radius:12px; background:#000; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="../index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;" data-i18n-title="home"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></a>
+    <div class="header-title" data-i18n="vm_title">صانع فيديو الآيات</div>
+    <button class="icon-btn" onclick="openLanguage()" title="اللغة" data-i18n-title="nav_language" aria-label="Language">
+      <svg class="action-icon" viewBox="0 0 24 24" style="width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </button>
+  </div>
+
+  <div class="layout">
+    <div class="preview-col">
+      <div class="card">
+        <div class="stage" id="vmStage">
+          <canvas id="vmCanvas" width="1080" height="1920"></canvas>
+          <div class="stage-badge" id="vmBadge" hidden></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="vmPreview" type="button">
+            <span id="vmPreviewIcon">▶</span><span id="vmPreviewLabel" data-i18n="vm_preview">معاينة</span>
+          </button>
+          <button class="btn primary" id="vmExport" type="button" data-i18n="vm_export">إنشاء الفيديو</button>
+        </div>
+        <div class="progress" id="vmProgress" hidden><div id="vmProgressBar"></div></div>
+        <div class="status" id="vmStatus" aria-live="polite"></div>
+        <button class="btn danger" id="vmCancel" type="button" hidden data-i18n="cancel">إلغاء</button>
+      </div>
+
+      <div class="card result" id="vmResult" hidden>
+        <div class="label" data-i18n="vm_done">الفيديو جاهز</div>
+        <video id="vmVideo" controls playsinline></video>
+        <div class="hint" id="vmFormatNote"></div>
+        <div class="actions">
+          <button class="btn primary" id="vmShare" type="button" data-i18n="vm_share">مشاركة</button>
+          <a class="btn" id="vmDownload" data-i18n="vm_download">تنزيل</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-col">
+      <div class="card">
+        <div class="field">
+          <label for="vmSurah" data-i18n="vm_surah">السورة</label>
+          <select id="vmSurah"></select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="vmFrom" data-i18n="vm_from">من آية</label>
+            <input type="number" id="vmFrom" min="1" value="1" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="vmTo" data-i18n="vm_to">إلى آية</label>
+            <input type="number" id="vmTo" min="1" value="1" inputmode="numeric">
+          </div>
+        </div>
+        <div class="check-row" id="vmBasmalaRow">
+          <span data-i18n="vm_basmala">البدء بالبسملة</span>
+          <input type="checkbox" id="vmBasmala" checked>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label for="vmReciter" data-i18n="vm_reciter">القارئ</label>
+          <select id="vmReciter"></select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label" data-i18n="vm_background">الخلفية</div>
+        <div class="bg-strip" id="vmBgs"></div>
+      </div>
+
+      <div class="card">
+        <div class="label" data-i18n="vm_format">المقاس</div>
+        <div class="seg" id="vmFormat">
+          <button type="button" data-fmt="story" class="active"><span data-i18n="vm_format_story">حالة / ستوري</span><small>9:16</small></button>
+          <button type="button" data-fmt="square"><span data-i18n="vm_format_square">مربع</span><small>1:1</small></button>
+          <button type="button" data-fmt="wide"><span data-i18n="vm_format_wide">عريض</span><small>16:9</small></button>
+        </div>
+
+        <div class="field">
+          <label for="vmFont" data-i18n="vm_font_size">حجم الخط</label>
+          <input type="range" id="vmFont" min="0.7" max="1.4" step="0.05" value="1">
+        </div>
+
+        <div class="field">
+          <div class="label" data-i18n="vm_text_color">لون النص</div>
+          <div class="color-row" id="vmColors">
+            <button type="button" class="swatch active" data-color="#ffffff" style="background:#ffffff" aria-label="#ffffff"></button>
+            <button type="button" class="swatch" data-color="#f5e6b8" style="background:#f5e6b8" aria-label="#f5e6b8"></button>
+            <button type="button" class="swatch" data-color="#e6c068" style="background:#e6c068" aria-label="#e6c068"></button>
+            <button type="button" class="swatch" data-color="#a7f3d0" style="background:#a7f3d0" aria-label="#a7f3d0"></button>
+            <input type="color" id="vmColor" value="#ffffff" aria-label="Custom color">
+          </div>
+        </div>
+
+        <div class="check-row">
+          <span data-i18n="vm_caption">إظهار اسم السورة والقارئ</span>
+          <input type="checkbox" id="vmCaption" checked>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/i18n/names.js"></script>
+<script src="../js/theme-manager.js"></script>
+<script src="../js/back-close.js"></script>
+<script src="../js/reciters.js"></script>
+<script src="../js/video-maker.js"></script>
+<script>
+function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
+</script>
+<script src="../js/svg-injector.js"></script>
+</body>
+</html>
