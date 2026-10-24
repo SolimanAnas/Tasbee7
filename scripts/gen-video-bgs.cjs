@@ -2,8 +2,9 @@
 // The video maker (pages/video-maker.html) can't list a directory on a static
 // host, so it reads this manifest instead. Re-run after adding/removing files:
 //   npm run bgs:video
-// Videos (.mp4/.webm) need a '<name>.thumb.webp' still next to them for the
-// picker; those thumbnails are not backgrounds themselves, so they're skipped.
+// Videos (.mp4/.webm) need a full-size '<name>.thumb.webp' still next to them —
+// it's the picker thumbnail and the poster drawn until the video has a frame.
+// Those stills are not backgrounds themselves, so they're skipped here.
 const fs = require('fs');
 const path = require('path');
 
@@ -17,4 +18,4 @@ const missingThumbs = files.filter(f => /\.(mp4|webm)$/i.test(f))
 
 fs.writeFileSync(path.join(DIR, 'manifest.json'), JSON.stringify(files, null, 2) + '\n', 'utf8');
 console.log(`✓ ${files.length} background(s) → images/video-maker/manifest.json`);
-missingThumbs.forEach(f => console.warn(`⚠ ${f} has no thumbnail — create it with:\n  ffmpeg -ss 1 -i ${f} -frames:v 1 -vf scale=320:-2 -c:v libwebp -quality 80 ${f.replace(/\.(mp4|webm)$/i, '.thumb.webp')}`));
+missingThumbs.forEach(f => console.warn(`⚠ ${f} has no thumbnail — create it with:\n  ffmpeg -ss 0.5 -i ${f} -frames:v 1 -c:v libwebp -quality 85 ${f.replace(/\.(mp4|webm)$/i, '.thumb.webp')}`));

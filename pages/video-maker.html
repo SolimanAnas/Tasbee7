@@ -23,9 +23,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 /* Local copies so the canvas can draw offline (canvas text never falls back gracefully). */
+/* Same Quran face as takrar.html (Amiri) — renders quran.json's marks correctly. */
 @font-face {
-  font-family: 'QuranHafs';
-  src: url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
+  font-family: 'QuranAmiri';
+  src: url('../fonts/Amiri.ttf') format('truetype');
   font-display: block;
 }
 @font-face {
@@ -266,6 +267,14 @@ input[type="color"] { width:34px; height:34px; border:none; background:none; pad
       <div class="card">
         <div class="label" data-i18n="vm_background">الخلفية</div>
         <div class="bg-strip" id="vmBgs"></div>
+        <div class="label" data-i18n="vm_motion">حركة الخلفية</div>
+        <div class="seg" id="vmMotion">
+          <button type="button" data-motion="none"><span data-i18n="vm_motion_none">ثابتة</span><small>■</small></button>
+          <button type="button" data-motion="zoomIn" class="active"><span data-i18n="vm_motion_zoom_in">تقريب</span><small>⤢</small></button>
+          <button type="button" data-motion="zoomOut"><span data-i18n="vm_motion_zoom_out">تبعيد</span><small>⤡</small></button>
+          <button type="button" data-motion="panLeft"><span data-i18n="vm_motion_pan_left">تحريك</span><small>←</small></button>
+          <button type="button" data-motion="panRight"><span data-i18n="vm_motion_pan_right">تحريك</span><small>→</small></button>
+        </div>
       </div>
 
       <div class="card">
@@ -295,6 +304,11 @@ input[type="color"] { width:34px; height:34px; border:none; background:none; pad
         <div class="check-row">
           <span data-i18n="vm_caption">إظهار اسم السورة والقارئ</span>
           <input type="checkbox" id="vmCaption" checked>
+        </div>
+
+        <div class="check-row">
+          <span data-i18n="vm_branding">إظهار شعار التطبيق</span>
+          <input type="checkbox" id="vmBranding" checked>
         </div>
       </div>
     </div>

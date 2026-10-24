@@ -12,7 +12,14 @@
   const TAIL = 1.0;   // hold after the last ayah ends (s)
   const AUDIO_BASE = 'https://everyayah.com/data/';
   const BG_DIR = '../images/video-maker/';
+  const BRAND = 'Zad Al-Muslim App';
+  const appIcon = new Image();
+  appIcon.src = '../icons/icon-192.png';
   const STORE_KEY = 'vm_settings';
+  const MOTIONS = ['none', 'zoomIn', 'zoomOut', 'panLeft', 'panRight'];
+  const ZOOM = 0.12;      // how far zoom in/out travels over the clip
+  const PAN_ZOOM = 1.1;   // pans run slightly zoomed so there is always room to move
+  const PAN_MAX = 0.18;   // cap pan travel to this share of the frame width
   // Warsh audio doesn't match the Hafs text we render, and muallim repeats
   // every ayah — both would drift from the on-screen text.
   const STYLES = ['murattal', 'mujawwad'];
@@ -35,9 +42,11 @@
     reciter: 'afasy',
     bg: 'g0',            // 'g<i>' = built-in gradient, 'i:<file>' = image
     format: 'story',
+    motion: 'zoomIn',   // background camera move: none | zoomIn | zoomOut | panLeft | panRight
     fontMul: 1,
     color: '#ffffff',
     caption: true,
+    branding: true,     // app icon + name at the top
     basmala: true,
   };
 
@@ -47,20 +56,50 @@
   let bgImages = [];      // filenames from the manifest
   let bgImg = null;       // loaded Image for the current 'i:' background
   let bgVideo = null;     // <video> for the current 'v:' background (muted, looping)
+  let bgPoster = null;    // full-size still of that video, drawn until it has a frame
   let timeline = null;    // last built timeline (reused by preview + export)
   let playing = null;     // { sources, t0, raf, export }
   const layoutCache = new Map();
 
   // ---------- helpers ----------
-  const tr = (k, p) => (window.t ? window.t(k, p) : k);
   const lang = () => (window.I18n ? I18n.getLang() : 'ar');
   const arabicNames = () => ['ar', 'ckb', 'ur'].includes(lang());
+  // Built-in copies of the strings this script sets itself. The SW serves
+  // js/i18n/*.js cache-first, so right after an update the cached dictionary
+  // can predate these keys — without this, buttons would show 'vm_stop' etc.
+  const FALLBACK = {
+    ar: {
+      vm_title: 'صانع فيديو الآيات', vm_preview: 'معاينة', vm_stop: 'إيقاف', vm_done: 'الفيديو جاهز',
+      vm_loading: 'جارٍ تحميل التلاوة...', vm_keep_open: 'جارٍ إنشاء الفيديو — أبقِ هذه الشاشة مفتوحة',
+      vm_max_ayat: 'الحد الأقصى {n} آية في الفيديو', vm_err_audio: 'تعذّر تحميل التلاوة — تحقق من الاتصال',
+      vm_err_unsupported: 'متصفحك لا يدعم إنشاء الفيديو — جرّب Chrome أو Safari الحديث',
+      vm_webm_note: 'حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4',
+      takrar_style_murattal: 'مرتل', takrar_style_mujawwad: 'مجوّد',
+    },
+    en: {
+      vm_title: 'Ayah Video Maker', vm_preview: 'Preview', vm_stop: 'Stop', vm_done: 'Video ready',
+      vm_loading: 'Loading recitation...', vm_keep_open: 'Creating video — keep this screen open',
+      vm_max_ayat: 'Maximum {n} ayat per video', vm_err_audio: "Couldn't load the recitation — check your connection",
+      vm_err_unsupported: "Your browser can't record video — try a recent Chrome or Safari",
+      vm_webm_note: 'Saved as WebM — some apps may require MP4',
+      takrar_style_murattal: 'Murattal', takrar_style_mujawwad: 'Mujawwad',
+    },
+  };
+  function tr(k, p) {
+    const out = window.t ? window.t(k, p) : k;
+    if (out !== k) return out;
+    let str = (arabicNames() ? FALLBACK.ar : FALLBACK.en)[k] || k;
+    Object.keys(p || {}).forEach(n => { str = str.split('{' + n + '}').join(p[n]); });
+    return str;
+  }
   const pad3 = n => String(n).padStart(3, '0');
   const arDigits = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
   const clamp01 = x => Math.max(0, Math.min(1, x));
-  const isVideoFile = f => /.(mp4|webm)$/i.test(f);
+  // Letters only (same as takrar.html) — strips harakat/Quranic marks and wasla.
+  const bareLetters = w => w.replace(/[\u064B-\u0670\u06D6-\u06ED]/g, '').replace(/\u0671/g, 'ا');
+  const isVideoFile = f => /\.(mp4|webm)$/i.test(f);
   // Each video ships a '<name>.thumb.webp' still for the picker (see scripts/gen-video-bgs.cjs).
-  const thumbFor = f => f.replace(/.(mp4|webm)$/i, '.thumb.webp');
+  const thumbFor = f => f.replace(/\.(mp4|webm)$/i, '.thumb.webp');
 
   function setStatus(msg, isError) {
     const el = $('vmStatus');
@@ -84,6 +123,7 @@
   function loadSettings() {
     try { Object.assign(state, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) { /* ignore */ }
     if (!FORMATS[state.format]) state.format = 'story';
+    if (!MOTIONS.includes(state.motion)) state.motion = 'zoomIn';
   }
 
   function reciterObj() {
@@ -109,9 +149,12 @@
     basmalaText = surahs[0].ayat[0];
     // quran.json prefixes ayah 1 of most surahs with the basmala, but the
     // everyayah ayah-1 audio doesn't include it — strip it so text matches audio.
+    // Compared on bare letters like takrar.html's localAyah(): the diacritic
+    // order differs between surahs (an exact match misses 95 and 97).
     for (const s of surahs) {
-      if (s.n === 1) continue;
-      if (s.ayat[0] && s.ayat[0].startsWith(basmalaText)) s.ayat[0] = s.ayat[0].slice(basmalaText.length).trim();
+      if (s.n === 1 || !s.ayat[0]) continue;
+      const w = s.ayat[0].split(/\s+/);
+      if (w.slice(0, 4).map(bareLetters).join(' ') === 'بسم الله الرحمن الرحيم') s.ayat[0] = w.slice(4).join(' ');
     }
   }
 
@@ -184,21 +227,39 @@
   }
 
   // ---------- rendering ----------
-  // Cover-fits an image or video frame, then darkens it so the text stays readable.
-  function drawCover(c, src, sw, sh, w, h, zoom) {
-    const scale = Math.max(w / sw, h / sh) * zoom;
+  // Camera move for the whole clip: zoom factor + horizontal pan in [-1, 1]
+  // (share of the available pan room). Eased so it starts and ends gently.
+  function cameraAt(progress) {
+    const p = (1 - Math.cos(Math.PI * clamp01(progress))) / 2;
+    switch (state.motion) {
+      case 'none': return { zoom: 1, pan: 0 };
+      case 'zoomOut': return { zoom: 1 + ZOOM * (1 - p), pan: 0 };
+      case 'panLeft': return { zoom: PAN_ZOOM, pan: 1 - 2 * p };
+      case 'panRight': return { zoom: PAN_ZOOM, pan: 2 * p - 1 };
+      default: return { zoom: 1 + ZOOM * p, pan: 0 };
+    }
+  }
+
+  // Cover-fits an image or video frame at the camera position, then darkens
+  // it so the text stays readable.
+  function drawCover(c, src, sw, sh, w, h, cam) {
+    const scale = Math.max(w / sw, h / sh) * cam.zoom;
     const dw = sw * scale, dh = sh * scale;
-    c.drawImage(src, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    const room = Math.min((dw - w) / 2, w * PAN_MAX);
+    c.drawImage(src, (w - dw) / 2 + cam.pan * room, (h - dh) / 2, dw, dh);
     c.fillStyle = 'rgba(0,0,0,0.38)';
     c.fillRect(0, 0, w, h);
   }
 
   function drawBackground(c, w, h, progress) {
-    const zoom = 1 + 0.08 * progress;   // slow Ken Burns push-in
+    const cam = cameraAt(progress);
+    const zoom = cam.zoom;
     if (state.bg.startsWith('v:') && bgVideo && bgVideo.readyState >= 2) {
-      drawCover(c, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, w, h, zoom);
+      drawCover(c, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, w, h, cam);
+    } else if (state.bg.startsWith('v:') && bgPoster && bgPoster.complete && bgPoster.naturalWidth) {
+      drawCover(c, bgPoster, bgPoster.naturalWidth, bgPoster.naturalHeight, w, h, cam);
     } else if (state.bg.startsWith('i:') && bgImg && bgImg.complete && bgImg.naturalWidth) {
-      drawCover(c, bgImg, bgImg.naturalWidth, bgImg.naturalHeight, w, h, zoom);
+      drawCover(c, bgImg, bgImg.naturalWidth, bgImg.naturalHeight, w, h, cam);
     } else {
       const g = GRADIENTS[parseInt(state.bg.slice(1), 10)] || GRADIENTS[0];
       const lin = c.createLinearGradient(0, 0, w * 0.3, h);
@@ -238,15 +299,15 @@
     const key = [seg.surah, seg.ayah, w, h, state.fontMul, state.caption].join('|');
     if (layoutCache.has(key)) return layoutCache.get(key);
     const words = seg.text.split(/\s+/).filter(Boolean);
-    // UthmanicHafs draws its own ayah-end ornament around Arabic-Indic digits,
-    // so no ﴿﴾ brackets; the NBSP keeps the marker from wrapping onto its own line.
-    if (seg.num != null && words.length) words[words.length - 1] += ' ' + arDigits(seg.num);
+    // U+06DD (end of ayah) + Arabic-Indic digits renders as Amiri's ayah
+    // medallion; the NBSP keeps the marker from wrapping onto its own line.
+    if (seg.num != null && words.length) words[words.length - 1] += '\u00A0\u06DD' + arDigits(seg.num);
     const maxW = w * 0.84;
     const maxH = h * (state.caption ? 0.6 : 0.7);
     let size = Math.min(w, h) * 0.085 * state.fontMul;
     let lines;
     for (;;) {
-      c.font = size + 'px QuranHafs';
+      c.font = size + 'px QuranAmiri';
       lines = wrapWords(c, words, maxW);
       if (lines.length * size * 1.8 <= maxH || size <= 22) break;
       size *= 0.94;
@@ -262,7 +323,7 @@
     const L = layoutText(c, seg, w, h);
     c.save();
     c.globalAlpha = alpha;
-    c.font = L.size + 'px QuranHafs';
+    c.font = L.size + 'px QuranAmiri';
     c.direction = 'rtl';
     c.textAlign = 'center';
     c.textBaseline = 'middle';
@@ -298,7 +359,7 @@
     c.stroke();
     c.fillStyle = 'rgba(255,255,255,0.95)';
     if (arabicNames()) {
-      c.font = (base * 0.045) + 'px QuranHafs';
+      c.font = (base * 0.045) + 'px QuranAmiri';
       c.fillText(s.name, w / 2, y);
     } else {
       c.font = (base * 0.04) + 'px VMTajawal';
@@ -307,9 +368,43 @@
     c.fillStyle = 'rgba(255,255,255,0.75)';
     c.font = (base * 0.03) + 'px VMTajawal';
     c.fillText(reciterName(reciterObj()), w / 2, y + base * 0.055);
-    c.fillStyle = 'rgba(255,255,255,0.5)';
-    c.font = (base * 0.024) + 'px VMTajawal';
-    c.fillText(tr('app_name'), w / 2, base * 0.07);
+    c.restore();
+  }
+
+  // Small app icon + name at the top, centered as one group. Always the
+  // English brand name so shared clips read the same in every UI language.
+  function drawBranding(c, w, h) {
+    if (!state.branding) return;
+    const base = Math.min(w, h);
+    const size = base * 0.026;
+    const icon = base * 0.042;
+    const gap = base * 0.012;
+    const y = base * 0.07;
+    const hasIcon = appIcon.complete && appIcon.naturalWidth;
+    c.save();
+    c.globalAlpha = 0.8;
+    c.font = size + 'px VMTajawal';
+    c.direction = 'ltr';
+    c.textAlign = 'left';
+    c.textBaseline = 'middle';
+    const tw = c.measureText(BRAND).width;
+    const total = tw + (hasIcon ? icon + gap : 0);
+    let x = (w - total) / 2;
+    c.shadowColor = 'rgba(0,0,0,0.5)';
+    c.shadowBlur = 8;
+    if (hasIcon) {
+      // Rounded-square clip so it reads as an app icon.
+      c.save();
+      c.beginPath();
+      if (c.roundRect) c.roundRect(x, y - icon / 2, icon, icon, icon * 0.22);
+      else c.rect(x, y - icon / 2, icon, icon);
+      c.clip();
+      c.drawImage(appIcon, x, y - icon / 2, icon, icon);
+      c.restore();
+      x += icon + gap;
+    }
+    c.fillStyle = '#fff';
+    c.fillText(BRAND, x, y);
     c.restore();
   }
 
@@ -332,6 +427,7 @@
       });
     }
     drawCaption(c, w, h);
+    drawBranding(c, w, h);
   }
 
   function sizeCanvas() {
@@ -357,11 +453,18 @@
   }
 
   // The video loops on its own; each tick just draws whatever frame is current.
+  // Resolves once frames are actually flowing (or after 3 s) so a recording
+  // never opens on a blank background.
   function startBgVideo() {
-    if (bgVideo && state.bg.startsWith('v:')) {
-      bgVideo.currentTime = 0;
-      bgVideo.play().catch(() => {});
-    }
+    const v = bgVideo;
+    if (!v || !state.bg.startsWith('v:')) return Promise.resolve();
+    return new Promise(resolve => {
+      const done = () => { clearTimeout(timer); v.removeEventListener('playing', done); resolve(); };
+      const timer = setTimeout(done, 3000);
+      v.addEventListener('playing', done);
+      if (v.currentTime > 0) v.currentTime = 0;
+      v.play().catch(done);
+    });
   }
   function stopBgVideo() {
     if (bgVideo) bgVideo.pause();
@@ -414,8 +517,9 @@
     const tl = await loadTimelineWithUi();
     if (!tl || playing) return;
     sizeCanvas();
+    await startBgVideo();
+    if (playing) return;
     const t0 = ac.currentTime + 0.1;
-    startBgVideo();
     playing = { sources: startSources(tl, [ac.destination], t0), t0, raf: 0, export: false };
     updatePreviewBtn();
     const tick = () => {
@@ -472,7 +576,7 @@
     cancelExport = () => { cancelled = true; };
     $('vmCancel').hidden = false;
 
-    startBgVideo();
+    await startBgVideo();
     rec.start(1000);
     const t0 = ac.currentTime + 0.15;
     // Also route to the speakers so the user hears what is being recorded.
@@ -588,6 +692,7 @@
       bgVideo.removeAttribute('src');
       bgVideo.load();   // releases the decoder on mobile
       bgVideo = null;
+      bgPoster = null;
     }
     state.bg = id;
     document.querySelectorAll('#vmBgs .bg-thumb').forEach(b => b.classList.toggle('active', b.dataset.bg === id));
@@ -611,6 +716,10 @@
       v.addEventListener('seeked', renderIdle);
       v.src = BG_DIR + encodeURI(id.slice(2));
       bgVideo = v;
+      const poster = new Image();
+      poster.onload = () => { if (state.bg === id) renderIdle(); };
+      poster.src = BG_DIR + encodeURI(thumbFor(id.slice(2)));
+      bgPoster = poster;
     }
     renderIdle();
   }
@@ -653,6 +762,14 @@
     $('vmReciter').onchange = () => { state.reciter = $('vmReciter').value; onChange(); };
     $('vmFont').oninput = () => { state.fontMul = parseFloat($('vmFont').value); onChange(); };
     $('vmCaption').onchange = () => { state.caption = $('vmCaption').checked; onChange(); };
+    $('vmBranding').onchange = () => { state.branding = $('vmBranding').checked; onChange(); };
+    document.querySelectorAll('#vmMotion button').forEach(b => {
+      b.onclick = () => {
+        state.motion = b.dataset.motion;
+        document.querySelectorAll('#vmMotion button').forEach(x => x.classList.toggle('active', x === b));
+        onChange();
+      };
+    });
     document.querySelectorAll('#vmFormat button').forEach(b => {
       b.onclick = () => {
         state.format = b.dataset.fmt;
@@ -677,10 +794,12 @@
   function applyStateToControls() {
     $('vmFont').value = state.fontMul;
     $('vmCaption').checked = state.caption;
+    $('vmBranding').checked = state.branding;
     $('vmBasmala').checked = state.basmala;
     $('vmColor').value = state.color;
     document.querySelectorAll('#vmColors .swatch').forEach(s => s.classList.toggle('active', s.dataset.color === state.color));
     document.querySelectorAll('#vmFormat button').forEach(b => b.classList.toggle('active', b.dataset.fmt === state.format));
+    document.querySelectorAll('#vmMotion button').forEach(b => b.classList.toggle('active', b.dataset.motion === state.motion));
     $('vmFrom').value = state.from;
     $('vmTo').value = state.to;
   }
@@ -707,9 +826,11 @@
     bindControls();
     // Canvas text silently falls back to a system font if drawn before the
     // webfont is ready, so wait for both faces before the first frame.
-    try { await Promise.all([document.fonts.load('40px QuranHafs'), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
+    try { await Promise.all([document.fonts.load('40px QuranAmiri'), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
     selectBackground(state.bg);
   }
+
+  appIcon.onload = () => renderIdle();
 
   window.VM = { state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
   init();
