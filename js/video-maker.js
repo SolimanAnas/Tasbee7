@@ -736,7 +736,17 @@
 
     if (cancelled) { setStatus(''); return; }
     const type = (rec.mimeType || mime).split(';')[0];
-    showResult(new Blob(chunks, { type }), type);
+    let blob = new Blob(chunks, { type });
+    // MediaRecorder MP4 is fragmented with a 0/partial duration in the header,
+    // so galleries and WhatsApp show ~3 s for a 1-minute clip. Rewrite it into
+    // a regular fast-start MP4 (lossless; js/mp4-faststart.js).
+    if (type.includes('mp4') && window.Mp4FastStart) {
+      try {
+        const fixed = Mp4FastStart.defragment(await blob.arrayBuffer());
+        if (fixed) blob = new Blob([fixed], { type: 'video/mp4' });
+      } catch (e) { console.warn('[video-maker] MP4 remux failed, keeping original', e); }
+    }
+    showResult(blob, type);
   }
 
   let resultUrl = null;
