@@ -34,6 +34,8 @@
     { z: [PAN_ZOOM, PAN_ZOOM], x: [0, 0], y: [-1, 1] },           // tilt down
   ];
   const STILL = { z: [1, 1], x: [0, 0], y: [0, 0] };
+  const MAX_SLIDES = 10;  // pictures in one slideshow
+  const XFADE = 0.9;      // crossfade between slideshow pictures (s)
   // Warsh audio doesn't match the Hafs text we render, and muallim repeats
   // every ayah — both would drift from the on-screen text.
   const STYLES = ['murattal', 'mujawwad'];
@@ -57,6 +59,8 @@
     bg: 'g0',            // 'g<i>' = built-in gradient, 'i:<file>' = image
     format: 'story',
     motion: true,       // random zoom/pan of the background, re-rolled per clip
+    multiBg: false,     // slideshow: several pictures change during the clip
+    bgs: [],            // picked pictures in order ('i:<file>'), used when multiBg is on
     fontMul: 1,
     color: '#ffffff',
     caption: true,
@@ -73,6 +77,8 @@
   let bgVideo = null;     // <video> for the current 'v:' background (muted, looping)
   let bgPoster = null;    // full-size still of that video, drawn until it has a frame
   let move = MOVES[0];    // camera move for the current clip
+  let slideMoves = MOVES.slice();   // one camera move per slideshow picture
+  const imgCache = new Map();       // 'i:<file>' -> Image, for slideshow pictures
   let timeline = null;    // last built timeline (reused by preview + export)
   let playing = null;     // { sources, t0, raf, export }
   const layoutCache = new Map();
@@ -92,7 +98,7 @@
       vm_webm_note: 'حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4',
       takrar_style_murattal: 'مرتل', takrar_style_mujawwad: 'مجوّد',
       vm_share_text: 'صُنع بتطبيق زاد المسلم', vm_share_page: 'اصنع فيديو مثله',
-      takrar_no_results: 'لا نتائج', takrar_style_all: 'الكل',
+      takrar_no_results: 'لا نتائج', takrar_style_all: 'الكل', vm_max_bgs: 'الحد الأقصى {n} صور',
       vm_cat_famous: 'آيات مشهورة', vm_cat_surahs: 'سور قصيرة', vm_cat_duas: 'أدعية قرآنية', vm_cat_comfort: 'طمأنينة وتذكير',
     },
     en: {
@@ -103,7 +109,7 @@
       vm_webm_note: 'Saved as WebM — some apps may require MP4',
       takrar_style_murattal: 'Murattal', takrar_style_mujawwad: 'Mujawwad',
       vm_share_text: 'Made with Zad Al-Muslim App', vm_share_page: 'Make your own',
-      takrar_no_results: 'No results', takrar_style_all: 'All',
+      takrar_no_results: 'No results', takrar_style_all: 'All', vm_max_bgs: 'Up to {n} pictures',
       vm_cat_famous: 'Famous ayat', vm_cat_surahs: 'Short surahs', vm_cat_duas: 'Quranic duas', vm_cat_comfort: 'Comfort & reminders',
     },
   };
@@ -147,6 +153,9 @@
     if (!FORMATS[state.format]) state.format = 'story';
     // Older versions stored a named move; anything but 'none' means motion on.
     if (typeof state.motion !== 'boolean') state.motion = state.motion !== 'none';
+    if (!Array.isArray(state.bgs)) state.bgs = [];
+    state.bgs = state.bgs.filter(id => typeof id === 'string' && id.startsWith('i:')).slice(0, MAX_SLIDES);
+    state.multiBg = !!state.multiBg;
   }
 
   function reciterObj() {
@@ -256,9 +265,9 @@
   // ---------- rendering ----------
   // Camera move for the whole clip: zoom factor + horizontal pan in [-1, 1]
   // (share of the available pan room). Eased so it starts and ends gently.
-  function cameraAt(progress) {
+  function cameraAt(progress, slideMove) {
     const p = (1 - Math.cos(Math.PI * clamp01(progress))) / 2;
-    const m = state.motion ? move : STILL;
+    const m = state.motion ? (slideMove || move) : STILL;
     const lerp = ([a, b]) => a + (b - a) * p;
     return { zoom: lerp(m.z), panX: lerp(m.x), panY: lerp(m.y) };
   }
@@ -267,24 +276,110 @@
   function rollMove() {
     const options = MOVES.filter(m => m !== move);
     move = options[Math.floor(Math.random() * options.length)];
+    // Each slideshow picture gets its own move, never repeating the previous one.
+    slideMoves = [];
+    let prev = null;
+    for (let i = 0; i < MAX_SLIDES; i++) {
+      const opts = MOVES.filter(m => m !== prev);
+      prev = opts[Math.floor(Math.random() * opts.length)];
+      slideMoves.push(prev);
+    }
+  }
+
+  // ---------- slideshow (several pictures) ----------
+  const imgReady = img => !!img && img.complete && img.naturalWidth > 0;
+  function slideIds() {
+    return state.multiBg ? state.bgs.filter(id => bgImages.includes(id.slice(2))) : [];
+  }
+  function slideImage(id) {
+    let img = imgCache.get(id);
+    if (!img) {
+      img = new Image();
+      img.onload = () => renderIdle();
+      img.src = BG_DIR + encodeURI(id.slice(2));
+      imgCache.set(id, img);
+    }
+    return img;
+  }
+  // Waits (max 8 s) until every picked picture has loaded, so a recording
+  // never shows an empty slide.
+  function ensureSlideImages() {
+    const imgs = slideIds().map(slideImage).filter(img => !imgReady(img));
+    if (!imgs.length) return Promise.resolve();
+    return Promise.race([
+      Promise.all(imgs.map(img => new Promise(res => { img.addEventListener('load', res, { once: true }); img.addEventListener('error', res, { once: true }); }))),
+      new Promise(res => setTimeout(res, 8000)),
+    ]);
+  }
+  // Slide boundaries [0, b1, …, total]: equal shares of the clip, each cut moved
+  // onto the nearest ayah change when one is close, so pictures change with the ayat.
+  function slideBounds(tl, n) {
+    const total = tl ? tl.total : 1;
+    const cuts = tl ? tl.items.slice(0, -1).map(it => it.end) : [];
+    const out = [0];
+    for (let k = 1; k < n; k++) {
+      let b = total * k / n;
+      if (cuts.length) {
+        const near = cuts.reduce((a, x) => (Math.abs(x - b) < Math.abs(a - b) ? x : a), cuts[0]);
+        if (Math.abs(near - b) <= total / n / 2 && near - out[out.length - 1] >= 1.5 && total - near >= 1.5) b = near;
+      }
+      out.push(Math.max(b, out[out.length - 1] + 0.5));
+    }
+    out.push(total);
+    return out;
+  }
+  function drawSlideshow(c, w, h, t, tl, ids) {
+    const n = ids.length;
+    const b = slideBounds(tl, n);
+    let i = 0;
+    while (i < n - 1 && t >= b[i + 1]) i++;
+    const local = j => (t - b[j]) / Math.max(0.001, b[j + 1] - b[j]);
+    const draw = (j, alpha) => {
+      const img = slideImage(ids[j]);
+      if (!imgReady(img)) return;
+      c.save();
+      c.globalAlpha = alpha;
+      drawCover(c, img, img.naturalWidth, img.naturalHeight, w, h, cameraAt(local(j), slideMoves[j % slideMoves.length]), true);
+      c.restore();
+    };
+    c.fillStyle = '#000';
+    c.fillRect(0, 0, w, h);
+    // Crossfade centred on each cut (the idle still just shows the first picture).
+    if (!tl) {
+      draw(0, 1);
+    } else if (i > 0 && t < b[i] + XFADE / 2) {
+      draw(i - 1, 1);
+      draw(i, clamp01((t - (b[i] - XFADE / 2)) / XFADE));
+    } else if (i < n - 1 && t > b[i + 1] - XFADE / 2) {
+      draw(i, 1);
+      draw(i + 1, clamp01((t - (b[i + 1] - XFADE / 2)) / XFADE));
+    } else {
+      draw(i, 1);
+    }
+    c.fillStyle = 'rgba(0,0,0,0.38)';
+    c.fillRect(0, 0, w, h);
   }
 
   // Cover-fits an image or video frame at the camera position, then darkens
   // it so the text stays readable.
-  function drawCover(c, src, sw, sh, w, h, cam) {
+  function drawCover(c, src, sw, sh, w, h, cam, noShade) {
     const scale = Math.max(w / sw, h / sh) * cam.zoom;
     const dw = sw * scale, dh = sh * scale;
     const roomX = Math.min((dw - w) / 2, w * PAN_MAX);
     const roomY = Math.min((dh - h) / 2, h * PAN_MAX);
     c.drawImage(src, (w - dw) / 2 + cam.panX * roomX, (h - dh) / 2 + cam.panY * roomY, dw, dh);
+    if (noShade) return;
     c.fillStyle = 'rgba(0,0,0,0.38)';
     c.fillRect(0, 0, w, h);
   }
 
-  function drawBackground(c, w, h, progress) {
+  function drawBackground(c, w, h, progress, t, tl) {
     const cam = cameraAt(progress);
     const zoom = cam.zoom;
-    if (state.bg.startsWith('v:') && bgVideo && bgVideo.readyState >= 2) {
+    const ids = slideIds();
+    if (ids.length) {
+      drawSlideshow(c, w, h, tl ? t : 0, tl, ids);
+    } else if (state.bg.startsWith('v:') && bgVideo && bgVideo.readyState >= 2) {
       drawCover(c, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, w, h, cam);
     } else if (state.bg.startsWith('v:') && bgPoster && bgPoster.complete && bgPoster.naturalWidth) {
       drawCover(c, bgPoster, bgPoster.naturalWidth, bgPoster.naturalHeight, w, h, cam);
@@ -459,7 +554,7 @@
   // t = seconds into the clip. With no timeline, draws a still of the first segment.
   function renderFrame(c, w, h, t, tl) {
     const total = tl ? tl.total : 1;
-    drawBackground(c, w, h, tl ? clamp01(t / total) : 0);
+    drawBackground(c, w, h, tl ? clamp01(t / total) : 0, t, tl);
     if (!tl) {
       const segs = segments();
       if (segs.length) drawAyah(c, segs[0], w, h, 1);
@@ -566,7 +661,7 @@
   // never opens on a blank background.
   function startBgVideo() {
     const v = bgVideo;
-    if (!v || !state.bg.startsWith('v:')) return Promise.resolve();
+    if (!v || !state.bg.startsWith('v:') || slideIds().length) return Promise.resolve();
     return new Promise(resolve => {
       const done = () => { clearTimeout(timer); v.removeEventListener('playing', done); resolve(); };
       const timer = setTimeout(done, 3000);
@@ -643,6 +738,7 @@
     if (!tl || playing) return;
     sizeCanvas();
     rollMove();
+    await ensureSlideImages();
     await startBgVideo();
     if (playing) return;
     const t0 = ac.currentTime + 0.1;
@@ -691,6 +787,7 @@
 
     sizeCanvas();
     rollMove();
+    await ensureSlideImages();
     renderFrame(ctx, canvas.width, canvas.height, 0, tl);
     const dest = ac.createMediaStreamDestination();
     const stream = new MediaStream([
@@ -1007,12 +1104,55 @@
       b.style.backgroundSize = 'cover';
       b.style.backgroundPosition = 'center';
       b.dataset.bg = id;
-      b.onclick = () => selectBackground(id);
+      b.onclick = () => tapBackground(id);
       strip.appendChild(b);
     };
     bgImages.filter(isVideoFile).forEach(f => add('v:' + f, `url("${BG_DIR}${encodeURI(thumbFor(f))}")`, true));
     bgImages.filter(f => !isVideoFile(f)).forEach(f => add('i:' + f, `url("${BG_DIR}${encodeURI(f)}")`));
     GRADIENTS.forEach((g, i) => add('g' + i, `linear-gradient(160deg, ${g.stops.join(', ')})`));
+  }
+
+  // Order numbers / ✓ on the thumbnails; videos and gradients are dimmed in multi mode.
+  function markBackgrounds() {
+    const order = state.multiBg ? slideIds() : [];
+    document.querySelectorAll('#vmBgs .bg-thumb').forEach(b => {
+      const n = order.indexOf(b.dataset.bg);
+      b.classList.toggle('active', state.multiBg ? n >= 0 : b.dataset.bg === state.bg);
+      if (n >= 0) b.dataset.order = n + 1; else delete b.dataset.order;
+      b.classList.toggle('off-in-multi', state.multiBg && !b.dataset.bg.startsWith('i:'));
+    });
+  }
+  function toggleSlide(id) {
+    const i = state.bgs.indexOf(id);
+    if (i >= 0) state.bgs.splice(i, 1);
+    else if (state.bgs.length >= MAX_SLIDES) { setStatus(tr('vm_max_bgs', { n: MAX_SLIDES })); return; }
+    else { state.bgs.push(id); slideImage(id); }
+    setStatus('');
+    markBackgrounds();
+    onChange();
+  }
+  function setMultiBg(on) {
+    state.multiBg = on;
+    if (on) {
+      // Start the set with the current picture, if it is one.
+      if (!state.bgs.length && state.bg.startsWith('i:')) state.bgs = [state.bg];
+      if (bgVideo) bgVideo.pause();
+      slideIds().forEach(slideImage);
+      // Videos come first in the strip but can't be picked here — scroll to the pictures.
+      const firstPic = document.querySelector('#vmBgs .bg-thumb[data-bg^="i:"]');
+      if (firstPic) firstPic.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    } else if (state.bgs.length) {
+      selectBackground(state.bgs[0]);
+    }
+    markBackgrounds();
+    onChange();
+  }
+
+  // Thumbnail taps: toggle pictures in multi mode, otherwise pick the single background.
+  // (selectBackground itself never toggles — init re-applies the saved single choice.)
+  function tapBackground(id) {
+    if (state.multiBg) { if (id.startsWith('i:')) toggleSlide(id); return; }
+    selectBackground(id);
   }
 
   function selectBackground(id) {
@@ -1025,7 +1165,7 @@
       bgPoster = null;
     }
     state.bg = id;
-    document.querySelectorAll('#vmBgs .bg-thumb').forEach(b => b.classList.toggle('active', b.dataset.bg === id));
+    markBackgrounds();
     saveSettings();
     if (id.startsWith('i:')) {
       const img = new Image();
@@ -1097,6 +1237,7 @@
     $('vmBranding').onchange = () => { state.branding = $('vmBranding').checked; onChange(); };
     $('vmPanel').onchange = () => { state.textPanel = $('vmPanel').checked; onChange(); };
     $('vmMotion').onchange = () => { state.motion = $('vmMotion').checked; onChange(); };
+    $('vmMultiBg').onchange = () => setMultiBg($('vmMultiBg').checked);
     document.querySelectorAll('.stepper button').forEach(b => {
       b.onclick = () => {
         const input = $(b.dataset.for);
@@ -1153,6 +1294,7 @@
     document.querySelectorAll('#vmColors .swatch').forEach(s => s.classList.toggle('active', s.dataset.color === state.color));
     document.querySelectorAll('#vmFormat button').forEach(b => b.classList.toggle('active', b.dataset.fmt === state.format));
     $('vmMotion').checked = state.motion;
+    $('vmMultiBg').checked = state.multiBg;
     $('vmFrom').value = state.from;
     $('vmTo').value = state.to;
   }

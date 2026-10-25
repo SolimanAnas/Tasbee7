@@ -363,9 +363,12 @@ body.vm-pseudo-fs .action-bar { display:none; }
 .bg-thumb:active { transform:scale(.94); }
 .bg-thumb.active { border-color:var(--accent-main); box-shadow:0 0 0 3px var(--accent-muted); }
 .bg-thumb.active::before {
-  content:'✓'; position:absolute; top:4px; inset-inline-start:4px; width:18px; height:18px; border-radius:50%;
+  content:attr(data-order); position:absolute; top:4px; inset-inline-start:4px; width:18px; height:18px; border-radius:50%;
   background:var(--accent-main); color:#fff; font-size:11px; font-weight:800; line-height:18px; text-align:center;
 }
+.bg-thumb.active:not([data-order])::before { content:'✓'; }
+/* Multi-picture mode: only pictures can be picked. */
+.bg-thumb.off-in-multi { opacity:.35; filter:grayscale(.6); pointer-events:none; }
 .bg-thumb.is-video::after {
   content:'▶'; position:absolute; bottom:5px; inset-inline-end:6px;
   color:#fff; font-size:12px; text-shadow:0 1px 3px #000;
@@ -527,6 +530,13 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
       <section class="card">
         <div class="step-head"><span class="step-num">3</span><span class="step-title" data-i18n="vm_background">الخلفية</span></div>
         <div class="bg-strip" id="vmBgs"></div>
+        <label class="switch-row">
+          <span class="sw-text">
+            <span class="sw-title" data-i18n="vm_multi_bg">عدة صور</span>
+            <span class="sw-desc" data-i18n="vm_multi_bg_desc">اختر أكثر من صورة لتتبدّل خلال الفيديو</span>
+          </span>
+          <input type="checkbox" class="switch" id="vmMultiBg">
+        </label>
         <label class="switch-row">
           <span class="sw-text">
             <span class="sw-title" data-i18n="vm_motion">حركة الخلفية</span>
