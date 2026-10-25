@@ -1327,6 +1327,9 @@
 
   appIcon.onload = () => renderIdle();
 
-  window.VM = { state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
+  // Bump BUILD whenever pages/video-maker.html starts depending on new script
+  // features; the page reloads once with a fresh copy if it gets an older one.
+  const BUILD = 2;   // 2: multi-picture slideshow
+  window.VM = { build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
   init();
 })();

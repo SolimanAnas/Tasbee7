@@ -679,6 +679,25 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
 <script src="../js/video-maker.js"></script>
 <script>
 function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
+
+// The service worker serves pages stale-while-revalidate but scripts cache-first,
+// so right after an update this page can run with an older video-maker.js (e.g.
+// the "multiple pictures" switch shows but does nothing). Drop the stale copy from
+// every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
+(function () {
+  var NEED = 2;
+  try {
+    if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
+    if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
+    sessionStorage.setItem('vmHealed', '1');
+  } catch (e) { return; }
+  var url = new URL('../js/video-maker.js', location.href).href;
+  caches.keys().then(function (keys) {
+    return Promise.all(keys.map(function (k) {
+      return caches.open(k).then(function (c) { return c.delete(url, { ignoreSearch: true }); });
+    }));
+  }).then(function () { location.reload(); }, function () { location.reload(); });
+})();
 </script>
 <script src="../js/svg-injector.js"></script>
 </body>
