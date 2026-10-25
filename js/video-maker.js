@@ -93,6 +93,7 @@
       takrar_style_murattal: 'مرتل', takrar_style_mujawwad: 'مجوّد',
       vm_share_text: 'صُنع بتطبيق زاد المسلم', vm_share_page: 'اصنع فيديو مثله',
       takrar_no_results: 'لا نتائج', takrar_style_all: 'الكل',
+      vm_cat_famous: 'آيات مشهورة', vm_cat_surahs: 'سور قصيرة', vm_cat_duas: 'أدعية قرآنية', vm_cat_comfort: 'طمأنينة وتذكير',
     },
     en: {
       vm_title: 'Ayah Video Maker', vm_preview: 'Preview', vm_stop: 'Stop', vm_done: 'Video ready',
@@ -103,6 +104,7 @@
       takrar_style_murattal: 'Murattal', takrar_style_mujawwad: 'Mujawwad',
       vm_share_text: 'Made with Zad Al-Muslim App', vm_share_page: 'Make your own',
       takrar_no_results: 'No results', takrar_style_all: 'All',
+      vm_cat_famous: 'Famous ayat', vm_cat_surahs: 'Short surahs', vm_cat_duas: 'Quranic duas', vm_cat_comfort: 'Comfort & reminders',
     },
   };
   function tr(k, p) {
@@ -869,13 +871,69 @@
     if (pickSheet) return;
     pickSheet = kind;
     $('vm' + kind + 'Search').value = '';
-    if (kind === 'Surah') renderSurahList(); else renderReciterList();
+    if (kind === 'Surah') renderSurahList();
+    else if (kind === 'Popular') renderPopularList();
+    else renderReciterList();
     $('vmPickOverlay').classList.add('active');
     $('vm' + kind + 'Sheet').classList.add('active');
     if (window.BackClose) BackClose.opened(closePick);
-    const sel = $('vm' + kind + 'List').querySelector('.selected');
+    // Long lists jump to the current choice; the popular sheet opens at the top
+    // so its search box and category chips stay in view.
+    const sel = kind !== 'Popular' && $('vm' + kind + 'List').querySelector('.selected');
     if (sel) sel.scrollIntoView({ block: 'center' });
   }
+  // ---------- "✦ Popular" quick picks (js/popular-ayat.js) ----------
+  const POP_CATS = ['famous', 'surahs', 'duas', 'comfort'];
+  let popularCat = 'all';
+  const popularList = () => (window.POPULAR_AYAT || []).filter(p => surahs[p.s - 1] && p.to <= surahs[p.s - 1].ayat.length);
+  const popTitle = p => (arabicNames() ? p.ar : p.en);
+  function popRange(p) {
+    const num = n => (arabicNames() ? arDigits(n) : String(n));
+    return p.from === p.to ? num(p.from) : num(p.from) + '–' + num(p.to);
+  }
+  // First words of the opening ayah, so the row shows exactly what will be recited.
+  function popOpening(p) {
+    const words = (surahs[p.s - 1].ayat[p.from - 1] || '').replace(/^۞\s*/, '').split(/\s+/).filter(Boolean);
+    return words.slice(0, 6).join(' ') + (words.length > 6 ? ' …' : '');
+  }
+  function popRowHtml(p) {
+    const sel = p.s === state.surah && p.from === state.from && p.to === state.to;
+    return '<button type="button" class="sheet-item pop-row' + (sel ? ' selected' : '') + '" data-pop="' +
+      p.s + ':' + p.from + ':' + p.to + '">' +
+      '<span class="pop-title">' + esc(popTitle(p)) + '</span>' +
+      '<span class="pop-meta">' + esc(surahLabel(surahs[p.s - 1])) + ' · ' + popRange(p) + '</span>' +
+      '<span class="pop-text">' + esc(popOpening(p)) + '</span></button>';
+  }
+  function renderPopularList() {
+    const q = normalize($('vmPopularSearch').value.trim());
+    document.querySelectorAll('#vmPopularFilter .filter-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === popularCat));
+    const rows = popularList().filter(p => (popularCat === 'all' || p.cat === popularCat) &&
+      (!q || normalize(p.ar).includes(q) || p.en.toLowerCase().includes(q) ||
+        normalize(surahPlain(surahs[p.s - 1])).includes(q) || normalize(surahs[p.s - 1].ayat[p.from - 1]).includes(q)));
+    let html;
+    if (popularCat === 'all' && !q) {
+      // Arranged by category with a heading per group.
+      html = POP_CATS.map(cat => {
+        const group = rows.filter(p => p.cat === cat);
+        return group.length ? '<div class="sheet-group-title">' + esc(tr('vm_cat_' + cat)) + '</div>' + group.map(popRowHtml).join('') : '';
+      }).join('');
+    } else {
+      html = rows.map(popRowHtml).join('');
+    }
+    $('vmPopularList').innerHTML = html || '<div class="sheet-empty">' + esc(tr('takrar_no_results')) + '</div>';
+  }
+  function choosePopular(key) {
+    const [s, from, to] = key.split(':').map(Number);
+    closePick();
+    state.surah = s;
+    $('vmSurah').value = s;
+    $('vmFrom').value = from;
+    $('vmTo').value = to;
+    clampRange('from');
+    renderPickerButtons();
+    onChange();
+  }
+
   function closePick() {
     if (!pickSheet) return;
     if (window.BackClose) BackClose.closed();
@@ -907,6 +965,12 @@
   function bindPickers() {
     $('vmSurahBtn').onclick = () => openPick('Surah');
     $('vmReciterBtn').onclick = () => openPick('Reciter');
+    $('vmPopularBtn').onclick = () => openPick('Popular');
+    $('vmPopularSearch').oninput = renderPopularList;
+    $('vmPopularList').onclick = e => { const b = e.target.closest('[data-pop]'); if (b) choosePopular(b.dataset.pop); };
+    document.querySelectorAll('#vmPopularFilter .filter-chip').forEach(b => {
+      b.onclick = () => { popularCat = b.dataset.cat; renderPopularList(); };
+    });
     $('vmPickOverlay').onclick = closePick;
     document.querySelectorAll('[data-close-pick]').forEach(b => { b.onclick = closePick; });
     $('vmSurahSearch').oninput = renderSurahList;
@@ -1071,7 +1135,12 @@
     bindPickers();
     if (window.ResizeObserver) new ResizeObserver(layoutStage).observe($('vmStage'));
     else window.addEventListener('resize', layoutStage);
-    window.addEventListener('langchange', () => { fillSurahs(); fillReciters(); updatePreviewBtn(); updateSummary(); renderIdle(); });
+    window.addEventListener('langchange', () => {
+      fillSurahs(); fillReciters(); updatePreviewBtn(); updateSummary(); renderIdle();
+      if (pickSheet === 'Surah') renderSurahList();
+      else if (pickSheet === 'Reciter') renderReciterList();
+      else if (pickSheet === 'Popular') renderPopularList();
+    });
   }
 
   function applyStateToControls() {

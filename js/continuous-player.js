@@ -116,6 +116,7 @@
   }
   function removeFrame() {
     if (frame) { frame.remove(); frame = null; }
+    dismissed = false;
     frameMedia.clear();
     document.documentElement.classList.remove('zad-frame-open');
     if (opts && opts.title) document.title = opts.title;
@@ -203,6 +204,8 @@
   };
   let state = { title: '', subtitle: '', playing: false, progress: 0, art: '' };
   let collapsed = false, pos = null;
+  let dismissed = false;    // user dropped the island on the ✕ target; hidden until playback starts again
+  let zone = null;          // bottom ✕ drop target, shown while dragging
   try { collapsed = localStorage.getItem('zadIslandCollapsed') === '1'; pos = JSON.parse(localStorage.getItem('zadIslandPos') || 'null'); } catch {}
 
   function buildIsland() {
@@ -241,7 +244,7 @@
     renderIsland();
   }
   function renderIsland() {
-    const show = !!frame && !!opts && opts.isActive();
+    const show = !!frame && !!opts && opts.isActive() && !dismissed;
     if (!show) { if (island) island.hidden = true; return; }
     if (!island) buildIsland();
     island.hidden = false;
@@ -257,7 +260,45 @@
     island.style.setProperty('--zi-p', Math.max(0, Math.min(100, state.progress || 0)) + '%');
     applyPos();
   }
-  function update(s) { state = Object.assign(state, s); if (island || frame) renderIsland(); }
+  function update(s) {
+    // Starting playback again (from the player page) brings a dismissed island back.
+    if (dismissed && s && s.playing && !state.playing) dismissed = false;
+    state = Object.assign(state, s);
+    if (island || frame) renderIsland();
+  }
+
+  // ------------------------------------------------- drag-to-dismiss target
+  const label = (k, f) => { const v = window.t ? window.t(k) : ''; return v && v !== k ? v : f; };
+  function buildZone() {
+    zone = document.createElement('div');
+    zone.id = 'zadDismiss';
+    zone.setAttribute('aria-hidden', 'true');
+    zone.innerHTML =
+      '<div class="zd-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>' +
+      '<div class="zd-label"></div>';
+    document.body.appendChild(zone);
+  }
+  function showZone(on) {
+    if (!zone) buildZone();
+    zone.querySelector('.zd-label').textContent = label('audio_island_dismiss', 'إغلاق المشغّل');
+    zone.classList.toggle('show', on);
+    if (!on) zone.classList.remove('hot');
+  }
+  // Centre of the ✕ circle, or null while the target isn't on screen.
+  function zoneCenter() {
+    if (!zone || !zone.classList.contains('show')) return null;
+    const c = zone.querySelector('.zd-circle').getBoundingClientRect();
+    return { x: c.left + c.width / 2, y: c.top + c.height / 2 };
+  }
+  function dismissIsland() {
+    dismissed = true;
+    island.classList.add('zi-dismissing');
+    if (opts && opts.isPlaying()) opts.pause();
+    setTimeout(() => {
+      island.classList.remove('zi-dismissing', 'zi-over-close');
+      renderIsland();
+    }, 220);
+  }
 
   function applyPos() {
     if (!island) return;
@@ -271,7 +312,7 @@
     } else { island.style.left = ''; island.style.right = ''; }
   }
   function enableDrag(el) {
-    let sx = 0, sy = 0, oy = 0, moved = false, id = null;
+    let sx = 0, sy = 0, oy = 0, moved = false, id = null, hot = false;
     el.addEventListener('pointerdown', (e) => {
       if (e.target.closest('button') && !collapsed) return;
       id = e.pointerId; sx = e.clientX; sy = e.clientY; oy = el.getBoundingClientRect().top; moved = false;
@@ -283,8 +324,23 @@
       if (e.pointerId !== id) return;
       const dx = e.clientX - sx, dy = e.clientY - sy;
       if (!moved && Math.hypot(dx, dy) < 8) return;
+      if (!moved) showZone(true);
       moved = true;
       el.classList.add('dragging');
+      // Over the ✕ target: highlight it, give a short buzz, and snap the bubble onto it.
+      const c = zoneCenter();
+      const over = !!c && Math.hypot(e.clientX - c.x, e.clientY - c.y) < 80;
+      if (over !== hot) {
+        hot = over;
+        zone.classList.toggle('hot', hot);
+        el.classList.toggle('zi-over-close', hot);
+        if (hot && navigator.vibrate) { try { navigator.vibrate(12); } catch {} }
+      }
+      if (hot && collapsed) {
+        el.style.left = (c.x - 29) + 'px'; el.style.right = 'auto';
+        el.style.top = (c.y - 29) + 'px';
+        return;
+      }
       el.style.top = Math.max(8, Math.min(window.innerHeight - 72, oy + dy)) + 'px';
       if (collapsed) { el.style.left = (e.clientX - 28) + 'px'; el.style.right = 'auto'; }
     });
@@ -300,6 +356,11 @@
         if (hit && hit.closest && hit.closest('.zi-text')) closeFrame();
         return;
       }
+      const drop = hot && e.type === 'pointerup';
+      hot = false;
+      showZone(false);
+      el.classList.remove('zi-over-close');
+      if (drop) { dismissIsland(); applyPos(); return; }   // keep the last saved position
       pos = { y: el.getBoundingClientRect().top, side: e.clientX < window.innerWidth / 2 ? 'left' : 'right' };
       try { localStorage.setItem('zadIslandPos', JSON.stringify(pos)); } catch {}
       applyPos();
@@ -312,7 +373,7 @@
   const css = `
 html.zad-frame-open, html.zad-frame-open body { overflow: hidden !important; }
 #zadFrame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 2147482000; background: var(--bg-surface, #fff); }
-#zadIsland { position: fixed; z-index: 2147482001; left: 50%; transform: translateX(-50%); touch-action: none; user-select: none; -webkit-user-select: none;
+#zadIsland { position: fixed; z-index: 2147482002; left: 50%; transform: translateX(-50%); touch-action: none; user-select: none; -webkit-user-select: none;
   font-family: inherit; direction: rtl; transition: transform .25s, opacity .25s; }
 #zadIsland[hidden] { display: none; }
 #zadIsland img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
@@ -340,10 +401,28 @@ html.zad-frame-open, html.zad-frame-open body { overflow: hidden !important; }
   background: conic-gradient(var(--accent-main, #10b981) var(--zi-p, 0%), rgba(127,127,127,.25) 0);
   -webkit-mask: radial-gradient(circle, transparent 25px, #000 26px); mask: radial-gradient(circle, transparent 25px, #000 26px); }
 #zadIsland.collapsed { transform: none; }
+#zadIsland .zi-pill, #zadIsland .zi-bubble { transition: transform .18s, opacity .18s; }
+#zadIsland.zi-over-close .zi-pill { opacity: .6; transform: scale(.94); }
+#zadIsland.zi-over-close .zi-bubble { transform: scale(.85); }
+#zadIsland.zi-dismissing { opacity: 0; }
+#zadIsland.zi-dismissing .zi-pill, #zadIsland.zi-dismissing .zi-bubble { transform: scale(.4); }
+#zadDismiss { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2147482001; height: 200px; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); font-family: inherit;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,.35) 45%, rgba(0,0,0,.7));
+  opacity: 0; transform: translateY(100%); transition: transform .25s cubic-bezier(.22,1,.36,1), opacity .2s; }
+#zadDismiss.show { opacity: 1; transform: none; }
+#zadDismiss .zd-circle { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+  background: rgba(20,20,20,.6); border: 2px solid rgba(255,255,255,.7); box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: transform .18s, background .18s; }
+#zadDismiss .zd-circle svg { width: 26px; height: 26px; }
+#zadDismiss.hot .zd-circle { transform: scale(1.22); background: #ef4444; border-color: #fff; }
+#zadDismiss .zd-label { color: #fff; font-size: 12.5px; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #zadIsland.collapsed .zi-pill { display: none; }
 #zadIsland.collapsed .zi-bubble { display: block; }
 @keyframes ziSpin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { #zadIsland.playing .zi-art { animation: none; } }`;
+@media (prefers-reduced-motion: reduce) { #zadIsland.playing .zi-art { animation: none; } #zadDismiss { transition: opacity .2s; } }`;
   function injectCss() {
     if (document.getElementById('zadShellCss')) return;
     const s = document.createElement('style'); s.id = 'zadShellCss'; s.textContent = css;

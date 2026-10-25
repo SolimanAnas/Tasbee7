@@ -28,6 +28,22 @@ const LOCALES = ['ar', 'en', 'tr', 'ckb', 'ur'];
     }
   }
 
+  // A key defined twice in one file is invisible to the set comparison above
+  // (the later value silently wins) but fails ESLint's no-dupe-keys in CI.
+  const fs = require('fs');
+  for (const loc of LOCALES) {
+    const src = fs.readFileSync(path.resolve(__dirname, '..', 'js', 'i18n', loc + '.js'), 'utf8');
+    const seen = new Map();
+    src.split('\n').forEach((line, i) => {
+      const m = line.match(/^\s*['"]?([\w-]+)['"]?\s*:/);
+      if (!m) return;
+      if (seen.has(m[1])) {
+        failed = true;
+        console.error(`✗ ${loc}.js defines '${m[1]}' twice (lines ${seen.get(m[1])} and ${i + 1})`);
+      } else seen.set(m[1], i + 1);
+    });
+  }
+
   console.log(`Locales checked: ${LOCALES.join(', ')} — ${union.size} keys in union.`);
   if (failed) process.exit(1);
   console.log('✓ All locales have identical key sets.');

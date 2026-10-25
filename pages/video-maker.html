@@ -129,6 +129,29 @@ button { font-family: inherit; }
 
 /* Section headers: numbered steps guide the flow top to bottom */
 .step-head { display:flex; align-items:center; gap:10px; }
+/* "✦ Popular" quick pick — a filled pill at the end of the step row. Solid accent
+   fill + glow so it reads as a call to action against the glass card, in every theme. */
+.popular-btn {
+  margin-inline-start:auto; flex-shrink:0; display:inline-flex; align-items:center; gap:6px;
+  padding:6px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;
+  border:none; color:#fff;
+  background:linear-gradient(135deg, var(--accent-main), var(--accent-strong));
+  box-shadow:0 4px 14px rgba(16,185,129,.4), inset 0 1px 0 rgba(255,255,255,.25);
+  font-family:inherit; font-size:13.5px; font-weight:800; line-height:1.35;
+  transition:transform .15s, box-shadow .2s, filter .2s;
+}
+[data-theme="sepia"] .popular-btn { box-shadow:0 4px 14px rgba(138,90,28,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+.popular-btn:hover { filter:brightness(1.08); box-shadow:0 6px 18px rgba(16,185,129,.5), inset 0 1px 0 rgba(255,255,255,.25); }
+.popular-btn:active { transform:scale(.95); }
+.popular-btn:focus-visible { outline:2px solid var(--accent-main); outline-offset:3px; }
+.popular-btn:disabled { opacity:.5; box-shadow:none; }
+.popular-btn .spark { font-size:14px; color:#fde68a; display:inline-block; animation:sparkle 2.4s ease-in-out infinite; }
+@keyframes sparkle {
+  0%, 70%, 100% { transform:scale(1) rotate(0); opacity:1; }
+  80% { transform:scale(1.35) rotate(45deg); opacity:.85; }
+  90% { transform:scale(.9) rotate(90deg); opacity:1; }
+}
+@media (prefers-reduced-motion:reduce) { .popular-btn .spark { animation:none; } }
 .step-num {
   width:26px; height:26px; border-radius:50%; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -208,6 +231,16 @@ select:focus, input[type="number"]:focus { border-color:var(--accent-main); box-
 .rc-text { display:flex; flex-direction:column; gap:3px; min-width:0; }
 .rc-name { font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sheet-empty { text-align:center; color:var(--text-secondary); padding:24px; font-weight:600; }
+.sheet-group-title { font-size:13px; font-weight:800; color:var(--accent-main); margin:8px 4px 0; }
+.sheet-group-title:first-child { margin-top:0; }
+.pop-row { flex-direction:column; align-items:stretch; gap:2px; padding:11px 14px; }
+.pop-title { font-size:15px; font-weight:800; }
+.pop-meta { font-size:12px; font-weight:700; color:var(--text-secondary); }
+.pop-text {
+  font-family:'QuranFont', serif; font-size:16px; font-weight:400; line-height:1.75; color:var(--text-secondary);
+  direction:rtl; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sheet-item.selected .pop-meta, .sheet-item.selected .pop-text { color:rgba(255,255,255,.9); }
 .reciter-filter { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; flex-shrink:0; }
 .reciter-filter::-webkit-scrollbar { display:none; }
 .filter-chip {
@@ -446,7 +479,12 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
 
     <div class="controls-col">
       <section class="card">
-        <div class="step-head"><span class="step-num">1</span><span class="step-title" data-i18n="vm_step_ayat">الآيات</span></div>
+        <div class="step-head">
+          <span class="step-num">1</span><span class="step-title" data-i18n="vm_step_ayat">الآيات</span>
+          <button type="button" class="popular-btn" id="vmPopularBtn" aria-haspopup="dialog">
+            <span class="spark" aria-hidden="true">✦</span><span data-i18n="vm_popular">الأكثر استخداماً</span>
+          </button>
+        </div>
         <div class="field">
           <span class="label" data-i18n="vm_surah">السورة</span>
           <button type="button" class="picker-btn" id="vmSurahBtn" aria-haspopup="dialog">
@@ -569,6 +607,21 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
     <div class="sheet-list" id="vmSurahList"></div>
   </div>
 </div>
+<div class="bottom-sheet" id="vmPopularSheet" role="dialog" aria-modal="true">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2 data-i18n="vm_popular_title">آيات مختارة</h2><button class="icon-btn" type="button" data-close-pick aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
+  <div class="sheet-content">
+    <input type="text" class="sheet-search" id="vmPopularSearch" placeholder="ابحث في الآيات..." data-i18n-placeholder="vm_search_popular" autocomplete="off">
+    <div class="reciter-filter" id="vmPopularFilter">
+      <button type="button" class="filter-chip active" data-cat="all" data-i18n="takrar_style_all">الكل</button>
+      <button type="button" class="filter-chip" data-cat="famous" data-i18n="vm_cat_famous">آيات مشهورة</button>
+      <button type="button" class="filter-chip" data-cat="surahs" data-i18n="vm_cat_surahs">سور قصيرة</button>
+      <button type="button" class="filter-chip" data-cat="duas" data-i18n="vm_cat_duas">أدعية قرآنية</button>
+      <button type="button" class="filter-chip" data-cat="comfort" data-i18n="vm_cat_comfort">طمأنينة وتذكير</button>
+    </div>
+    <div class="sheet-list" id="vmPopularList"></div>
+  </div>
+</div>
 <div class="bottom-sheet" id="vmReciterSheet" role="dialog" aria-modal="true">
   <div class="drag-handle"></div>
   <div class="sheet-header"><h2 data-i18n="takrar_choose_reciter">اختر القارئ</h2><button class="icon-btn" type="button" data-close-pick aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
@@ -611,6 +664,7 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
 <script src="../js/back-close.js"></script>
 <script src="../js/reciters.js"></script>
 <script src="../js/surah-map.js"></script>
+<script src="../js/popular-ayat.js"></script>
 <script src="../js/mp4-faststart.js"></script>
 <script src="../js/video-maker.js"></script>
 <script>
