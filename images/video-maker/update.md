@@ -80,6 +80,13 @@ For each video that needs processing:
 
 ## 4. Regenerate the manifest
 Run `npm run bgs:video`. It must print no "has no thumbnail" warnings.
+The manifest order is the picker order and is curated by theme. The script keeps the existing
+order, drops deleted files and appends new ones at the end. Then move each appended entry into
+its theme group in `manifest.json` (videos first, then: holy places & mosques → heritage
+terraces & cozy evenings → sunsets → nature). Never run it with `--sort` (that resets the
+arrangement to plain numeric order).
+Also check new images against existing ones for exact duplicates (e.g. compare downscaled
+grayscale pixels); report duplicates instead of adding them twice.
 
 ## 5. Verify
 - `images/video-maker/manifest.json` lists every processed image/video and no `.thumb.webp`,
