@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Zad Al-Muslim — Ayah Video Maker promo</title>
+<!--
+  30 s vertical (1080×1920) promo for the app's Ayah Video Maker (status / story
+  clips). Rendered by: node scripts/render.cjs --page=vm-promo.html --fmt=vertical
+  Every phone screen is a genuine capture (scripts/capture-video-maker.cjs) and
+  the clip shown full-screen is one the app itself exported.
+-->
+<link rel="stylesheet" href="styles.css">
+<style>
+  .stepdots { position: absolute; display: flex; gap: 18px; direction: rtl; }
+  .stepdots span { width: 16px; height: 16px; border-radius: 50%; background: rgba(230, 207, 156, 0.28); }
+  .stepdots span.on { background: var(--gold-soft); box-shadow: 0 0 14px rgba(230, 207, 156, 0.7); }
+  .kicker { position: absolute; left: 0; right: 0; text-align: center; font-family: 'Tajawal', sans-serif;
+            font-weight: 700; color: var(--gold-soft); direction: rtl; }
+  #clip { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; object-fit: cover; visibility: hidden; }
+  .storybar { position: absolute; left: 36px; right: 36px; top: 30px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.35); overflow: hidden; }
+  .storybar i { display: block; height: 100%; background: #fff; width: 0; margin-right: auto; margin-left: 0; }
+</style>
+</head>
+<body>
+<div id="frame" class="ar">
+  <canvas id="bg"></canvas>
+  <div id="world" class="layer"><div id="anchor" class="anchor"></div></div>
+  <canvas id="glow"></canvas>
+  <img id="clip" alt="">
+  <div id="type" class="layer"></div>
+  <div id="vignette" class="layer"></div>
+  <canvas id="grain"></canvas>
+</div>
+<script src="lib.js"></script>
+<script src="phone.js"></script>
+<script src="fx.js"></script>
+<script src="vm-scenes.js"></script>
+</body>
+</html>

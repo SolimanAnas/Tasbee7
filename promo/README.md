@@ -38,6 +38,24 @@ scripts/verify.py     ← QA report
 
 Every frame is a pure function of time: `renderFrame(t)` sets all state from `t`. Frames can therefore be rendered in any order, split across workers, and re-rendered one at a time. To preview any moment in a browser, serve `promo/` and open `src/index.html?fmt=vertical&t=12.5`.
 
+## Ayah Video Maker promo (Arabic, story 9:16)
+
+`output/zad-al-muslim-video-maker-story-ar.mp4` is a 30 s, 1080×1920 promo for the app's **Ayah Video Maker** (`pages/video-maker.html`), which makes ayah clips for status and stories. It has no music, and its storyboard is `output/zad-al-muslim-video-maker-storyboard.md`.
+
+- **Everything shown is real.** `scripts/capture-video-maker.cjs` opens the actual page in Arabic and captures the editor steps, the popular-ayat sheet, the recording screen and the «الفيديو جاهز» result. It then exports a clip with **the app's own recorder** (canvas + MediaRecorder, recitation from everyayah.com, as the app does). The clip is Ash-Sharh 94:5–6 recited by Mishary Alafasy, the app's default reciter, over background 3 with motion, in story format. All the Arabic ayah text in the promo is drawn by the app.
+- **The recitation is respected.** The clip plays full-screen with its own recitation, with no narration, no text and no sound design over it. Sample-accurate checks place the recitation at exactly 13.400 s, and everything else is ≥ 30 dB below it, which is only codec residue.
+- **Narration:** the same VoxCPM2 designed narrator (`make-voiceover-ar.py --vm`), mean CER 0.8%. It stops before the recitation begins and resumes on the end card.
+
+```bash
+node scripts/capture-video-maker.cjs                       # real screens + exported clip (needs network for everyayah.com)
+ffmpeg -i assets/video-maker/clip.mp4 -vf fps=30 -q:v 2 build/vm-frames/f%04d.jpg
+ffmpeg -i assets/video-maker/clip.mp4 -vn -ac 2 -ar 48000 build/vm-clip-audio.wav
+.venv-ar/bin/python scripts/make-voiceover-ar.py --vm --takes 3
+.venv/bin/python scripts/make-vm-audio.py
+node scripts/render.cjs --page=vm-promo.html --fmt=vertical --lang=ar
+scripts/mux.sh vm-promo-vertical-ar zad-al-muslim-video-maker-story-ar.mp4 8M mix-vm-ar.flac
+```
+
 ## Google Play listing (Arabic)
 
 `output/google-play/ar/` holds the Play Console assets for the Arabic store listing: the app icon (512×512), the feature graphic (1024×500), 8 phone screenshots (1080×1920), and the no-music promo video cut to Play's preview guidelines, with Arabic captions. The upload steps and the spec check are in `output/google-play/README.md`.

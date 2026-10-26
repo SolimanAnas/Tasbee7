@@ -53,6 +53,21 @@ LINES = [
 # (Play preview-asset guidelines), so the narration ends on the feature line.
 PLAY_LINES = LINES[:9] + [(39.35, "بلا إعلانات، ويعمل دون إنترنت.")]
 
+# Ayah Video Maker promo (--vm, 30 s, src/vm-scenes.js). The narration stops
+# before the exported clip's recitation (13.4–23.5 s) and resumes after it.
+VM_DURATION = 30.0
+VM_LINES = [
+    (0.50, "اجعلْ حالتَكَ آيةً تُذكِّرُ القلوب."),
+    (3.30, "اختَرِ الآياتِ التي تُحِبّ،"),
+    (5.70, "والقارئَ والخلفيّة،"),
+    (8.40, "والمقاسَ المناسبَ للحالةِ أو القصّة."),
+    (11.00, "ثم أنشئِ الفيديو بلمسةٍ واحدة."),
+    (24.20, "صانعُ فيديو الآيات، في زادِ المسلم."),
+    (27.00, "حمِّلْهُ الآن من جوجل بلاي."),
+]
+# a line must end by this time (the next line's start otherwise)
+VM_HARD_STOPS = {4: 13.2}
+
 # a line may run until this many seconds before the next one starts
 GAP = 0.25
 
@@ -93,11 +108,14 @@ def main():
     ap.add_argument("--whisper", default="small")
     ap.add_argument("--reuse", action="store_true", help="re-use takes already in build/vo-ar (re-place and re-score only)")
     ap.add_argument("--play", action="store_true", help="Google Play preview cut (outputs *-play files)")
+    ap.add_argument("--vm", action="store_true", help="Ayah Video Maker promo narration (outputs *-vm files)")
     ap.add_argument("--redo", default="", help="with --reuse: comma-separated line numbers to regenerate (e.g. after a script edit)")
     args = ap.parse_args()
     redo = {int(n) for n in args.redo.split(",") if n.strip()}
-    lines = PLAY_LINES if args.play else LINES
-    suffix = "-play" if args.play else ""
+    lines = VM_LINES if args.vm else PLAY_LINES if args.play else LINES
+    suffix = "-vm" if args.vm else "-play" if args.play else ""
+    duration = VM_DURATION if args.vm else DURATION
+    stops = VM_HARD_STOPS if args.vm else {}
 
     import torch
     from faster_whisper import WhisperModel
@@ -116,6 +134,10 @@ def main():
         return " ".join(s.text for s in segs)
 
     work = ROOT / "build" / ("vo-ar" + suffix)
+    if args.vm and not work.exists():  # same narrator: reuse the designed voice's anchor
+        work.mkdir(parents=True)
+        import shutil
+        shutil.copy(ROOT / "build" / "vo-ar" / "anchor.wav", work / "anchor.wav")
     if args.play and not work.exists():  # start from the main cut's takes; the edited line is redone
         import shutil
         shutil.copytree(ROOT / "build" / "vo-ar", work, ignore=shutil.ignore_patterns("line09-*", "line10-*"))
@@ -126,10 +148,10 @@ def main():
         sf.write(anchor_wav, a, vsr)
         print("anchor:", transcribe(a), flush=True)
 
-    track = np.zeros(int(DURATION * SR), dtype=np.float32)
+    track = np.zeros(int(duration * SR), dtype=np.float32)
     timing, qa = [], []
     for k, (start, text) in enumerate(lines):
-        limit = (lines[k + 1][0] - GAP if k + 1 < len(lines) else DURATION - 0.4) - start
+        limit = min(lines[k + 1][0] - GAP if k + 1 < len(lines) else duration - 0.4, stops.get(k, 1e9)) - start
         best = None
         regen = not args.reuse or k in redo
         if regen:  # drop stale takes of an edited line
