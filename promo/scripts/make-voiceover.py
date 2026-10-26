@@ -31,6 +31,8 @@ SAY = {
     "hadith,": "[[ hædˈiːθ, ]]",
     "qibla,": "[[ kˈɪblə, ]]",
     "Zad Al-Muslim.": "[[ zˈɑːd ælmˈʊslɪm. ]]",
+    "ayah.": "[[ ˈɑːjə. ]]",
+    "Ayah": "[[ ˈɑːjə ]]",
 }
 
 # (start second, text, length_scale) — start times follow the edit in src/timeline.js
@@ -74,15 +76,31 @@ def synth(model, text, length_scale, piper):
     return x
 
 
+# Ayah Video Maker promo (--vm, 30 s, src/vm-scenes.js?lang=en): every line
+# ends before the exported clip's recitation (13.4–23.5 s).
+VM_DURATION = 30.0
+VM_LINES = [
+    (0.50, "Make your status an ayah.", 1.06),
+    (3.30, "Pick the verses you love,", 1.04),
+    (5.70, "choose a reciter and a background,", 1.0),
+    (8.40, "and the right size for your status or story.", 1.0),
+    (11.00, "Then create your video in one tap.", 1.02),
+    (24.20, "Ayah Video Maker. In Zad Al-Muslim.", 1.04),
+    (27.00, "Download it on Google Play.", 1.06),
+]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--voice", required=True)
     ap.add_argument("--piper", default="piper")
+    ap.add_argument("--vm", action="store_true", help="Ayah Video Maker promo narration (outputs *-vm files)")
     args = ap.parse_args()
-    track = np.zeros(int(DURATION * SR), dtype=np.float32)
+    lines, suffix = (VM_LINES, "-vm") if args.vm else (LINES, "")
+    track = np.zeros(int((VM_DURATION if args.vm else DURATION) * SR), dtype=np.float32)
     timing = []
     prev_end = 0
-    for start, text, ls in LINES:
+    for start, text, ls in lines:
         x = synth(args.voice, text, ls, args.piper)
         i = int(start * SR)
         end = start + len(x) / SR
@@ -100,8 +118,8 @@ def main():
         with wave.open(str(tmp), "wb") as w:
             w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
             w.writeframes((track * 32767).astype(np.int16).tobytes())
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), str(ROOT / "audio" / "vo.flac")], check=True)
-    (ROOT / "audio" / "vo-timing.json").write_text(json.dumps(timing, indent=2))
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), str(ROOT / "audio" / f"vo{suffix}.flac")], check=True)
+    (ROOT / "audio" / f"vo-timing{suffix}.json").write_text(json.dumps(timing, indent=2))
 
 
 if __name__ == "__main__":

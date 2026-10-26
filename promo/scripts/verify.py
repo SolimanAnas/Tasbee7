@@ -25,6 +25,7 @@ EXPECT = {
     "zad-al-muslim-hero-ar.mp4": (1920, 1080),
     "zad-al-muslim-hero-ar-no-music.mp4": (1920, 1080),
     "zad-al-muslim-video-maker-story-ar.mp4": (1080, 1920),  # 30 s feature promo
+    "zad-al-muslim-video-maker-story-en.mp4": (1080, 1920),
 }
 
 

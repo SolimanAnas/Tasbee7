@@ -18,10 +18,15 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascri
   '.otf': 'font/otf', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
 
 // The clip: Ash-Sharh 94:5–6, Mishary Alafasy (app default), picture 3 with motion, story 9:16.
+// --lang=en captures the English UI and exports with picture 20 (night mosque);
+// the default (Arabic) uses picture 3 (misty sunrise).
+const LANG = (process.argv.find(a => a.startsWith('--lang=')) || '--lang=ar').slice(7);
+const SUF = LANG === 'ar' ? '' : `-${LANG}`;
 const SETTINGS = {
   surah: 94, from: 5, to: 6, reciter: 'afasy', bg: 'i:3.webp', format: 'story', motion: true,
   multiBg: false, bgs: [], fontMul: 1, color: '#ffffff', caption: true, branding: true, textPanel: true, basmala: true,
 };
+if (LANG !== 'ar') SETTINGS.bg = 'i:20.webp';
 
 (async () => {
   fs.mkdirSync(SHOTS, { recursive: true });
@@ -37,20 +42,20 @@ const SETTINGS = {
   const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
   const ctx = await browser.newContext({
     viewport: { width: 412, height: 892 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true,
-    colorScheme: 'dark', locale: 'ar', timezoneId: 'Asia/Riyadh', serviceWorkers: 'block',
+    colorScheme: 'dark', locale: LANG, timezoneId: 'Asia/Riyadh', serviceWorkers: 'block',
   });
-  await ctx.addInitScript(s => {
+  await ctx.addInitScript(([s, lang]) => {
     if (sessionStorage.getItem('__promo_init')) return;
-    localStorage.setItem('zad_lang', 'ar');
+    localStorage.setItem('zad_lang', lang);
     localStorage.setItem('themeMode', 'dark');
     localStorage.setItem('vm_settings', s);
     sessionStorage.setItem('__promo_init', '1');
-  }, JSON.stringify(SETTINGS));
+  }, [JSON.stringify(SETTINGS), LANG]);
   const page = await ctx.newPage();
   page.on('pageerror', e => console.error('[page]', e.message));
   await page.goto(`${base}/pages/video-maker.html`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(3000);
-  const shot = async name => { await page.waitForTimeout(700); await page.screenshot({ path: path.join(SHOTS, `${name}.png`) }); console.log('captured', name); };
+  const shot = async name => { await page.waitForTimeout(700); await page.screenshot({ path: path.join(SHOTS, `${name}${SUF}.png`) }); console.log('captured', name); };
 
   await shot('vm-editor');
   // each numbered step brought to the top of the screen, as a user scrolls
@@ -83,7 +88,7 @@ const SETTINGS = {
     return btoa(s);
   });
   const type = await page.evaluate(() => document.getElementById('vmDownload').download);
-  const out = path.join(CLIPS, 'clip' + path.extname(type));
+  const out = path.join(CLIPS, 'clip' + SUF + path.extname(type));
   fs.writeFileSync(out, Buffer.from(b64, 'base64'));
   console.log('clip →', out, (fs.statSync(out).size / 1e6).toFixed(1), 'MB');
   await browser.close();

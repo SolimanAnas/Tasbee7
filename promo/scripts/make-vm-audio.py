@@ -1,6 +1,7 @@
 """Soundtrack for the Ayah Video Maker promo (30 s, no music).
 
-    python scripts/make-vm-audio.py   -> audio/mix-vm-ar.flac
+    python scripts/make-vm-audio.py             -> audio/mix-vm-ar.flac
+    python scripts/make-vm-audio.py --lang=en   -> audio/mix-vm-en.flac (vo-vm.flac, Piper)
 
 Layers:
 - narration: audio/vo-ar-vm.flac (VoxCPM2, same designed narrator), processed
@@ -15,6 +16,7 @@ import importlib.util
 import json
 import re
 import subprocess
+import sys
 import tempfile
 import wave
 from pathlib import Path
@@ -24,7 +26,11 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 A, B = ROOT / "audio", ROOT / "build"
 SR, DUR = 48000, 30.0
-CLIP_T0, CLIP_LEN = 13.4, 302 / 30
+EN = "--lang=en" in sys.argv
+LANG = "en" if EN else "ar"
+VO = "vo-vm.flac" if EN else "vo-ar-vm.flac"
+CLIP_AUDIO = "vm-clip-audio-en.wav" if EN else "vm-clip-audio.wav"
+CLIP_T0, CLIP_LEN = 13.4, (303 if EN else 302) / 30   # frames of each export at 30 fps
 
 spec = importlib.util.spec_from_file_location("score", ROOT / "scripts" / "make-score.py")
 sc = importlib.util.module_from_spec(spec)
@@ -86,9 +92,9 @@ def main():
         vo_chain = ("highpass=f=85,lowpass=f=12000,acompressor=threshold=0.12:ratio=3:attack=8:release=180:makeup=1.6,"
                     "equalizer=f=220:t=q:w=1.2:g=-1.5,equalizer=f=3200:t=q:w=1.0:g=2,aecho=0.85:0.5:38|61:0.12|0.08,"
                     "pan=stereo|c0=c0|c1=c0")
-        loudnorm2(A / "vo-ar-vm.flac", td / "vo.wav", "I=-16:TP=-2:LRA=11", vo_chain)
+        loudnorm2(A / VO, td / "vo.wav", "I=-16:TP=-2:LRA=11", vo_chain)
         # the clip's recitation, untouched apart from level, placed at CLIP_T0
-        loudnorm2(B / "vm-clip-audio.wav", td / "clip.wav", "I=-16:TP=-2:LRA=11")
+        loudnorm2(B / CLIP_AUDIO, td / "clip.wav", "I=-16:TP=-2:LRA=11")
         d = int(CLIP_T0 * 1000)
         graph = (f"[0:a]asplit=2[vo][sc];[1:a]volume=0.7[bed];"
                  f"[bed][sc]sidechaincompress=threshold=0.04:ratio=5:attack=25:release=450[duck];"
@@ -96,8 +102,8 @@ def main():
                  f"[duck][vo][clip]amix=inputs=3:normalize=0:duration=first,atrim=0:{DUR}")
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(td / "vo.wav"), "-i", str(td / "bed.wav"),
                         "-i", str(td / "clip.wav"), "-filter_complex", graph, "-ar", str(SR), str(td / "sum.wav")], check=True)
-        i = loudnorm2(td / "sum.wav", A / "mix-vm-ar.flac", "I=-14:TP=-1.5:LRA=11", extra=("-c:a", "flac", "-sample_fmt", "s32"))
-        print(f"mix-vm-ar.flac: measured {i} LUFS -> -14 LUFS")
+        i = loudnorm2(td / "sum.wav", A / f"mix-vm-{LANG}.flac", "I=-14:TP=-1.5:LRA=11", extra=("-c:a", "flac", "-sample_fmt", "s32"))
+        print(f"mix-vm-{LANG}.flac: measured {i} LUFS -> -14 LUFS")
 
 
 if __name__ == "__main__":

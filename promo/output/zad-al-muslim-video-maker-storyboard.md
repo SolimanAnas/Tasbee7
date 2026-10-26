@@ -15,3 +15,19 @@
 **Sound:** narration plus non-tonal sound design only: air, soft whooshes, two UI taps, and a low impact on the end card. All of it is silent while the recitation plays. Loudness is −14 LUFS.
 
 **For Google Play:** this cut is meant for social status and stories. Its end card has a QR code, a badge and «مجّاني», which Play's preview-asset guidelines don't allow, so it is not a Play listing video.
+
+## English version (`zad-al-muslim-video-maker-story-en.mp4`)
+
+The beats and timing are the same as the Arabic cut. The differences:
+- **App footage:** the English UI and its own export, on a different background: picture 20, the night mosque under an arch.
+- **Layout:** reads left to right.
+
+| Time | On screen | Narration (Piper `joe`) |
+|---|---|---|
+| 0.0–3.2 | AYAH VIDEO MAKER · ZAD AL-MUSLIM — Make your status / *an ayah.* | 0.5 Make your status an ayah. |
+| 3.2–5.6 | Pick the *ayat* · Any surah, or a popular selection | 3.3 Pick the verses you love, |
+| 5.6–8.3 | Reciter & *background* · Multiple reciters · picture & video backgrounds | 5.7 choose a reciter and a background, |
+| 8.3–10.9 | Sized for *every platform* · Status / Story · Square · Wide | 8.4 and the right size for your status or story. |
+| 10.9–13.0 | Create the *video* · Recitation and ayah text, ready to share | 11.0 Then create your video in one tap. |
+| 13.4–23.5 | The exported clip (Ash-Sharh 94:5–6, Alafasy, night mosque), full screen | — the clip's recitation only |
+| 23.5–30.0 | Ayah Video *Maker* · in the Zad Al-Muslim app · FREE • AD-FREE • WORKS OFFLINE · Download on *Google Play* · QR · English Google Play badge | 24.2 Ayah Video Maker. In Zad Al-Muslim. · 27.0 Download it on Google Play. |

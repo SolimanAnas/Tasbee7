@@ -1,4 +1,5 @@
-// Ayah Video Maker promo — 30 s, 1080×1920, Arabic. Pure function of time.
+// Ayah Video Maker promo — 30 s, 1080×1920, Arabic (default) or English
+// (?lang=en: English UI captures and an English-UI export). Pure function of time.
 //   0.0–3.2   hook: "make your status an ayah", the editor rises into view
 //   3.2–13.0  three steps in the real UI: ayat → reciter & background → format → create
 //   13.4–23.5 the exported clip, full screen, with its own recitation (nothing over it)
@@ -6,14 +7,19 @@
 (function () {
   const { clamp, lerp, prog, ease, tween, set, el, makeText, playText } = K;
   const win = K.window;
+  const qs = new URLSearchParams(location.search);
+  const EN = qs.get('lang') === 'en';
+  const tx = (en, ar) => (EN ? en : ar);
+  const SUF = EN ? '-en' : '';
   const FPS = 30, DURATION = 30;
-  const CLIP_T0 = 13.4, CLIP_FRAMES = 302;
+  const CLIP_T0 = 13.4, CLIP_FRAMES = EN ? 303 : 302;   // frames extracted from each export
   const CLIP_END = CLIP_T0 + CLIP_FRAMES / FPS;
   const W = 1080, H = 1920, u = 1;
-  const L = { W, H, u, v: true, sq: false, lang: 'ar', rtl: true,
+  const L = { W, H, u, v: true, sq: false, lang: EN ? 'en' : 'ar', rtl: !EN,
     arch: { cx: W / 2, top: 0, w: 200, h: 400 }, beamTo: { x: 0, y: H, spread: 300 }, floorY: H };
 
   const frame = document.getElementById('frame');
+  if (EN) { frame.classList.remove('ar'); frame.classList.add('en'); document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
   frame.style.width = W + 'px'; frame.style.height = H + 'px';
   const cv = {};
   ['bg', 'glow', 'grain'].forEach(id => { const c = document.getElementById(id); c.width = W; c.height = H; cv[id] = c.getContext('2d'); });
@@ -28,7 +34,7 @@
   };
   function headline(html, y, size) {
     const b = makeText(type, html);
-    Object.assign(b.style, { left: 0, width: W + 'px', textAlign: 'center', top: y * H + 'px', fontSize: size + 'px', direction: 'rtl' });
+    Object.assign(b.style, { left: 0, width: W + 'px', textAlign: 'center', top: y * H + 'px', fontSize: size + 'px', direction: EN ? 'ltr' : 'rtl' });
     return b;
   }
   function kicker(text, y, size) {
@@ -39,6 +45,9 @@
 
   let render;
   window.ready = (async () => {
+    await document.fonts.load('500 40px Cormorant');
+    await document.fonts.load('italic 400 40px Cormorant');
+    await document.fonts.load('600 40px Manrope');
     await document.fonts.load('400 40px Amiri', 'زاد');
     await document.fonts.load('700 40px Tajawal', 'زاد');
     await document.fonts.load('500 40px Tajawal', 'زاد');
@@ -47,19 +56,22 @@
     // ---- phone with the genuine editor screens
     const hPh = 0.6 * H, phY = 0.085 * H;
     const SCR = ['vm-editor', 'vm-popular', 'vm-step2', 'vm-step3', 'vm-step4', 'vm-recording', 'vm-result'];
-    const phone = makePhone(anchor, hPh, SCR);
+    const phone = makePhone(anchor, hPh, SCR.map(n => n + SUF));
+    const show = st => phone.show(Object.fromEntries(Object.entries(st).map(([k, v]) => [k + SUF, v])));
 
     // ---- type
-    const K0 = kicker('صانعُ فيديو الآيات · زاد المسلم', 0.06, 40);
-    const T0 = headline('اجعلْ حالتَكَ<br><em>آيةً تُذكِّر</em>', 0.1, 118);
+    const K0 = kicker(tx('Ayah Video Maker · Zad Al-Muslim', 'صانعُ فيديو الآيات · زاد المسلم'), 0.06, EN ? 30 : 40);
+    if (EN) K0.classList.add('caps-en');
+    const T0 = headline(tx('Make your status<br><em>an ayah.</em>', 'اجعلْ حالتَكَ<br><em>آيةً تُذكِّر</em>'), 0.1, EN ? 128 : 118);
     const steps = [
-      ['اختَرِ <em>الآيات</em>', 'من أيِّ سورة، أو من الآيات المختارة', 3.2, 5.55],
-      ['القارئُ <em>والخلفيّة</em>', 'قرّاء متعدّدون · خلفيات صور وفيديو', 5.6, 8.25],
-      ['مقاسٌ <em>لكلِّ منصّة</em>', 'حالة / ستوري · مربع · عريض', 8.3, 10.85],
-      ['أنشئِ <em>الفيديو</em>', 'بالتلاوة ونصِّ الآيات، جاهزًا للمشاركة', 10.9, 13.05],
-    ].map(([h1, sub, a, b]) => ({ h: headline(h1, 0.06, 104), s: kicker(sub, 0.15, 42), a, b }));
+      [tx('Pick the <em>ayat</em>', 'اختَرِ <em>الآيات</em>'), tx('Any surah, or a popular selection', 'من أيِّ سورة، أو من الآيات المختارة'), 3.2, 5.55],
+      [tx('Reciter & <em>background</em>', 'القارئُ <em>والخلفيّة</em>'), tx('Multiple reciters · picture & video backgrounds', 'قرّاء متعدّدون · خلفيات صور وفيديو'), 5.6, 8.25],
+      [tx('Sized for <em>every platform</em>', 'مقاسٌ <em>لكلِّ منصّة</em>'), tx('Status / Story · Square · Wide', 'حالة / ستوري · مربع · عريض'), 8.3, 10.85],
+      [tx('Create the <em>video</em>', 'أنشئِ <em>الفيديو</em>'), tx('Recitation and ayah text, ready to share', 'بالتلاوة ونصِّ الآيات، جاهزًا للمشاركة'), 10.9, 13.05],
+    ].map(([h1, sub, a, b]) => ({ h: headline(h1, 0.06, EN ? 112 : 104), s: kicker(sub, 0.15, EN ? 38 : 42), a, b }));
     steps.forEach(s => { s.s.style.color = 'rgba(244,237,223,0.8)'; s.s.style.fontWeight = 500; });
     const dots = el('div', 'stepdots', type, '<span></span><span></span><span></span><span></span>');
+    if (EN) dots.style.direction = 'ltr';
     const dotEls = [...dots.children];
     const bar = el('div', 'storybar', type, '<i></i>');
 
@@ -67,21 +79,23 @@
     const icon = el('div', 'icon', type, '<img src="../assets/brand/app-icon-1024.png"><div class="sweep"></div>');
     Object.assign(icon.style, { width: '250px', height: '250px' });
     const sweep = icon.querySelector('.sweep');
-    const endT = headline('صانعُ فيديو <em>الآيات</em>', 0.27, 112);
-    const endSub = kicker('في تطبيق زادِ المسلم', 0.365, 48);
+    const endT = headline(tx('Ayah Video <em>Maker</em>', 'صانعُ فيديو <em>الآيات</em>'), 0.27, EN ? 120 : 112);
+    const endSub = kicker(tx('in the Zad Al-Muslim app', 'في تطبيق زادِ المسلم'), 0.365, EN ? 44 : 48);
     endSub.style.color = 'var(--ivory)';
-    const endBen = kicker('مَجّاني  •  بلا إعلانات  •  يعمل دون إنترنت', 0.425, 36);
-    const cta = headline('حمِّله الآن من <em>Google Play</em>', 0.5, 66);
+    const endBen = kicker(tx('Free  •  Ad-Free  •  Works Offline', 'مَجّاني  •  بلا إعلانات  •  يعمل دون إنترنت'), 0.425, EN ? 26 : 36);
+    if (EN) endBen.classList.add('caps-en');
+    const cta = headline(tx('Download on <em>Google Play</em>', 'حمِّله الآن من <em>Google Play</em>'), 0.5, EN ? 72 : 66);
     const qr = el('div', 'qr-card', type, '<img src="../assets/brand/qr-google-play.png">');
     Object.assign(qr.style, { width: '400px', height: '400px' });
-    const scan = kicker('امسح الرمز للتثبيت', 0.785, 32);
-    const badge = el('div', 'badge', type, '<img src="../assets/brand/google-play-badge-ar-cropped.png">');
+    const scan = kicker(tx('Scan to install', 'امسح الرمز للتثبيت'), 0.785, EN ? 22 : 32);
+    if (EN) scan.classList.add('caps-en');
+    const badge = el('div', 'badge', type, `<img src="../assets/brand/google-play-badge${EN ? '' : '-ar'}-cropped.png">`);
     badge.style.width = '420px';
     const url = el('div', 'url', type, 'play.google.com/store/apps/details?id=io.github.solimananas.twa');
     Object.assign(url.style, { fontSize: '24px', direction: 'ltr' });
 
     // preload clip frames
-    const frames = Array.from({ length: CLIP_FRAMES }, (_, i) => `../build/vm-frames/f${String(i + 1).padStart(4, '0')}.jpg`);
+    const frames = Array.from({ length: CLIP_FRAMES }, (_, i) => `../build/vm-frames${SUF}/f${String(i + 1).padStart(4, '0')}.jpg`);
     await Promise.all(frames.map(src => new Promise(r => { const im = new Image(); im.onload = im.onerror = r; im.src = src; })));
     await Promise.all([...document.images].map(im => im.decode().catch(() => {})));
 
@@ -131,9 +145,10 @@
       else if (t < 11.4) st = push('vm-step3', 'vm-step4', 8.3);
       else if (t < 12.3) { const p = ease.inOut(prog(t, 11.4, 11.65)); st = { 'vm-step4': { o: 1 - p }, 'vm-recording': { o: p } }; }
       else { const p = ease.inOut(prog(t, 12.3, 12.75)); st = { 'vm-recording': { o: 1 }, 'vm-result': { o: p > 0 ? 1 : 0, y: (1 - p) * 100 } }; }
-      phone.show(st);
-      phone.tap(0.2, 0.875, prog(t, 3.65, 4.15));  // "الأكثر استخداماً" → popular sheet
-      phone.tap(0.25, 0.955, prog(t, 11.0, 11.5)); // "إنشاء الفيديو"
+      show(st);
+      // taps on the real buttons (mirrored between the RTL and LTR layouts)
+      phone.tap(EN ? 0.81 : 0.2, 0.875, prog(t, 3.65, 4.15));   // Popular → popular-ayat sheet
+      phone.tap(EN ? 0.7 : 0.25, 0.955, prog(t, 11.0, 11.5));   // Create video
       phone.dim(0);
 
       // the exported clip, full screen
@@ -174,6 +189,5 @@
     FX.drawGlow(cv.glow, t, L, S);
     FX.drawGrain(cv.grain, Math.round(t * FPS), L);
   };
-  const qs = new URLSearchParams(location.search);
   if (qs.has('t')) window.ready.then(() => window.renderFrame(parseFloat(qs.get('t'))));
 })();

@@ -45,6 +45,16 @@ Every frame is a pure function of time: `renderFrame(t)` sets all state from `t`
 - **Everything shown is real.** `scripts/capture-video-maker.cjs` opens the actual page in Arabic and captures the editor steps, the popular-ayat sheet, the recording screen and the «الفيديو جاهز» result. It then exports a clip with **the app's own recorder** (canvas + MediaRecorder, recitation from everyayah.com, as the app does). The clip is Ash-Sharh 94:5–6 recited by Mishary Alafasy, the app's default reciter, over background 3 with motion, in story format. All the Arabic ayah text in the promo is drawn by the app.
 - **The recitation is respected.** The clip plays full-screen with its own recitation, with no narration, no text and no sound design over it. Sample-accurate checks place the recitation at exactly 13.400 s, and everything else is ≥ 30 dB below it, which is only codec residue.
 - **Narration:** the same VoxCPM2 designed narrator (`make-voiceover-ar.py --vm`), mean CER 0.8%. It stops before the recitation begins and resumes on the end card.
+- **English version:** `output/zad-al-muslim-video-maker-story-en.mp4`. It uses the English UI captures and a separate English-UI export with a **different background**: picture 20, the night mosque under an arch («Surah Ash-Sharh · Mishary Alafasy»). The layout reads left to right, the type is Cormorant and Manrope, and the narration is the English commercial's Piper `joe` voice (`make-voiceover.py --vm`; "ayah" is pronounced /ˈɑːjə/). Its recitation sits at exactly 13.400 s, and everything else is ≥ 30 dB below it.
+  ```bash
+  node scripts/capture-video-maker.cjs --lang=en
+  ffmpeg -i assets/video-maker/clip-en.mp4 -vf fps=30 -q:v 2 build/vm-frames-en/f%04d.jpg
+  ffmpeg -i assets/video-maker/clip-en.mp4 -vn -ac 2 -ar 48000 build/vm-clip-audio-en.wav
+  .venv/bin/python scripts/make-voiceover.py --vm --voice en_US-joe-medium.onnx --piper .venv/bin/piper
+  .venv/bin/python scripts/make-vm-audio.py --lang=en
+  node scripts/render.cjs --page=vm-promo.html --fmt=vertical --lang=en
+  scripts/mux.sh vm-promo-vertical zad-al-muslim-video-maker-story-en.mp4 8M mix-vm-en.flac
+  ```
 
 ```bash
 node scripts/capture-video-maker.cjs                       # real screens + exported clip (needs network for everyayah.com)
