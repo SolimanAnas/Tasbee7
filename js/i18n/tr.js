@@ -901,7 +901,7 @@ export default {
   'vm_webm_note': "WebM olarak kaydedildi — bazı uygulamalar MP4 gerektirebilir",
 
   // Duaa / dhikr image cards (js/share-card.js)
-  'sc_title': "Görsel olarak paylaş",
+  'sc_title': "Görsel veya video olarak paylaş",
   'sc_share': "Paylaş",
   'sc_download': "Görseli kaydet",
   'sc_close': "Kapat",
@@ -915,4 +915,14 @@ export default {
   'sc_repeat': "Tekrar: {n}",
   'sc_made_with': "Zad Al-Muslim uygulamasıyla yapıldı",
   'sc_ruqia': "Rukye",
+  'sc_make_video': "Video oluştur",
+  'sc_share_video': "Videoyu paylaş",
+  'sc_save_video': "Videoyu kaydet",
+  'sc_cancel': "İptal",
+  'sc_recording': "Video oluşturuluyor — bu ekranı açık tutun",
+  'sc_video_ready': "Video hazır ({s} sn)",
+  'sc_video_too_long': "Bu metin tek bir video için çok uzun — Hikâye boyutunda görsel olarak paylaşın",
+  'sc_video_unsupported': "Tarayıcınız video oluşturamıyor — güncel Chrome veya Safari deneyin",
+  'sc_webm_note': "WebM olarak kaydedildi — bazı uygulamalar MP4 gerektirebilir",
+  'sc_hadith_number': "No. {n}",
 };

@@ -451,6 +451,7 @@
 
 <script src="../js/theme-manager.js"></script>
 <script src="../js/back-close.js"></script>
+<script src="../js/share-card.js"></script>
 <script>
   let App = { bookId:"", bookName:"", data:[], currentIdx:0, searchIndex:[], isSearchMode:false, bookmarks:[] };
 
@@ -723,6 +724,9 @@
         <div class="card-ref">
           <span>رقم: <b>${item.number}</b> &nbsp;<span class="${badgeClass}">${item.gradeText}</span></span>
           <div class="card-actions">
+            <button class="card-btn" onclick="shareHadith(${App.currentIdx}, ${i})" title="مشاركة كصورة أو فيديو" aria-label="مشاركة كصورة أو فيديو">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
             <button class="card-btn" onclick="copyText(decodeURIComponent('${textToCopy}'))" title="نسخ الحديث">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
@@ -733,6 +737,12 @@
     }).join('');
     document.getElementById('content-area').innerHTML = `<div class="cards-container">${html}</div>`;
     window.scrollTo(0, 0);
+  }
+
+  function shareHadith(sIdx, iIdx) {
+    const sec = App.data[sIdx], item = sec && sec.items[iIdx];
+    if (!item || !window.ShareCard) return;
+    ShareCard.open({ text: item.ar, title: App.bookName, source: `${sec.title} • رقم ${item.number} • ${item.gradeText}` });
   }
 
   let searchDebounceTimer;

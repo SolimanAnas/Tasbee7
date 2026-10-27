@@ -901,7 +901,7 @@ export default {
   'vm_webm_note': "WebM میں محفوظ ہوا — کچھ ایپس کو MP4 درکار ہو سکتا ہے",
 
   // Duaa / dhikr image cards (js/share-card.js)
-  'sc_title': "تصویر کے طور پر شیئر کریں",
+  'sc_title': "تصویر یا ویڈیو کے طور پر شیئر کریں",
   'sc_share': "شیئر کریں",
   'sc_download': "تصویر محفوظ کریں",
   'sc_close': "بند کریں",
@@ -915,4 +915,14 @@ export default {
   'sc_repeat': "تکرار: {n}",
   'sc_made_with': "زاد المسلم ایپ سے بنایا گیا",
   'sc_ruqia': "رقیہ",
+  'sc_make_video': "ویڈیو بنائیں",
+  'sc_share_video': "ویڈیو شیئر کریں",
+  'sc_save_video': "ویڈیو محفوظ کریں",
+  'sc_cancel': "منسوخ کریں",
+  'sc_recording': "ویڈیو بن رہی ہے — یہ اسکرین کھلی رکھیں",
+  'sc_video_ready': "ویڈیو تیار ہے ({s} سیکنڈ)",
+  'sc_video_too_long': "یہ متن ایک ویڈیو کے لیے بہت طویل ہے — اسے اسٹوری سائز کی تصویر کے طور پر شیئر کریں",
+  'sc_video_unsupported': "آپ کا براؤزر ویڈیو نہیں بنا سکتا — جدید Chrome یا Safari آزمائیں",
+  'sc_webm_note': "WebM میں محفوظ ہوا — کچھ ایپس کو MP4 درکار ہو سکتا ہے",
+  'sc_hadith_number': "نمبر {n}",
 };

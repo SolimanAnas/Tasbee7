@@ -929,7 +929,7 @@ export default {
   'vm_webm_note': "وەک WebM پاشەکەوت کرا — هەندێک ئەپ MP4 پێویست دەکەن",
 
   // Duaa / dhikr image cards (js/share-card.js)
-  'sc_title': "هاوبەشکردن وەک وێنە",
+  'sc_title': "هاوبەشکردن وەک وێنە یان ڤیدیۆ",
   'sc_share': "هاوبەشکردن",
   'sc_download': "پاشەکەوتکردنی وێنە",
   'sc_close': "داخستن",
@@ -943,4 +943,14 @@ export default {
   'sc_repeat': "دووبارەکردنەوە: {n}",
   'sc_made_with': "دروستکراوە بە ئەپی زاد المسلم",
   'sc_ruqia': "ڕوقیە",
+  'sc_make_video': "دروستکردنی ڤیدیۆ",
+  'sc_share_video': "هاوبەشکردنی ڤیدیۆ",
+  'sc_save_video': "پاشەکەوتکردنی ڤیدیۆ",
+  'sc_cancel': "هەڵوەشاندنەوە",
+  'sc_recording': "ڤیدیۆ دروست دەکرێت — ئەم شاشەیە کراوە بهێڵەوە",
+  'sc_video_ready': "ڤیدیۆ ئامادەیە ({s} چرکە)",
+  'sc_video_too_long': "دەقەکە زۆر درێژە بۆ یەک ڤیدیۆ — وەک وێنەی ستۆری هاوبەشی بکە",
+  'sc_video_unsupported': "وێبگەڕەکەت ناتوانێت ڤیدیۆ دروست بکات — Chrome یان Safari ی نوێ تاقی بکەرەوە",
+  'sc_webm_note': "وەک WebM پاشەکەوت کرا — هەندێک ئەپ MP4 پێویست دەکەن",
+  'sc_hadith_number': "ژمارە {n}",
 };

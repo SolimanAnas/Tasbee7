@@ -395,6 +395,7 @@
 <script src="../js/i18n.js"></script>
 <script src="../js/theme-manager.js"></script>
 <script src="../js/back-close.js"></script>
+<script src="../js/share-card.js"></script>
 <script>
     // ===================== الثيمات =====================
     ThemeManager.init();
@@ -409,6 +410,13 @@
         { id: 'nasai',    name: 'سنن النسائي' },
         { id: 'ibnmajah', name: 'سنن ابن ماجه' }
     ];
+    // Display names for every book id (the daily-hadith data also uses the
+    // books outside the search set above).
+    const BOOK_NAMES = Object.assign(Object.fromEntries(BOOKS_INFO.map(b => [b.id, b.name])), {
+        riyad_assalihin: 'رياض الصالحين', bulugh_almaram: 'بلوغ المرام', mishkat_almasabih: 'مشكاة المصابيح',
+        aladab_almufrad: 'الأدب المفرد', shamail_muhammadiyah: 'الشمائل المحمدية', nawawi40: 'الأربعون النووية',
+        qudsi40: 'الأربعون القدسية'
+    });
 
     let localDatabase = [];
     let currentSearchResults = [];
@@ -651,14 +659,28 @@
     }
 
     // ===================== الحديث المميز =====================
-    function buildCardActions(textToCopy, link) {
+    // Share payloads for the card buttons, referenced by index so long texts
+    // never have to be escaped into onclick attributes.
+    const shareItems = [];
+    function shareHadith(i) {
+        if (shareItems[i] && window.ShareCard) ShareCard.open(shareItems[i]);
+    }
+    function hadithShareItem(text, bookName, sectionName, number, grade) {
+        const parts = [sectionName, number != null && number !== '' ? t('sc_hadith_number', { n: number }) : '', grade].filter(Boolean);
+        return { text, title: bookName, source: parts.join(' • ') };
+    }
+
+    function buildCardActions(textToCopy, link, share) {
+        const shareBtn = share ? `<button class="card-action-btn" onclick="shareHadith(${shareItems.push(share) - 1})" title="${t('sc_title')}" aria-label="${t('sc_title')}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>` : '';
         const copyBtn = `<button class="card-action-btn" onclick="copyToClipboard('${textToCopy}')" title="${t('hadith_copy_tooltip')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
         </button>`;
         const viewBtn = link ? `<a href="${link}" class="card-action-btn" title="${t('hadith_view_tooltip')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         </a>` : '';
-        return `<div class="card-actions">${copyBtn}${viewBtn}</div>`;
+        return `<div class="card-actions">${shareBtn}${copyBtn}${viewBtn}</div>`;
     }
 
     async function fetchRandomHadith() {
@@ -669,14 +691,16 @@
                 if (Array.isArray(data) && data.length > 0) {
                     const random = data[Math.floor(Math.random() * data.length)];
                     const text = random.hadith || random.text || "";
-                    const source = random.source || random.bookName || "";
+                    // Some entries store the book id ("riyad_assalihin") instead of its name.
+                    const rawSource = random.source || random.bookName || "";
+                    const source = BOOK_NAMES[rawSource] || rawSource;
                     const grade = random.grade || (random.grades ? getHadithGrade('', random.grades).text : "");
                     const textToCopy = encodeURIComponent(`${text}\n\n[${source} - ${grade}]`);
                     document.getElementById('dailyHadithText').innerHTML = `
                         ${text}
                         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;">
                             <span class="daily-meta">${source}${grade ? ' • ' + grade : ''}</span>
-                            ${buildCardActions(textToCopy, null)}
+                            ${buildCardActions(textToCopy, null, hadithShareItem(text, source, '', '', grade))}
                         </div>`;
                     return;
                 }
@@ -699,7 +723,7 @@
             ${random.text}
             <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;">
                 <span class="daily-meta">${random.bookName}${sectionText} • ${gradeInfo.text}</span>
-                ${buildCardActions(textToCopy, link)}
+                ${buildCardActions(textToCopy, link, hadithShareItem(random.text, random.bookName, random.sectionName, random.number, gradeInfo.text))}
             </div>`;
     }
 
@@ -819,7 +843,7 @@
             card.innerHTML = `
                 <div class="hadith-head">
                     <span class="${badgeClass}">${gradeInfo.text}</span>
-                    ${buildCardActions(textToCopy, link)}
+                    ${buildCardActions(textToCopy, link, hadithShareItem(hadith.text, hadith.bookName, hadith.sectionName, hadith.number, gradeInfo.text))}
                 </div>
                 <div class="hadith-text">${highlightedText}</div>
                 <div class="hadith-meta"><b>${t('hadith_book_prefix')}</b> ${hadith.bookName}${sectionDisplay} &nbsp;|&nbsp; <b>${t('hadith_number_prefix')}</b> ${hadith.number}</div>`;

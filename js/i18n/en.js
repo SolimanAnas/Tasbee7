@@ -929,7 +929,7 @@ export default {
   'vm_webm_note': "Saved as WebM — some apps may require MP4",
 
   // Duaa / dhikr image cards (js/share-card.js)
-  'sc_title': "Share as image",
+  'sc_title': "Share as image or video",
   'sc_share': "Share",
   'sc_download': "Save image",
   'sc_close': "Close",
@@ -943,4 +943,14 @@ export default {
   'sc_repeat': "Repeat: {n}×",
   'sc_made_with': "Made with Zad Al-Muslim App",
   'sc_ruqia': "Ruqyah",
+  'sc_make_video': "Create video",
+  'sc_share_video': "Share video",
+  'sc_save_video': "Save video",
+  'sc_cancel': "Cancel",
+  'sc_recording': "Creating video — keep this screen open",
+  'sc_video_ready': "Video ready ({s} s)",
+  'sc_video_too_long': "This text is too long for one video — share it as a Story-size image instead",
+  'sc_video_unsupported': "Your browser can't record video — try a recent Chrome or Safari",
+  'sc_webm_note': "Saved as WebM — some apps may require MP4",
+  'sc_hadith_number': "No. {n}",
 };

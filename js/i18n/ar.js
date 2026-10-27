@@ -929,7 +929,7 @@ export default {
   'vm_webm_note': "حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4",
 
   // Duaa / dhikr image cards (js/share-card.js)
-  'sc_title': "مشاركة كصورة",
+  'sc_title': "مشاركة كصورة أو فيديو",
   'sc_share': "مشاركة",
   'sc_download': "حفظ الصورة",
   'sc_close': "إغلاق",
@@ -943,4 +943,14 @@ export default {
   'sc_repeat': "التكرار: {n}",
   'sc_made_with': "صُنع بتطبيق زاد المسلم",
   'sc_ruqia': "الرقية الشرعية",
+  'sc_make_video': "إنشاء فيديو",
+  'sc_share_video': "مشاركة الفيديو",
+  'sc_save_video': "حفظ الفيديو",
+  'sc_cancel': "إلغاء",
+  'sc_recording': "جارٍ إنشاء الفيديو — أبقِ هذه الشاشة مفتوحة",
+  'sc_video_ready': "الفيديو جاهز ({s} ثانية)",
+  'sc_video_too_long': "النص أطول من أن يُعرض في فيديو واحد — شاركه كصورة بمقاس ستوري",
+  'sc_video_unsupported': "متصفحك لا يدعم إنشاء الفيديو — جرّب Chrome أو Safari الحديث",
+  'sc_webm_note': "حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4",
+  'sc_hadith_number': "رقم {n}",
 };
