@@ -973,4 +973,8 @@ export default {
 
   // Blocked notifications inside the Google Play app (TWA)
   'notif_blocked_app': "ئاگادارکردنەوەکان بۆ ئەپی زاد المسلم کوژاونەتەوە — ڕێکخستنەکانی ئەندرۆید ← ئەپەکان ← زاد المسلم ← ئاگادارکردنەوەکان بکەرەوە و چالاکیان بکە",
+
+  // Home prayer cards: badge on the upcoming prayer
+  'prayer_card_next': "داهاتوو",
+  'prayer_remaining_sunrise': "ماوە بۆ خۆرهەڵاتن",
 };

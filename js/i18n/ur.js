@@ -945,4 +945,8 @@ export default {
 
   // Blocked notifications inside the Google Play app (TWA)
   'notif_blocked_app': "زاد المسلم ایپ کے لیے اطلاعات بند ہیں — اینڈرائیڈ سیٹنگز ← ایپس ← زاد المسلم ← اطلاعات کھول کر انہیں آن کریں",
+
+  // Home prayer cards: badge on the upcoming prayer
+  'prayer_card_next': "اگلی",
+  'prayer_remaining_sunrise': "طلوعِ آفتاب میں باقی وقت",
 };
