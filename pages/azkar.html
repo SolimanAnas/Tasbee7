@@ -1158,6 +1158,7 @@ body::after {
 <script>if (window.I18n) I18n.init();</script>
 <script src="../js/back-close.js"></script>
 <script src="../js/share-card.js"></script>
+<script src="../js/dhikr-stats.js"></script>
 <script>
 let currentIndex = 0;
 let currentCount = 0;
@@ -1361,6 +1362,7 @@ function increment() {
     checkDailyResetAzkar();
     let todayAzkar = parseInt(localStorage.getItem("azkar_today") || "0");
     localStorage.setItem("azkar_today", todayAzkar + 1);
+    if (window.DhikrStats) DhikrStats.sync();   // dated history for the weekly stats card
 
     let totalAzkar = parseInt(localStorage.getItem("total_azkar") || "0");
     localStorage.setItem("total_azkar", totalAzkar + 1);

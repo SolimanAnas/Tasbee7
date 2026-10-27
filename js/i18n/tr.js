@@ -925,4 +925,15 @@ export default {
   'sc_video_unsupported': "Tarayıcınız video oluşturamıyor — güncel Chrome veya Safari deneyin",
   'sc_webm_note': "WebM olarak kaydedildi — bazı uygulamalar MP4 gerektirebilir",
   'sc_hadith_number': "No. {n}",
+
+  // Weekly dhikr stats card (js/dhikr-stats.js)
+  'ds_title': "Bu haftaki zikirlerim",
+  'ds_week_tasbih': "bu haftaki tesbih",
+  'ds_streak': "gün üst üste",
+  'ds_azkar': "okunan zikir",
+  'ds_pages': "Kur'an sayfası",
+  'ds_top': "En çok: {name} ({n})",
+  'ds_lifetime': "Toplam: {n} tesbih",
+  'ds_today': "Bugün",
+  'ds_share': "Haftamı paylaş",
 };

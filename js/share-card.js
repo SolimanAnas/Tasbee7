@@ -11,6 +11,13 @@
        repeat:      3,                      // optional, shown when > 1
      });
 
+   Instead of text, a page can draw its own content inside the card panel
+   (e.g. a stats chart) — chrome, sizes, export and video stay the same:
+     ShareCard.open({ title, source, custom: {
+       seconds: 7,                                   // video length of the content
+       draw(c, box, anim) { ... },                   // box = {x, y, w, h, base}; anim 0→1 in videos, 1 for stills
+     }});
+
    Opens a bottom sheet with a live preview, background / size / toggle
    options, Share (Web Share API with the PNG) + Download buttons, and a
    video export: the card animates (background motion, text fading in) and
@@ -327,13 +334,34 @@
     return [w, h];
   }
 
+  // Caller-drawn content (item.custom) in a panel filling the body area.
+  function drawCustom(c, w, F, alpha, rise, anim) {
+    if (alpha <= 0) return;
+    const base = F.base;
+    const pw = w * 0.9, ph = F.bottom - F.top - base * 0.04;
+    const x = (w - pw) / 2, y = F.top + base * 0.02 + rise;
+    c.save();
+    c.globalAlpha = alpha;
+    c.fillStyle = 'rgba(0,0,0,0.30)';
+    c.strokeStyle = 'rgba(255,255,255,0.12)';
+    c.lineWidth = 2;
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, pw, ph, base * 0.04); else c.rect(x, y, pw, ph);
+    c.fill();
+    c.stroke();
+    try { item.custom.draw(c, { x, y, w: pw, h: ph, base }, anim); }
+    catch (e) { console.warn('[share-card] custom draw failed', e); }
+    c.restore();
+  }
+
   function draw() {
     const [w, h] = sizeCanvas();
     const c = ui.canvas.getContext('2d');
     c.clearRect(0, 0, w, h);
     const F = frame(c, w, h);
     drawChrome(c, w, h, F, 0);
-    drawBody(c, w, F, layoutBody(c, w, F.maxH), 1, 0, null);
+    if (item.custom) drawCustom(c, w, F, 1, 0, 1);
+    else drawBody(c, w, F, layoutBody(c, w, F.maxH), 1, 0, null);
   }
 
   // ---------- video ----------
@@ -341,6 +369,10 @@
   // included); otherwise fixed-size Arabic split into screens.
   function videoPlan(c, w, h) {
     const F = frame(c, w, h);
+    if (item.custom) {
+      const dur = item.custom.seconds || 7;
+      return { F, pages: [{ custom: true, start: LEAD, dur }], total: LEAD + dur + TAIL };
+    }
     const words = s => s.split(/\s+/).filter(Boolean).length;
     let pages;
     const single = layoutBody(c, w, F.maxH);
@@ -377,6 +409,8 @@
       const fadeOut = i < last ? clamp01((p.dur - local) / FADE) : 1;
       const alpha = Math.min(fadeIn, fadeOut);
       const rise = (1 - fadeIn) * F.base * 0.02;
+      // custom content animates in over ~2.2 s (ease-out)
+      if (p.custom) { drawCustom(c, w, F, alpha, rise, 1 - Math.pow(1 - clamp01(local / 2.2), 3)); return; }
       drawBody(c, w, F, p.L, alpha, rise, pages.length > 1 ? { n: pages.length, i } : null);
     });
   }
@@ -682,9 +716,10 @@
   }
 
   async function open(entry) {
-    if (!entry || !entry.text) return;
+    if (!entry || !(entry.text || (entry.custom && typeof entry.custom.draw === 'function'))) return;
     item = {
-      text: cleanText(entry.text),
+      custom: entry.custom || null,
+      text: entry.text ? cleanText(entry.text) : '',
       translation: entry.translation ? String(entry.translation).trim() : '',
       title: entry.title ? String(entry.title).trim() : '',
       source: entry.source ? String(entry.source).trim() : '',

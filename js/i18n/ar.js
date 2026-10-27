@@ -953,4 +953,15 @@ export default {
   'sc_video_unsupported': "متصفحك لا يدعم إنشاء الفيديو — جرّب Chrome أو Safari الحديث",
   'sc_webm_note': "حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4",
   'sc_hadith_number': "رقم {n}",
+
+  // Weekly dhikr stats card (js/dhikr-stats.js)
+  'ds_title': "أذكاري هذا الأسبوع",
+  'ds_week_tasbih': "تسبيحة هذا الأسبوع",
+  'ds_streak': "أيام متتالية",
+  'ds_azkar': "أذكار مقروءة",
+  'ds_pages': "صفحة قرآن",
+  'ds_top': "الأكثر تكرارًا: {name} ({n})",
+  'ds_lifetime': "المجموع منذ البداية: {n} تسبيحة",
+  'ds_today': "اليوم",
+  'ds_share': "مشاركة إنجاز الأسبوع",
 };

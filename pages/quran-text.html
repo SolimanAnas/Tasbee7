@@ -775,6 +775,7 @@
   <div id="contextOverlay" style="display:none;position:fixed;inset:0;z-index:199;" onclick="closeContextMenu()"></div>
 
   <script src="../js/quran-common.js"></script>
+  <script src="../js/dhikr-stats.js"></script>
 
   <script>
     let fontSize = 40; 
@@ -818,6 +819,7 @@
         checkDailyResetKhatma();
         let pagesReadToday = parseInt(localStorage.getItem("khatma_today") || "0");
         localStorage.setItem("khatma_today", pagesReadToday + 1);
+        if (window.DhikrStats) DhikrStats.sync();   // dated history for the weekly stats card
         
         // Optional: Keep a grand total of pages read
         let totalPagesRead = parseInt(localStorage.getItem("total_khatma_pages") || "0");
