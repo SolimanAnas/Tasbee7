@@ -945,4 +945,8 @@ export default {
 
   // Blocked notifications inside the Google Play app (TWA)
   'notif_blocked_app': "Zad Al-Muslim uygulaması için bildirimler kapalı — Android Ayarlar → Uygulamalar → Zad Al-Muslim → Bildirimler bölümünden açın",
+
+  // Home prayer cards: badge on the upcoming prayer
+  'prayer_card_next': "Sıradaki",
+  'prayer_remaining_sunrise': "Güneşin doğmasına kalan",
 };

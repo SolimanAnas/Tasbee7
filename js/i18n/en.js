@@ -973,4 +973,8 @@ export default {
 
   // Blocked notifications inside the Google Play app (TWA)
   'notif_blocked_app': "Notifications are off for the Zad Al-Muslim app — open Android Settings → Apps → Zad Al-Muslim → Notifications and turn them on",
+
+  // Home prayer cards: badge on the upcoming prayer
+  'prayer_card_next': "Next",
+  'prayer_remaining_sunrise': "Remaining until sunrise",
 };

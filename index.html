@@ -172,7 +172,7 @@
   --surface-active: rgba(243, 233, 213, 0.85);
   --on-base: #3B2A18;
   --on-surface: #46341F;
-  --on-surface-variant: #d8d2ca;
+  --on-surface-variant: #7A6248;   /* was #d8d2ca: secondary text was near-invisible on parchment */
   --border: rgba(140, 100, 40, 0.14);
   --glass-bg: rgba(250, 244, 231, 0.82);
   --shadow-sm: 0 2px 10px rgba(90, 60, 20, 0.08);
@@ -303,25 +303,62 @@ input, textarea, select {
 .prayer-timer { font-size: 1.8rem; font-weight: 800; color: var(--on-surface); font-variant-numeric: tabular-nums; line-height: 1; }
 .prayer-next-label { font-size: 0.75rem; font-weight: 500; color: var(--on-surface-variant); margin-top: 4px; direction: rtl; }
 
-.prayer-chips {
-  display: flex; gap: var(--spacing-sm);
-  overflow-x: auto; padding-bottom: 4px;
-  scrollbar-width: none;
+.prayer-cards {
+  /* the five prayers plus sunrise in one balanced row, no scrolling */
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px;
+  padding-top: 8px;   /* room for the "next" badge */
 }
-.prayer-chips::-webkit-scrollbar { display: none; }
-.prayer-chip {
-  background: var(--surface-raised);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  min-width: 70px;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  flex-shrink: 0;
-  transition: background var(--ease-smooth), border-color var(--ease-smooth), color var(--ease-smooth);
+.prayer-card {
+  position: relative; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 1px 9px;
+  border-radius: 14px;
+  /* muted, not faded: a quieter surface and secondary text keep the times readable */
+  background: color-mix(in srgb, var(--surface-raised) 65%, transparent);
+  border: 1px solid var(--border);
+  color: var(--on-surface-variant);
+  transition: transform var(--ease-smooth), background var(--ease-smooth), box-shadow var(--ease-smooth);
 }
-.prayer-chip.active { background: var(--primary); color: var(--on-primary); box-shadow: 0 4px 12px var(--primary-container); }
-.prayer-chip.active .chip-time { color: var(--on-primary); opacity: 0.9; }
-.chip-name { font-size: 0.8rem; font-weight: 700; }
-.chip-time { font-size: 0.7rem; color: var(--on-surface-variant); font-weight: 500; }
+.prayer-card .pc-icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.pc-name {
+  font-size: clamp(0.68rem, 2.9vw, 0.8rem); font-weight: 700; color: color-mix(in srgb, var(--on-surface) 80%, transparent);
+  max-width: 100%; text-align: center; line-height: 1.15;   /* two-word names (e.g. Urdu "طلوع آفتاب") wrap */
+}
+.pc-time { font-size: clamp(0.58rem, 2.5vw, 0.72rem); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* sunrise is a time, not a prayer: lighter, dashed card */
+.prayer-card.is-sunrise { background: transparent; border-style: dashed; }
+.prayer-card.is-sunrise .pc-name { font-weight: 600; }
+.prayer-card.is-sunrise.is-countdown { border-color: var(--primary); border-style: solid; color: var(--primary); }
+
+/* upcoming prayer: accent gradient, soft glow, lifted */
+.prayer-card.is-next {
+  color: var(--on-primary);
+  background: linear-gradient(160deg, var(--primary), var(--primary-grad-end));
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  box-shadow: 0 8px 20px -8px var(--primary), 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
+  transform: translateY(-3px);
+}
+.prayer-card.is-next .pc-name, .prayer-card.is-next .pc-time { color: var(--on-primary); }
+.prayer-card.is-next .pc-icon { opacity: 1; }
+.pc-badge {
+  position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+  font-size: 0.56rem; font-weight: 800; line-height: 1; letter-spacing: 0.02em; white-space: nowrap;
+  padding: 3px 7px; border-radius: 999px;
+  background: var(--surface); color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--primary) 60%, transparent);
+}
+.prayer-card.is-empty .pc-time { opacity: 0.6; }
+@media (prefers-reduced-motion: reduce) { .prayer-card { transition: none; } .prayer-card.is-next { transform: none; } }
+/* small phones (≤360px): six cards are ~37px wide — tighten so names stay whole */
+@media (max-width: 360px) {
+  .prayer-cards { gap: 3px; }
+  .prayer-card { padding: 9px 0 8px; border-radius: 12px; }
+  .pc-name { font-size: 0.6rem; letter-spacing: -0.02em; }
+  .pc-time { font-size: 0.56rem; letter-spacing: -0.03em; }
+  .prayer-card .pc-icon { width: 16px; height: 16px; }
+}
 
 /* ======================== QURAN HERO CARD ======================== */
 .quran-hero {
@@ -610,7 +647,6 @@ input, textarea, select {
 .lang-flag { font-size: 1.1rem; }
 .lang-name { white-space: nowrap; }
 [dir="ltr"] .bottom-nav { direction: ltr; }
-[dir="ltr"] .prayer-chips { direction: ltr; }
 
 /* ======================== PRAYER TIMES MODAL ======================== */
 .prayer-next-banner {
@@ -738,7 +774,7 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
         <div class="prayer-next-label" id="homeNextLabel" data-i18n="prayer_calculating">⏳ جاري الحساب</div>
       </div>
     </div>
-    <div class="prayer-chips" id="homePrayerChips"></div>
+    <div class="prayer-cards" id="homePrayerChips" role="list"></div>
   </div>
 
   <div class="quran-hero" onclick="handleQuranClick()">
@@ -1336,18 +1372,21 @@ function initQuranHero() {
   if (meta) meta.style.display = 'flex';
 }
 
-function startCountdown(nextObj, nameAr) {
+function startCountdown(nextObj, nameAr, nextKey) {
   if(countdownInterval) clearInterval(countdownInterval);
   const lbl = document.getElementById('homeNextLabel');
   const tmr = document.getElementById('homeCountdown');
   if(!nextObj) { lbl.innerText=t('prayer_no_location'); tmr.innerText="--:--:--"; return; }
-  lbl.innerText = t('prayer_remaining', {name: nameAr});
-  countdownInterval = setInterval(() => {
+  // Sunrise isn't a prayer: "remaining until sunrise", not "…sunrise prayer".
+  lbl.innerText = nextKey === 'sunrise' ? t('prayer_remaining_sunrise') : t('prayer_remaining', {name: nameAr});
+  const tick = () => {
     const diff = nextObj.getTime() - Date.now();
     if(diff <= 0) { refreshPrayerTimes(); return; }
     const h = Math.floor(diff/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
     tmr.innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  }, 1000);
+  };
+  tick();   // show the countdown now, not after the first second
+  countdownInterval = setInterval(tick, 1000);
 }
 
 // Single source of truth: js/prayer-service.js (madhab already set there).
@@ -1375,6 +1414,47 @@ function computePrayer(lat, lng) {
   return { pt, nextEnum, nextDate, nextName, city, hijri };
 }
 
+// The five prayers plus sunrise as one row of cards; the upcoming prayer is
+// highlighted. Between Fajr and sunrise the library's "next" is sunrise,
+// which isn't a prayer — Dhuhr gets the highlight and the sunrise card an
+// outline (the countdown runs to sunrise). After Isha the next prayer is
+// tomorrow's Fajr, so that card shows tomorrow's time.
+const PRAYER_CARD_ICONS = {
+  fajr:    '<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 7V4M5.6 10.6 4.2 9.2M18.4 10.6l1.4-1.4"/>',
+  sunrise: '<path d="M3 18h18M7 18a5 5 0 0 1 10 0M12 4v5M9.5 6.5 12 4l2.5 2.5"/>',
+  dhuhr:   '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>',
+  asr:     '<circle cx="12" cy="14" r="4"/><path d="M12 5v2M5 14H3M21 14h-2M6.3 8.3l1.4 1.4M17.7 8.3l-1.4 1.4M4 20h16"/>',
+  maghrib: '<path d="M3 17h18M7 17a5 5 0 0 1 10 0M12 9V5M9.5 7.5 12 10l2.5-2.5M4 21h16"/>',
+  isha:    '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'
+};
+// Arabic-script UIs keep the existing "5:38 ص"; others get their own format
+// (Arabic ص/م inside left-to-right text flipped to "ص 5:38").
+function formatPrayerCardTime(d) {
+  const lang = (window.I18n && I18n.getLang()) || 'ar';
+  if (['ar', 'ckb', 'ur'].includes(lang) || !d || isNaN(d.getTime())) return formatTimeArabic12h(d);
+  return d.toLocaleTimeString(lang === 'tr' ? 'tr-TR' : 'en-US', { hour: 'numeric', minute: '2-digit' });
+}
+function renderPrayerCards(pt, nextEnum, nextDate) {
+  const keys = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
+  const upcoming = nextEnum === 'sunrise' ? 'dhuhr' : nextEnum;
+  return keys.map(k => {
+    const isSunrise = k === 'sunrise';
+    const isNext = !!pt && !isSunrise && k === upcoming;
+    const cls = (isNext ? ' is-next' : '') + (pt ? '' : ' is-empty') +
+      (isSunrise ? ' is-sunrise' + (pt && nextEnum === 'sunrise' ? ' is-countdown' : '') : '');
+    const time = !pt ? '--:--'
+      : (isNext && k === 'fajr' && nextDate && nextDate > pt.isha) ? formatPrayerCardTime(nextDate)   // tomorrow's Fajr
+      : formatPrayerCardTime(pt[k]);
+    return `
+      <div class="prayer-card${cls}" role="listitem"${isNext ? ' aria-current="time"' : ''}>
+        ${isNext ? `<span class="pc-badge">${t('prayer_card_next')}</span>` : ''}
+        <svg class="pc-icon" viewBox="0 0 24 24" aria-hidden="true">${PRAYER_CARD_ICONS[k]}</svg>
+        <span class="pc-name">${getPrayerName(k)}</span>
+        <bdi class="pc-time">${time}</bdi>
+      </div>`;
+  }).join('');
+}
+
 function updateUIWithPrayerTimes(lat, lng) {
   document.getElementById('homeHijri').innerText = formatHijriDate(new Date(), false);
   const chipsContainer = document.getElementById('homePrayerChips');
@@ -1382,7 +1462,11 @@ function updateUIWithPrayerTimes(lat, lng) {
   if(!lat || !lng) {
     document.getElementById('homeCity').innerHTML =
       `<svg viewBox="0 0 24 24" style="width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.125em;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${t('prayer_set_location')}`;
-    chipsContainer.innerHTML = `<div style="opacity:0.6;font-size:0.85rem;">${t('prayer_no_location_desc')}</div>`;
+    // No "calculating…" spinner without a location — say what to do instead.
+    if (countdownInterval) clearInterval(countdownInterval);
+    document.getElementById('homeCountdown').innerText = '--:--';
+    document.getElementById('homeNextLabel').innerText = t('prayer_no_location_desc');
+    chipsContainer.innerHTML = renderPrayerCards(null, null);
     return;
   }
   try {
@@ -1390,20 +1474,9 @@ function updateUIWithPrayerTimes(lat, lng) {
     if(!data) return;
     const { pt, nextEnum, nextDate, nextName, city, hijri } = data;
 
-    startCountdown(nextDate, nextName);
+    startCountdown(nextDate, nextName, nextEnum);
 
-    const order = ["fajr","sunrise","dhuhr","asr","maghrib","isha"];
-    let chipsHtml = "";
-    for(const k of order) {
-      if(!pt[k]) continue;
-      const isNext = (k === nextEnum);
-      chipsHtml += `
-        <div class="prayer-chip ${isNext ? 'active' : ''}">
-          <span class="chip-name">${getPrayerName(k)}</span>
-          <span class="chip-time">${formatTimeArabic12h(pt[k])}</span>
-        </div>`;
-    }
-    chipsContainer.innerHTML = chipsHtml;
+    chipsContainer.innerHTML = renderPrayerCards(pt, nextEnum, nextDate);
 
     document.getElementById('homeCity').innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> <span>${city}</span>`;
     document.getElementById('homeHijri').innerText = hijri;
