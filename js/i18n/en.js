@@ -927,4 +927,20 @@ export default {
   'vm_err_audio': "Couldn't load the recitation — check your connection",
   'vm_err_unsupported': "Your browser can't record video — try a recent Chrome or Safari",
   'vm_webm_note': "Saved as WebM — some apps may require MP4",
+
+  // Duaa / dhikr image cards (js/share-card.js)
+  'sc_title': "Share as image",
+  'sc_share': "Share",
+  'sc_download': "Save image",
+  'sc_close': "Close",
+  'sc_format': "Size",
+  'sc_fmt_square': "Square",
+  'sc_fmt_portrait': "Portrait",
+  'sc_fmt_story': "Story",
+  'sc_background': "Background",
+  'sc_translation': "Translation",
+  'sc_source': "Title & source",
+  'sc_repeat': "Repeat: {n}×",
+  'sc_made_with': "Made with Zad Al-Muslim App",
+  'sc_ruqia': "Ruqyah",
 };

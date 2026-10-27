@@ -927,4 +927,20 @@ export default {
   'vm_err_audio': "نەتوانرا خوێندنەوە بار بکرێت — پەیوەندییەکەت بپشکنە",
   'vm_err_unsupported': "وێبگەڕەکەت ناتوانێت ڤیدیۆ تۆمار بکات — Chrome یان Safari ی نوێ تاقی بکەرەوە",
   'vm_webm_note': "وەک WebM پاشەکەوت کرا — هەندێک ئەپ MP4 پێویست دەکەن",
+
+  // Duaa / dhikr image cards (js/share-card.js)
+  'sc_title': "هاوبەشکردن وەک وێنە",
+  'sc_share': "هاوبەشکردن",
+  'sc_download': "پاشەکەوتکردنی وێنە",
+  'sc_close': "داخستن",
+  'sc_format': "قەبارە",
+  'sc_fmt_square': "چوارگۆشە",
+  'sc_fmt_portrait': "ستوونی",
+  'sc_fmt_story': "ستۆری",
+  'sc_background': "باکگراوند",
+  'sc_translation': "وەرگێڕان",
+  'sc_source': "ناونیشان و سەرچاوە",
+  'sc_repeat': "دووبارەکردنەوە: {n}",
+  'sc_made_with': "دروستکراوە بە ئەپی زاد المسلم",
+  'sc_ruqia': "ڕوقیە",
 };

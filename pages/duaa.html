@@ -672,6 +672,7 @@
   <script src="../js/i18n.js"></script>
   <script>if (window.I18n) I18n.init();</script>
   <script src="../js/back-close.js"></script>
+  <script src="../js/share-card.js"></script>
   <script>
     // ---------- DATA FOR "الدعاء من الكتاب والسنة" ----------
     const DEFAULT_DUAA_DATA = [
@@ -723,6 +724,7 @@
       }
     ];
 
+    const svgShare = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
     const svgCopy = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
     const svgStarOutline = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
     const svgStarFilled = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
@@ -812,6 +814,9 @@
             <div class="card-ref">${item.ref || t('duaa_default_ref')}</div>
           </div>
           <div class="card-actions">
+            <button class="action-btn" onclick="shareCard(${sIdx}, ${iIdx})" title="${t('sc_title')}" aria-label="${t('sc_title')}">
+              ${svgShare}
+            </button>
             <button class="action-btn" onclick="copyText('${safeText}')" title="${t('duaa_copy')}">
               ${svgCopy}
             </button>
@@ -1080,6 +1085,11 @@
     window.updateFontColor = updateFontColor;
     window.resetFontColor = resetFontColor;
     window.copyText = copyText;
+    window.shareCard = function (sIdx, iIdx) {
+      const section = App.data[sIdx], item = section && section.items[iIdx];
+      if (!item || !window.ShareCard) return;
+      ShareCard.open({ text: item.ar, title: section.title, source: item.ref || t('duaa_default_ref') });
+    };
     window.toggleBookmark = toggleBookmark;
     window.viewBookmarks = viewBookmarks;
 

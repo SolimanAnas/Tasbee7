@@ -899,4 +899,20 @@ export default {
   'vm_err_audio': "Tilavet yüklenemedi — bağlantınızı kontrol edin",
   'vm_err_unsupported': "Tarayıcınız video kaydedemiyor — güncel Chrome veya Safari deneyin",
   'vm_webm_note': "WebM olarak kaydedildi — bazı uygulamalar MP4 gerektirebilir",
+
+  // Duaa / dhikr image cards (js/share-card.js)
+  'sc_title': "Görsel olarak paylaş",
+  'sc_share': "Paylaş",
+  'sc_download': "Görseli kaydet",
+  'sc_close': "Kapat",
+  'sc_format': "Boyut",
+  'sc_fmt_square': "Kare",
+  'sc_fmt_portrait': "Dikey",
+  'sc_fmt_story': "Hikâye",
+  'sc_background': "Arka plan",
+  'sc_translation': "Çeviri",
+  'sc_source': "Başlık ve kaynak",
+  'sc_repeat': "Tekrar: {n}",
+  'sc_made_with': "Zad Al-Muslim uygulamasıyla yapıldı",
+  'sc_ruqia': "Rukye",
 };

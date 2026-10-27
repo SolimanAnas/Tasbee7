@@ -899,4 +899,20 @@ export default {
   'vm_err_audio': "تلاوت لوڈ نہیں ہو سکی — کنکشن چیک کریں",
   'vm_err_unsupported': "آپ کا براؤزر ویڈیو ریکارڈ نہیں کر سکتا — جدید Chrome یا Safari آزمائیں",
   'vm_webm_note': "WebM میں محفوظ ہوا — کچھ ایپس کو MP4 درکار ہو سکتا ہے",
+
+  // Duaa / dhikr image cards (js/share-card.js)
+  'sc_title': "تصویر کے طور پر شیئر کریں",
+  'sc_share': "شیئر کریں",
+  'sc_download': "تصویر محفوظ کریں",
+  'sc_close': "بند کریں",
+  'sc_format': "سائز",
+  'sc_fmt_square': "مربع",
+  'sc_fmt_portrait': "عمودی",
+  'sc_fmt_story': "اسٹوری",
+  'sc_background': "پس منظر",
+  'sc_translation': "ترجمہ",
+  'sc_source': "عنوان اور حوالہ",
+  'sc_repeat': "تکرار: {n}",
+  'sc_made_with': "زاد المسلم ایپ سے بنایا گیا",
+  'sc_ruqia': "رقیہ",
 };

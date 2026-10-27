@@ -927,4 +927,20 @@ export default {
   'vm_err_audio': "تعذّر تحميل التلاوة — تحقق من الاتصال",
   'vm_err_unsupported': "متصفحك لا يدعم إنشاء الفيديو — جرّب Chrome أو Safari الحديث",
   'vm_webm_note': "حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4",
+
+  // Duaa / dhikr image cards (js/share-card.js)
+  'sc_title': "مشاركة كصورة",
+  'sc_share': "مشاركة",
+  'sc_download': "حفظ الصورة",
+  'sc_close': "إغلاق",
+  'sc_format': "المقاس",
+  'sc_fmt_square': "مربع",
+  'sc_fmt_portrait': "عمودي",
+  'sc_fmt_story': "ستوري",
+  'sc_background': "الخلفية",
+  'sc_translation': "الترجمة",
+  'sc_source': "العنوان والمصدر",
+  'sc_repeat': "التكرار: {n}",
+  'sc_made_with': "صُنع بتطبيق زاد المسلم",
+  'sc_ruqia': "الرقية الشرعية",
 };
