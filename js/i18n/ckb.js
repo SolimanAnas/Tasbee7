@@ -953,4 +953,15 @@ export default {
   'sc_video_unsupported': "وێبگەڕەکەت ناتوانێت ڤیدیۆ دروست بکات — Chrome یان Safari ی نوێ تاقی بکەرەوە",
   'sc_webm_note': "وەک WebM پاشەکەوت کرا — هەندێک ئەپ MP4 پێویست دەکەن",
   'sc_hadith_number': "ژمارە {n}",
+
+  // Weekly dhikr stats card (js/dhikr-stats.js)
+  'ds_title': "زیکرەکانم ئەم هەفتەیە",
+  'ds_week_tasbih': "تەسبیح ئەم هەفتەیە",
+  'ds_streak': "ڕۆژی بەردەوام",
+  'ds_azkar': "زیکری خوێندراو",
+  'ds_pages': "لاپەڕەی قورئان",
+  'ds_top': "زۆرترین دووبارە: {name} ({n})",
+  'ds_lifetime': "کۆی گشتی: {n} تەسبیح",
+  'ds_today': "ئەمڕۆ",
+  'ds_share': "هاوبەشکردنی هەفتەکەم",
 };

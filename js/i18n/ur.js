@@ -925,4 +925,15 @@ export default {
   'sc_video_unsupported': "آپ کا براؤزر ویڈیو نہیں بنا سکتا — جدید Chrome یا Safari آزمائیں",
   'sc_webm_note': "WebM میں محفوظ ہوا — کچھ ایپس کو MP4 درکار ہو سکتا ہے",
   'sc_hadith_number': "نمبر {n}",
+
+  // Weekly dhikr stats card (js/dhikr-stats.js)
+  'ds_title': "اس ہفتے کے میرے اذکار",
+  'ds_week_tasbih': "اس ہفتے کی تسبیحات",
+  'ds_streak': "مسلسل دن",
+  'ds_azkar': "پڑھے گئے اذکار",
+  'ds_pages': "قرآن کے صفحات",
+  'ds_top': "سب سے زیادہ: {name} ({n})",
+  'ds_lifetime': "کل مجموعہ: {n} تسبیحات",
+  'ds_today': "آج",
+  'ds_share': "اپنا ہفتہ شیئر کریں",
 };

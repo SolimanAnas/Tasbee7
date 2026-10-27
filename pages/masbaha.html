@@ -441,6 +441,7 @@
                 <span data-i18n="masbaha_total">المجموع الكلي</span>
                 <span id="grandTotalDisplay">0</span>
             </div>
+            <button class="btn-action" onclick="DhikrStats.share()" data-i18n="ds_share">مشاركة إنجاز الأسبوع</button>
             <button class="btn-action" style="background:#ef4444; margin-top:15px; font-size:12px" onclick="openResetStatsModal()" data-i18n="masbaha_reset_all">تصفير الإحصائيات بالكامل</button>
         </div>
 
@@ -546,6 +547,8 @@
 </div>
 
 <script src="../js/back-close.js"></script>
+<script src="../js/share-card.js"></script>
+<script src="../js/dhikr-stats.js"></script>
 <script>
     // --- Data ---
     const defaultTargets = {
@@ -690,6 +693,11 @@
         checkDailyReset();
         let todayCount = parseInt(localStorage.getItem("masbaha_today") || "0");
         localStorage.setItem("masbaha_today", todayCount + 1);
+        // dated history for the weekly stats card (js/dhikr-stats.js)
+        if (window.DhikrStats) {
+            const opt = document.getElementById("dhikrSelect").selectedOptions[0];
+            DhikrStats.tap(currentDhikr, opt ? opt.text : '');
+        }
 
         document.getElementById("count").innerText = count;
         document.getElementById("powerCount").innerText = count;
