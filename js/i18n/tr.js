@@ -942,4 +942,7 @@ export default {
   'asr_auto': "Otomatik (ülkeye göre)",
   'asr_shafi': "Standart (Asr-ı evvel: Şafiî, Mâlikî, Hanbelî)",
   'asr_hanafi': "Hanefî (Asr-ı sânî)",
+
+  // Blocked notifications inside the Google Play app (TWA)
+  'notif_blocked_app': "Zad Al-Muslim uygulaması için bildirimler kapalı — Android Ayarlar → Uygulamalar → Zad Al-Muslim → Bildirimler bölümünden açın",
 };

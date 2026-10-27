@@ -1906,8 +1906,9 @@ if (!isFramed) window.addEventListener('popstate', (e) => {
   openExitModal();
 });
 
-// Service Worker: only for PWA asset caching — NOT for notifications in Capacitor.
-// Notifications are handled by @capacitor/local-notifications (js/notifications.js).
+// Service Worker: offline caching + Web Push. Notifications (browser PWA and the
+// Play Store TWA alike) are Web Push via sw.js and js/notifications.js; the
+// Capacitor stubs above are leftovers from an older native build.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')

@@ -942,4 +942,7 @@ export default {
   'asr_auto': "خودکار (ملک کے مطابق)",
   'asr_shafi': "جمہور (شافعی، مالکی، حنبلی)",
   'asr_hanafi': "حنفی",
+
+  // Blocked notifications inside the Google Play app (TWA)
+  'notif_blocked_app': "زاد المسلم ایپ کے لیے اطلاعات بند ہیں — اینڈرائیڈ سیٹنگز ← ایپس ← زاد المسلم ← اطلاعات کھول کر انہیں آن کریں",
 };

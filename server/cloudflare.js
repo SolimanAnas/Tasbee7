@@ -125,7 +125,9 @@ async function signVapid(privateKey32, publicKey65, audience) {
 
 // ====== Send one encrypted Web Push to a single subscription ======
 // Returns the HTTP status from the push service (2xx = delivered, 410/404 = gone).
-async function sendPushToSubscriber(env, subscription, payloadObj) {
+// opts.urgency 'high' asks FCM/APNs to wake a dozing phone now instead of
+// batching the message; opts.ttl (s) drops it if it can't arrive in time.
+async function sendPushToSubscriber(env, subscription, payloadObj, opts = {}) {
   const privKey = b64urlDec(env.VAPID_PRIVATE_KEY);
   const pubKey  = b64urlDec(env.VAPID_PUBLIC_KEY);
 
@@ -143,8 +145,8 @@ async function sendPushToSubscriber(env, subscription, payloadObj) {
     headers: {
       'Content-Type': 'application/octet-stream',
       'Content-Encoding': 'aes128gcm',
-      'TTL': '86400',
-      'Urgency': 'normal',
+      'TTL': String(opts.ttl || 86400),
+      'Urgency': opts.urgency || 'normal',
       'Authorization': `vapid t=${vapidToken}, k=${vapidKeyB64}`,
     },
     body: encrypted
@@ -166,8 +168,8 @@ const PUSH_HOSTS = [
   'web.push.apple.com',                                      // Safari
   'notify.windows.com'                                       // Edge (Windows), *.notify.windows.com
 ];
-const MAX_BODY_BYTES = 64 * 1024;
-const MAX_EVENTS = 300;            // the client uploads ~7 days (~10 events/day)
+const MAX_BODY_BYTES = 160 * 1024;
+const MAX_EVENTS = 600;            // the client uploads 30 days (~12 events/day)
 const USER_ID_RE = /^user_[a-z0-9]{1,16}_\d{10,14}$/;   // js/notifications.js generateUserId()
 
 function isPushEndpoint(endpoint) {
@@ -191,7 +193,7 @@ const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
 // allow only in-app relative URLs (the SW opens this URL on notification click).
 function cleanSchedule(schedule) {
   if (!Array.isArray(schedule)) return [];
-  const now = Date.now(), min = now - 24 * 3600e3, max = now + 15 * 24 * 3600e3;
+  const now = Date.now(), min = now - 24 * 3600e3, max = now + 35 * 24 * 3600e3;
   const out = [];
   for (const e of schedule) {
     if (out.length >= MAX_EVENTS) break;
@@ -235,7 +237,7 @@ async function listAllSubKeys(env) {
 // ====== CRON DISPATCHER ======
 // Each subscriber record holds a client-computed schedule of absolute-time
 // events: { tag, title, body, url, ts }. The client (which already runs adhan.js)
-// uploads ~7 days ahead via /subscribe. This handler — invoked by the Cloudflare
+// uploads ~30 days ahead via /subscribe. This handler — invoked by the Cloudflare
 // cron trigger every minute — fires whatever has come due since last run. No
 // prayer-time math lives on the server.
 async function dispatchDue(env) {
@@ -269,6 +271,11 @@ async function dispatchDue(env) {
           body:  e.body  || '',
           tag:   e.tag   || 'zad-muslim',
           data:  { url: e.url || './index.html', type: e.tag || 'default' }
+        }, {
+          // Time-critical: deliver immediately; a prayer alert that can't arrive
+          // within 15 min is worse than none, reminders get an hour.
+          urgency: 'high',
+          ttl: /^(prayer|pre)-/.test(e.tag || '') ? 900 : 3600
         });
         if (status === 410 || status === 404) { gone = true; break; }
       } catch { /* transient — will retry next minute if still within MAX_LATE */ }

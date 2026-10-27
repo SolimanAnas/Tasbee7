@@ -970,4 +970,7 @@ export default {
   'asr_auto': "Automatic (by country)",
   'asr_shafi': "Standard (Shafi'i, Maliki, Hanbali)",
   'asr_hanafi': "Hanafi",
+
+  // Blocked notifications inside the Google Play app (TWA)
+  'notif_blocked_app': "Notifications are off for the Zad Al-Muslim app — open Android Settings → Apps → Zad Al-Muslim → Notifications and turn them on",
 };
