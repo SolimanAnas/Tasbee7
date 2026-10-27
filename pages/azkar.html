@@ -1000,6 +1000,7 @@ body::after {
   <div class="zikr-index-counter" id="zikrIndexCounter"></div>
 
   <div class="top-bar-group end">
+    <div class="icon-btn" onclick="shareZikrCard()" title="مشاركة كصورة" data-i18n-title="sc_title"><img src="../img/SVG/share.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
     <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">
       <div style="width:24px;height:24px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
     </div>
@@ -1156,6 +1157,7 @@ body::after {
 <script src="../js/i18n.js"></script>
 <script>if (window.I18n) I18n.init();</script>
 <script src="../js/back-close.js"></script>
+<script src="../js/share-card.js"></script>
 <script>
 let currentIndex = 0;
 let currentCount = 0;
@@ -1189,6 +1191,15 @@ function loadAzkarData() {
   });
 }
 loadAzkarData();
+
+/* --- Share the current zikr as an image card --- */
+const CARD_TITLE_KEYS = { morning: 'card_morning', night: 'card_evening', sleeping: 'card_sleeping', salah: 'card_post_prayer', ruqia: 'sc_ruqia' };
+function shareZikrCard() {
+  const z = azkarData && azkarData[currentIndex];
+  if (!z || !window.ShareCard) return;
+  const key = CARD_TITLE_KEYS[type];
+  ShareCard.open({ text: z.arabic, translation: z.english, title: key ? t(key) : '', repeat: z.count });
+}
 
 /* --- Image Modal for salah type --- */
 function openImageModal() {
