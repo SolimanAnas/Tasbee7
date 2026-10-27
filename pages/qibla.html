@@ -659,6 +659,7 @@
     <script src="../js/i18n.js"></script>
     <script>if (window.I18n) I18n.init();</script>
     <script src="../js/back-close.js"></script>
+    <script src="../js/wmm.js"></script>
     <script>
         // ================= CONFIGURATION & STORAGE =================
         const KAABA_LAT = 21.422487;
@@ -667,6 +668,10 @@
         let userLat = parseFloat(localStorage.getItem('last_lat')) || null;
         let userLng = parseFloat(localStorage.getItem('last_lng')) || null;
         let qiblaAngle = parseFloat(localStorage.getItem('last_qibla')) || 0;
+        // Magnetic declination at the user's location (degrees, east +).
+        // Compass sensors report magnetic north; the Qibla bearing is from
+        // true north, so sensor headings get this added (see handleOrientation).
+        let magDeclination = 0;
         
         let rawHeading = 0;
         let rawTilt = 90;
@@ -960,6 +965,7 @@
             const y = Math.sin(dLng) * Math.cos(lat2);
             const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
             qiblaAngle = (Math.atan2(y, x) * (180 / Math.PI) + 360) % 360; 
+            magDeclination = window.WMM ? WMM.declination(userLat, userLng) : 0;
             
             localStorage.setItem('last_qibla', qiblaAngle);
             valQibla.innerText = Math.round(qiblaAngle) + '°';
@@ -984,26 +990,28 @@
             distanceTextAR.innerText = distNum + ' ' + unitStrEn;
         }
 
-        // Compass heading (0° = north, clockwise) of the direction the user is
-        // pointing, from the W3C Euler angles (Z-X'-Y''):
-        //  - phone flat: the top edge  → 360 - alpha
-        //  - phone tilted up (AR): the back camera, which needs beta+gamma too;
-        //    360 - alpha alone drifts badly once the phone is upright and the
-        //    hand rolls it slightly sideways.
-        // Both agree when gamma = 0, so switching between them is seamless.
-        function headingFromEuler(alpha, beta, gamma) {
+        // Compass heading (0° = magnetic north, clockwise) from the W3C Euler
+        // angles (Z-X'-Y''), for the direction the current view reads:
+        //  - 2D compass: the screen's top edge (follows landscape rotation).
+        //    It only depends on alpha, so rolling the phone sideways while
+        //    holding it at a reading angle no longer swings the needle.
+        //  - AR view: the back camera, which needs beta+gamma too.
+        // Each falls back to the other near its degenerate pose.
+        function headingFromEuler(alpha, beta, gamma, useCamera) {
             const d = Math.PI / 180;
             const sA = Math.sin(alpha * d), cA = Math.cos(alpha * d);
             const sB = Math.sin(beta * d),  cB = Math.cos(beta * d);
             const sG = Math.sin(gamma * d), cG = Math.cos(gamma * d);
-            // back-camera (-Z) direction projected on the ground (east, north)
-            const bx = -cA * sG - sA * sB * cG;
-            const by = -sA * sG + cA * sB * cG;
-            if (Math.hypot(bx, by) > 0.5) {               // tilted > ~30° from flat
-                return (Math.atan2(bx, by) / d + 360) % 360;
-            }
-            // top-edge (+Y) direction projected on the ground
-            return (Math.atan2(-sA * cB, cA * cB) / d + 360) % 360;
+            // device axes projected on the ground as (east, north)
+            const xE = cA * cG - sA * sB * sG, xN = sA * cG + cA * sB * sG;   // +X (right edge)
+            const yE = -sA * cB,               yN = cA * cB;                  // +Y (top edge)
+            const bE = -cA * sG - sA * sB * cG, bN = -sA * sG + cA * sB * cG; // -Z (back camera)
+            const th = screenAngle() * d;
+            const tE = Math.cos(th) * yE + Math.sin(th) * xE;                 // screen's top edge
+            const tN = Math.cos(th) * yN + Math.sin(th) * xN;
+            let e = useCamera ? bE : tE, n = useCamera ? bN : tN;
+            if (Math.hypot(e, n) < 0.25) { e = useCamera ? tE : bE; n = useCamera ? tN : bN; }
+            return (Math.atan2(e, n) / d + 360) % 360;
         }
 
         function screenAngle() {
@@ -1019,9 +1027,7 @@
                 // iOS: already tilt-compensated, relative to the screen's top edge
                 heading = event.webkitCompassHeading + screenAngle();
             } else if (event.alpha != null && (event.absolute || event.type === 'deviceorientationabsolute')) {
-                heading = headingFromEuler(event.alpha, event.beta || 0, event.gamma || 0);
-                // the flat (top-edge) result is portrait-based → rotate in landscape
-                if (Math.hypot(event.beta || 0, event.gamma || 0) < 30) heading += screenAngle();
+                heading = headingFromEuler(event.alpha, event.beta || 0, event.gamma || 0, isARMode);
             }
             // Relative-only events (absolute:false) aren't north-referenced, so
             // they can't give a Qibla bearing (previously the first one was used
@@ -1029,7 +1035,8 @@
             // offers manual mode instead of showing a wrong direction.
             if (heading != null) {
                 hasSensor = true;
-                rawHeading = (heading + 360) % 360;
+                // magnetic → true north
+                rawHeading = (heading + magDeclination + 360) % 360;
             }
             
             if (event.beta != null) {
