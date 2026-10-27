@@ -936,4 +936,10 @@ export default {
   'ds_lifetime': "کل مجموعہ: {n} تسبیحات",
   'ds_today': "آج",
   'ds_share': "اپنا ہفتہ شیئر کریں",
+
+  // Asr calculation setting (js/prayer-service.js)
+  'setting_asr_madhab': "عصر کا وقت",
+  'asr_auto': "خودکار (ملک کے مطابق)",
+  'asr_shafi': "جمہور (شافعی، مالکی، حنبلی)",
+  'asr_hanafi': "حنفی",
 };

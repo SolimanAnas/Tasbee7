@@ -449,7 +449,9 @@ test('page has correct meta tags for SEO', async ({ page }) => {
   const description = await page.locator('meta[name="description"]').getAttribute('content');
   expect(description.length).toBeGreaterThan(20);
   const viewport = await page.locator('meta[name="viewport"]').getAttribute('content');
-  expect(viewport).toContain('maximum-scale=1.0');
+  // Pinch-zoom must stay available (WCAG 1.4.4): no maximum-scale cap, no user-scalable=no.
+  expect(viewport).toContain('width=device-width');
+  expect(viewport).not.toMatch(/user-scalable\s*=\s*no|maximum-scale\s*=\s*1(\.0)?\b/);
 });
 
 // ========== 19. SCRIPT LOAD VERIFICATION ==========

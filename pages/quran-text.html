@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
   <title>القرآن الكريم النصي — قراءة وتسميع | زاد المسلم</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
   <meta name="description" content="قراءة القرآن الكريم بالنص العثماني مع تلوين التجويد وأداة تسميع وحفظ متطورة. كل سورة وآية بخط عثماني واضح مع إمكانية التكرار والتقييم. Quran text with Uthmani script and Tajweed coloring, with advanced Tasmee' recitation and memorization tool.">
@@ -1101,6 +1102,22 @@
         navigator.clipboard.writeText(fullText).then(() => { showCustomToast('تم نسخ الآية بنجاح <img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'); });
     }
 
+    // Third-party API text is shown as text, never parsed as HTML.
+    function escHtml(str) { return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function escRegex(str) { return String(str).replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&'); }
+    function showApiText(box, label, text, ltr) {
+        box.textContent = '';
+        const head = document.createElement('strong');
+        head.style.color = 'var(--accent)';
+        head.textContent = label + ':';
+        const body = document.createElement('div');
+        body.style.whiteSpace = 'pre-line';
+        body.style.marginTop = '10px';
+        if (ltr) { body.style.direction = 'ltr'; body.style.textAlign = 'left'; body.style.fontFamily = 'sans-serif'; }
+        body.textContent = text;
+        box.append(head, body);
+    }
+
     function fetchTafsir(overrideId = null) {
         currentAyahViewMode = 'tafsir'; const box = document.getElementById('ayahResultBox');
         box.innerHTML = 'جاري جلب التفسير... ⏳'; box.classList.add('active');
@@ -1110,7 +1127,7 @@
         
         fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahGlobalNumber}/${tafsirType}`)
             .then(res => res.json())
-            .then(data => { if (data.code === 200) { box.innerHTML = `<strong style="color:var(--accent);">${tafsirName}:</strong><br><br>${data.data.text}`; } })
+            .then(data => { if (data.code === 200) showApiText(box, tafsirName, data.data.text, false); })
             .catch(() => { box.innerHTML = 'تعذر جلب التفسير. تأكد من الإنترنت.'; });
     }
 
@@ -1120,7 +1137,7 @@
         
         fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahGlobalNumber}/en.asad`)
             .then(res => res.json())
-            .then(data => { if (data.code === 200) { box.innerHTML = `<strong style="color:var(--accent);">English (Muhammad Asad):</strong><br><div style="direction:ltr; text-align:left; font-family:sans-serif; margin-top:10px;">${data.data.text}</div>`; } })
+            .then(data => { if (data.code === 200) showApiText(box, 'English (Muhammad Asad)', data.data.text, true); })
             .catch(() => { box.innerHTML = 'Failed to fetch translation.'; });
     }
 
@@ -1319,13 +1336,15 @@
       resD.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color: var(--accent);">جاري البحث... ⏳</div>';
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-          fetch(`https://api.alquran.cloud/v1/search/${query}/all/quran-simple-clean`).then(res => res.json()).then(data => {
+          // The query goes into a URL path and two regexes: encode / escape it.
+          const qRe = escRegex(query), qHtmlRe = escRegex(escHtml(query));
+          fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/quran-simple-clean`).then(res => res.json()).then(data => {
               if (data.code === 200 && data.data.count > 0) {
-                  const exactRegex = new RegExp('(^|[^\\p{L}])' + query + '([^\\p{L}]|$)', 'ui'); 
+                  const exactRegex = new RegExp('(^|[^\\p{L}])' + qRe + '([^\\p{L}]|$)', 'ui'); 
                   const matches = data.data.matches.filter(m => exactRegex.test(m.text));
                   if (matches.length > 0) {
                       let h = `<div style="text-align:center; margin-bottom: 10px; color: var(--accent); font-weight: bold; font-size: 14px;">تم العثور على ${matches.length} نتيجة</div>`;
-                      h += matches.map(m => `<div class="search-result-item" onclick="jumpToSearchResult(${m.number})"><div class="res-meta">سورة ${m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim()} - آية ${m.numberInSurah}</div><div class="res-text">${m.text.replace(new RegExp('(^|[^\\p{L}])(' + query + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div></div>`).join('');
+                      h += matches.map(m => `<div class="search-result-item" onclick="jumpToSearchResult(${parseInt(m.number, 10)})"><div class="res-meta">سورة ${escHtml(m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim())} - آية ${parseInt(m.numberInSurah, 10)}</div><div class="res-text">${escHtml(m.text).replace(new RegExp('(^|[^\\p{L}])(' + qHtmlRe + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div></div>`).join('');
                       resD.innerHTML = h;
                   } else { resD.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج مطابقة تماماً.</div>'; }
               } else { resD.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج.</div>'; }

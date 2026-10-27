@@ -936,4 +936,10 @@ export default {
   'ds_lifetime': "Toplam: {n} tesbih",
   'ds_today': "Bugün",
   'ds_share': "Haftamı paylaş",
+
+  // Asr calculation setting (js/prayer-service.js)
+  'setting_asr_madhab': "İkindi vakti",
+  'asr_auto': "Otomatik (ülkeye göre)",
+  'asr_shafi': "Standart (Asr-ı evvel: Şafiî, Mâlikî, Hanbelî)",
+  'asr_hanafi': "Hanefî (Asr-ı sânî)",
 };

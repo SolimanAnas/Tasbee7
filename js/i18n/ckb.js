@@ -964,4 +964,10 @@ export default {
   'ds_lifetime': "کۆی گشتی: {n} تەسبیح",
   'ds_today': "ئەمڕۆ",
   'ds_share': "هاوبەشکردنی هەفتەکەم",
+
+  // Asr calculation setting (js/prayer-service.js)
+  'setting_asr_madhab': "کاتی عەسر",
+  'asr_auto': "خۆکار (بەپێی وڵات)",
+  'asr_shafi': "ستاندارد (شافیعی، مالیکی، حەنبەلی)",
+  'asr_hanafi': "حەنەفی",
 };

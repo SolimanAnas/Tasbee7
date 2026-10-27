@@ -964,4 +964,10 @@ export default {
   'ds_lifetime': "All-time total: {n} tasbeeh",
   'ds_today': "Today",
   'ds_share': "Share my week",
+
+  // Asr calculation setting (js/prayer-service.js)
+  'setting_asr_madhab': "Asr time",
+  'asr_auto': "Automatic (by country)",
+  'asr_shafi': "Standard (Shafi'i, Maliki, Hanbali)",
+  'asr_hanafi': "Hanafi",
 };

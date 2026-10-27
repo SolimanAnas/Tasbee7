@@ -156,6 +156,69 @@ async function sendPushToSubscriber(env, subscription, payloadObj) {
 // (each app open refreshes the TTL). Keeps KV free of dead subscriptions.
 const SUB_TTL_SECONDS = 45 * 24 * 3600;
 
+// ====== INPUT VALIDATION ======
+// Only real browser push services may be stored as endpoints: the cron POSTs
+// to every stored endpoint, so an arbitrary URL would turn it into a request
+// cannon aimed at any host.
+const PUSH_HOSTS = [
+  'fcm.googleapis.com', 'android.googleapis.com',            // Chrome, Edge (Android), Opera, Samsung
+  'updates.push.services.mozilla.com', 'push.services.mozilla.com', // Firefox
+  'web.push.apple.com',                                      // Safari
+  'notify.windows.com'                                       // Edge (Windows), *.notify.windows.com
+];
+const MAX_BODY_BYTES = 64 * 1024;
+const MAX_EVENTS = 300;            // the client uploads ~7 days (~10 events/day)
+const USER_ID_RE = /^user_[a-z0-9]{1,16}_\d{10,14}$/;   // js/notifications.js generateUserId()
+
+function isPushEndpoint(endpoint) {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:' &&
+      PUSH_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h));
+  } catch { return false; }
+}
+
+function validSubscription(sub) {
+  return !!sub && typeof sub === 'object' &&
+    typeof sub.endpoint === 'string' && sub.endpoint.length <= 1024 && isPushEndpoint(sub.endpoint) &&
+    sub.keys && typeof sub.keys.p256dh === 'string' && sub.keys.p256dh.length <= 256 &&
+    typeof sub.keys.auth === 'string' && sub.keys.auth.length <= 64;
+}
+
+const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+
+// Keep only well-formed events inside a sane time window; clamp text sizes and
+// allow only in-app relative URLs (the SW opens this URL on notification click).
+function cleanSchedule(schedule) {
+  if (!Array.isArray(schedule)) return [];
+  const now = Date.now(), min = now - 24 * 3600e3, max = now + 15 * 24 * 3600e3;
+  const out = [];
+  for (const e of schedule) {
+    if (out.length >= MAX_EVENTS) break;
+    if (!e || typeof e !== 'object' || typeof e.ts !== 'number' || !(e.ts >= min && e.ts <= max)) continue;
+    const url = str(e.url, 200);
+    out.push({
+      ts: e.ts,
+      tag: str(e.tag, 64),
+      title: str(e.title, 120),
+      body: str(e.body, 400),
+      url: (url && !/^[a-z][a-z0-9+.-]*:|^\/\//i.test(url)) ? url : './index.html'
+    });
+  }
+  return out;
+}
+
+function isAdmin(request, env) {
+  const auth = request.headers.get('Authorization') || '';
+  return !!env.ADMIN_TOKEN && auth === `Bearer ${env.ADMIN_TOKEN}`;
+}
+
+async function readJson(request) {
+  const text = await request.text();
+  if (text.length > MAX_BODY_BYTES) throw new Error('too large');
+  return JSON.parse(text);
+}
+
 // KV list() returns at most 1000 keys per page — walk the cursor so we never
 // silently skip subscribers once the install base grows.
 async function listAllSubKeys(env) {
@@ -191,6 +254,8 @@ async function dispatchDue(env) {
     const subscription = rec.subscription || rec;
     const schedule = Array.isArray(rec.schedule) ? rec.schedule : [];
     if (!subscription || !subscription.endpoint || !schedule.length) return;
+    // Records stored before endpoint validation existed may point anywhere.
+    if (!isPushEndpoint(subscription.endpoint)) { await env.PUSH_SUBS.delete(name); return; }
 
     const cursor = rec.lastDispatch || 0;
     const due = schedule.filter(e => e.ts <= now && e.ts > cursor && e.ts > now - MAX_LATE);
@@ -241,8 +306,14 @@ export default {
       });
     }
 
-    // GET /kvcount — debug endpoint to check KV entries
+    // GET /kvcount — admin debug endpoint. It lists every subscriber key, which
+    // used to let anyone enumerate and then delete/overwrite all subscriptions.
     if (url.pathname === '/kvcount' && request.method === 'GET') {
+      if (!isAdmin(request, env)) {
+        return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+          status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
       const keys = await listAllSubKeys(env);
       return new Response(JSON.stringify({ count: keys.length, names: keys.map(k => k.name) }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -256,8 +327,7 @@ export default {
           status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
-      const auth = request.headers.get('Authorization') || '';
-      if (auth !== `Bearer ${env.ADMIN_TOKEN}`) {
+      if (!isAdmin(request, env)) {
         return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
           status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
@@ -271,15 +341,22 @@ export default {
 
     // POST /subscribe — upsert subscription + its precomputed notification schedule
     if (url.pathname === '/subscribe' && request.method === 'POST') {
-      const body = await request.json();
-      const { subscription, userId, schedule, tzOffset } = body;
-      if (!subscription) {
-        return new Response(JSON.stringify({ success: false, error: 'Missing subscription' }), {
+      let body;
+      try { body = await readJson(request); } catch {
+        return new Response(JSON.stringify({ success: false, error: 'Invalid body' }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+      const { subscription, userId, schedule, tzOffset } = body || {};
+      if (!validSubscription(subscription)) {
+        return new Response(JSON.stringify({ success: false, error: 'Invalid subscription' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
 
-      const key = userId || subscription.endpoint;
+      // Client ids look like user_<random>_<timestamp>; anything else falls back
+      // to the endpoint so a crafted id can't target another record's key.
+      const key = (typeof userId === 'string' && USER_ID_RE.test(userId)) ? userId : subscription.endpoint;
 
       // Preserve the dispatch cursor across re-uploads so already-fired events don't repeat
       let lastDispatch = 0;
@@ -287,9 +364,10 @@ export default {
       if (prev) { try { lastDispatch = (JSON.parse(prev).lastDispatch) || 0; } catch {} }
 
       const rec = {
-        subscription,
-        schedule: Array.isArray(schedule) ? schedule : [],
-        tzOffset: typeof tzOffset === 'number' ? tzOffset : 0,
+        subscription: { endpoint: subscription.endpoint, expirationTime: subscription.expirationTime || null,
+                        keys: { p256dh: subscription.keys.p256dh, auth: subscription.keys.auth } },
+        schedule: cleanSchedule(schedule),
+        tzOffset: (typeof tzOffset === 'number' && Math.abs(tzOffset) <= 900) ? tzOffset : 0,
         lastDispatch,
         updated: Date.now()
       };
@@ -301,10 +379,29 @@ export default {
     }
 
     // POST /unsubscribe
+    // Requires the subscription's endpoint (only the device itself knows it), so
+    // knowing someone's userId is not enough to delete their notifications.
     if (url.pathname === '/unsubscribe' && request.method === 'POST') {
-      const body = await request.json();
-      const key = body.userId || body.endpoint;
-      if (key) await env.PUSH_SUBS.delete(key);
+      let body;
+      try { body = await readJson(request); } catch { body = null; }
+      const endpoint = body && typeof body.endpoint === 'string' ? body.endpoint : '';
+      if (!endpoint) {
+        return new Response(JSON.stringify({ success: false, error: 'Missing endpoint' }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+      const key = (typeof body.userId === 'string' && USER_ID_RE.test(body.userId)) ? body.userId : endpoint;
+      const raw = await env.PUSH_SUBS.get(key);
+      if (raw) {
+        let stored = '';
+        try { const r = JSON.parse(raw); stored = (r.subscription || r).endpoint || ''; } catch {}
+        if (stored !== endpoint) {
+          return new Response(JSON.stringify({ success: false, error: 'Forbidden' }), {
+            status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          });
+        }
+        await env.PUSH_SUBS.delete(key);
+      }
       return new Response(JSON.stringify({ success: true }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
@@ -319,14 +416,14 @@ export default {
           status: 503, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
-      const auth = request.headers.get('Authorization') || '';
-      if (auth !== `Bearer ${env.ADMIN_TOKEN}`) {
+      if (!isAdmin(request, env)) {
         return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
           status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
 
-      const body = await request.json();
+      let body;
+      try { body = await readJson(request); } catch { body = {}; }
 
       const payload = {
         title: body.title || '🔔 Zad Al-Muslim',

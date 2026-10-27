@@ -266,6 +266,7 @@ const NotificationSystem = {
       lat: localStorage.getItem('prayer_lat'),
       lng: localStorage.getItem('prayer_lng'),
       calcMethod: localStorage.getItem('calcMethod') || 'UAE',
+      asrMadhab: (typeof PrayerService !== 'undefined') ? PrayerService.asrName() : 'shafi',
       quietHoursStart: this.config.quietHoursStart,
       quietHoursEnd: this.config.quietHoursEnd,
       preReminderMinutes: this.config.preReminderMinutes,
@@ -399,7 +400,6 @@ const NotificationSystem = {
     try {
       const calcMethod = this.getAdhanMethod();
       if (!calcMethod) throw new Error('adhan.js not loaded');
-      calcMethod.madhab = adhan.Madhab.Shafi;
       const coords = new adhan.Coordinates(lat, lng);
       const now = new Date();
       const pt = new adhan.PrayerTimes(coords, now, calcMethod);
@@ -418,7 +418,6 @@ const NotificationSystem = {
     try {
       const calcMethod = this.getAdhanMethod();
       if (!calcMethod) throw new Error('adhan.js not loaded');
-      calcMethod.madhab = adhan.Madhab.Shafi;
       // Look the city up in the bundled cities database when available;
       // otherwise fall back to Cairo (matches the declared default city).
       const known = (typeof cityCoordinatesMap !== 'undefined' && cityCoordinatesMap[city]) || null;
