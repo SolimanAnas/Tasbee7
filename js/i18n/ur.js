@@ -936,4 +936,13 @@ export default {
   'ds_lifetime': "کل مجموعہ: {n} تسبیحات",
   'ds_today': "آج",
   'ds_share': "اپنا ہفتہ شیئر کریں",
+
+  // Asr calculation setting (js/prayer-service.js)
+  'setting_asr_madhab': "عصر کا وقت",
+  'asr_auto': "خودکار (ملک کے مطابق)",
+  'asr_shafi': "جمہور (شافعی، مالکی، حنبلی)",
+  'asr_hanafi': "حنفی",
+
+  // Blocked notifications inside the Google Play app (TWA)
+  'notif_blocked_app': "زاد المسلم ایپ کے لیے اطلاعات بند ہیں — اینڈرائیڈ سیٹنگز ← ایپس ← زاد المسلم ← اطلاعات کھول کر انہیں آن کریں",
 };

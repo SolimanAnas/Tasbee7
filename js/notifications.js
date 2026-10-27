@@ -29,12 +29,35 @@ const NotificationSystem = {
     vapidPublicKey: 'BFBoJ96GEU6t_hIBX_MaWHQRTSdChk2yA78dDNcQuNyXfiL2gFVnyRsrZW5d1kO5aEY2oCkafBQHX7kRU3tS1Y',
     quietHoursStart: 23,
     quietHoursEnd: 5,
-    preReminderMinutes: 10
+    preReminderMinutes: 10,
+    // Days of notifications uploaded to the push server. The Play Store (TWA)
+    // build gets no periodic background sync to renew the schedule while the
+    // app is closed, so a long horizon keeps it notifying for a month after
+    // the last open (it was 7 days).
+    scheduleDays: 30
   },
 
   // ========== SUPPORT CHECK ==========
   get isSupported() {
     return ('Notification' in window) && ('serviceWorker' in navigator);
+  },
+
+  // True inside the Google Play app (TWA). Android passes this referrer only
+  // on the launch navigation, so remember it for the other pages. There the
+  // notification switch is the Android app's, not Chrome's site setting.
+  get isPlayApp() {
+    try {
+      if ((document.referrer || '').startsWith('android-app://io.github.solimananas.twa')) {
+        localStorage.setItem('zad_play_app', '1');
+      }
+      return localStorage.getItem('zad_play_app') === '1';
+    } catch (e) { return false; }
+  },
+
+  // i18n key for "notifications are blocked" — points Play users to the
+  // Android app settings instead of browser settings.
+  blockedMessageKey(kind) {
+    return this.isPlayApp ? 'notif_blocked_app' : kind;
   },
 
   // ========== SETTINGS ==========
@@ -98,6 +121,7 @@ const NotificationSystem = {
 
     this.generateUserId();
     this.loadState();
+    void this.isPlayApp;   // record the Play-app launch referrer while it is present
 
     // FIX: Attach to existing SW instead of re-registering (index.html already registers)
     await this.attachServiceWorker();
@@ -150,7 +174,7 @@ const NotificationSystem = {
   },
 
   // ========== PUSH SUBSCRIPTION + SERVER SCHEDULE ==========
-  // Subscribes this device and uploads a precomputed ~7-day notification schedule
+  // Subscribes this device and uploads a precomputed ~30-day notification schedule
   // so the server's cron can deliver prayer/azkar notifications even when the app
   // is fully closed. The server does no prayer-time math — it just fires what we
   // send it at the right moment (see server/cloudflare.js dispatchDue).
@@ -218,7 +242,7 @@ const NotificationSystem = {
     subscription = subscription || await this.swRegistration.pushManager.getSubscription();
     if (!subscription) return;
 
-    const schedule = this.buildSchedule(7);
+    const schedule = this.buildSchedule();
     try {
       const res = await fetch(`${this.config.serverUrl}/subscribe`, {
         method: 'POST',
@@ -248,11 +272,11 @@ const NotificationSystem = {
   },
 
   // True while the server holds a usable schedule for this device: the last
-  // upload succeeded, contained events, and hasn't outlived its 7-day horizon.
+  // upload succeeded, contained events, and hasn't outlived its horizon.
   // If this is false the local scheduler must keep firing — otherwise a failed
   // or empty upload silences notifications entirely.
   serverScheduleActive() {
-    const SCHEDULE_HORIZON_MS = 7 * 24 * 3600 * 1000;
+    const SCHEDULE_HORIZON_MS = this.config.scheduleDays * 24 * 3600 * 1000;
     return (this.state.lastScheduleCount || 0) > 0 &&
            (Date.now() - (this.state.lastScheduleUpload || 0)) < SCHEDULE_HORIZON_MS;
   },
@@ -266,10 +290,12 @@ const NotificationSystem = {
       lat: localStorage.getItem('prayer_lat'),
       lng: localStorage.getItem('prayer_lng'),
       calcMethod: localStorage.getItem('calcMethod') || 'UAE',
+      asrMadhab: (typeof PrayerService !== 'undefined') ? PrayerService.asrName() : 'shafi',
       quietHoursStart: this.config.quietHoursStart,
       quietHoursEnd: this.config.quietHoursEnd,
       preReminderMinutes: this.config.preReminderMinutes,
       serverUrl: this.config.serverUrl,
+      scheduleDays: this.config.scheduleDays,
       userId: this.state.userId
     };
   },
@@ -278,7 +304,7 @@ const NotificationSystem = {
   // Delegates to the shared builder (js/schedule-builder.js) — the same code
   // the service worker runs on periodicsync. Returns [] if we can't compute
   // prayers (no location / adhan.js missing) — the server then has nothing to fire.
-  buildSchedule(days = 7) {
+  buildSchedule(days = this.config.scheduleDays) {
     if (typeof buildNotificationSchedule !== 'function') return [];
     return buildNotificationSchedule(this.scheduleContext(), days);
   },
@@ -295,7 +321,7 @@ const NotificationSystem = {
     } catch (e) { /* cache unavailable — periodicsync refresh just won't run */ }
   },
 
-  // Ask the browser to wake the SW ~daily so it can re-upload a fresh 7-day
+  // Ask the browser to wake the SW ~daily so it can re-upload a fresh
   // schedule even if the user never opens the app (closes the "pushes stop
   // after 7 days" gap). Chromium-only; silently unsupported elsewhere.
   async registerPeriodicSync() {
@@ -399,7 +425,6 @@ const NotificationSystem = {
     try {
       const calcMethod = this.getAdhanMethod();
       if (!calcMethod) throw new Error('adhan.js not loaded');
-      calcMethod.madhab = adhan.Madhab.Shafi;
       const coords = new adhan.Coordinates(lat, lng);
       const now = new Date();
       const pt = new adhan.PrayerTimes(coords, now, calcMethod);
@@ -418,7 +443,6 @@ const NotificationSystem = {
     try {
       const calcMethod = this.getAdhanMethod();
       if (!calcMethod) throw new Error('adhan.js not loaded');
-      calcMethod.madhab = adhan.Madhab.Shafi;
       // Look the city up in the bundled cities database when available;
       // otherwise fall back to Cairo (matches the declared default city).
       const known = (typeof cityCoordinatesMap !== 'undefined' && cityCoordinatesMap[city]) || null;

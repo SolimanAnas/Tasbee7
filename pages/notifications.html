@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
   <title>الإشعارات الذكية — زاد المسلم | Smart Notifications</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
   <meta name="description" content="إشعارات ذكية لأوقات الصلاة والأذكار اليومية. Smart notifications for prayer times and daily adhkar reminders.">
@@ -411,7 +412,7 @@
       const isEnabled = getVal('enabled');
       const isBlocked = ('Notification' in window) && Notification.permission === 'denied';
       document.getElementById('statusText').textContent =
-        isBlocked ? t('notif_blocked') : isEnabled ? t('notif_status_active') : t('notif_status_inactive');
+        isBlocked ? t(NotificationSystem.blockedMessageKey('notif_blocked')) : isEnabled ? t('notif_status_active') : t('notif_status_inactive');
       document.getElementById('statusDot').className = (isEnabled && !isBlocked) ? 'status-dot active' : 'status-dot inactive';
       
       // Streak
@@ -459,7 +460,7 @@
       if (key === 'enabled' && value === true && Notification.permission !== 'granted') {
         const result = await NotificationSystem.enableNotifications();
         if (result !== 'granted') {
-          alert(t('notif_permission_denied'));
+          alert(t(result === 'denied' ? NotificationSystem.blockedMessageKey('notif_permission_denied') : 'notif_permission_denied'));
           document.getElementById('toggleEnabled').checked = false;
           NotificationSystem.toggleSetting('enabled', false);
           updateUI();
@@ -502,7 +503,7 @@
 
     async function testNotification() {
       if(typeof NotificationSystem === 'undefined') { alert(t('notif_not_loaded')); return; }
-      if(Notification.permission === 'denied') { alert(t('notif_denied')); return; }
+      if(Notification.permission === 'denied') { alert(t(NotificationSystem.blockedMessageKey('notif_denied'))); return; }
       if(Notification.permission === 'default') {
         const result = await Notification.requestPermission();
         if(result !== 'granted') { alert(t('notif_permission_denied')); return; }

@@ -964,4 +964,13 @@ export default {
   'ds_lifetime': "المجموع منذ البداية: {n} تسبيحة",
   'ds_today': "اليوم",
   'ds_share': "مشاركة إنجاز الأسبوع",
+
+  // Asr calculation setting (js/prayer-service.js)
+  'setting_asr_madhab': "وقت العصر",
+  'asr_auto': "تلقائي حسب البلد",
+  'asr_shafi': "الجمهور (الشافعي والمالكي والحنبلي)",
+  'asr_hanafi': "الحنفي",
+
+  // Blocked notifications inside the Google Play app (TWA)
+  'notif_blocked_app': "الإشعارات متوقفة لتطبيق زاد المسلم — افتح إعدادات أندرويد ← التطبيقات ← زاد المسلم ← الإشعارات وفعّلها",
 };

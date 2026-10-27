@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <title data-i18n="meta_title">زاد المسلم — Zad Al-Muslim | Islamic Companion App</title>
 <meta name="i18n-title" content="meta_title">
 
@@ -1008,6 +1009,12 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
             <option value="Egypt" data-i18n="calc_method_egypt">الهيئة المصرية</option>
             <option value="Karachi" data-i18n="calc_method_karachi">كراتشي</option>
           </select>
+          <div class="s-title" style="margin-top:12px;" data-i18n="setting_asr_madhab">وقت العصر</div>
+          <select id="asrMadhab" onchange="setAsrMadhab(this.value)" class="input-styled" style="padding:8px; margin-top:6px;">
+            <option value="auto" data-i18n="asr_auto">تلقائي حسب البلد</option>
+            <option value="shafi" data-i18n="asr_shafi">الجمهور (الشافعي والمالكي والحنبلي)</option>
+            <option value="hanafi" data-i18n="asr_hanafi">الحنفي</option>
+          </select>
         </div>
       </div>
     </div>
@@ -1747,7 +1754,14 @@ function setTheme(mode, persist = true) {
 }
 function autoTheme() { setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
 
-function setCalcMethod(m) { calcMethod=m; localStorage.setItem('calcMethod',m); refreshPrayerTimes(); }
+function setCalcMethod(m) { calcMethod=m; localStorage.setItem('calcMethod',m); refreshPrayerTimes(); resyncNotifications(); }
+function setAsrMadhab(v) { localStorage.setItem('asrMadhab', v); refreshPrayerTimes(); resyncNotifications(); }
+// Method / Asr changes move prayer times → refresh the pushed schedule too.
+function resyncNotifications() {
+  if (typeof NotificationSystem !== 'undefined' && NotificationSystem.refreshPrayerTimes) {
+    NotificationSystem.refreshPrayerTimes().catch(() => {});
+  }
+}
 function resetData() { if(confirm(t('confirm_reset_data'))) { localStorage.clear(); location.reload(); } }
 function shareApp() {
   const link = 'https://play.google.com/store/apps/details?id=io.github.solimananas.twa';
@@ -1819,6 +1833,8 @@ window.addEventListener('load', async () => {
 
   const saved2 = localStorage.getItem('calcMethod');
   if(saved2) { calcMethod=saved2; const sel=document.getElementById('calcMethod'); if(sel) sel.value=calcMethod; }
+  const asrSel = document.getElementById('asrMadhab');
+  if (asrSel && typeof PrayerService !== 'undefined') asrSel.value = PrayerService.asrSetting();
 });
 
 // Re-render prayer widget and Quran hero when language changes
@@ -1890,8 +1906,9 @@ if (!isFramed) window.addEventListener('popstate', (e) => {
   openExitModal();
 });
 
-// Service Worker: only for PWA asset caching — NOT for notifications in Capacitor.
-// Notifications are handled by @capacitor/local-notifications (js/notifications.js).
+// Service Worker: offline caching + Web Push. Notifications (browser PWA and the
+// Play Store TWA alike) are Web Push via sw.js and js/notifications.js; the
+// Capacitor stubs above are leftovers from an older native build.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')

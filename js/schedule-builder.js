@@ -26,7 +26,7 @@
     if (!isFinite(lat) || !isFinite(lng) || typeof adhan === 'undefined') return events;
 
     const settings = ctx.settings;
-    const method = PrayerService.method(ctx.calcMethod); // madhab included
+    const method = PrayerService.method(ctx.calcMethod, ctx.asrMadhab); // madhab included
     const coords = new adhan.Coordinates(lat, lng);
     const now = Date.now();
     const prayers = [

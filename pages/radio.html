@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#0F172A">
 <title>إذاعة القرآن الكريم — زاد المسلم | Live Quran Radio</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
@@ -19,7 +20,10 @@
 <link rel="stylesheet" href="../css/fonts.css">
 <!-- Pinned exact version: @latest auto-updates third-party code with full DOM
      access (supply-chain risk + spontaneous breakage). Bump deliberately. -->
-<script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<!-- async, not defer: a deferred CDN script holds back DOMContentLoaded until it
+     downloads, so a slow jsDelivr froze the whole page. hlsPending() covers the
+     moment before it arrives. -->
+<script async id="hlsLib" src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js" onerror="this.dataset.failed='1'"></script>
 <script src="../js/radio-stations.js"></script>
 <style>
 /* ============================================================
@@ -908,8 +912,10 @@ function altHostUrl(url){
 //  - explicit `fallbacks` (e.g. Sharjah: audio-only AAC on two CDN hosts, then HLS)
 //  - qurango stations: the same path on both hosts
 // URLs this browser can't decode are skipped up front.
+// hls.js loads async; true while it is still on its way.
+function hlsPending(){const s=document.getElementById('hlsLib');return !window.Hls&&!!s&&!s.dataset.failed}
 function canPlayUrl(u){
-  if(/\.m3u8(\?|$)/.test(u))return supportsNativeHLS()||!!(window.Hls&&Hls.isSupported());
+  if(/\.m3u8(\?|$)/.test(u))return supportsNativeHLS()||hlsPending()||!!(window.Hls&&Hls.isSupported());
   if(/icecast\.audio|\.aac(\?|$)/.test(u))return audio.canPlayType('audio/aac')!==''||audio.canPlayType('audio/aacp')!=='';
   return true;
 }
@@ -955,6 +961,13 @@ function startPlayback(){
   userWantsPlay=true;hideRadioError();clearTimeout(reconnectTimer);
   if(state!=='reconnecting')setState('connecting');
   const url=streamUrl();
+  // Tapped play before hls.js arrived: start as soon as it does.
+  if(audio.dataset.loadedUrl!==url&&/\.m3u8(\?|$)/.test(url)&&!supportsNativeHLS()&&hlsPending()){
+    const lib=document.getElementById('hlsLib');
+    const resume=()=>{lib.removeEventListener('load',resume);lib.removeEventListener('error',resume);if(userWantsPlay)startPlayback()};
+    lib.addEventListener('load',resume);lib.addEventListener('error',resume);
+    return;
+  }
   if(audio.dataset.loadedUrl!==url&&!loadStream(url)){userWantsPlay=false;setState('stopped');return}
   const seq=++loadSeq;
   armStallWatch();
