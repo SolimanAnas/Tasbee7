@@ -2,8 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
+<!-- Page zoom stays off here: the zikr card has its own pinch-to-resize text
+     (and a font-size slider), and a page pinch that missed the card left the
+     whole screen zoomed and cropped. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{touch-action:manipulation}</style>
 <meta name="theme-color" content="#0F172A">
 <title>الأذكار — زاد المسلم | Adhkar & Supplications</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
@@ -925,7 +928,9 @@ body::after {
 @keyframes uiRise { from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
 .top-bar         { animation:uiRise .5s cubic-bezier(.22,1,.36,1) both; }
 .session-progress{ animation:uiRise .5s .05s cubic-bezier(.22,1,.36,1) both; }
-.counter-anchor  { animation:uiRise .55s .14s cubic-bezier(.22,1,.36,1) both; }
+/* backwards, not both: a transform left on the ring after the entrance made it a
+   separate layer, and Chrome cropped its glow into a visible square. */
+.counter-anchor  { animation:uiRise .55s .14s cubic-bezier(.22,1,.36,1) backwards; }
 .bottom-stack    { animation:uiRise .55s .2s cubic-bezier(.22,1,.36,1) both; }
 
 /* Counter badge → refined pill */
@@ -958,7 +963,20 @@ body::after {
 .counter-anchor { width:min(46vw,200px); height:min(46vw,200px); }
 .bg-circle { stroke-width:9; opacity:.45; }
 .fg-circle { stroke:url(#ringGrad); stroke-width:9; filter:drop-shadow(0 0 7px var(--gold-soft)); }
-.progress-wrapper { box-shadow:0 0 90px -30px var(--gold); }
+/* Ring glow: a radial gradient that fades to nothing inside its own circle,
+   instead of a wide blurred box-shadow (which rendered with a square edge). */
+.progress-wrapper { box-shadow:none; }
+.counter-anchor::before {
+  content:''; position:absolute; inset:-38%; border-radius:50%; pointer-events:none; z-index:0;
+  /* halo: clear in the middle, strongest at the ring (≈57% of this radius) */
+  background:radial-gradient(circle closest-side,
+    transparent 38%,
+    color-mix(in srgb, var(--gold) 22%, transparent) 57%,
+    color-mix(in srgb, var(--gold) 8%, transparent) 76%,
+    transparent 100%);
+}
+/* let the ring's own drop-shadow extend past the SVG box instead of being cut square */
+.progress-wrapper svg { overflow:visible; }
 .progress-wrapper::after {           /* per-tap ripple */
   content:''; position:absolute; inset:5%; border-radius:50%;
   border:2px solid var(--gold); opacity:0; pointer-events:none;
