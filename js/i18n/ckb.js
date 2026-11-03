@@ -953,6 +953,9 @@ export default {
   'sc_video_too_long': "دەقەکە زۆر درێژە بۆ یەک ڤیدیۆ — وەک وێنەی ستۆری هاوبەشی بکە",
   'sc_video_unsupported': "وێبگەڕەکەت ناتوانێت ڤیدیۆ دروست بکات — Chrome یان Safari ی نوێ تاقی بکەرەوە",
   'sc_webm_note': "وەک WebM پاشەکەوت کرا — هەندێک ئەپ MP4 پێویست دەکەن",
+  'sc_audio': "دەنگی خوێندنەوە",
+  'sc_audio_loading': "خوێندنەوە باردەکرێت…",
+  'sc_audio_failed': "خوێندنەوە بار نەکرا — ڤیدیۆکە بێ دەنگ دروستکرا",
   'sc_hadith_number': "ژمارە {n}",
 
   // Weekly dhikr stats card (js/dhikr-stats.js)
