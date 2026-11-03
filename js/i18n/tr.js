@@ -44,6 +44,7 @@ export default {
   'card_tasbih': 'Tasbih (Sayıcı)',
   'card_qibla': 'Kıble Yönü',
   'card_hadith': 'Hadis Ansiklopedisi',
+  'card_nawawi': "Nevevî'nin Kırk Hadisi",
   'card_prayer_times': 'Namaz Vakitleri',
 
   'prayer_locating': 'Konum bulunuyor...',
@@ -947,6 +948,5 @@ export default {
   'notif_blocked_app': "Zad Al-Muslim uygulaması için bildirimler kapalı — Android Ayarlar → Uygulamalar → Zad Al-Muslim → Bildirimler bölümünden açın",
 
   // Home prayer cards: badge on the upcoming prayer
-  'prayer_card_next': "Sıradaki",
   'prayer_remaining_sunrise': "Güneşin doğmasına kalan",
 };

@@ -729,7 +729,7 @@
     clearVideo();
     setStatus('');
     ui.overlay.hidden = false;
-    if (window.BackClose) BackClose.opened(close);
+    if (window.BackClose) BackClose.opened(hide);
     refresh();
     loadPhotos();
     // Draw again once the bundled fonts are ready (first open may predate them).
@@ -739,12 +739,19 @@
     }
   }
 
-  function close() {
+  // hide() is the back-button path (its history entry is already popped);
+  // close() is the UI path and consumes that entry first. Registering close()
+  // with BackClose would pop the entry of a modal underneath (e.g. a reader).
+  function hide() {
     if (!ui || ui.overlay.hidden) return;
     if (recording) recording.cancel();
-    if (window.BackClose) BackClose.closed();
     ui.overlay.hidden = true;
     clearVideo();
+  }
+  function close() {
+    if (!ui || ui.overlay.hidden) return;
+    if (window.BackClose) BackClose.closed();
+    hide();
   }
 
   window.ShareCard = { open, close };

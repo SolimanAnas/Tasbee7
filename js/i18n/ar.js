@@ -48,6 +48,7 @@ export default {
   'card_tasbih': 'المسبحة',
   'card_qibla': 'اتجاه القبلة',
   'card_hadith': 'موسوعة الحديث',
+  'card_nawawi': "الأربعون النووية",
   'card_prayer_times': 'مواعيد الصلاة',
 
   // Prayer Widget
@@ -975,6 +976,5 @@ export default {
   'notif_blocked_app': "الإشعارات متوقفة لتطبيق زاد المسلم — افتح إعدادات أندرويد ← التطبيقات ← زاد المسلم ← الإشعارات وفعّلها",
 
   // Home prayer cards: badge on the upcoming prayer
-  'prayer_card_next': "التالية",
   'prayer_remaining_sunrise': "متبقي على الشروق",
 };

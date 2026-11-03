@@ -341,14 +341,6 @@ input, textarea, select {
 }
 .prayer-card.is-next .pc-name, .prayer-card.is-next .pc-time { color: var(--on-primary); }
 .prayer-card.is-next .pc-icon { opacity: 1; }
-.pc-badge {
-  position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-  font-size: 0.56rem; font-weight: 800; line-height: 1; letter-spacing: 0.02em; white-space: nowrap;
-  padding: 3px 7px; border-radius: 999px;
-  background: var(--surface); color: var(--primary);
-  border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
-  box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--primary) 60%, transparent);
-}
 .prayer-card.is-empty .pc-time { opacity: 0.6; }
 @media (prefers-reduced-motion: reduce) { .prayer-card { transition: none; } .prayer-card.is-next { transform: none; } }
 /* small phones (≤360px): six cards are ~37px wide — tighten so names stay whole */
@@ -972,6 +964,17 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
       </div>
       <div class="fc-text" data-i18n="card_hadith">موسوعة الحديث</div>
     </div>
+    <div class="feature-card glass-panel" onclick="go('pages/nawawi.html')">
+      <div class="fc-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/>
+          <path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>
+          <path d="M17 7.5l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>
+        </svg>
+      </div>
+      <div class="fc-text" data-i18n="card_nawawi">الأربعون النووية</div>
+      <span class="new-badge" data-i18n="badge_new">جديد</span>
+    </div>
     <div class="feature-card glass-panel" onclick="openPrayerModal()">
       <div class="fc-icon-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1447,7 +1450,6 @@ function renderPrayerCards(pt, nextEnum, nextDate) {
       : formatPrayerCardTime(pt[k]);
     return `
       <div class="prayer-card${cls}" role="listitem"${isNext ? ' aria-current="time"' : ''}>
-        ${isNext ? `<span class="pc-badge">${t('prayer_card_next')}</span>` : ''}
         <svg class="pc-icon" viewBox="0 0 24 24" aria-hidden="true">${PRAYER_CARD_ICONS[k]}</svg>
         <span class="pc-name">${getPrayerName(k)}</span>
         <bdi class="pc-time">${time}</bdi>
