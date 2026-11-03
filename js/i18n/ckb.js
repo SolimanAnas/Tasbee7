@@ -48,6 +48,7 @@ export default {
   'card_tasbih': 'تسبیح',
   'card_qibla': 'ئاراستەی قبلە',
   'card_hadith': 'دەستکاری حەدیس',
+  'card_nawawi': "چل فەرموودەی نەوەوی",
   'card_prayer_times': 'کاتەکانی نوێژ',
 
   // Prayer Widget
@@ -975,6 +976,5 @@ export default {
   'notif_blocked_app': "ئاگادارکردنەوەکان بۆ ئەپی زاد المسلم کوژاونەتەوە — ڕێکخستنەکانی ئەندرۆید ← ئەپەکان ← زاد المسلم ← ئاگادارکردنەوەکان بکەرەوە و چالاکیان بکە",
 
   // Home prayer cards: badge on the upcoming prayer
-  'prayer_card_next': "داهاتوو",
   'prayer_remaining_sunrise': "ماوە بۆ خۆرهەڵاتن",
 };

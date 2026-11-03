@@ -44,6 +44,7 @@ export default {
   'card_tasbih': 'تسبیح',
   'card_qibla': 'قبلہ کی سمت',
   'card_hadith': 'حدیث موسوعہ',
+  'card_nawawi': "اربعین نووی",
   'card_prayer_times': 'نماز کے اوقات',
 
   'prayer_locating': 'پتہ لگایا جا رہا ہے...',
@@ -947,6 +948,5 @@ export default {
   'notif_blocked_app': "زاد المسلم ایپ کے لیے اطلاعات بند ہیں — اینڈرائیڈ سیٹنگز ← ایپس ← زاد المسلم ← اطلاعات کھول کر انہیں آن کریں",
 
   // Home prayer cards: badge on the upcoming prayer
-  'prayer_card_next': "اگلی",
   'prayer_remaining_sunrise': "طلوعِ آفتاب میں باقی وقت",
 };

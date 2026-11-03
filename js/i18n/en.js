@@ -48,6 +48,7 @@ export default {
   'card_tasbih': 'Tasbih (Counter)',
   'card_qibla': 'Qibla Direction',
   'card_hadith': 'Hadith Encyclopedia',
+  'card_nawawi': "An-Nawawi's Forty Hadith",
   'card_prayer_times': 'Prayer Times',
 
   // Prayer Widget
@@ -975,6 +976,5 @@ export default {
   'notif_blocked_app': "Notifications are off for the Zad Al-Muslim app — open Android Settings → Apps → Zad Al-Muslim → Notifications and turn them on",
 
   // Home prayer cards: badge on the upcoming prayer
-  'prayer_card_next': "Next",
   'prayer_remaining_sunrise': "Remaining until sunrise",
 };
