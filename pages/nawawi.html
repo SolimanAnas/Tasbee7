@@ -166,6 +166,8 @@
       border:1px solid var(--border); background:var(--card-bg); color:var(--text-muted); transition:.2s;
     }
     .chip.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+    .chip svg.ci{ width:13px; height:13px; vertical-align:-2px; margin-inline-end:4px; }
+    .chip.active svg.ci{ stroke:#fff; }
     .chip .n{ opacity:.75; font-weight:500; margin-inline-start:3px; }
 
     /* ---------- list ---------- */
@@ -694,8 +696,11 @@
   });
 
   // ---- list view ----
+  // inline icons (the page avoids emoji-range characters such as ★ ✓)
+  const CHIP_STAR = '<svg class="i ci" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>';
+  const CHIP_CHECK = '<svg class="i ci" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>';
   const FILTERS = () => [
-    ['all', 'الكل', H.length], ['fav', '★ المفضلة', S.fav.length], ['mem', '✓ المحفوظة', S.mem.length], ['todo', 'لم أحفظها', H.length - S.mem.length],
+    ['all', 'الكل', H.length], ['fav', CHIP_STAR + 'المفضلة', S.fav.length], ['mem', CHIP_CHECK + 'المحفوظة', S.mem.length], ['todo', 'لم أحفظها', H.length - S.mem.length],
     ...Object.keys(CATS).map(k => [k, CATS[k], H.filter(h => h.cat === k).length])
   ];
   function renderChips() {
