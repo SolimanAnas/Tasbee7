@@ -261,27 +261,41 @@
     .src b{ font-family:'Tajawal', sans-serif; font-size:.72rem; color:var(--gold); display:block; line-height:1.4; letter-spacing:.02em; }
 
     /* ---------- audio player ---------- */
+    /* compact card above the dock; collapses to a small pill (.min) */
     .player{
-      display:flex; flex-direction:column; gap:6px; padding:8px 12px 6px;
-      background:var(--glass-bg); border-top:1px solid var(--border);
+      align-self:center; width:calc(100% - 32px); max-width:400px; margin:0 0 8px;
+      display:flex; flex-direction:column; gap:2px; padding:4px 8px 5px;
+      background:var(--glass-bg); border:1px solid var(--border); border-radius:18px;
+      box-shadow:0 10px 26px -16px rgba(0,0,0,.55);
       -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
     }
-    .p-row{ display:flex; align-items:center; gap:6px; }
-    .p-btn{ width:36px; height:36px; min-width:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text); position:relative; }
-    .p-btn svg.i{ width:19px; height:19px; }
+    .p-row{ display:flex; align-items:center; gap:2px; }
+    .p-btn{ width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text); position:relative; }
+    .p-btn svg.i{ width:17px; height:17px; }
     .p-btn.on{ color:var(--accent); background:var(--accent-bg); }
-    .p-btn .badge{ position:absolute; top:1px; inset-inline-end:1px; min-width:15px; height:15px; border-radius:9px; font-size:.6rem; font-weight:800; line-height:15px; text-align:center;
-      background:var(--accent); color:#fff; padding:0 3px; }
-    .p-play{ width:44px; height:44px; min-width:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;
+    .p-btn .badge{ position:absolute; top:-2px; inset-inline-end:-3px; min-width:15px; height:15px; border-radius:9px; font-size:.58rem; font-weight:800; line-height:15px; text-align:center;
+      background:var(--accent); color:#fff; padding:0 3px; white-space:nowrap; }
+    .p-play{ width:40px; height:40px; min-width:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;
       background:linear-gradient(160deg, var(--accent), var(--accent-deep)); box-shadow:0 6px 14px -8px var(--accent); }
-    .p-play svg{ width:20px; height:20px; fill:currentColor; }
+    .p-play svg{ width:18px; height:18px; fill:currentColor; }
     .p-play.loading svg{ animation:spin 1s linear infinite; }
     @keyframes spin{ to{ transform:rotate(360deg); } }
-    .p-time{ font-size:.7rem; color:var(--text-muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:center; direction:ltr; }
-    .p-seek{ flex:1; direction:rtl; accent-color:var(--accent); height:4px; }
-    .p-speed{ direction:ltr; font-size:.72rem; font-weight:800; min-width:40px; height:28px; border-radius:9px; border:1px solid var(--border); color:var(--text); }
+    .p-time{ font-size:.66rem; color:var(--text-muted); font-variant-numeric:tabular-nums; min-width:30px; text-align:center; direction:ltr; }
+    .p-seek{ flex:1; min-width:0; direction:rtl; accent-color:var(--accent); height:4px; margin:0 2px; }
+    .p-speed{ direction:ltr; font-size:.68rem; font-weight:800; min-width:36px; height:26px; border-radius:8px; border:1px solid var(--border); color:var(--text); }
     .p-spacer{ flex:1; }
-    .p-label{ font-size:.72rem; color:var(--text-muted); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .p-mini{ display:none; align-items:center; gap:8px; }
+    .p-mini .p-play{ width:34px; height:34px; min-width:34px; }
+    .p-mini .p-play svg{ width:15px; height:15px; }
+    .p-mini-t{ font-size:.76rem; font-weight:700; white-space:nowrap; color:var(--text); }
+    .p-mini-t small{ font-weight:500; color:var(--text-muted); margin-inline-start:4px; direction:ltr; display:inline-block; }
+    .player.min{
+      width:auto; max-width:calc(100% - 20px); padding:3px; border-radius:999px;
+      /* progress shows as a soft fill behind the pill */
+      background:linear-gradient(to left, var(--accent-bg) var(--pp, 0%), var(--glass-bg) var(--pp, 0%));
+    }
+    .player.min .p-full{ display:none; }
+    .player.min .p-mini{ display:flex; }
 
     /* floating mini player on the list while audio keeps playing */
     .mini{
@@ -452,37 +466,44 @@
     <div class="r-inner" id="rInner"></div>
   </div>
   <div class="player" id="player" aria-label="مشغل الصوت">
-    <div class="p-row">
-      <span class="p-time" id="pCur">0:00</span>
-      <input class="p-seek" id="pSeek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل">
-      <span class="p-time" id="pDur">0:00</span>
+    <div class="p-mini">
+      <button class="p-play" id="pPlayMini" onclick="togglePlay()" aria-label="تشغيل"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+      <span class="p-mini-t" id="pMiniT"></span>
+      <button class="p-btn" onclick="setPlayerMin(false)" aria-label="توسيع المشغل" title="توسيع المشغل"><svg class="i" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></button>
     </div>
-    <div class="p-row">
-      <button class="p-btn" id="pRepeat" onclick="cycleRepeat()" aria-label="تكرار الحديث" title="تكرار الحديث">
-        <svg class="i" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-        <span class="badge" id="pRepeatN" hidden></span>
-      </button>
-      <button class="p-btn" id="pAuto" onclick="toggleAuto()" aria-label="الانتقال التلقائي للحديث التالي" title="الانتقال التلقائي للحديث التالي">
-        <svg class="i" viewBox="0 0 24 24"><path d="M3 12h13"/><path d="m12 7 5 5-5 5"/><path d="M21 5v14"/></svg>
-      </button>
-      <span class="p-spacer"></span>
-      <button class="p-btn" onclick="playStep(-1)" aria-label="الحديث السابق" title="الحديث السابق">
-        <svg class="i" viewBox="0 0 24 24"><path d="M6 5v14"/><path d="m18 6-9 6 9 6z"/></svg>
-      </button>
-      <button class="p-btn" onclick="seekBy(-5)" aria-label="رجوع ٥ ثوانٍ" title="رجوع ٥ ثوانٍ">
-        <svg class="i" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-7 7"/><path d="M12 5 9 2M12 5 9 8"/></svg>
-      </button>
-      <button class="p-play" id="pPlay" onclick="togglePlay()" aria-label="تشغيل"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></button>
-      <button class="p-btn" onclick="seekBy(5)" aria-label="تقديم ٥ ثوانٍ" title="تقديم ٥ ثوانٍ">
-        <svg class="i" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 0 7 7"/><path d="m12 5 3-3M12 5l3 3"/></svg>
-      </button>
-      <button class="p-btn" onclick="playStep(1)" aria-label="الحديث التالي" title="الحديث التالي">
-        <svg class="i" viewBox="0 0 24 24"><path d="M18 5v14"/><path d="m6 6 9 6-9 6z"/></svg>
-      </button>
-      <span class="p-spacer"></span>
-      <button class="p-speed" id="pSpeed" onclick="cycleSpeed()" aria-label="سرعة التشغيل" title="سرعة التشغيل">1×</button>
+    <div class="p-full">
+      <div class="p-row">
+        <button class="p-btn" onclick="setPlayerMin(true)" aria-label="تصغير المشغل" title="تصغير المشغل"><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+        <span class="p-time" id="pCur">0:00</span>
+        <input class="p-seek" id="pSeek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل">
+        <span class="p-time" id="pDur">0:00</span>
+      </div>
+      <div class="p-row">
+        <button class="p-btn" id="pRepeat" onclick="cycleRepeat()" aria-label="تكرار الحديث" title="تكرار الحديث">
+          <svg class="i" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+          <span class="badge" id="pRepeatN" hidden></span>
+        </button>
+        <button class="p-btn" id="pAuto" onclick="toggleAuto()" aria-label="الانتقال التلقائي للحديث التالي" title="الانتقال التلقائي للحديث التالي">
+          <svg class="i" viewBox="0 0 24 24"><path d="M3 12h13"/><path d="m12 7 5 5-5 5"/><path d="M21 5v14"/></svg>
+        </button>
+        <span class="p-spacer"></span>
+        <button class="p-btn" onclick="playStep(-1)" aria-label="الحديث السابق" title="الحديث السابق">
+          <svg class="i" viewBox="0 0 24 24"><path d="M6 5v14"/><path d="m18 6-9 6 9 6z"/></svg>
+        </button>
+        <button class="p-btn" onclick="seekBy(-5)" aria-label="رجوع ٥ ثوانٍ" title="رجوع ٥ ثوانٍ">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-7 7"/><path d="M12 5 9 2M12 5 9 8"/></svg>
+        </button>
+        <button class="p-play" id="pPlay" onclick="togglePlay()" aria-label="تشغيل"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+        <button class="p-btn" onclick="seekBy(5)" aria-label="تقديم ٥ ثوانٍ" title="تقديم ٥ ثوانٍ">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 0 7 7"/><path d="m12 5 3-3M12 5l3 3"/></svg>
+        </button>
+        <button class="p-btn" onclick="playStep(1)" aria-label="الحديث التالي" title="الحديث التالي">
+          <svg class="i" viewBox="0 0 24 24"><path d="M18 5v14"/><path d="m6 6 9 6-9 6z"/></svg>
+        </button>
+        <span class="p-spacer"></span>
+        <button class="p-speed" id="pSpeed" onclick="cycleSpeed()" aria-label="سرعة التشغيل" title="سرعة التشغيل">1×</button>
+      </div>
     </div>
-    <div class="p-label" id="pLabel"></div>
   </div>
   <nav class="r-dock">
     <button class="d-btn" id="dPrev" onclick="step(-1)" aria-label="الحديث السابق">
@@ -607,7 +628,7 @@
   let cur = -1;               // open index
   let filter = 'all';
   let memo = false;
-  const S = { read: [], mem: [], fav: [], last: 0, fs: 1, trans: false, rep: 0, auto: true, speed: 1 };
+  const S = { read: [], mem: [], fav: [], last: 0, fs: 1, trans: false, rep: 0, auto: true, speed: 1, pmin: false };
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* private mode */ }
   ['read','mem','fav'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -966,6 +987,7 @@
     if (seeking || !isFinite(audio.duration)) return;
     $('pSeek').value = Math.round(audio.currentTime / audio.duration * 1000);
     $('pCur').textContent = fmt(audio.currentTime);
+    syncMini();
   });
   audio.addEventListener('ended', () => {
     if (playsLeft === Infinity || playsLeft > 1) {
@@ -989,7 +1011,7 @@
   function syncPlayer() {
     const playing = audioIdx >= 0 && !audio.paused;
     const icon = loading && playing ? ICON_LOAD : playing ? ICON_PAUSE : ICON_PLAY;
-    ['pPlay', 'miniPlay'].forEach(id => {
+    ['pPlay', 'pPlayMini', 'miniPlay'].forEach(id => {
       const b = $(id); b.innerHTML = icon; b.classList.toggle('loading', loading && playing);
       b.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
     });
@@ -999,16 +1021,28 @@
     const n = REPS[S.rep];
     $('pRepeat').classList.toggle('on', !!n);
     $('pRepeatN').hidden = !n;
-    $('pRepeatN').textContent = n === Infinity ? '∞' : n ? ar(n) : '';
+    // badge: repeat count, or "this play / total" while repeating this hadith
+    $('pRepeatN').textContent = n === Infinity ? '∞' : !n ? '' : here && playing ? `${ar(n - playsLeft + 1)}/${ar(n)}` : ar(n);
     $('pAuto').classList.toggle('on', S.auto);
     $('pSpeed').textContent = S.speed + '×';
-    const reps = n && here && playsLeft !== Infinity ? ` • التكرار ${ar(n - playsLeft + 1)} من ${ar(n)}` : '';
-    $('pLabel').textContent = `تلاوة: ${AUDIO ? AUDIO.reader : ''}${reps}`;
+    $('player').title = `تلاوة: ${AUDIO ? AUDIO.reader : ''}`;
+    $('player').classList.toggle('min', !!S.pmin);
+    syncMini();
     const showMini = cur < 0 && audioIdx >= 0;
     $('mini').hidden = !showMini;
     if (showMini) $('miniT').innerHTML = `الحديث ${ar(H[audioIdx].n)}: ${esc(H[audioIdx].title)}<small>${playing ? 'يُتلى الآن' : 'متوقف مؤقتاً'} — اضغط للفتح</small>`;
   }
   Object.defineProperty(window, 'audioIdx', { get: () => audioIdx });   // for the mini player's onclick
+
+  // collapsed pill: hadith number, elapsed / total, progress fill
+  function syncMini() {
+    const here = audioIdx >= 0 && audioIdx === cur, i = cur >= 0 ? cur : Math.max(audioIdx, 0);
+    const d = here && isFinite(audio.duration) ? audio.duration : 0;
+    const tm = here ? `${fmt(audio.currentTime)} / ${fmt(d)}` : '';
+    $('pMiniT').innerHTML = H[i] ? `الحديث ${ar(H[i].n)}<small>${tm}</small>` : '';
+    $('player').style.setProperty('--pp', d ? (audio.currentTime / d * 100).toFixed(1) + '%' : '0%');
+  }
+  window.setPlayerMin = function (v) { S.pmin = !!v; save(); syncPlayer(); };
 
   function setMediaSession() {
     if (!('mediaSession' in navigator) || audioIdx < 0) return;
