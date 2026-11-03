@@ -140,6 +140,8 @@
     .daily-title{ font-weight:800; font-size:1.02rem; margin-top:6px; }
     .daily-text{ font-family:'Amiri', serif; font-size:1.18rem; line-height:2; margin-top:6px; color:var(--text);
       display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .daily-text p{ display:inline; }
+    .daily-text .matn{ font-weight:700; color:var(--accent); }
     .daily-actions{ display:flex; gap:8px; margin-top:10px; }
     .chip-btn{
       display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px; font-size:.82rem; font-weight:700;
@@ -245,8 +247,52 @@
     .memo-hint{ display:none; text-align:center; font-size:.8rem; color:var(--text-muted); margin-bottom:10px; }
     .memo .memo-hint{ display:block; }
 
-    .src{ margin-top:14px; padding-top:12px; border-top:1px dashed var(--border); font-size:.86rem; color:var(--text-muted); line-height:1.9; }
-    .src b{ color:var(--gold); }
+    /* the Prophet's ﷺ own words (matn): bold, accent colour, ornamental quotes */
+    .ar .matn{ font-weight:700; color:var(--accent-deep); }
+    [data-theme="light"] .ar .matn, [data-theme="sepia"] .ar .matn{ color:var(--accent); }
+    .ar .matn::before{ content:"«"; color:var(--gold); font-weight:400; }
+    .ar .matn::after{ content:"»"; color:var(--gold); font-weight:400; }
+    .memo .matn::before, .memo .matn::after{ color:var(--gold); }
+    .legend{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:.74rem; color:var(--text-muted); margin:-2px 0 10px; }
+    .legend i{ font-style:normal; font-family:'Amiri', serif; font-weight:700; color:var(--accent); }
+
+    .src{ margin:12px 0 4px; padding:9px 12px; border-radius:12px; font-size:calc(.95rem * var(--fs, 1)); color:var(--text-muted); line-height:1.9;
+      background:var(--gold-soft); border-inline-start:3px solid var(--gold); font-family:'Amiri', serif; text-align:start; }
+    .src b{ font-family:'Tajawal', sans-serif; font-size:.72rem; color:var(--gold); display:block; line-height:1.4; letter-spacing:.02em; }
+
+    /* ---------- audio player ---------- */
+    .player{
+      display:flex; flex-direction:column; gap:6px; padding:8px 12px 6px;
+      background:var(--glass-bg); border-top:1px solid var(--border);
+      -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    }
+    .p-row{ display:flex; align-items:center; gap:6px; }
+    .p-btn{ width:36px; height:36px; min-width:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text); position:relative; }
+    .p-btn svg.i{ width:19px; height:19px; }
+    .p-btn.on{ color:var(--accent); background:var(--accent-bg); }
+    .p-btn .badge{ position:absolute; top:1px; inset-inline-end:1px; min-width:15px; height:15px; border-radius:9px; font-size:.6rem; font-weight:800; line-height:15px; text-align:center;
+      background:var(--accent); color:#fff; padding:0 3px; }
+    .p-play{ width:44px; height:44px; min-width:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;
+      background:linear-gradient(160deg, var(--accent), var(--accent-deep)); box-shadow:0 6px 14px -8px var(--accent); }
+    .p-play svg{ width:20px; height:20px; fill:currentColor; }
+    .p-play.loading svg{ animation:spin 1s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    .p-time{ font-size:.7rem; color:var(--text-muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:center; direction:ltr; }
+    .p-seek{ flex:1; direction:rtl; accent-color:var(--accent); height:4px; }
+    .p-speed{ direction:ltr; font-size:.72rem; font-weight:800; min-width:40px; height:28px; border-radius:9px; border:1px solid var(--border); color:var(--text); }
+    .p-spacer{ flex:1; }
+    .p-label{ font-size:.72rem; color:var(--text-muted); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* floating mini player on the list while audio keeps playing */
+    .mini{
+      position:fixed; z-index:30; left:50%; bottom:max(14px, env(safe-area-inset-bottom)); transform:translateX(-50%);
+      display:flex; align-items:center; gap:8px; padding:6px 8px 6px 6px; border-radius:999px; max-width:calc(100% - 32px);
+      background:var(--solid); border:1px solid var(--border); box-shadow:0 14px 30px -14px rgba(0,0,0,.55);
+    }
+    .mini[hidden]{ display:none; }
+    .mini .p-play{ width:38px; height:38px; min-width:38px; }
+    .mini-t{ font-size:.82rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52vw; }
+    .mini-t small{ display:block; font-weight:500; font-size:.7rem; color:var(--text-muted); }
     .trans{ margin-top:14px; direction:ltr; text-align:left; font-family:Georgia, 'Times New Roman', serif; font-size:calc(1rem * var(--fs, 1)); line-height:1.75; color:var(--text);
       background:var(--accent-bg); border-radius:16px; padding:14px 16px; }
     .trans .nar{ color:var(--text-muted); font-style:italic; display:block; margin-bottom:4px; }
@@ -364,6 +410,10 @@
         <svg class="i" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
         حديث عشوائي
       </button>
+      <button class="pill-btn ghost" onclick="listenAll()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>
+        استمع للأحاديث
+      </button>
     </div>
   </section>
 
@@ -400,6 +450,39 @@
   <div class="r-progress"><i id="rBar"></i></div>
   <div class="r-scroll" id="rScroll">
     <div class="r-inner" id="rInner"></div>
+  </div>
+  <div class="player" id="player" aria-label="مشغل الصوت">
+    <div class="p-row">
+      <span class="p-time" id="pCur">0:00</span>
+      <input class="p-seek" id="pSeek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل">
+      <span class="p-time" id="pDur">0:00</span>
+    </div>
+    <div class="p-row">
+      <button class="p-btn" id="pRepeat" onclick="cycleRepeat()" aria-label="تكرار الحديث" title="تكرار الحديث">
+        <svg class="i" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+        <span class="badge" id="pRepeatN" hidden></span>
+      </button>
+      <button class="p-btn" id="pAuto" onclick="toggleAuto()" aria-label="الانتقال التلقائي للحديث التالي" title="الانتقال التلقائي للحديث التالي">
+        <svg class="i" viewBox="0 0 24 24"><path d="M3 12h13"/><path d="m12 7 5 5-5 5"/><path d="M21 5v14"/></svg>
+      </button>
+      <span class="p-spacer"></span>
+      <button class="p-btn" onclick="playStep(-1)" aria-label="الحديث السابق" title="الحديث السابق">
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 5v14"/><path d="m18 6-9 6 9 6z"/></svg>
+      </button>
+      <button class="p-btn" onclick="seekBy(-5)" aria-label="رجوع ٥ ثوانٍ" title="رجوع ٥ ثوانٍ">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-7 7"/><path d="M12 5 9 2M12 5 9 8"/></svg>
+      </button>
+      <button class="p-play" id="pPlay" onclick="togglePlay()" aria-label="تشغيل"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+      <button class="p-btn" onclick="seekBy(5)" aria-label="تقديم ٥ ثوانٍ" title="تقديم ٥ ثوانٍ">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 0 7 7"/><path d="m12 5 3-3M12 5l3 3"/></svg>
+      </button>
+      <button class="p-btn" onclick="playStep(1)" aria-label="الحديث التالي" title="الحديث التالي">
+        <svg class="i" viewBox="0 0 24 24"><path d="M18 5v14"/><path d="m6 6 9 6-9 6z"/></svg>
+      </button>
+      <span class="p-spacer"></span>
+      <button class="p-speed" id="pSpeed" onclick="cycleSpeed()" aria-label="سرعة التشغيل" title="سرعة التشغيل">1×</button>
+    </div>
+    <div class="p-label" id="pLabel"></div>
   </div>
   <nav class="r-dock">
     <button class="d-btn" id="dPrev" onclick="step(-1)" aria-label="الحديث السابق">
@@ -441,6 +524,15 @@
     <button class="s-opt" onclick="shareAsImage()"><span class="ic vid"><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3z"/></svg></span>فيديو</button>
   </div>
 </div>
+
+<div class="mini" id="mini" hidden>
+  <button class="p-play" id="miniPlay" onclick="togglePlay()" aria-label="تشغيل"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+  <button class="mini-t" id="miniT" onclick="openReader(audioIdx)"></button>
+  <button class="p-btn" onclick="stopAudio()" aria-label="إيقاف" title="إيقاف">
+    <svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+<audio id="audio" preload="none"></audio>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -515,7 +607,7 @@
   let cur = -1;               // open index
   let filter = 'all';
   let memo = false;
-  const S = { read: [], mem: [], fav: [], last: 0, fs: 1, trans: false };
+  const S = { read: [], mem: [], fav: [], last: 0, fs: 1, trans: false, rep: 0, auto: true, speed: 1 };
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* private mode */ }
   ['read','mem','fav'].forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -529,40 +621,48 @@
   ThemeManager.init();
   window.setTheme = t => ThemeManager.set(t);
 
-  // ---- text cleaning ----
-  function clean(s) {
-    return String(s || '').replace(/[‎‏]/g, '')
-      .replace(/صلى الله عليه و ?سلم/g, 'ﷺ')
-      .split('\n')
-      .map(l => l.replace(/[ \t ]+([.,،؛:!؟])/g, '$1').replace(/([،,])\s*[،,]+/g, '$1').replace(/[ \t ]{2,}/g, ' ').trim())
-      .filter(l => !/^[\s.,،؛:!؟]*$/.test(l))
-      .join('\n');
-  }
   const plain = s => s.replace(/[ً-ْٰـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
 
-  function decorate(line) {
-    return esc(line)
-      .replace(/ﷺ/g, '<span class="saw">ﷺ</span>');
-  }
-  function wordsHtml(text) {
+  // Data (assets/hadith/nawawi40-matn.json): each hadith is a list of blocks —
+  //   {p: [[text, isMatn], …]}  a paragraph; isMatn marks the Prophet's ﷺ words
+  //   {src: '…'}                 the takhreej (who narrated it), after the hadith
+  function decorate(w) { return esc(w).replace(/ﷺ/g, '<span class="saw">ﷺ</span>'); }
+  function blocksHtml(blocks) {
     let i = 0;
-    return text.split('\n').map(line =>
-      '<p>' + line.split(/(\s+)/).map(w => /^\s+$/.test(w) || !w ? w : `<span class="mw" data-w="${i++}">${decorate(w)}</span>`).join('') + '</p>'
+    const words = t => t.split(/(\s+)/).map(w => /^\s+$/.test(w) || !w ? w : `<span class="mw" data-w="${i++}">${decorate(w)}</span>`).join('');
+    return blocks.map(b => b.src != null
+      ? `<div class="src"><b>التخريج</b>${esc(b.src)}</div>`
+      : '<p>' + b.p.map(([t, m]) => {
+          if (!m) return words(t);
+          const lead = t.match(/^\s*/)[0], tail = t.match(/\s*$/)[0];
+          return lead + `<span class="matn">${words(t.trim())}</span>` + tail;
+        }).join('') + '</p>'
     ).join('');
   }
+  // Plain text for copying / sharing / the image card: matn inside « ».
+  function plainOf(blocks, withSrc) {
+    return blocks.filter(b => b.p || withSrc || b !== blocks[blocks.length - 1])
+      .map(b => b.src != null ? b.src : b.p.map(([t, m]) => m ? t.replace(/^(\s*)(.*?)(\s*)$/, '$1«$2»$3') : t).join('')).join('\n');
+  }
+
+  const srcLabel = h => /^كتاب/.test(h.source) ? 'رويناه في ' + h.source : 'رواه ' + h.source;
 
   // ---- load ----
-  fetch('../assets/hadith/nawawi40.json').then(r => r.json()).then(d => {
-    H = d.hadiths.slice(0, 42).map((h, i) => {
+  let AUDIO = null;
+  fetch('../assets/hadith/nawawi40-matn.json').then(r => r.json()).then(d => {
+    AUDIO = d.audio;
+    H = d.hadiths.map((h, i) => {
       const m = META[i] || ['الحديث ' + ar(i + 1), '', '', 'aqeedah'];
-      const text = clean(h.arabic);
+      const text = plainOf(h.blocks, false);
+      const takhreej = h.blocks[h.blocks.length - 1].src || '';
       return {
-        n: i + 1, title: m[0], narrator: m[1], source: m[2], cat: m[3], text,
-        en: h.english ? { nar: (h.english.narrator || '').trim(), text: (h.english.text || '').trim() } : null,
-        norm: plain(text + ' ' + m[0] + ' ' + m[1] + ' ' + m[2])
+        n: h.n, title: m[0], narrator: m[1], source: m[2], cat: m[3], blocks: h.blocks, text, takhreej,
+        audio: h.audio ? AUDIO.base + encodeURIComponent(h.audio) : '',
+        en: h.en && (h.en.text || h.en.nar) ? h.en : null,
+        norm: plain(text + ' ' + m[0] + ' ' + m[1] + ' ' + takhreej)
       };
     });
-    renderChips(); renderList(); renderStats(); renderDaily();
+    renderChips(); renderList(); renderStats(); renderDaily(); syncPlayer();
     const m = location.hash.match(/^#(\d{1,2})$/);
     if (m && +m[1] >= 1 && +m[1] <= H.length) {
       try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { /* ignore */ }
@@ -644,7 +744,7 @@
         حديث اليوم<span class="spacer"></span><span style="color:var(--text-muted);font-weight:700">رقم ${ar(h.n)}</span>
       </div>
       <div class="daily-title">${esc(h.title)}</div>
-      <div class="daily-text">${esc(h.text.split('\n')[0])}</div>
+      <div class="daily-text">${blocksHtml([h.blocks[0]])}</div>
       <div class="daily-actions">
         <button class="chip-btn" onclick="openReader(${h.n - 1})">
           <svg class="i" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>اقرأ كاملاً</button>
@@ -662,6 +762,7 @@
     cur = i; memo = false;
     renderReader();
     if (!wasOpen) {
+      $('mini').hidden = true;
       $('reader').classList.add('open'); $('reader').setAttribute('aria-hidden', 'false');
       document.body.classList.add('reader-open');
     }
@@ -672,6 +773,7 @@
     document.body.classList.remove('reader-open');
     try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { /* ignore */ }
     renderList(); renderStats(); renderChips();
+    syncPlayer();
   }
   window.closeReader = function () {
     if (cur < 0) return;
@@ -694,14 +796,15 @@
         <h2 class="r-title">${esc(h.title)}</h2>
         <div class="r-tags">
           <span class="tag">${ICON_USER}عن ${esc(h.narrator)}</span>
-          <span class="tag">${ICON_BOOK}رواه ${esc(h.source)}</span>
+          <span class="tag">${ICON_BOOK}${esc(srcLabel(h))}</span>
           <span class="tag cat">${esc(CATS[h.cat])}</span>
         </div>
         <div class="ornament"><svg viewBox="0 0 48 48"><use href="#star8"/></svg></div>
       </div>
       <article class="text-card${memo ? ' memo' : ''}" id="tCard">
         <div class="memo-hint">وضع الحفظ: اضغط على أي كلمة لإظهارها، أو استخدم الأزرار بالأسفل</div>
-        <div class="ar" id="arText">${wordsHtml(h.text)}</div>
+        <div class="legend">كلام النبي ﷺ مميَّز بـ <i>«اللون والخط العريض»</i></div>
+        <div class="ar" id="arText">${blocksHtml(h.blocks)}</div>
         <div class="memo-bar">
           <button class="tool" onclick="revealNext()">إظهار الكلمة التالية</button>
           <button class="tool" onclick="revealAll(true)">إظهار الكل</button>
@@ -724,6 +827,8 @@
     $('dNext').disabled = cur >= H.length - 1;
     syncDock();
     $('rScroll').scrollTop = 0;
+    // Keep the audio on the hadith being read: switching hadith while playing switches the track.
+    if (audioIdx !== cur && !audio.paused) loadTrack(cur, true); else syncPlayer();
   }
   function syncDock() {
     const n = H[cur].n;
@@ -788,7 +893,140 @@
     if (e.key === 'ArrowLeft') step(1);
     else if (e.key === 'ArrowRight') step(-1);
     else if (e.key === 'Escape' && !$('shareSheet').classList.contains('open')) closeReader();
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); togglePlay(); }
   });
+
+  // ---- audio: one recitation track per hadith ----
+  const audio = $('audio');
+  const REPS = [0, 3, 5, 10, Infinity];          // plays per hadith (0 = no repeat)
+  const SPEEDS = [0.75, 1, 1.25, 1.5];
+  const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+  const ICON_LOAD = '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  let audioIdx = -1, playsLeft = 0, loading = false;
+  if (!REPS[S.rep]) S.rep = 0;
+  if (!SPEEDS.includes(S.speed)) S.speed = 1;
+  const fmt = t => !isFinite(t) || t < 0 ? '0:00' : Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+
+  function loadTrack(i, play) {
+    if (!H[i] || !H[i].audio) return;
+    audioIdx = i; playsLeft = REPS[S.rep] || 1;
+    audio.src = H[i].audio; audio.playbackRate = S.speed;
+    if (play) start();
+    setMediaSession();
+    syncPlayer();
+  }
+  function start() {
+    loading = true; syncPlayer();
+    const p = audio.play();
+    if (p && p.catch) p.catch(e => { loading = false; syncPlayer(); if (e && e.name !== 'AbortError') toast('تعذّر تشغيل الصوت — تحقق من الاتصال'); });
+  }
+  window.togglePlay = function () {
+    const want = cur >= 0 ? cur : (audioIdx >= 0 ? audioIdx : 0);
+    if (audioIdx !== want && cur >= 0) return loadTrack(want, true);
+    if (audioIdx < 0) return loadTrack(want, true);
+    if (audio.paused) start(); else audio.pause();
+  };
+  window.playStep = function (d) {
+    const i = (audioIdx >= 0 ? audioIdx : Math.max(cur, 0)) + d;
+    if (i < 0 || i >= H.length) return;
+    loadTrack(i, true);
+    if (cur >= 0) { cur = i; memo = false; renderReader(); }
+  };
+  window.seekBy = d => { if (audioIdx >= 0 && isFinite(audio.duration)) audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + d)); };
+  window.cycleRepeat = function () {
+    S.rep = (S.rep + 1) % REPS.length; save();
+    playsLeft = REPS[S.rep] || 1;
+    syncPlayer();
+    toast(S.rep ? `تكرار الحديث ${REPS[S.rep] === Infinity ? 'بلا توقف' : ar(REPS[S.rep]) + ' مرات'}` : 'التكرار متوقف');
+  };
+  window.toggleAuto = function () {
+    S.auto = !S.auto; save(); syncPlayer();
+    toast(S.auto ? 'الانتقال التلقائي للحديث التالي: مفعّل' : 'الانتقال التلقائي: متوقف');
+  };
+  window.cycleSpeed = function () {
+    S.speed = SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]; save();
+    audio.playbackRate = S.speed; syncPlayer();
+  };
+  window.stopAudio = function () {
+    audio.pause(); audio.removeAttribute('src'); audio.load();
+    audioIdx = -1; $('mini').hidden = true; syncPlayer();
+  };
+  window.listenAll = function () {
+    if (!S.auto) { S.auto = true; save(); }
+    openReader(0); loadTrack(0, true);
+  };
+
+  audio.addEventListener('playing', () => { loading = false; syncPlayer(); });
+  audio.addEventListener('waiting', () => { loading = true; syncPlayer(); });
+  audio.addEventListener('pause', syncPlayer);
+  audio.addEventListener('loadedmetadata', syncPlayer);
+  audio.addEventListener('error', () => { if (!audio.getAttribute('src')) return; loading = false; syncPlayer(); toast('تعذّر تحميل التلاوة — تحقق من الاتصال'); });
+  audio.addEventListener('timeupdate', () => {
+    if (seeking || !isFinite(audio.duration)) return;
+    $('pSeek').value = Math.round(audio.currentTime / audio.duration * 1000);
+    $('pCur').textContent = fmt(audio.currentTime);
+  });
+  audio.addEventListener('ended', () => {
+    if (playsLeft === Infinity || playsLeft > 1) {
+      if (playsLeft !== Infinity) playsLeft--;
+      audio.currentTime = 0; start(); syncPlayer(); return;
+    }
+    if (S.auto && audioIdx < H.length - 1) { playStep(1); return; }
+    syncPlayer();
+  });
+  let seeking = false;
+  $('pSeek').addEventListener('input', () => {
+    seeking = true;
+    if (isFinite(audio.duration)) $('pCur').textContent = fmt($('pSeek').value / 1000 * audio.duration);
+  });
+  $('pSeek').addEventListener('change', () => {
+    if (audioIdx < 0 && cur >= 0) loadTrack(cur, false);
+    if (isFinite(audio.duration)) audio.currentTime = $('pSeek').value / 1000 * audio.duration;
+    seeking = false;
+  });
+
+  function syncPlayer() {
+    const playing = audioIdx >= 0 && !audio.paused;
+    const icon = loading && playing ? ICON_LOAD : playing ? ICON_PAUSE : ICON_PLAY;
+    ['pPlay', 'miniPlay'].forEach(id => {
+      const b = $(id); b.innerHTML = icon; b.classList.toggle('loading', loading && playing);
+      b.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+    });
+    const here = audioIdx >= 0 && audioIdx === cur;
+    if (!here && !seeking) { $('pSeek').value = 0; $('pCur').textContent = '0:00'; }
+    $('pDur').textContent = here ? fmt(audio.duration) : '0:00';
+    const n = REPS[S.rep];
+    $('pRepeat').classList.toggle('on', !!n);
+    $('pRepeatN').hidden = !n;
+    $('pRepeatN').textContent = n === Infinity ? '∞' : n ? ar(n) : '';
+    $('pAuto').classList.toggle('on', S.auto);
+    $('pSpeed').textContent = S.speed + '×';
+    const reps = n && here && playsLeft !== Infinity ? ` • التكرار ${ar(n - playsLeft + 1)} من ${ar(n)}` : '';
+    $('pLabel').textContent = `تلاوة: ${AUDIO ? AUDIO.reader : ''}${reps}`;
+    const showMini = cur < 0 && audioIdx >= 0;
+    $('mini').hidden = !showMini;
+    if (showMini) $('miniT').innerHTML = `الحديث ${ar(H[audioIdx].n)}: ${esc(H[audioIdx].title)}<small>${playing ? 'يُتلى الآن' : 'متوقف مؤقتاً'} — اضغط للفتح</small>`;
+  }
+  Object.defineProperty(window, 'audioIdx', { get: () => audioIdx });   // for the mini player's onclick
+
+  function setMediaSession() {
+    if (!('mediaSession' in navigator) || audioIdx < 0) return;
+    const h = H[audioIdx];
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: `الحديث ${ar(h.n)}: ${h.title}`, artist: AUDIO.reader, album: BOOK,
+        artwork: [{ src: new URL('../icons/icon_512.png', location.href).href, sizes: '512x512', type: 'image/png' }]
+      });
+      const ms = navigator.mediaSession;
+      ms.setActionHandler('play', () => start());
+      ms.setActionHandler('pause', () => audio.pause());
+      ms.setActionHandler('previoustrack', () => playStep(-1));
+      ms.setActionHandler('nexttrack', () => playStep(1));
+      ms.setActionHandler('seekbackward', () => seekBy(-5));
+      ms.setActionHandler('seekforward', () => seekBy(5));
+    } catch (e) { /* older browsers */ }
+  }
 
   window.continueReading = () => openReader(Math.max(0, (S.last || 1) - 1));
   window.openRandom = () => openReader(Math.floor(Math.random() * H.length));
@@ -796,7 +1034,7 @@
   // ---- sharing ----
   let shareIdx = -1;
   function shareTextOf(h) {
-    return `📖 ${BOOK} — الحديث ${ar(h.n)}: ${h.title}\n\n${h.text}\n\n— رواه ${h.source}\n\n${PAGE_URL}#${h.n}`;
+    return `📖 ${BOOK} — الحديث ${ar(h.n)}: ${h.title}\n\n${h.text}\n\n${h.takhreej}\n\n${PAGE_URL}#${h.n}`;
   }
   window.openShare = function () {
     shareIdx = cur;
@@ -817,7 +1055,7 @@
       text: h.text,
       translation: h.en ? [h.en.nar, h.en.text].filter(Boolean).join(' ') : '',
       title: `${BOOK} • الحديث ${ar(h.n)}`,
-      source: `${h.title} — رواه ${h.source}`
+      source: `${h.title} — ${srcLabel(h)}`
     });
   };
   window.shareAsImage = function () {
