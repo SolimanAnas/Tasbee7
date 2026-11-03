@@ -757,7 +757,10 @@
     ui.srcChip.textContent = tr('sc_source');
     ui.srcChip.classList.toggle('active', !!state.source);
     ui.audioChip.hidden = !item.audio;
-    ui.audioChip.textContent = '♪ ' + tr('sc_audio');
+    // note icon as SVG — the app avoids emoji-range characters (♪ is U+266A)
+    ui.audioChip.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="vertical-align:-2px;margin-inline-end:5px">' +
+      '<path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3" fill="currentColor"/><circle cx="17" cy="16" r="3" fill="currentColor"/></svg>';
+    ui.audioChip.appendChild(document.createTextNode(tr('sc_audio')));
     ui.audioChip.classList.toggle('active', !!state.audio);
     ui.shareBtn.textContent = tr('sc_share');
     ui.dlBtn.textContent = tr('sc_download');
