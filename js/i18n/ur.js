@@ -925,6 +925,9 @@ export default {
   'sc_video_too_long': "یہ متن ایک ویڈیو کے لیے بہت طویل ہے — اسے اسٹوری سائز کی تصویر کے طور پر شیئر کریں",
   'sc_video_unsupported': "آپ کا براؤزر ویڈیو نہیں بنا سکتا — جدید Chrome یا Safari آزمائیں",
   'sc_webm_note': "WebM میں محفوظ ہوا — کچھ ایپس کو MP4 درکار ہو سکتا ہے",
+  'sc_audio': "تلاوت کی آواز",
+  'sc_audio_loading': "تلاوت لوڈ ہو رہی ہے…",
+  'sc_audio_failed': "تلاوت لوڈ نہیں ہو سکی — ویڈیو بغیر آواز کے بنائی گئی",
   'sc_hadith_number': "نمبر {n}",
 
   // Weekly dhikr stats card (js/dhikr-stats.js)

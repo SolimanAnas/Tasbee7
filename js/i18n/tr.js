@@ -925,6 +925,9 @@ export default {
   'sc_video_too_long': "Bu metin tek bir video için çok uzun — Hikâye boyutunda görsel olarak paylaşın",
   'sc_video_unsupported': "Tarayıcınız video oluşturamıyor — güncel Chrome veya Safari deneyin",
   'sc_webm_note': "WebM olarak kaydedildi — bazı uygulamalar MP4 gerektirebilir",
+  'sc_audio': "Tilavet sesi",
+  'sc_audio_loading': "Tilavet yükleniyor…",
+  'sc_audio_failed': "Tilavet yüklenemedi — video sessiz oluşturuldu",
   'sc_hadith_number': "No. {n}",
 
   // Weekly dhikr stats card (js/dhikr-stats.js)

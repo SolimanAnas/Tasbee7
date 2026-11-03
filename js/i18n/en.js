@@ -953,6 +953,9 @@ export default {
   'sc_video_too_long': "This text is too long for one video — share it as a Story-size image instead",
   'sc_video_unsupported': "Your browser can't record video — try a recent Chrome or Safari",
   'sc_webm_note': "Saved as WebM — some apps may require MP4",
+  'sc_audio': "Recitation audio",
+  'sc_audio_loading': "Loading the recitation…",
+  'sc_audio_failed': "Couldn't load the recitation — video made without sound",
   'sc_hadith_number': "No. {n}",
 
   // Weekly dhikr stats card (js/dhikr-stats.js)

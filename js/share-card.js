@@ -9,7 +9,8 @@
        title:       'أذكار الصباح',          // optional heading
        source:      'رواه مسلم',             // optional reference line
        repeat:      3,                      // optional, shown when > 1
-     });
+       audio:       'https://…/hadith.mp3', // optional recitation; the video plays it
+     });                                    //   (needs CORS) and its text follows its length
 
    Instead of text, a page can draw its own content inside the card panel
    (e.g. a stats chart) — chrome, sizes, export and video stay the same:
@@ -68,6 +69,8 @@
       sc_video_ready: 'الفيديو جاهز ({s} ثانية)', sc_video_too_long: 'النص أطول من أن يُعرض في فيديو واحد — شاركه كصورة بمقاس ستوري',
       sc_video_unsupported: 'متصفحك لا يدعم إنشاء الفيديو — جرّب Chrome أو Safari الحديث',
       sc_webm_note: 'حُفظ بصيغة WebM — بعض التطبيقات قد تتطلب MP4',
+      sc_audio: 'صوت التلاوة', sc_audio_loading: 'جارٍ تحميل التلاوة…',
+      sc_audio_failed: 'تعذّر تحميل التلاوة — أُنشئ الفيديو بدون صوت',
     },
     en: {
       sc_title: 'Share as image or video', sc_share: 'Share', sc_download: 'Save image', sc_close: 'Close',
@@ -79,6 +82,8 @@
       sc_video_ready: 'Video ready ({s} s)', sc_video_too_long: 'This text is too long for one video — share it as a Story-size image instead',
       sc_video_unsupported: "Your browser can't record video — try a recent Chrome or Safari",
       sc_webm_note: 'Saved as WebM — some apps may require MP4',
+      sc_audio: 'Recitation audio', sc_audio_loading: 'Loading the recitation…',
+      sc_audio_failed: "Couldn't load the recitation — video made without sound",
     },
   };
 
@@ -96,7 +101,7 @@
     return s;
   }
 
-  const state = { bg: 'g0', format: 'square', translation: !isRtlUi(), source: true };
+  const state = { bg: 'g0', format: 'square', translation: !isRtlUi(), source: true, audio: true };
   try { Object.assign(state, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch (e) { /* private mode */ }
   if (!FORMATS[state.format]) state.format = 'square';
   function saveState() {
@@ -367,7 +372,7 @@
   // ---------- video ----------
   // One screen if the whole text fits at a readable size (translation
   // included); otherwise fixed-size Arabic split into screens.
-  function videoPlan(c, w, h) {
+  function videoPlan(c, w, h, audioDur) {
     const F = frame(c, w, h);
     if (item.custom) {
       const dur = item.custom.seconds || 7;
@@ -392,8 +397,14 @@
         });
       }
     }
+    // With a recitation, the screens share its length in proportion to their words.
+    const sum = pages.reduce((a, p) => a + Math.max(1, p.words), 0);
     let t = LEAD;
-    pages.forEach(p => { p.start = t; p.dur = pageSeconds(p.words); t += p.dur; });
+    pages.forEach(p => {
+      p.start = t;
+      p.dur = audioDur ? audioDur * Math.max(1, p.words) / sum : pageSeconds(p.words);
+      t += p.dur;
+    });
     return { F, pages, total: t + TAIL };
   }
 
@@ -415,10 +426,13 @@
     });
   }
 
-  function pickMime() {
+  function pickMime(withAudio) {
     if (!window.MediaRecorder) return null;
-    const list = ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4',
-      'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+    const list = withAudio
+      ? ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4',
+        'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+      : ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4',
+        'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
     return list.find(m => { try { return MediaRecorder.isTypeSupported(m); } catch (e) { return false; } }) || null;
   }
 
@@ -432,34 +446,73 @@
     });
   }
 
+  // Decoded recitations, keyed by URL (a hadith is often re-exported in another size).
+  const audioCache = new Map();
+  async function loadAudio(url, actx) {
+    if (audioCache.has(url)) return audioCache.get(url);
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.arrayBuffer();
+    const buf = await new Promise((ok, fail) => {
+      const p = actx.decodeAudioData(data, ok, fail);
+      if (p && p.then) p.then(ok, fail);
+    });
+    audioCache.set(url, buf);
+    return buf;
+  }
+
   async function makeVideo() {
     if (recording) return;
-    const mime = pickMime();
-    if (!mime || !ui.canvas.captureStream) { setStatus(tr('sc_video_unsupported'), true); return; }
-    const [w, h] = sizeCanvas();
-    const c = ui.canvas.getContext('2d');
-    const plan = videoPlan(c, w, h);
-    if (plan.total > MAX_VIDEO) { setStatus(tr('sc_video_too_long'), true); return; }
+    if (!pickMime(false) || !ui.canvas.captureStream) { setStatus(tr('sc_video_unsupported'), true); return; }
+    // The AudioContext is created inside the tap so browsers let it run.
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let actx = item.audio && state.audio && AC ? new AC() : null;
+    if (actx && actx.resume) actx.resume().catch(() => {});
 
     clearVideo();
     let cancelled = false;
     recording = { cancel: () => { cancelled = true; } };
     syncUi();
+    let buffer = null, audioFailed = false;
+    if (actx) {
+      setStatus(tr('sc_audio_loading'));
+      try { buffer = await loadAudio(item.audio, actx); } catch (e) { audioFailed = true; console.warn('[share-card] audio', e); }
+      if (!buffer) { actx.close().catch(() => {}); actx = null; }
+    }
+    const done = msg => { if (actx) actx.close().catch(() => {}); recording = null; syncUi(); setStatus(msg || '', !!msg); redraw(); };
+    if (cancelled || !ui || ui.overlay.hidden) return done();
+
+    const mime = pickMime(!!buffer);
+    const [w, h] = sizeCanvas();
+    const c = ui.canvas.getContext('2d');
+    const plan = videoPlan(c, w, h, buffer ? buffer.duration : 0);
+    if (plan.total > MAX_VIDEO) return done(tr('sc_video_too_long'));
     setStatus(tr('sc_recording'));
     let wakeLock = null;
     try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { /* optional */ }
 
     drawVideoFrame(c, w, h, plan, 0);
     const stream = ui.canvas.captureStream(FPS);
-    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 });
+    let src = null;
+    if (buffer) {
+      const dest = actx.createMediaStreamDestination();
+      src = actx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(dest);
+      dest.stream.getAudioTracks().forEach(tk => stream.addTrack(tk));
+    }
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000, audioBitsPerSecond: 128000 });
     const chunks = [];
     rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
     const stopped = new Promise(res => { rec.onstop = res; });
     rec.start(1000);
+    // With audio, frames follow the audio clock so text and recitation stay in step.
+    const a0 = actx ? actx.currentTime : 0;
+    if (src) src.start(a0 + LEAD);
     const t0 = performance.now();
     await new Promise(resolve => {
       const tick = () => {
-        const t = (performance.now() - t0) / 1000;
+        const t = actx ? actx.currentTime - a0 : (performance.now() - t0) / 1000;
         drawVideoFrame(c, w, h, plan, Math.min(t, plan.total));
         ui.bar.style.width = (clamp01(t / plan.total) * 100).toFixed(1) + '%';
         if (cancelled || t >= plan.total) { resolve(); return; }
@@ -469,7 +522,9 @@
     });
     rec.stop();
     await stopped;
+    if (src) { try { src.stop(); } catch (e) { /* already ended */ } }
     stream.getTracks().forEach(tk => tk.stop());
+    if (actx) actx.close().catch(() => {});
     if (wakeLock) wakeLock.release().catch(() => {});
     recording = null;
 
@@ -489,7 +544,8 @@
     }
     const ext = type.includes('mp4') ? 'mp4' : 'webm';
     video = { blob, type, name: fileName(ext), seconds: Math.round(plan.total) };
-    setStatus(tr('sc_video_ready', { s: video.seconds }) + (ext === 'webm' ? ' — ' + tr('sc_webm_note') : ''));
+    setStatus(tr('sc_video_ready', { s: video.seconds }) + (ext === 'webm' ? ' — ' + tr('sc_webm_note') : '') +
+      (audioFailed ? ' — ' + tr('sc_audio_failed') : ''), audioFailed);
     syncUi();
     draw();
   }
@@ -607,7 +663,8 @@
     const toggles = el('div', 'sc-toggles');
     const trChip = btn('sc-chip', () => { state.translation = !state.translation; changed(); });
     const srcChip = btn('sc-chip', () => { state.source = !state.source; changed(); });
-    toggles.append(trChip, srcChip);
+    const audioChip = btn('sc-chip', () => { state.audio = !state.audio; changed(); });
+    toggles.append(trChip, srcChip, audioChip);
 
     const imgRow = el('div', 'sc-actions');
     const shareBtn = btn('sc-btn primary', shareImage);
@@ -627,7 +684,7 @@
 
     sheet.append(head, preview, fmtLabel, fmts, bgLabel, bgs, toggles, imgRow, vidRow, progress, status);
     document.body.appendChild(overlay);
-    ui = { overlay, sheet, h2, x, canvas, fmtLabel, fmts, bgLabel, bgs, trChip, srcChip,
+    ui = { overlay, sheet, h2, x, canvas, fmtLabel, fmts, bgLabel, bgs, trChip, srcChip, audioChip,
       shareBtn, dlBtn, videoBtn, shareVidBtn, saveVidBtn, progress, bar, status };
   }
 
@@ -699,6 +756,9 @@
     ui.srcChip.hidden = !(item.title || item.source || item.repeat > 1);
     ui.srcChip.textContent = tr('sc_source');
     ui.srcChip.classList.toggle('active', !!state.source);
+    ui.audioChip.hidden = !item.audio;
+    ui.audioChip.textContent = '♪ ' + tr('sc_audio');
+    ui.audioChip.classList.toggle('active', !!state.audio);
     ui.shareBtn.textContent = tr('sc_share');
     ui.dlBtn.textContent = tr('sc_download');
     syncUi();
@@ -724,6 +784,7 @@
       title: entry.title ? String(entry.title).trim() : '',
       source: entry.source ? String(entry.source).trim() : '',
       repeat: parseInt(entry.repeat, 10) || 1,
+      audio: entry.audio ? String(entry.audio) : '',
     };
     if (!ui) build();
     clearVideo();
