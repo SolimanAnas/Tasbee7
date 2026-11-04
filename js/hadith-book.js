@@ -3,7 +3,11 @@
      { title, pageUrl, storageKey, data, cats: {key: label}, meta: [[title, narrator, source, cat], …] }
    and provides the markup (see pages/nawawi.html). Data file format:
      { audio?: {base, reader, source}, hadiths: [{ n, blocks, en?, audio?, grade?, title?, narrator?, source?, cat? }] }
-   blocks: {p: [[text, isMatn], …]} paragraphs, {src: '…'} takhreej lines. */
+   blocks: {p: [[text, isMatn], …]} paragraphs, {src: '…'} takhreej lines,
+           {head: {n, repeat, audio, short}} starts one supplication in a chapter-style
+           book (حصن المسلم): number, repeat counter and its own share button,
+           {tr: 'translation', tl: 'transliteration'} that supplication's translation.
+   Optional labels (CFG.labels) rename «الحديث» etc. for books that are not hadith lists. */
 (function () {
   'use strict';
 
@@ -14,6 +18,14 @@
   const KEY = CFG.storageKey;
   const CATS = CFG.cats || {};
   const META = CFG.meta || [];
+  const L = Object.assign({
+    unit: 'الحديث',            // «الحديث ٥ من ٤٢»
+    units: 'الأحاديث',
+    daily: 'حديث اليوم',
+    legend: 'كلام النبي ﷺ مميَّز بـ',
+    empty: 'لا توجد أحاديث مطابقة.',
+    loadErr: 'تعذّر تحميل الأحاديث. تحقق من الاتصال ثم أعد المحاولة.'
+  }, CFG.labels || {});
   const $ = id => document.getElementById(id);
   const ar = n => Number(n).toLocaleString('ar-EG');
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -42,11 +54,24 @@
   //   {p: [[text, isMatn], …]}  a paragraph; isMatn marks the Prophet's ﷺ words
   //   {src: '…'}                 the takhreej (who narrated it), after the hadith
   function decorate(w) { return esc(w).replace(/ﷺ/g, '<span class="saw">ﷺ</span>'); }
+  const ICON_IMG = '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>';
+  function headHtml(b, k) {
+    const h = b.head, r = +h.repeat || 1;
+    return `<div class="dua-head" data-k="${k}">
+        <span class="dua-n">${ar(h.n)}</span>
+        ${h.tag ? `<span class="dua-tag">${esc(h.tag)}</span>` : ''}
+        ${r > 1 ? `<button class="dua-count" data-left="${r}" data-total="${r}" aria-label="عدّاد التكرار">${ar(r)} مرات</button>` : ''}
+        <span class="spacer"></span>
+        <button class="dua-share" data-k="${k}" aria-label="مشاركة هذا الذكر كصورة أو فيديو" title="مشاركة كصورة أو فيديو">${ICON_IMG}</button>
+      </div>`;
+  }
   function blocksHtml(blocks) {
     let i = 0;
     const words = t => t.split(/(\s+)/).map(w => /^\s+$/.test(w) || !w ? w : `<span class="mw" data-w="${i++}">${decorate(w)}</span>`).join('');
-    return blocks.map(b => b.src != null
-      ? `<div class="src"><b>التخريج</b>${esc(b.src)}</div>`
+    return blocks.map((b, k) => b.head ? headHtml(b, k)
+      : b.tr != null ? `<div class="trans dtr"${S.trans ? '' : ' hidden'}>${b.tl ? `<span class="nar">${esc(b.tl)}</span>` : ''}${esc(b.tr)}</div>`
+      : b.src != null
+      ? `<div class="src"><b>التخريج</b>${esc(b.src).replace(/\n/g, '<br>')}</div>`
       : '<p>' + b.p.map(([t, m]) => {
           if (!m) return words(t);
           const lead = t.match(/^\s*/)[0], tail = t.match(/\s*$/)[0];
@@ -56,7 +81,7 @@
   }
   // Plain text for copying / sharing / the image card: matn inside « ».
   function plainOf(blocks, withSrc) {
-    return blocks.filter(b => b.p || withSrc || b !== blocks[blocks.length - 1])
+    return blocks.filter(b => b.p || (b.src != null && (withSrc || b !== blocks[blocks.length - 1])))
       .map(b => b.src != null ? b.src : b.p.map(([t, m]) => m ? t.replace(/^(\s*)(.*?)(\s*)$/, '$1«$2»$3') : t).join('')).join('\n');
   }
 
@@ -80,22 +105,23 @@
       const m = h.title ? [h.title, h.narrator || '', h.source || '', h.cat || ''] : (META[i] || ['الحديث ' + ar(i + 1), '', '', '']);
       const text = plainOf(h.blocks, false);
       const takhreej = h.blocks[h.blocks.length - 1].src || '';
+      const count = h.blocks.filter(b => b.head).length;
       return {
         n: h.n, title: m[0], narrator: m[1], source: m[2], cat: m[3], blocks: h.blocks, text, takhreej,
-        grade: h.grade || null,
+        grade: h.grade || null, count,
         audio: h.audio && AUDIO ? AUDIO.base + encodeURIComponent(h.audio) : '',
         en: h.en && (h.en.text || h.en.nar) ? h.en : null,
         norm: plain(text + ' ' + m[0] + ' ' + m[1] + ' ' + takhreej)
       };
     });
     renderChips(); renderList(); renderStats(); renderDaily(); syncPlayer();
-    const m = location.hash.match(/^#(\d{1,2})$/);
+    const m = location.hash.match(/^#(\d{1,3})$/);
     if (m && +m[1] >= 1 && +m[1] <= H.length) {
       try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { /* ignore */ }
       openReader(+m[1] - 1);
     }
   }).catch(() => {
-    $('list').innerHTML = '<div class="empty">تعذّر تحميل الأحاديث. تحقق من الاتصال ثم أعد المحاولة.</div>';
+    $('list').innerHTML = `<div class="empty">${esc(L.loadErr)}</div>`;
   });
 
   // ---- list view ----
@@ -137,13 +163,13 @@
   }
   function renderList() {
     const items = visible();
-    if (!items.length) { $('list').innerHTML = '<div class="empty">لا توجد أحاديث مطابقة.</div>'; return; }
+    if (!items.length) { $('list').innerHTML = `<div class="empty">${esc(L.empty)}</div>`; return; }
     $('list').innerHTML = items.map((h, k) => `
       <button class="h-card${has('mem', h.n) ? ' mem' : ''}" role="listitem" data-i="${h.n - 1}" style="animation-delay:${Math.min(k, 12) * 25}ms">
         <span class="num">${MEDAL}<span>${ar(h.n)}</span></span>
         <span class="h-body">
           <span class="h-title">${esc(h.title)}</span>
-          <span class="h-meta"><span>${ICON_USER}${esc(h.narrator)}</span><span>${ICON_BOOK}${esc(h.source)}</span>${h.grade && h.grade.weak ? `<span class="g-weak">${esc(h.grade.label)}</span>` : ''}</span>
+          <span class="h-meta">${h.narrator ? `<span>${ICON_USER}${esc(h.narrator)}</span>` : ''}${h.source ? `<span>${ICON_BOOK}${esc(h.source)}</span>` : ''}${h.count ? `<span>${ICON_BOOK}${ar(h.count)} ${h.count === 1 ? 'ذكر' : h.count === 2 ? 'ذكران' : h.count <= 10 ? 'أذكار' : 'ذكرًا'}</span>` : ''}${h.grade && h.grade.weak ? `<span class="g-weak">${esc(h.grade.label)}</span>` : ''}</span>
         </span>
         <span class="h-flags">${has('fav', h.n) ? STAR : ''}${has('read', h.n) && !has('mem', h.n) ? '<span class="read">' + EYE + '</span>' : ''}</span>
       </button>`).join('');
@@ -158,7 +184,7 @@
     const pct = Math.round(S.mem.length / total * 100);
     $('memBar').style.width = pct + '%';
     $('memLabel').textContent = `تقدّم الحفظ: ${ar(S.mem.length)} من ${ar(total)} (${ar(pct)}٪)`;
-    $('continueLabel').textContent = S.last ? `تابع من الحديث ${ar(S.last)}` : 'ابدأ القراءة';
+    $('continueLabel').textContent = S.last ? `تابع من ${L.unit} ${ar(S.last)}` : 'ابدأ القراءة';
   }
 
   function dayIndex() {
@@ -170,10 +196,10 @@
     $('daily').innerHTML = `
       <div class="daily-head">
         <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        حديث اليوم<span class="spacer"></span><span style="color:var(--text-muted);font-weight:700">رقم ${ar(h.n)}</span>
+        ${esc(L.daily)}<span class="spacer"></span><span style="color:var(--text-muted);font-weight:700">رقم ${ar(h.n)}</span>
       </div>
       <div class="daily-title">${esc(h.title)}</div>
-      <div class="daily-text">${blocksHtml([h.blocks[0]])}</div>
+      <div class="daily-text">${blocksHtml([h.blocks.find(b => b.p)])}</div>
       <div class="daily-actions">
         <button class="chip-btn" onclick="openReader(${h.n - 1})">
           <svg class="i" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>اقرأ كاملاً</button>
@@ -216,16 +242,18 @@
     S.last = h.n; save();
     try { history.replaceState(history.state, '', '#' + h.n); } catch (e) { /* ignore */ }
     document.documentElement.style.setProperty('--fs', S.fs);
-    $('rPos').innerHTML = `الحديث ${ar(h.n)} من ${ar(H.length)}<small>${esc(CATS[h.cat])}</small>`;
+    $('rPos').innerHTML = `${L.unit} ${ar(h.n)} من ${ar(H.length)}<small>${esc(CATS[h.cat] || '')}</small>`;
     $('rBar').style.width = (h.n / H.length * 100) + '%';
     const trans = h.en && (h.en.text || h.en.nar);
+    const hasTr = trans || h.blocks.some(b => b.tr);
     $('rInner').innerHTML = `
       <div class="r-head">
         <div class="medal">${MEDAL}<span>${ar(h.n)}</span></div>
         <h2 class="r-title">${esc(h.title)}</h2>
         <div class="r-tags">
-          <span class="tag">${ICON_USER}الراوي: ${esc(h.narrator)}</span>
-          <span class="tag">${ICON_BOOK}${esc(srcLabel(h))}</span>
+          ${h.narrator ? `<span class="tag">${ICON_USER}الراوي: ${esc(h.narrator)}</span>` : ''}
+          ${h.source ? `<span class="tag">${ICON_BOOK}${esc(srcLabel(h))}</span>` : ''}
+          ${h.count ? `<span class="tag">${ICON_BOOK}${ar(h.count)} ${h.count === 1 ? 'ذكر' : h.count === 2 ? 'ذكران' : h.count <= 10 ? 'أذكار' : 'ذكرًا'}</span>` : ''}
           ${CATS[h.cat] ? `<span class="tag cat">${esc(CATS[h.cat])}</span>` : ''}
           ${gradeTag(h)}
         </div>
@@ -233,7 +261,7 @@
       </div>
       <article class="text-card${memo ? ' memo' : ''}" id="tCard">
         <div class="memo-hint">وضع الحفظ: اضغط على أي كلمة لإظهارها، أو استخدم الأزرار بالأسفل</div>
-        <div class="legend">كلام النبي ﷺ مميَّز بـ <i>«اللون والخط العريض»</i></div>
+        <div class="legend">${esc(L.legend)} <i>«اللون والخط العريض»</i></div>
         <div class="ar" id="arText">${blocksHtml(h.blocks)}</div>
         <div class="memo-bar">
           <button class="tool" onclick="revealNext()">إظهار الكلمة التالية</button>
@@ -244,7 +272,7 @@
       </article>
       ${gradeNote(h)}
       <div class="tools">
-        ${trans ? `<button class="tool${S.trans ? ' on' : ''}" id="tTrans" onclick="toggleTrans()">
+        ${hasTr ? `<button class="tool${S.trans ? ' on' : ''}" id="tTrans" onclick="toggleTrans()">
           <svg class="i" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>الترجمة</button>` : ''}
         <button class="tool${memo ? ' on' : ''}" id="tMemo" onclick="toggleMemo()">
           <svg class="i" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2z"/></svg>وضع الحفظ</button>
@@ -253,7 +281,7 @@
         <button class="tool" onclick="shareImageOf(${cur})">
           <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>صورة</button>
       </div>
-      <div class="swipe-hint">اسحب يميناً أو يساراً للتنقل بين الأحاديث</div>`;
+      <div class="swipe-hint">اسحب يميناً أو يساراً للتنقل بين ${esc(L.units)}</div>`;
     $('dPrev').disabled = cur <= 0;
     $('dNext').disabled = cur >= H.length - 1;
     syncDock();
@@ -282,7 +310,7 @@
   };
   window.toggleTrans = function () {
     S.trans = !S.trans; save();
-    const t = $('trans'); if (t) t.hidden = !S.trans;
+    document.querySelectorAll('#rInner .trans').forEach(t => { t.hidden = !S.trans; });
     $('tTrans').classList.toggle('on', S.trans);
   };
   window.fontStep = function (d) {
@@ -306,6 +334,18 @@
     else toast('أحسنت! ظهرت كل الكلمات');
   };
   $('rInner').addEventListener('click', e => {
+    const cnt = e.target.closest('.dua-count');
+    if (cnt) {                                  // tap counter: counts the repetitions down
+      let left = +cnt.dataset.left;
+      left = left > 0 ? left - 1 : +cnt.dataset.total;
+      cnt.dataset.left = left;
+      cnt.classList.toggle('done', left === 0);
+      cnt.textContent = left === 0 ? 'تمّ' : `${ar(left)} مرات`;
+      if (left === 0 && navigator.vibrate) navigator.vibrate(30);
+      return;
+    }
+    const sh = e.target.closest('.dua-share');
+    if (sh) { shareDua(cur, +sh.dataset.k); return; }
     if (!memo) return;
     const w = e.target.closest('.mw'); if (w) w.classList.toggle('h');
   });
@@ -369,11 +409,11 @@
     S.rep = (S.rep + 1) % REPS.length; save();
     playsLeft = REPS[S.rep] || 1;
     syncPlayer();
-    toast(S.rep ? `تكرار الحديث ${REPS[S.rep] === Infinity ? 'بلا توقف' : ar(REPS[S.rep]) + ' مرات'}` : 'التكرار متوقف');
+    toast(S.rep ? `تكرار ${L.unit} ${REPS[S.rep] === Infinity ? 'بلا توقف' : ar(REPS[S.rep]) + ' مرات'}` : 'التكرار متوقف');
   };
   window.toggleAuto = function () {
     S.auto = !S.auto; save(); syncPlayer();
-    toast(S.auto ? 'الانتقال التلقائي للحديث التالي: مفعّل' : 'الانتقال التلقائي: متوقف');
+    toast(S.auto ? `الانتقال التلقائي إلى ${L.unit} التالي: مفعّل` : 'الانتقال التلقائي: متوقف');
   };
   window.cycleSpeed = function () {
     S.speed = SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]; save();
@@ -440,7 +480,7 @@
     syncMini();
     const showMini = cur < 0 && audioIdx >= 0;
     $('mini').hidden = !showMini;
-    if (showMini) $('miniT').innerHTML = `الحديث ${ar(H[audioIdx].n)}: ${esc(H[audioIdx].title)}<small>${playing ? 'يُتلى الآن' : 'متوقف مؤقتاً'} — اضغط للفتح</small>`;
+    if (showMini) $('miniT').innerHTML = `${L.unit} ${ar(H[audioIdx].n)}: ${esc(H[audioIdx].title)}<small>${playing ? 'يُتلى الآن' : 'متوقف مؤقتاً'} — اضغط للفتح</small>`;
   }
   Object.defineProperty(window, 'audioIdx', { get: () => audioIdx });   // for the mini player's onclick
 
@@ -449,7 +489,7 @@
     const here = audioIdx >= 0 && audioIdx === cur, i = cur >= 0 ? cur : Math.max(audioIdx, 0);
     const d = here && isFinite(audio.duration) ? audio.duration : 0;
     const tm = here ? `${fmt(audio.currentTime)} / ${fmt(d)}` : '';
-    $('pMiniT').innerHTML = H[i] ? `الحديث ${ar(H[i].n)}<small>${tm}</small>` : '';
+    $('pMiniT').innerHTML = H[i] ? `${L.unit} ${ar(H[i].n)}<small>${tm}</small>` : '';
     $('player').style.setProperty('--pp', d ? (audio.currentTime / d * 100).toFixed(1) + '%' : '0%');
   }
   window.setPlayerMin = function (v) { S.pmin = !!v; save(); syncPlayer(); };
@@ -459,7 +499,7 @@
     const h = H[audioIdx];
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: `الحديث ${ar(h.n)}: ${h.title}`, artist: AUDIO.reader, album: BOOK,
+        title: `${L.unit} ${ar(h.n)}: ${h.title}`, artist: AUDIO.reader, album: BOOK,
         artwork: [{ src: new URL('../icons/icon_512.png', location.href).href, sizes: '512x512', type: 'image/png' }]
       });
       const ms = navigator.mediaSession;
@@ -478,12 +518,12 @@
   // ---- sharing ----
   let shareIdx = -1;
   function shareTextOf(h) {
-    return `📖 ${BOOK} — الحديث ${ar(h.n)}: ${h.title}\n\n${h.text}\n\n${h.takhreej}\n\n${PAGE_URL}#${h.n}`;
+    return `📖 ${BOOK} — ${L.unit} ${ar(h.n)}: ${h.title}\n\n${h.text}\n\n${h.takhreej}\n\n${PAGE_URL}#${h.n}`;
   }
   window.openShare = function () {
     shareIdx = cur;
     const h = H[cur];
-    $('shareSub').textContent = `الحديث ${ar(h.n)}: ${h.title}`;
+    $('shareSub').textContent = `${L.unit} ${ar(h.n)}: ${h.title}`;
     $('shareOverlay').classList.add('open'); $('shareSheet').classList.add('open');
     if (window.BackClose) BackClose.opened(closeShareUi);
   };
@@ -498,11 +538,27 @@
     ShareCard.open({
       text: h.text,
       translation: h.en ? [h.en.nar, h.en.text].filter(Boolean).join(' ') : '',
-      title: `${BOOK} • الحديث ${ar(h.n)}`,
-      source: `${h.title} — ${srcLabel(h)}`,
+      title: `${BOOK} • ${L.unit} ${ar(h.n)}`,
+      source: h.source ? `${h.title} — ${srcLabel(h)}` : h.title,
       audio: h.audio
     });
   };
+  // One supplication of a chapter (from its head block to the next head).
+  function shareDua(i, k) {
+    const h = H[i]; if (!h || !window.ShareCard) return;
+    const head = h.blocks[k].head;
+    let end = h.blocks.findIndex((b, j) => j > k && b.head); if (end < 0) end = h.blocks.length;
+    const part = h.blocks.slice(k + 1, end);
+    const tr = part.find(b => b.tr != null);
+    ShareCard.open({
+      text: plainOf(part.filter(b => b.p), false),
+      translation: tr ? tr.tr : '',
+      title: `${BOOK} • ${h.title}`,
+      source: head.short || '',
+      repeat: +head.repeat || 1,
+      audio: head.audio && AUDIO ? AUDIO.base + encodeURIComponent(head.audio) : ''
+    });
+  }
   window.shareAsImage = function () {
     const i = shareIdx >= 0 ? shareIdx : cur;
     // Let the sheet's history.back() land before ShareCard pushes its own
@@ -516,11 +572,11 @@
   window.shareText = function () {
     const h = H[shareIdx], text = shareTextOf(h);
     if (navigator.share) navigator.share({ title: `${BOOK} — ${h.title}`, text }).catch(() => {});
-    else copy(text, 'تم نسخ الحديث — الصقه حيث تريد');
+    else copy(text, 'تم النسخ — الصقه حيث تريد');
   };
   window.shareTo = function (where) {
     const h = H[shareIdx], text = shareTextOf(h), url = `${PAGE_URL}#${h.n}`;
-    const short = `${BOOK} — الحديث ${ar(h.n)}: ${h.title}`;
+    const short = `${BOOK} — ${L.unit} ${ar(h.n)}: ${h.title}`;
     const links = {
       wa: 'https://wa.me/?text=' + encodeURIComponent(text),
       tg: 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(short + '\n\n' + h.text),
@@ -531,7 +587,7 @@
   };
   window.copyHadith = function () {
     const h = H[shareIdx >= 0 && $('shareSheet').classList.contains('open') ? shareIdx : cur];
-    copy(shareTextOf(h), 'تم نسخ الحديث');
+    copy(shareTextOf(h), 'تم النسخ');
   };
   window.copyLink = function () { copy(`${PAGE_URL}#${H[shareIdx].n}`, 'تم نسخ الرابط'); };
 
