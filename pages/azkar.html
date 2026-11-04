@@ -340,6 +340,25 @@ body::before {
   width: 100%;
 }
 
+/* ===== Source / grading under the dhikr ===== */
+.zikr-src{
+  margin:10px auto 4px; max-width:560px; width:100%; padding:8px 12px; border-radius:14px;
+  font-family:'Tajawal',sans-serif; font-size:.78rem; line-height:1.7; text-align:start; cursor:pointer;
+  background:var(--ambient); border:1px solid var(--glass-border); color:var(--text-secondary);
+}
+.zikr-src .zs-line{ display:flex; align-items:center; gap:8px; }
+.zikr-src .zs-badge{ flex-shrink:0; padding:2px 9px; border-radius:999px; font-weight:800; font-size:.72rem;
+  background:var(--accent-main); color:#fff; }
+.zikr-src .zs-text{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.zikr-src .zs-chev{ width:14px; height:14px; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2.2; transition:transform .2s; }
+.zikr-src .zs-more{ display:none; margin-top:6px; padding-top:6px; border-top:1px dashed var(--glass-border); white-space:normal; }
+.zikr-src.open .zs-more{ display:block; }
+.zikr-src.open .zs-text{ white-space:normal; }
+.zikr-src.open .zs-chev{ transform:rotate(180deg); }
+.zikr-src.g-weak .zs-badge{ background:#c2410c; }
+.zikr-src.g-mixed .zs-badge{ background:#b7791f; }
+.zikr-src.g-quran .zs-badge{ background:var(--text-secondary); }
+
 /* ===== Circle styles ===== */
 .counter-anchor {
   position: relative;
@@ -1049,6 +1068,8 @@ body::after {
   <div class="zikr-container fade-in" onclick="increment()">
     <div class="zikr-scroll-area">
       <div class="zikr-text" id="arabicText"></div>
+      <!-- source + grading; tapping it opens the full takhreej (and must not count) -->
+      <div class="zikr-src" id="zikrSrc" hidden onclick="event.stopPropagation(); if (this.classList.toggle('open')) this.scrollIntoView({ block: 'nearest', behavior: 'smooth' })"></div>
     </div>
   </div>
 
@@ -1215,13 +1236,27 @@ function loadAzkarData() {
 }
 loadAzkarData();
 
+/* --- Source and grading of the current zikr (assets/azkar.json: source, takhreej, grade) --- */
+function renderZikrSource(z) {
+  const el = document.getElementById('zikrSrc');
+  if (!el) return;
+  if (!z || !z.source) { el.hidden = true; return; }
+  const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const g = z.grade || {};
+  el.className = 'zikr-src g-' + (g.cls || 'ok');
+  el.innerHTML = `<span class="zs-line">${g.label ? `<span class="zs-badge">${esc(g.label)}</span>` : ''}<span class="zs-text">${esc(z.source)}</span>` +
+    `<svg class="zs-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>` +
+    (z.takhreej ? `<span class="zs-more">${esc(z.takhreej).replace(/\n/g, '<br>')}</span>` : '');
+  el.hidden = false;
+}
+
 /* --- Share the current zikr as an image card --- */
 const CARD_TITLE_KEYS = { morning: 'card_morning', night: 'card_evening', sleeping: 'card_sleeping', salah: 'card_post_prayer', ruqia: 'sc_ruqia' };
 function shareZikrCard() {
   const z = azkarData && azkarData[currentIndex];
   if (!z || !window.ShareCard) return;
   const key = CARD_TITLE_KEYS[type];
-  ShareCard.open({ text: z.arabic, translation: z.english, title: key ? t(key) : '', repeat: z.count });
+  ShareCard.open({ text: z.arabic, translation: z.english, title: key ? t(key) : '', source: z.source ? z.source.split(' — ')[0] : '', repeat: z.count });
 }
 
 /* --- Image Modal for salah type --- */
@@ -1332,6 +1367,7 @@ function loadZikr() {
     currentCount = 0;
     if(azkarData && azkarData[currentIndex]){
         document.getElementById("arabicText").innerText = azkarData[currentIndex].arabic;
+        renderZikrSource(azkarData[currentIndex]);
         document.getElementById("englishText").innerText = azkarData[currentIndex].english;
 
         const currentNum = currentIndex + 1;
