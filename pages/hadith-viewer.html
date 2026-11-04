@@ -143,6 +143,14 @@
       padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px;
     }
     .card-ref b{ color:var(--text); }
+    /* the Prophet's ﷺ words and the chain of narrators (same language as the book pages) */
+    .card-arabic .matn{ font-weight:700; color:var(--accent-deep); }
+    [data-theme="light"] .card-arabic .matn, [data-theme="sepia"] .card-arabic .matn{ color:var(--accent); }
+    .card-arabic .matn::before{ content:"«"; color:var(--gold); font-weight:400; }
+    .card-arabic .matn::after{ content:"»"; color:var(--gold); font-weight:400; }
+    .card-arabic .isnad{ color:var(--text-muted); font-size:.8em; }
+    .card-ref .hnum{ display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:26px; padding:0 9px;
+      border-radius:999px; background:var(--gold-soft); color:var(--gold); font-weight:800; margin-inline-end:6px; }
 
     .card-actions{ display:flex; gap:8px; align-items:center; }
     .card-btn{
@@ -544,6 +552,34 @@
   function normalizeText(text) {
     return (text || "").replace(TASHKEEL_REGEX, '').replace(INVISIBLE_REGEX, '').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ـ/g,'').replace(/\s+/g,' ');
   }
+  // Hadith text → HTML: the quoted part (the Prophet's ﷺ words) as .matn, the chain
+  // of narrators before it as .isnad; escaped, with the optional search highlight
+  // applied to each run so it never cuts through a tag.
+  function escHtml(s){ return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+  function formatHadith(ar, hl) {
+    const t = String(ar || '').replace(/[\u200E\u200F]/g, '');
+    const runs = []; let pos = 0, first = true;
+    const re = /"([^"]+)"|«([^«»]+)»/g; let m;
+    while ((m = re.exec(t))) {
+      if (m.index > pos) runs.push([t.slice(pos, m.index), first ? 'isnad' : '']);
+      runs.push([(m[1] || m[2]).trim(), 'matn']); pos = re.lastIndex; first = false;
+    }
+    let rest = t.slice(pos);
+    const open = rest.indexOf('"');               // an opening quote the data never closes
+    if (open >= 0 && rest.indexOf('"', open + 1) < 0 && rest.slice(open + 1).trim().length > 10) {
+      if (open > 0) runs.push([rest.slice(0, open), first ? 'isnad' : '']);
+      runs.push([rest.slice(open + 1).trim(), 'matn']); rest = ''; first = false;
+    }
+    if (rest) runs.push([rest, '']);
+    // a text with no quotation at all has no chain/words split
+    if (runs.length === 1) runs[0][1] = '';
+    return runs.map(([txt, cls]) => {
+      let h = escHtml(txt);
+      if (hl) h = h.replace(hl, '<mark>$1</mark>');
+      h = h.replace(/\n/g, '<br>');
+      return cls ? `<span class="${cls}">${h}</span>` : h;
+    }).join('');
+  }
   function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   function buildHighlightRegex(rawQuery) {
     let clean = normalizeText(rawQuery), pattern = "";
@@ -589,6 +625,8 @@
         qudsi40: '../assets/thumbnails/others/الأربعون القدسية.webp'
       };
 
+      // books that have their own reviewed page with the new design
+      const BOOK_PAGES = { nawawi40: 'nawawi.html', qudsi40: 'qudsi.html' };
       const bookCard = b => {
         const thumb = MAIN_THUMBS[b.id] || OTHER_THUMBS[b.id];
         const isMain = !!MAIN_THUMBS[b.id];
@@ -596,7 +634,7 @@
           ? `<img class="book-card-thumb${isMain ? ' book-card-thumb--round' : ''}" src="${thumb}" alt="${b.name}" loading="lazy">`
           : `<div class="book-card-flourish"></div><div class="book-card-icon"></div>`;
         return `
-        <a href="?book=${b.id}" class="book-card">
+        <a href="${BOOK_PAGES[b.id] || '?book=' + b.id}" class="book-card">
             <div class="book-card-cover">${coverContent}</div>
             <div class="book-card-body">
                 <div class="book-card-title">${b.name}</div>
@@ -658,6 +696,7 @@
         records.forEach(h => {
           const gradeInfo = getHadithGrade(App.bookId, h.grades);
           const arText = h.text || h.arabic || "";
+          if (!arText.trim()) return;           // numbering kept in the dataset with no text
           const isNumberedBook = (App.bookId === 'nawawi40' || App.bookId === 'qudsi40');
           let secNum, secTitle;
           if (isNumberedBook) {
@@ -722,9 +761,9 @@
       const saved = isBookmarked(App.currentIdx, i);
       return `
       <div class="card hadith-card ${item.isOk ? '' : 'warn'}" data-item="${i}">
-        <div class="card-arabic">${item.ar}</div>
+        <div class="card-arabic">${formatHadith(item.ar)}</div>
         <div class="card-ref">
-          <span>رقم: <b>${item.number}</b> &nbsp;<span class="${badgeClass}">${item.gradeText}</span></span>
+          <span><span class="hnum" title="رقم الحديث">${item.number}</span><span class="${badgeClass}">${item.gradeText}</span></span>
           <div class="card-actions">
             <button class="card-btn" onclick="shareHadith(${App.currentIdx}, ${i})" title="مشاركة كصورة أو فيديو" aria-label="مشاركة كصورة أو فيديو">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -784,7 +823,7 @@
         const highlightRegex = App.searchRegex;
         const html = results.map(r => {
           const badgeClass = r.gradeText === 'غير محدد' ? "badge-neutral" : (r.isOk ? "badge-ok" : "badge-warn");
-          const highlighted = r.ar.replace(highlightRegex, '<mark>$1</mark>');
+          const highlighted = formatHadith(r.ar, highlightRegex);
           return `
           <div class="card hadith-card ${r.isOk ? '' : 'warn'}" data-item="${r.iIdx}" onclick="goToResult(${r.sIdx},${r.iIdx})" style="cursor:pointer">
             <div class="card-arabic">${highlighted}</div>
