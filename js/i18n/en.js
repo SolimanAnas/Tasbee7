@@ -49,6 +49,7 @@ export default {
   'card_qibla': 'Qibla Direction',
   'card_hadith': 'Hadith Encyclopedia',
   'card_nawawi': "An-Nawawi's Forty Hadith",
+  'card_qudsi': "Forty Hadith Qudsi",
   'card_prayer_times': 'Prayer Times',
 
   // Prayer Widget

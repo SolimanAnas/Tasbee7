@@ -45,6 +45,7 @@ export default {
   'card_qibla': 'قبلہ کی سمت',
   'card_hadith': 'حدیث موسوعہ',
   'card_nawawi': "اربعین نووی",
+  'card_qudsi': "اربعین قدسیہ",
   'card_prayer_times': 'نماز کے اوقات',
 
   'prayer_locating': 'پتہ لگایا جا رہا ہے...',

@@ -45,6 +45,7 @@ export default {
   'card_qibla': 'Kıble Yönü',
   'card_hadith': 'Hadis Ansiklopedisi',
   'card_nawawi': "Nevevî'nin Kırk Hadisi",
+  'card_qudsi': "Kırk Kudsî Hadis",
   'card_prayer_times': 'Namaz Vakitleri',
 
   'prayer_locating': 'Konum bulunuyor...',

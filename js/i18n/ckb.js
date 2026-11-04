@@ -49,6 +49,7 @@ export default {
   'card_qibla': 'ئاراستەی قبلە',
   'card_hadith': 'دەستکاری حەدیس',
   'card_nawawi': "چل فەرموودەی نەوەوی",
+  'card_qudsi': "چل فەرموودەی قودسی",
   'card_prayer_times': 'کاتەکانی نوێژ',
 
   // Prayer Widget

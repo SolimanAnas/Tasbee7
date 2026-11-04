@@ -49,6 +49,7 @@ export default {
   'card_qibla': 'اتجاه القبلة',
   'card_hadith': 'موسوعة الحديث',
   'card_nawawi': "الأربعون النووية",
+  'card_qudsi': "الأربعون القدسية",
   'card_prayer_times': 'مواعيد الصلاة',
 
   // Prayer Widget
