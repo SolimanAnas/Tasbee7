@@ -24,8 +24,10 @@
     daily: 'حديث اليوم',
     legend: 'كلام النبي ﷺ مميَّز بـ',
     empty: 'لا توجد أحاديث مطابقة.',
-    loadErr: 'تعذّر تحميل الأحاديث. تحقق من الاتصال ثم أعد المحاولة.'
+    loadErr: 'تعذّر تحميل الأحاديث. تحقق من الاتصال ثم أعد المحاولة.',
+    count: ['ذكر واحد', 'ذكران', 'أذكار', 'ذكرًا']   // 1 / 2 / 3–10 / 11+
   }, CFG.labels || {});
+  const countLabel = n => n === 1 ? L.count[0] : n === 2 ? L.count[1] : `${ar(n)} ${n <= 10 ? L.count[2] : L.count[3]}`;
   const $ = id => document.getElementById(id);
   const ar = n => Number(n).toLocaleString('ar-EG');
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -169,7 +171,7 @@
         <span class="num">${MEDAL}<span>${ar(h.n)}</span></span>
         <span class="h-body">
           <span class="h-title">${esc(h.title)}</span>
-          <span class="h-meta">${h.narrator ? `<span>${ICON_USER}${esc(h.narrator)}</span>` : ''}${h.source ? `<span>${ICON_BOOK}${esc(h.source)}</span>` : ''}${h.count ? `<span>${ICON_BOOK}${ar(h.count)} ${h.count === 1 ? 'ذكر' : h.count === 2 ? 'ذكران' : h.count <= 10 ? 'أذكار' : 'ذكرًا'}</span>` : ''}${h.grade && h.grade.weak ? `<span class="g-weak">${esc(h.grade.label)}</span>` : ''}</span>
+          <span class="h-meta">${h.narrator ? `<span>${ICON_USER}${esc(h.narrator)}</span>` : ''}${h.source ? `<span>${ICON_BOOK}${esc(h.source)}</span>` : ''}${h.count ? `<span>${ICON_BOOK}${countLabel(h.count)}</span>` : ''}${h.grade && h.grade.weak ? `<span class="g-weak">${esc(h.grade.label)}</span>` : ''}</span>
         </span>
         <span class="h-flags">${has('fav', h.n) ? STAR : ''}${has('read', h.n) && !has('mem', h.n) ? '<span class="read">' + EYE + '</span>' : ''}</span>
       </button>`).join('');
@@ -253,7 +255,7 @@
         <div class="r-tags">
           ${h.narrator ? `<span class="tag">${ICON_USER}الراوي: ${esc(h.narrator)}</span>` : ''}
           ${h.source ? `<span class="tag">${ICON_BOOK}${esc(srcLabel(h))}</span>` : ''}
-          ${h.count ? `<span class="tag">${ICON_BOOK}${ar(h.count)} ${h.count === 1 ? 'ذكر' : h.count === 2 ? 'ذكران' : h.count <= 10 ? 'أذكار' : 'ذكرًا'}</span>` : ''}
+          ${h.count ? `<span class="tag">${ICON_BOOK}${countLabel(h.count)}</span>` : ''}
           ${CATS[h.cat] ? `<span class="tag cat">${esc(CATS[h.cat])}</span>` : ''}
           ${gradeTag(h)}
         </div>
