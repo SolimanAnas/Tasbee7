@@ -3,68 +3,68 @@
 window.THABAT_CONTENT = {
  "ayat": [
   {
-   "ar": "﴿۞ قُلْ يَٰعِبَادِىَ ٱلَّذِينَ أَسْرَفُوا۟ عَلَىٰٓ أَنفُسِهِمْ لَا تَقْنَطُوا۟ مِن رَّحْمَةِ ٱللَّهِ ۚ إِنَّ ٱللَّهَ يَغْفِرُ ٱلذُّنُوبَ جَمِيعًا ۚ إِنَّهُۥ هُوَ ٱلْغَفُورُ ٱلرَّحِيمُ﴾",
-   "src": "سورة الزُّمَرِ ٥٣",
+   "ar": "﴿قُلْ يَٰعِبَادِىَ ٱلَّذِينَ أَسْرَفُوا۟ عَلَىٰٓ أَنفُسِهِمْ لَا تَقْنَطُوا۟ مِن رَّحْمَةِ ٱللَّهِ ۚ إِنَّ ٱللَّهَ يَغْفِرُ ٱلذُّنُوبَ جَمِيعًا ۚ إِنَّهُۥ هُوَ ٱلْغَفُورُ ٱلرَّحِيمُ﴾",
+   "src": "سورة الزمر ٥٣",
    "en": "Say: O My servants who have transgressed against themselves, do not despair of the mercy of Allah. Indeed, Allah forgives all sins. He is the Forgiving, the Merciful."
   },
   {
    "ar": "﴿وَٱلَّذِينَ جَٰهَدُوا۟ فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا ۚ وَإِنَّ ٱللَّهَ لَمَعَ ٱلْمُحْسِنِينَ﴾",
-   "src": "سورة العَنكَبُوتِ ٦٩",
+   "src": "سورة العنكبوت ٦٩",
    "en": "And those who strive for Us — We will surely guide them to Our ways. And indeed, Allah is with the doers of good."
   },
   {
    "ar": "﴿يُثَبِّتُ ٱللَّهُ ٱلَّذِينَ ءَامَنُوا۟ بِٱلْقَوْلِ ٱلثَّابِتِ فِى ٱلْحَيَوٰةِ ٱلدُّنْيَا وَفِى ٱلْءَاخِرَةِ ۖ وَيُضِلُّ ٱللَّهُ ٱلظَّٰلِمِينَ ۚ وَيَفْعَلُ ٱللَّهُ مَا يَشَآءُ﴾",
-   "src": "سورة إِبۡرَاهِيمَ ٢٧",
+   "src": "سورة إبراهيم ٢٧",
    "en": "Allah keeps firm those who believe, with the firm word, in this worldly life and in the Hereafter."
   },
   {
    "ar": "﴿وَٱلَّذِينَ إِذَا فَعَلُوا۟ فَٰحِشَةً أَوْ ظَلَمُوٓا۟ أَنفُسَهُمْ ذَكَرُوا۟ ٱللَّهَ فَٱسْتَغْفَرُوا۟ لِذُنُوبِهِمْ وَمَن يَغْفِرُ ٱلذُّنُوبَ إِلَّا ٱللَّهُ وَلَمْ يُصِرُّوا۟ عَلَىٰ مَا فَعَلُوا۟ وَهُمْ يَعْلَمُونَ﴾",
-   "src": "سورة آلِ عِمۡرَانَ ١٣٥",
+   "src": "سورة آل عمران ١٣٥",
    "en": "And those who, when they commit an immorality or wrong themselves, remember Allah and seek forgiveness for their sins — and who forgives sins except Allah? — and do not persist in what they have done while they know."
   },
   {
    "ar": "﴿… إِنَّ ٱللَّهَ يُحِبُّ ٱلتَّوَّٰبِينَ وَيُحِبُّ ٱلْمُتَطَهِّرِينَ﴾",
-   "src": "سورة البَقَرَةِ ٢٢٢",
+   "src": "سورة البقرة ٢٢٢",
    "en": "Indeed, Allah loves those who constantly repent and loves those who purify themselves."
   },
   {
    "ar": "﴿… وَتُوبُوٓا۟ إِلَى ٱللَّهِ جَمِيعًا أَيُّهَ ٱلْمُؤْمِنُونَ لَعَلَّكُمْ تُفْلِحُونَ﴾",
-   "src": "سورة النُّورِ ٣١",
+   "src": "سورة النور ٣١",
    "en": "And turn to Allah in repentance, all of you, O believers, that you might succeed."
   },
   {
    "ar": "﴿إِلَّا مَن تَابَ وَءَامَنَ وَعَمِلَ عَمَلًۭا صَٰلِحًۭا فَأُو۟لَٰٓئِكَ يُبَدِّلُ ٱللَّهُ سَيِّـَٔاتِهِمْ حَسَنَٰتٍۢ ۗ وَكَانَ ٱللَّهُ غَفُورًۭا رَّحِيمًۭا﴾",
-   "src": "سورة الفُرۡقَانِ ٧٠",
+   "src": "سورة الفرقان ٧٠",
    "en": "Except for those who repent, believe and do righteous work — for them Allah will replace their evil deeds with good. And ever is Allah Forgiving and Merciful."
   },
   {
    "ar": "﴿إِنَّ ٱلَّذِينَ قَالُوا۟ رَبُّنَا ٱللَّهُ ثُمَّ ٱسْتَقَٰمُوا۟ تَتَنَزَّلُ عَلَيْهِمُ ٱلْمَلَٰٓئِكَةُ أَلَّا تَخَافُوا۟ وَلَا تَحْزَنُوا۟ وَأَبْشِرُوا۟ بِٱلْجَنَّةِ ٱلَّتِى كُنتُمْ تُوعَدُونَ﴾",
-   "src": "سورة فُصِّلَتۡ ٣٠",
+   "src": "سورة فصلت ٣٠",
    "en": "Indeed, those who have said, \"Our Lord is Allah\" and then remained steadfast — the angels will descend upon them: \"Do not fear and do not grieve, but receive good tidings of Paradise, which you were promised.\""
   },
   {
    "ar": "﴿إِنَّ ٱلَّذِينَ ٱتَّقَوْا۟ إِذَا مَسَّهُمْ طَٰٓئِفٌۭ مِّنَ ٱلشَّيْطَٰنِ تَذَكَّرُوا۟ فَإِذَا هُم مُّبْصِرُونَ﴾",
-   "src": "سورة الأَعۡرَافِ ٢٠١",
+   "src": "سورة الأعراف ٢٠١",
    "en": "Indeed, those who fear Allah — when an impulse touches them from Satan, they remember Him, and at once they have insight."
   },
   {
    "ar": "﴿وَمَن يَتَّقِ ٱللَّهَ يَجْعَل لَّهُۥ مَخْرَجًۭا ۝ وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ …﴾",
-   "src": "سورة الطَّلَاقِ ٢–٣",
+   "src": "سورة الطلاق ٢–٣",
    "en": "And whoever fears Allah — He will make for him a way out, and will provide for him from where he does not expect."
   },
   {
    "ar": "﴿وَٱصْبِرْ وَمَا صَبْرُكَ إِلَّا بِٱللَّهِ ۚ وَلَا تَحْزَنْ عَلَيْهِمْ وَلَا تَكُ فِى ضَيْقٍۢ مِّمَّا يَمْكُرُونَ﴾",
-   "src": "سورة النَّحۡلِ ١٢٧",
+   "src": "سورة النحل ١٢٧",
    "en": "And be patient, and your patience is not but through Allah."
   },
   {
    "ar": "﴿وَٱعْبُدْ رَبَّكَ حَتَّىٰ يَأْتِيَكَ ٱلْيَقِينُ﴾",
-   "src": "سورة الحِجۡرِ ٩٩",
+   "src": "سورة الحجر ٩٩",
    "en": "And worship your Lord until there comes to you the certainty (death)."
   },
   {
    "ar": "﴿رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً ۚ إِنَّكَ أَنتَ ٱلْوَهَّابُ﴾",
-   "src": "سورة آلِ عِمۡرَانَ ٨",
+   "src": "سورة آل عمران ٨",
    "en": "Our Lord, let not our hearts deviate after You have guided us, and grant us from Yourself mercy. Indeed, You are the Bestower."
   }
  ],
@@ -153,7 +153,7 @@ window.THABAT_CONTENT = {
   },
   {
    "ar": "﴿وَلَمَّا بَرَزُوا۟ لِجَالُوتَ وَجُنُودِهِۦ قَالُوا۟ رَبَّنَآ أَفْرِغْ عَلَيْنَا صَبْرًۭا وَثَبِّتْ أَقْدَامَنَا وَٱنصُرْنَا عَلَى ٱلْقَوْمِ ٱلْكَٰفِرِينَ﴾",
-   "src": "سورة البَقَرَةِ ٢٥٠",
+   "src": "سورة البقرة ٢٥٠",
    "en": "\"Our Lord, pour upon us patience, plant firmly our feet, and give us victory.\""
   },
   {
@@ -195,32 +195,32 @@ window.THABAT_CONTENT = {
  "quran": [
   {
    "ar": "﴿إِنَّ ٱلَّذِينَ يَتْلُونَ كِتَٰبَ ٱللَّهِ وَأَقَامُوا۟ ٱلصَّلَوٰةَ وَأَنفَقُوا۟ مِمَّا رَزَقْنَٰهُمْ سِرًّۭا وَعَلَانِيَةًۭ يَرْجُونَ تِجَٰرَةًۭ لَّن تَبُورَ﴾",
-   "src": "سورة فَاطِرٍ ٢٩",
+   "src": "سورة فاطر ٢٩",
    "en": "Indeed, those who recite the Book of Allah, establish prayer and spend from what We have provided them, secretly and publicly, hope for a transaction that will never perish."
   },
   {
    "ar": "﴿وَلَقَدْ يَسَّرْنَا ٱلْقُرْءَانَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍۢ﴾",
-   "src": "سورة القَمَرِ ١٧",
+   "src": "سورة القمر ١٧",
    "en": "And We have certainly made the Qur'an easy to remember, so is there any who will remember?"
   },
   {
    "ar": "﴿كِتَٰبٌ أَنزَلْنَٰهُ إِلَيْكَ مُبَٰرَكٌۭ لِّيَدَّبَّرُوٓا۟ ءَايَٰتِهِۦ وَلِيَتَذَكَّرَ أُو۟لُوا۟ ٱلْأَلْبَٰبِ﴾",
-   "src": "سورة صٓ ٢٩",
+   "src": "سورة ص ٢٩",
    "en": "(This is) a blessed Book which We have revealed to you, that they might reflect upon its verses and that those of understanding would be reminded."
   },
   {
    "ar": "﴿إِنَّ هَٰذَا ٱلْقُرْءَانَ يَهْدِى لِلَّتِى هِىَ أَقْوَمُ وَيُبَشِّرُ ٱلْمُؤْمِنِينَ ٱلَّذِينَ يَعْمَلُونَ ٱلصَّٰلِحَٰتِ أَنَّ لَهُمْ أَجْرًۭا كَبِيرًۭا﴾",
-   "src": "سورة الإِسۡرَاءِ ٩",
+   "src": "سورة الإسراء ٩",
    "en": "Indeed, this Qur'an guides to that which is most upright and gives good tidings to the believers who do righteous deeds that they will have a great reward."
   },
   {
    "ar": "﴿أَوْ زِدْ عَلَيْهِ وَرَتِّلِ ٱلْقُرْءَانَ تَرْتِيلًا﴾",
-   "src": "سورة المُزَّمِّلِ ٤",
+   "src": "سورة المزمل ٤",
    "en": "Or add to it, and recite the Qur'an with measured recitation."
   },
   {
    "ar": "﴿ٱلَّذِينَ ءَامَنُوا۟ وَتَطْمَئِنُّ قُلُوبُهُم بِذِكْرِ ٱللَّهِ ۗ أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ﴾",
-   "src": "سورة الرَّعۡدِ ٢٨",
+   "src": "سورة الرعد ٢٨",
    "en": "Those who have believed and whose hearts are assured by the remembrance of Allah. Unquestionably, by the remembrance of Allah hearts are assured."
   },
   {

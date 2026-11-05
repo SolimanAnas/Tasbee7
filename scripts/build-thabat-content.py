@@ -1,12 +1,17 @@
 # Builds js/thabat-content.js for pages/thabat.html: verses are taken verbatim from
 # data/quran.json. Run: python3 scripts/build-thabat-content.py
-import json, os
+import json, os, re, unicodedata
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 Q = {(a['surah'], a['ayah']): a for a in json.load(open(os.path.join(ROOT, 'data', 'quran.json')))}
 def ayah(s, a1, a2=None):
     a2 = a2 or a1
-    txt = ' '.join(Q[(s, i)]['text_uthmani'].replace('﻿', '') + f' ﴿{i}﴾' if a2 > a1 else Q[(s, i)]['text_uthmani'].replace('﻿', '') for i in range(a1, a2 + 1))
-    name = Q[(s, a1)]['surah_name'].replace('سُورَةُ ', '')
+    # «۞» (U+06DE) marks a quarter of a hizb in the mushaf; it is not part of the verse
+    clean = lambda t: t.replace('\ufeff', '').replace('\u06de', '').strip()
+    txt = ' '.join(clean(Q[(s, i)]['text_uthmani']) + (f' ﴿{i}﴾' if a2 > a1 else '') for i in range(a1, a2 + 1))
+    # the label is set in Tajawal, which has no glyph for the Uthmani sukun (U+06E1, drawn as
+    # a box in «إِبۡرَاهِيمَ») or the wasla: show the plain name, «سورة إبراهيم» (NFC first,
+    # so ا + madd stays «آ» in «آل عمران»)
+    name = re.sub('[\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed]', '', unicodedata.normalize('NFC', Q[(s, a1)]['surah_name']).replace('سُورَةُ ', '').replace('\u0671', '\u0627'))
     return txt, name
 AYAT = [
  ((39, 53), 'Say: O My servants who have transgressed against themselves, do not despair of the mercy of Allah. Indeed, Allah forgives all sins. He is the Forgiving, the Merciful.', 'لا قنوط'),
