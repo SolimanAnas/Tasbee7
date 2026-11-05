@@ -13,23 +13,42 @@
 
   // Per-book settings come from the page (window.HADITH_BOOK).
   const CFG = window.HADITH_BOOK || {};
-  const BOOK = CFG.title;
   const PAGE_URL = CFG.pageUrl;
   const KEY = CFG.storageKey;
-  const CATS = CFG.cats || {};
   const META = CFG.meta || [];
-  const L = Object.assign({
-    unit: 'الحديث',            // «الحديث ٥ من ٤٢»
-    units: 'الأحاديث',
-    daily: 'حديث اليوم',
-    legend: 'كلام النبي ﷺ مميَّز بـ',
-    empty: 'لا توجد أحاديث مطابقة.',
-    loadErr: 'تعذّر تحميل الأحاديث. تحقق من الاتصال ثم أعد المحاولة.',
-    count: ['ذكر واحد', 'ذكران', 'أذكار', 'ذكرًا']   // 1 / 2 / 3–10 / 11+
-  }, CFG.labels || {});
-  const countLabel = n => n === 1 ? L.count[0] : n === 2 ? L.count[1] : `${ar(n)} ${n <= 10 ? L.count[2] : L.count[3]}`;
+
+  // ---- interface language (js/i18n.js; keys hb_* and <CFG.i18n>_* per book).
+  // The book text itself stays Arabic, so the page keeps its RTL layout.
+  const lang = () => (window.I18n ? I18n.getLang() : 'ar');
+  function T(k, f, p) {
+    let s = f;
+    if (k && window.I18n) { const v = I18n.t(k); if (v && v !== k) s = v; }
+    if (p) Object.keys(p).forEach(x => { s = String(s).split('{' + x + '}').join(p[x]); });
+    return s;
+  }
+  const B = (k, f, p) => T(CFG.i18n ? CFG.i18n + '_' + k : '', f, p);   // this book's own wording
+  let BOOK, CATS, L;
+  function relabel() {
+    const D = CFG.labels || {}, chapters = !!D.unit;
+    BOOK = B('title', CFG.title);
+    CATS = {};
+    Object.keys(CFG.cats || {}).forEach(k => { CATS[k] = B('cat_' + k, CFG.cats[k]); });
+    L = {
+      unit: T(chapters ? 'hb_chapter' : 'hb_unit', D.unit || 'الحديث'),     // «الحديث ٥ من ٤٢»
+      units: T(chapters ? 'hb_chapters' : 'hb_units', D.units || 'الأحاديث'),
+      daily: B('daily', T('hb_daily', D.daily || 'حديث اليوم')),
+      legend: B('legend', T('hb_legend', D.legend || 'كلام النبي ﷺ مميَّز بـ')),
+      empty: T(chapters ? 'hb_empty_chapters' : 'hb_empty', D.empty || 'لا توجد أحاديث مطابقة.'),
+      loadErr: B('load_err', T('hb_load_err', D.loadErr || 'تعذّر تحميل الأحاديث. تحقق من الاتصال ثم أعد المحاولة.')),
+      count: D.count || ['ذكر واحد', 'ذكران', 'أذكار', 'ذكرًا']   // 1 / 2 / 3–10 / 11+
+    };
+    document.title = `${BOOK} | ${T('app_name', 'زاد المسلم')}`;
+  }
+  relabel();
+  const countLabel = n => lang() !== 'ar' ? B('count', T('hb_count', '{n}'), { n: ar(n) })
+    : n === 1 ? L.count[0] : n === 2 ? L.count[1] : `${ar(n)} ${n <= 10 ? L.count[2] : L.count[3]}`;
   const $ = id => document.getElementById(id);
-  const ar = n => Number(n).toLocaleString('ar-EG');
+  const ar = n => Number(n).toLocaleString(['en', 'tr'].includes(lang()) ? 'en-US' : 'ar-EG');
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
   let H = [];                 // hadiths
@@ -62,9 +81,9 @@
     return `<div class="dua-head" data-k="${k}">
         <span class="dua-n">${ar(h.n)}</span>
         ${h.tag ? `<span class="dua-tag">${esc(h.tag)}</span>` : ''}
-        ${r > 1 ? `<button class="dua-count" data-left="${r}" data-total="${r}" aria-label="عدّاد التكرار">${ar(r)} مرات</button>` : ''}
+        ${r > 1 ? `<button class="dua-count" data-left="${r}" data-total="${r}" aria-label="${esc(T('hb_counter', 'عدّاد التكرار'))}">${T('hb_times', '{n} مرات', { n: ar(r) })}</button>` : ''}
         <span class="spacer"></span>
-        <button class="dua-share" data-k="${k}" aria-label="مشاركة هذا الذكر كصورة أو فيديو" title="مشاركة كصورة أو فيديو">${ICON_IMG}</button>
+        <button class="dua-share" data-k="${k}" aria-label="${esc(T('hb_share_one', 'مشاركة هذا الذكر كصورة أو فيديو'))}" title="${esc(T('hb_share_iv', 'مشاركة كصورة أو فيديو'))}">${ICON_IMG}</button>
       </div>`;
   }
   function blocksHtml(blocks) {
@@ -73,7 +92,7 @@
     return blocks.map((b, k) => b.head ? headHtml(b, k)
       : b.tr != null ? `<div class="trans dtr"${S.trans ? '' : ' hidden'}>${b.tl ? `<span class="nar">${esc(b.tl)}</span>` : ''}${esc(b.tr)}</div>`
       : b.src != null
-      ? `<div class="src"><b>التخريج</b>${esc(b.src).replace(/\n/g, '<br>')}</div>`
+      ? `<div class="src"><b>${esc(T('hb_takhreej', 'التخريج'))}</b>${esc(b.src).replace(/\n/g, '<br>')}</div>`
       : '<p>' + b.p.map(([t, m]) => {
           if (!m) return words(t);
           const lead = t.match(/^\s*/)[0], tail = t.match(/\s*$/)[0];
@@ -90,12 +109,12 @@
   // Optional grading: {label: 'صحيح', by: 'الألباني', weak: false, note: '…'}
   function gradeTag(h) {
     const g = h.grade; if (!g) return '';
-    return `<span class="tag grade${g.weak ? ' weak' : ''}">الحكم: ${esc(g.label)}${g.by ? ' — ' + esc(g.by) : ''}</span>`;
+    return `<span class="tag grade${g.weak ? ' weak' : ''}">${esc(T('hb_grade', 'الحكم: {g}', { g: g.label + (g.by ? ' — ' + g.by : '') }))}</span>`;
   }
   function gradeNote(h) {
-    const g = h.grade; return g && g.note ? `<div class="grade-note${g.weak ? ' weak' : ''}"><b>درجة الحديث</b>${esc(g.note)}</div>` : '';
+    const g = h.grade; return g && g.note ? `<div class="grade-note${g.weak ? ' weak' : ''}"><b>${esc(T('hb_grade_note', 'درجة الحديث'))}</b>${esc(g.note)}</div>` : '';
   }
-  const srcLabel = h => /^كتاب/.test(h.source) ? 'رويناه في ' + h.source : 'رواه ' + h.source;
+  const srcLabel = h => /^كتاب/.test(h.source) ? T('hb_src_book', 'رويناه في {s}', { s: h.source }) : T('hb_src', 'رواه {s}', { s: h.source });
 
   // ---- load ----
   let AUDIO = null;
@@ -116,7 +135,7 @@
         norm: plain(text + ' ' + m[0] + ' ' + m[1] + ' ' + takhreej)
       };
     });
-    renderChips(); renderList(); renderStats(); renderDaily(); syncPlayer();
+    renderAll();
     const m = location.hash.match(/^#(\d{1,3})$/);
     if (m && +m[1] >= 1 && +m[1] <= H.length) {
       try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { /* ignore */ }
@@ -131,8 +150,9 @@
   const CHIP_STAR = '<svg class="i ci" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>';
   const CHIP_CHECK = '<svg class="i ci" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>';
   const FILTERS = () => [
-    ['all', 'الكل', H.length], ['fav', CHIP_STAR + 'المفضلة', S.fav.length], ['mem', CHIP_CHECK + 'المحفوظة', S.mem.length], ['todo', 'لم أحفظها', H.length - S.mem.length],
-    ...Object.keys(CATS).map(k => [k, CATS[k], H.filter(h => h.cat === k).length])
+    ['all', esc(T('hb_f_all', 'الكل')), H.length], ['fav', CHIP_STAR + esc(T('hb_f_fav', 'المفضلة')), S.fav.length],
+    ['mem', CHIP_CHECK + esc(T('hb_f_mem', 'المحفوظة')), S.mem.length], ['todo', esc(T('hb_f_todo', 'لم أحفظها')), H.length - S.mem.length],
+    ...Object.keys(CATS).map(k => [k, esc(CATS[k]), H.filter(h => h.cat === k).length])
   ];
   function renderChips() {
     $('chips').innerHTML = FILTERS().map(([k, l, n]) =>
@@ -185,8 +205,8 @@
     const total = H.length || 42;
     const pct = Math.round(S.mem.length / total * 100);
     $('memBar').style.width = pct + '%';
-    $('memLabel').textContent = `تقدّم الحفظ: ${ar(S.mem.length)} من ${ar(total)} (${ar(pct)}٪)`;
-    $('continueLabel').textContent = S.last ? `تابع من ${L.unit} ${ar(S.last)}` : 'ابدأ القراءة';
+    $('memLabel').textContent = T('hb_mem_progress', 'تقدّم الحفظ: {a} من {b} ({p}٪)', { a: ar(S.mem.length), b: ar(total), p: ar(pct) });
+    $('continueLabel').textContent = S.last ? T('hb_continue', 'تابع من {u} {n}', { u: L.unit, n: ar(S.last) }) : T('hb_start', 'ابدأ القراءة');
   }
 
   function dayIndex() {
@@ -198,15 +218,15 @@
     $('daily').innerHTML = `
       <div class="daily-head">
         <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        ${esc(L.daily)}<span class="spacer"></span><span style="color:var(--text-muted);font-weight:700">رقم ${ar(h.n)}</span>
+        ${esc(L.daily)}<span class="spacer"></span><span style="color:var(--text-muted);font-weight:700">${esc(T('hb_number', 'رقم {n}', { n: ar(h.n) }))}</span>
       </div>
       <div class="daily-title">${esc(h.title)}</div>
       <div class="daily-text">${blocksHtml([h.blocks.find(b => b.p)])}</div>
       <div class="daily-actions">
         <button class="chip-btn" onclick="openReader(${h.n - 1})">
-          <svg class="i" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>اقرأ كاملاً</button>
+          <svg class="i" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>${esc(T('hb_read_full', 'اقرأ كاملاً'))}</button>
         <button class="chip-btn" onclick="shareImageOf(${h.n - 1})">
-          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>شاركه كصورة</button>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>${esc(T('hb_share_image', 'شاركه كصورة'))}</button>
       </div>`;
   }
 
@@ -244,7 +264,7 @@
     S.last = h.n; save();
     try { history.replaceState(history.state, '', '#' + h.n); } catch (e) { /* ignore */ }
     document.documentElement.style.setProperty('--fs', S.fs);
-    $('rPos').innerHTML = `${L.unit} ${ar(h.n)} من ${ar(H.length)}<small>${esc(CATS[h.cat] || '')}</small>`;
+    $('rPos').innerHTML = `${esc(T('hb_pos', '{u} {n} من {t}', { u: L.unit, n: ar(h.n), t: ar(H.length) }))}<small>${esc(CATS[h.cat] || '')}</small>`;
     $('rBar').style.width = (h.n / H.length * 100) + '%';
     const trans = h.en && (h.en.text || h.en.nar);
     const hasTr = trans || h.blocks.some(b => b.tr);
@@ -253,7 +273,7 @@
         <div class="medal">${MEDAL}<span>${ar(h.n)}</span></div>
         <h2 class="r-title">${esc(h.title)}</h2>
         <div class="r-tags">
-          ${h.narrator ? `<span class="tag">${ICON_USER}الراوي: ${esc(h.narrator)}</span>` : ''}
+          ${h.narrator ? `<span class="tag">${ICON_USER}${esc(T('hb_narrator', 'الراوي: {s}', { s: h.narrator }))}</span>` : ''}
           ${h.source ? `<span class="tag">${ICON_BOOK}${esc(srcLabel(h))}</span>` : ''}
           ${h.count ? `<span class="tag">${ICON_BOOK}${countLabel(h.count)}</span>` : ''}
           ${CATS[h.cat] ? `<span class="tag cat">${esc(CATS[h.cat])}</span>` : ''}
@@ -262,28 +282,28 @@
         <div class="ornament"><svg viewBox="0 0 48 48"><use href="#star8"/></svg></div>
       </div>
       <article class="text-card${memo ? ' memo' : ''}" id="tCard">
-        <div class="memo-hint">وضع الحفظ: اضغط على أي كلمة لإظهارها، أو استخدم الأزرار بالأسفل</div>
-        <div class="legend">${esc(L.legend)} <i>«اللون والخط العريض»</i></div>
+        <div class="memo-hint">${esc(T('hb_memo_hint', 'وضع الحفظ: اضغط على أي كلمة لإظهارها، أو استخدم الأزرار بالأسفل'))}</div>
+        <div class="legend">${esc(L.legend)} <i>«${esc(T('hb_legend_style', 'اللون والخط العريض'))}»</i></div>
         <div class="ar" id="arText">${blocksHtml(h.blocks)}</div>
         <div class="memo-bar">
-          <button class="tool" onclick="revealNext()">إظهار الكلمة التالية</button>
-          <button class="tool" onclick="revealAll(true)">إظهار الكل</button>
-          <button class="tool" onclick="revealAll(false)">إخفاء الكل</button>
+          <button class="tool" onclick="revealNext()">${esc(T('hb_reveal_next', 'إظهار الكلمة التالية'))}</button>
+          <button class="tool" onclick="revealAll(true)">${esc(T('hb_reveal_all', 'إظهار الكل'))}</button>
+          <button class="tool" onclick="revealAll(false)">${esc(T('hb_hide_all', 'إخفاء الكل'))}</button>
         </div>
         ${trans ? `<div class="trans" id="trans"${S.trans ? '' : ' hidden'}>${h.en.nar ? `<span class="nar">${esc(h.en.nar)}</span>` : ''}${esc(h.en.text).replace(/\n+/g, '<br>')}</div>` : ''}
       </article>
       ${gradeNote(h)}
       <div class="tools">
         ${hasTr ? `<button class="tool${S.trans ? ' on' : ''}" id="tTrans" onclick="toggleTrans()">
-          <svg class="i" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>الترجمة</button>` : ''}
+          <svg class="i" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>${esc(T('hb_translation', 'الترجمة'))}</button>` : ''}
         <button class="tool${memo ? ' on' : ''}" id="tMemo" onclick="toggleMemo()">
-          <svg class="i" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2z"/></svg>وضع الحفظ</button>
+          <svg class="i" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24A2.5 2.5 0 0 0 14.5 2z"/></svg>${esc(T('hb_memo', 'وضع الحفظ'))}</button>
         <button class="tool" onclick="copyHadith()">
-          <svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>نسخ</button>
+          <svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>${esc(T('hb_copy', 'نسخ'))}</button>
         <button class="tool" onclick="shareImageOf(${cur})">
-          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>صورة</button>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>${esc(T('hb_image', 'صورة'))}</button>
       </div>
-      <div class="swipe-hint">اسحب يميناً أو يساراً للتنقل بين ${esc(L.units)}</div>`;
+      <div class="swipe-hint">${esc(T('hb_swipe', 'اسحب يميناً أو يساراً للتنقل بين {units}', { units: L.units }))}</div>`;
     $('dPrev').disabled = cur <= 0;
     $('dNext').disabled = cur >= H.length - 1;
     syncDock();
@@ -307,8 +327,8 @@
     const n = H[cur].n, a = S[k], at = a.indexOf(n);
     if (at >= 0) a.splice(at, 1); else a.push(n);
     save(); syncDock(); renderStats();
-    toast(k === 'fav' ? (at >= 0 ? 'أُزيل من المفضلة' : 'أُضيف إلى المفضلة')
-                      : (at >= 0 ? 'أُزيلت علامة الحفظ' : `ما شاء الله! حفظت ${ar(S.mem.length)} من ${ar(H.length)}`));
+    toast(k === 'fav' ? (at >= 0 ? T('hb_fav_removed', 'أُزيل من المفضلة') : T('hb_fav_added', 'أُضيف إلى المفضلة'))
+                      : (at >= 0 ? T('hb_mem_removed', 'أُزيلت علامة الحفظ') : T('hb_mem_added', 'ما شاء الله! حفظت {a} من {b}', { a: ar(S.mem.length), b: ar(H.length) })));
   };
   window.toggleTrans = function () {
     S.trans = !S.trans; save();
@@ -333,7 +353,7 @@
   window.revealNext = function () {
     const w = document.querySelector('#arText .mw.h');
     if (w) { w.classList.remove('h'); w.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
-    else toast('أحسنت! ظهرت كل الكلمات');
+    else toast(T('hb_all_shown', 'أحسنت! ظهرت كل الكلمات'));
   };
   $('rInner').addEventListener('click', e => {
     const cnt = e.target.closest('.dua-count');
@@ -342,7 +362,7 @@
       left = left > 0 ? left - 1 : +cnt.dataset.total;
       cnt.dataset.left = left;
       cnt.classList.toggle('done', left === 0);
-      cnt.textContent = left === 0 ? 'تمّ' : `${ar(left)} مرات`;
+      cnt.textContent = left === 0 ? T('hb_done', 'تمّ') : T('hb_times', '{n} مرات', { n: ar(left) });
       if (left === 0 && navigator.vibrate) navigator.vibrate(30);
       return;
     }
@@ -392,7 +412,7 @@
   function start() {
     loading = true; syncPlayer();
     const p = audio.play();
-    if (p && p.catch) p.catch(e => { loading = false; syncPlayer(); if (e && e.name !== 'AbortError') toast('تعذّر تشغيل الصوت — تحقق من الاتصال'); });
+    if (p && p.catch) p.catch(e => { loading = false; syncPlayer(); if (e && e.name !== 'AbortError') toast(T('hb_play_err', 'تعذّر تشغيل الصوت — تحقق من الاتصال')); });
   }
   window.togglePlay = function () {
     const want = cur >= 0 ? cur : (audioIdx >= 0 ? audioIdx : 0);
@@ -411,11 +431,12 @@
     S.rep = (S.rep + 1) % REPS.length; save();
     playsLeft = REPS[S.rep] || 1;
     syncPlayer();
-    toast(S.rep ? `تكرار ${L.unit} ${REPS[S.rep] === Infinity ? 'بلا توقف' : ar(REPS[S.rep]) + ' مرات'}` : 'التكرار متوقف');
+    toast(S.rep ? T('hb_repeat_on', 'تكرار {u} {x}', { u: L.unit, x: REPS[S.rep] === Infinity ? T('hb_repeat_inf', 'بلا توقف') : T('hb_times', '{n} مرات', { n: ar(REPS[S.rep]) }) })
+                : T('hb_repeat_off', 'التكرار متوقف'));
   };
   window.toggleAuto = function () {
     S.auto = !S.auto; save(); syncPlayer();
-    toast(S.auto ? `الانتقال التلقائي إلى ${L.unit} التالي: مفعّل` : 'الانتقال التلقائي: متوقف');
+    toast(S.auto ? T('hb_auto_on', 'الانتقال التلقائي إلى {u} التالي: مفعّل', { u: L.unit }) : T('hb_auto_off', 'الانتقال التلقائي: متوقف'));
   };
   window.cycleSpeed = function () {
     S.speed = SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]; save();
@@ -434,7 +455,7 @@
   audio.addEventListener('waiting', () => { loading = true; syncPlayer(); });
   audio.addEventListener('pause', syncPlayer);
   audio.addEventListener('loadedmetadata', syncPlayer);
-  audio.addEventListener('error', () => { if (!audio.getAttribute('src')) return; loading = false; syncPlayer(); toast('تعذّر تحميل التلاوة — تحقق من الاتصال'); });
+  audio.addEventListener('error', () => { if (!audio.getAttribute('src')) return; loading = false; syncPlayer(); toast(T('hb_audio_err', 'تعذّر تحميل التلاوة — تحقق من الاتصال')); });
   audio.addEventListener('timeupdate', () => {
     if (seeking || !isFinite(audio.duration)) return;
     $('pSeek').value = Math.round(audio.currentTime / audio.duration * 1000);
@@ -465,7 +486,7 @@
     const icon = loading && playing ? ICON_LOAD : playing ? ICON_PAUSE : ICON_PLAY;
     ['pPlay', 'pPlayMini', 'miniPlay'].forEach(id => {
       const b = $(id); b.innerHTML = icon; b.classList.toggle('loading', loading && playing);
-      b.setAttribute('aria-label', playing ? 'إيقاف مؤقت' : 'تشغيل');
+      b.setAttribute('aria-label', playing ? T('hb_pause', 'إيقاف مؤقت') : T('hb_play', 'تشغيل'));
     });
     const here = audioIdx >= 0 && audioIdx === cur;
     if (!here && !seeking) { $('pSeek').value = 0; $('pCur').textContent = '0:00'; }
@@ -477,12 +498,12 @@
     $('pRepeatN').textContent = n === Infinity ? '∞' : !n ? '' : here && playing ? `${ar(n - playsLeft + 1)}/${ar(n)}` : ar(n);
     $('pAuto').classList.toggle('on', S.auto);
     $('pSpeed').textContent = S.speed + '×';
-    $('player').title = `تلاوة: ${AUDIO ? AUDIO.reader : ''}`;
+    $('player').title = T('hb_recitation', 'تلاوة: {r}', { r: AUDIO ? AUDIO.reader : '' });
     $('player').classList.toggle('min', !!S.pmin);
     syncMini();
     const showMini = cur < 0 && audioIdx >= 0;
     $('mini').hidden = !showMini;
-    if (showMini) $('miniT').innerHTML = `${L.unit} ${ar(H[audioIdx].n)}: ${esc(H[audioIdx].title)}<small>${playing ? 'يُتلى الآن' : 'متوقف مؤقتاً'} — اضغط للفتح</small>`;
+    if (showMini) $('miniT').innerHTML = `${L.unit} ${ar(H[audioIdx].n)}: ${esc(H[audioIdx].title)}<small>${esc(playing ? T('hb_now_playing', 'يُتلى الآن') : T('hb_paused', 'متوقف مؤقتاً'))} — ${esc(T('hb_tap_open', 'اضغط للفتح'))}</small>`;
   }
   Object.defineProperty(window, 'audioIdx', { get: () => audioIdx });   // for the mini player's onclick
 
@@ -574,7 +595,7 @@
   window.shareText = function () {
     const h = H[shareIdx], text = shareTextOf(h);
     if (navigator.share) navigator.share({ title: `${BOOK} — ${h.title}`, text }).catch(() => {});
-    else copy(text, 'تم النسخ — الصقه حيث تريد');
+    else copy(text, T('hb_copied_paste', 'تم النسخ — الصقه حيث تريد'));
   };
   window.shareTo = function (where) {
     const h = H[shareIdx], text = shareTextOf(h), url = `${PAGE_URL}#${h.n}`;
@@ -589,9 +610,9 @@
   };
   window.copyHadith = function () {
     const h = H[shareIdx >= 0 && $('shareSheet').classList.contains('open') ? shareIdx : cur];
-    copy(shareTextOf(h), 'تم النسخ');
+    copy(shareTextOf(h), T('hb_copied', 'تم النسخ'));
   };
-  window.copyLink = function () { copy(`${PAGE_URL}#${H[shareIdx].n}`, 'تم نسخ الرابط'); };
+  window.copyLink = function () { copy(`${PAGE_URL}#${H[shareIdx].n}`, T('hb_link_copied', 'تم نسخ الرابط')); };
 
   function copy(text, msg) {
     const done = () => toast(msg);
@@ -601,9 +622,21 @@
   function fallback(text, done) {
     const ta = document.createElement('textarea');
     ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0'; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); done(); } catch (e) { toast('تعذّر النسخ'); }
+    try { document.execCommand('copy'); done(); } catch (e) { toast(T('hb_copy_fail', 'تعذّر النسخ')); }
     ta.remove();
   }
+  function renderAll() { renderChips(); renderList(); renderStats(); renderDaily(); syncPlayer(); }
+  function onLang() {
+    document.documentElement.dir = 'rtl';          // Arabic book text: keep the RTL layout
+    document.documentElement.classList.toggle('ui-ltr', ['en', 'tr'].includes(lang()));
+    relabel();
+    if (!H.length) return;
+    renderAll();
+    if (cur >= 0) { const top = $('rScroll').scrollTop; renderReader(); $('rScroll').scrollTop = top; }
+  }
+  window.addEventListener('langchange', onLang);
+  if (window.I18n) I18n.init().then(onLang, onLang);
+
   function toast(msg) {
     const t = $('toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);

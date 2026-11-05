@@ -43,11 +43,56 @@
   const frameMedia = new Set();
   let leaveArmed = false;
 
+  // The stack is mirrored in sessionStorage so a reload of the host (pull to
+  // refresh while a page is shown in the frame) or a back press into one of
+  // our entries from another document can still tell which page an entry is.
+  // Without it the reloaded host had no idea what its entries were: refresh
+  // showed the player, and back walked through dead entries of the player.
+  const SKEY = 'zadShell:' + location.pathname;
+  let sid = '';
+  let reopen = '';          // page to show again after the host reloaded
+  function save() {
+    try { sessionStorage.setItem(SKEY, JSON.stringify({ sid, meta })); } catch {}
+  }
+  function navType() {
+    try { const n = performance.getEntriesByType('navigation')[0]; return n ? n.type : ''; } catch { return ''; }
+  }
+  // Returns true when the page is being replaced (caller stops initialising).
+  function restore() {
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(SKEY) || 'null'); } catch {}
+    const st = history.state;
+    const k = st && typeof st.zad === 'number' ? st.zad : 0;
+    if (saved && saved.sid && st && st.zs === saved.sid) {
+      sid = saved.sid;
+      Object.assign(meta, saved.meta || {});
+      depth = k;
+      for (const d in meta) if (meta[d] && meta[d].kind === 'leave') leaveArmed = true;
+      const top = meta[k];
+      // A page that was showing in the frame: show it again, so refresh
+      // refreshes that page and back keeps walking the visited pages.
+      if (k > 0 && top && top.kind === 'page') reopen = top.url;
+      // Back from the "leave" entry onto the player's first entry: the user is
+      // leaving the player, so keep going instead of showing it a second time.
+      if (k === 0 && navType() === 'back_forward' && meta[1] && meta[1].kind === 'leave') {
+        try { sessionStorage.removeItem(SKEY); } catch {}
+        history.back(); return true;
+      }
+      return false;
+    }
+    sid = Math.random().toString(36).slice(2);
+    depth = 0;
+    for (const d in meta) delete meta[d];
+    try { sessionStorage.removeItem(SKEY); } catch {}
+    return false;
+  }
+
   // ---------------------------------------------------------------- history
   function push(kind, url) {
     depth++;
     meta[depth] = { kind, url };
-    history.pushState({ zad: depth }, '');
+    history.pushState({ zad: depth, zs: sid }, '');
+    save();
   }
   function pageEntries() {
     let n = 0;
@@ -63,6 +108,7 @@
     const wrap = (fn) => function (st, ...rest) {
       if (st == null || typeof st !== 'object') st = {};
       if (typeof st.zad !== 'number') st = Object.assign({}, st, { zad: depth });
+      if (!st.zs) st = Object.assign({}, st, { zs: sid });
       return fn.call(history, st, ...rest);
     };
     history.pushState = wrap(history.pushState);
@@ -74,6 +120,7 @@
     if (target >= depth) return;            // not one of ours (e.g. a sheet)
     let popped = null;
     while (depth > target) { popped = meta[depth]; delete meta[depth]; depth--; }
+    save();
     const top = meta[depth];
     if (closing) {
       if (top && top.kind === 'page') { history.go(-pageEntries()); return; }
@@ -438,7 +485,13 @@ html.zad-frame-open, html.zad-frame-open body { overflow: hidden !important; }
   function init(o) {
     opts = Object.assign({ title: document.title }, o);
     injectCss();
-    if (supported) stampHistory();
+    if (!supported) return;
+    if (restore()) return;
+    stampHistory();
+    // stamp the host's own entry so a later reload can recognise our stack
+    const st = history.state;
+    if (!st || st.zs !== sid || typeof st.zad !== 'number') history.replaceState(Object.assign({}, st || {}, { zad: depth, zs: sid }), '');
+    if (reopen) showInFrame(reopen);
   }
 
   window.ZadShell = { init, navigate, openFrame, closeFrame, shouldFrame, armLeave, update, pauseFrameMedia,

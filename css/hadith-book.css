@@ -385,3 +385,9 @@ main{ position:relative; z-index:1; max-width:820px; margin:0 auto; padding:18px
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{ animation:none !important; transition:none !important; }
 }
+
+/* English / Turkish interface over the RTL book layout: each piece of UI text
+   takes its own direction, so "132 chapters…" or "Narrator: …" read correctly.
+   The Arabic text of the book is left to its paragraph direction. */
+html.ui-ltr body *:not(svg):not(svg *):not(.ar *):not(.daily-text *) { unicode-bidi: plaintext; }
+html.ui-ltr #q, html.ui-ltr .legend { direction: ltr; }
