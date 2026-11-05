@@ -1145,4 +1145,12 @@ export default {
   "hb_duaa_cat_quran": "Supplications from the Qur'an",
   "hb_duaa_cat_sunnah": "Supplications from the Sunnah",
   "hb_duaa_about": "<h3>About the book</h3>«Supplication from the Qur'an and Sunnah» by Shaykh Sa'id ibn Ali ibn Wahf al-Qahtani (may Allah have mercy on him), abridged from his book «Al-Dhikr wal-Du'a wal-'Ilaj bil-Ruqa min al-Kitab was-Sunnah».<h3 style=\"margin-top:10px\">Source of the texts</h3>The texts, numbering and takhrij are as in the book (a printed edition published on the Turath website); the takhrij under each supplication is the author's, from the book's footnotes. Next to the supplication number we flag what al-Albani graded weak, what is a saying of a Companion (mawquf), and what is adapted from the Qur'an or from a supplication the Prophet ﷺ made for someone else.",
+
+  // Azkar: virtue panel, zoom buttons, saved counts
+  "azkar_fadl": "Virtue",
+  "azkar_zoom_in": "Larger text",
+  "azkar_zoom_out": "Smaller text",
+  "azkar_reset": "Reset count",
+  "azkar_all_done": "All done — may Allah accept",
+  "azkar_reset_all": "Reset all",
 };
