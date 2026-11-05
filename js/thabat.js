@@ -19,15 +19,28 @@
     if (p) Object.keys(p).forEach(x => { s = String(s).split('{' + x + '}').join(p[x]); });
     return s;
   }
-  const num = n => Number(n).toLocaleString(['en', 'tr'].includes(lang()) ? 'en-US' : 'ar-EG');
-  const two = n => ['en', 'tr'].includes(lang()) ? String(n).padStart(2, '0') : String(n).padStart(2, '0').replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-  function daysLabel(n) {
-    if (lang() === 'ar') return n === 1 ? 'يوم واحد' : n === 2 ? 'يومان' : n <= 10 ? `${num(n)} أيام` : `${num(n)} يومًا`;
-    return T(n === 1 ? 'th_day_one' : 'th_day_many', n === 1 ? 'يوم واحد' : '{n} يومًا', { n: num(n) });
+  // Counters use Western digits, like the app's other counters (the Arabic zero «٠»
+  // renders as a small diamond in Tajawal and read as a broken character).
+  const num = n => Number(n).toLocaleString('en-US');
+  const two = n => String(n).padStart(2, '0');
+  // Arabic counted nouns: 1 / 2 / 3–10 / 11+
+  function counted(n, ar, key1, keyN) {
+    if (lang() === 'ar') return n === 1 ? ar[0] : n === 2 ? ar[1] : n <= 10 ? `${num(n)} ${ar[2]}` : `${num(n)} ${ar[3]}`;
+    return T(n === 1 ? key1 : keyN, n === 1 ? ar[0] : `{n} ${ar[3]}`, { n: num(n) });
+  }
+  const daysLabel = n => counted(n, ['يوم واحد', 'يومان', 'أيام', 'يومًا'], 'th_day_one', 'th_day_many');
+  const hoursLabel = n => counted(n, ['ساعة واحدة', 'ساعتان', 'ساعات', 'ساعة'], 'th_hour_one', 'th_hour_many');
+  const minutesLabel = n => counted(n, ['دقيقة واحدة', 'دقيقتان', 'دقائق', 'دقيقة'], 'th_min_one', 'th_min_many');
+  // a remaining time: whole days from two days on, otherwise hours, then minutes
+  function leftLabel(ms) {
+    if (ms >= 2 * DAY) return daysLabel(Math.floor(ms / DAY));
+    if (ms >= 36e5) return hoursLabel(Math.ceil(ms / 36e5));
+    return minutesLabel(Math.max(1, Math.ceil(ms / 6e4)));
   }
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const fmtDate = ms => new Date(ms).toLocaleDateString(lang() === 'ar' ? 'ar-EG' : lang(), { year: 'numeric', month: 'long', day: 'numeric' });
-  const fmtDT = ms => new Date(ms).toLocaleString(lang() === 'ar' ? 'ar-EG' : lang(), { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const loc = () => (lang() === 'ar' ? 'ar-EG-u-nu-latn' : lang());
+  const fmtDate = ms => new Date(ms).toLocaleDateString(loc(), { year: 'numeric', month: 'long', day: 'numeric' });
+  const fmtDT = ms => new Date(ms).toLocaleString(loc(), { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const toLocalInput = ms => { const d = new Date(ms - new Date(ms).getTimezoneOffset() * 6e4); return d.toISOString().slice(0, 16); };
   const showEn = () => ['en', 'tr'].includes(lang());
 
@@ -68,17 +81,20 @@
       return;
     }
     box.innerHTML = S.journeys.map(j => {
-      const d = streakDays(cur(j)), nx = nextMile(d), pv = prevMile(d);
-      const pct = nx ? Math.round((d - pv) / (nx - pv) * 100) : 100;
+      const ms = elapsed(j), d = Math.floor(ms / DAY), nx = nextMile(d), pv = prevMile(d);
+      const pct = nx ? Math.min(100, Math.round((ms / DAY - pv) / (nx - pv) * 100)) : 100;
+      // a new journey counts its first hours and minutes instead of showing 0 days
+      const badge = d >= 1 ? [num(d), T('th_u_days', 'يوم')]
+        : ms >= 36e5 ? [num(Math.floor(ms / 36e5)), T('th_u_hours', 'ساعة')] : [num(Math.floor(ms / 6e4)), T('th_u_minutes', 'دقيقة')];
       return `<button class="card j-card" data-id="${j.id}">
         <img class="j-cover" src="${COVERS[(j.cover || 1) - 1]}" alt="">
         <span class="j-body">
           <span class="j-name">${esc(j.name)}</span>
           <span class="j-kind">${esc(kindLabel(j))}</span>
           <span class="j-next"><span class="j-bar"><i style="width:${pct}%"></i></span>
-            <small>${nx ? esc(T('th_to_next', 'إلى محطة {m}', { m: daysLabel(nx) })) : esc(T('th_all_miles', 'بلغت كل المحطات، الحمد لله'))}</small></span>
+            <small>${nx ? esc(T('th_to_next', 'المحطة القادمة: {m}', { m: daysLabel(nx) })) : esc(T('th_all_miles', 'بلغت كل المحطات، الحمد لله'))}</small></span>
         </span>
-        <span class="j-days">${S.settings.hideNumbers ? `<svg class="i" viewBox="0 0 24 24" style="color:var(--accent)"><path d="m5 12 5 5 9-10"/></svg>` : `<b>${num(d)}</b><span>${esc(T('th_u_days', 'يوم'))}</span>`}</span>
+        <span class="j-days">${S.settings.hideNumbers ? `<svg class="i" viewBox="0 0 24 24" style="color:var(--accent)"><path d="m5 12 5 5 9-10"/></svg>` : `<b>${badge[0]}</b><span>${esc(badge[1])}</span>`}</span>
       </button>`;
     }).join('');
   }
@@ -110,13 +126,20 @@
   };
 
   // ---- library ----
-  let libKind = 'ayat';
+  let libKind = 'ayat', libAll = false;
+  const LIB_FIRST = 4;
   function renderLib() {
     document.querySelectorAll('#libTabs button').forEach(b => b.classList.toggle('on', b.dataset.k === libKind));
-    $('lib').innerHTML = C[libKind].map((x, i) => `<article class="card item">${quoteHtml(x)}
-      <div class="acts"><button class="icon-btn" onclick="copyQuote('${libKind}', ${i})" aria-label="${esc(T('hb_copy', 'نسخ'))}"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button></div></article>`).join('');
+    const list = C[libKind], shown = libAll ? list : list.slice(0, LIB_FIRST);
+    const more = list.length > LIB_FIRST ? `<div class="more"><button class="chip-btn" onclick="toggleLib()">${esc(libAll ? T('th_show_less', 'عرض أقل') : T('th_show_all', 'عرض الكل ({n})', { n: num(list.length) }))}</button></div>` : '';
+    $('lib').innerHTML = shown.map((x, i) => `<article class="card item">${quoteHtml(x)}
+      <div class="acts"><button class="icon-btn" onclick="copyQuote('${libKind}', ${i})" aria-label="${esc(T('hb_copy', 'نسخ'))}"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button></div></article>`).join('') + more;
   }
-  $('libTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { libKind = b.dataset.k; renderLib(); } });
+  window.toggleLib = () => {
+    libAll = !libAll; renderLib();
+    if (!libAll) $('libTabs').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+  $('libTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { libKind = b.dataset.k; libAll = false; renderLib(); } });
 
   // ---- journey view ----
   window.curId = null;
@@ -139,7 +162,7 @@
     const past = j.streaks.slice(0, -1).reverse();
     $('vContent').innerHTML = `
       <div class="v-banner" style="background-image:url('${COVERS[(j.cover || 1) - 1]}')">
-        <h2>${esc(j.name)}</h2><div class="j-kind">${esc(kindLabel(j))}</div>
+        <h2>${esc(j.name)}</h2><span class="pill">${esc(kindLabel(j))}</span>
       </div>
       <div class="v-body">
         <div class="card"><div id="timer"></div></div>
@@ -147,7 +170,7 @@
         <div class="card miles">
           <h3><svg class="i" viewBox="0 0 24 24" style="color:var(--gold)"><use href="#star8"/></svg>${esc(T('th_miles', 'محطات الشكر'))}</h3>
           <div class="track" id="track">${MILES.map(m => `<div class="ms${d >= m ? ' done' : ''}${m === nx ? ' cur' : ''}"><i>${d >= m ? CHECK : ''}</i><b>${num(m)}</b><span>${esc(T('th_u_days', 'يوم'))}</span></div>`).join('')}</div>
-          <div class="next-msg">${nx ? esc(T('th_next_in', 'بقي {n} على محطة {m}', { n: daysLabel(nx - d), m: daysLabel(nx) })) : esc(T('th_all_miles', 'بلغت كل المحطات، الحمد لله'))}</div>
+          <div class="next-msg">${nextText(j)}</div>
         </div>
         <div class="card box"><h3>${esc(T('th_f_why', 'نيّتي وسببي'))}</h3>
           ${j.why ? `<div class="why">${esc(j.why)}</div>` : `<div class="why empty-why">${esc(T('th_why_empty', 'لم تكتب سببًا بعد؛ اكتبه من زر التعديل ليذكّرك حين تضعف.'))}</div>`}</div>
@@ -167,6 +190,10 @@
     const doneEls = $('track').querySelectorAll('.ms.done');
     if (doneEls.length) doneEls[doneEls.length - 1].scrollIntoView({ inline: 'center', block: 'nearest' });
   }
+  function nextText(j) {
+    const nx = nextMile(streakDays(cur(j)));
+    return nx ? esc(T('th_next_in', 'بقي {n} على محطة «{m}»', { n: leftLabel(nx * DAY - elapsed(j)), m: daysLabel(nx) })) : esc(T('th_all_miles', 'بلغت كل المحطات، الحمد لله'));
+  }
   function tick() {
     const el = $('timer'); if (!el || !window.curId) return;
     const j = byId(window.curId); if (!j) return;
@@ -184,9 +211,14 @@
   }
   setInterval(() => { if (document.hidden) return; tick(); }, 1000);
   let lastDay = -1;
-  setInterval(() => {   // day rollover: refresh the lists and check milestones
+  setInterval(() => {   // each minute: refresh the cards / next-milestone text and check milestones
     const d = Math.floor(now() / 6e4);
-    if (d !== lastDay) { lastDay = d; if (!window.curId) renderHome(); checkMilestones(); }
+    if (d !== lastDay) {
+      lastDay = d;
+      if (!window.curId) renderHome();
+      else { const n = document.querySelector('#vContent .next-msg'), j = byId(window.curId); if (n && j) n.innerHTML = nextText(j); }
+      checkMilestones();
+    }
   }, 30000);
 
   // ---- milestones: thank Allah once per milestone per stretch ----
@@ -381,7 +413,7 @@
   let pinMode = null, pinBuf = '', pinFirst = '';
   function buildKeypad() {
     $('keypad').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'x', 0, '⌫'].map(k => k === 'x' ? '<span></span>'
-      : `<button type="button" data-k="${k}">${k === '⌫' ? '<svg class="i" viewBox="0 0 24 24"><path d="M21 5H8l-6 7 6 7h13z"/><path d="m16 9-6 6M10 9l6 6"/></svg>' : (lang() === 'ar' ? '٠١٢٣٤٥٦٧٨٩'[k] : k)}</button>`).join('');
+      : `<button type="button" data-k="${k}">${k === '⌫' ? '<svg class="i" viewBox="0 0 24 24"><path d="M21 5H8l-6 7 6 7h13z"/><path d="m16 9-6 6M10 9l6 6"/></svg>' : k}</button>`).join('');
   }
   function pinUi(msg) {
     document.querySelectorAll('#pinDots i').forEach((d, i) => d.classList.toggle('f', i < pinBuf.length));
