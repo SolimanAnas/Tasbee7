@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1a16" id="metaThemeColor">
+  <title>ثبات | زاد المسلم</title>
+  <meta name="description" content="ثبات: رحلاتك الخاصة في التوبة والثبات — عدّاد أيام، محطات شكر، آيات وأحاديث وأدعية للثبات، ولحظة ضعف. كل البيانات على جهازك فقط.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/thabat.css">
+</head>
+<body data-theme="dark">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="sprout" viewBox="0 0 48 48"><path d="M24 44V24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path d="M24 26C24 15 16 9 5 9c0 11 8 17 19 17z" fill="currentColor"/><path d="M24 22c0-9 7-14 19-14 0 10-7 15-19 14z" fill="currentColor" opacity=".78"/></symbol>
+    <symbol id="star8" viewBox="0 0 48 48"><polygon fill="currentColor" points="24.0,1.0 31.0,7.2 40.3,7.7 40.8,17.0 47.0,24.0 40.8,31.0 40.3,40.3 31.0,40.8 24.0,47.0 17.0,40.8 7.7,40.3 7.2,31.0 1.0,24.0 7.2,17.0 7.7,7.7 17.0,7.2"/></symbol>
+  </defs>
+</svg>
+
+<!-- PIN lock (optional, set in settings) -->
+<div id="lock" role="dialog" aria-modal="true">
+  <svg class="sprout"><use href="#sprout"/></svg>
+  <h2 data-i18n="th_lock_title">أدخل الرمز</h2>
+  <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+  <div class="pin-msg" id="pinMsg"></div>
+  <div class="keypad" id="keypad"></div>
+</div>
+
+<header>
+  <div class="toolbar">
+    <a href="../index.html" class="hbtn" aria-label="الرئيسية" data-i18n-aria="home">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
+    </a>
+    <div class="htitle"><span data-i18n="th_title">ثبات</span><small data-i18n="th_subtitle">رحلات التوبة والثبات</small></div>
+    <div class="theme-dock">
+      <button class="dot" data-set="light" style="background:#fbf3df" onclick="setTheme('light')" aria-label="فاتح" data-i18n-aria="hb_theme_light"></button>
+      <button class="dot" data-set="sepia" style="background:#d9bf8a" onclick="setTheme('sepia')" aria-label="عسلي" data-i18n-aria="hb_theme_sepia"></button>
+      <button class="dot" data-set="dark" style="background:#0e201b" onclick="setTheme('dark')" aria-label="داكن" data-i18n-aria="hb_theme_dark"></button>
+    </div>
+    <button class="hbtn" onclick="openSettings()" aria-label="الإعدادات" data-i18n-aria="settings">
+      <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <svg class="sprout"><use href="#sprout"/></svg>
+    <h1 data-i18n="th_title">ثبات</h1>
+    <div class="tag" data-i18n="th_tagline">رحلةٌ صادقة إلى الله، يومًا بعد يوم</div>
+    <div class="verse">﴿وَٱلَّذِينَ جَٰهَدُوا۟ فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا﴾<small>سورة العنكبوت ٦٩</small></div>
+    <div class="stats">
+      <div class="stat"><b id="stJ">٠</b><span data-i18n="th_stat_journeys">رحلاتي</span></div>
+      <div class="stat"><b id="stD">٠</b><span data-i18n="th_stat_days">أيام الثبات</span></div>
+      <div class="stat"><b id="stM">٠</b><span data-i18n="th_stat_miles">محطات بلغتها</span></div>
+    </div>
+    <div class="hero-actions">
+      <button class="btn primary" onclick="openForm()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="th_new">رحلة جديدة</span></button>
+      <button class="btn weak" onclick="openWeak()">
+        <svg class="i" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg><span data-i18n="th_weak">أشعر بضعف</span></button>
+    </div>
+  </section>
+
+  <div class="sec-head"><div><h2 data-i18n="th_daily">زاد اليوم</h2><small data-i18n="th_daily_sub">آية أو حديث أو دعاء يتجدّد كل يوم</small></div></div>
+  <section class="card daily" id="daily"></section>
+
+  <div class="sec-head">
+    <div><h2 data-i18n="th_my">رحلاتي</h2><small data-i18n="th_my_sub">كل رحلة عزمٌ مستقل، تبدأ بنية صادقة</small></div>
+    <span class="spacer"></span>
+    <button class="round-add" onclick="openForm()" aria-label="رحلة جديدة" data-i18n-aria="th_new"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+  <section class="journeys" id="journeys"></section>
+  <p class="privacy"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span data-i18n="th_privacy">كل ما تكتبه هنا يبقى على جهازك فقط، لا يُرسل إلى أي خادم. استر على نفسك ما ستره الله عليك، واختر أسماءً لا تكشف شيئًا لو رآها غيرك.</span></p>
+
+  <div class="sec-head"><div><h2 data-i18n="th_lib">زاد الثبات</h2><small data-i18n="th_lib_sub">آيات وأحاديث وأدعية في التوبة والثبات</small></div></div>
+  <div class="tabs" role="tablist" id="libTabs">
+    <button class="on" data-k="ayat" data-i18n="th_tab_ayat">آيات</button>
+    <button data-k="hadith" data-i18n="th_tab_hadith">أحاديث</button>
+    <button data-k="dua" data-i18n="th_tab_dua">أدعية</button>
+  </div>
+  <section class="lib" id="lib"></section>
+</main>
+
+<!-- ===== journey view ===== -->
+<section class="view" id="view" aria-hidden="true">
+  <div class="v-top">
+    <button class="hbtn" onclick="closeView()" aria-label="رجوع" data-i18n-aria="hb_back"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <span class="spacer"></span>
+    <button class="hbtn" onclick="openForm(curId)" aria-label="تعديل" data-i18n-aria="th_edit"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+    <button class="hbtn" onclick="askDelete()" aria-label="حذف" data-i18n-aria="th_delete"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+  </div>
+  <div id="vContent"></div>
+</section>
+
+<div class="overlay" id="overlay" onclick="closeSheet()"></div>
+
+<!-- new / edit -->
+<div class="sheet" id="formSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3 id="formTitle" data-i18n="th_new">رحلة جديدة</h3>
+  <div class="sub" data-i18n="th_form_sub">بسم الله، وعلى الله التوكّل</div>
+  <div class="field">
+    <label for="fName" data-i18n="th_f_name">اسم الرحلة</label>
+    <input class="inp" id="fName" maxlength="40" autocomplete="off" placeholder="مثال: رحلة ١" data-i18n-placeholder="th_f_name_ph">
+    <div class="hint" data-i18n="th_f_name_hint">اختر اسمًا لا يكشف شيئًا لو رآه غيرك؛ فالله ستّير يحبّ الستر.</div>
+  </div>
+  <div class="field">
+    <label data-i18n="th_f_kind">نوع الرحلة</label>
+    <div class="seg" id="fKind">
+      <button type="button" data-k="quit" class="on" data-i18n="th_kind_quit">ترك ما لا يرضي الله</button>
+      <button type="button" data-k="keep" data-i18n="th_kind_keep">مداومة على طاعة</button>
+    </div>
+  </div>
+  <div class="field">
+    <label for="fStart" data-i18n="th_f_start">بداية الرحلة</label>
+    <input class="inp" id="fStart" type="datetime-local">
+  </div>
+  <div class="field">
+    <label for="fWhy" data-i18n="th_f_why">نيّتي وسببي</label>
+    <textarea class="inp" id="fWhy" maxlength="500" placeholder="لماذا بدأت؟ اكتب ما يذكّرك حين تضعف…" data-i18n-placeholder="th_f_why_ph"></textarea>
+    <div class="hint" data-i18n="th_f_why_hint">سيظهر لك هذا في لحظات الضعف.</div>
+  </div>
+  <div class="field">
+    <label data-i18n="th_f_cover">صورة الرحلة</label>
+    <div class="covers" id="fCovers"></div>
+  </div>
+  <button class="btn primary block" id="fSave" onclick="saveForm()"><span data-i18n="th_f_save">ابدأ الرحلة بسم الله</span></button>
+</div>
+
+<!-- renew resolve -->
+<div class="sheet" id="renewSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3 data-i18n="th_renew">جدّد العزم</h3>
+  <div class="card qcard">
+    <div class="quote">«أذنب عبدٌ ذنبًا فقال: اللهم اغفر لي ذنبي، فقال تبارك وتعالى: أذنب عبدي ذنبًا فعلم أن له ربًّا يغفر الذنب ويأخذ بالذنب… اعمل ما شئت فقد غفرت لك».</div>
+    <div class="quote-src">رواه البخاري ومسلم</div>
+  </div>
+  <p class="note" data-i18n="th_renew_note">زلّتك لا تمحو ما مضى؛ أيام ثباتك محفوظة في سجلّك، والتوبة تجبّ ما قبلها. استغفر وابدأ من جديد، ولا تيأس من رحمة الله.</p>
+  <div class="field">
+    <label for="rWhen" data-i18n="th_r_when">متى؟</label>
+    <input class="inp" id="rWhen" type="datetime-local">
+  </div>
+  <div class="field">
+    <label for="rNote" data-i18n="th_r_note">ما الذي أوقعك؟ (اختياري)</label>
+    <textarea class="inp" id="rNote" maxlength="300" placeholder="ملاحظة خاصة بك تعينك على الحذر في المرة القادمة" data-i18n-placeholder="th_r_note_ph"></textarea>
+  </div>
+  <button class="btn primary block" onclick="doRenew()"><span data-i18n="th_r_go">أستغفر الله، وأبدأ من جديد</span></button>
+</div>
+
+<!-- weak moment -->
+<div class="sheet" id="weakSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3 data-i18n="th_weak">أشعر بضعف</h3>
+  <div class="refuge">أعوذ بالله من الشيطان الرجيم</div>
+  <p class="note" data-i18n="th_weak_note">هذه اللحظة ستمرّ بإذن الله. الرغبة تشتدّ ثم تهدأ؛ اصبر قليلًا ودع الذكر يملأ هذه الدقائق.</p>
+  <div class="patience">
+    <div class="ring">
+      <svg viewBox="0 0 160 160"><circle class="bg" cx="80" cy="80" r="72"/><circle class="fg" id="pRing" cx="80" cy="80" r="72"/></svg>
+      <div class="c"><b id="pTime">١٠:٠٠</b><span id="pDhikr">سبحان الله</span></div>
+    </div>
+    <button class="btn warm" id="pBtn" style="margin-top:10px" onclick="togglePatience()"><span data-i18n="th_p_start">اصبر عشر دقائق</span></button>
+  </div>
+  <div class="field"><label data-i18n="th_weak_why">تذكّر لماذا بدأت</label><div class="why-list" id="weakWhy"></div></div>
+  <div class="field"><label data-i18n="th_weak_steps">خطوات تعينك الآن</label>
+    <div class="steps">
+      <label><input type="checkbox"><span data-i18n="th_s1">قم فتوضّأ، وغيّر مكانك أو هيئتك</span></label>
+      <label><input type="checkbox"><span data-i18n="th_s2">صلِّ ركعتين، وادعُ الله بما في قلبك</span></label>
+      <label><input type="checkbox"><span data-i18n="th_s3">ابتعد عن الخلوة والشاشة، واخرج إلى الناس</span></label>
+      <label><input type="checkbox"><span data-i18n="th_s4">كلّم صديقًا صالحًا تثق به</span></label>
+      <label><input type="checkbox"><span data-i18n="th_s5">اقرأ شيئًا من القرآن ولو آيات</span></label>
+    </div>
+  </div>
+  <div class="card qcard">
+    <div class="quote">«يا مقلِّبَ القلوب، ثبِّت قلبي على دينك»</div><div class="quote-src">رواه الترمذي</div>
+  </div>
+  <div class="links">
+    <a class="btn soft" href="masbaha.html"><span data-i18n="card_tasbih">المسبحة</span></a>
+    <a class="btn soft" href="quran-text.html"><span data-i18n="th_quran">القرآن الكريم</span></a>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="sheet" id="setSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3 data-i18n="settings">الإعدادات</h3>
+  <div class="set-row"><div><b data-i18n="th_set_sec">إظهار الثواني</b><small data-i18n="th_set_sec_sub">العدّ بالأيام أهدأ للقلب؛ الثواني اختيارية</small></div><button class="switch" id="swSec" onclick="toggleSet('seconds')"></button></div>
+  <div class="set-row"><div><b data-i18n="th_set_hide">إخفاء الأرقام</b><small data-i18n="th_set_hide_sub">لمن يشغله العدّ: تبقى الرحلة والمحطات دون عدّاد</small></div><button class="switch" id="swHide" onclick="toggleSet('hideNumbers')"></button></div>
+  <div class="set-row"><div><b data-i18n="th_set_pin">قفل برمز</b><small data-i18n="th_set_pin_sub">يطلب رمزًا من ٤ أرقام عند فتح الصفحة</small></div><button class="switch" id="swPin" onclick="togglePin()"></button></div>
+  <div class="set-btns">
+    <button class="btn ghost" onclick="exportData()"><span data-i18n="th_export">تصدير نسخة</span></button>
+    <button class="btn ghost" onclick="document.getElementById('importFile').click()"><span data-i18n="th_import">استيراد نسخة</span></button>
+  </div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <button class="btn danger block" onclick="wipeAll()"><span data-i18n="th_wipe">حذف كل البيانات</span></button>
+  <p class="note" data-i18n="th_set_note">البيانات محفوظة في هذا المتصفح فقط؛ مسح بيانات المتصفح أو التطبيق يحذفها، فاحتفظ بنسخة إن شئت.</p>
+</div>
+
+<!-- milestone -->
+<div class="modal" id="mileModal" role="dialog" aria-modal="true">
+  <div class="m-card">
+    <svg class="m-star"><use href="#star8"/></svg>
+    <h3>الحمد لله الذي بنعمته تتمّ الصالحات</h3>
+    <p id="mileText"></p>
+    <div class="card qcard"><div class="quote" id="mileQuote"></div><div class="quote-src" id="mileSrc"></div></div>
+    <p class="note" data-i18n="th_mile_note">هذا بتوفيق الله وحده؛ فاشكره، واسأله الثبات، ولا تغترّ بما مضى.</p>
+    <button class="btn primary block" onclick="closeMile()"><span data-i18n="th_mile_ok">الحمد لله</span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../js/theme-manager.js"></script>
+<script src="../js/back-close.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/thabat-content.js"></script>
+<script src="../js/thabat.js"></script>
+</body>
+</html>
