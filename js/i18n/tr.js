@@ -1117,4 +1117,12 @@ export default {
   "hb_duaa_cat_quran": "Kur'an duaları",
   "hb_duaa_cat_sunnah": "Sünnet duaları",
   "hb_duaa_about": "<h3>Kitap hakkında</h3>Şeyh Saîd b. Ali b. Vehf el-Kahtânî'nin (rahimehullah) «ed-Duâ mine'l-Kitâb ve's-Sünne» adlı eseri; kendisinin «ez-Zikr ve'd-Duâ ve'l-İlâc bi'r-Rukâ mine'l-Kitâb ve's-Sünne» kitabından özetlenmiştir.<h3 style=\"margin-top:10px\">Metinlerin kaynağı</h3>Metinler, numaralandırma ve tahric kitaptaki gibidir («Turâs» sitesinde yayımlanan basılı nüsha); her duanın altındaki tahric, müellifin kitabın dipnotlarındaki tahricidir. Dua numarasının yanında Elbânî'nin zayıf saydıkları, sahabeye mevkuf olanlar ve Kur'an'dan ya da Peygamber'in ﷺ başkası için yaptığı duadan iktibas edilenler belirtilmiştir.",
+
+  // Azkar: virtue panel, zoom buttons, saved counts
+  "azkar_fadl": "Fazileti",
+  "azkar_zoom_in": "Yazıyı büyüt",
+  "azkar_zoom_out": "Yazıyı küçült",
+  "azkar_reset": "Sayacı sıfırla",
+  "azkar_all_done": "Hepsi tamam — Allah kabul etsin",
+  "azkar_reset_all": "Hepsini sıfırla",
 };
