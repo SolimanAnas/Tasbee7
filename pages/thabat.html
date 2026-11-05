@@ -110,12 +110,36 @@
   </div>
   <div class="field">
     <label data-i18n="th_f_kind">نوع الرحلة</label>
-    <div class="seg" id="fKind">
+    <div class="seg kinds" id="fKind">
+      <button type="button" data-k="quran" class="kind-quran">
+        <img src="../images/thabat/covers/mushaf-s.webp" alt="">
+        <span><b data-i18n="th_kind_quran">ورد القرآن</b><small data-i18n="th_kind_quran_sub">ورد يومي من المصحف، وتقدّمٌ نحو الختمة</small></span>
+        <svg class="kq-star"><use href="#star8"/></svg>
+      </button>
       <button type="button" data-k="quit" class="on" data-i18n="th_kind_quit">ترك ما لا يرضي الله</button>
       <button type="button" data-k="keep" data-i18n="th_kind_keep">مداومة على طاعة</button>
     </div>
   </div>
-  <div class="field">
+  <!-- Qur'an wird only -->
+  <div class="field q-only">
+    <label data-i18n="th_f_wird">مقدار الورد اليومي</label>
+    <div class="wird-chips" id="fWirdChips"></div>
+    <div class="stepper">
+      <button type="button" onclick="wirdStep(-1)" aria-label="−">−</button>
+      <span><b id="fWirdN">2</b> <small id="fWirdU">صفحة</small></span>
+      <button type="button" onclick="wirdStep(1)" aria-label="+">+</button>
+    </div>
+    <div class="hint" id="fWirdHint"></div>
+  </div>
+  <div class="field q-only">
+    <label for="fSurah" data-i18n="th_f_from">أبدأ من</label>
+    <div class="q-start">
+      <select class="inp" id="fSurah"></select>
+      <input class="inp" id="fPage" type="number" min="1" max="604" inputmode="numeric" aria-label="صفحة" data-i18n-aria="th_page">
+    </div>
+    <div class="hint" data-i18n="th_f_from_hint">رقم الصفحة في مصحف المدينة (٦٠٤ صفحات)، ويفتح عليها المصحف في التطبيق.</div>
+  </div>
+  <div class="field t-only">
     <label for="fStart" data-i18n="th_f_start">بداية الرحلة</label>
     <input class="inp" id="fStart" type="datetime-local">
   </div>
@@ -163,6 +187,11 @@
       <div class="c"><b id="pTime">10:00</b><span id="pDhikr">سبحان الله</span></div>
     </div>
     <button class="btn warm" id="pBtn" style="margin-top:10px" onclick="togglePatience()"><span data-i18n="th_p_start">اصبر عشر دقائق</span></button>
+    <div class="p-done" id="pDone" hidden>
+      <button class="btn primary block overcome" onclick="overcome()">
+        <svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span data-i18n="th_overcome">تجاوزت هذه اللحظة، الحمد لله</span></button>
+      <button class="link-btn" onclick="togglePatience()" data-i18n="th_p_again">مرة أخرى</button>
+    </div>
   </div>
   <div class="field"><label data-i18n="th_weak_why">تذكّر لماذا بدأت</label><div class="why-list" id="weakWhy"></div></div>
   <div class="field"><label data-i18n="th_weak_steps">خطوات تعينك الآن</label>
@@ -202,7 +231,7 @@
 <!-- milestone -->
 <div class="modal" id="mileModal" role="dialog" aria-modal="true">
   <div class="m-card">
-    <svg class="m-star"><use href="#star8"/></svg>
+    <div class="m-plant"><img id="milePlant" src="../images/thabat/growth/g1.webp" alt=""></div>
     <h3>الحمد لله الذي بنعمته تتمّ الصالحات</h3>
     <p id="mileText"></p>
     <div class="card qcard"><div class="quote" id="mileQuote"></div><div class="quote-src" id="mileSrc"></div></div>
@@ -211,11 +240,22 @@
   </div>
 </div>
 
+<div class="modal" id="winModal" role="dialog" aria-modal="true">
+  <div class="m-card win">
+    <div class="win-pic" id="winPic"></div>
+    <h3 id="winTitle">الحمد لله</h3>
+    <p id="winText"></p>
+    <div class="card qcard"><div class="quote" id="winQuote"></div><div class="quote-src" id="winSrc"></div></div>
+    <button class="btn primary block" onclick="closeWin()"><span data-i18n="th_mile_ok">الحمد لله</span></button>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="../js/theme-manager.js"></script>
 <script src="../js/back-close.js"></script>
 <script src="../js/i18n.js"></script>
+<script src="../js/surah-map.js"></script>
 <script src="../js/thabat-content.js"></script>
 <script src="../js/thabat.js"></script>
 </body>

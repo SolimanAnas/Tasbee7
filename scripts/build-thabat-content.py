@@ -24,6 +24,8 @@ AYAT = [
  ((3, 8), 'Our Lord, let not our hearts deviate after You have guided us, and grant us from Yourself mercy. Indeed, You are the Bestower.', 'دعاء'),
 ]
 HADITH = [
+ ('«يأتي على الناس زمانٌ الصابرُ فيهم على دينه كالقابض على الجمر».', 'رواه الترمذي، وصحّحه الألباني',
+  '"A time will come upon people when the one who holds patiently to his religion among them will be like one holding a burning coal."'),
  ('«أذنب عبدٌ ذنبًا فقال: اللهم اغفر لي ذنبي، فقال تبارك وتعالى: أذنب عبدي ذنبًا فعلم أن له ربًّا يغفر الذنب ويأخذ بالذنب، ثم عاد فأذنب… اعمل ما شئت فقد غفرت لك».', 'رواه البخاري ومسلم',
   '"A servant committed a sin and said: O Allah, forgive me my sin. Allah said: My servant sinned and knew he has a Lord who forgives sin and holds to account for it… Then he sinned again… Do as you wish, I have forgiven you."'),
  ('«لَلَّهُ أفرحُ بتوبة عبده من أحدكم سقط على بعيره وقد أضلّه في أرض فلاة».', 'رواه البخاري ومسلم',
@@ -63,8 +65,26 @@ DUA = [
  ('«اللهم إني أعوذ بك من الهمّ والحزن، والعجز والكسل، والجبن والبخل، وضَلَع الدَّين وغلبة الرجال».', 'رواه البخاري', '"O Allah, I seek refuge in You from worry and grief, incapacity and laziness, cowardice and miserliness, the burden of debt and being overpowered by men."'),
  ('«أستغفر الله العظيم الذي لا إله إلا هو الحيَّ القيوم وأتوب إليه».', 'رواه أبو داود والترمذي', '"I seek forgiveness from Allah the Mighty, there is no god but He, the Living, the Sustainer, and I repent to Him."'),
 ]
+# For the Qur'an wird journeys: verses and hadith on reciting and keeping up the Qur'an
+QURAN_AYAT = [
+ ((35, 29), 'Indeed, those who recite the Book of Allah, establish prayer and spend from what We have provided them, secretly and publicly, hope for a transaction that will never perish.'),
+ ((54, 17), 'And We have certainly made the Qur\'an easy to remember, so is there any who will remember?'),
+ ((38, 29), '(This is) a blessed Book which We have revealed to you, that they might reflect upon its verses and that those of understanding would be reminded.'),
+ ((17, 9), 'Indeed, this Qur\'an guides to that which is most upright and gives good tidings to the believers who do righteous deeds that they will have a great reward.'),
+ ((73, 4), 'Or add to it, and recite the Qur\'an with measured recitation.'),
+ ((13, 28), 'Those who have believed and whose hearts are assured by the remembrance of Allah. Unquestionably, by the remembrance of Allah hearts are assured.'),
+]
+QURAN_HADITH = [
+ ('«اقرؤوا القرآن؛ فإنه يأتي يوم القيامة شفيعًا لأصحابه».', 'رواه مسلم', '"Recite the Qur\'an, for it will come on the Day of Resurrection as an intercessor for its companions."'),
+ ('«من قرأ حرفًا من كتاب الله فله به حسنة، والحسنة بعشر أمثالها، لا أقول: الم حرف، ولكن ألفٌ حرف، ولامٌ حرف، وميمٌ حرف».', 'رواه الترمذي، وصحّحه الألباني', '"Whoever reads a letter from the Book of Allah has a good deed for it, and a good deed is multiplied by ten…"'),
+ ('«الماهر بالقرآن مع السفرة الكرام البررة، والذي يقرأ القرآن ويتتعتع فيه وهو عليه شاقٌّ له أجران».', 'رواه البخاري ومسلم', '"The one skilled in the Qur\'an is with the noble, righteous scribes; and the one who recites it haltingly, finding it hard, has two rewards."'),
+ ('«خيركم من تعلّم القرآن وعلّمه».', 'رواه البخاري', '"The best of you are those who learn the Qur\'an and teach it."'),
+ ('«يُقال لصاحب القرآن: اقرأ وارتقِ ورتّل كما كنت ترتّل في الدنيا، فإن منزلك عند آخر آية تقرؤها».', 'رواه أبو داود والترمذي، وصحّحه الألباني', '"It will be said to the companion of the Qur\'an: Recite and rise, and recite as you used to in the world, for your rank is at the last verse you recite."'),
+ ('«من نام عن حزبه أو عن شيءٍ منه، فقرأه فيما بين صلاة الفجر وصلاة الظهر، كُتب له كأنما قرأه من الليل».', 'رواه مسلم', '"Whoever sleeps through his portion (of the night\'s recitation) or part of it, and reads it between Fajr and Dhuhr, it is recorded for him as if he had read it at night."'),
+ ('«أحبُّ الأعمال إلى الله أدومها وإن قلّ».', 'رواه البخاري ومسلم', '"The deeds most beloved to Allah are the most constant, even if small."'),
+]
 AR = lambda x: str(x).translate(str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩'))
-out = {'ayat': [], 'hadith': [], 'dua': []}
+out = {'ayat': [], 'hadith': [], 'dua': [], 'quran': []}
 for ref, en, tag in AYAT:
     t, name = ayah(*ref)
     if ref == (65, 2, 3):   # only the promise: «ومن يتق الله يجعل له مخرجا ۝ ويرزقه من حيث لا يحتسب»
@@ -80,6 +100,14 @@ for ar, src, en in DUA:
     if ar is None:
         t, name = ayah(*src); out['dua'].append({'ar': f'﴿{t}﴾', 'src': f'سورة {name} {AR(src[1])}', 'en': en})
     else: out['dua'].append({'ar': ar, 'src': src, 'en': en})
+for ref, en in QURAN_AYAT:
+    t, name = ayah(*ref)
+    out['quran'].append({'ar': f'﴿{t}﴾', 'src': f'سورة {name} {AR(ref[1])}', 'en': en})
+for ar, src, en in QURAN_HADITH: out['quran'].append({'ar': ar, 'src': src, 'en': en})
+# the growth panel: «كشجرة طيبة أصلها ثابت وفرعها في السماء» (only this part of Ibrahim 24)
+_t = Q[(14, 24)]['text_uthmani']
+out['tree'] = {'ar': '﴿… ' + _t[_t.index('كَشَجَرَةٍ'):] + '﴾', 'src': 'سورة إبراهيم ٢٤',
+               'en': '… like a good tree, whose root is firmly fixed and whose branches are high in the sky.'}
 js = ('/* thabat-content.js — verses (verbatim from data/quran.json), hadith and duas on\n'
       '   repentance and steadfastness for pages/thabat.html. Generated by scripts/build-thabat-content.py. */\n'
       'window.THABAT_CONTENT = ' + json.dumps(out, ensure_ascii=False, indent=1) + ';\n')

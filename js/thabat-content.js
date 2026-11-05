@@ -70,6 +70,11 @@ window.THABAT_CONTENT = {
  ],
  "hadith": [
   {
+   "ar": "«يأتي على الناس زمانٌ الصابرُ فيهم على دينه كالقابض على الجمر».",
+   "src": "رواه الترمذي، وصحّحه الألباني",
+   "en": "\"A time will come upon people when the one who holds patiently to his religion among them will be like one holding a burning coal.\""
+  },
+  {
    "ar": "«أذنب عبدٌ ذنبًا فقال: اللهم اغفر لي ذنبي، فقال تبارك وتعالى: أذنب عبدي ذنبًا فعلم أن له ربًّا يغفر الذنب ويأخذ بالذنب، ثم عاد فأذنب… اعمل ما شئت فقد غفرت لك».",
    "src": "رواه البخاري ومسلم",
    "en": "\"A servant committed a sin and said: O Allah, forgive me my sin. Allah said: My servant sinned and knew he has a Lord who forgives sin and holds to account for it… Then he sinned again… Do as you wish, I have forgiven you.\""
@@ -186,5 +191,77 @@ window.THABAT_CONTENT = {
    "src": "رواه أبو داود والترمذي",
    "en": "\"I seek forgiveness from Allah the Mighty, there is no god but He, the Living, the Sustainer, and I repent to Him.\""
   }
- ]
+ ],
+ "quran": [
+  {
+   "ar": "﴿إِنَّ ٱلَّذِينَ يَتْلُونَ كِتَٰبَ ٱللَّهِ وَأَقَامُوا۟ ٱلصَّلَوٰةَ وَأَنفَقُوا۟ مِمَّا رَزَقْنَٰهُمْ سِرًّۭا وَعَلَانِيَةًۭ يَرْجُونَ تِجَٰرَةًۭ لَّن تَبُورَ﴾",
+   "src": "سورة فَاطِرٍ ٢٩",
+   "en": "Indeed, those who recite the Book of Allah, establish prayer and spend from what We have provided them, secretly and publicly, hope for a transaction that will never perish."
+  },
+  {
+   "ar": "﴿وَلَقَدْ يَسَّرْنَا ٱلْقُرْءَانَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍۢ﴾",
+   "src": "سورة القَمَرِ ١٧",
+   "en": "And We have certainly made the Qur'an easy to remember, so is there any who will remember?"
+  },
+  {
+   "ar": "﴿كِتَٰبٌ أَنزَلْنَٰهُ إِلَيْكَ مُبَٰرَكٌۭ لِّيَدَّبَّرُوٓا۟ ءَايَٰتِهِۦ وَلِيَتَذَكَّرَ أُو۟لُوا۟ ٱلْأَلْبَٰبِ﴾",
+   "src": "سورة صٓ ٢٩",
+   "en": "(This is) a blessed Book which We have revealed to you, that they might reflect upon its verses and that those of understanding would be reminded."
+  },
+  {
+   "ar": "﴿إِنَّ هَٰذَا ٱلْقُرْءَانَ يَهْدِى لِلَّتِى هِىَ أَقْوَمُ وَيُبَشِّرُ ٱلْمُؤْمِنِينَ ٱلَّذِينَ يَعْمَلُونَ ٱلصَّٰلِحَٰتِ أَنَّ لَهُمْ أَجْرًۭا كَبِيرًۭا﴾",
+   "src": "سورة الإِسۡرَاءِ ٩",
+   "en": "Indeed, this Qur'an guides to that which is most upright and gives good tidings to the believers who do righteous deeds that they will have a great reward."
+  },
+  {
+   "ar": "﴿أَوْ زِدْ عَلَيْهِ وَرَتِّلِ ٱلْقُرْءَانَ تَرْتِيلًا﴾",
+   "src": "سورة المُزَّمِّلِ ٤",
+   "en": "Or add to it, and recite the Qur'an with measured recitation."
+  },
+  {
+   "ar": "﴿ٱلَّذِينَ ءَامَنُوا۟ وَتَطْمَئِنُّ قُلُوبُهُم بِذِكْرِ ٱللَّهِ ۗ أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ﴾",
+   "src": "سورة الرَّعۡدِ ٢٨",
+   "en": "Those who have believed and whose hearts are assured by the remembrance of Allah. Unquestionably, by the remembrance of Allah hearts are assured."
+  },
+  {
+   "ar": "«اقرؤوا القرآن؛ فإنه يأتي يوم القيامة شفيعًا لأصحابه».",
+   "src": "رواه مسلم",
+   "en": "\"Recite the Qur'an, for it will come on the Day of Resurrection as an intercessor for its companions.\""
+  },
+  {
+   "ar": "«من قرأ حرفًا من كتاب الله فله به حسنة، والحسنة بعشر أمثالها، لا أقول: الم حرف، ولكن ألفٌ حرف، ولامٌ حرف، وميمٌ حرف».",
+   "src": "رواه الترمذي، وصحّحه الألباني",
+   "en": "\"Whoever reads a letter from the Book of Allah has a good deed for it, and a good deed is multiplied by ten…\""
+  },
+  {
+   "ar": "«الماهر بالقرآن مع السفرة الكرام البررة، والذي يقرأ القرآن ويتتعتع فيه وهو عليه شاقٌّ له أجران».",
+   "src": "رواه البخاري ومسلم",
+   "en": "\"The one skilled in the Qur'an is with the noble, righteous scribes; and the one who recites it haltingly, finding it hard, has two rewards.\""
+  },
+  {
+   "ar": "«خيركم من تعلّم القرآن وعلّمه».",
+   "src": "رواه البخاري",
+   "en": "\"The best of you are those who learn the Qur'an and teach it.\""
+  },
+  {
+   "ar": "«يُقال لصاحب القرآن: اقرأ وارتقِ ورتّل كما كنت ترتّل في الدنيا، فإن منزلك عند آخر آية تقرؤها».",
+   "src": "رواه أبو داود والترمذي، وصحّحه الألباني",
+   "en": "\"It will be said to the companion of the Qur'an: Recite and rise, and recite as you used to in the world, for your rank is at the last verse you recite.\""
+  },
+  {
+   "ar": "«من نام عن حزبه أو عن شيءٍ منه، فقرأه فيما بين صلاة الفجر وصلاة الظهر، كُتب له كأنما قرأه من الليل».",
+   "src": "رواه مسلم",
+   "en": "\"Whoever sleeps through his portion (of the night's recitation) or part of it, and reads it between Fajr and Dhuhr, it is recorded for him as if he had read it at night.\""
+  },
+  {
+   "ar": "«أحبُّ الأعمال إلى الله أدومها وإن قلّ».",
+   "src": "رواه البخاري ومسلم",
+   "en": "\"The deeds most beloved to Allah are the most constant, even if small.\""
+  }
+ ],
+ "tree": {
+  "ar": "﴿… كَشَجَرَةٍۢ طَيِّبَةٍ أَصْلُهَا ثَابِتٌۭ وَفَرْعُهَا فِى ٱلسَّمَآءِ﴾",
+  "src": "سورة إبراهيم ٢٤",
+  "en": "… like a good tree, whose root is firmly fixed and whose branches are high in the sky."
+ }
 };
