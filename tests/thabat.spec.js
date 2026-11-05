@@ -92,3 +92,75 @@ test('a long journey name never makes the page wider than the phone', async ({ b
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(340);
   await ctx.close();
 });
+
+test('a Qur\'an wird journey: daily pages, the mushaf link, khatma and undo', async ({ page }) => {
+  await page.goto(URL);
+  await page.evaluate(() => localStorage.removeItem('thabat_v1'));
+  await page.reload();
+  // the invitation card opens the form on the Qur'an kind
+  await page.locator('#journeys .empty .btn').click();
+  await page.evaluate(() => closeSheet());
+  await page.evaluate(() => openForm(null, 'quran'));
+  await expect(page.locator('#formSheet .q-only').first()).toBeVisible();
+  await expect(page.locator('#formSheet .t-only')).toBeHidden();
+  await page.locator('#fWirdChips button[data-n="4"]').click();
+  await page.fill('#fPage', '602');
+  await page.locator('#fSave').click();
+  const q0 = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')).journeys[0]);
+  expect(q0.kind).toBe('quran');
+  expect(q0.quran).toMatchObject({ daily: 4, pos: 602, khatmat: 0 });
+  expect(q0.cover).toBe('mushaf');
+  await page.locator('.j-card.quran').click();
+  await expect(page.locator('#view')).toHaveClass(/qv/);
+  await expect(page.locator('.mushaf a.btn').first()).toHaveAttribute('href', 'quran-text.html?page=602');
+  await page.locator('.mushaf .btn.gold').click();               // 4 pages from 602 → past 604: a khatma
+  await expect(page.locator('#winModal')).toHaveClass(/open/);
+  let q = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')).journeys[0].quran);
+  expect(q.pos).toBe(2);
+  expect(q.khatmat).toBe(1);
+  expect(Object.values(q.log)).toEqual([4]);
+  await page.locator('#winModal .btn').click();
+  await page.waitForTimeout(500);
+  if (await page.locator('#mileModal.open').count()) await page.locator('#mileModal .btn').click();
+  await page.locator('.mushaf .btn.ghost', { hasText: 'تراجع' }).click();
+  q = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')).journeys[0].quran);
+  expect(q).toMatchObject({ pos: 602, khatmat: 0, log: {} });
+});
+
+test('journeys saved with an old cover number keep their picture', async ({ page }) => {
+  await page.goto(URL);
+  await page.evaluate(() => {
+    const n = Date.now();
+    localStorage.setItem('thabat_v1', JSON.stringify({ journeys: [{ id: 'jo', name: 'قديمة', why: '', kind: 'quit', cover: 5, created: n,
+      streaks: [{ start: n - 6e4, seen: [] }] }], settings: {} }));
+  });
+  await page.reload();
+  await expect(page.locator('.j-card .j-cover')).toHaveAttribute('src', /covers\/c5-s\.webp$/);
+  await page.locator('.j-card').click();
+  expect(await page.locator('.v-banner').getAttribute('style')).toContain('covers/c5.webp');
+});
+
+test('the "I made it through" button appears only when the ten minutes end', async ({ page }) => {
+  await page.clock.install();
+  await page.goto(URL);
+  await page.evaluate(() => {
+    const n = Date.now();
+    localStorage.setItem('thabat_v1', JSON.stringify({ journeys: [{ id: 'jw', name: 'ر', why: 'سبب', kind: 'quit', cover: 'ember', created: n,
+      streaks: [{ start: n - 6e4, seen: [] }] }], settings: {} }));
+  });
+  await page.reload();
+  await page.locator('.j-card').click();
+  await page.evaluate(() => openWeak());
+  await page.locator('#pBtn').click();
+  await page.clock.runFor(300000);
+  await expect(page.locator('#pDone')).toBeHidden();
+  await page.clock.runFor(301000);
+  await expect(page.locator('#pDone')).toBeVisible();
+  await expect(page.locator('#pBtn')).toBeHidden();
+  await page.locator('#pDone .overcome').click();
+  await page.clock.runFor(1000);
+  await expect(page.locator('#winModal')).toHaveClass(/open/);
+  const d = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')));
+  expect(d.overcome).toBe(1);
+  expect(d.journeys[0].overcome).toBe(1);
+});

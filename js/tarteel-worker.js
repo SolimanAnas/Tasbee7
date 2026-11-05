@@ -188,7 +188,8 @@ function matchVerse(transcript) {
     if (score > bestScore) { bestScore = score; bestVerse = v; }
   }
   return bestVerse
-    ? { surah: bestVerse.surah, ayah: bestVerse.ayah, text: bestVerse.text_uthmani, surahName: bestVerse.surah_name, score: bestScore }
+    ? { surah: bestVerse.surah, ayah: bestVerse.ayah, text: bestVerse.text_uthmani, surahName: String(bestVerse.surah_name || '').replace(/\u06E1/g, '\u0652').replace(/\u0671/g, '\u0627'),   // UI font (Tajawal) has neither the Uthmani sukun nor the wasla
+      score: bestScore }
     : null;
 }
 
