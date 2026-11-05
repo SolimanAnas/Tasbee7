@@ -42,7 +42,7 @@ test('renewing resolve keeps past days in the record', async ({ page }) => {
   expect(j.streaks[0].end).toBeTruthy();
   expect(j.streaks[0].note).toBe('ملاحظة');
   // total days still counts the 20 days before the slip
-  await expect(page.locator('.grid3 .mini b').first()).toHaveText('٢٠');
+  await expect(page.locator('.grid3 .mini b').first()).toHaveText('20');
   await expect(page.locator('.hist .h')).toHaveCount(1);
 });
 
@@ -73,4 +73,22 @@ test('PIN lock hides the page until the right code', async ({ page }) => {
   await expect(page.locator('body')).toHaveClass(/locked/);
   await tap('1234');
   await expect(page.locator('body')).not.toHaveClass(/locked/);
+});
+
+test('a long journey name never makes the page wider than the phone', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 340, height: 740 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => {
+    const n = Date.now();
+    localStorage.setItem('thabat_v1', JSON.stringify({ journeys: [{ id: 'jl', name: 'المداومة على الصلاة في جماعة في المسجد كل يوم بإذن الله',
+      why: '', kind: 'keep', cover: 2, created: n, streaks: [{ start: n - 6e4, seen: [] }] }], settings: {} }));
+  });
+  await page.goto(URL);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(340);
+  // a journey a minute old counts minutes, not "0 days"
+  await expect(page.locator('.j-days span')).toHaveText('دقيقة');
+  await page.locator('.j-card').click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(340);
+  await ctx.close();
 });
