@@ -28,3 +28,9 @@ Quran speech recognition powered by NVIDIA FastConformer Arabic CTC model,
 originally developed by Yazin Insai (https://github.com/yazinsai/offline-tarteel).
 Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 ```
+
+## Reciter photos
+
+- `images/reciters/*.webp` — reciter photos used as album art in the Quran audio player,
+  taken from [way2quran.com](https://way2quran.com) (الطريق إلى القرآن), cropped square and
+  resized to at most 320 px. The pictures remain the property of their owners.

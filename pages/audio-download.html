@@ -1691,6 +1691,8 @@ function buildJuzData(){
   }else if(reciter.type==='surah'){
     surahNames.forEach((name,index)=>{
       let num=index+1;
+      // missing: surahs the host only has as a broken/cut-off file
+      if(reciter.missing&&reciter.missing.includes(num))return;
       let sn=num<10?'00'+num:num<100?'0'+num:num;
       const url=(reciter.overrides&&reciter.overrides[sn])||reciter.baseUrl+sn+'.mp3';
       currentJuzData.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});

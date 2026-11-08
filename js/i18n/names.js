@@ -129,7 +129,8 @@
     '46': 'Salah Bukhatir', '48': 'Adel Rayyan', '49': 'Abdul Bari Al-Thubaiti',
     '50': 'Abdul Bari Mohammad', '55': 'Abdul Aziz Al-Ahmad', '57': 'Abdullah Al-Buraimi',
     '58': 'Abdullah Al-Buaijan', '59': 'Abdullah Al-Matroud', '60': 'Abdullah Basfar',
-    '61': 'Abdullah Khayyat'
+    '61': 'Abdullah Khayyat',
+    'muhammad-abadh': 'Mohamed Obada'
   };
 
   // ---- Radio station names (index aligned to RADIO_STATIONS order) --------
