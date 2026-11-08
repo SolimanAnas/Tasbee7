@@ -862,7 +862,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 
       <!-- Album art (rotates when playing) -->
       <div class="m-album-wrap" id="mandalaAlbum">
-        <img class="m-album" id="albumArt" src="../images/album.png" alt="">
+        <img class="m-album" id="albumArt" src="../images/album.png" alt="" decoding="async">
       </div>
 
       <!-- Waveform bars (visible when playing) -->
@@ -1393,7 +1393,41 @@ function setSelTicker(elId,text){
 // ============================================================
 //  VISUAL HELPERS (new in audio3)
 // ============================================================
-function updateVisuals(reciterDisp,juzDisp){
+// r: the reciter now showing (defaults to the selected one)
+function updateVisuals(reciterDisp,juzDisp,r){
+  setAlbumArt(r!==undefined?r:appData.reciters[selectedReciterIndex]);
+}
+
+// Album art: the reciter's photo (`photo` in json/audio-*.json: a square
+// WebP in images/reciters/, path from the site root), with the default disc
+// art when a reciter has none or the photo can't be loaded.
+const DEFAULT_ART='../images/album.png';
+const albumArt=document.getElementById('albumArt');
+let artWanted='';  // photo URL asked for ('' = default art)
+let artShown='';   // photo URL actually loaded and on screen
+function setAlbumArt(r){
+  const want=r&&r.photo?new URL('../'+r.photo,location.href).href:'';
+  if(want===artWanted)return;
+  artWanted=want;artShown='';
+  albumArt.classList.toggle('is-photo',!!want);
+  albumArt.src=want||DEFAULT_ART;
+  setMediaArtwork();
+}
+albumArt.addEventListener('load',()=>{
+  artShown=artWanted&&albumArt.classList.contains('is-photo')?albumArt.src:'';
+  setMediaArtwork();syncIsland();
+});
+albumArt.addEventListener('error',()=>{
+  if(!albumArt.classList.contains('is-photo'))return;
+  // keep artWanted so the same reciter doesn't retry on every track
+  albumArt.classList.remove('is-photo');albumArt.src=DEFAULT_ART;
+});
+function mediaArtwork(){
+  return artShown?[{src:artShown,sizes:'320x320',type:'image/webp'}]:[{src:'../icons/icon_512.png',sizes:'512x512',type:'image/png'}];
+}
+function setMediaArtwork(){
+  if(!('mediaSession'in navigator)||!navigator.mediaSession.metadata)return;
+  try{navigator.mediaSession.metadata.artwork=mediaArtwork()}catch(e){}
 }
 
 function triggerMandalaChange(){
@@ -1464,11 +1498,27 @@ async function loadMultipleJSONs(){
   }catch(e){reciterSelectBtn.textContent=t('audio_load_error')}
 }
 
+// «المصحف الجديد» used to be 60 multi-surah tracks (GitHub release, often
+// unreachable); it is now one file per surah. A saved track from the old
+// list (last played, favourites) resumes at the first surah of that track
+// still in the new list. Index = old track number.
+const MINSHAWI_NEW_OLD_TRACK_SURAH=[0,1,2,2,2,2,2,3,3,3,4,4,4,5,5,5,6,6,7,7,7,8,9,9,10,11,11,12,12,14,16,17,17,18,19,20,22,0,25,25,26,27,28,30,32,0,36,37,39,40,41,43,46,49,53,56,59,64,68,73,79,88];
+function upgradedTrack(u){
+  const m=/\/al-minshawy-new\/(\d+)\.mp3$/.exec(u||'');
+  if(!m)return null;
+  const s=MINSHAWI_NEW_OLD_TRACK_SURAH[+m[1]];
+  const r=appData.reciters.find(x=>x.id==='minshawi_new');
+  return (s&&r&&(r.items||[]).find(i=>surahNum(i)===s))||null;
+}
+
 function initData(){
   if(appData.reciters.length===0)return;
   let lastTrack=localStorage.getItem('lastTrack');
+  const moved=upgradedTrack(lastTrack);
+  if(moved){lastTrack=moved.url;localStorage.setItem('lastTrack',lastTrack);localStorage.setItem('lastSurah',moved.name)}
+  let fi=-1;
   if(lastTrack&&lastTrack.startsWith('http')){
-    let fi=appData.reciters.findIndex(r=>{
+    fi=appData.reciters.findIndex(r=>{
       if(r.type==='surah')return lastTrack.startsWith(r.baseUrl);
       if(r.items)return r.items.some(i=>i.url===lastTrack);
       return false;
@@ -1478,12 +1528,14 @@ function initData(){
   const rd=reciterShortDisplay(appData.reciters[selectedReciterIndex]);
   setSelTicker('reciterSelectBtn',rd);
   buildJuzData();
-  if(lastTrack&&lastTrack.startsWith('http')){
-    let fj=currentJuzData.findIndex(j=>j.url===lastTrack);
-    if(fj!==-1){selectedJuzIndex=fj;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[fj]))}
+  // Only restore a track that is still in the lists: a link that was removed
+  // would otherwise play under whichever reciter happens to be first.
+  const fj=fi!==-1?currentJuzData.findIndex(j=>j.url===lastTrack):-1;
+  if(fj!==-1){
+    selectedJuzIndex=fj;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[fj]));
     currentTrackUrl=lastTrack;audio.src=lastTrack;
     const rd2=reciterDisplay(appData.reciters[selectedReciterIndex]);
-    const jd=fj!==-1?juzDisplay(currentJuzData[fj]):(localStorage.getItem('lastSurah')||'');
+    const jd=juzDisplay(currentJuzData[fj]);
     setHeroTicker(jd);
     document.getElementById('nowReciter').innerText=rd2;
     document.getElementById('miniSurah').innerText=jd;
@@ -1502,6 +1554,8 @@ function buildJuzData(){
   }else if(reciter.type==='surah'){
     surahNames.forEach((name,index)=>{
       let num=index+1;
+      // missing: surahs the host only has as a broken/cut-off file
+      if(reciter.missing&&reciter.missing.includes(num))return;
       let sn=num<10?'00'+num:num<100?'0'+num:num;
       // overrides: per-surah URL for the odd file a host names differently
       const url=(reciter.overrides&&reciter.overrides[sn])||reciter.baseUrl+sn+'.mp3';
@@ -1538,7 +1592,7 @@ function makeSelRow({num,title,sub,active,onPick}){
   return div;
 }
 function reciterSubtitle(r){
-  if(r.type==='surah')return t('audio_n_surahs',{n:114});
+  if(r.type==='surah')return t('audio_n_surahs',{n:114-(r.missing||[]).length});
   const n=(r.items||r.juz||[]).length;
   return r.type==='juz'?t('audio_n_parts',{n}):t('audio_n_clips',{n});
 }
@@ -1688,7 +1742,7 @@ function toggleRepeat(){isRepeat=!isRepeat;document.getElementById('repeatBtn').
 
 function updateMediaSession(title,artist){
   if('mediaSession'in navigator){
-    navigator.mediaSession.metadata=new MediaMetadata({title:title||t('audio_media_title'),artist:artist||t('audio_media_artist'),album:t('audio_media_album'),artwork:[{src:'../icons/icon_512.png',sizes:'512x512',type:'image/png'}]});
+    navigator.mediaSession.metadata=new MediaMetadata({title:title||t('audio_media_title'),artist:artist||t('audio_media_artist'),album:t('audio_media_album'),artwork:mediaArtwork()});
     navigator.mediaSession.setActionHandler('play',()=>togglePlay());
     navigator.mediaSession.setActionHandler('pause',()=>togglePlay());
     navigator.mediaSession.setActionHandler('previoustrack',()=>{haptic();playPrevTrack()});
@@ -1885,7 +1939,22 @@ async function downloadTrack(){
 // ============================================================
 //  FAVORITES
 // ============================================================
-function readFavs(){try{const f=JSON.parse(localStorage.getItem('favorites')||'[]');return Array.isArray(f)?f:[]}catch(e){return[]}}
+function readFavs(){
+  let f;
+  try{f=JSON.parse(localStorage.getItem('favorites')||'[]')}catch(e){return[]}
+  if(!Array.isArray(f))return[];
+  // move favourites from the old «المصحف الجديد» tracks to their surah
+  let changed=false;const seen=new Set();
+  f=f.filter(x=>{
+    if(!x||!x.url)return false;
+    const moved=upgradedTrack(x.url);
+    if(moved){x.url=moved.url;x.surah=moved.name;changed=true}
+    if(seen.has(x.url)){changed=true;return false}
+    seen.add(x.url);return true;
+  });
+  if(changed)try{localStorage.setItem('favorites',JSON.stringify(f))}catch(e){}
+  return f;
+}
 function openFavSheet(){
   sheetMode=null;
   const favs=readFavs();
@@ -1935,7 +2004,7 @@ function playFromFav(url,surah,reciter){
   document.getElementById('nowReciter').innerText=reciterDisp;
   document.getElementById('miniSurah').innerText=surahDisp;
   document.getElementById('miniReciter').innerText=reciterDisp;
-  updateVisuals(reciterDisp,surahDisp);
+  updateVisuals(reciterDisp,surahDisp,rObj||null);
   errorRetryCount=0;audio.play().catch(()=>{});closeAllSheets();
 }
 function removeFav(index,e){e.stopPropagation();let favs=readFavs();favs.splice(index,1);localStorage.setItem('favorites',JSON.stringify(favs));openFavSheet();checkFavStatus()}
@@ -1963,7 +2032,9 @@ function syncIsland(){
     subtitle:err&&!err.hidden?document.getElementById('trackErrorText').textContent:document.getElementById('miniReciter').innerText,
     playing:!audio.paused,
     progress:audio.duration?audio.currentTime/audio.duration*100:0,
-    art:document.getElementById('albumArt').src
+    // the default art until the photo has actually loaded (no broken image)
+    art:artShown||new URL(DEFAULT_ART,location.href).href,
+    photo:!!artShown
   });
 }
 let lastIslandSync=0;

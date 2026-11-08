@@ -249,7 +249,7 @@
     next: '<svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>',
     collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
   };
-  let state = { title: '', subtitle: '', playing: false, progress: 0, art: '' };
+  let state = { title: '', subtitle: '', playing: false, progress: 0, art: '', photo: false };
   let collapsed = false, pos = null;
   let dismissed = false;    // user dropped the island on the ✕ target; hidden until playback starts again
   let zone = null;          // bottom ✕ drop target, shown while dragging
@@ -297,6 +297,7 @@
     island.hidden = false;
     island.classList.toggle('collapsed', collapsed);
     island.classList.toggle('playing', !!state.playing);
+    island.classList.toggle('photo', !!state.photo); // a reciter's portrait: don't spin it
     island.querySelectorAll('.zi-art').forEach(i => { if (state.art && i.getAttribute('src') !== state.art) i.src = state.art; });
     island.querySelector('.zi-title').textContent = state.title || '';
     island.querySelector('.zi-sub').textContent = state.subtitle || '';
@@ -431,6 +432,7 @@ html.zad-frame-open, html.zad-frame-open body { overflow: hidden !important; }
 #zadIsland .zi-open { flex: none; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
 #zadIsland .zi-art { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 0 0 2px var(--accent-main, #10b981); }
 #zadIsland.playing .zi-art { animation: ziSpin 12s linear infinite; }
+#zadIsland.photo .zi-art { animation: none; }
 #zadIsland .zi-text { flex: 1; min-width: 0; cursor: pointer; }
 #zadIsland .zi-title { font-weight: 800; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #zadIsland .zi-sub { font-weight: 600; font-size: 11.5px; color: var(--accent-main, #10b981); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
