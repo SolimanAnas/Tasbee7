@@ -163,7 +163,7 @@ test.describe('pinch-to-zoom hint', () => {
     await blockNetwork(page);
     await page.goto(`${BASE_URL}/pages/quran-text.html?page=2`, { waitUntil: 'load' });
     await expect.poll(() => shown(page), { timeout: 6000 }).toBe(true);
-    await expect(hint(page)).toContainText('بإصبعين');
+    await expect(hint(page)).toContainText('حجم الخط');
     await expect.poll(() => shown(page), { timeout: 6000 }).toBe(false);
     expect(await page.evaluate(() => getComputedStyle(document.getElementById('qtZoomHint')).opacity)).toBe('0');
   });
