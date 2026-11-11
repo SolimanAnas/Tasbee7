@@ -39,7 +39,7 @@ const browserGlobals = {
 export default [
   {
     ignores: ['node_modules/**', 'dist/**', 'data/adhan.js', 'js/medina2.data.js',
-              'js/quranpages.data.js', 'js/plugins/**', 'archive/**', 'mushaf*/**'],
+              'js/quranpages.data.js', 'js/plugins/**', 'js/vendor/**', 'archive/**', 'mushaf*/**'],
   },
   {
     files: ['js/**/*.js', 'sw.js'],

@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-muslim-v125"; // v125: audio — «المصحف الجديد» (Minshawi) served per surah from mp3quran (GitHub release tracks often timed out) and listed after the murattal; new reciter محمد عبادة; reciter photos as album art (images/reciters/, also on the lock screen and the island, default art as fallback); 217 tracks that silently played another reciter (mp3quran redirects missing files to Minshawi) and 10 cut-off files hidden via `missing`; v124: ثبات — ورد القرآن journeys (daily pages, opens the mushaf at the page, khatma progress, 4-week calendar, make-up for a missed day), sprouts as growth (7 stages, milestone track with the plant of each milestone), «تجاوزت هذه اللحظة» after the ten minutes, new high-quality covers (images/thabat/covers: 1200px banners + 256px thumbnails, new artwork first); surah names shown in the UI font without the Uthmani sukun «ۡ» or the wasla (Tajawal has no glyph for either: they showed as boxes) in ثبات and the mushaf recitation messages; v123: ثبات — long journey names no longer widen the page (the whole page slid sideways on phones), counters in Western digits (Tajawal draws «٠» as a diamond), banner text readable in every theme, new journeys count hours/minutes, hours shown when a milestone is under two days away, library shows 4 then «عرض الكل»; v122: «ثبات» — private journeys of repentance and steadfastness (pages/thabat.html, js/thabat.js, js/thabat-content.js, images/thabat/), card on the home page; v121: azkar — «فضل الذكر» under each dhikr instead of takhreej/grading, taller card + smaller ring, A-/A+ zoom buttons, counts kept for the day with per-dhikr reset and "reset all", prev/next disabled at the ends; v120: azkar grading label shows the strongest ruling (حسن/صحيح), weak fadail ones «يؤخذ بالضعيف في الفضائل»; continuous player survives a host reload (refresh re-shows the framed page, back walks the visited pages instead of sticking on the player); book pages (Nawawi, Qudsi, Hisn, Duaa) menus, player and labels follow the app language (hb_* keys); v119: hadith encyclopedia — 75 corrupted characters repaired in the six books, empty entries hidden, Prophet's words / chain styled, Nawawi & Qudsi open their own pages; v118: بستان الدعاء rebuilt from «الدعاء من الكتاب والسنة» on the book design (assets/duaa-book.json, author's takhreej); honorific ligatures spelled out in hisn/azkar notes; v117: azkar — source, takhreej and grading for every dhikr (azkar.json, salah.json, sleeping-zikr.json) shown under the text; v116: حصن المسلم on the new book design (pages/hisn.html + assets/hisn-matn.json: author's takhreej for all 267, repeat counters, official per-chapter/per-dhikr audio); v115: الأربعون القدسية page (pages/qudsi.html, reviewed text + grading); Nawawi page split into shared css/hadith-book.css + js/hadith-book.js; v114: Nawawi filter chips and share-card audio toggle use SVG icons (no emoji-range characters); v113: Nawawi audio player — compact card, collapsible to a pill; v112: share-card videos can carry a recitation track (Nawawi hadith audio), text timed to it; v111: hadith encyclopedia — corrected An-Nawawi Forty text and takhreej (assets/hadith/nawawi40.json); v110: Nawawi page — corrected takhreej + wording (assets/hadith/nawawi40-matn.json), Prophet's words highlighted, per-hadith recitation player (repeat, auto-next, speed); v109: dedicated An-Nawawi Forty page (pages/nawawi.html: memorization mode, favourites, image/text sharing), prayer cards drop the "next" badge, share card back press no longer closes the modal underneath; v108: home prayer cards (five prayers, upcoming highlighted), sepia secondary text readable; v107: form controls inherit the app font (css/fonts.css), azkar page zoom off again; v106: notifications — 30-day push schedule (Play/TWA has no periodic sync), Play-app guidance when notifications are blocked; v105: audit fixes — Asr (Hanafi/standard) setting, pinch-zoom re-enabled on all pages, quran-text search escaping + API text rendered as text; v104: weekly dhikr stats card (js/dhikr-stats.js: dated history of masbaha/azkar/Quran counters, shared via ShareCard); v103: hadith image cards + silent video export for all share cards (hadith, hisn, duaa, azkar); v102: duaa/dhikr image cards (js/share-card.js) on hisn, duaa and azkar; v101: qibla corrects magnetic→true north (js/wmm.js, WMM2025) and reads the top edge, not the camera, in the 2D compass; v100: all pages load Tajawal + Amiri from bundled fonts via css/fonts.css (no Google Fonts); v99: azkar.html loads Amiri from the bundled fonts/Amiri.ttf (was Google-Fonts-only, fell back to a system font); v98: video maker self-heals a stale cached script (multi-picture switch did nothing with old video-maker.js); v97: video maker multi-picture slideshow (pan/zoom per picture, crossfades on ayah changes); v96: new dark-theme background (images/Background-dark.webp, now used by index.html too); v95: audio island drag-to-dismiss (drop on the bottom ✕ to stop and hide the floating player); v94: video maker "✦ Popular" quick-pick sheet (js/popular-ayat.js); v93: video maker exports a regular fast-start MP4 (MediaRecorder fragmented MP4 showed ~3 s in galleries/WhatsApp); v92: video maker redesign (numbered step cards, searchable surah/reciter sheets, steppers, switches, full-screen preview, Scheherazade canvas font, share caption); v91: ayah video maker (pages/video-maker.html — canvas + MediaRecorder status clips); v90: offline download runs in the page via CacheStorage (fixes wrapped PWA/TWA where the SW message path failed), keeps sw.js as single source for assets + cache name; v89: radio station selector card restored below the player (no pill), page padding trimmed so it still fits without scrolling; v88: radio player fits one screen (art scales with height, stations pill), tap art to pause motion, station title no longer overwritten by late i18n; v87: Sharjah radio via audio-only AAC (itworkscdn) with HLS fallbacks, per-station stream candidates, itworkscdn streams bypass the SW; v86: radio.html UX overhaul (categories, auto-reconnect with host fallback, prev/next, sleep timer, continuous host) + 10 wrong station streams fixed; live radio streams bypass the SW; v85: continuous audio — pages open in a frame over audio.html with a floating island player (js/continuous-player.js), setting in audio.html + index.html; v84: audio.html UX (no silent skip on load/offline, inline error + retry, buffering ring, rich searchable lists, lock-screen seek) + 40 dead audio links fixed/removed in audio-01.json; v83: hadith-viewer RTL swipe (finger → right = next chapter, like duaa/hisn), hadith search ignores invisible RLM marks, viewer shows full result count + "show more", hadith.html scrolls results into view; v82: qibla tilt-compensated heading (back-camera bearing when upright), ignore relative-only orientation, calibration "done" no longer exits the page (BackClose.swap); v81: takrar unit labels strip the basmala + quote the opening, readable selected rows; v80: takrar settings sheet, first-open preferences, ayah-opening unit labels, language button; v79: takrar redesign (player dock, 46 reciters, infinite range loop) + new i18n keys; v78: let GitHub release audio bypass the SW (range requests via SW broke seeking); v77: Minshawi new murattal tracks moved to GitHub release + clean track names; v76: harden offline modal — reply timeouts + graceful recovery when an old SW still controls after update; v75: drop ?v= cache-buster from audio pages, strip dead CSS; v74: unified offline-download.js controller; v73: precache quran-v2 + audio/radio JSONs, hadith books on-demand, ZAD_CACHE_ALL handler
+const CACHE_NAME = "zad-muslim-v126"; // v126: offline — sql.js bundled (js/vendor/, the mushaf no longer needs a CDN), played/bundled audio really cached and served with byte ranges (seeking + iOS offline), precache in parallel batches, tafsir books + bundled audio in «download all», every page registers the SW and shows an offline notice (js/net-status.js), pages cached once regardless of ?query; v125: audio — «المصحف الجديد» (Minshawi) served per surah from mp3quran (GitHub release tracks often timed out) and listed after the murattal; new reciter محمد عبادة; reciter photos as album art (images/reciters/, also on the lock screen and the island, default art as fallback); 217 tracks that silently played another reciter (mp3quran redirects missing files to Minshawi) and 10 cut-off files hidden via `missing`; v124: ثبات — ورد القرآن journeys (daily pages, opens the mushaf at the page, khatma progress, 4-week calendar, make-up for a missed day), sprouts as growth (7 stages, milestone track with the plant of each milestone), «تجاوزت هذه اللحظة» after the ten minutes, new high-quality covers (images/thabat/covers: 1200px banners + 256px thumbnails, new artwork first); surah names shown in the UI font without the Uthmani sukun «ۡ» or the wasla (Tajawal has no glyph for either: they showed as boxes) in ثبات and the mushaf recitation messages; v123: ثبات — long journey names no longer widen the page (the whole page slid sideways on phones), counters in Western digits (Tajawal draws «٠» as a diamond), banner text readable in every theme, new journeys count hours/minutes, hours shown when a milestone is under two days away, library shows 4 then «عرض الكل»; v122: «ثبات» — private journeys of repentance and steadfastness (pages/thabat.html, js/thabat.js, js/thabat-content.js, images/thabat/), card on the home page; v121: azkar — «فضل الذكر» under each dhikr instead of takhreej/grading, taller card + smaller ring, A-/A+ zoom buttons, counts kept for the day with per-dhikr reset and "reset all", prev/next disabled at the ends; v120: azkar grading label shows the strongest ruling (حسن/صحيح), weak fadail ones «يؤخذ بالضعيف في الفضائل»; continuous player survives a host reload (refresh re-shows the framed page, back walks the visited pages instead of sticking on the player); book pages (Nawawi, Qudsi, Hisn, Duaa) menus, player and labels follow the app language (hb_* keys); v119: hadith encyclopedia — 75 corrupted characters repaired in the six books, empty entries hidden, Prophet's words / chain styled, Nawawi & Qudsi open their own pages; v118: بستان الدعاء rebuilt from «الدعاء من الكتاب والسنة» on the book design (assets/duaa-book.json, author's takhreej); honorific ligatures spelled out in hisn/azkar notes; v117: azkar — source, takhreej and grading for every dhikr (azkar.json, salah.json, sleeping-zikr.json) shown under the text; v116: حصن المسلم on the new book design (pages/hisn.html + assets/hisn-matn.json: author's takhreej for all 267, repeat counters, official per-chapter/per-dhikr audio); v115: الأربعون القدسية page (pages/qudsi.html, reviewed text + grading); Nawawi page split into shared css/hadith-book.css + js/hadith-book.js; v114: Nawawi filter chips and share-card audio toggle use SVG icons (no emoji-range characters); v113: Nawawi audio player — compact card, collapsible to a pill; v112: share-card videos can carry a recitation track (Nawawi hadith audio), text timed to it; v111: hadith encyclopedia — corrected An-Nawawi Forty text and takhreej (assets/hadith/nawawi40.json); v110: Nawawi page — corrected takhreej + wording (assets/hadith/nawawi40-matn.json), Prophet's words highlighted, per-hadith recitation player (repeat, auto-next, speed); v109: dedicated An-Nawawi Forty page (pages/nawawi.html: memorization mode, favourites, image/text sharing), prayer cards drop the "next" badge, share card back press no longer closes the modal underneath; v108: home prayer cards (five prayers, upcoming highlighted), sepia secondary text readable; v107: form controls inherit the app font (css/fonts.css), azkar page zoom off again; v106: notifications — 30-day push schedule (Play/TWA has no periodic sync), Play-app guidance when notifications are blocked; v105: audit fixes — Asr (Hanafi/standard) setting, pinch-zoom re-enabled on all pages, quran-text search escaping + API text rendered as text; v104: weekly dhikr stats card (js/dhikr-stats.js: dated history of masbaha/azkar/Quran counters, shared via ShareCard); v103: hadith image cards + silent video export for all share cards (hadith, hisn, duaa, azkar); v102: duaa/dhikr image cards (js/share-card.js) on hisn, duaa and azkar; v101: qibla corrects magnetic→true north (js/wmm.js, WMM2025) and reads the top edge, not the camera, in the 2D compass; v100: all pages load Tajawal + Amiri from bundled fonts via css/fonts.css (no Google Fonts); v99: azkar.html loads Amiri from the bundled fonts/Amiri.ttf (was Google-Fonts-only, fell back to a system font); v98: video maker self-heals a stale cached script (multi-picture switch did nothing with old video-maker.js); v97: video maker multi-picture slideshow (pan/zoom per picture, crossfades on ayah changes); v96: new dark-theme background (images/Background-dark.webp, now used by index.html too); v95: audio island drag-to-dismiss (drop on the bottom ✕ to stop and hide the floating player); v94: video maker "✦ Popular" quick-pick sheet (js/popular-ayat.js); v93: video maker exports a regular fast-start MP4 (MediaRecorder fragmented MP4 showed ~3 s in galleries/WhatsApp); v92: video maker redesign (numbered step cards, searchable surah/reciter sheets, steppers, switches, full-screen preview, Scheherazade canvas font, share caption); v91: ayah video maker (pages/video-maker.html — canvas + MediaRecorder status clips); v90: offline download runs in the page via CacheStorage (fixes wrapped PWA/TWA where the SW message path failed), keeps sw.js as single source for assets + cache name; v89: radio station selector card restored below the player (no pill), page padding trimmed so it still fits without scrolling; v88: radio player fits one screen (art scales with height, stations pill), tap art to pause motion, station title no longer overwritten by late i18n; v87: Sharjah radio via audio-only AAC (itworkscdn) with HLS fallbacks, per-station stream candidates, itworkscdn streams bypass the SW; v86: radio.html UX overhaul (categories, auto-reconnect with host fallback, prev/next, sleep timer, continuous host) + 10 wrong station streams fixed; live radio streams bypass the SW; v85: continuous audio — pages open in a frame over audio.html with a floating island player (js/continuous-player.js), setting in audio.html + index.html; v84: audio.html UX (no silent skip on load/offline, inline error + retry, buffering ring, rich searchable lists, lock-screen seek) + 40 dead audio links fixed/removed in audio-01.json; v83: hadith-viewer RTL swipe (finger → right = next chapter, like duaa/hisn), hadith search ignores invisible RLM marks, viewer shows full result count + "show more", hadith.html scrolls results into view; v82: qibla tilt-compensated heading (back-camera bearing when upright), ignore relative-only orientation, calibration "done" no longer exits the page (BackClose.swap); v81: takrar unit labels strip the basmala + quote the opening, readable selected rows; v80: takrar settings sheet, first-open preferences, ayah-opening unit labels, language button; v79: takrar redesign (player dock, 46 reciters, infinite range loop) + new i18n keys; v78: let GitHub release audio bypass the SW (range requests via SW broke seeking); v77: Minshawi new murattal tracks moved to GitHub release + clean track names; v76: harden offline modal — reply timeouts + graceful recovery when an old SW still controls after update; v75: drop ?v= cache-buster from audio pages, strip dead CSS; v74: unified offline-download.js controller; v73: precache quran-v2 + audio/radio JSONs, hadith books on-demand, ZAD_CACHE_ALL handler
 const AUDIO_CACHE = "audio-cache-v1";
 const PUSH_CTX_CACHE = "push-ctx-v1"; // schedule context written by js/notifications.js
 
@@ -111,6 +111,9 @@ const STATIC_ASSETS = [
   "./js/dhikr-stats.js",
   "./js/continuous-player.js",
   "./js/sw-update.js",
+  "./js/net-status.js",
+  "./js/vendor/sql-wasm.js",
+  "./js/vendor/sql-wasm.wasm",
   "./js/offline-download.js",
   "./js/pwa-install.js",
   "./js/plugins/capacitor-core.js",
@@ -371,11 +374,11 @@ const STATIC_ASSETS = [
 ];
 
 // ===== Optional heavy content (NOT precached on install) =====
-// The full hadith books total ~58 MB. Forcing every visitor to download that
-// on first load would make the SW install slow and waste storage for users who
-// never open the hadith section. Instead they are fetched on demand — either
-// lazily when a book is first opened (the fetch handler caches them), or in bulk
-// via the "Download for offline" modal in index.html (ZAD_CACHE_ALL message).
+// The full hadith books (~58 MB), the tafsir books (~60 MB) and the bundled
+// recordings (~70 MB) are too heavy to force on every visitor at install.
+// Instead they are fetched on demand — either lazily when first opened (the
+// fetch handler caches them), or in bulk via the "Download for offline" modal
+// in index.html (js/offline-download.js reads this list straight from here).
 const OPTIONAL_ASSETS = [
   "./assets/hadith/bukhari.json",
   "./assets/hadith/muslim.json",
@@ -391,7 +394,32 @@ const OPTIONAL_ASSETS = [
   "./assets/hadith/nawawi40.json",
   "./assets/hadith/nawawi40-matn.json",
   "./assets/hadith/qudsi40-matn.json",
-  "./assets/hadith/qudsi40.json"
+  "./assets/hadith/qudsi40.json",
+
+  // Tafsir books (SQLite, ~60 MB) — opened from the tafsir sheet of the mushaf.
+  "./db/tafsir-saadi.db",
+  "./db/tafsir-baghawi.db",
+  "./db/tafsir-qortobi.db",
+  "./db/tafsir-ibn-kathir.db",
+
+  // Bundled recordings (~70 MB): adhan, morning/evening azkar, ruqyah, sleep azkar.
+  "./assets/azan.mp3",
+  "./assets/media/Azkar-morning.mp3",
+  "./assets/media/Azkar-night.mp3",
+  "./assets/media/rokia06.mp3",
+  "./assets/media/sleep-zikr/ar_99.mp3",
+  "./assets/media/sleep-zikr/ar_100.mp3",
+  "./assets/media/sleep-zikr/ar_101.mp3",
+  "./assets/media/sleep-zikr/ar_102.mp3",
+  "./assets/media/sleep-zikr/ar_103.mp3",
+  "./assets/media/sleep-zikr/ar_104.mp3",
+  "./assets/media/sleep-zikr/ar_105.mp3",
+  "./assets/media/sleep-zikr/ar_106.mp3",
+  "./assets/media/sleep-zikr/ar_107.mp3",
+  "./assets/media/sleep-zikr/ar_108.mp3",
+  "./assets/media/sleep-zikr/ar_109.mp3",
+  "./assets/media/sleep-zikr/ar_110.mp3",
+  "./assets/media/sleep-zikr/ar_111.mp3"
 ];
 
 // Everything the "Download for offline" modal pulls: the full app shell plus the
@@ -427,24 +455,51 @@ const DEEP_LINKS = {
 };
 
 // ===== Install: cache static assets =====
+// Fetched in small parallel batches (one-by-one took minutes on a slow link,
+// and an install that never finishes means no offline layer at all).
+// "no-cache" revalidates against the HTTP cache, so a new version never
+// precaches a stale copy and unchanged files cost a 304, not a download.
+const PRECACHE_CONCURRENCY = 8;
+
+async function precacheOne(cache, asset) {
+  try {
+    const response = await fetch(asset, { cache: "no-cache" });
+    if (response.ok) {
+      await cache.put(asset, response);
+      return true;
+    }
+    console.warn(`⚠️ Failed to cache: ${asset} (Status: ${response.status})`);
+  } catch (err) {
+    console.warn(`🚨 Network error while caching: ${asset}`, err);
+  }
+  return false;
+}
+
+async function precacheAll(cache, assets) {
+  let next = 0;
+  let failed = [];
+  const worker = async () => {
+    while (next < assets.length) {
+      const asset = assets[next++];
+      if (!(await precacheOne(cache, asset))) failed.push(asset);
+    }
+  };
+  await Promise.all(Array.from({ length: PRECACHE_CONCURRENCY }, worker));
+  // One more pass for whatever a flaky connection dropped.
+  const retry = failed;
+  failed = [];
+  for (const asset of retry) {
+    if (!(await precacheOne(cache, asset))) failed.push(asset);
+  }
+  return failed;
+}
+
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      console.log("📦 Caching assets one by one...");
-      for (let asset of STATIC_ASSETS) {
-        try {
-          const response = await fetch(asset);
-          if (response.ok) {
-            await cache.put(asset, response);
-          } else {
-            console.warn(`⚠️ Failed to cache: ${asset} (Status: ${response.status})`);
-          }
-        } catch (err) {
-          console.error(`🚨 Network error while caching: ${asset}`, err);
-        }
-      }
-      console.log("✅ Caching process completed.");
+      const failed = await precacheAll(cache, STATIC_ASSETS);
+      console.log(`✅ Precache done: ${STATIC_ASSETS.length - failed.length}/${STATIC_ASSETS.length}`);
     })
   );
 });
@@ -463,6 +518,101 @@ self.addEventListener("activate", event => {
   return self.clients.claim();
 });
 
+// ===== Audio: offline playback =====
+// <audio> asks for byte ranges ("Range: bytes=0-", then more on every seek).
+// The Cache API can't store the 206 answers, so before this the audio cache
+// stayed empty and nothing played offline. Now:
+//   • a cached full copy answers any range itself (206 slices — Safari refuses
+//     to play without them, and seeking needs them everywhere);
+//   • a readable response that carries the whole file — a plain 200, or the
+//     usual 206 for "bytes=0-" — is stored as a full copy while it plays.
+// Cross-origin audio requested without CORS is opaque and can't be stored
+// here; pages that download a track put it in AUDIO_CACHE themselves.
+async function findCachedAudio(href) {
+  const opts = { ignoreVary: true };
+  const audioCache = await caches.open(AUDIO_CACHE);
+  let hit = await audioCache.match(href, opts);
+  // Also the app cache ("download all" stores bundled recordings there) and
+  // any download cache a page keeps.
+  if (!hit) hit = await caches.match(href, opts);
+  if (!hit) {
+    // Retry URLs carry a throw-away "_r=" parameter (pages/audio.html).
+    const clean = href.replace(/([?&])_r=\d+(&|$)/, (m, a, b) => (b ? a : ""));
+    if (clean !== href) hit = (await audioCache.match(clean, opts)) || (await caches.match(clean, opts));
+  }
+  // Only a complete, readable body can be sliced.
+  return hit && hit.status === 200 && hit.type !== "opaque" ? hit : null;
+}
+
+async function rangeResponse(full, rangeHeader) {
+  const blob = await full.blob();
+  const size = blob.size;
+  const m = /^bytes=(\d*)-(\d*)$/.exec((rangeHeader || "").trim());
+  if (!m || (m[1] === "" && m[2] === "")) return new Response(blob, { status: 200, headers: full.headers });
+
+  let start, end;
+  if (m[1] === "") {                       // "bytes=-500": the last 500 bytes
+    start = Math.max(0, size - Number(m[2]));
+    end = size - 1;
+  } else {
+    start = Number(m[1]);
+    end = m[2] === "" ? size - 1 : Math.min(Number(m[2]), size - 1);
+  }
+  if (start >= size || start > end) {
+    return new Response("", { status: 416, headers: { "Content-Range": `bytes */${size}` } });
+  }
+
+  const type = full.headers.get("Content-Type") || "audio/mpeg";
+  return new Response(blob.slice(start, end + 1, type), {
+    status: 206,
+    statusText: "Partial Content",
+    headers: {
+      "Content-Type": type,
+      "Content-Length": String(end - start + 1),
+      "Content-Range": `bytes ${start}-${end}/${size}`,
+      "Accept-Ranges": "bytes"
+    }
+  });
+}
+
+// A 206 that starts at byte 0 and runs to the end is the whole file.
+function isWholeFile206(res) {
+  const m = /^bytes 0-(\d+)\/(\d+)$/.exec(res.headers.get("Content-Range") || "");
+  return !!m && Number(m[1]) + 1 === Number(m[2]);
+}
+
+async function storeFullAudio(href, res) {
+  try {
+    const headers = new Headers();
+    const type = res.headers.get("Content-Type");
+    if (type) headers.set("Content-Type", type);
+    const cache = await caches.open(AUDIO_CACHE);
+    // Stored as a plain 200 keyed by URL; the put fails (and nothing is kept)
+    // if the download is cut short, so a partial file is never served later.
+    await cache.put(href, new Response(res.body, { status: 200, headers }));
+    await trimAudioCache(cache);
+  } catch (_) { /* aborted download, quota… — play from the network next time */ }
+}
+
+async function handleAudio(event) {
+  const req = event.request;
+  const range = req.headers.get("range");
+
+  const cached = await findCachedAudio(req.url);
+  if (cached) return range ? rangeResponse(cached, range) : cached;
+
+  try {
+    const response = await fetch(req);
+    if (response.type !== "opaque" &&
+        (response.status === 200 || (response.status === 206 && isWholeFile206(response)))) {
+      event.waitUntil(storeFullAudio(req.url, response.clone()));
+    }
+    return response;
+  } catch (_) {
+    return new Response("", { status: 503, statusText: "Offline" });
+  }
+}
+
 // ===== Fetch handler =====
 self.addEventListener("fetch", event => {
   const req = event.request;
@@ -480,27 +630,11 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // --- Audio files: cache-first with audio-cache-v1 ---
+  // --- Audio files: cache-first, byte ranges served from the cached copy ---
   if (url.pathname.endsWith(".mp3") ||
       url.hostname.includes("mp3quran") ||
       url.hostname.includes("archive.org")) {
-    event.respondWith(
-      caches.open(AUDIO_CACHE).then(async cache => {
-        const cached = await cache.match(req);
-        if (cached) return cached;
-        try {
-          const response = await fetch(req);
-          if (response && response.ok) {
-            event.waitUntil(
-              cache.put(req, response.clone()).then(() => trimAudioCache(cache)).catch(() => {})
-            );
-          }
-          return response;
-        } catch (_) {
-          return new Response("", { status: 503 });
-        }
-      })
-    );
+    event.respondWith(handleAudio(event));
     return;
   }
 
@@ -520,31 +654,35 @@ self.addEventListener("fetch", event => {
   }
 
   // --- HTML pages: stale-while-revalidate ---
-  if (req.headers.get("accept")?.includes("text/html")) {
+  if (req.mode === "navigate" || req.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
-        // Exact match first, then ignoring the query string — notification
-        // deep links like "pages/azkar.html?type=morning" would otherwise
-        // miss the cache offline even though the page itself is precached.
-        let cached = await cache.match(req);
+        // Pages are static files: "azkar.html?type=morning" and "azkar.html"
+        // are the same document. One cache entry per page (keyed without the
+        // query) — deep links hit the precached copy offline, and the cache
+        // doesn't fill up with a copy per ?surah=/?page= value.
+        const pageKey = url.origin === self.location.origin ? url.origin + url.pathname : req.url;
+        const save = res => {
+          if (res && res.ok && !res.redirected) return cache.put(pageKey, res);
+        };
+
+        let cached = await cache.match(pageKey);
         if (!cached) cached = await cache.match(req, { ignoreSearch: true });
 
         if (cached) {
-          // Serve the cached copy immediately; revalidate in the background
-          // with a single fetch (previously this path issued two).
-          event.waitUntil(
-            fetch(req).then(res => { if (res && res.ok) cache.put(req, res); }).catch(() => {})
-          );
+          // Serve the cached copy immediately; revalidate in the background.
+          event.waitUntil(fetch(req).then(save).catch(() => {}));
           return cached;
         }
 
         try {
           const res = await fetch(req);
-          if (res && res.ok) cache.put(req, res.clone());
+          event.waitUntil(Promise.resolve(save(res.clone())).catch(() => {}));
           return res;
         } catch (e) {
-          // Fully offline with nothing cached for this URL — show the
-          // styled offline/404 page instead of a bare browser error.
+          // Offline with nothing cached for this URL — show the styled
+          // fallback page (it explains the connection is down) instead of a
+          // bare browser error.
           return (await cache.match("./404.html")) ||
             new Response("Offline", { status: 503, statusText: "Service Unavailable", headers: { "Content-Type": "text/plain" } });
         }
