@@ -281,9 +281,9 @@ test('Arabic translations contain Arabic script', async ({ page }) => {
   await page.evaluate(() => window.I18n.setLang('ar'));
   await page.waitForTimeout(300);
 
-  const title = await page.locator('[data-i18n="app_name"]').textContent();
+  const title = await page.locator('[data-i18n="greet_salam"]').textContent();
   const hasArabic = /[\u0600-\u06FF]/.test(title);
-  expect(hasArabic, `app_name "${title}" should contain Arabic script`).toBe(true);
+  expect(hasArabic, `greet_salam "${title}" should contain Arabic script`).toBe(true);
 });
 
 // =====================================================
@@ -296,9 +296,9 @@ test('Kurdish translations contain Kurdish text', async ({ page }) => {
   await page.evaluate(() => window.I18n.setLang('ckb'));
   await page.waitForTimeout(300);
 
-  const title = await page.locator('[data-i18n="app_name"]').textContent();
+  const title = await page.locator('[data-i18n="greet_salam"]').textContent();
   const hasArabic = /[\u0600-\u06FF]/.test(title);
-  expect(hasArabic, `ckb app_name "${title}" should contain Arabic-script characters`).toBe(true);
+  expect(hasArabic, `ckb greet_salam "${title}" should contain Arabic-script characters`).toBe(true);
 });
 
 // =====================================================
