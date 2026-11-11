@@ -154,3 +154,42 @@ test('display formatting never adds or drops a character, for every ayah', async
   expect(bad).toEqual([]);
   expect(outputs.length).toBe(6236 + 280);
 });
+
+test.describe('pinch-to-zoom hint', () => {
+  const hint = page => page.locator('#qtZoomHint');
+  const shown = page => page.evaluate(() => document.getElementById('qtZoomHint').classList.contains('show'));
+
+  test('appears over the first page, then fades by itself', async ({ page }) => {
+    await blockNetwork(page);
+    await page.goto(`${BASE_URL}/pages/quran-text.html?page=2`, { waitUntil: 'load' });
+    await expect.poll(() => shown(page), { timeout: 6000 }).toBe(true);
+    await expect(hint(page)).toContainText('بإصبعين');
+    await expect.poll(() => shown(page), { timeout: 6000 }).toBe(false);
+    expect(await page.evaluate(() => getComputedStyle(document.getElementById('qtZoomHint')).opacity)).toBe('0');
+  });
+
+  test('a touch dismisses it at once', async ({ page }) => {
+    await blockNetwork(page);
+    await page.goto(`${BASE_URL}/pages/quran-text.html?page=2`, { waitUntil: 'load' });
+    await expect.poll(() => shown(page), { timeout: 6000 }).toBe(true);
+    await page.evaluate(() => document.dispatchEvent(new Event('touchstart')));
+    expect(await shown(page)).toBe(false);
+  });
+
+  test('is shown only a few times, and never after the reader has pinched', async ({ page }) => {
+    await blockNetwork(page);
+    await page.addInitScript(() => { try { localStorage.setItem('qtZoomHintCount', '3'); } catch (e) {} });
+    await page.goto(`${BASE_URL}/pages/quran-text.html?page=2`, { waitUntil: 'load' });
+    await expect(page.locator('.ayah-wrapper').first()).toBeVisible();
+    await page.waitForTimeout(1500);
+    expect(await shown(page)).toBe(false);
+
+    const second = await page.context().newPage();
+    await blockNetwork(second);
+    await second.addInitScript(() => { try { localStorage.setItem('qtZoomHintDone', '1'); } catch (e) {} });
+    await second.goto(`${BASE_URL}/pages/quran-text.html?page=2`, { waitUntil: 'load' });
+    await expect(second.locator('.ayah-wrapper').first()).toBeVisible();
+    await second.waitForTimeout(1500);
+    expect(await shown(second)).toBe(false);
+  });
+});
