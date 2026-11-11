@@ -320,7 +320,7 @@ body.is-playing .bar{animation:wave 1.1s ease-in-out infinite}
 }
 .time{font-size:11.5px;color:var(--text-secondary);width:40px;text-align:center;font-variant-numeric:tabular-nums;flex-shrink:0}
 input[type=range]{-webkit-appearance:none;width:100%;background:transparent;cursor:pointer}
-input[type=range]:focus{outline:none}
+input[type=range]:focus:not(:focus-visible){outline:none}
 input[type=range]::-webkit-slider-runnable-track{
   height:5px;border-radius:4px;background:var(--track-bg);
 }
@@ -758,6 +758,16 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 }
 
 /* Install prompt rendered by ../js/pwa-install.js */
+/* ===== Touch targets (P1-3) =====
+   Small controls get an invisible 44×44 px tap area from a pseudo-element:
+   nothing moves or changes size on screen. Taps on a pseudo-element go to its
+   element, so handlers see the same event target as before. A control that is
+   already 44 px or larger gets no extra area (the min() resolves to 0). */
+.icon-btn, .action-btn, .track-error-retry { position: relative; }
+.icon-btn::after, .action-btn::after, .track-error-retry::after { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }
+/* the seek bar: a 24 px tall touch strip around the same 5 px track */
+#progress { height: 24px; margin: -9.5px 0; }   /* was 5 px tall; same place on screen */
+
 </style>
 <script type="application/ld+json">
 {
@@ -790,6 +800,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   ]
 }
 </script>
+<link rel="stylesheet" href="../css/a11y.css">
 </head>
 <body>
 
@@ -825,7 +836,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       <button class="icon-btn" onclick="haptic();I18n.openLangSheet()" aria-label="Language">
         <div style="width:22px;height:22px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
       </button>
-      <button class="icon-btn" onclick="haptic();openSheet('settingsSheet',true)">
+      <button class="icon-btn" onclick="haptic();openSheet('settingsSheet',true)" aria-label="الإعدادات" data-i18n-aria="settings">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </div>
@@ -893,7 +904,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     <div class="progress-section">
       <div class="progress-container">
         <span class="time" id="currentTime">00:00</span>
-        <input type="range" id="progress" value="0" min="0" max="100" step="0.1">
+        <input type="range" id="progress" value="0" min="0" max="100" step="0.1" aria-label="موضع التلاوة" data-i18n-aria="a11y_seek">
         <span class="time" id="durationTime">00:00</span>
       </div>
     </div>
@@ -964,7 +975,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 <div id="selectionSheet" class="bottom-sheet">
   <div class="sheet-header">
     <h2 id="selectionSheetTitle">العنوان</h2>
-    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px">
+    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px" aria-label="إغلاق" data-i18n-aria="close">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -981,7 +992,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   <div class="drag-handle"></div>
   <div class="sheet-header">
     <h2 data-i18n="settings">الإعدادات</h2>
-    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px">
+    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px" aria-label="إغلاق" data-i18n-aria="close">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -1093,7 +1104,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 <div id="timerSheet" class="bottom-sheet">
   <div class="sheet-header">
     <h2 data-i18n="audio_sleep_title">مؤقت النوم</h2>
-    <button class="icon-btn" onclick="openSheet('settingsSheet',true)" style="width:36px;height:36px">
+    <button class="icon-btn" onclick="openSheet('settingsSheet',true)" style="width:36px;height:36px" aria-label="الإعدادات" data-i18n-aria="settings">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -1117,13 +1128,13 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <button class="timer-preset-btn" onclick="haptic();setPresetTimer(30)"><span>30</span><small>min</small></button>
       </div>
       <div style="display:flex;gap:18px;align-items:center;margin-top:8px">
-        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();cancelSleepTimer()">
+        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();cancelSleepTimer()" aria-label="إلغاء المؤقت" data-i18n-aria="radio_sleep_cancel">
           <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
         </button>
         <button class="play-pause-btn" style="width:68px;height:68px" onclick="haptic();startCustomTimer()">
           <svg viewBox="0 0 24 24" width="28" fill="currentColor" id="timerPlayIcon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </button>
-        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();closeAllSheets()">
+        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();closeAllSheets()" aria-label="إغلاق" data-i18n-aria="close">
           <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </button>
       </div>
@@ -2110,5 +2121,6 @@ window.addEventListener('langchange',()=>{
 
 <!-- Install prompt (PWA / Play Store / iOS) rendered by pwa-install.js -->
 <script src="../js/net-status.js"></script>
+<script src="../js/tap-a11y.js"></script>
 </body>
 </html>

@@ -2537,3 +2537,13 @@
   }
 }
 
+/* ===== Touch targets (P1-3) =====
+   Small controls get an invisible 44×44 px tap area from a pseudo-element:
+   nothing moves or changes size on screen. Taps on a pseudo-element go to its
+   element, so handlers see the same event target as before. A control that is
+   already 44 px or larger gets no extra area (the min() resolves to 0). */
+.icon-btn::after, .label-box::after, .dl-toast-x::after { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }
+.dl-toast-x { position: relative; }
+/* the left toolbar buttons touch each other: grow their tap area up and down only,
+   so a neighbour never takes over the edge of a button */
+.header-left .icon-btn::after { left: 0; right: 0; }

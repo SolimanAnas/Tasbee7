@@ -5,7 +5,7 @@
 <!-- Page zoom stays off here: the zikr card has its own pinch-to-resize text
      (and a font-size slider), and a page pinch that missed the card left the
      whole screen zoomed and cropped. -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <style>html{touch-action:manipulation}</style>
 <meta name="theme-color" content="#0F172A">
 <title>الأذكار — زاد المسلم | Adhkar & Supplications</title>
@@ -1047,7 +1047,18 @@ body::after {
   .top-bar, .session-progress, .counter-anchor, .bottom-stack,
   .progress-wrapper.tick::after, .progress-wrapper.tick .count-number { animation:none; }
 }
+/* ===== Touch targets (P1-3) =====
+   Small controls get an invisible 44×44 px tap area from a pseudo-element:
+   nothing moves or changes size on screen. Taps on a pseudo-element go to its
+   element, so handlers see the same event target as before. A control that is
+   already 44 px or larger gets no extra area (the min() resolves to 0). */
+.icon-btn { position: relative; }
+.icon-btn::before { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }   /* ::after is the "audio playing" dot */
+.zoom-btns button { position: relative; }
+.zoom-btns button::after { content: ""; position: absolute; inset: -8px -4px; }   /* only 6 px between A− and A+ */
+
 </style>
+<link rel="stylesheet" href="../css/a11y.css">
 </head>
 
 <body>
@@ -1161,7 +1172,7 @@ body::after {
 
     <div class="settings-row">
       <h3 data-i18n="azkar_font_size">حجم الخط</h3>
-      <input type="range" min="22" max="40" value="28" id="fontSizeSlider"
+      <input type="range" min="22" max="40" value="28" id="fontSizeSlider" aria-label="حجم الخط" data-i18n-aria="a11y_font_size"
              oninput="changeFontSize(this.value)">
     </div>
 
@@ -2000,5 +2011,6 @@ window.addEventListener("load", () => {
   </script>
   <script src="../js/sw-update.js"></script>
 <script src="../js/net-status.js"></script>
+<script src="../js/tap-a11y.js"></script>
 </body>
 </html>
