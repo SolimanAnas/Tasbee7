@@ -483,7 +483,17 @@
       .qt-zoom-hint.show .qt-zoom-cap { animation: qtStill 2.6s linear both; transform: translate(-50%, 0); }
       @keyframes qtStill { 0%, 100% { opacity: 0; } 12%, 85% { opacity: 1; } }
     }
-  </style>
+
+/* ===== Touch targets (P1-3) =====
+   Small controls get an invisible 44×44 px tap area from a pseudo-element:
+   nothing moves or changes size on screen. Taps on a pseudo-element go to its
+   element, so handlers see the same event target as before. A control that is
+   already 44 px or larger gets no extra area (the min() resolves to 0). */
+    .icon-btn { position: relative; }
+    .icon-btn::after, .label-box::after { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }
+    .header-left .icon-btn::after { left: 0; right: 0; }
+          </style>
+<link rel="stylesheet" href="../css/a11y.css">
 </head>
 <body data-theme="light">
 
@@ -1830,5 +1840,6 @@
     }
   </script>
 <script src="../js/net-status.js"></script>
+<script src="../js/tap-a11y.js"></script>
 </body>
 </html>
