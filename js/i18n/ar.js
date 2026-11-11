@@ -131,6 +131,8 @@ export default {
   // Location Modal
   'location_title': 'تحديد الموقع',
   'location_subtitle': 'لعرض مواقيت الصلاة بدقة',
+  'location_reason': `تُحسب مواقيت الصلاة واتجاه القبلة على جهازك. يُحفظ موقع تقريبي على جهازك فقط.`,
+  'location_later': `لاحقاً`,
   'location_gps': 'استخدام موقعي الحالي (GPS)',
   'location_or_search': 'أو البحث يدوياً',
   'location_placeholder': 'اسم المدينة (مثال: Cairo)',

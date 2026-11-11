@@ -101,4 +101,5 @@
       updateBookmarkStar();
       updatePageLabels();
       trackQuranReading();
+      if (typeof dlNotePageTurn === 'function') dlNotePageTurn();
     }
