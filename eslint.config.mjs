@@ -10,7 +10,7 @@ const appGlobals = {
   adhan: 'readonly', Capacitor: 'readonly', Hls: 'readonly', initSqlJs: 'readonly', ort: 'readonly',
   // app modules (classic-script globals)
   NotificationSystem: 'writable', ThemeManager: 'readonly', PrayerService: 'readonly',
-  Toast: 'readonly', I18n: 'readonly', AudioCache: 'readonly', TasmeeEngine: 'readonly',
+  Toast: 'readonly', I18n: 'readonly', AudioCache: 'readonly', QuranTextSource: 'writable', TasmeeEngine: 'readonly',
   TasmeeMatcher: 'readonly', TasmeeStore: 'readonly', buildNotificationSchedule: 'readonly',
   cityCoordinatesMap: 'readonly', t: 'readonly', RADIO_STATIONS: 'readonly',
 };

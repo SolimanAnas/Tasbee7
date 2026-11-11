@@ -777,6 +777,7 @@
 
   <script src="../js/quran-common.js"></script>
   <script src="../js/dhikr-stats.js"></script>
+  <script src="../js/quran-text-source.js"></script>
 
   <script>
     let fontSize = 40; 
@@ -883,9 +884,13 @@
     }
 
     function changeFontFamily(fontFamily) {
+      const before = textEncodingForFont();
       currentFont = fontFamily;
       localStorage.setItem('quranFontFamily', fontFamily);
       applyTextSettings();
+      // The Madinah font and the other fonts need different encodings of the
+      // text; switching between them reloads the page in the right one.
+      if (textEncodingForFont() !== before) renderText();
     }
 
     function changeFontSizeSlider(value) { 
@@ -1157,6 +1162,9 @@
             else { stopAudio(); } 
             return; 
         }
+        // The text can come from the device; the recitation cannot. Stop here
+        // rather than skipping ahead through pages that have no audio either.
+        if (!pageAudioUrls[index]) { stopAudio(); showCustomToast("تأكد من الاتصال بالإنترنت لتشغيل التلاوة."); return; }
         currentAyahIndex = index; audioPlayer.src = pageAudioUrls[index]; 
         audioPlayer.play().catch(e => showCustomToast("تأكد من الاتصال بالإنترنت لتشغيل التلاوة."));
         isPlaying = true; updatePlayBtnUI(); updateMediaSession();
@@ -1179,7 +1187,9 @@
 
     function cleanAndFormatAyahText(apiText) {
         if (!apiText) return "";
-        let t = apiText;
+        // Shown as text: nothing in the source string is ever parsed as markup.
+        // (The only markup in the result is the stop-mark span added below.)
+        let t = escHtml(apiText);
         t = t.replace(/[\u06DD\u06F0-\u06F9\u0660-\u0669\uFD3E\uFD3F\(\)\s]+$/g, '');
         t = t.replace(/[\u25CC]/g, '');
         t = t.replace(/\s+([\u06D6-\u06DC\u06DF-\u06ED])/g, '$1');
@@ -1188,131 +1198,120 @@
         return t.trim();
     }
 
-    function renderText() {
-      const txtCont = document.getElementById('textContainer');
-      if (!txtCont) return;
-      
-      const cacheKey = `quran_master_v49_${currentPage}_${selectedReciter}`;
+    // ===== Page text =====
+    // js/quran-text-source.js decides what a page shows: the layout (which
+    // ayahs, their numbers, surah titles) always comes from the app's own
+    // verified text; text fetched for the chosen font is used only when its
+    // letters match that text ayah by ayah; with no connection the page is the
+    // local text. See that file for the rules.
+
+    // The Madinah font needs its own encoding of the text; the others share one.
+    function textEncodingForFont() { return currentFont === 'MadinahFont' ? 'qpc' : 'uthmani'; }
+
+    const PAGE_CACHE_PREFIX = 'quran_text_v50_';
+    function pageCacheKey(page) { return `${PAGE_CACHE_PREFIX}${page}_${selectedReciter}_${textEncodingForFont()}`; }
+
+    // Pages cached by earlier versions were stored as fetched, unverified.
+    (function dropOldPageCaches() {
       try {
-          const cachedData = localStorage.getItem(cacheKey);
-          if (cachedData) {
-              const parsed = JSON.parse(cachedData); 
-              txtCont.innerHTML = parsed.html; 
-              pageAudioUrls = parsed.audio; 
-              currentPageAyahsData = parsed.ayahsData;
-              txtCont.scrollTop = 0; 
-              if (autoPlayNextPage) { playAyah(0); autoPlayNextPage = false; } 
-              handlePendingAyahAction(); 
-              prefetchNextPage(); 
-              applyTextSettings(); 
-              setupLongPressForAyahs();
-              if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
-              if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
-              return;
-          }
-      } catch(e) { localStorage.removeItem(cacheKey); }
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('quran_master_v') || k.startsWith('quran_page_master_v'))) localStorage.removeItem(k);
+        }
+      } catch (e) {}
+    })();
 
-      txtCont.innerHTML = '<div style="text-align:center; padding:50px; font-size:20px; color: var(--accent);">جاري تحميل النص والصوت...</div>';
-      const quranComFetch = fetch(`https://api.quran.com/api/v4/verses/by_page/${currentPage}?words=false&fields=text_qpc_hafs,text_uthmani&per_page=50`)
-          .then(res => res.json()).catch(err => { return null; });
+    // 'remote' (fetched text, verified) or 'local' (the app's own text) for the
+    // page on screen — applyTextSettings() picks the font accordingly.
+    let pageTextSource = 'remote';
 
-      Promise.all([
-          fetch(`https://api.alquran.cloud/v1/page/${currentPage}/${selectedReciter}`).then(res => res.json()),
-          quranComFetch
-      ]).then(([audioData, quranComData]) => {
-          if (audioData && audioData.code === 200) {
-            const metaAyahs = audioData.data.ayahs; 
-            const qpcAyahs = (quranComData && quranComData.verses) ? quranComData.verses : null; 
-            pageAudioUrls = metaAyahs.map(a => a.audio); 
-            currentPageAyahsData = [];
-            let htmlContent = '';
-            
-            metaAyahs.forEach((a, i) => {
-                let text = "";
-                if (qpcAyahs && qpcAyahs[i]) { 
-                    if (currentFont === 'MadinahFont') {
-                        text = qpcAyahs[i].text_qpc_hafs || qpcAyahs[i].text_uthmani || a.text;
-                    } else {
-                        text = qpcAyahs[i].text_uthmani || a.text;
-                    }
-                } else { 
-                    text = a.text || ""; 
-                }
-
-                if (a.numberInSurah === 1 && a.surah.number !== 1 && a.surah.number !== 9) { text = text.replace(/^.*?(ٱلرَّحِيمِ|الرَّحِيمِ|الرحيم)\s*/, ''); }
-                text = cleanAndFormatAyahText(text);
-
-                if (a.numberInSurah === 1) {
-                    let cleanSurahName = a.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim(); 
-                    let metaText = a.surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية';
-                    htmlContent += `
+    function buildPageView(result) {
+      let htmlContent = '';
+      const ayahsData = [];
+      result.ayahs.forEach((a, i) => {
+        const text = cleanAndFormatAyahText(a.text);
+        if (a.numberInSurah === 1) {
+          const cleanSurahName = escHtml(String(a.surahName).replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim());
+          const metaText = a.meccan ? 'مكية' : 'مدنية';
+          htmlContent += `
                     <div class="surah-separator">
                         <div class="surah-header-container">
                             <img src="../img/Sura_border.svg" class="surah-frame-img" alt="">
                             <div class="surah-title-text">سُورَةُ ${cleanSurahName}</div>
                         </div>
-                        <div class="surah-meta">${metaText} • آياتها ${a.surah.numberOfAyahs}</div>
+                        <div class="surah-meta">${metaText} • آياتها ${Number(a.numberOfAyahs)}</div>
                     </div>`;
-                    if (a.surah.number !== 1 && a.surah.number !== 9) { htmlContent += `<div class="basmalah-container"><img class="basmalah-svg" src="../img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
-                }
-                currentPageAyahsData.push({ number: a.number, numberInSurah: a.numberInSurah, surahName: a.surah.name, text: text });
-                htmlContent += `<span class="ayah-wrapper" id="ayah-wrapper-${i}" data-index="${i}">
+          if (a.surah !== 1 && a.surah !== 9) { htmlContent += `<div class="basmalah-container"><img class="basmalah-svg" src="../img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
+        }
+        ayahsData.push({ number: a.number, numberInSurah: a.numberInSurah, surahName: a.surahName, text: text });
+        htmlContent += `<span class="ayah-wrapper" id="ayah-wrapper-${i}" data-index="${i}">
                     <span class="ayah-text">${text}</span> 
-                    <span class="ayah-number">${a.numberInSurah.toLocaleString('ar-EG')}</span>
+                    <span class="ayah-number">${Number(a.numberInSurah).toLocaleString('ar-EG')}</span>
                 </span> `;
-            });
-            try { localStorage.setItem(cacheKey, JSON.stringify({ html: htmlContent, audio: pageAudioUrls, ayahsData: currentPageAyahsData })); } catch(e) {}
-            txtCont.innerHTML = htmlContent; 
-            txtCont.scrollTop = 0; 
-            if (autoPlayNextPage) { playAyah(0); autoPlayNextPage = false; } 
-            handlePendingAyahAction(); 
-            prefetchNextPage(); 
-            applyTextSettings();
-            setupLongPressForAyahs();
-            if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
-            if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
-          } else { txtCont.innerHTML = '<div style="text-align:center; padding:50px;">عذراً، لم يتم العثور على النص</div>'; }
-      }).catch(err => { txtCont.innerHTML = `<div class="error-log"><b>Error:</b><br>${err.message}</div>`; });
+      });
+      return { html: htmlContent, audio: result.audio, ayahsData: ayahsData, source: result.source };
+    }
+
+    // Kept for the next visit only when it is complete: verified fetched text
+    // and a recitation URL for every ayah. A local-text page is rebuilt from
+    // the local files each time (it costs nothing and never goes stale).
+    function cachePageView(page, view) {
+      if (view.source !== 'remote' || !view.audio.length || view.audio.some(u => !u)) return;
+      try { localStorage.setItem(pageCacheKey(page), JSON.stringify(view)); } catch (e) {}
+    }
+
+    function showPageView(txtCont, view) {
+      pageTextSource = view.source === 'local' ? 'local' : 'remote';
+      txtCont.innerHTML = view.html;
+      pageAudioUrls = view.audio;
+      currentPageAyahsData = view.ayahsData;
+      txtCont.scrollTop = 0;
+      if (autoPlayNextPage) { playAyah(0); autoPlayNextPage = false; }
+      handlePendingAyahAction();
+      prefetchNextPage();
+      applyTextSettings();
+      setupLongPressForAyahs();
+      if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
+      if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
+    }
+
+    function renderText() {
+      const txtCont = document.getElementById('textContainer');
+      if (!txtCont) return;
+
+      const page = currentPage;
+      const cacheKey = pageCacheKey(page);
+      try {
+          const cachedData = localStorage.getItem(cacheKey);
+          if (cachedData) {
+              const parsed = JSON.parse(cachedData);
+              if (parsed && parsed.html && Array.isArray(parsed.audio) && Array.isArray(parsed.ayahsData)) {
+                  showPageView(txtCont, parsed);
+                  return;
+              }
+          }
+      } catch(e) { try { localStorage.removeItem(cacheKey); } catch (_) {} }
+
+      txtCont.innerHTML = '<div style="text-align:center; padding:50px; font-size:20px; color: var(--accent);">جاري تحميل النص والصوت...</div>';
+      QuranTextSource.getPage(page, selectedReciter, textEncodingForFont()).then(result => {
+          if (page !== currentPage) return; // the reader moved on while this loaded
+          if (!result.ayahs.length) { txtCont.innerHTML = '<div style="text-align:center; padding:50px;">عذراً، لم يتم العثور على النص</div>'; return; }
+          const view = buildPageView(result);
+          cachePageView(page, view);
+          showPageView(txtCont, view);
+      }).catch(err => {
+          if (page !== currentPage) return;
+          txtCont.innerHTML = `<div class="error-log"><b>Error:</b><br>${escHtml(err && err.message)}</div>`;
+      });
     }
 
     function prefetchNextPage() {
-        const nextPage = currentPage + 1; 
-        if (nextPage > 604) return; 
-        const cacheKey = `quran_page_master_v49_${nextPage}_${selectedReciter}`;
-        if (!localStorage.getItem(cacheKey)) {
-            const qComFetch = fetch(`https://api.quran.com/api/v4/verses/by_page/${nextPage}?words=false&fields=text_qpc_hafs,text_uthmani&per_page=50`).then(res => res.json()).catch(() => null);
-            Promise.all([ fetch(`https://api.alquran.cloud/v1/page/${nextPage}/${selectedReciter}`).then(res => res.json()), qComFetch ]).then(([audioData, qData]) => {
-                if (audioData.code === 200) {
-                    const mAyahs = audioData.data.ayahs; 
-                    const qAyahs = qData ? qData.verses : null; 
-                    const audios = mAyahs.map(a => a.audio); 
-                    let html = ''; let tempD = [];
-                    mAyahs.forEach((a, i) => {
-                        let t = "";
-                        if (qAyahs && qAyahs[i]) {
-                            if (currentFont === 'MadinahFont') {
-                                t = qAyahs[i].text_qpc_hafs || qAyahs[i].text_uthmani || a.text;
-                            } else {
-                                t = qAyahs[i].text_uthmani || a.text;
-                            }
-                        } else {
-                            t = a.text || "";
-                        }
-                        if (a.numberInSurah === 1 && a.surah.number !== 1 && a.surah.number !== 9) { t = t.replace(/^.*?(ٱلرَّحِيمِ|الرَّحِيمِ|الرحيم)\s*/, ''); }
-                        t = cleanAndFormatAyahText(t);
-                        tempD.push({ number: a.number, numberInSurah: a.numberInSurah, surahName: a.surah.name, text: t });
-                        if (a.numberInSurah === 1) {
-                            let n = a.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim(); 
-                            let rt = a.surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية';
-                            html += `<div class="surah-separator"><div class="surah-header-container"><img src="../img/Sura_border.svg" class="surah-frame-img" alt=""><div class="surah-title-text">سُورَةُ ${n}</div></div><div class="surah-meta">${rt} • آياتها ${a.surah.numberOfAyahs}</div></div>`;
-                            if (a.surah.number !== 1 && a.surah.number !== 9) { html += `<div class="basmalah-container"><img class="basmalah-svg" src="../img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
-                        }
-                        html += `<span class="ayah-wrapper" id="ayah-wrapper-${i}" data-index="${i}"><span class="ayah-text">${t}</span> <span class="ayah-number">${a.numberInSurah.toLocaleString('ar-EG')}</span></span> `;
-                    });
-                    try { localStorage.setItem(cacheKey, JSON.stringify({ html: html, audio: audios, ayahsData: tempD })); } catch(e) {}
-                }
-            }).catch(()=>{});
-        }
+        const nextPage = currentPage + 1;
+        if (nextPage > 604 || navigator.onLine === false) return;
+        try { if (localStorage.getItem(pageCacheKey(nextPage))) return; } catch (e) { return; }
+        QuranTextSource.getPage(nextPage, selectedReciter, textEncodingForFont())
+          .then(result => { if (result.ayahs.length) cachePageView(nextPage, buildPageView(result)); })
+          .catch(() => {});
     }
 
     let searchOverlayActive = false; 
