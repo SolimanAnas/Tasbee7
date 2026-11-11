@@ -45,7 +45,10 @@
     offline_done: 'تم التحميل بنجاح',
     offline_downloading: 'جاري التحميل…',
     offline_storage_used: 'المساحة المستخدمة: {used}',
-    offline_error: 'تعذّر التحميل. تحقق من الاتصال ثم حاول مرة أخرى.'
+    offline_error: 'تعذّر التحميل. تحقق من الاتصال ثم حاول مرة أخرى.',
+    offline_incomplete: 'تعذّر تحميل {n} ملف — تحقق من الاتصال ثم أكمل التحميل',
+    offline_no_space: 'لا توجد مساحة كافية على الجهاز — بقي {n} ملف',
+    offline_retry_missing: 'إكمال تحميل الملفات الناقصة'
   };
 
   function T(key, params) {
@@ -133,7 +136,9 @@
     ['STATIC_ASSETS', 'OPTIONAL_ASSETS'].forEach(function (name) {
       var block = txt.match(new RegExp('(?:const|let|var)\\s+' + name + '\\s*=\\s*\\[([\\s\\S]*?)\\];'));
       if (!block) return;
-      var strs = block[1].match(/["'](\.\/[^"']*)["']/g) || [];
+      // Entries are double-quoted; a file name may itself hold an apostrophe
+      // ("Nasa'ie.webp"), so only the double quote ends an entry.
+      var strs = block[1].match(/"(\.\/[^"]*)"/g) || [];
       strs.forEach(function (s) {
         var rel = s.slice(1, -1);
         var abs = new URL(rel, base).href;
@@ -220,27 +225,54 @@
     }
     render();
 
+    // A few files at a time: the list is ~450 entries and the heavy ones (hadith
+    // and tafsir books, recordings) are tens of MB, so strictly one-by-one was
+    // needlessly slow. Each file gets a second attempt before it counts as
+    // failed, and a full disk stops the run instead of failing every file.
+    var CONCURRENCY = 4;
+    var quotaHit = false;
+
+    async function fetchInto(cache, url) {
+      // Reuse an already-cached copy (the SW precached most on install) so we
+      // only actually download what's missing.
+      var res = await cache.match(url);
+      if (res) return res;
+      for (var attempt = 0; attempt < 2; attempt++) {
+        try {
+          res = await fetch(url, { cache: 'no-cache' });
+          if (res && res.ok) {
+            await cache.put(url, res.clone());
+            return res;
+          }
+        } catch (e) {
+          if (e && e.name === 'QuotaExceededError') { quotaHit = true; return null; }
+        }
+      }
+      return null;
+    }
+
     try {
       var cache = await caches.open(mf.cacheName);
-      for (var i = 0; i < mf.urls.length; i++) {
-        var url = mf.urls[i];
-        try {
-          // Reuse an already-cached copy (the SW precached most on install) so
-          // we only actually download what's missing (mainly the hadith books).
-          var res = await cache.match(url);
-          if (!res) {
-            res = await fetch(url, { cache: 'no-cache' });
-            if (res && res.ok) { await cache.put(url, res.clone()); }
-            else { failed++; res = null; }
-          }
+      var next = 0;
+      var worker = async function () {
+        while (next < mf.urls.length && !quotaHit) {
+          var url = mf.urls[next++];
+          var res = null;
+          try { res = await fetchInto(cache, url); } catch (_) { res = null; }
           if (res) {
             var len = Number(res.headers.get('content-length'));
             if (!isNaN(len) && len > 0) bytes += len;
+          } else {
+            failed++;
           }
-        } catch (_) { failed++; }
-        done++;
-        render();
-      }
+          done++;
+          render();
+        }
+      };
+      var workers = [];
+      for (var w = 0; w < CONCURRENCY; w++) workers.push(worker());
+      await Promise.all(workers);
+      failed += mf.urls.length - done; // files never reached after a full disk
     } catch (e) {
       downloading = false;
       if (btn) btn.disabled = false;
@@ -251,13 +283,24 @@
     }
 
     downloading = false;
+    if (btn) btn.disabled = false;
+    showStorage();
+
+    if (failed) {
+      // Don't claim "fully downloaded" when files are missing: show the real
+      // count and leave the button ready to fetch only what's left.
+      if (ptext) ptext.textContent = T(quotaHit ? 'offline_no_space' : 'offline_incomplete', { n: failed });
+      if (btn) { btn.textContent = T('offline_retry_missing'); btn.classList.remove('is-done'); }
+      await refresh();
+      return;
+    }
+
     if (fill) fill.style.width = '100%';
     if (pctEl) pctEl.textContent = '100%';
-    if (ptext) ptext.textContent = failed ? (T('offline_done') + ' — ' + failed + ' ✗') : T('offline_done');
-    if (btn) { btn.disabled = false; btn.textContent = T('offline_redownload'); btn.classList.add('is-done'); }
+    if (ptext) ptext.textContent = T('offline_done');
+    if (btn) { btn.textContent = T('offline_redownload'); btn.classList.add('is-done'); }
     if (statusEl) statusEl.textContent = T('offline_status_complete');
     setDot('ok');
-    showStorage();
     setTimeout(function () { if (wrap) wrap.style.display = 'none'; if (fill) fill.style.width = '0%'; }, 3500);
   }
 
