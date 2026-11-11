@@ -181,7 +181,7 @@
           try {
             const next = await getNextAyahDb(surah, ayah);
             if (next) { startPlayback(next.surah, next.ayah); }
-            else { stopAudio(); showCustomToast("تم اختراق القرآن الكريم"); }
+            else { stopAudio(); showCustomToast("تم ختم القرآن الكريم"); }
           } catch (_) {
             stopAudio();
           }
@@ -261,7 +261,7 @@
              if (next) {
                  startPlayback(next.surah, next.ayah);
              } else {
-                 stopAudio(); showCustomToast("تم اختراق القرآن الكريم");
+                 stopAudio(); showCustomToast("تم ختم القرآن الكريم");
              }
          }
        } catch (e) {
