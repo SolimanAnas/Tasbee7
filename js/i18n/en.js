@@ -844,7 +844,7 @@ export default {
   'offline_storage_used': `Storage used: {used}`,
   'offline_needs_reopen': `The app is updating. Please reopen it and try again.`,
   'offline_error': `Download failed. Check your connection and try again.`,
-  'greet_salam': `Peace, mercy and blessings of Allah be upon you`,
+  'greet_salam': `As-salamu alaykum`,
   'offline_incomplete': `{n} file(s) could not be downloaded — check your connection, then continue`,
   'offline_no_space': `Not enough storage on this device — {n} file(s) left`,
   'offline_retry_missing': `Download the missing files`,

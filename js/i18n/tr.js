@@ -816,7 +816,7 @@ export default {
   'offline_storage_used': `Kullanılan alan: {used}`,
   'offline_needs_reopen': `Uygulama güncelleniyor. Yeniden açıp tekrar deneyin.`,
   'offline_error': `İndirme başarısız. Bağlantınızı kontrol edip tekrar deneyin.`,
-  'greet_salam': `Allah'ın selamı, rahmeti ve bereketi üzerinize olsun`,
+  'greet_salam': `Es-selâmü aleyküm`,
   'offline_incomplete': `{n} dosya indirilemedi — bağlantınızı kontrol edip devam edin`,
   'offline_no_space': `Cihazda yeterli alan yok — {n} dosya kaldı`,
   'offline_retry_missing': `Eksik dosyaları indir`,
