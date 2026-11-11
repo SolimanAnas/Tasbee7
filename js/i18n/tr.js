@@ -122,6 +122,8 @@ export default {
 
   'location_title': 'Konum Belirle',
   'location_subtitle': 'Doğru namaz vakitleri için',
+  'location_reason': `Namaz vakitleri ve kıble cihazınızda hesaplanır. Yalnızca yaklaşık konum, cihazınızda saklanır.`,
+  'location_later': `Daha sonra`,
   'location_gps': 'Mevcut konumumu kullan (GPS)',
   'location_or_search': 'Veya manuel arama',
   'location_placeholder': 'Şehir adı (örn: İstanbul)',

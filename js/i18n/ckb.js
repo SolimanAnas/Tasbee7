@@ -131,6 +131,8 @@ export default {
   // Location Modal
   'location_title': 'دیاریکردنی شوێن',
   'location_subtitle': 'بۆ کاتەکانی نوێژی ورد',
+  'location_reason': `کاتەکانی نوێژ و ئاڕاستەی قیبلە لەسەر ئامێرەکەت دەژمێردرێن. تەنها شوێنێکی نزیک لەسەر ئامێرەکەت هەڵدەگیرێت.`,
+  'location_later': `دواتر`,
   'location_gps': 'بەکارهێنانی شوێنی ئێستام (GPS)',
   'location_or_search': 'یان گەڕان بە دەست',
   'location_placeholder': 'ناوی شار (بۆ نموونە: Cairo)',

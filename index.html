@@ -619,6 +619,15 @@ body.home-swap .feature-card { animation: cardSwap .34s var(--ease-smooth) backw
   body.home-swap .feature-card { animation: none; }
 }
 
+
+/* ===== first-run location step ===== */
+.location-reason { margin: -4px 0 14px; font-size: 0.8rem; line-height: 1.6; text-align: center; color: var(--on-surface-variant); }
+.location-later {
+  display: block; margin: 10px auto 0; padding: 10px 18px; min-height: 44px;
+  background: none; border: none; color: var(--on-surface-variant);
+  font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+}
+
 /* ======================== BOTTOM NAVIGATION ======================== */
 .bottom-nav {
   position: fixed;
@@ -1297,11 +1306,13 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
       <div class="modal-title" data-i18n="location_title">تحديد الموقع</div>
       <div class="modal-sub" data-i18n="location_subtitle">لعرض مواقيت الصلاة بدقة</div>
     </div>
+    <p class="location-reason" data-i18n="location_reason">تُحسب مواقيت الصلاة واتجاه القبلة على جهازك. يُحفظ موقع تقريبي على جهازك فقط.</p>
     <button class="btn-primary" onclick="startGPS()" id="gpsBtn" data-i18n="location_gps">استخدام موقعي الحالي (GPS)</button>
     <div style="text-align:center; margin:16px 0; font-size:0.8rem; color:var(--on-surface-variant);" data-i18n="location_or_search">أو البحث يدوياً</div>
     <input type="text" id="cityInput" class="input-styled" data-i18n-placeholder="location_placeholder" placeholder="اسم المدينة (مثال: Cairo)" list="citiesDataList" onkeypress="if(event.key==='Enter') saveCity()">
     <datalist id="citiesDataList" class="cities-datalist-opts"></datalist>
     <button class="btn-primary btn-secondary" onclick="saveCity()" data-i18n="location_save">حفظ المدينة</button>
+    <button type="button" class="location-later" onclick="closeLocationModal()" data-i18n="location_later">لاحقاً</button>
   </div>
 </div>
 
@@ -1862,6 +1873,16 @@ function renderPrayerModal() {
   }
 }
 
+// First-run step after the language: ask once for a location, with the reason.
+// Later visits keep the "tap to set location" line on the prayer card.
+function maybeAskLocation() {
+  try {
+    if (ptGetLatLng() || localStorage.getItem('locationAsked')) return;
+    localStorage.setItem('locationAsked', '1');
+  } catch (e) { return; }
+  openLocationModal();
+}
+
 function openLocationModal() { document.getElementById('locationModal').classList.add('active'); }
 function closeLocationModal() { document.getElementById('locationModal').classList.remove('active'); }
 
@@ -2059,7 +2080,8 @@ window.addEventListener('load', async () => {
   if (window.I18n) {
     await I18n.init();
     I18n.createSwitcher('langSwitcher');
-    I18n.maybeFirstRun();   // first-visit "choose your language" prompt
+    // First visit: choose a language, then (once) set a location for prayer times.
+    I18n.maybeFirstRun(() => setTimeout(maybeAskLocation, 250));
   }
 
   const saved = localStorage.getItem('themeMode');

@@ -122,6 +122,8 @@ export default {
 
   'location_title': 'مقام مقرر کریں',
   'location_subtitle': 'دقیق نماز کے اوقات کے لیے',
+  'location_reason': `نماز کے اوقات اور قبلہ آپ کے آلے پر ہی معلوم کیے جاتے ہیں۔ صرف تقریبی مقام آپ کے آلے پر محفوظ ہوتا ہے۔`,
+  'location_later': `بعد میں`,
   'location_gps': 'میرے موجودہ مقام کا استعمال کریں (GPS)',
   'location_or_search': 'یا دستی تلاش کریں',
   'location_placeholder': 'شہر کا نام (مثلاً: کائرو)',

@@ -131,6 +131,8 @@ export default {
   // Location Modal
   'location_title': 'Set Location',
   'location_subtitle': 'For accurate prayer times',
+  'location_reason': `Prayer times and the Qibla are worked out on your device. Only an approximate location is saved, on your device.`,
+  'location_later': `Later`,
   'location_gps': 'Use my current location (GPS)',
   'location_or_search': 'Or search manually',
   'location_placeholder': 'City name (e.g., Cairo)',
