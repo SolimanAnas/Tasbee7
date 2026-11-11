@@ -280,7 +280,7 @@ input, textarea, select {
   line-height: 1.2;
   text-shadow: 0 2px 10px rgba(0,0,0,0.1);
   margin: 0 auto;
-  width: 100%; text-align: center;
+  width: 100%; text-align: start;   /* follows the language: right in RTL, left in LTR */
   white-space: nowrap; overflow: hidden;   /* one line; fitGreeting() shrinks the type to fit */
 }
 
@@ -359,16 +359,17 @@ input, textarea, select {
   margin: 0 var(--spacing-md) var(--spacing-sm);
   background: linear-gradient(135deg, var(--primary), #047857 50%, var(--primary-grad-end));
   border-radius: var(--radius-lg);
-  padding: 22px 24px;
+  padding: 16px 18px 20px;
   color: white;
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: space-between; align-items: center; gap: 14px;
   cursor: pointer;
-  box-shadow: 0 8px 28px var(--primary-container);
+  box-shadow: 0 10px 28px -8px var(--primary-container), inset 0 1px 0 rgba(255,255,255,.18);
   position: relative; overflow: hidden;
   transition: transform var(--ease-smooth), box-shadow var(--ease-smooth);
-  min-height: 96px;
+  min-height: 0;
   isolation: isolate;
 }
+.quran-hero:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .quran-hero:active { transform: scale(0.97); }
 /* Interlocking 8-pointed star geometric pattern */
 .quran-hero::before {
@@ -413,45 +414,71 @@ input, textarea, select {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
   border-radius: 0 0 2px 2px; pointer-events: none; z-index: 0;
 }
-.quran-hero-text { display: flex; flex-direction: column; gap: 3px; z-index: 1; flex: 1; }
+.quran-hero-text { display: flex; flex-direction: column; gap: 5px; z-index: 1; flex: 1; min-width: 0; }
 .quran-hero-continue {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.72rem; font-weight: 700;
-  opacity: 0.8; letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 1px;
-  transition: opacity var(--ease-smooth);
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 0.74rem; font-weight: 600;
+  opacity: 0.88;
 }
-.quran-hero-continue:hover { opacity: 1; }
-.quran-hero-arrow {
-  stroke: currentColor; fill: none; stroke-width: 2.2;
-  stroke-linecap: round; stroke-linejoin: round;
+.quran-hero-continue::before {      /* a small "live" dot: you have a place to return to */
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.22); flex: none;
+}
+.quran-hero-title {
+  font-family: 'Amiri', 'Tajawal-Local', serif;
+  font-size: 1.75rem; font-weight: 700;
+  line-height: 1.25;
+  text-shadow: 0 2px 10px rgba(0,0,0,.18);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.quran-hero-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.qh-chip {
+  font-size: 0.72rem; font-weight: 600; line-height: 1;
+  padding: 5px 9px; border-radius: 999px;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.14);
+  white-space: nowrap;
+}
+.qh-chip:empty { display: none; }
+
+/* continue button: the page position of the whole mushaf runs around it as a ring */
+.quran-hero-go {
+  position: relative; flex: none; z-index: 1;
+  width: 58px; height: 58px;
+  display: grid; place-items: center;
+}
+.quran-hero-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+[dir="rtl"] .quran-hero-ring { transform: scaleX(-1) rotate(-90deg); }   /* fills the way the page turns */
+.quran-hero-ring circle { fill: none; stroke-width: 3.5; }
+.quran-hero-ring .track { stroke: rgba(255,255,255,.22); }
+.quran-hero-ring .fill {
+  stroke: #fff; stroke-linecap: round;
+  stroke-dasharray: 150.8; stroke-dashoffset: 150.8;
+  transition: stroke-dashoffset .9s cubic-bezier(.22,1,.36,1);
+}
+.quran-hero-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #fff; color: var(--primary);
+  display: grid; place-items: center;
+  box-shadow: 0 6px 14px -4px rgba(0,0,0,.35);
   transition: transform var(--ease-spring);
 }
-.quran-hero:hover .quran-hero-arrow { transform: translateX(3px); }
-.quran-hero-title {
-  font-family: 'Tajawal-Local', sans-serif;
-  font-size: 1.35rem; font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0.01em;
+.quran-hero:hover .quran-hero-btn { transform: scale(1.06); }
+.quran-hero-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+[dir="rtl"] .quran-hero-btn svg { transform: scaleX(-1); }   /* the arrow points the way you read */
+.quran-hero-bar {
+  position: absolute; inset-inline: 0; bottom: 0; height: 4px; z-index: 1;
+  background: rgba(255,255,255,.16);
 }
-.quran-hero-meta {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 0.8rem; font-weight: 500;
-  opacity: 0.85;
-  flex-wrap: wrap;
+.quran-hero-bar i {
+  display: block; height: 100%; width: 0; background: rgba(255,255,255,.85);
+  border-radius: 0 4px 4px 0; transition: width .9s cubic-bezier(.22,1,.36,1);
 }
-.quran-hero-sep { opacity: 0.5; }
-.quran-hero-icon {
-  width: 52px; height: 52px; flex-shrink: 0;
-  background: rgba(255,255,255,0.15);
-  border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  transition: background var(--ease-smooth), transform var(--ease-spring);
+[dir="rtl"] .quran-hero-bar i { border-radius: 4px 0 0 4px; }
+.quran-hero:not(.has-progress) .quran-hero-bar, .quran-hero:not(.has-progress) .quran-hero-ring .fill { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .quran-hero-ring .fill, .quran-hero-bar i { transition: none; }
 }
-.quran-hero:hover .quran-hero-icon { background: rgba(255,255,255,0.22); transform: scale(1.05); }
-.quran-hero-icon svg { width: 28px; height: 28px; fill: white; }
 
 /* ======================== CONTENT GRID ======================== */
 .section-title {
@@ -538,6 +565,58 @@ input, textarea, select {
 
 @media (prefers-reduced-motion: reduce) {
   .feature-card { animation: none; }
+}
+
+
+/* ======================== SECTION LAYOUT SWITCH ======================== */
+.sec-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sec-row .section-title { margin-bottom: 6px; }
+/* Small segmented switch right under the Quran card: 2 wide tiles per row  ⇄  4 icons per row. */
+.view-switch {
+  --vs-dir: 1;
+  position: relative; flex: none;
+  width: 54px; height: 28px; padding: 0;
+  margin: -2px var(--spacing-md) 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
+  display: grid; grid-template-columns: 1fr 1fr; place-items: center;
+  cursor: pointer; color: var(--on-surface-variant);
+  -webkit-tap-highlight-color: transparent;
+}
+[dir="rtl"] .view-switch { --vs-dir: -1; }
+.view-switch:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.view-switch .vs-thumb {
+  position: absolute; top: 2px; inset-inline-start: 2px;
+  width: 23px; height: 22px; border-radius: 999px;
+  background: linear-gradient(160deg, var(--primary), var(--primary-grad-end));
+  box-shadow: 0 3px 8px -2px var(--primary);
+  transition: transform .32s cubic-bezier(.34,1.56,.64,1);
+}
+.view-switch[aria-checked="true"] .vs-thumb { transform: translateX(calc(var(--vs-dir) * 27px)); }
+.view-switch svg {
+  position: relative; z-index: 1; width: 13px; height: 13px;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round;
+  transition: color .2s, transform .32s cubic-bezier(.34,1.56,.64,1);
+}
+.view-switch[aria-checked="false"] .vs-list, .view-switch[aria-checked="true"] .vs-grid { color: var(--on-primary, #fff); transform: scale(1.08); }
+.view-switch:active .vs-thumb { width: 27px; }
+
+/* 4-icons-per-row view */
+body.home-compact .grid { grid-template-columns: repeat(4, 1fr); gap: 7px; }
+body.home-compact .feature-card {
+  flex-direction: column; justify-content: center; gap: 5px;
+  padding: 9px 2px 8px; min-height: 0;
+}
+body.home-compact .fc-icon-wrap { width: 34px; height: 34px; }
+body.home-compact .fc-icon-wrap svg { width: 18px; height: 18px; }
+body.home-compact .fc-text { font-size: 0.68rem; line-height: 1.2; }
+body.home-compact .new-badge { top: -6px; font-size: 0.55rem; padding: 3px 6px; }
+@keyframes cardSwap { from { opacity: 0; transform: scale(.88); } to { opacity: 1; transform: none; } }
+body.home-swap .feature-card { animation: cardSwap .34s var(--ease-smooth) backwards; }
+@media (prefers-reduced-motion: reduce) {
+  .view-switch .vs-thumb, .view-switch svg { transition: none; }
+  body.home-swap .feature-card { animation: none; }
 }
 
 /* ======================== BOTTOM NAVIGATION ======================== */
@@ -749,6 +828,10 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
 </head>
 <body>
 
+<script>
+// Remembered layout of the sections (set before first paint so it never flashes).
+try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classList.add('home-compact'); } catch (e) {}
+</script>
 <div class="page-wrapper">
 
   <header class="top-bar">
@@ -773,35 +856,36 @@ body.fade-out { opacity: 0; transition: opacity 0.2s; }
     <div class="prayer-cards" id="homePrayerChips" role="list"></div>
   </div>
 
-  <div class="quran-hero" onclick="handleQuranClick()">
+  <div class="quran-hero" id="quranHero" onclick="handleQuranClick()" role="button" tabindex="0"
+       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleQuranClick();}">
     <div class="quran-hero-glow"></div>
     <div class="quran-hero-accent"></div>
     <div class="quran-hero-text">
-      <span class="quran-hero-continue" id="quranHeroContinue">
-        <svg class="quran-hero-arrow" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        <span data-i18n="quran_hero_continue_label">Continue Reading</span>
-      </span>
+      <span class="quran-hero-continue" id="quranHeroContinue" data-i18n="quran_hero_continue_label">Continue Reading</span>
       <span class="quran-hero-title" id="quranHeroTitle" data-i18n="quran_hero_title">المصحف الشريف</span>
       <div class="quran-hero-meta" id="quranHeroMeta">
-        <span class="quran-hero-page" id="quranHeroPage" data-i18n="quran_hero_sub">الرسم العثماني · النصي</span>
-        <span class="quran-hero-sep">·</span>
-        <span class="quran-hero-time" id="quranHeroTime"></span>
+        <span class="qh-chip" id="quranHeroPage" data-i18n="quran_hero_sub">الرسم العثماني · النصي</span>
+        <span class="qh-chip" id="quranHeroJuz"></span>
+        <span class="qh-chip" id="quranHeroTime"></span>
       </div>
     </div>
-    <div class="quran-hero-icon">
-      <svg viewBox="144 144 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <g>
-          <path d="m252.08 561.22c-2.7812 0-5.0352-2.2578-5.0352-5.0391v-312.36c0-27.559 24.938-49.977 55.418-49.977h233.57c17.531 0 31.789 12.949 31.789 28.867v305.81c0 2.7852-2.2539 5.0391-5.0352 5.0391-2.7852 0-5.0391-2.2539-5.0391-5.0391v-305.56c-0.41406-5.3633-2.9258-10.344-6.9922-13.863-4.0664-3.5195-9.3594-5.2891-14.723-4.9297h-233.46c-25.191 0-45.344 17.887-45.344 39.902v312.11c0 1.3555-0.54297 2.6523-1.5117 3.5977-0.96484 0.94922-2.2734 1.4688-3.6289 1.4414z"/>
-          <path d="m283.37 589.23c-9.3555 0.070312-18.41-3.3008-25.441-9.4727-6.9023-5.8906-10.879-14.508-10.883-23.578 0-17.984 16.223-32.547 35.973-32.547h280.07c1.3359 0 2.6172 0.53125 3.5625 1.4766 0.94531 0.94531 1.4766 2.2266 1.4766 3.5625v55.418c0 1.3359-0.53125 2.6172-1.4766 3.5625-0.94531 0.94531-2.2266 1.4766-3.5625 1.4766h-248.73c-2.7812 0-5.0391-2.2578-5.0391-5.0391s2.2578-5.0391 5.0391-5.0391h243.69v-45.344l-275.03 0.003907c-14.207 0-25.844 10.078-25.895 22.418h-0.003906c0.074218 6.1445 2.8125 11.957 7.5078 15.922 5.1914 4.5156 11.859 6.9727 18.742 6.9023 2.7812 0 5.0391 2.2539 5.0391 5.0352 0 2.7852-2.2578 5.0391-5.0391 5.0391z"/>
-          <path d="m327.05 503.58-42.523-37.785v-205l42.523-37.836h164.45l42.523 37.836-0.003906 204.95-42.523 37.836zm-32.445-42.32 36.273 32.242h156.84l36.273-32.293v-195.93l-36.273-32.293-156.89-0.003906-36.273 32.242z"/>
-          <path d="m407.55 445.34c-1.3398 0.007812-2.625-0.51562-3.5742-1.4609l-21.059-21.059h-30.535c-2.7812 0-5.0352-2.2539-5.0352-5.0391v-30.629l-20.152-20.152c-0.95312-0.94531-1.4922-2.2344-1.4922-3.5781s0.53906-2.6328 1.4922-3.5781l20.152-20.152v-30.832c0-2.7812 2.2539-5.0391 5.0352-5.0391h30.531l21.059-21.109h0.003907c1.9648-1.9531 5.1367-1.9531 7.1016 0l21.109 21.109h29.02c1.3359 0 2.6172 0.53125 3.5625 1.4766 0.94531 0.94531 1.4766 2.2266 1.4766 3.5625v29.02l21.812 21.816c0.95703 0.94531 1.4922 2.2305 1.4922 3.5742s-0.53516 2.6328-1.4922 3.5781l-21.816 21.816v29.02h0.003906c0 1.3359-0.53125 2.6172-1.4766 3.5625-0.94531 0.94531-2.2266 1.4727-3.5625 1.4727h-29.07l-21.059 21.062c-0.92188 0.96484-2.1914 1.5273-3.5273 1.5586zm-50.383-32.598 27.711 0.003906c1.3477 0.003906 2.6367 0.54688 3.5781 1.5117l18.992 18.941 18.941-18.941h0.003907c0.94141-0.96484 2.2305-1.5078 3.5781-1.5117h26.098v-26.199c0.015625-1.3281 0.55859-2.5977 1.5078-3.5273l19.699-19.75-19.598-19.699c-0.96094-0.94141-1.5039-2.2305-1.5117-3.5742v-26.098h-25.945c-1.3477-0.007813-2.6328-0.55078-3.5781-1.5117l-19.094-18.945-18.992 18.941v0.003907c-0.94141 0.96094-2.2305 1.5039-3.5781 1.5117h-27.559v27.559c-0.003906 1.3438-0.55078 2.6328-1.5117 3.5742l-18.238 18.238 18.238 18.238c0.96094 0.94531 1.5078 2.2305 1.5117 3.5781z"/>
-        </g>
-      </svg>
+    <div class="quran-hero-go" aria-hidden="true">
+      <svg class="quran-hero-ring" viewBox="0 0 58 58"><circle class="track" cx="29" cy="29" r="24"/><circle class="fill" id="quranHeroRing" cx="29" cy="29" r="24"/></svg>
+      <span class="quran-hero-btn"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
     </div>
+    <div class="quran-hero-bar" id="quranHeroBar" role="progressbar" aria-valuemin="1" aria-valuemax="604" aria-valuenow="1" data-i18n-aria="quran_hero_progress" aria-label="Position in the mushaf"><i id="quranHeroBarFill"></i></div>
   </div>
 
   <!-- ===== Section 1: Quran & Recitation ===== -->
-  <div class="section-title" data-i18n="section_quran">القرآن والتلاوة</div>
+  <div class="sec-row">
+    <div class="section-title" data-i18n="section_quran">القرآن والتلاوة</div>
+    <button type="button" class="view-switch" id="viewSwitch" role="switch" aria-checked="false"
+            data-i18n-aria="home_view_toggle" aria-label="Switch section layout" onclick="toggleHomeView()">
+      <span class="vs-thumb"></span>
+      <svg class="vs-list" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/></svg>
+      <svg class="vs-grid" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg>
+    </button>
+  </div>
   <div class="grid">
     <div class="feature-card glass-panel" onclick="go('pages/audio.html')">
       <div class="fc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
@@ -1374,29 +1458,56 @@ function relativeTime(ts) {
   return t('quran_hero_long_ago');
 }
 
+// First page of each juz (Madinah mushaf, 604 pages), for the "Juz N" chip.
+const JUZ_START_PAGES = [1,22,42,62,82,102,121,142,162,182,201,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
+function pageJuz(page) {
+  let juz = 1;
+  for (let i = 0; i < JUZ_START_PAGES.length; i++) if (page >= JUZ_START_PAGES[i]) juz = i + 1;
+  return juz;
+}
+
 function initQuranHero() {
-  const lastPage = localStorage.getItem('lastPage');
+  const lastPage = parseInt(localStorage.getItem('lastPage'), 10);
   const lastTime = localStorage.getItem('lastPageTime');
+  const hero = document.getElementById('quranHero');
   const title = document.getElementById('quranHeroTitle');
   const cont = document.getElementById('quranHeroContinue');
   const meta = document.getElementById('quranHeroMeta');
   const pageEl = document.getElementById('quranHeroPage');
+  const juzEl = document.getElementById('quranHeroJuz');
   const timeEl = document.getElementById('quranHeroTime');
-  if (!lastPage) {
+  const bar = document.getElementById('quranHeroBar');
+  const fill = document.getElementById('quranHeroBarFill');
+  const ring = document.getElementById('quranHeroRing');
+  if (!(lastPage >= 1 && lastPage <= 604)) {
+    // Never opened: invite to start; no position to show.
+    if (hero) hero.classList.remove('has-progress');
     if (title) title.textContent = t('quran_hero_title');
     if (pageEl) pageEl.textContent = t('quran_hero_sub');
-    if (cont) cont.style.display = 'none';
-    if (meta) meta.style.display = 'none';
+    if (juzEl) juzEl.textContent = '';
+    if (timeEl) timeEl.textContent = '';
+    if (cont) cont.textContent = t('quran_hero_start');
+    if (meta) meta.style.display = 'flex';
     return;
   }
-  const surahNum = pageSurah(parseInt(lastPage));
+  const surahNum = pageSurah(lastPage);
   const name = surahName(surahNum);
+  const pct = lastPage / 604;
+  if (hero) hero.classList.add('has-progress');
+  if (cont) cont.textContent = t('quran_hero_continue_label');
   if (title) title.textContent = t('quran_hero_surah', {name: name});
   if (pageEl) pageEl.textContent = t('quran_hero_page', {page: lastPage});
-  if (cont) cont.style.display = 'inline-flex';
-  if (timeEl && lastTime) timeEl.textContent = relativeTime(parseInt(lastTime));
+  if (juzEl) juzEl.textContent = t('quran_hero_juz', {n: pageJuz(lastPage)});
+  if (timeEl) timeEl.textContent = lastTime ? relativeTime(parseInt(lastTime)) : '';
   if (meta) meta.style.display = 'flex';
+  if (bar) bar.setAttribute('aria-valuenow', String(lastPage));
+  // Animate from empty on first paint.
+  requestAnimationFrame(() => {
+    if (fill) fill.style.width = (pct * 100).toFixed(2) + '%';
+    if (ring) ring.style.strokeDashoffset = (150.8 * (1 - pct)).toFixed(1);
+  });
 }
+window.addEventListener('langchange', () => initQuranHero());
 
 function startCountdown(nextObj, nameAr, nextKey) {
   if(countdownInterval) clearInterval(countdownInterval);
@@ -1804,6 +1915,22 @@ function saveCity() {
     closeLocationModal();
   } else { alert(`لم نتعرف على "${v}". تأكد من الإملاء.`); }
 }
+
+function toggleHomeView() {
+  const body = document.body;
+  const compact = !body.classList.contains('home-compact');
+  body.classList.add('home-swap');
+  body.classList.toggle('home-compact', compact);
+  const sw = document.getElementById('viewSwitch');
+  if (sw) sw.setAttribute('aria-checked', String(compact));
+  try { localStorage.setItem('homeGridCompact', compact ? '1' : '0'); } catch (e) {}
+  if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+  setTimeout(() => body.classList.remove('home-swap'), 420);
+}
+(function syncViewSwitch() {
+  const sw = document.getElementById('viewSwitch');
+  if (sw) sw.setAttribute('aria-checked', String(document.body.classList.contains('home-compact')));
+})();
 
 function handleQuranClick() { 
   let p = localStorage.getItem('preferredQuranVersion'); 
