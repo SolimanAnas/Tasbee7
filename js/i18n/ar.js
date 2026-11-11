@@ -844,6 +844,7 @@ export default {
   'offline_storage_used': `المساحة المستخدمة: {used}`,
   'offline_needs_reopen': `يتم تحديث التطبيق. أعد فتحه ثم حاول مرة أخرى.`,
   'offline_error': `تعذّر التحميل. تحقق من الاتصال ثم حاول مرة أخرى.`,
+  'greet_salam': `السلام عليكم ورحمة الله وبركاته`,
   'offline_incomplete': `تعذّر تحميل {n} ملف — تحقق من الاتصال ثم أكمل التحميل`,
   'offline_no_space': `لا توجد مساحة كافية على الجهاز — بقي {n} ملف`,
   'offline_retry_missing': `إكمال تحميل الملفات الناقصة`,
