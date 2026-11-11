@@ -398,6 +398,91 @@
     .label-top-left { top: 0px; left: 20px; }
     .label-top-right { top: 0px; right: 20px; }
     .label-bottom { bottom: 1px; left: 50%; transform: translateX(-50%); }
+
+    /* ===== Pinch-to-zoom hint =====
+       Shows the gesture AND its result: two touch points press down on the verse,
+       spread — and the real text grows — then pinch in and it eases smaller.
+       Colours come from the page theme (--accent / --text-primary), so it reads
+       as part of the paper, not as a foreign overlay. ~3.2 s, then it is gone. */
+    .qt-zoom-hint { position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0; }
+    .qt-zoom-hint.show { opacity: 1; }
+    .qt-touch {
+      position: absolute; left: 50%; top: 44%;
+      width: 46px; height: 46px; margin: -23px 0 0 -23px;
+      border-radius: 50%; opacity: 0;
+      background: color-mix(in srgb, var(--accent, #10b981) 30%, transparent);
+      border: 2px solid var(--accent, #10b981);
+      box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--accent, #10b981) 70%, transparent);
+    }
+    .qt-touch::before {                      /* ripple at touch-down */
+      content: ''; position: absolute; inset: -2px; border-radius: 50%;
+      border: 2px solid var(--accent, #10b981); opacity: 0;
+    }
+    .qt-zoom-hint.show .qt-t1 { animation: qtT1 3.2s cubic-bezier(.45,0,.25,1) both; }
+    .qt-zoom-hint.show .qt-t2 { animation: qtT2 3.2s cubic-bezier(.45,0,.25,1) both; }
+    .qt-zoom-hint.show .qt-touch::before { animation: qtRipple 3.2s ease-out both; }
+    /* fingers: press down close together → spread → hold → pinch in → lift */
+    @keyframes qtT1 {
+      0%   { opacity: 0; transform: translate(-12px, 12px) scale(.7); }
+      10%  { opacity: 1; transform: translate(-12px, 12px) scale(1); }
+      40%  { transform: translate(-52px, 52px) scale(1); }
+      52%  { transform: translate(-52px, 52px) scale(1); }
+      78%  { opacity: 1; transform: translate(-16px, 16px) scale(1); }
+      92%  { opacity: 0; transform: translate(-16px, 16px) scale(.8); }
+      100% { opacity: 0; }
+    }
+    @keyframes qtT2 {
+      0%   { opacity: 0; transform: translate(12px, -12px) scale(.7); }
+      10%  { opacity: 1; transform: translate(12px, -12px) scale(1); }
+      40%  { transform: translate(52px, -52px) scale(1); }
+      52%  { transform: translate(52px, -52px) scale(1); }
+      78%  { opacity: 1; transform: translate(16px, -16px) scale(1); }
+      92%  { opacity: 0; transform: translate(16px, -16px) scale(.8); }
+      100% { opacity: 0; }
+    }
+    @keyframes qtRipple {
+      0%, 4% { opacity: 0; transform: scale(1); }
+      6%     { opacity: .7; transform: scale(1); }
+      22%    { opacity: 0; transform: scale(2.1); }
+      100%   { opacity: 0; }
+    }
+    /* the page itself responds, so the gesture's meaning is obvious */
+    body.qt-hinting #textContainer { animation: qtTextZoom 3.2s cubic-bezier(.45,0,.25,1) both; transform-origin: 50% 40%; }
+    @keyframes qtTextZoom {
+      0%, 10% { transform: scale(1); }
+      40%, 52% { transform: scale(1.04); }
+      78%, 100% { transform: scale(1); }
+    }
+    .qt-zoom-cap {
+      position: absolute; left: 50%; bottom: calc(112px + env(safe-area-inset-bottom));
+      transform: translate(-50%, 8px);
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 16px; border-radius: 999px;
+      background: #1e2a3a; color: #f6efe0;
+      font-family: 'Tajawal', sans-serif; font-size: .88rem; font-weight: 600; line-height: 1;
+      white-space: nowrap; opacity: 0;
+      box-shadow: 0 10px 26px -10px rgba(0,0,0,.45);
+    }
+    body.real-dark-mode .qt-zoom-cap { background: #f0ead8; color: #1e2a3a; }
+    .qt-zoom-cap svg { width: 15px; height: 15px; flex: none; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .qt-zoom-hint.show .qt-zoom-cap { animation: qtCap 3.2s cubic-bezier(.22,1,.36,1) both; }
+    @keyframes qtCap {
+      0%, 6% { opacity: 0; transform: translate(-50%, 8px); }
+      16%    { opacity: 1; transform: translate(-50%, 0); }
+      86%    { opacity: 1; transform: translate(-50%, 0); }
+      100%   { opacity: 0; transform: translate(-50%, 4px); }
+    }
+    .qt-zoom-hint.gone { opacity: 0; transition: opacity .12s; }
+    .qt-zoom-hint.gone *, body.qt-hinting-stop #textContainer { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      /* no movement: the two touch points rest apart, the caption fades in and out */
+      body.qt-hinting #textContainer { animation: none; }
+      .qt-zoom-hint.show .qt-t1, .qt-zoom-hint.show .qt-t2 { animation: qtStill 2.6s linear both; }
+      .qt-zoom-hint.show .qt-touch::before { animation: none; }
+      .qt-t1 { transform: translate(-30px, 30px); } .qt-t2 { transform: translate(30px, -30px); }
+      .qt-zoom-hint.show .qt-zoom-cap { animation: qtStill 2.6s linear both; transform: translate(-50%, 0); }
+      @keyframes qtStill { 0%, 100% { opacity: 0; } 12%, 85% { opacity: 1; } }
+    }
   </style>
 </head>
 <body data-theme="light">
@@ -483,6 +568,14 @@
     </div>
     <div class="search-results-container" id="searchResults">
       <div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>
+    </div>
+  </div>
+
+  <div id="qtZoomHint" class="qt-zoom-hint" aria-hidden="true">
+    <span class="qt-touch qt-t1"></span><span class="qt-touch qt-t2"></span>
+    <div class="qt-zoom-cap">
+      <svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-7 7"/><path d="M10 20H4v-6"/><path d="M4 20l7-7"/></svg>
+      <span>باعد أو قرّب إصبعيك لتغيير حجم الخط</span>
     </div>
   </div>
 
@@ -957,6 +1050,43 @@
 
     document.addEventListener('touchstart', () => { if (isAutoScrolling || continueAutoScroll) { stopAutoScroll(); } }, {passive: true});
 
+    // ===== Pinch-to-zoom hint =====
+    // Shown over the text for about three seconds the first few times a page is
+    // read, then never again — and never once the reader has pinched. Any touch
+    // dismisses it at once.
+    const ZOOM_HINT_MAX = 3;
+    let zoomHintTimer = null, zoomHintShownThisVisit = false;
+    function zoomHintAllowed() {
+      try {
+        return localStorage.getItem('qtZoomHintDone') !== '1' &&
+               (parseInt(localStorage.getItem('qtZoomHintCount') || '0', 10) < ZOOM_HINT_MAX);
+      } catch (e) { return false; }
+    }
+    function hideZoomHint(immediate) {
+      const el = document.getElementById('qtZoomHint');
+      clearTimeout(zoomHintTimer);
+      if (!el) return;
+      const wasShowing = el.classList.contains('show');
+      el.classList.remove('show');
+      document.body.classList.remove('qt-hinting');
+      if (immediate && wasShowing) { el.classList.add('gone'); setTimeout(() => el.classList.remove('gone'), 200); }
+    }
+    function maybeShowZoomHint() {
+      if (zoomHintShownThisVisit || !zoomHintAllowed()) return;
+      const el = document.getElementById('qtZoomHint');
+      if (!el) return;
+      zoomHintShownThisVisit = true;
+      try { localStorage.setItem('qtZoomHintCount', String(parseInt(localStorage.getItem('qtZoomHintCount') || '0', 10) + 1)); } catch (e) {}
+      setTimeout(() => {
+        el.classList.remove('gone');
+        void el.offsetWidth;            // restart the animations
+        el.classList.add('show');
+        document.body.classList.add('qt-hinting');
+        zoomHintTimer = setTimeout(() => hideZoomHint(false), 3300);
+      }, 800);
+    }
+    document.addEventListener('touchstart', () => hideZoomHint(true), { passive: true });
+
     let initialPinchDistance = null;
     let initialPinchFontSize = null;
     const pinchArea = document.getElementById('textContainer');
@@ -966,6 +1096,7 @@
             if (e.touches.length === 2) {
                 initialPinchDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 initialPinchFontSize = fontSize;
+                try { localStorage.setItem('qtZoomHintDone', '1'); } catch (err) {}   // they know how to zoom
             }
         }, { passive: false });
 
@@ -1262,6 +1393,7 @@
 
     function showPageView(txtCont, view) {
       pageTextSource = view.source === 'local' ? 'local' : 'remote';
+      maybeShowZoomHint();
       txtCont.innerHTML = view.html;
       pageAudioUrls = view.audio;
       currentPageAyahsData = view.ayahsData;
