@@ -84,6 +84,17 @@ test.describe('offline', () => {
     await expect.poll(() => page.evaluate(() => !!window.SQL), { timeout: 20000 }).toBe(true);
   });
 
+  test('the text mushaf reads any page with the server down', async ({ page }) => {
+    await page.goto(srv.origin + '/index.html');
+    await waitForOfflineReady(page);
+    await srv.stop();
+
+    // A page never opened before, straight from the precached Quran text.
+    await page.goto(srv.origin + '/pages/quran-text.html?page=300');
+    await expect(page.locator('.ayah-wrapper').first()).toBeVisible({ timeout: 20000 });
+    expect(await page.locator('.ayah-wrapper').count()).toBeGreaterThan(3);
+  });
+
   test('a page that was never saved shows the fallback page, not a browser error', async ({ page }) => {
     await page.goto(srv.origin + '/index.html');
     await waitForOfflineReady(page);
