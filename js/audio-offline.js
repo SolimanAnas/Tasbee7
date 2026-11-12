@@ -385,7 +385,11 @@
     if (act === 'start') start(i);
     else if (act === 'pause') pause();
     else if (act === 'delete') remove(i);
-    else if (act === 'show') { targetIndex = i; render(); }
+    // a saved recitation: open it in the player at its track list
+    else if (act === 'show') {
+      if (host.openReciter) host.openReciter(i);
+      else { targetIndex = i; render(); }
+    }
   }
 
   function openSheet(index) {

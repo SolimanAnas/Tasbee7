@@ -740,6 +740,11 @@ body.is-buffering .buffer-ring{opacity:1;animation:bufSpin .8s linear infinite}
 .sel-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sel-sub{font-size:12px;font-weight:600;color:var(--text-secondary)}
 .selection-item.active .sel-sub{color:rgba(255,255,255,.85)}
+/* saved for offline listening: a small download-done mark at the row's end (far left in Arabic) */
+.sel-saved{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-muted);color:var(--accent-main)}
+.sel-saved svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.selection-item.active .sel-saved{background:rgba(255,255,255,.22);color:#fff}
 .sel-eq{flex:none;display:none;align-items:flex-end;gap:2px;height:16px}
 .sel-eq i{width:3px;background:currentColor;border-radius:2px;height:40%;animation:eqBar .9s ease-in-out infinite}
 .sel-eq i:nth-child(2){animation-delay:.2s}.sel-eq i:nth-child(3){animation-delay:.4s}
@@ -1605,7 +1610,8 @@ async function loadMultipleJSONs(){
         tracksFor:tracksForReciter,
         nameOf:reciterDisplay,
         currentIndex:()=>selectedReciterIndex,
-        onChange:updateOfflineRow
+        onChange:updateOfflineRow,
+        openReciter:openSavedReciter
       });
     }
     else throw new Error('No data');
@@ -1709,7 +1715,8 @@ function normAr(s){
     .replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي')
     .replace(/[\s\-_()·.،,]+/g,'');
 }
-function makeSelRow({num,title,sub,active,onPick}){
+const SAVED_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10"/><path d="m7.5 10 4.5 4.5 4.5-4.5"/><path d="M5 19.5h14"/></svg>';
+function makeSelRow({num,title,sub,active,saved,onPick}){
   const div=document.createElement('div');
   div.className='selection-item'+(active?' active':'');
   div.setAttribute('role','option');div.tabIndex=0;
@@ -1719,6 +1726,11 @@ function makeSelRow({num,title,sub,active,onPick}){
   const ti=document.createElement('span');ti.className='sel-title';ti.textContent=title;main.appendChild(ti);
   if(sub){const su=document.createElement('span');su.className='sel-sub';su.textContent=sub;main.appendChild(su)}
   div.appendChild(main);
+  if(saved){
+    const sv=document.createElement('span');sv.className='sel-saved';
+    sv.setAttribute('role','img');sv.setAttribute('aria-label',t('offl_saved_badge'));sv.title=t('offl_saved_badge');
+    sv.innerHTML=SAVED_ICON;div.appendChild(sv);
+  }
   const eq=document.createElement('span');eq.className='sel-eq';eq.setAttribute('aria-hidden','true');eq.innerHTML='<i></i><i></i><i></i>';div.appendChild(eq);
   div.onclick=onPick;
   div.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick()}};
@@ -1736,29 +1748,40 @@ function setSheetTitle(text,count){
 }
 function emptyRow(){return `<div class="selection-item" style="justify-content:center">${t('audio_no_results')}</div>`}
 
+// Make reciter `oi` the current one, keeping the same surah where it has it.
+function selectReciter(oi){
+  const r=appData.reciters[oi];if(!r)return;
+  selectedReciterIndex=oi;
+  setSelTicker('reciterSelectBtn',reciterShortDisplay(r));
+  errorRetryCount=0;
+  let prevJuzName=currentJuzData[selectedJuzIndex]?.name,prevNum=surahNum(currentJuzData[selectedJuzIndex]);
+  buildJuzData();
+  let ni=currentJuzData.findIndex(j=>j.name===prevJuzName);
+  // keep the same surah across reciters even when the labels differ
+  if(ni===-1&&prevNum)ni=currentJuzData.findIndex(j=>surahNum(j)===prevNum);
+  selectedJuzIndex=ni!==-1?ni:0;
+  setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[selectedJuzIndex]));
+}
+// From «المصاحف المحفوظة»: switch the player to that reciter and show its tracks.
+function openSavedReciter(oi){
+  haptic();
+  if(oi!==selectedReciterIndex){selectReciter(oi);prepareTrack(false,false)}   // load, don't play: the listener picks a surah
+  openJuzSheet();
+}
 function renderReciterList(filterText=''){
   const list=document.getElementById('selectionList');list.innerHTML='';
   const q=normAr(filterText);
   const filtered=[];
   appData.reciters.forEach((r,oi)=>{if(!q||normAr(r.name).includes(q)||normAr(reciterDisplay(r)).includes(q)||normAr(r.englishName).includes(q))filtered.push([r,oi])});
   if(filtered.length===0){list.innerHTML=emptyRow();return}
+  // recitations saved for offline listening come first (stable: the rest keep their order)
+  const isSaved=r=>!!(window.AudioOffline&&AudioOffline.isReciterSaved(r));
+  const savedSet=new Set(filtered.filter(([r])=>isSaved(r)).map(([,oi])=>oi));
+  filtered.sort((a,b)=>savedSet.has(b[1])-savedSet.has(a[1]));
   const frag=document.createDocumentFragment();
   filtered.forEach(([r,oi])=>{
-    const pick=()=>{
-      haptic();selectedReciterIndex=oi;
-      const rd=reciterShortDisplay(r);setSelTicker('reciterSelectBtn',rd);
-      errorRetryCount=0;
-      let prevJuzName=currentJuzData[selectedJuzIndex]?.name,prevNum=surahNum(currentJuzData[selectedJuzIndex]);
-      buildJuzData();
-      let ni=currentJuzData.findIndex(j=>j.name===prevJuzName);
-      // keep the same surah across reciters even when the labels differ
-      if(ni===-1&&prevNum)ni=currentJuzData.findIndex(j=>surahNum(j)===prevNum);
-      selectedJuzIndex=ni!==-1?ni:0;
-      setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[selectedJuzIndex]));
-      closeAllSheets();prepareTrack(true);
-    };
-    const saved=window.AudioOffline&&AudioOffline.isReciterSaved(r)?' · '+t('offl_saved_badge'):'';
-    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r)+saved,active:oi===selectedReciterIndex,onPick:pick}));
+    const pick=()=>{haptic();selectReciter(oi);closeAllSheets();prepareTrack(true)};
+    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r),active:oi===selectedReciterIndex,saved:savedSet.has(oi),onPick:pick}));
   });
   list.appendChild(frag);
 }
