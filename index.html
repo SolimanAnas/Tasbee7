@@ -566,6 +566,29 @@ input, textarea, select {
   .quran-hero-ring .fill, .quran-hero-bar i { transition: none; }
 }
 
+
+/* ===== Continue-reading card: Quran and lantern picture =====
+   Green in the light and dark themes, golden in sepia. The Quran sits behind
+   the title: on the right in RTL (a recomposed copy, not a mirror, so the
+   script on the pages is never reversed) and on the left in LTR. */
+.quran-hero, [data-theme] .quran-hero {
+  background:
+    url('images/quran-hero-green-rtl.webp') right 62% / cover no-repeat,
+    #013d2b;
+}
+[dir="ltr"] .quran-hero, [dir="ltr"] [data-theme] .quran-hero { background-image: url('images/quran-hero-green.webp'); background-position: left 62%; }
+[data-theme="sepia"] .quran-hero { background: url('images/quran-hero-sepia-rtl.webp') right 62% / cover no-repeat, #7a4510; }
+html[dir="ltr"][data-theme="sepia"] .quran-hero, [dir="ltr"] [data-theme="sepia"] .quran-hero { background-image: url('images/quran-hero-sepia.webp'); background-position: left 62%; }
+/* white text on the picture in sepia too (the old gold card used dark text) */
+[data-theme="sepia"] .quran-hero, [data-theme="sepia"] .quran-hero .quran-hero-text,
+[data-theme="sepia"] .quran-hero .quran-hero-title, [data-theme="sepia"] .quran-hero .quran-hero-continue,
+[data-theme="sepia"] .quran-hero .qh-chip { color: #fff; }
+[data-theme="sepia"] .quran-hero .quran-hero-continue::before { background: #fff; }
+/* the picture brings its own pattern and glow */
+.quran-hero::before, .quran-hero .quran-hero-glow, .quran-hero .quran-hero-accent { display: none; }
+.quran-hero .quran-hero-text { text-shadow: 0 1px 2px rgba(0,0,0,.6), 0 0 12px rgba(0,0,0,.45); }
+.quran-hero .qh-chip { background: rgba(0,0,0,.28); border-color: rgba(255,255,255,.22); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+
 /* ======================== CONTENT GRID ======================== */
 .section-title {
   margin: 0 var(--spacing-md) 6px;
