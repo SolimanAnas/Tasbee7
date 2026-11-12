@@ -797,6 +797,36 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 .offl-row-del{flex:none;width:44px;height:44px;margin-inline-end:4px;border:none;border-radius:12px;background:none;color:var(--danger);display:grid;place-items:center;cursor:pointer}
 .offl-row-del svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .offl-empty{font-size:13px;color:var(--text-secondary);padding:6px 2px}
+
+/* ===== Full mushaf download: card under the selectors ===== */
+.offl-entry{grid-column:1 / -1}
+.offl-entry-icon{position:relative;flex:none;width:40px;height:40px;display:grid;place-items:center}
+.offl-entry-icon>svg{grid-area:1/1}
+.offl-entry-ring{width:40px;height:40px;transform:rotate(-90deg)}
+[dir="rtl"] .offl-entry-ring{transform:scaleX(-1) rotate(-90deg)}
+.offl-entry-ring circle{fill:none;stroke-width:3}
+.offl-entry-ring .track{stroke:var(--accent-muted)}
+.offl-entry-ring .fill{stroke:var(--accent-main);stroke-linecap:round;stroke-dasharray:106.8;stroke-dashoffset:106.8;transition:stroke-dashoffset .4s ease}
+.offl-entry-dl,.offl-entry-ok{width:18px;height:18px;fill:none;stroke:var(--accent-main);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.offl-entry-ok{display:none;stroke:#fff;stroke-width:3}
+.offl-entry[data-state="idle"] .offl-entry-icon{border-radius:50%;background:var(--accent-main)}
+.offl-entry[data-state="idle"] .offl-entry-ring{display:none}
+.offl-entry[data-state="idle"] .offl-entry-dl{stroke:#fff}
+.offl-entry[data-state="done"] .offl-entry-icon{border-radius:50%;background:var(--accent-main)}
+.offl-entry[data-state="done"] .offl-entry-ring,.offl-entry[data-state="done"] .offl-entry-dl{display:none}
+.offl-entry[data-state="done"] .offl-entry-ok{display:block}
+.offl-entry[data-state="running"] .offl-entry-dl{animation:offlBob 1.2s ease-in-out infinite}
+@keyframes offlBob{50%{transform:translateY(2px)}}
+@media (prefers-reduced-motion:reduce){.offl-entry[data-state="running"] .offl-entry-dl{animation:none}}
+.offl-entry .sel-value{font-size:14px}
+/* per-surah progress in the sheet */
+.offl-files{display:flex;flex-direction:column;gap:8px}
+.offl-file{display:flex;flex-direction:column;gap:4px}
+.offl-file-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;font-weight:700;color:var(--text-primary)}
+.offl-file-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.offl-file-pct{flex:none;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.offl-file-bar{height:4px;border-radius:4px;background:var(--track-bg);overflow:hidden}
+.offl-file-bar i{display:block;height:100%;background:var(--accent-main);opacity:.75;border-radius:4px;transition:width .25s linear}
 </style>
 <script type="application/ld+json">
 {
@@ -990,6 +1020,19 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <div class="sel-value-wrap"><span class="sel-value" id="juzSelectBtn" data-i18n="loading">جاري...</span></div>
       </div>
       <svg class="sel-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <!-- Full mushaf download for the current reciter (js/audio-offline.js) -->
+    <div class="sel-card card offl-entry" id="offlineCard" role="button" tabindex="0" data-state="idle"
+         onclick="haptic();AudioOffline.openSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();AudioOffline.openSheet()}">
+      <div class="sel-text">
+        <span class="sel-label" data-i18n="offl_card_label">للاستماع دون اتصال</span>
+        <div class="sel-value-wrap"><span class="sel-value" id="offlineCardText" data-i18n="offl_title">تحميل المصحف كاملاً</span></div>
+      </div>
+      <span class="offl-entry-icon" aria-hidden="true">
+        <svg class="offl-entry-ring" viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="17"/><circle class="fill" id="offlineCardRing" cx="20" cy="20" r="17"/></svg>
+        <svg class="offl-entry-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg class="offl-entry-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
     </div>
   </div>
 
@@ -1636,8 +1679,18 @@ function tracksForReciter(reciter){
   return out;
 }
 function updateOfflineRow(){
+  if(!window.AudioOffline)return;
   const el=document.getElementById('offlineRowSub');
-  if(el&&window.AudioOffline)el.textContent=AudioOffline.summary(selectedReciterIndex);
+  if(el)el.textContent=AudioOffline.summary(selectedReciterIndex);
+  // the card under the reciter / surah selectors
+  const card=document.getElementById('offlineCard');
+  if(!card)return;
+  const st=AudioOffline.cardState(selectedReciterIndex);
+  card.dataset.state=st.state;
+  const txt=document.getElementById('offlineCardText');
+  if(txt&&st.text)txt.textContent=st.text;
+  const ring=document.getElementById('offlineCardRing');
+  if(ring)ring.style.strokeDashoffset=(106.8*(1-st.pct/100)).toFixed(1);
 }
 function buildJuzData(){
   currentJuzData=tracksForReciter(appData.reciters[selectedReciterIndex]);

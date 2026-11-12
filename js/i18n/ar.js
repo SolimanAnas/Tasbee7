@@ -847,6 +847,8 @@ export default {
   'offline_needs_reopen': `يتم تحديث التطبيق. أعد فتحه ثم حاول مرة أخرى.`,
   'offline_error': `تعذّر التحميل. تحقق من الاتصال ثم حاول مرة أخرى.`,
   'offl_title': `تحميل المصحف كاملاً`,
+  'offl_card_label': `للاستماع دون اتصال`,
+  'offl_progress_of': `{done} من {total} · {size} من {total_size}`,
   'offl_row_sub': `احفظ تلاوة كاملة للاستماع دون اتصال`,
   'offl_surahs': `{n} سورة`,
   'offl_size': `نحو {size}`,

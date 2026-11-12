@@ -819,6 +819,8 @@ export default {
   'offline_needs_reopen': `Uygulama güncelleniyor. Yeniden açıp tekrar deneyin.`,
   'offline_error': `İndirme başarısız. Bağlantınızı kontrol edip tekrar deneyin.`,
   'offl_title': `Mushafın tamamını indir`,
+  'offl_card_label': `Çevrimdışı dinle`,
+  'offl_progress_of': `{done} / {total} · {size} / {total_size}`,
   'offl_row_sub': `Çevrimdışı dinlemek için bir kıraatin tamamını kaydet`,
   'offl_surahs': `{n} sure`,
   'offl_size': `yaklaşık {size}`,
