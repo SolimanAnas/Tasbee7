@@ -60,6 +60,35 @@ test.describe('full mushaf download', () => {
     await expect(page.locator('#offlineBody .offl-row')).toHaveCount(0);
   });
 
+  test('a saved recitation opens from the saved list, is marked and listed first among reciters', async ({ page, context }) => {
+    await mockAudioHosts(context);
+    await openOnReciter(page, SMALL);
+    await page.evaluate(() => caches.delete('quran-audio-offline-v1'));
+    await page.evaluate(() => AudioOffline.openSheet());
+    await page.click('#offlineBody [data-act="start"]');
+    await expect(page.locator('#offlineBody .offl-card')).toContainText('محفوظ للاستماع دون اتصال', { timeout: 20000 });
+
+    // the player moves to another reciter…
+    const smallIndex = await page.evaluate(id => appData.reciters.findIndex(r => r.id === id), SMALL.id);
+    await page.evaluate(i => { selectReciter(i === 0 ? 1 : 0); prepareTrack(false, false); }, smallIndex);
+
+    // …tapping the saved recitation brings it back and shows its tracks
+    await page.evaluate(() => AudioOffline.openSheet());
+    await page.click('#offlineBody .offl-row-main');
+    await expect(page.locator('#selectionSheet')).toHaveClass(/active/);
+    await expect(page.locator('#selectionSheetTitle')).toContainText('السورة');
+    expect(await page.evaluate(() => selectedReciterIndex)).toBe(smallIndex);
+    await expect(page.locator('#selectionList .selection-item')).toHaveCount(SMALL.items.length);
+    expect(await page.evaluate(() => audio.paused)).toBe(true);   // loaded, not started
+
+    // the reciter list puts it first, with the saved mark
+    await page.evaluate(() => openReciterSheet());
+    const first = page.locator('#selectionList .selection-item').first();
+    await expect(first.locator('.sel-saved')).toHaveCount(1);
+    await expect(first.locator('.sel-saved')).toHaveAttribute('aria-label', 'محفوظ');
+    await expect(page.locator('#selectionList .sel-saved')).toHaveCount(1);
+  });
+
   test('a failed file is reported and "resume" fetches only what is missing', async ({ page, context }) => {
     let failing = true;
     await mockAudioHosts(context, { fail: url => failing && /\/095\.mp3/.test(url) });
