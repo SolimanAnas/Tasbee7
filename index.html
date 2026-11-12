@@ -437,6 +437,49 @@ input, textarea, select {
 [data-theme="light"] .prayer-widget .prayer-card.is-next .pc-name,
 [data-theme="sepia"] .prayer-widget .prayer-card.is-next .pc-name { color: var(--on-primary); }
 
+
+/* ===== Prayer card: glossy light sweep =====
+   One orchestrated moment, every 7 s: a soft band of light crosses the card
+   like a reflection on glass while a glint runs along the arch outline, both
+   moving in the reading direction. A faint static sheen sits at the top.
+   Transform / dash-offset only (no layout work); off with reduced motion. */
+.pw-sheen { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+[dir="rtl"] .pw-sheen { transform: scaleX(-1); }
+.pw-sheen::after {               /* static glass sheen */
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 22%, transparent 38%);
+}
+.pw-sheen::before {              /* the sweep: a soft glossy band with a bright core */
+  content: ''; position: absolute; top: -40%; bottom: -40%; left: -70%; width: 60%;
+  background: linear-gradient(100deg,
+    rgba(255,255,255,0) 0%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.16) 40%,
+    rgba(255,255,255,.34) 48%, rgba(255,255,255,.46) 50%, rgba(255,255,255,.34) 52%,
+    rgba(255,255,255,.16) 60%, rgba(255,255,255,.05) 75%, rgba(255,255,255,0) 100%);
+  transform: translateX(0) skewX(-16deg);
+  animation: pwSweep 7s cubic-bezier(.4,.1,.3,1) .9s infinite;
+}
+@keyframes pwSweep {
+  0%        { transform: translateX(0) skewX(-16deg); opacity: 0; }
+  4%        { opacity: 1; }
+  26%       { opacity: 1; }
+  30%, 100% { transform: translateX(300%) skewX(-16deg); opacity: 0; }
+}
+.pw-glint {
+  fill: none; stroke: #fff; stroke-width: 3.5; stroke-linecap: round;
+  stroke-dasharray: .09 .91; stroke-dashoffset: 1; opacity: 0;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px rgba(255,255,255,.7));
+  animation: pwGlint 7s cubic-bezier(.45,.05,.25,1) .9s infinite;
+}
+[dir="rtl"] .pw-glint { animation-name: pwGlintRtl; }
+/* the path starts at the top of the left side and runs clockwise: the top
+   edge with the arch is roughly its first 40 %. Offset 1 → .58 moves the glint
+   from the top-left corner to the top-right one. */
+@keyframes pwGlint    { 0% { stroke-dashoffset: 1; opacity: 0; } 4% { opacity: 1; } 26% { opacity: 1; } 30%, 100% { stroke-dashoffset: .58; opacity: 0; } }
+@keyframes pwGlintRtl { 0% { stroke-dashoffset: .58; opacity: 0; } 4% { opacity: 1; } 26% { opacity: 1; } 30%, 100% { stroke-dashoffset: 1; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .pw-sheen::before, .pw-glint { animation: none; opacity: 0; }
+}
+
 /* ======================== QURAN HERO CARD ======================== */
 .quran-hero {
   margin: 0 var(--spacing-md) var(--spacing-sm);
@@ -934,7 +977,9 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
   <div class="pw-wrap">
   <div class="prayer-widget" id="prayerWidget" onclick="openPrayerModal()">
     <!-- arched frame: shape drawn by shapePrayerWidget() from the widget's size -->
-    <svg class="pw-frame" id="pwFrame" aria-hidden="true" preserveAspectRatio="none"><path id="pwOutline"/></svg>
+    <svg class="pw-frame" id="pwFrame" aria-hidden="true" preserveAspectRatio="none"><path id="pwOutline"/><path id="pwGlint" class="pw-glint" pathLength="1"/></svg>
+    <!-- glossy light sweep (decorative) -->
+    <span class="pw-sheen" aria-hidden="true"></span>
     <div class="prayer-header-info">
       <div class="prayer-meta">
         <span class="prayer-hijri" id="homeHijri">-- رمضان</span>
@@ -1773,7 +1818,11 @@ function shapePrayerWidget() {
   const d = prayerArchPath(W, H, archH);
   el.style.clipPath = `path('${d}')`;
   const svg = document.getElementById('pwFrame');
-  if (svg) { svg.setAttribute('viewBox', `0 0 ${W} ${H}`); document.getElementById('pwOutline').setAttribute('d', d); }
+  if (svg) {
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    document.getElementById('pwOutline').setAttribute('d', d);
+    document.getElementById('pwGlint').setAttribute('d', d);
+  }
 }
 if (window.ResizeObserver) {
   const pw = document.getElementById('prayerWidget');
