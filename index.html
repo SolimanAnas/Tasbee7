@@ -356,7 +356,8 @@ input, textarea, select {
 
 
 /* ======================== PRAYER CARD: arched night scene ========================
-   The card keeps one look in every theme: a night sky with a mosque, framed by
+   Dark themes: a night sky with a mosque; light: the same scene by day;
+   sepia: at golden hour. Framed by
    an arch (traced from the design asset, drawn as a path so it stays crisp and
    its proportions don't stretch with the width). shapePrayerWidget() sets the
    clip path and the outline from the card's size. */
@@ -393,6 +394,48 @@ input, textarea, select {
   background: linear-gradient(160deg, var(--primary), var(--primary-grad-end));
   border-color: color-mix(in srgb, var(--primary) 60%, transparent); color: var(--on-primary);
 }
+/* light and sepia themes: the same scene by day / at golden hour. The sky at
+   the top keeps white text; the pale lower part takes light chips with dark text. */
+[data-theme="light"] .prayer-widget {
+  background:
+    url('images/prayer-scene-light.webp') center calc(var(--arch-h) - 8px) / 100% auto no-repeat,
+    linear-gradient(#1798fa 0%, #1798fa 22%, #b9ddfc 55%, #e3f0fd 100%);
+}
+[data-theme="sepia"] .prayer-widget {
+  background:
+    url('images/prayer-scene-sepia.webp') center calc(var(--arch-h) - 8px) / 100% auto no-repeat,
+    linear-gradient(#875e3f 0%, #875e3f 22%, #c48f58 55%, #cb9865 100%);
+}
+[data-theme="light"] .pw-wrap { filter: drop-shadow(0 10px 22px rgba(20, 80, 160, .22)); }
+[data-theme="sepia"] .pw-wrap { filter: drop-shadow(0 10px 22px rgba(90, 55, 15, .25)); }
+[data-theme="light"] .pw-frame path { stroke: rgba(255, 255, 255, .75); }
+[data-theme="sepia"] .pw-frame path { stroke: rgba(255, 236, 200, .7); }
+/* the city and the "time left" line can fall on the bright skyline */
+[data-theme="light"] .prayer-widget :is(.prayer-timer, .prayer-next-label, .prayer-city, .prayer-hijri),
+[data-theme="sepia"] .prayer-widget :is(.prayer-timer, .prayer-next-label, .prayer-city, .prayer-hijri) {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 0 10px rgba(0, 0, 0, .35);
+}
+[data-theme="light"] .prayer-widget :is(.prayer-next-label, .prayer-city),
+[data-theme="sepia"] .prayer-widget :is(.prayer-next-label, .prayer-city) { color: #fff; }
+[data-theme="light"] .prayer-widget .prayer-hijri { color: #b9ffd9; }
+[data-theme="sepia"] .prayer-widget .prayer-hijri { color: #ffe1a8; }
+[data-theme="light"] .prayer-widget .prayer-card {
+  background: rgba(255, 255, 255, .62); border-color: rgba(20, 70, 140, .14); color: #3b5170;
+}
+[data-theme="light"] .prayer-widget .prayer-card .pc-name { color: #10284d; }
+[data-theme="light"] .prayer-widget .prayer-card.is-sunrise { background: rgba(255, 255, 255, .38); }
+[data-theme="sepia"] .prayer-widget .prayer-card {
+  background: rgba(255, 246, 228, .55); border-color: rgba(110, 70, 25, .18); color: #6a4c2c;
+}
+[data-theme="sepia"] .prayer-widget .prayer-card .pc-name { color: #3b2412; }
+[data-theme="sepia"] .prayer-widget .prayer-card.is-sunrise { background: rgba(255, 246, 228, .35); }
+[data-theme="light"] .prayer-widget .prayer-card.is-next,
+[data-theme="sepia"] .prayer-widget .prayer-card.is-next {
+  background: linear-gradient(160deg, var(--primary), var(--primary-grad-end));
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent); color: var(--on-primary);
+}
+[data-theme="light"] .prayer-widget .prayer-card.is-next .pc-name,
+[data-theme="sepia"] .prayer-widget .prayer-card.is-next .pc-name { color: var(--on-primary); }
 
 /* ======================== QURAN HERO CARD ======================== */
 .quran-hero {
