@@ -67,10 +67,25 @@ for (const p of PAGES) {
   });
 }
 
-test('adhkar page can be zoomed with two fingers', async ({ page }) => {
-  await page.goto(`${BASE_URL}/pages/azkar.html?type=morning`, { waitUntil: 'domcontentloaded' });
+test('adhkar: no page zoom on touch screens; pinching the dhikr card resizes its text', async ({ page }) => {
+  await page.route(url => !url.href.startsWith(BASE_URL), route => route.abort());
+  await page.goto(`${BASE_URL}/pages/azkar.html?type=morning`, { waitUntil: 'load' });
   const viewport = await page.getAttribute('meta[name="viewport"]', 'content');
-  expect(viewport).not.toMatch(/user-scalable\s*=\s*no|maximum-scale\s*=\s*1(\.0)?\b/);
+  expect(viewport).toMatch(/user-scalable\s*=\s*no/);
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).touchAction)).toBe('pan-x pan-y');
+
+  const size = () => page.evaluate(() => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--zikr-size'), 10));
+  const before = await size();
+  // two fingers on the card, moving apart
+  await page.evaluate(() => {
+    const el = document.querySelector('.zikr-container');
+    const r = el.getBoundingClientRect(); const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const t = (id, x, y) => new Touch({ identifier: id, target: el, clientX: x, clientY: y, screenX: x, screenY: y });
+    const fire = (type, d) => el.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true,
+      touches: type === 'touchend' ? [] : [t(1, cx - d, cy), t(2, cx + d, cy)], changedTouches: [t(1, cx - d, cy), t(2, cx + d, cy)] }));
+    fire('touchstart', 40); fire('touchmove', 60); fire('touchmove', 80); fire('touchend', 80);
+  });
+  expect(await size()).toBeGreaterThan(before);
 });
 
 test('a tappable div works with the keyboard and a switch reports its state', async ({ page }) => {
