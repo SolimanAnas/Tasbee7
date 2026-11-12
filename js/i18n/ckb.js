@@ -847,6 +847,8 @@ export default {
   'offline_needs_reopen': `ئەپەکە نوێ دەکرێتەوە. دووبارە بیکەرەوە و هەوڵ بدەرەوە.`,
   'offline_error': `داگرتن سەرکەوتوو نەبوو. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەرەوە.`,
   'offl_title': `داگرتنی هەموو موسحەف`,
+  'offl_card_label': `گوێگرتن بەبێ ئینتەرنێت`,
+  'offl_progress_of': `{done} لە {total} · {size} لە {total_size}`,
   'offl_row_sub': `خوێندنەوەیەکی تەواو پاشەکەوت بکە بۆ گوێگرتن بەبێ ئینتەرنێت`,
   'offl_surahs': `{n} سورەت`,
   'offl_size': `نزیکەی {size}`,

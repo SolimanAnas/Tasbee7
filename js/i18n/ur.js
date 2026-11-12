@@ -819,6 +819,8 @@ export default {
   'offline_needs_reopen': `ایپ اپ ڈیٹ ہو رہی ہے۔ دوبارہ کھول کر کوشش کریں۔`,
   'offline_error': `ڈاؤن لوڈ ناکام۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔`,
   'offl_title': `پورا مصحف ڈاؤن لوڈ کریں`,
+  'offl_card_label': `آف لائن سنیں`,
+  'offl_progress_of': `{done} از {total} · {size} از {total_size}`,
   'offl_row_sub': `آف لائن سننے کے لیے پوری تلاوت محفوظ کریں`,
   'offl_surahs': `{n} سورتیں`,
   'offl_size': `تقریباً {size}`,

@@ -26,6 +26,12 @@
   var SIZE_KEY = 'audioOfflineSizes';    // { reciterId: bytes } — remembered size estimates
   var CONCURRENCY = 3;
 
+  // Relative length of each surah (letters ÷ 10, from data/quran.json). Audio
+  // size follows text length, so downloading in this order goes from the
+  // short surahs to the long ones: progress moves quickly from the start
+  // instead of sitting on Al-Baqarah first.
+  var SURAH_LEN = [14,2610,1483,1618,1210,1268,1434,539,1102,758,780,730,355,353,286,777,664,656,391,540,504,530,444,572,387,561,480,593,430,348,217,157,572,359,323,305,387,306,485,509,337,353,359,148,207,266,241,251,153,152,155,133,145,148,168,174,254,204,196,156,97,78,81,109,121,110,136,129,114,97,98,113,88,105,70,110,84,80,79,58,45,35,77,47,48,28,32,40,60,36,27,34,18,12,18,31,13,42,18,19,18,14,9,16,12,10,13,6,11,10,10,7,9,10];
+
   var host = null;            // { reciters(), tracksFor(r), nameOf(r), currentIndex(), onChange() }
   var savedUrls = new Set();  // every URL saved for offline listening
   var job = null;             // the running download: { id, total, done, failed, bytes, paused, quota }
@@ -55,7 +61,9 @@
   function readJSON(key) { try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; } }
   function writeJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
   function reciter(i) { return host.reciters()[i]; }
-  function tracksOf(r) { return (host.tracksFor(r) || []).filter(function (t) { return t && /^https:\/\//.test(t.url); }); }
+  // https links only (plus a local test server, which never ships in the data)
+  var OK_URL = /^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/)/;
+  function tracksOf(r) { return (host.tracksFor(r) || []).filter(function (t) { return t && OK_URL.test(t.url); }); }
 
   // On mobile data? (Android Chrome reports the connection type; elsewhere unknown.)
   function onMobileData() {
@@ -135,18 +143,43 @@
   }
 
   // ---------- download ----------
-  async function saveOne(cache, url) {
+  function surahOf(t) {
+    if (t.number) return +t.number;
+    var m = /^\s*(\d{1,3})\b/.exec(t.name || '');
+    return m ? +m[1] : 0;
+  }
+
+  // Shortest surahs first; a list that isn't per surah keeps its own order.
+  function downloadOrder(tracks) {
+    var all = tracks.every(function (t) { var n = surahOf(t); return n >= 1 && n <= 114; });
+    if (!all) return tracks.slice();
+    return tracks.slice().sort(function (a, b) {
+      return (SURAH_LEN[surahOf(a) - 1] - SURAH_LEN[surahOf(b) - 1]) || (surahOf(b) - surahOf(a));
+    });
+  }
+
+  // One file. `item` tracks its progress for the per-surah bars:
+  // { name, got, size }. Counting happens on the way into the cache.
+  async function saveOne(cache, url, item) {
     for (var attempt = 0; attempt < 2; attempt++) {
       try {
+        item.got = 0;
         var res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) continue;
         var len = Number(res.headers.get('content-length')) || 0;
+        item.size = len;
         var headers = { 'Content-Type': res.headers.get('content-type') || 'audio/mpeg' };
         if (len) headers['Content-Length'] = String(len);
+        var body = res.body;
+        if (body && typeof TransformStream !== 'undefined') {
+          body = body.pipeThrough(new TransformStream({
+            transform: function (chunk, ctl) { item.got += chunk.byteLength; schedulePaint(); ctl.enqueue(chunk); }
+          }));
+        }
         // Stored as a plain 200 under the URL the player uses (the host may
         // have redirected). put() rejects if the body is cut short.
-        await cache.put(url, new Response(res.body, { status: 200, headers: headers }));
-        return len || 1;
+        await cache.put(url, new Response(body, { status: 200, headers: headers }));
+        return len || item.got || 1;
       } catch (e) {
         if (e && e.name === 'QuotaExceededError') throw e;
       }
@@ -158,9 +191,10 @@
     if (job || !('caches' in window)) return;
     var r = reciter(index);
     var tracks = tracksOf(r);
-    var todo = tracks.filter(function (t) { return !savedUrls.has(t.url); });
+    var todo = downloadOrder(tracks.filter(function (t) { return !savedUrls.has(t.url); }));
     var prevBytes = (readJSON(INDEX_KEY)[r.id] || {}).bytes || 0;
-    job = { id: r.id, index: index, total: tracks.length, done: tracks.length - todo.length, failed: 0, bytes: prevBytes, paused: false, quota: false };
+    job = { id: r.id, index: index, total: tracks.length, done: tracks.length - todo.length, failed: 0, bytes: prevBytes,
+            paused: false, quota: false, active: [] };
     try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {}
     render(); notify();
 
@@ -169,11 +203,15 @@
     async function worker() {
       while (next < todo.length && !job.paused && !job.quota) {
         var t = todo[next++];
+        var item = { name: t.originalName || t.name || '', got: 0, size: 0 };
+        job.active.push(item);
+        render();
         try {
-          var got = await saveOne(cache, t.url);
+          var got = await saveOne(cache, t.url, item);
           if (got) { savedUrls.add(t.url); job.done++; job.bytes += got; }
           else job.failed++;
         } catch (e) { job.quota = true; }
+        job.active.splice(job.active.indexOf(item), 1);
         render(); notify();
       }
     }
@@ -210,6 +248,54 @@
   // ---------- UI ----------
   function notify() { try { if (host && host.onChange) host.onChange(); } catch (e) {} }
 
+  // Overall progress, 0…1: bytes against the size estimate when there is one
+  // (in-flight files included), otherwise files done.
+  function progressOf(r) {
+    var c = countSaved(r);
+    if (!(job && job.id === r.id)) return c.total ? c.saved / c.total : 0;
+    var est = readJSON(SIZE_KEY)[r.id];
+    var inflight = job.active.reduce(function (a, it) { return a + it.got; }, 0);
+    if (est) return Math.min(0.999, (job.bytes + inflight) / est);
+    return job.total ? job.done / job.total : 0;
+  }
+
+  function overallText(r) {
+    var est = readJSON(SIZE_KEY)[r.id];
+    var inflight = job.active.reduce(function (a, it) { return a + it.got; }, 0);
+    var got = fmtBytes(job.bytes + inflight);
+    return est
+      ? T('offl_progress_of', { done: job.done, total: job.total, size: got, total_size: fmtBytes(est) }, '{done} من {total} · {size} من {total_size}')
+      : T('offl_progress', { done: job.done, total: job.total, size: got }, '{done} من {total} · {size}');
+  }
+
+  function activeRowsHtml() {
+    return job.active.map(function (it) {
+      var pct = it.size ? Math.min(100, Math.round(it.got / it.size * 100)) : 0;
+      return '<div class="offl-file"><div class="offl-file-top"><span class="offl-file-name">' + esc(it.name) +
+        '</span><span class="offl-file-pct">' + pct + '%</span></div>' +
+        '<div class="offl-file-bar"><i style="width:' + pct + '%"></i></div></div>';
+    }).join('');
+  }
+
+  // Byte-level updates repaint only the progress parts, a few times a second.
+  var paintTimer = null;
+  function schedulePaint() {
+    if (paintTimer) return;
+    paintTimer = setTimeout(function () { paintTimer = null; paint(); notify(); }, 250);
+  }
+  function paint() {
+    if (!job || !host) return;
+    var i = targetIndex != null ? targetIndex : host.currentIndex();
+    var r = reciter(i);
+    if (!r || r.id !== job.id) return;
+    var pct = Math.round(progressOf(r) * 100);
+    var fill = $('offlOverallFill'), text = $('offlOverallText'), files = $('offlFiles'), bar = $('offlOverallBar');
+    if (fill) fill.style.width = pct + '%';
+    if (bar) bar.setAttribute('aria-valuenow', String(pct));
+    if (text) text.textContent = overallText(r);
+    if (files) files.innerHTML = activeRowsHtml();
+  }
+
   async function render() {
     var body = $('offlineBody');
     if (!body || !host) return;
@@ -225,12 +311,12 @@
     var mobile = onMobileData();
 
     var status;
-    if (running) status = T('offl_progress', { done: job.done, total: job.total, size: fmtBytes(job.bytes) }, '{done} من {total} · {size}');
+    if (running) status = overallText(r);
     else if (complete) status = T('offl_complete', null, 'محفوظ للاستماع دون اتصال');
     else if (c.saved > 0) status = T('offl_paused', { done: c.saved, total: c.total }, 'متوقف · {done} من {total}');
     else status = '';
 
-    var pct = c.total ? Math.round(((running ? job.done : c.saved) / c.total) * 100) : 0;
+    var pct = Math.round(progressOf(r) * 100);
     var note = '';
     if (!complete && !running) {
       if (mobile === true) note = '<div class="offl-note warn">' + esc(T('offl_mobile', { size: size ? fmtBytes(size) : '…' }, 'أنت على بيانات الجوال. سيستهلك التحميل نحو {size} من باقتك.')) + '</div>';
@@ -260,8 +346,9 @@
           '<div class="offl-who"><div class="offl-name">' + esc(host.nameOf(r)) + '</div><div class="offl-meta">' + esc(meta) + '</div></div>' +
           (complete ? '<span class="offl-check" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>' : '') +
         '</div>' +
-        (c.saved > 0 || running ? '<div class="offl-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div>' : '') +
-        (status ? '<div class="offl-status">' + esc(status) + '</div>' : '') +
+        (c.saved > 0 || running ? '<div class="offl-bar" id="offlOverallBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i id="offlOverallFill" style="width:' + pct + '%"></i></div>' : '') +
+        (status ? '<div class="offl-status" id="offlOverallText">' + esc(status) + '</div>' : '') +
+        (running ? '<div class="offl-files" id="offlFiles">' + activeRowsHtml() + '</div>' : '') +
         note + err +
         ((primary || del) ? '<div class="offl-actions">' + primary + del + '</div>' : '') +
         (running ? '<div class="offl-hint">' + esc(T('offl_keep_open', null, 'يستمر التحميل ما دامت هذه الصفحة مفتوحة')) + '</div>' : '') +
@@ -314,11 +401,23 @@
     if (!host) return '';
     var r = reciter(index);
     if (!r) return '';
-    if (job && job.id === r.id) return T('offl_progress', { done: job.done, total: job.total, size: fmtBytes(job.bytes) }, '{done} من {total} · {size}');
+    if (job && job.id === r.id) return overallText(r);
     var c = countSaved(r);
     if (c.total && c.saved >= c.total) return T('offl_complete', null, 'محفوظ للاستماع دون اتصال');
     if (c.saved) return T('offl_paused', { done: c.saved, total: c.total }, 'متوقف · {done} من {total}');
     return T('offl_row_sub', null, 'احفظ تلاوة كاملة للاستماع دون اتصال');
+  }
+
+  // For the card on the player: { state: idle | running | partial | done, pct, text }
+  function cardState(index) {
+    if (!host) return { state: 'idle', pct: 0, text: '' };
+    var r = reciter(index);
+    if (!r) return { state: 'idle', pct: 0, text: '' };
+    var c = countSaved(r);
+    if (job && job.id === r.id) return { state: 'running', pct: Math.round(progressOf(r) * 100), text: overallText(r) };
+    if (c.total && c.saved >= c.total) return { state: 'done', pct: 100, text: T('offl_complete', null, 'محفوظ للاستماع دون اتصال') };
+    if (c.saved) return { state: 'partial', pct: Math.round(c.saved / c.total * 100), text: T('offl_paused', { done: c.saved, total: c.total }, 'متوقف · {done} من {total}') };
+    return { state: 'idle', pct: 0, text: T('offl_title', null, 'تحميل المصحف كاملاً') };
   }
 
   function isSaved(url) { return savedUrls.has(url); }
@@ -337,7 +436,7 @@
   }
 
   window.AudioOffline = {
-    init: init, openSheet: openSheet, render: render, summary: summary,
+    init: init, openSheet: openSheet, render: render, summary: summary, cardState: cardState,
     isSaved: isSaved, isReciterSaved: isReciterSaved,
     _cacheName: OFFLINE_CACHE
   };

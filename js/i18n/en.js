@@ -847,6 +847,8 @@ export default {
   'offline_needs_reopen': `The app is updating. Please reopen it and try again.`,
   'offline_error': `Download failed. Check your connection and try again.`,
   'offl_title': `Download the full mushaf`,
+  'offl_card_label': `Listen offline`,
+  'offl_progress_of': `{done} of {total} · {size} of {total_size}`,
   'offl_row_sub': `Save a whole recitation to listen offline`,
   'offl_surahs': `{n} surahs`,
   'offl_size': `about {size}`,
