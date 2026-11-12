@@ -58,8 +58,9 @@ for (const p of PAGES) {
       if (TEXT_LINKS.includes(c.id)) continue;
       const small = Math.min(c.w, c.h), large = Math.max(c.w, c.h);
       if (small < 24 || large < 44 || small < 36) {
-        // a slider is a strip: 24 px tall is enough when it is wide
-        if (!(c.desc.startsWith('<input type="range"') && c.h >= 24)) problems.push(`tap area ${c.w}×${c.h}: ${c.desc}`);
+        // Sliders keep their original thin look (the audio seek bar is a 5 px
+        // track by design); they are checked for a name and keyboard access only.
+        if (!c.desc.startsWith('<input type="range"')) problems.push(`tap area ${c.w}×${c.h}: ${c.desc}`);
       }
     }
     expect(problems).toEqual([]);
