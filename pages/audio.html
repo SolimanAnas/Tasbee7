@@ -766,6 +766,37 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 .icon-btn, .action-btn, .track-error-retry { position: relative; }
 .icon-btn::after, .action-btn::after, .track-error-retry::after { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }
 
+
+/* ===== Full mushaf download sheet (js/audio-offline.js) ===== */
+.offl-card{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:18px;background:var(--list-hover);border:1px solid var(--glass-border)}
+.offl-card.is-done{border-color:var(--accent-main)}
+.offl-head{display:flex;align-items:center;gap:12px}
+.offl-photo{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 0 3px var(--accent-muted)}
+.offl-who{flex:1;min-width:0}
+.offl-name{font-size:16px;font-weight:800;color:var(--text-primary);line-height:1.35}
+.offl-meta{font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.offl-check{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent-main);display:grid;place-items:center}
+.offl-check svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.offl-bar{height:6px;border-radius:6px;background:var(--track-bg);overflow:hidden}
+.offl-bar i{display:block;height:100%;background:var(--accent-main);border-radius:6px;transition:width .4s ease}
+.offl-status{font-size:13px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums}
+.offl-note{font-size:12.5px;font-weight:600;line-height:1.55;color:var(--text-secondary)}
+.offl-note.warn{color:#b45309;background:rgba(245,158,11,.12);border-radius:12px;padding:9px 12px}
+[data-theme="dark"] .offl-note.warn{color:#fbbf24}
+.offl-actions{display:flex;gap:8px}
+.offl-btn{flex:1;min-height:46px;border:none;border-radius:14px;background:var(--accent-main);color:#fff;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer}
+.offl-btn:disabled{opacity:.45;cursor:default}
+.offl-btn.ghost{flex:0 0 auto;padding:0 18px;background:transparent;color:var(--danger);border:1px solid var(--glass-border)}
+.offl-btn:active{transform:scale(.98)}
+.offl-hint{font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+.offl-row{display:flex;align-items:center;gap:6px;border-radius:14px;background:var(--list-hover);border:1px solid var(--glass-border)}
+.offl-row.current{border-color:var(--accent-main)}
+.offl-row-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;background:none;border:none;font:inherit;text-align:start;cursor:pointer;color:var(--text-primary)}
+.offl-row-name{font-size:14.5px;font-weight:700}
+.offl-row-sub{font-size:12px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.offl-row-del{flex:none;width:44px;height:44px;margin-inline-end:4px;border:none;border-radius:12px;background:none;color:var(--danger);display:grid;place-items:center;cursor:pointer}
+.offl-row-del svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.offl-empty{font-size:13px;color:var(--text-secondary);padding:6px 2px}
 </style>
 <script type="application/ld+json">
 {
@@ -1049,6 +1080,16 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     <!-- ── TOOLS ── -->
     <div class="settings-section">
       <div class="settings-section-label">أدوات</div>
+      <div class="settings-row" id="offlineRow" onclick="haptic();AudioOffline.openSheet()">
+        <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:#10b981">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="offl_title">تحميل المصحف كاملاً</div>
+          <div class="settings-row-sub" id="offlineRowSub">احفظ تلاوة كاملة للاستماع دون اتصال</div>
+        </div>
+        <svg class="settings-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
       <div class="settings-row" onclick="haptic();openSheet('timerSheet',false)">
         <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:#10b981">
           <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -1096,6 +1137,18 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     </div>
 
   </div>
+</div>
+
+<!-- Full mushaf download (js/audio-offline.js renders the body) -->
+<div id="offlineSheet" class="bottom-sheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header">
+    <h2 data-i18n="offl_title">تحميل المصحف كاملاً</h2>
+    <button class="icon-btn" onclick="openSheet('settingsSheet',true)" style="width:36px;height:36px" aria-label="إغلاق" data-i18n-aria="close">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="settings-body" id="offlineBody"></div>
 </div>
 
 <!-- Sleep Timer Sheet -->
@@ -1502,7 +1555,16 @@ async function loadMultipleJSONs(){
       let data=await res.json();
       if(data&&data.reciters)appData.reciters.push(...data.reciters);
     }
-    if(appData.reciters.length>0)initData();
+    if(appData.reciters.length>0){
+      initData();
+      if(window.AudioOffline)AudioOffline.init({
+        reciters:()=>appData.reciters,
+        tracksFor:tracksForReciter,
+        nameOf:reciterDisplay,
+        currentIndex:()=>selectedReciterIndex,
+        onChange:updateOfflineRow
+      });
+    }
     else throw new Error('No data');
   }catch(e){reciterSelectBtn.textContent=t('audio_load_error')}
 }
@@ -1554,13 +1616,13 @@ function initData(){
   }else{prepareTrack(false,false)}
 }
 
-function buildJuzData(){
-  currentJuzData=[];
-  let reciter=appData.reciters[selectedReciterIndex];
+// Every track of a reciter, in order (also used by the full-mushaf download).
+function tracksForReciter(reciter){
+  if(!reciter)return [];
   let arrayData=reciter.items||reciter.juz;
-  if((reciter.type==='juz'||reciter.type==='custom'||!reciter.type)&&arrayData){
-    currentJuzData=arrayData;
-  }else if(reciter.type==='surah'){
+  if((reciter.type==='juz'||reciter.type==='custom'||!reciter.type)&&arrayData)return arrayData;
+  const out=[];
+  if(reciter.type==='surah'){
     surahNames.forEach((name,index)=>{
       let num=index+1;
       // missing: surahs the host only has as a broken/cut-off file
@@ -1568,9 +1630,18 @@ function buildJuzData(){
       let sn=num<10?'00'+num:num<100?'0'+num:num;
       // overrides: per-surah URL for the odd file a host names differently
       const url=(reciter.overrides&&reciter.overrides[sn])||reciter.baseUrl+sn+'.mp3';
-      currentJuzData.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});
+      out.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});
     });
   }
+  return out;
+}
+function updateOfflineRow(){
+  const el=document.getElementById('offlineRowSub');
+  if(el&&window.AudioOffline)el.textContent=AudioOffline.summary(selectedReciterIndex);
+}
+function buildJuzData(){
+  currentJuzData=tracksForReciter(appData.reciters[selectedReciterIndex]);
+  updateOfflineRow();
   // Sync strip badge
   const dlsCount=document.getElementById('dlsCount');
   if(dlsCount)dlsCount.textContent=currentJuzData.length?currentJuzData.length+' ملف':'—';
@@ -1633,7 +1704,8 @@ function renderReciterList(filterText=''){
       setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[selectedJuzIndex]));
       closeAllSheets();prepareTrack(true);
     };
-    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r),active:oi===selectedReciterIndex,onPick:pick}));
+    const saved=window.AudioOffline&&AudioOffline.isReciterSaved(r)?' · '+t('offl_saved_badge'):'';
+    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r)+saved,active:oi===selectedReciterIndex,onPick:pick}));
   });
   list.appendChild(frag);
 }
@@ -1685,7 +1757,8 @@ function renderJuzList(filterText=''){
   const frag=document.createDocumentFragment();
   filtered.forEach(([j,oi,num])=>{
     const pick=()=>{haptic();selectedJuzIndex=oi;setSelTicker('juzSelectBtn',juzDisplay(j));errorRetryCount=0;closeAllSheets();prepareTrack(true)};
-    frag.appendChild(makeSelRow({num,title:juzTitle(j),active:oi===selectedJuzIndex,onPick:pick}));
+    const saved=window.AudioOffline&&AudioOffline.isSaved(j.url)?t('offl_saved_badge'):null;
+    frag.appendChild(makeSelRow({num,title:juzTitle(j),sub:saved,active:oi===selectedJuzIndex,onPick:pick}));
   });
   list.appendChild(frag);
 }
@@ -2120,5 +2193,6 @@ window.addEventListener('langchange',()=>{
 <!-- Install prompt (PWA / Play Store / iOS) rendered by pwa-install.js -->
 <script src="../js/net-status.js"></script>
 <script src="../js/tap-a11y.js"></script>
+<script src="../js/audio-offline.js"></script>
 </body>
 </html>
