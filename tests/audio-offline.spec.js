@@ -51,7 +51,8 @@ test.describe('full mushaf download', () => {
 
     // the surah list marks saved tracks
     await page.evaluate(() => openJuzSheet());
-    await expect(page.locator('#selectionList .sel-sub').first()).toContainText('محفوظ');
+    await expect(page.locator('#selectionList .sel-saved')).toHaveCount(5);
+    await expect(page.locator('#selectionList .sel-saved').first()).toHaveAttribute('aria-label', 'محفوظ');
 
     page.once('dialog', d => d.accept());
     await page.evaluate(() => AudioOffline.openSheet());
