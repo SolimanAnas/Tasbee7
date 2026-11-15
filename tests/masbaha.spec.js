@@ -48,7 +48,7 @@ test.describe('masbaha', () => {
     await page.click('#dhikrList .dhikr-item');
 
     await expect(page.locator('#dhikrSheet')).not.toHaveClass(/open/);
-    await expect(page.locator('#dhikrPickerBtn')).toHaveText('لا إله إلا أنت سبحانك إني كنت من الظالمين');
+    await expect(page.locator('#dhikrText')).toHaveText('لا إله إلا أنت سبحانك إني كنت من الظالمين');
     await expect(page.locator('#hintBox')).toContainText('ذي النون');
     expect(await page.evaluate(() => localStorage.getItem('currentDhikr'))).toBe('dhannoon');
 
@@ -95,6 +95,86 @@ test.describe('masbaha', () => {
     await page.mouse.up();
     await page.waitForTimeout(200);
     await expect(page.locator('#count')).toHaveText(String(before + 1));
+  });
+
+  test('the ring shows the round, the progress in it and the lit beads', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'subhan'); localStorage.setItem('target_subhan', '33'); localStorage.setItem('counter_subhan', '45'); } catch (e) {} });
+    await open(page, 'light');
+    await expect(page.locator('#count')).toHaveText('45');
+    await expect(page.locator('#countLabel')).toHaveText('الدورة 2');
+    await expect(page.locator('#roundProgress')).toHaveText('12 من 33');
+    await expect(page.locator('#beads .bead')).toHaveCount(33);
+    await expect(page.locator('#beads .bead.lit')).toHaveCount(12);
+    await expect(page.locator('#beads .bead.now')).toHaveCount(1);
+    await expect(page.locator('#dhikrText')).toHaveText('سبحان الله');
+  });
+
+  test('undo takes back the last tap everywhere it was counted', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'hamd'); } catch (e) {} });
+    await open(page, 'dark');
+    await expect(page.locator('#undoBtn')).toBeDisabled();
+    const read = () => page.evaluate(() => {
+      const day = (d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'))(new Date());
+      const log = JSON.parse(localStorage.getItem('dhikr_log') || '{}')[day] || {};
+      return [localStorage.getItem('counter_hamd'), localStorage.getItem('total_hamd'), localStorage.getItem('grand_total'), localStorage.getItem('masbaha_today'), (log.d || {}).hamd || 0, log.m || 0];
+    });
+    await page.click('#counterZone'); await page.click('#counterZone');
+    expect(await read()).toEqual(['2', '2', '2', '2', 2, 2]);
+    await page.click('#undoBtn');
+    await expect(page.locator('#count')).toHaveText('1');
+    expect(await read()).toEqual(['1', '1', '1', '1', 1, 1]);
+    await page.click('#undoBtn');
+    await expect(page.locator('#undoBtn')).toBeDisabled();
+    await expect(page.locator('#countLabel')).toHaveText('اضغط للتسبيح');
+  });
+
+  test('the keyboard counts and takes back', async ({ page }) => {
+    await open(page, 'dark');
+    const start = Number(await page.locator('#count').innerText());
+    await page.keyboard.press('Space');
+    await page.keyboard.press('ArrowUp');
+    await expect(page.locator('#count')).toHaveText(String(start + 2));
+    await page.keyboard.press('ArrowDown');
+    await expect(page.locator('#count')).toHaveText(String(start + 1));
+    await expect(page.locator('#countAnnounce')).toHaveText(String(start + 1));
+  });
+
+  test('the target sheet sets a common count in one tap, or any number', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'subhan'); } catch (e) {} });
+    await open(page, 'sepia');
+    await page.click('.act-target');
+    await expect(page.locator('#targetSheet')).toHaveClass(/open/);
+    await expect(page.locator('.target-chip.active')).toHaveText('33');
+    await page.click('.target-chip:has-text("100")');
+    await expect(page.locator('#targetSheet')).not.toHaveClass(/open/);
+    expect(await page.evaluate(() => localStorage.getItem('target_subhan'))).toBe('100');
+    await expect(page.locator('#targetBtnLabel')).toHaveText('الهدف 100');
+
+    await page.click('.act-target');
+    await page.fill('#targetInput', '0');
+    await page.click('#targetSheet .btn-inline');
+    await expect(page.locator('#targetSheet')).toHaveClass(/open/);     // refused
+    await page.fill('#targetInput', '250');
+    await page.press('#targetInput', 'Enter');
+    await expect(page.locator('#targetSheet')).not.toHaveClass(/open/);
+    await expect(page.locator('#roundProgress')).toHaveText('0 من 250');
+  });
+
+  test('the virtue shows its source on its own line', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'dhannoon'); } catch (e) {} });
+    await open(page, 'light');
+    await expect(page.locator('#hintSource')).toHaveText('رواه الترمذي');
+    await expect(page.locator('#hintBox')).not.toContainText('رواه');
+  });
+
+  test('statistics list the adhkar said, most first', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('total_hamd', '5'); localStorage.setItem('total_subhan', '40'); } catch (e) {} });
+    await open(page, 'light');
+    await page.evaluate(() => toggleSettings());
+    await expect(page.locator('#grandTotalDisplay')).toHaveText('45');
+    await page.click('.stats-details > summary');
+    await expect(page.locator('#statsTable tr')).toHaveCount(2);
+    await expect(page.locator('#statsTable tr').first()).toContainText('سبحان الله');
   });
 
   test('custom adhkar appear in their own group', async ({ page }) => {

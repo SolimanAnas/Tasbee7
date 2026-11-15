@@ -95,6 +95,21 @@
     }
   }
 
+  // Take back one masbaha tap on `id` (call after masbaha_today was lowered).
+  // sync() only ever raises a day's value, so today's total is set directly.
+  function untap(id) {
+    const log = read(LOG_KEY);
+    const e = log[dayKey(new Date())];
+    if (!e) return;
+    if (e.d && e.d[id] > 0) { e.d[id]--; if (!e.d[id]) delete e.d[id]; }
+    let today = 0;
+    try {
+      if (localStorage.getItem('masbaha_last_date') === new Date().toDateString()) today = parseInt(localStorage.getItem('masbaha_today') || '0', 10) || 0;
+    } catch (err) { /* storage blocked */ }
+    e.m = Math.min(e.m || 0, today);
+    write(LOG_KEY, log);
+  }
+
   // ---------- summary ----------
   function summary() {
     const log = sync();
@@ -253,5 +268,5 @@
     });
   }
 
-  window.DhikrStats = { sync, tap, summary, share };
+  window.DhikrStats = { sync, tap, untap, summary, share };
 })();
