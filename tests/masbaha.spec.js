@@ -97,15 +97,20 @@ test.describe('masbaha', () => {
     await expect(page.locator('#count')).toHaveText(String(before + 1));
   });
 
-  test('the ring shows the round, the progress in it and the lit beads', async ({ page }) => {
+  test('the ring shows the round, the progress in it and where you are', async ({ page }) => {
     await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'subhan'); localStorage.setItem('target_subhan', '33'); localStorage.setItem('counter_subhan', '45'); } catch (e) {} });
     await open(page, 'light');
     await expect(page.locator('#count')).toHaveText('45');
     await expect(page.locator('#countLabel')).toHaveText('الدورة 2');
     await expect(page.locator('#roundProgress')).toHaveText('12 من 33');
-    await expect(page.locator('#beads .bead')).toHaveCount(33);
-    await expect(page.locator('#beads .bead.lit')).toHaveCount(12);
-    await expect(page.locator('#beads .bead.now')).toHaveCount(1);
+    // 12 of 33: the arc covers 12/33 of the circle and the knob sits at its end (clockwise from the top)
+    const ring = await page.evaluate(() => {
+      const c = document.getElementById('progressCircle'), k = document.getElementById('ringKnob');
+      return { offset: parseFloat(c.style.strokeDashoffset), x: +k.getAttribute('cx'), y: +k.getAttribute('cy'), hidden: k.hasAttribute('hidden') || getComputedStyle(k).display === 'none' };
+    });
+    expect(ring.offset).toBeCloseTo(552.9 * (1 - 12 / 33), 0);
+    expect(ring.hidden).toBe(false);
+    expect(ring.x).toBeGreaterThan(100);                    // right half: clockwise
     await expect(page.locator('#dhikrText')).toHaveText('سبحان الله');
   });
 

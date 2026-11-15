@@ -75,7 +75,7 @@
         --sheet-bg:rgba(15,23,42,.78); --field-bg:rgba(255,255,255,.06); --hairline:rgba(255,255,255,.07);
         --dots:rgba(255,255,255,.06);
         --count-grad:linear-gradient(180deg,#ffffff,#9fe7cf); --count-shadow:0 6px 28px rgba(0,0,0,.45);
-        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#7dd3fc; --ring-done-b:#0ea5e9; --ring-track:rgba(255,255,255,.06);
+        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#7dd3fc; --ring-done-b:#0ea5e9; --ring-track:rgba(255,255,255,.12);
         --pill-bg:rgba(56,189,248,.12); --pill-bd:rgba(56,189,248,.25); --pill-ink:#7dd3fc;
         --mini-bg:rgba(15,23,42,.72); --on-primary:#04140d; --modal-dim:rgba(0,0,0,.6);
         --disc-a:rgba(30,41,70,.55); --disc-b:rgba(10,16,34,.55);
@@ -91,7 +91,7 @@
         --sheet-bg:rgba(248,250,252,.82); --field-bg:rgba(15,23,42,.05); --hairline:rgba(15,23,42,.08);
         --dots:rgba(15,23,42,.06);
         --count-grad:linear-gradient(180deg,#064e3b,#10b981); --count-shadow:0 4px 18px rgba(16,185,129,.18);
-        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#38bdf8; --ring-done-b:#0284c7; --ring-track:rgba(15,23,42,.07);
+        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#38bdf8; --ring-done-b:#0284c7; --ring-track:rgba(255,255,255,.55);
         --pill-bg:rgba(2,132,199,.10); --pill-bd:rgba(2,132,199,.25); --pill-ink:#0369a1;
         --mini-bg:rgba(255,255,255,.82); --on-primary:#fff; --modal-dim:rgba(15,23,42,.3);
         --disc-a:rgba(255,255,255,.92); --disc-b:rgba(226,236,250,.78);
@@ -107,7 +107,7 @@
         --sheet-bg:rgba(248,238,218,.86); --field-bg:rgba(60,40,20,.06); --hairline:rgba(60,40,20,.10);
         --dots:rgba(60,40,20,.07);
         --count-grad:linear-gradient(180deg,#4a2f0f,#B8860B); --count-shadow:0 4px 18px rgba(124,82,26,.18);
-        --ring-a:#d4a843; --ring-b:#9a6f08; --ring-done-a:#e8c27a; --ring-done-b:#b07a22; --ring-track:rgba(60,40,20,.08);
+        --ring-a:#d4a843; --ring-b:#9a6f08; --ring-done-a:#e8c27a; --ring-done-b:#b07a22; --ring-track:rgba(255,248,232,.5);
         --pill-bg:rgba(184,134,11,.12); --pill-bd:rgba(184,134,11,.30); --pill-ink:#7a4f12;
         --mini-bg:rgba(250,242,226,.85); --on-primary:#fff; --modal-dim:rgba(60,40,20,.35);
         --disc-a:rgba(255,250,238,.9); --disc-b:rgba(240,224,194,.75);
@@ -252,24 +252,22 @@
     /* ring colours follow the theme */
     #gradEmerald stop:first-child { stop-color: var(--ring-a); }
     #gradEmerald stop:last-child { stop-color: var(--ring-b); }
-    .ring-track { fill: none; stroke: var(--ring-track); stroke-width: 3; }
+    /* progress: a thick arc around the disc, clockwise from the top, with a knob where you are */
+    .ring-track { fill: none; stroke: var(--ring-track); stroke-width: 9; }
     .ring-arc {
-        fill: none; stroke: url(#gradEmerald); stroke-width: 3; stroke-linecap: round;
+        fill: none; stroke: url(#gradEmerald); stroke-width: 9; stroke-linecap: round;
         transform: rotate(-90deg); transform-origin: 100px 100px;
+        filter: drop-shadow(0 0 4px var(--primary-glow));
         transition: stroke-dashoffset 0.12s linear;
     }
+    .ring-knob { fill: #fff; stroke: var(--ring-a); stroke-width: 3; filter: drop-shadow(0 0 4px var(--primary-glow)); transition: cx .12s linear, cy .12s linear; }
+    .ring-knob[hidden] { display: none; }
+    .progress-wrapper.complete .ring-arc { stroke: var(--ring-done-b); filter: drop-shadow(0 0 6px var(--accent2-glow)); }
+    .progress-wrapper.complete .ring-knob { stroke: var(--ring-done-b); }
 
-    /* the misbaha: 33 beads and the imam bead at the top; beads light clockwise as you count */
-    .bead { fill: var(--ring-track); stroke: var(--glass-border); stroke-width: .6; transition: fill .2s ease, transform .2s ease; transform-box: fill-box; transform-origin: center; }
-    .bead.lit { fill: var(--ring-b); stroke: none; }
-    .bead.now { fill: var(--ring-a); transform: scale(1.45); filter: drop-shadow(0 0 3px var(--primary-glow)); }
-    .imam { fill: var(--accent2); opacity: .85; }
-    .progress-wrapper.complete .bead.lit { fill: var(--ring-done-b); }
-    .progress-wrapper.complete .ring-arc { stroke: var(--ring-done-b); }
-
-    /* the frosted disc inside the ring (plain: the beads are the ornament) */
+    /* the frosted disc inside the ring */
     .ring-disc {
-        position: absolute; inset: 14%; border-radius: 50%; overflow: hidden;
+        position: absolute; inset: 11%; border-radius: 50%; overflow: hidden;
         background: radial-gradient(circle at 50% 40%, var(--disc-a), var(--disc-b));
         border: 1px solid var(--glass-border);
         box-shadow: inset 0 2px 10px rgba(255,255,255,.35), 0 8px 24px rgba(10,25,60,.12);
@@ -510,7 +508,7 @@
 
     @media (prefers-reduced-motion: reduce) {
         .progress-wrapper.tick .count-number { animation: none !important; }
-        .bead, .ring-arc, .progress-wrapper { transition: none !important; }
+        .ring-knob, .ring-arc, .progress-wrapper { transition: none !important; }
     }
 </style>
 </head>
@@ -614,9 +612,9 @@
                             <stop offset="100%" stop-color="#059669" />
                         </linearGradient>
                     </defs>
-                    <circle class="ring-track" cx="100" cy="100" r="77" />
-                    <circle class="ring-arc" id="progressCircle" cx="100" cy="100" r="77" stroke-dasharray="483.8" stroke-dashoffset="483.8" />
-                    <g class="beads" id="beads"></g>
+                    <circle class="ring-track" cx="100" cy="100" r="88" />
+                    <circle class="ring-arc" id="progressCircle" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="552.9" />
+                    <circle class="ring-knob" id="ringKnob" cx="100" cy="12" r="6.5" hidden />
                 </svg>
                 <div class="counter-content">
                     <span class="count-label" id="countLabel"></span>
@@ -882,8 +880,7 @@
     const customVerse = `«وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُمْ مَغْفِرَةً وَأَجْرًا عَظِيمًا»`;
 
     let currentDhikr = localStorage.getItem("currentDhikr") || "subhan";
-    const fullCircle = 483.8;   // ring arc circumference (r = 77)
-    const BEADS = 33;           // a misbaha of 33 beads
+    const fullCircle = 552.9;   // ring arc circumference (r = 88)
 
     // --- Sound & Haptic ---
     let audioCtx = null;        // created on the first sound, after a tap (browsers block it before)
@@ -932,7 +929,6 @@
             currentDhikr = document.getElementById("dhikrSelect").options[0].value;
             document.getElementById("dhikrSelect").value = currentDhikr;
         }
-        renderBeads();
         updatePickerLabel();
         markTheme(document.documentElement.getAttribute('data-theme'));
         document.getElementById("dhikrSearch").addEventListener('input', renderDhikrList);
@@ -981,29 +977,7 @@
         showHint();
     }
 
-    // The 33 beads around the ring and the imam bead at the top (built once).
-    function renderBeads() {
-        const g = document.getElementById("beads");
-        if (!g || g.childElementCount) return;
-        const NS = 'http://www.w3.org/2000/svg';
-        const slots = BEADS + 1;            // slot 0 is the imam bead
-        for (let i = 1; i <= BEADS; i++) {
-            const a = (-90 + i * 360 / slots) * Math.PI / 180;
-            const c = document.createElementNS(NS, 'circle');
-            c.setAttribute('class', 'bead');
-            c.setAttribute('cx', (100 + 90 * Math.cos(a)).toFixed(2));
-            c.setAttribute('cy', (100 + 90 * Math.sin(a)).toFixed(2));
-            c.setAttribute('r', '4.1');
-            g.appendChild(c);
-        }
-        const imam = document.createElementNS(NS, 'ellipse');
-        imam.setAttribute('class', 'imam');
-        imam.setAttribute('cx', '100'); imam.setAttribute('cy', '10');
-        imam.setAttribute('rx', '3.4'); imam.setAttribute('ry', '6.6');
-        g.appendChild(imam);
-    }
-
-    // Ring, beads and the labels inside the ring for `count` taps on a target.
+    // The ring, its knob and the labels inside it for `count` taps on a target.
     function updateProgress(count, target) {
         target = parseInt(target) || 33;
         count = parseInt(count) || 0;
@@ -1018,11 +992,11 @@
         circle.style.strokeDashoffset = fullCircle - fullCircle * percent;
         wrapper.classList.toggle("complete", done);
 
-        const lit = Math.round(percent * BEADS);
-        document.querySelectorAll('#beads .bead').forEach((b, i) => {
-            b.classList.toggle('lit', i < lit);
-            b.classList.toggle('now', i === lit - 1 && !done);
-        });
+        const knob = document.getElementById("ringKnob");
+        const ang = (-90 + 360 * percent) * Math.PI / 180;    // clockwise from the top
+        knob.setAttribute('cx', (100 + 88 * Math.cos(ang)).toFixed(2));
+        knob.setAttribute('cy', (100 + 88 * Math.sin(ang)).toFixed(2));
+        knob.toggleAttribute('hidden', inRound === 0);   // an SVG element has no .hidden property
 
         document.getElementById("countLabel").textContent =
             count === 0 ? tr('masbaha_tap_hint', 'اضغط للتسبيح') : tr('masbaha_round', 'الدورة {n}', { n: round });
@@ -1657,7 +1631,7 @@
 <script>
     if (window.I18n) {
         // labels built in script (round, target, progress) follow the language once it has loaded
-        const relabel = () => { if (typeof loadCounter === 'function' && document.getElementById('beads').childElementCount) { loadCounter(); updatePickerLabel(); } };
+        const relabel = () => { if (typeof loadCounter === 'function' && document.getElementById('countLabel').textContent) { loadCounter(); updatePickerLabel(); } };
         Promise.resolve(I18n.init()).then(relabel);
         window.addEventListener('langchange', relabel);
     }
