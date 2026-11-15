@@ -201,6 +201,9 @@ export default {
   'masbaha_sec_stats': 'ئامار',
   'masbaha_stats_details': 'بۆ هەر زیکرێک',
   'masbaha_stats_empty': 'هێشتا هیچ تەسبیحێک نەژمێردراوە',
+  'masbaha_prev': 'زیکری پێشوو',
+  'masbaha_next': 'زیکری داهاتوو',
+  'masbaha_fav': 'دڵخوازەکان',
 
   // Azkar
   'azkar_title': 'ئێکار — زادالمسلم',

@@ -189,6 +189,9 @@ export default {
   'masbaha_sec_stats': 'اعداد و شمار',
   'masbaha_stats_details': 'ہر ذکر کی تفصیل',
   'masbaha_stats_empty': 'ابھی کوئی تسبیح شمار نہیں ہوئی',
+  'masbaha_prev': 'پچھلا ذکر',
+  'masbaha_next': 'اگلا ذکر',
+  'masbaha_fav': 'پسندیدہ',
 
   'azkar_title': 'اذکار — زاد المسلم',
   'azkar_remaining': 'باقی',

@@ -201,6 +201,9 @@ export default {
   'masbaha_sec_stats': 'الإحصائيات',
   'masbaha_stats_details': 'التفاصيل لكل ذكر',
   'masbaha_stats_empty': 'لم تُسجَّل تسبيحات بعد',
+  'masbaha_prev': 'الذكر السابق',
+  'masbaha_next': 'الذكر التالي',
+  'masbaha_fav': 'المفضلة',
 
   // Azkar
   'azkar_title': 'الأذكار — زاد المسلم',

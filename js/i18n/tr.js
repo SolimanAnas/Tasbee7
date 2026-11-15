@@ -189,6 +189,9 @@ export default {
   'masbaha_sec_stats': 'İstatistikler',
   'masbaha_stats_details': 'Zikir bazında',
   'masbaha_stats_empty': 'Henüz tesbih sayılmadı',
+  'masbaha_prev': 'Önceki zikir',
+  'masbaha_next': 'Sonraki zikir',
+  'masbaha_fav': 'Favoriler',
 
   'azkar_title': 'Zikirler — Zad Al-Muslim',
   'azkar_remaining': 'Kalan',
