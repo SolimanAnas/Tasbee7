@@ -179,6 +179,7 @@ export default {
   'masbaha_long_exit': 'LONG_PRESS_TO_EXIT',
   'masbaha_pick_dhikr': 'Choose a dhikr',
   'masbaha_search': 'Search adhkar...',
+  'masbaha_group_frequent': 'Most used',
   'masbaha_group_tasbeeh': 'Glorification & praise',
   'masbaha_group_tahleel': 'Tahlil & takbir',
   'masbaha_group_istighfar': 'Forgiveness & supplication',

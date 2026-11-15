@@ -167,6 +167,7 @@ export default {
   'masbaha_long_exit': 'DABAE_RAKHEIN_BAHAR_JANE_K_LIYE',
   'masbaha_pick_dhikr': 'ذکر منتخب کریں',
   'masbaha_search': 'ذکر تلاش کریں...',
+  'masbaha_group_frequent': 'سب سے زیادہ استعمال ہونے والے',
   'masbaha_group_tasbeeh': 'تسبیح و تحمید',
   'masbaha_group_tahleel': 'تہلیل و تکبیر',
   'masbaha_group_istighfar': 'استغفار و دعا',

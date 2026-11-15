@@ -167,6 +167,7 @@ export default {
   'masbaha_long_exit': 'UZUN_BASIN_CIKMAK_ICIN',
   'masbaha_pick_dhikr': 'Zikir seç',
   'masbaha_search': 'Zikir ara...',
+  'masbaha_group_frequent': 'En çok kullanılanlar',
   'masbaha_group_tasbeeh': 'Tesbih ve hamd',
   'masbaha_group_tahleel': 'Tehlil ve tekbir',
   'masbaha_group_istighfar': 'İstiğfar ve dua',

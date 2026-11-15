@@ -36,7 +36,12 @@ test.describe('masbaha', () => {
     const total = await page.evaluate(() => document.getElementById('dhikrSelect').options.length);
     expect(total).toBeGreaterThanOrEqual(17);
     await expect(page.locator('#dhikrList .dhikr-item')).toHaveCount(total);
-    await expect(page.locator('#dhikrList .dhikr-group-label')).toHaveCount(4);
+    await expect(page.locator('#dhikrList .dhikr-group-label')).toHaveCount(5);
+    // the most used three come first, under their own title
+    await expect(page.locator('#dhikrList .dhikr-group-label').first()).toHaveText('الأكثر استخدامًا');
+    await expect(page.locator('#dhikrList .dhikr-title').nth(0)).toHaveText('سبحان الله');
+    await expect(page.locator('#dhikrList .dhikr-title').nth(1)).toHaveText('الحمد لله');
+    await expect(page.locator('#dhikrList .dhikr-title').nth(2)).toHaveText('لا إله إلا الله');
     await expect(page.locator('#dhikrList .dhikr-item.active')).toHaveCount(1);
 
     // search ignores diacritics and hamza forms
@@ -208,13 +213,44 @@ test.describe('masbaha', () => {
     await expect(page.locator('#favBtn')).toHaveAttribute('aria-pressed', 'false');
   });
 
+  test('a dhikr can be added from the picker, and the same words are not added twice', async ({ page }) => {
+    await open(page, 'light');
+    await page.click('#dhikrPickerBtn');
+    await page.click('.dhikr-add-open');
+    await page.fill('#pickerDhikrInput', 'اللهم أعني على ذكرك وشكرك وحسن عبادتك');
+    await page.press('#pickerDhikrInput', 'Enter');
+    await expect(page.locator('#dhikrSheet')).not.toHaveClass(/open/);
+    await expect(page.locator('#dhikrText')).toHaveText('اللهم أعني على ذكرك وشكرك وحسن عبادتك');
+    const before = await page.evaluate(() => document.getElementById('dhikrSelect').options.length);
+    await page.click('#dhikrPickerBtn');
+    await page.click('.dhikr-add-open');
+    await page.fill('#pickerDhikrInput', 'سُبْحَانَ اللَّه');        // an existing dhikr, with harakat
+    await page.click('.dhikr-add .btn-inline');
+    expect(await page.evaluate(() => document.getElementById('dhikrSelect').options.length)).toBe(before);
+    await expect(page.locator('#dhikrText')).toHaveText('سبحان الله');
+  });
+
+  test('the bookmark sits beside the chip, clear of the dhikr text', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'wahdahu'); } catch (e) {} });
+    await open(page, 'light');
+    const [t, f] = await Promise.all([page.locator('#dhikrText').boundingBox(), page.locator('#favBtn').boundingBox()]);
+    expect(f.y).toBeGreaterThanOrEqual(t.y + t.height - 1);   // below the text, not over it
+  });
+
+  test('every dhikr has a meaning with its source', async ({ page }) => {
+    await open(page, 'light');
+    const n = await page.evaluate(() => document.getElementById('dhikrSelect').options.length);
+    await expect(page.locator('#meaningsModal .meaning-item')).toHaveCount(n);
+    await expect(page.locator('#meaningsModal .meaning-source')).toHaveCount(n);
+  });
+
   test('custom adhkar appear in their own group', async ({ page }) => {
     await page.addInitScript(() => {
       try { localStorage.setItem('customDhikrs', JSON.stringify([{ id: 'custom_1', text: 'ذكر تجريبي' }])); } catch (e) {}
     });
     await open(page, 'dark');
     await page.click('#dhikrPickerBtn');
-    await expect(page.locator('#dhikrList .dhikr-group-label')).toHaveCount(5);
+    await expect(page.locator('#dhikrList .dhikr-group-label')).toHaveCount(6);
     await expect(page.locator('#dhikrList .dhikr-group-label').last()).toHaveText('أذكاري الخاصة');
     await expect(page.locator('#dhikrList .dhikr-item').last()).toContainText('ذكر تجريبي');
   });
