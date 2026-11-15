@@ -177,6 +177,14 @@ export default {
   'masbaha_confirm_title': 'پشتڕاستکردنی کردار',
   'masbaha_power_hint': 'بۆ دەرچوون مادەی درێژ بگرە',
   'masbaha_long_exit': 'MAD_DAGIRTIN_BOWE_DARACHWUN',
+  'masbaha_pick_dhikr': 'زیکرێک هەڵبژێرە',
+  'masbaha_search': 'گەڕان بۆ زیکر...',
+  'masbaha_group_tasbeeh': 'تەسبیح و حەمد',
+  'masbaha_group_tahleel': 'تەهلیل و تەکبیر',
+  'masbaha_group_istighfar': 'ئیستیغفار و دوعا',
+  'masbaha_group_salawat': 'صەڵەوات لەسەر پێغەمبەر ﷺ',
+  'masbaha_group_custom': 'زیکرەکانی من',
+  'masbaha_row_sub': 'ژمارە {count} · کۆ {total}',
 
   // Azkar
   'azkar_title': 'ئێکار — زادالمسلم',

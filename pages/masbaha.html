@@ -51,15 +51,64 @@
 <link rel="icon" href="../icons/icon-192.png">
 
 <link rel="stylesheet" href="../css/fonts.css">
+<script>
+  // same theme as the rest of the app (themeMode): light, dark or sepia
+  (function () {
+    var m; try { m = localStorage.getItem('themeMode'); } catch (e) {}
+    if (m === 'warm') m = 'sepia';
+    if (m === 'plain-dark' || m === 'oled') m = 'dark';
+    if (['light', 'dark', 'sepia'].indexOf(m) < 0) m = (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', m);
+  })();
+</script>
 
 <style>
     /* ================= THEME ================= */
-    :root {
+    /* dark (default) — the app's night background, emerald + sky accents */
+    :root, [data-theme="dark"] {
         --bg-0:#020617;
+        --bg-image:url('../images/Background-dark.webp'); --bg-overlay:rgba(2,6,23,.55);
         --primary:#10b981; --primary-bright:#34d399; --primary-glow:rgba(16,185,129,.5);
         --accent2:#38bdf8; --accent2-bright:#7dd3fc; --accent2-glow:rgba(56,189,248,.42);
         --text-main:#f1f5f9; --text-muted:#9fb0c0;
         --glass:rgba(255,255,255,.06); --glass-2:rgba(255,255,255,.10); --glass-border:rgba(255,255,255,.12);
+        --sheet-bg:rgba(15,23,42,.78); --field-bg:rgba(255,255,255,.06); --hairline:rgba(255,255,255,.07);
+        --dots:rgba(255,255,255,.06);
+        --count-grad:linear-gradient(180deg,#ffffff,#9fe7cf); --count-shadow:0 6px 28px rgba(0,0,0,.45);
+        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#7dd3fc; --ring-done-b:#0ea5e9; --ring-track:rgba(255,255,255,.06);
+        --pill-bg:rgba(56,189,248,.12); --pill-bd:rgba(56,189,248,.25); --pill-ink:#7dd3fc;
+        --mini-bg:rgba(15,23,42,.72); --on-primary:#04140d; --modal-dim:rgba(0,0,0,.6);
+        --muted-btn:#334155; --muted-btn-ink:#fff;
+    }
+    [data-theme="light"] {
+        --bg-0:#eef5fb;
+        --bg-image:url('../images/Background-light.webp'); --bg-overlay:rgba(255,255,255,.22);
+        --primary:#10b981; --primary-bright:#059669; --primary-glow:rgba(16,185,129,.35);
+        --accent2:#0284c7; --accent2-bright:#0369a1; --accent2-glow:rgba(2,132,199,.22);
+        --text-main:#0f172a; --text-muted:#475569;
+        --glass:rgba(255,255,255,.55); --glass-2:rgba(255,255,255,.78); --glass-border:rgba(255,255,255,.75);
+        --sheet-bg:rgba(248,250,252,.82); --field-bg:rgba(15,23,42,.05); --hairline:rgba(15,23,42,.08);
+        --dots:rgba(15,23,42,.06);
+        --count-grad:linear-gradient(180deg,#064e3b,#10b981); --count-shadow:0 4px 18px rgba(16,185,129,.18);
+        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#38bdf8; --ring-done-b:#0284c7; --ring-track:rgba(15,23,42,.07);
+        --pill-bg:rgba(2,132,199,.10); --pill-bd:rgba(2,132,199,.25); --pill-ink:#0369a1;
+        --mini-bg:rgba(255,255,255,.82); --on-primary:#fff; --modal-dim:rgba(15,23,42,.3);
+        --muted-btn:rgba(15,23,42,.08); --muted-btn-ink:#0f172a;
+    }
+    [data-theme="sepia"] {
+        --bg-0:#f3e7d1;
+        --bg-image:url('../images/background-sepia.webp'); --bg-overlay:rgba(180,140,100,.16);
+        --primary:#B8860B; --primary-bright:#9a6f08; --primary-glow:rgba(184,134,11,.35);
+        --accent2:#8a5a14; --accent2-bright:#7a4f12; --accent2-glow:rgba(184,134,11,.25);
+        --text-main:#3D2B1F; --text-muted:#7a6046;
+        --glass:rgba(250,242,226,.55); --glass-2:rgba(250,242,226,.78); --glass-border:rgba(210,180,140,.45);
+        --sheet-bg:rgba(248,238,218,.86); --field-bg:rgba(60,40,20,.06); --hairline:rgba(60,40,20,.10);
+        --dots:rgba(60,40,20,.07);
+        --count-grad:linear-gradient(180deg,#4a2f0f,#B8860B); --count-shadow:0 4px 18px rgba(124,82,26,.18);
+        --ring-a:#d4a843; --ring-b:#9a6f08; --ring-done-a:#e8c27a; --ring-done-b:#b07a22; --ring-track:rgba(60,40,20,.08);
+        --pill-bg:rgba(184,134,11,.12); --pill-bd:rgba(184,134,11,.30); --pill-ink:#7a4f12;
+        --mini-bg:rgba(250,242,226,.85); --on-primary:#fff; --modal-dim:rgba(60,40,20,.35);
+        --muted-btn:rgba(60,40,20,.08); --muted-btn-ink:#3D2B1F;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -67,13 +116,13 @@
     body {
         margin: 0; height: 100dvh; overflow: hidden;
         font-family: 'Tajawal', sans-serif; color: var(--text-main);
-        background: radial-gradient(135% 95% at 50% -12%, #0f3b2e 0%, #0a1b2a 40%, var(--bg-0) 80%);
+        background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image) center/cover no-repeat, var(--bg-0);
         display: flex; justify-content: center; user-select: none; position: relative;
     }
     /* dotted texture, faded toward edges */
     body::before {
         content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .55;
-        background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+        background-image: radial-gradient(var(--dots) 1px, transparent 1px);
         background-size: 22px 22px;
         -webkit-mask-image: radial-gradient(circle at 50% 36%, #000 0%, transparent 72%);
                 mask-image: radial-gradient(circle at 50% 36%, #000 0%, transparent 72%);
@@ -102,7 +151,7 @@
     .icon-btn {
         width: 48px; height: 48px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
-        background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; color: #fff; cursor: pointer;
+        background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; color: var(--text-main); cursor: pointer;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         transition: transform .15s ease, background .2s, border-color .2s;
     }
@@ -120,12 +169,12 @@
         content: '۞'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
         color: var(--accent2); opacity: .6; font-family: 'Amiri', serif; font-size: 15px; pointer-events: none; z-index: 1;
     }
-    select {
-        width: 100%; padding: 14px 38px 14px 38px; appearance: none; background: transparent; border: none; color: #fff;
-        font-family: 'Amiri', serif; font-size: 16.5px; font-weight: 700; cursor: pointer;
-        text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; direction: rtl;
+    #dhikrSelect { display: none; }   /* the list of adhkar; shown through the picker sheet */
+    .dhikr-picker {
+        width: 100%; min-height: 48px; padding: 12px 38px; background: transparent; border: none; color: var(--text-main);
+        font-family: 'Amiri', serif; font-size: 16.5px; font-weight: 700; cursor: pointer; line-height: 1.3;
+        text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; display: block;
     }
-    select option { background: #0f2a22; color: #fff; text-align: right; font-family: 'Tajawal', sans-serif; }
     .select-arrow { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: .75; font-size: 11px; color: var(--accent2); }
 
     /* ================= MAIN AREA ================= */
@@ -148,7 +197,12 @@
 
     .progress-wrapper circle { fill: none; stroke-linecap: round; }
     .bead-circle { stroke: var(--accent2); stroke-width: 3; opacity: .28; stroke-dasharray: 1.6 11.4; }  /* tasbih beads */
-    .bg-circle { stroke: rgba(255,255,255,0.06); stroke-width: 10; }
+    .bg-circle { stroke: var(--ring-track); stroke-width: 10; }
+    /* ring colours follow the theme */
+    #gradEmerald stop:first-child, #gradient stop:first-child { stop-color: var(--ring-a); }
+    #gradEmerald stop:last-child, #gradient stop:last-child { stop-color: var(--ring-b); }
+    #gradComplete stop:first-child { stop-color: var(--ring-done-a); }
+    #gradComplete stop:last-child { stop-color: var(--ring-done-b); }
     .fg-circle {
         stroke: url(#gradEmerald); stroke-width: 10;
         filter: drop-shadow(0 0 7px var(--primary-glow));
@@ -171,23 +225,23 @@
     .count-label { font-size: 12px; color: var(--text-muted); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 6px; }
     .count-number {
         font-size: clamp(62px, 16vw, 94px); font-weight: 800; line-height: 1; letter-spacing: -2px;
-        background: linear-gradient(180deg, #ffffff, #9fe7cf);
+        background: var(--count-grad);
         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-        text-shadow: 0 6px 28px rgba(0,0,0,0.45);
+        text-shadow: var(--count-shadow);
     }
     .progress-wrapper.tick .count-number { animation: numPop .32s cubic-bezier(.34,1.56,.64,1); }
     @keyframes numPop { 0% { transform:scale(1); } 45% { transform:scale(1.14); } 100% { transform:scale(1); } }
     .target-pill {
         margin-top: 12px; font-size: 13px; font-weight: 600;
-        background: rgba(56,189,248,0.12); color: var(--accent2-bright);
-        border: 1px solid rgba(56,189,248,0.25); padding: 5px 14px; border-radius: 999px;
+        background: var(--pill-bg); color: var(--pill-ink);
+        border: 1px solid var(--pill-bd); padding: 5px 14px; border-radius: 999px;
     }
 
     .mini-reset-btn, .mini-power-btn {
         position: absolute; bottom: 5%; width: 46px; height: 46px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20;
         backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        background: rgba(15, 23, 42, 0.72); box-shadow: 0 6px 16px rgba(0,0,0,0.35); transition: transform .15s, background .2s;
+        background: var(--mini-bg); box-shadow: 0 6px 16px rgba(0,0,0,0.2); transition: transform .15s, background .2s;
     }
     .mini-reset-btn { left: 1%; border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; }
     .mini-power-btn { right: 1%; border: 1px solid var(--primary-glow); color: var(--primary-bright); }
@@ -198,7 +252,7 @@
     /* ================= VIRTUE CARD ================= */
     .hadith-card {
         width: 100%; position: relative; overflow: hidden;
-        background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+        background: linear-gradient(180deg, var(--glass-2), var(--glass));
         border: 1px solid var(--glass-border); border-radius: 22px; padding: 22px 20px 20px;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); text-align: center; flex-shrink: 0;
         margin-top: 22px; margin-bottom: calc(34px + env(safe-area-inset-bottom));
@@ -209,11 +263,11 @@
         color: var(--accent2); opacity: .5; font-family: 'Amiri', serif; font-size: 15px;
     }
     .hadith-title { font-size: 12px; color: var(--accent2-bright); letter-spacing: .16em; text-transform: uppercase; margin: 6px 0 10px; font-weight: 700; }
-    .hadith-text { font-family: 'Amiri', serif; font-size: 18px; line-height: 1.95; color: #e7eee9; }
+    .hadith-text { font-family: 'Amiri', serif; font-size: 18px; line-height: 1.95; color: var(--text-main); }
 
     /* ================= MODALS & FORMS ================= */
     .modal-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        position: fixed; inset: 0; background: var(--modal-dim); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
         z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
         display: flex; align-items: flex-end; justify-content: center;
     }
@@ -221,58 +275,63 @@
 
     .modal-content {
         width: 100%; max-width: 480px;
-        background: linear-gradient(180deg, #14233a, #0c1626); border-radius: 26px 26px 0 0;
-        padding: 24px; max-height: 85vh; overflow-y: auto;
+        background: var(--sheet-bg); border-radius: 28px 28px 0 0; color: var(--text-main);
+        backdrop-filter: blur(36px); -webkit-backdrop-filter: blur(36px);
+        padding: 22px 18px; max-height: 85vh; overflow-y: auto;
         transform: translateY(100%); transition: 0.34s cubic-bezier(0.2, 0.8, 0.2, 1);
         border-top: 1px solid var(--glass-border); padding-bottom: max(24px, env(safe-area-inset-bottom));
-        box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
+        box-shadow: 0 -12px 50px rgba(0,0,0,0.25);
     }
-    .modal-content::before { content:""; display:block; width:42px; height:5px; background:var(--glass-border); border-radius:999px; margin:-8px auto 16px; }
+    .modal-content::before { content:""; display:block; width:38px; height:4px; background:rgba(150,150,150,.35); border-radius:10px; margin:-10px auto 14px; }
     .modal-overlay.active .modal-content, .modal-overlay.open .modal-content, .modal-overlay.show .modal-content { transform: translateY(0); }
 
-    #confirmResetModal, #confirmResetStatsModal { align-items: center; background: rgba(0,0,0,0.5); }
+    #confirmResetModal, #confirmResetStatsModal { align-items: center; }
     #confirmResetModal .modal-content, #confirmResetStatsModal .modal-content {
         border-radius: 24px; transform: scale(0.9); transition: 0.2s; max-width: 320px; text-align: center;
-        background: rgba(20, 35, 58, 0.96); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+        background: var(--sheet-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
         box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
     #confirmResetModal .modal-content::before, #confirmResetStatsModal .modal-content::before { display:none; }
     #confirmResetModal.active .modal-content, #confirmResetStatsModal.active .modal-content { transform: scale(1); }
 
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-    .modal-title { font-size: 20px; font-weight: 800; }
-    .close-btn { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-muted); font-size: 18px; cursor: pointer; width: 34px; height: 34px; border-radius: 50%; line-height: 1; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin: 0 -18px 16px; padding: 0 18px 14px; border-bottom: 1px solid var(--hairline); }
+    .modal-title { font-size: 1.35rem; font-weight: 800; }
+    .close-btn { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main); font-size: 16px; cursor: pointer; width: 36px; height: 36px; border-radius: 12px; line-height: 1; display: grid; place-items: center; }
 
-    .setting-group { margin-bottom: 22px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 16px; }
-    .group-title { font-size: 13px; color: var(--accent2-bright); margin-bottom: 14px; font-weight: 700; display: block; letter-spacing: .08em; }
-    .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .setting-label { font-size: 16px; }
+    /* settings: sections with a small label and rows on cards (same as the other pages) */
+    .setting-group { margin-bottom: 20px; }
+    .group-title { font-size: 10.5px; color: var(--text-muted); margin: 0 0 8px; padding: 0 4px; font-weight: 800; display: block; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px;
+        padding: 12px 14px; border-radius: 16px; background: var(--field-bg); border: 1px solid var(--glass-border); }
+    .setting-label { font-size: 14.5px; font-weight: 700; }
 
-    .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex: none; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; inset: 0; background-color: #334155; border-radius: 34px; transition: .4s; }
-    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s; }
-    input:checked + .slider { background-color: var(--primary); }
+    .slider { position: absolute; inset: 0; background-color: rgba(150,150,150,.3); border-radius: 34px; transition: .35s; box-shadow: inset 0 1px 3px rgba(0,0,0,.12); }
+    .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: transform .35s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 1px 6px rgba(0,0,0,.22); }
+    input:checked + .slider { background-color: var(--primary); box-shadow: 0 2px 10px var(--primary-glow); }
     input:checked + .slider:before { transform: translateX(22px); }
 
-    input[type=number], input[type=text], input[type=time] { background: #1e2c44; border: 1px solid var(--glass-border); color: white; padding: 11px; border-radius: 10px; font-size: 16px; width: 100%; box-sizing: border-box; }
+    input[type=number], input[type=text], input[type=time], input[type=search] { background: var(--field-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 12px 14px; border-radius: 14px; font-size: 15px; width: 100%; box-sizing: border-box; font-family: inherit; }
     input[type=number] { width: 80px; text-align: center; }
-    input:focus { border-color: var(--primary); }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--accent2-glow); }
+    input::placeholder { color: var(--text-muted); opacity: .8; }
 
-    .btn-action { background: var(--primary); color: #04140d; border: none; padding: 11px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; transition: 0.2s; }
+    .btn-action { background: var(--primary); color: var(--on-primary); border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; transition: 0.2s; font-family: inherit; }
+    .btn-muted { background: var(--muted-btn) !important; color: var(--muted-btn-ink) !important; }
     .btn-action:active { transform: scale(0.98); opacity: 0.9; }
     .reset-btn-full { width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
     .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-    .stats-table td { padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: var(--text-muted); }
+    .stats-table td { padding: 9px 0; border-bottom: 1px solid var(--hairline); font-size: 14px; color: var(--text-muted); }
     .stats-table td:first-child { padding-left: 10px; white-space: normal; word-break: break-word; line-height: 1.5; }
-    .stats-table td:last-child { text-align: left; color: white; font-weight: bold; font-family: sans-serif; white-space: nowrap; }
-    .total-row { display: flex; justify-content: space-between; font-weight: bold; color: var(--accent2-bright); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 16px; }
+    .stats-table td:last-child { text-align: left; color: var(--text-main); font-weight: bold; font-family: sans-serif; white-space: nowrap; }
+    .total-row { display: flex; justify-content: space-between; font-weight: bold; color: var(--accent2-bright); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); font-size: 16px; }
 
-    .meaning-item { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .meaning-item { margin-bottom: 20px; border-bottom: 1px solid var(--hairline); padding-bottom: 15px; }
     .meaning-item:last-child { border: none; }
     .meaning-head { color: var(--primary-bright); font-weight: bold; font-size: 16px; margin-bottom: 5px; font-family: 'Amiri', serif; }
-    .meaning-desc { font-size: 14px; color: #e2e8f0; line-height: 1.6; }
+    .meaning-desc { font-size: 14px; color: var(--text-main); opacity: .9; line-height: 1.6; }
 
     /* ================= OVERLAYS ================= */
     #powerModeOverlay {
@@ -302,6 +361,38 @@
     .about-section { text-align: center; padding: 10px 0; }
     .app-version { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
     .dev-credit { font-family: 'Amiri', serif; font-size: 15px; color: var(--accent2-bright); letter-spacing: .5px; font-weight: bold; }
+
+    /* ===== theme selector (same as the audio page) ===== */
+    .theme-pill-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 5px; background: var(--field-bg); border-radius: 18px; border: 1px solid var(--glass-border); }
+    .theme-pill { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 6px 10px; border-radius: 14px; border: none; background: transparent;
+        color: var(--text-muted); font-family: 'Tajawal', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: .25s cubic-bezier(.22,1,.36,1); }
+    .theme-pill-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--glass-border); transition: .25s; }
+    .theme-pill-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .theme-pill.active { color: var(--primary); }
+    .theme-pill.active .theme-pill-icon { background: var(--primary); box-shadow: 0 4px 14px var(--primary-glow); }
+    .theme-pill.active .theme-pill-icon svg { stroke: #fff; }
+    .theme-pill:active { transform: scale(.93); }
+
+    /* ===== dhikr picker sheet (same look as the reciter / surah lists) ===== */
+    #dhikrSheet .modal-content { height: 86vh; max-height: 86vh; display: flex; flex-direction: column; overflow: hidden; }
+    .sheet-count { display: inline-block; margin-inline-start: 8px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 800; vertical-align: middle;
+        background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); }
+    .dhikr-search { flex-shrink: 0; margin-bottom: 10px; }
+    .dhikr-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; overscroll-behavior: contain; }
+    .dhikr-group-label { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; color: var(--text-muted); padding: 10px 4px 2px; opacity: .85; }
+    .dhikr-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 14px; background: var(--field-bg); border: 1px solid var(--glass-border);
+        color: var(--text-main); cursor: pointer; transition: .2s; text-align: start; }
+    .dhikr-item:active { transform: scale(.98); opacity: .85; }
+    .dhikr-item.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 18px var(--primary-glow); }
+    .dhikr-num { flex: none; min-width: 40px; height: 36px; padding: 0 6px; border-radius: 11px; display: grid; place-items: center; font-size: 13px; font-weight: 800;
+        background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); font-variant-numeric: tabular-nums; }
+    .dhikr-item.active .dhikr-num { background: rgba(255,255,255,.22); color: #fff; }
+    .dhikr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .dhikr-title { font-family: 'Amiri', serif; font-size: 16px; font-weight: 700; line-height: 1.45;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .dhikr-sub { font-size: 11.5px; font-weight: 600; color: var(--text-muted); }
+    .dhikr-item.active .dhikr-sub { color: rgba(255,255,255,.85); }
+    .dhikr-empty { text-align: center; color: var(--text-muted); padding: 24px 0; }
 
     @media (prefers-reduced-motion: reduce) {
         .top-bar, .counter-anchor, .hadith-card,
@@ -337,7 +428,8 @@
         </div>
 
         <div class="dhikr-select-wrapper">
-            <select id="dhikrSelect" onchange="changeDhikr()">
+            <!-- the adhkar list (data); chosen through the picker sheet below -->
+            <select id="dhikrSelect" onchange="changeDhikr()" aria-hidden="true" tabindex="-1">
                 <option value="subhan">سبحان الله</option>
                 <option value="hamd">الحمد لله</option>
                 <option value="tahleel">لا إله إلا الله</option>
@@ -347,8 +439,17 @@
                 <option value="istighfar">أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه</option>
                 <option value="subhanwabihamdih">سبحان الله وبحمده</option>
                 <option value="salawat">اللهم صلَّ على سيدنا محمد</option>
+                <option value="subhanazeem">سبحان الله وبحمده، سبحان الله العظيم</option>
+                <option value="ghars">سبحان الله العظيم وبحمده</option>
+                <option value="baqiyat">سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</option>
+                <option value="adadkhalqih">سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته</option>
+                <option value="radeetu">رضيت بالله ربًّا، وبالإسلام دينًا، وبمحمد ﷺ رسولًا</option>
+                <option value="tawbah">أستغفر الله وأتوب إليه</option>
+                <option value="dhannoon">لا إله إلا أنت سبحانك إني كنت من الظالمين</option>
+                <option value="hayyqayyum">يا حي يا قيوم برحمتك أستغيث</option>
             </select>
-            <span class="select-arrow">▼</span>
+            <button type="button" class="dhikr-picker" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">سبحان الله</button>
+            <span class="select-arrow" aria-hidden="true">▼</span>
         </div>
 
         <div class="icon-btn" onclick="toggleSettings()" title="الإعدادات" data-i18n-title="settings">
@@ -414,6 +515,24 @@
         </div>
 
         <div class="setting-group">
+            <span class="group-title" data-i18n="azkar_theme">المظهر</span>
+            <div class="theme-pill-selector">
+                <button type="button" class="theme-pill" data-theme-swatch="light" onclick="setTheme('light')">
+                    <span class="theme-pill-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg></span>
+                    <span data-i18n="theme_light">فاتح</span>
+                </button>
+                <button type="button" class="theme-pill" data-theme-swatch="dark" onclick="setTheme('dark')">
+                    <span class="theme-pill-icon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+                    <span data-i18n="theme_dark">داكن</span>
+                </button>
+                <button type="button" class="theme-pill" data-theme-swatch="sepia" onclick="setTheme('sepia')">
+                    <span class="theme-pill-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                    <span data-i18n="theme_sepia">عسلي</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-group">
             <span class="group-title">عام</span>
             <div class="setting-row">
                 <span class="setting-label" data-i18n="masbaha_daily_target">الهدف اليومي</span>
@@ -475,6 +594,19 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="dhikrSheet" onclick="if(event.target===this) closeDhikrSheet()">
+    <div class="modal-content" role="dialog" aria-labelledby="dhikrSheetTitle">
+        <div class="modal-header">
+            <span class="modal-title"><span id="dhikrSheetTitle" data-i18n="masbaha_pick_dhikr">اختر الذكر</span><span class="sheet-count" id="dhikrSheetCount"></span></span>
+            <button class="close-btn" onclick="closeDhikrSheet()" aria-label="إغلاق" data-i18n-aria="close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="dhikr-search">
+            <input type="search" id="dhikrSearch" placeholder="ابحث عن ذكر..." data-i18n-placeholder="masbaha_search" autocomplete="off" enterkeyhint="search">
+        </div>
+        <div class="dhikr-list" id="dhikrList" role="listbox"></div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="meaningsModal" onclick="if(event.target===this) toggleMeanings()">
     <div class="modal-content">
         <div class="modal-header">
@@ -527,7 +659,7 @@
         </p>
         <div style="display:flex; gap:10px;">
             <button class="btn-action" style="background:#ef4444; color:#fff;" onclick="confirmResetCounter()" data-i18n="masbaha_yes_reset">نعم، تصفير</button>
-            <button class="btn-action" style="background:#334155; color:white;" onclick="closeResetModal()" data-i18n="cancel">إلغاء</button>
+            <button class="btn-action btn-muted" onclick="closeResetModal()" data-i18n="cancel">إلغاء</button>
         </div>
     </div>
 </div>
@@ -542,7 +674,7 @@
         </p>
         <div style="display:flex; gap:10px;">
             <button class="btn-action" style="background:#ef4444; color:#fff;" onclick="confirmResetStats()" data-i18n="masbaha_yes_clear">نعم، مسح الكل</button>
-            <button class="btn-action" style="background:#334155; color:white;" onclick="closeResetStatsModal()" data-i18n="cancel">إلغاء</button>
+            <button class="btn-action btn-muted" onclick="closeResetStatsModal()" data-i18n="cancel">إلغاء</button>
         </div>
     </div>
 </div>
@@ -554,8 +686,18 @@
     // --- Data ---
     const defaultTargets = {
         subhan: 33, hamd: 33, tahleel: 33, takbeer: 33, hawqala: 100,
-        istighfar: 100, wahdahu: 100, subhanwabihamdih: 100, salawat: 100
+        istighfar: 100, wahdahu: 100, subhanwabihamdih: 100, salawat: 100,
+        subhanazeem: 100, ghars: 100, baqiyat: 100, adadkhalqih: 3,
+        radeetu: 3, tawbah: 100, dhannoon: 100, hayyqayyum: 33
     };
+
+    // how the picker groups the adhkar (custom ones are listed last)
+    const DHIKR_GROUPS = [
+        { key: 'masbaha_group_tasbeeh', label: 'التسبيح والتحميد', ids: ['subhan', 'hamd', 'subhanwabihamdih', 'subhanazeem', 'ghars', 'adadkhalqih', 'baqiyat'] },
+        { key: 'masbaha_group_tahleel', label: 'التهليل والتكبير', ids: ['tahleel', 'takbeer', 'wahdahu', 'hawqala', 'radeetu'] },
+        { key: 'masbaha_group_istighfar', label: 'الاستغفار والدعاء', ids: ['istighfar', 'tawbah', 'dhannoon', 'hayyqayyum'] },
+        { key: 'masbaha_group_salawat', label: 'الصلاة على النبي ﷺ', ids: ['salawat'] }
+    ];
 
     const hints = {
         subhan: `قال ﷺ: «أحب الكلام إلى الله أربع: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر»`,
@@ -566,7 +708,15 @@
         istighfar: `قال ﷺ: «منْ لَزِم الاسْتِغْفَار، جَعَلَ اللَّه لَهُ مِنْ كُلِّ ضِيقٍ مخْرجًا، ومنْ كُلِّ هَمٍّ فَرجًا، وَرَزَقَهُ مِنْ حيْثُ لاَ يَحْتَسِبُ»`,
         wahdahu: `من قالها 100 مرة: كانت له عدل عشر رقاب، وكتبت له مائة حسنة، ومحيت عنه مائة سيئة.`,
         subhanwabihamdih: `«من قال: سبحان الله وبحمده، في يوم مائة مرة، حُطَّت خطاياه وإن كانت مثل زبد البحر»`,
-        salawat: `«مَن صلَّى عليَّ صلاةً واحدةً صلَّى اللهُ عليه بها عشرًا»`
+        salawat: `«مَن صلَّى عليَّ صلاةً واحدةً صلَّى اللهُ عليه بها عشرًا»`,
+        subhanazeem: `قال ﷺ: «كلمتان خفيفتان على اللسان، ثقيلتان في الميزان، حبيبتان إلى الرحمن: سبحان الله وبحمده، سبحان الله العظيم» (متفق عليه)`,
+        ghars: `قال ﷺ: «من قال: سبحان الله العظيم وبحمده، غُرست له نخلة في الجنة» (رواه الترمذي)`,
+        baqiyat: `قال ﷺ: «لأن أقول: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر، أحبُّ إليَّ مما طلعت عليه الشمس» (رواه مسلم)`,
+        adadkhalqih: `قال ﷺ لجويرية رضي الله عنها: «لقد قلتُ بعدكِ أربع كلمات ثلاث مرات، لو وُزنت بما قلتِ منذ اليوم لوزنتهن» (رواه مسلم)`,
+        radeetu: `قال ﷺ: «من قال: رضيت بالله ربًّا، وبالإسلام دينًا، وبمحمد رسولًا، وجبت له الجنة» (رواه أبو داود)`,
+        tawbah: `قال ﷺ: «يا أيها الناس، توبوا إلى الله، فإني أتوب في اليوم إليه مائة مرة» (رواه مسلم)`,
+        dhannoon: `قال ﷺ: «دعوة ذي النون إذ دعا وهو في بطن الحوت: لا إله إلا أنت سبحانك إني كنت من الظالمين، فإنه لم يدعُ بها رجل مسلم في شيء قط إلا استجاب الله له» (رواه الترمذي)`,
+        hayyqayyum: `كان النبي ﷺ إذا كربه أمر قال: «يا حي يا قيوم، برحمتك أستغيث» (رواه الترمذي)`
     };
 
     const customVerse = `«وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُمْ مَغْفِرَةً وَأَجْرًا عَظِيمًا»`;
@@ -613,6 +763,13 @@
     function init() {
         loadCustomDhikrs();
         document.getElementById("dhikrSelect").value = currentDhikr;
+        if (document.getElementById("dhikrSelect").value !== currentDhikr) {   // a removed entry: start at the first
+            currentDhikr = document.getElementById("dhikrSelect").options[0].value;
+            document.getElementById("dhikrSelect").value = currentDhikr;
+        }
+        updatePickerLabel();
+        markTheme(document.documentElement.getAttribute('data-theme'));
+        document.getElementById("dhikrSearch").addEventListener('input', renderDhikrList);
 
         const savedSound = localStorage.getItem("soundPref");
         const savedVibrate = localStorage.getItem("vibratePref");
@@ -718,8 +875,115 @@
     function changeDhikr() {
         currentDhikr = document.getElementById("dhikrSelect").value;
         localStorage.setItem("currentDhikr", currentDhikr);
+        updatePickerLabel();
         loadCounter();
     }
+
+    // ===== Dhikr picker sheet =====
+    function tr(key, fallback, params) {
+        if (window.I18n && typeof window.t === 'function') {
+            const v = t(key, params);
+            if (v && v !== key) return v;
+        }
+        let out = fallback;
+        Object.keys(params || {}).forEach(k => { out = out.replace('{' + k + '}', params[k]); });
+        return out;
+    }
+    function updatePickerLabel() {
+        const sel = document.getElementById("dhikrSelect");
+        const opt = sel.selectedOptions[0] || sel.options[0];
+        const btn = document.getElementById("dhikrPickerBtn");
+        if (opt && btn) { btn.textContent = opt.text; btn.title = opt.text; }
+    }
+    // search ignores diacritics, tatweel and alef/yeh/teh-marbuta forms
+    function normAr(x) {
+        return String(x || '').toLowerCase()
+            .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+            .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+            .replace(/[،,.«»"']/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+    function dhikrTarget(id) {
+        return parseInt(localStorage.getItem("target_" + id)) || (id.startsWith("custom_") ? 33 : (defaultTargets[id] || 33));
+    }
+    function renderDhikrList() {
+        const sel = document.getElementById("dhikrSelect");
+        const list = document.getElementById("dhikrList");
+        const q = normAr(document.getElementById("dhikrSearch").value);
+        const byId = {};
+        for (const o of sel.options) byId[o.value] = o.text;
+        const groups = DHIKR_GROUPS.map(g => ({ label: tr(g.key, g.label), ids: g.ids.filter(id => byId[id] != null) }));
+        const listed = new Set(groups.flatMap(g => g.ids));
+        const rest = Object.keys(byId).filter(id => !listed.has(id));
+        if (rest.length) groups.push({ label: tr('masbaha_group_custom', 'أذكاري الخاصة'), ids: rest });
+
+        list.innerHTML = '';
+        let shown = 0;
+        groups.forEach(g => {
+            const ids = g.ids.filter(id => !q || normAr(byId[id]).includes(q));
+            if (!ids.length) return;
+            const lab = document.createElement('div');
+            lab.className = 'dhikr-group-label'; lab.textContent = g.label;
+            list.appendChild(lab);
+            ids.forEach(id => {
+                shown++;
+                const active = id === currentDhikr;
+                const row = document.createElement('div');
+                row.className = 'dhikr-item' + (active ? ' active' : '');
+                row.setAttribute('role', 'option'); row.tabIndex = 0;
+                if (active) row.setAttribute('aria-selected', 'true');
+                const target = dhikrTarget(id);
+                const num = document.createElement('span');
+                num.className = 'dhikr-num'; num.textContent = target;
+                num.title = tr('masbaha_target', 'الهدف: {target}', { target });
+                const main = document.createElement('div'); main.className = 'dhikr-main';
+                const ti = document.createElement('span'); ti.className = 'dhikr-title'; ti.textContent = byId[id];
+                const sub = document.createElement('span'); sub.className = 'dhikr-sub';
+                sub.textContent = tr('masbaha_row_sub', 'العداد {count} · المجموع {total}', {
+                    count: (parseInt(localStorage.getItem("counter_" + id)) || 0).toLocaleString('en-US'),
+                    total: (parseInt(localStorage.getItem("total_" + id)) || 0).toLocaleString('en-US')
+                });
+                main.appendChild(ti); main.appendChild(sub);
+                row.appendChild(num); row.appendChild(main);
+                const pick = () => {
+                    sel.value = id; changeDhikr(); closeDhikrSheet();
+                };
+                row.onclick = pick;
+                row.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+                list.appendChild(row);
+            });
+        });
+        if (!shown) list.innerHTML = '<div class="dhikr-empty">' + tr('audio_no_results', 'لا توجد نتائج') + '</div>';
+        document.getElementById("dhikrSheetCount").textContent = sel.options.length;
+    }
+    function openDhikrSheet() {
+        const m = document.getElementById("dhikrSheet");
+        if (m.classList.contains("open")) return;
+        document.getElementById("dhikrSearch").value = '';
+        renderDhikrList();
+        m.classList.add("open");
+        if (window.BackClose) BackClose.opened(() => m.classList.remove("open"));
+        setTimeout(() => { const a = document.querySelector('#dhikrList .active'); if (a) a.scrollIntoView({ block: 'center' }); }, 60);
+    }
+    function closeDhikrSheet() {
+        const m = document.getElementById("dhikrSheet");
+        if (m.classList.contains("open") && window.BackClose) BackClose.closed();
+        m.classList.remove("open");
+    }
+
+    // ===== Theme (shared with the other pages through themeMode) =====
+    function markTheme(mode) {
+        document.querySelectorAll('[data-theme-swatch]').forEach(b => b.classList.toggle('active', b.getAttribute('data-theme-swatch') === mode));
+    }
+    function setTheme(mode) {
+        document.documentElement.setAttribute('data-theme', mode);
+        try { localStorage.setItem('themeMode', mode); } catch (e) {}
+        markTheme(mode);
+    }
+    window.addEventListener('storage', e => {
+        if (e.key === 'themeMode' && ['light', 'dark', 'sepia'].includes(e.newValue)) {
+            document.documentElement.setAttribute('data-theme', e.newValue); markTheme(e.newValue);
+        }
+    });
 
     function saveTarget() {
         const newTarget = document.getElementById("targetInput").value;

@@ -177,6 +177,14 @@ export default {
   'masbaha_confirm_title': 'Confirm Action',
   'masbaha_power_hint': 'Long press to exit',
   'masbaha_long_exit': 'LONG_PRESS_TO_EXIT',
+  'masbaha_pick_dhikr': 'Choose a dhikr',
+  'masbaha_search': 'Search adhkar...',
+  'masbaha_group_tasbeeh': 'Glorification & praise',
+  'masbaha_group_tahleel': 'Tahlil & takbir',
+  'masbaha_group_istighfar': 'Forgiveness & supplication',
+  'masbaha_group_salawat': 'Salawat upon the Prophet ﷺ',
+  'masbaha_group_custom': 'My adhkar',
+  'masbaha_row_sub': 'Count {count} · Total {total}',
 
   // Azkar
   'azkar_title': 'Adhkar — Zad Al-Muslim',

@@ -177,6 +177,14 @@ export default {
   'masbaha_confirm_title': 'تأكيد العملية',
   'masbaha_power_hint': 'اضغط مطولاً للخروج',
   'masbaha_long_exit': 'LONG_PRESS_TO_EXIT',
+  'masbaha_pick_dhikr': 'اختر الذكر',
+  'masbaha_search': 'ابحث عن ذكر...',
+  'masbaha_group_tasbeeh': 'التسبيح والتحميد',
+  'masbaha_group_tahleel': 'التهليل والتكبير',
+  'masbaha_group_istighfar': 'الاستغفار والدعاء',
+  'masbaha_group_salawat': 'الصلاة على النبي ﷺ',
+  'masbaha_group_custom': 'أذكاري الخاصة',
+  'masbaha_row_sub': 'العداد {count} · المجموع {total}',
 
   // Azkar
   'azkar_title': 'الأذكار — زاد المسلم',
