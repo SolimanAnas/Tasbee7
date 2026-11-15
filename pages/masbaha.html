@@ -255,7 +255,7 @@
         background: linear-gradient(180deg, var(--glass-2), var(--glass));
         border: 1px solid var(--glass-border); border-radius: 22px; padding: 22px 20px 20px;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); text-align: center; flex-shrink: 0;
-        margin-top: 22px; margin-bottom: calc(34px + env(safe-area-inset-bottom));
+        margin-top: 22px; margin-bottom: calc(56px + env(safe-area-inset-bottom));   /* clear of the screen edge and the gesture bar */
         animation: mRise .6s .2s cubic-bezier(.22,1,.36,1) both;
     }
     .hadith-card::before {
@@ -341,12 +341,18 @@
     #powerModeOverlay.active { display: flex; }
     #powerCount { font-size: clamp(100px, 30vw, 200px); color: #2a3340; font-weight: 800; user-select: none; }
     #powerHint { position: absolute; bottom: 50px; color: #2a3340; font-size: 14px; }
+    /* long-press-to-exit ring: hidden until a press is held, then it grows around the finger */
     #exitCircle {
-        position: absolute; width: 100px; height: 100px; border-radius: 50%;
-        border: 4px solid #475569; opacity: 0.5; transform: scale(0.5);
-        transition: transform 3s linear, border-color 0.5s; pointer-events: none;
+        position: fixed; left: 0; top: 0; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%;
+        border: 3px solid #475569; opacity: 0; pointer-events: none;
+        transform: translate(var(--x, 50vw), var(--y, 50vh)) scale(.6);
+        transition: opacity .2s ease, transform .2s ease;
     }
-    #exitCircle.holding { opacity: 1; transform: scale(1.5); border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+    #exitCircle.holding {
+        opacity: .95; border-color: #ef4444; box-shadow: 0 0 22px rgba(239, 68, 68, 0.3);
+        transform: translate(var(--x, 50vw), var(--y, 50vh)) scale(1.7);
+        transition: opacity .2s ease, transform var(--grow, 2.75s) linear, border-color var(--grow, 2.75s) ease-in, box-shadow var(--grow, 2.75s) ease-in;
+    }
 
     #toast {
         position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-120px);
@@ -409,6 +415,7 @@
      onclick="handlePowerTap()"
      ontouchstart="handleTouchStart(event)"
      ontouchend="handleTouchEnd(event)"
+     ontouchcancel="handleTouchEnd(event)"
      onmousedown="handleTouchStart(event)"
      onmouseup="handleTouchEnd(event)"
      onmouseleave="handleTouchEnd(event)">
@@ -1022,30 +1029,59 @@
     }
 
     // --- Power Saving Mode ---
-    let holdTimer;
-    let isHolding = false;
+    // A quick tap counts. Holding shows a ring around the finger after
+    // HOLD_SHOW ms; holding HOLD_EXIT ms in all leaves the mode. A press held
+    // long enough to show the ring doesn't count as a tap when released.
+    const HOLD_SHOW = 250, HOLD_EXIT = 3000;
+    let holdTimer, showTimer, pressStart = 0, isHolding = false, lastTouch = 0, suppressClickUntil = 0;
     function enterPowerMode() {
         document.getElementById("powerModeOverlay").classList.add("active");
         if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(err => console.log(err));
     }
-    function handlePowerTap() { if (!isHolding) increment(); }
+    function handlePowerTap() { if (Date.now() >= suppressClickUntil) increment(); }
+    function pressPoint(e) {
+        const p = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
+        const r = 80;   // keep the grown ring on screen near the edges
+        return {
+            x: Math.min(Math.max(p.clientX, r), window.innerWidth - r),
+            y: Math.min(Math.max(p.clientY, r), window.innerHeight - r)
+        };
+    }
     function handleTouchStart(e) {
-        isHolding = true;
+        if (e.type === 'touchstart') lastTouch = Date.now();
+        else if (Date.now() - lastTouch < 800) return;    // the mouse events a browser adds after a touch
+        if (isHolding) return;
+        isHolding = true; pressStart = Date.now();
         const circle = document.getElementById("exitCircle");
+        const pt = pressPoint(e);
         circle.classList.remove("holding");
-        void circle.offsetWidth;
-        circle.classList.add("holding");
-        holdTimer = setTimeout(() => exitPowerMode(), 3000);
+        circle.style.setProperty('--x', pt.x + 'px');
+        circle.style.setProperty('--y', pt.y + 'px');
+        circle.style.setProperty('--grow', (HOLD_EXIT - HOLD_SHOW) / 1000 + 's');
+        clearTimeout(showTimer); clearTimeout(holdTimer);
+        showTimer = setTimeout(() => { void circle.offsetWidth; circle.classList.add("holding"); }, HOLD_SHOW);
+        holdTimer = setTimeout(() => exitPowerMode(), HOLD_EXIT);
     }
     function handleTouchEnd(e) {
+        if (e && e.type !== 'touchend' && Date.now() - lastTouch < 800) return;
+        if (!isHolding) return;
         isHolding = false;
-        clearTimeout(holdTimer);
+        clearTimeout(holdTimer); clearTimeout(showTimer);
+        if (Date.now() - pressStart >= HOLD_SHOW) suppressClickUntil = Date.now() + 500;
         document.getElementById("exitCircle").classList.remove("holding");
     }
     function exitPowerMode() {
+        isHolding = false;
+        clearTimeout(showTimer);
+        document.getElementById("exitCircle").classList.remove("holding");
         document.getElementById("powerModeOverlay").classList.remove("active");
-        navigator.vibrate([50,50,50]);
+        suppressClickUntil = Date.now() + 800;   // the finger lifting must not tap the counter underneath
+        if (navigator.vibrate) navigator.vibrate([50,50,50]);
     }
+    // swallow the click that follows a long press (on the overlay or, after exit, on the page)
+    document.addEventListener('click', e => {
+        if (Date.now() < suppressClickUntil) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
 
     // --- Stats ---
     function renderStats() {
