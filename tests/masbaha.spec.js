@@ -97,15 +97,20 @@ test.describe('masbaha', () => {
     await expect(page.locator('#count')).toHaveText(String(before + 1));
   });
 
-  test('the ring shows the round, the progress in it and the lit beads', async ({ page }) => {
+  test('the ring shows the round, the progress in it and where you are', async ({ page }) => {
     await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'subhan'); localStorage.setItem('target_subhan', '33'); localStorage.setItem('counter_subhan', '45'); } catch (e) {} });
     await open(page, 'light');
     await expect(page.locator('#count')).toHaveText('45');
     await expect(page.locator('#countLabel')).toHaveText('الدورة 2');
     await expect(page.locator('#roundProgress')).toHaveText('12 من 33');
-    await expect(page.locator('#beads .bead')).toHaveCount(33);
-    await expect(page.locator('#beads .bead.lit')).toHaveCount(12);
-    await expect(page.locator('#beads .bead.now')).toHaveCount(1);
+    // 12 of 33: the arc covers 12/33 of the circle and the knob sits at its end (clockwise from the top)
+    const ring = await page.evaluate(() => {
+      const c = document.getElementById('progressCircle'), k = document.getElementById('ringKnob');
+      return { offset: parseFloat(c.style.strokeDashoffset), x: +k.getAttribute('cx'), y: +k.getAttribute('cy'), hidden: k.hasAttribute('hidden') || getComputedStyle(k).display === 'none' };
+    });
+    expect(ring.offset).toBeCloseTo(552.9 * (1 - 12 / 33), 0);
+    expect(ring.hidden).toBe(false);
+    expect(ring.x).toBeGreaterThan(100);                    // right half: clockwise
     await expect(page.locator('#dhikrText')).toHaveText('سبحان الله');
   });
 
@@ -175,6 +180,32 @@ test.describe('masbaha', () => {
     await page.click('.stats-details > summary');
     await expect(page.locator('#statsTable tr')).toHaveCount(2);
     await expect(page.locator('#statsTable tr').first()).toContainText('سبحان الله');
+  });
+
+  test('the arrows step through the adhkar in the picker order, and wrap around', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'subhan'); } catch (e) {} });
+    await open(page, 'light');
+    await page.click('[data-i18n-aria="masbaha_next"]');
+    await expect(page.locator('#dhikrText')).toHaveText('الحمد لله');
+    await page.click('[data-i18n-aria="masbaha_prev"]');
+    await page.click('[data-i18n-aria="masbaha_prev"]');
+    await expect(page.locator('#dhikrText')).toHaveText('اللهم صلَّ على سيدنا محمد');   // the last one
+    expect(await page.evaluate(() => localStorage.getItem('currentDhikr'))).toBe('salawat');
+    // the cartouche is drawn to the card's size
+    expect(await page.evaluate(() => document.getElementById('ctLinePath').getAttribute('d').length)).toBeGreaterThan(100);
+  });
+
+  test('a bookmarked dhikr is listed first in the picker', async ({ page }) => {
+    await page.addInitScript(() => { try { localStorage.setItem('currentDhikr', 'dhannoon'); } catch (e) {} });
+    await open(page, 'dark');
+    await page.click('#favBtn');
+    await expect(page.locator('#favBtn')).toHaveAttribute('aria-pressed', 'true');
+    await page.click('#dhikrPickerBtn');
+    await expect(page.locator('#dhikrList .dhikr-group-label').first()).toHaveText('المفضلة');
+    await expect(page.locator('#dhikrList .dhikr-item').first()).toContainText('من الظالمين');
+    await page.evaluate(() => closeDhikrSheet());
+    await page.click('#favBtn');
+    await expect(page.locator('#favBtn')).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('custom adhkar appear in their own group', async ({ page }) => {

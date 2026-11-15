@@ -67,7 +67,7 @@
     /* dark (default) — the app's night background, emerald + sky accents */
     :root, [data-theme="dark"] {
         --bg-0:#020617;
-        --bg-image:url('../images/Background-dark.webp'); --bg-overlay:rgba(2,6,23,.55);
+        --bg-image:url('../images/masbaha-scene-dark.webp'); --bg-overlay:rgba(2,6,23,.12);
         --primary:#10b981; --primary-bright:#34d399; --primary-glow:rgba(16,185,129,.5);
         --accent2:#38bdf8; --accent2-bright:#7dd3fc; --accent2-glow:rgba(56,189,248,.42);
         --text-main:#f1f5f9; --text-muted:#9fb0c0;
@@ -75,14 +75,15 @@
         --sheet-bg:rgba(15,23,42,.78); --field-bg:rgba(255,255,255,.06); --hairline:rgba(255,255,255,.07);
         --dots:rgba(255,255,255,.06);
         --count-grad:linear-gradient(180deg,#ffffff,#9fe7cf); --count-shadow:0 6px 28px rgba(0,0,0,.45);
-        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#7dd3fc; --ring-done-b:#0ea5e9; --ring-track:rgba(255,255,255,.06);
+        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#7dd3fc; --ring-done-b:#0ea5e9; --ring-track:rgba(255,255,255,.12);
         --pill-bg:rgba(56,189,248,.12); --pill-bd:rgba(56,189,248,.25); --pill-ink:#7dd3fc;
         --mini-bg:rgba(15,23,42,.72); --on-primary:#04140d; --modal-dim:rgba(0,0,0,.6);
+        --disc-a:rgba(30,41,70,.55); --disc-b:rgba(10,16,34,.55);
         --muted-btn:#334155; --muted-btn-ink:#fff;
     }
     [data-theme="light"] {
         --bg-0:#eef5fb;
-        --bg-image:url('../images/Background-light.webp'); --bg-overlay:rgba(255,255,255,.22);
+        --bg-image:url('../images/masbaha-scene-light.webp'); --bg-overlay:rgba(255,255,255,.04);
         --primary:#10b981; --primary-bright:#059669; --primary-glow:rgba(16,185,129,.35);
         --accent2:#0284c7; --accent2-bright:#0369a1; --accent2-glow:rgba(2,132,199,.22);
         --text-main:#0f172a; --text-muted:#475569;
@@ -90,14 +91,15 @@
         --sheet-bg:rgba(248,250,252,.82); --field-bg:rgba(15,23,42,.05); --hairline:rgba(15,23,42,.08);
         --dots:rgba(15,23,42,.06);
         --count-grad:linear-gradient(180deg,#064e3b,#10b981); --count-shadow:0 4px 18px rgba(16,185,129,.18);
-        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#38bdf8; --ring-done-b:#0284c7; --ring-track:rgba(15,23,42,.07);
+        --ring-a:#34d399; --ring-b:#059669; --ring-done-a:#38bdf8; --ring-done-b:#0284c7; --ring-track:rgba(255,255,255,.55);
         --pill-bg:rgba(2,132,199,.10); --pill-bd:rgba(2,132,199,.25); --pill-ink:#0369a1;
         --mini-bg:rgba(255,255,255,.82); --on-primary:#fff; --modal-dim:rgba(15,23,42,.3);
+        --disc-a:rgba(255,255,255,.92); --disc-b:rgba(226,236,250,.78);
         --muted-btn:rgba(15,23,42,.08); --muted-btn-ink:#0f172a;
     }
     [data-theme="sepia"] {
         --bg-0:#f3e7d1;
-        --bg-image:url('../images/background-sepia.webp'); --bg-overlay:rgba(180,140,100,.16);
+        --bg-image:url('../images/masbaha-scene-sepia.webp'); --bg-overlay:rgba(250,240,220,.06);
         --primary:#B8860B; --primary-bright:#9a6f08; --primary-glow:rgba(184,134,11,.35);
         --accent2:#8a5a14; --accent2-bright:#7a4f12; --accent2-glow:rgba(184,134,11,.25);
         --text-main:#3D2B1F; --text-muted:#7a6046;
@@ -105,9 +107,10 @@
         --sheet-bg:rgba(248,238,218,.86); --field-bg:rgba(60,40,20,.06); --hairline:rgba(60,40,20,.10);
         --dots:rgba(60,40,20,.07);
         --count-grad:linear-gradient(180deg,#4a2f0f,#B8860B); --count-shadow:0 4px 18px rgba(124,82,26,.18);
-        --ring-a:#d4a843; --ring-b:#9a6f08; --ring-done-a:#e8c27a; --ring-done-b:#b07a22; --ring-track:rgba(60,40,20,.08);
+        --ring-a:#d4a843; --ring-b:#9a6f08; --ring-done-a:#e8c27a; --ring-done-b:#b07a22; --ring-track:rgba(255,248,232,.5);
         --pill-bg:rgba(184,134,11,.12); --pill-bd:rgba(184,134,11,.30); --pill-ink:#7a4f12;
         --mini-bg:rgba(250,242,226,.85); --on-primary:#fff; --modal-dim:rgba(60,40,20,.35);
+        --disc-a:rgba(255,250,238,.9); --disc-b:rgba(240,224,194,.75);
         --muted-btn:rgba(60,40,20,.08); --muted-btn-ink:#3D2B1F;
     }
 
@@ -116,11 +119,12 @@
     body {
         margin: 0; height: 100dvh; overflow: hidden;
         font-family: 'Tajawal', sans-serif; color: var(--text-main);
-        background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image) center/cover no-repeat, var(--bg-0);
+        background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image) center top / cover no-repeat, var(--bg-0);
         display: flex; justify-content: center; user-select: none; position: relative;
     }
     /* dotted texture, faded toward edges */
     body::before {
+        display: none;   /* the scenes bring their own texture (kept for a custom background) */
         content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .55;
         background-image: radial-gradient(var(--dots) 1px, transparent 1px);
         background-size: 22px 22px;
@@ -157,7 +161,24 @@
     .icon-btn:active { transform: scale(0.9); background: var(--glass-2); }
     @media (hover:hover) { .icon-btn:hover { border-color: var(--primary); } }
     .icon-btn svg { width: 23px; height: 23px; }
-    .page-title { margin: 0; text-align: center; font-size: 18px; font-weight: 800; color: var(--text-main); letter-spacing: 0; }
+    .page-head { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+    .page-mark { width: 22px; height: 26px; color: #d9b45a; filter: drop-shadow(0 1px 3px rgba(0,0,0,.25)); }
+    .page-title { margin: 0; text-align: center; font-size: 19px; font-weight: 800; color: var(--text-main); letter-spacing: 0; }
+    .page-rule { width: 120px; height: 8px; color: #d9b45a; opacity: .9; }
+    /* on the light scene the sky behind the header is deep blue */
+    [data-theme="light"] .page-title { color: #fff; text-shadow: 0 1px 8px rgba(10,25,60,.55); }
+    [data-theme="light"] .top-bar .icon-btn { background: rgba(18,38,82,.55); border-color: rgba(255,255,255,.35); color: #fff; }
+    /* short screens (these come before the base rules, so they are scoped to win) */
+    @media (max-height: 760px) {
+        .top-bar .page-mark, .top-bar .page-rule { display: none; }
+        .main-area .dhikr-card { padding: 22px 4px 12px; }
+        .main-area .dhikr-text.long { font-size: 18px; }
+        #mainApp .main-area { gap: 12px; }
+        .main-area .counter-zone { min-height: 180px; }
+        .main-area .act { min-height: 58px; padding: 7px 4px; }
+        .main-area .hadith-card { padding: 18px 16px 12px; }
+        .main-area .hadith-text { font-size: 16.5px; line-height: 1.8; }
+    }
 
     #dhikrSelect { display: none; }   /* the list of adhkar; shown through the picker sheet */
 
@@ -170,24 +191,47 @@
     }
     .main-area::-webkit-scrollbar { display: none; }
 
-    /* ===== the dhikr being recited: shown in full, tap to change ===== */
+    /* ===== the dhikr being recited, in a cartouche (drawn by shapeCartouche) ===== */
     .dhikr-card {
-        width: 100%; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;
-        padding: 14px 18px 10px; border-radius: 22px; cursor: pointer; font: inherit; color: var(--text-main);
-        background: linear-gradient(180deg, var(--glass-2), var(--glass));
-        border: 1px solid var(--glass-border);
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        transition: transform .15s ease, border-color .2s;
+        --ct-fill-a: #fffaf0; --ct-fill-b: #f3e7cf; --ct-gold-a: #f3d98c; --ct-gold-b: #b8862b; --ct-ink: #1c2433;
+        position: relative; width: 100%; flex-shrink: 0; color: var(--ct-ink);
+        display: grid; grid-template-columns: 44px 1fr 44px; align-items: center;
+        padding: 24px 4px 14px; min-height: 116px;
+        filter: drop-shadow(0 10px 18px rgba(10, 25, 60, .22));
     }
-    .dhikr-card:active { transform: scale(.985); }
-    @media (hover:hover) { .dhikr-card:hover { border-color: var(--primary); } }
+    [data-theme="dark"] .dhikr-card { --ct-fill-a: rgba(22,34,64,.92); --ct-fill-b: rgba(12,20,42,.92); --ct-ink: #f6efe0; filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)); }
+    [data-theme="sepia"] .dhikr-card { --ct-fill-a: #fbf2df; --ct-fill-b: #efdcb8; --ct-ink: #3D2B1F; filter: drop-shadow(0 10px 18px rgba(90,60,20,.25)); }
+    .cartouche { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .ct-fill { fill: url(#ctFill); }
+    .ct-line { fill: none; stroke: url(#ctGold); stroke-width: 2.6; }
+    .ct-inner { fill: none; stroke: url(#ctGold); stroke-width: 1; opacity: .75; }
+    #ctFill stop:first-child { stop-color: var(--ct-fill-a); } #ctFill stop:last-child { stop-color: var(--ct-fill-b); }
+    #ctGold stop:first-child, #ctGold stop:last-child { stop-color: var(--ct-gold-b); } #ctGold stop:nth-child(2) { stop-color: var(--ct-gold-a); }
+    .dhikr-main {
+        position: relative; z-index: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
+        padding: 4px 2px; background: none; border: 0; font: inherit; color: inherit; cursor: pointer;
+    }
     .dhikr-text {
-        font-family: 'Amiri', serif; font-weight: 700; font-size: 23px; line-height: 1.6; text-align: center;
+        font-family: 'Amiri', serif; font-weight: 700; font-size: 25px; line-height: 1.55; text-align: center;
         display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
     }
     .dhikr-text.long { font-size: 19px; line-height: 1.65; }
-    .dhikr-change { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 700; color: var(--primary-bright); }
-    .dhikr-change svg { width: 14px; height: 14px; }
+    .dhikr-change {
+        display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 999px;
+        font-size: 12.5px; font-weight: 700; color: inherit;
+        background: color-mix(in srgb, var(--ct-gold-b) 10%, transparent); border: 1px solid color-mix(in srgb, var(--ct-gold-b) 45%, transparent);
+    }
+    .dhikr-change svg { width: 15px; height: 15px; }
+    .dk-nav, .dk-fav {
+        position: relative; z-index: 1; width: 40px; height: 40px; display: grid; place-items: center; justify-self: center;
+        background: none; border: 0; border-radius: 50%; color: inherit; cursor: pointer; padding: 0;
+    }
+    .dk-nav svg { width: 22px; height: 22px; opacity: .7; }
+    .dk-nav:active { transform: scale(.88); }
+    [dir="rtl"] .dk-nav svg { transform: scaleX(-1); }
+    .dk-fav { position: absolute; top: 14px; inset-inline-end: 46px; width: 34px; height: 34px; }
+    .dk-fav svg { width: 19px; height: 19px; color: var(--ct-gold-b); }
+    .dk-fav[aria-pressed="true"] svg { fill: var(--ct-gold-b); }
 
     /* ===== counter: the whole zone counts a tap, not just the ring ===== */
     .counter-zone {
@@ -208,22 +252,27 @@
     /* ring colours follow the theme */
     #gradEmerald stop:first-child { stop-color: var(--ring-a); }
     #gradEmerald stop:last-child { stop-color: var(--ring-b); }
-    .ring-track { fill: none; stroke: var(--ring-track); stroke-width: 3; }
+    /* progress: a thick arc around the disc, clockwise from the top, with a knob where you are */
+    .ring-track { fill: none; stroke: var(--ring-track); stroke-width: 9; }
     .ring-arc {
-        fill: none; stroke: url(#gradEmerald); stroke-width: 3; stroke-linecap: round;
+        fill: none; stroke: url(#gradEmerald); stroke-width: 9; stroke-linecap: round;
         transform: rotate(-90deg); transform-origin: 100px 100px;
+        filter: drop-shadow(0 0 4px var(--primary-glow));
         transition: stroke-dashoffset 0.12s linear;
     }
-    [dir="rtl"] .ring-arc { transform: scale(-1, 1) rotate(-90deg); }   /* fills the way Arabic reads */
+    .ring-knob { fill: #fff; stroke: var(--ring-a); stroke-width: 3; filter: drop-shadow(0 0 4px var(--primary-glow)); transition: cx .12s linear, cy .12s linear; }
+    .ring-knob[hidden] { display: none; }
+    .progress-wrapper.complete .ring-arc { stroke: var(--ring-done-b); filter: drop-shadow(0 0 6px var(--accent2-glow)); }
+    .progress-wrapper.complete .ring-knob { stroke: var(--ring-done-b); }
 
-    /* the misbaha: 33 beads and the imam bead at the top; beads light as you count */
-    .bead { fill: var(--ring-track); stroke: var(--glass-border); stroke-width: .6; transition: fill .2s ease, transform .2s ease; transform-box: fill-box; transform-origin: center; }
-    .bead.lit { fill: var(--ring-b); stroke: none; }
-    .bead.now { fill: var(--ring-a); transform: scale(1.45); filter: drop-shadow(0 0 3px var(--primary-glow)); }
-    .imam { fill: var(--accent2); opacity: .85; }
-    .progress-wrapper.complete .bead.lit { fill: var(--ring-done-b); }
-    .progress-wrapper.complete .ring-arc { stroke: var(--ring-done-b); }
-
+    /* the frosted disc inside the ring */
+    .ring-disc {
+        position: absolute; inset: 11%; border-radius: 50%; overflow: hidden;
+        background: radial-gradient(circle at 50% 40%, var(--disc-a), var(--disc-b));
+        border: 1px solid var(--glass-border);
+        box-shadow: inset 0 2px 10px rgba(255,255,255,.35), 0 8px 24px rgba(10,25,60,.12);
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
     .counter-content {
         position: absolute; inset: 0; display: flex; flex-direction: column;
         align-items: center; justify-content: center; gap: 4px; pointer-events: none; text-align: center;
@@ -248,14 +297,14 @@
     .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex-shrink: 0; }
     .act {
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-        min-height: 60px; padding: 8px 4px; border-radius: 18px; cursor: pointer;
+        min-height: 66px; padding: 9px 4px; border-radius: 20px; cursor: pointer;
         background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);
         font-family: 'Tajawal', sans-serif; font-size: clamp(10.5px, 3.1vw, 12px); font-weight: 700; line-height: 1.2;
         white-space: nowrap; min-width: 0;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         transition: transform .15s ease, background .2s, opacity .2s;
     }
-    .act svg { width: 21px; height: 21px; color: var(--primary-bright); }
+    .act svg { width: 24px; height: 24px; color: var(--primary-bright); }
     .act:active { transform: scale(.93); background: var(--glass-2); }
     .act:disabled { opacity: .45; cursor: default; }
     .act.danger svg { color: #ef4444; }
@@ -263,12 +312,26 @@
 
     /* ================= VIRTUE CARD ================= */
     .hadith-card {
-        width: 100%; flex-shrink: 0; position: relative;
+        width: 100%; flex-shrink: 0; position: relative; margin-top: 12px;
         background: linear-gradient(180deg, var(--glass-2), var(--glass));
-        border: 1px solid var(--glass-border); border-radius: 22px; padding: 14px 18px 16px;
+        border: 1px solid var(--glass-border); border-radius: 24px; padding: 22px 18px 16px;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); text-align: center;
     }
-    .hadith-title { font-size: 13px; color: var(--primary-bright); margin: 0 0 6px; font-weight: 800; }
+    /* geometric corners */
+    .hadith-card::before, .hadith-card::after {
+        content: ''; position: absolute; bottom: 0; width: 64px; height: 64px; opacity: .35; pointer-events: none;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg stroke='%23c9a24a' stroke-width='1' fill='none'%3E%3Cpolygon points='32,4 37,21 52,12 43,27 60,32 43,37 52,52 37,43 32,60 27,43 12,52 21,37 4,32 21,27 12,12 27,21'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 32px 32px;
+    }
+    .hadith-card::before { left: 0; border-bottom-left-radius: 24px; -webkit-mask-image: radial-gradient(circle at 0 100%, #000, transparent 70%); mask-image: radial-gradient(circle at 0 100%, #000, transparent 70%); }
+    .hadith-card::after { right: 0; border-bottom-right-radius: 24px; -webkit-mask-image: radial-gradient(circle at 100% 100%, #000, transparent 70%); mask-image: radial-gradient(circle at 100% 100%, #000, transparent 70%); }
+    .hadith-title {
+        position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%);
+        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+        margin: 0; padding: 5px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 800; color: var(--text-main);
+        background: var(--sheet-bg); border: 1px solid var(--glass-border); box-shadow: 0 4px 12px rgba(10,25,60,.12);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .hadith-title svg { width: 16px; height: 16px; color: var(--primary-bright); }
     .hadith-text { font-family: 'Amiri', serif; font-size: 17.5px; line-height: 1.9; color: var(--text-main); }
     .hadith-source { margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
     .hadith-source:empty { display: none; }
@@ -410,8 +473,6 @@
     .target-chip:active { transform: scale(.94); }
     .target-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 14px var(--primary-glow); }
 
-    /* beads count the way the page reads */
-    [dir="rtl"] .beads { transform: scale(-1, 1); transform-origin: 100px 100px; }
 
     /* ===== theme selector (same as the audio page) ===== */
     .theme-pill-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 5px; background: var(--field-bg); border-radius: 18px; border: 1px solid var(--glass-border); }
@@ -447,7 +508,7 @@
 
     @media (prefers-reduced-motion: reduce) {
         .progress-wrapper.tick .count-number { animation: none !important; }
-        .bead, .ring-arc, .progress-wrapper { transition: none !important; }
+        .ring-knob, .ring-arc, .progress-wrapper { transition: none !important; }
     }
 </style>
 </head>
@@ -478,7 +539,16 @@
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
         </button>
-        <h1 class="page-title" data-i18n="card_tasbih">المسبحة</h1>
+        <div class="page-head">
+            <!-- a small misbaha: a loop of beads and its tassel -->
+            <svg class="page-mark" viewBox="0 0 22 26" aria-hidden="true" fill="currentColor">
+                <circle cx="11" cy="2.6" r="1.9"/><circle cx="15.6" cy="4.2" r="1.9"/><circle cx="18.3" cy="8.1" r="1.9"/><circle cx="17.6" cy="12.6" r="1.9"/>
+                <circle cx="6.4" cy="4.2" r="1.9"/><circle cx="3.7" cy="8.1" r="1.9"/><circle cx="4.4" cy="12.6" r="1.9"/><circle cx="7.6" cy="15.6" r="1.9"/><circle cx="14.4" cy="15.6" r="1.9"/>
+                <rect x="9.6" y="16.6" width="2.8" height="3.4" rx="1.2"/><path d="M8.6 25.4 11 19.8l2.4 5.6z"/>
+            </svg>
+            <h1 class="page-title" data-i18n="card_tasbih">المسبحة</h1>
+            <svg class="page-rule" viewBox="0 0 120 8" aria-hidden="true"><path d="M2 4h46M72 4h46" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".7"/><circle cx="52" cy="4" r="1.3" fill="currentColor"/><circle cx="68" cy="4" r="1.3" fill="currentColor"/><path d="M60 .6 63.4 4 60 7.4 56.6 4z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        </div>
         <button type="button" class="icon-btn" onclick="toggleSettings()" title="الإعدادات" data-i18n-title="settings" aria-label="الإعدادات" data-i18n-aria="settings">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </button>
@@ -507,15 +577,34 @@
 
     <div class="main-area">
         <!-- the dhikr being recited, in full; tap to choose another -->
-        <button type="button" class="dhikr-card" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">
-            <span class="dhikr-text" id="dhikrText">سبحان الله</span>
-            <span class="dhikr-change"><span data-i18n="masbaha_change">تغيير الذكر</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
-        </button>
+        <div class="dhikr-card" id="dhikrCard">
+            <svg class="cartouche" id="cartouche" aria-hidden="true" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="ctFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0"/><stop offset="1"/></linearGradient>
+                    <linearGradient id="ctGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0"/><stop offset=".5"/><stop offset="1"/></linearGradient>
+                </defs>
+                <path class="ct-fill" id="ctFillPath"/><path class="ct-line" id="ctLinePath"/><path class="ct-inner" id="ctInnerPath"/>
+            </svg>
+            <button type="button" class="dk-nav" onclick="stepDhikr(-1)" aria-label="الذكر السابق" data-i18n-aria="masbaha_prev">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="dhikr-main" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">
+                <span class="dhikr-text" id="dhikrText">سبحان الله</span>
+                <span class="dhikr-change"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg><span data-i18n="masbaha_change">تغيير الذكر</span></span>
+            </button>
+            <button type="button" class="dk-nav" onclick="stepDhikr(1)" aria-label="الذكر التالي" data-i18n-aria="masbaha_next">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button type="button" class="dk-fav" id="favBtn" onclick="toggleFav()" aria-pressed="false" aria-label="المفضلة" data-i18n-aria="masbaha_fav">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>
+            </button>
+        </div>
 
         <!-- tap anywhere in this zone to count -->
         <div class="counter-zone" id="counterZone" role="button" tabindex="0" onclick="increment()"
              aria-label="سبّح، اضغط للعد" data-i18n-aria="masbaha_count_aria" aria-describedby="countAnnounce">
             <div class="progress-wrapper">
+                <div class="ring-disc" aria-hidden="true"></div>
                 <svg viewBox="0 0 200 200" aria-hidden="true">
                     <defs>
                         <linearGradient id="gradEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -523,9 +612,9 @@
                             <stop offset="100%" stop-color="#059669" />
                         </linearGradient>
                     </defs>
-                    <circle class="ring-track" cx="100" cy="100" r="77" />
-                    <circle class="ring-arc" id="progressCircle" cx="100" cy="100" r="77" stroke-dasharray="483.8" stroke-dashoffset="483.8" />
-                    <g class="beads" id="beads"></g>
+                    <circle class="ring-track" cx="100" cy="100" r="88" />
+                    <circle class="ring-arc" id="progressCircle" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="552.9" />
+                    <circle class="ring-knob" id="ringKnob" cx="100" cy="12" r="6.5" hidden />
                 </svg>
                 <div class="counter-content">
                     <span class="count-label" id="countLabel"></span>
@@ -550,13 +639,13 @@
                 <span data-i18n="masbaha_reset_short">تصفير</span>
             </button>
             <button type="button" class="act" onclick="enterPowerMode()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
                 <span data-i18n="masbaha_power">توفير الطاقة</span>
             </button>
         </div>
 
         <section class="hadith-card" aria-labelledby="virtueTitle">
-            <h2 class="hadith-title" id="virtueTitle" data-i18n="masbaha_virtue">فضل الذكر</h2>
+            <h2 class="hadith-title" id="virtueTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg><span data-i18n="masbaha_virtue">فضل الذكر</span></h2>
             <div class="hadith-text" id="hintBox">...</div>
             <div class="hadith-source" id="hintSource"></div>
         </section>
@@ -791,8 +880,7 @@
     const customVerse = `«وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُمْ مَغْفِرَةً وَأَجْرًا عَظِيمًا»`;
 
     let currentDhikr = localStorage.getItem("currentDhikr") || "subhan";
-    const fullCircle = 483.8;   // ring arc circumference (r = 77)
-    const BEADS = 33;           // a misbaha of 33 beads
+    const fullCircle = 552.9;   // ring arc circumference (r = 88)
 
     // --- Sound & Haptic ---
     let audioCtx = null;        // created on the first sound, after a tap (browsers block it before)
@@ -841,7 +929,6 @@
             currentDhikr = document.getElementById("dhikrSelect").options[0].value;
             document.getElementById("dhikrSelect").value = currentDhikr;
         }
-        renderBeads();
         updatePickerLabel();
         markTheme(document.documentElement.getAttribute('data-theme'));
         document.getElementById("dhikrSearch").addEventListener('input', renderDhikrList);
@@ -890,29 +977,7 @@
         showHint();
     }
 
-    // The 33 beads around the ring and the imam bead at the top (built once).
-    function renderBeads() {
-        const g = document.getElementById("beads");
-        if (!g || g.childElementCount) return;
-        const NS = 'http://www.w3.org/2000/svg';
-        const slots = BEADS + 1;            // slot 0 is the imam bead
-        for (let i = 1; i <= BEADS; i++) {
-            const a = (-90 + i * 360 / slots) * Math.PI / 180;
-            const c = document.createElementNS(NS, 'circle');
-            c.setAttribute('class', 'bead');
-            c.setAttribute('cx', (100 + 90 * Math.cos(a)).toFixed(2));
-            c.setAttribute('cy', (100 + 90 * Math.sin(a)).toFixed(2));
-            c.setAttribute('r', '4.1');
-            g.appendChild(c);
-        }
-        const imam = document.createElementNS(NS, 'ellipse');
-        imam.setAttribute('class', 'imam');
-        imam.setAttribute('cx', '100'); imam.setAttribute('cy', '10');
-        imam.setAttribute('rx', '3.4'); imam.setAttribute('ry', '6.6');
-        g.appendChild(imam);
-    }
-
-    // Ring, beads and the labels inside the ring for `count` taps on a target.
+    // The ring, its knob and the labels inside it for `count` taps on a target.
     function updateProgress(count, target) {
         target = parseInt(target) || 33;
         count = parseInt(count) || 0;
@@ -927,11 +992,11 @@
         circle.style.strokeDashoffset = fullCircle - fullCircle * percent;
         wrapper.classList.toggle("complete", done);
 
-        const lit = Math.round(percent * BEADS);
-        document.querySelectorAll('#beads .bead').forEach((b, i) => {
-            b.classList.toggle('lit', i < lit);
-            b.classList.toggle('now', i === lit - 1 && !done);
-        });
+        const knob = document.getElementById("ringKnob");
+        const ang = (-90 + 360 * percent) * Math.PI / 180;    // clockwise from the top
+        knob.setAttribute('cx', (100 + 88 * Math.cos(ang)).toFixed(2));
+        knob.setAttribute('cy', (100 + 88 * Math.sin(ang)).toFixed(2));
+        knob.toggleAttribute('hidden', inRound === 0);   // an SVG element has no .hidden property
 
         document.getElementById("countLabel").textContent =
             count === 0 ? tr('masbaha_tap_hint', 'اضغط للتسبيح') : tr('masbaha_round', 'الدورة {n}', { n: round });
@@ -1042,6 +1107,101 @@
             el.classList.toggle('long', opt.text.length > 34);
             document.getElementById("dhikrPickerBtn").setAttribute('aria-label', opt.text + '، ' + tr('masbaha_change', 'تغيير الذكر'));
         }
+        const fav = document.getElementById("favBtn");
+        if (fav) fav.setAttribute('aria-pressed', String(getFavs().includes(currentDhikr)));
+        shapeCartouche();
+    }
+
+    // ===== the cartouche around the dhikr: an SVG path sized to the card =====
+    // Pointed ogee ends, an ogee peak at the top centre and a small one below.
+    // k = inset from the card's edge (the inner gold line is drawn at k = 6).
+    function cartouchePath(W, H, k) {
+        const e = 26 - k * .7, bh = 18 - k * .7, bb = 10 - k * .5, bw = Math.min(64, W * .18) - k;
+        const x0 = k, x1 = W - k, cx = W / 2;
+        const t = k + bh, b = H - k - bb, cy = (t + b) / 2;
+        const f = v => v.toFixed(1);
+        // one half (top: dir = -1, bottom: dir = +1) as cubic segments from the left tip to the right tip
+        const half = (y, bump, dir) => {
+            const d = y - cy;                     // from the mid line to this edge (negative above, positive below)
+            const ends = side => {                // side = 1 left end (tip → edge), -1 right end (edge → tip)
+                const X = side > 0 ? x0 : x1, s = side;
+                const seg = [
+                    [[X, cy], [X + s * e * .1, cy + d * .2], [X + s * e * .38, cy + d * .4], [X + s * e * .46, cy + d * .58]],
+                    [[X + s * e * .46, cy + d * .58], [X + s * e * .3, cy + d * .86], [X + s * e * .6, cy + d], [X + s * e, cy + d]]
+                ];
+                return side > 0 ? seg : seg.reverse().map(q => [q[3], q[2], q[1], q[0]]);
+            };
+            const peak = y + dir * bump;
+            const mid = [
+                [[cx - bw, y], [cx - bw * .55, y], [cx - bw * .42, y + dir * bump * .55], [cx - bw * .2, y + dir * bump * .8]],
+                [[cx - bw * .2, y + dir * bump * .8], [cx - bw * .08, y + dir * bump * .9], [cx - 1, y + dir * bump * .97], [cx, peak]],
+                [[cx, peak], [cx + 1, y + dir * bump * .97], [cx + bw * .08, y + dir * bump * .9], [cx + bw * .2, y + dir * bump * .8]],
+                [[cx + bw * .2, y + dir * bump * .8], [cx + bw * .42, y + dir * bump * .55], [cx + bw * .55, y], [cx + bw, y]]
+            ];
+            const L = ends(1), R = ends(-1);
+            return [...L, [[x0 + e, y], [x0 + e, y], [cx - bw, y], [cx - bw, y]], ...mid, [[cx + bw, y], [cx + bw, y], [x1 - e, y], [x1 - e, y]], ...R];
+        };
+        const top = half(t, bh, -1);
+        const bottom = half(b, bb, 1).reverse().map(q => [q[3], q[2], q[1], q[0]]);
+        const segs = [...top, ...bottom];
+        let dpath = 'M' + f(segs[0][0][0]) + ' ' + f(segs[0][0][1]);
+        segs.forEach(q => { dpath += 'C' + [q[1], q[2], q[3]].map(p => f(p[0]) + ' ' + f(p[1])).join(' '); });
+        return dpath + 'Z';
+    }
+    function shapeCartouche() {
+        const card = document.getElementById("dhikrCard"), svg = document.getElementById("cartouche");
+        if (!card || !svg) return;
+        const W = card.offsetWidth, H = card.offsetHeight;
+        if (!W || !H) return;
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        const outer = cartouchePath(W, H, 1.5);
+        document.getElementById("ctFillPath").setAttribute('d', outer);
+        document.getElementById("ctLinePath").setAttribute('d', outer);
+        document.getElementById("ctInnerPath").setAttribute('d', cartouchePath(W, H, 6.5));
+    }
+    if (window.ResizeObserver) document.addEventListener('DOMContentLoaded', () => {
+        const c = document.getElementById("dhikrCard"); if (c) new ResizeObserver(shapeCartouche).observe(c);
+    });
+
+    // ===== previous / next dhikr, in the picker's order =====
+    function dhikrOrder() {
+        const ids = [...document.getElementById("dhikrSelect").options].map(o => o.value);
+        const grouped = DHIKR_GROUPS.flatMap(g => g.ids).filter(id => ids.includes(id));
+        return grouped.concat(ids.filter(id => !grouped.includes(id)));
+    }
+    function stepDhikr(dir) {
+        const order = dhikrOrder(), n = order.length;
+        const i = order.indexOf(currentDhikr);
+        document.getElementById("dhikrSelect").value = order[((i < 0 ? 0 : i) + dir + n) % n];
+        changeDhikr();
+        triggerHaptic('tap');
+    }
+    // swipe the card: towards the reading direction's end goes to the next dhikr
+    (function () {
+        let x0 = null, y0 = 0;
+        document.addEventListener('touchstart', e => {
+            const c = e.target.closest && e.target.closest('#dhikrCard');
+            if (c && e.touches.length === 1) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null;
+        }, { passive: true });
+        document.addEventListener('touchend', e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+            x0 = null;
+            if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * .6) return;
+            const rtl = getComputedStyle(document.documentElement).direction === 'rtl';
+            stepDhikr((dx > 0) === rtl ? 1 : -1);
+            suppressClickUntil = Date.now() + 400;   // the swipe is not a tap on the card
+        }, { passive: true });
+    })();
+
+    // ===== favourites: listed first in the picker =====
+    function getFavs() { try { return JSON.parse(localStorage.getItem('masbaha_favs') || '[]'); } catch (e) { return []; } }
+    function toggleFav() {
+        let favs = getFavs();
+        favs = favs.includes(currentDhikr) ? favs.filter(x => x !== currentDhikr) : favs.concat(currentDhikr);
+        try { localStorage.setItem('masbaha_favs', JSON.stringify(favs)); } catch (e) {}
+        document.getElementById("favBtn").setAttribute('aria-pressed', String(favs.includes(currentDhikr)));
+        triggerHaptic('tap');
     }
     // search ignores diacritics, tatweel and alef/yeh/teh-marbuta forms
     function normAr(x) {
@@ -1063,6 +1223,8 @@
         const listed = new Set(groups.flatMap(g => g.ids));
         const rest = Object.keys(byId).filter(id => !listed.has(id));
         if (rest.length) groups.push({ label: tr('masbaha_group_custom', 'أذكاري الخاصة'), ids: rest });
+        const favs = getFavs().filter(id => byId[id] != null);
+        if (favs.length) groups.unshift({ label: tr('masbaha_fav', 'المفضلة'), ids: favs });
 
         list.innerHTML = '';
         let shown = 0;
@@ -1469,7 +1631,7 @@
 <script>
     if (window.I18n) {
         // labels built in script (round, target, progress) follow the language once it has loaded
-        const relabel = () => { if (typeof loadCounter === 'function' && document.getElementById('beads').childElementCount) { loadCounter(); updatePickerLabel(); } };
+        const relabel = () => { if (typeof loadCounter === 'function' && document.getElementById('countLabel').textContent) { loadCounter(); updatePickerLabel(); } };
         Promise.resolve(I18n.init()).then(relabel);
         window.addEventListener('langchange', relabel);
     }

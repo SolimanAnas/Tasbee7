@@ -201,6 +201,9 @@ export default {
   'masbaha_sec_stats': 'Statistics',
   'masbaha_stats_details': 'Per dhikr',
   'masbaha_stats_empty': 'No tasbeeh counted yet',
+  'masbaha_prev': 'Previous dhikr',
+  'masbaha_next': 'Next dhikr',
+  'masbaha_fav': 'Favourites',
 
   // Azkar
   'azkar_title': 'Adhkar — Zad Al-Muslim',
