@@ -118,7 +118,7 @@
 
     body {
         margin: 0; height: 100dvh; overflow: hidden;
-        font-family: 'Tajawal', sans-serif; color: var(--text-main);
+        font-family: 'Tajawal', 'Amiri', sans-serif; color: var(--text-main);   /* Amiri fills in ﷺ, which Tajawal lacks */
         background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image) center top / cover no-repeat, var(--bg-0);
         display: flex; justify-content: center; user-select: none; position: relative;
     }
@@ -207,18 +207,17 @@
     .ct-inner { fill: none; stroke: url(#ctGold); stroke-width: 1; opacity: .75; }
     #ctFill stop:first-child { stop-color: var(--ct-fill-a); } #ctFill stop:last-child { stop-color: var(--ct-fill-b); }
     #ctGold stop:first-child, #ctGold stop:last-child { stop-color: var(--ct-gold-b); } #ctGold stop:nth-child(2) { stop-color: var(--ct-gold-a); }
-    .dhikr-main {
-        position: relative; z-index: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
-        padding: 4px 2px; background: none; border: 0; font: inherit; color: inherit; cursor: pointer;
-    }
+    .dhikr-center { position: relative; z-index: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .dhikr-face { padding: 4px 2px; background: none; border: 0; font: inherit; color: inherit; cursor: pointer; max-width: 100%; }
+    .dhikr-tools { display: flex; align-items: center; justify-content: center; gap: 6px; }
     .dhikr-text {
         font-family: 'Amiri', serif; font-weight: 700; font-size: 25px; line-height: 1.55; text-align: center;
         display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
     }
     .dhikr-text.long { font-size: 19px; line-height: 1.65; }
     .dhikr-change {
-        display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 999px;
-        font-size: 12.5px; font-weight: 700; color: inherit;
+        display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 999px; min-height: 32px; cursor: pointer;
+        font-family: inherit; font-size: 12.5px; font-weight: 700; color: inherit;
         background: color-mix(in srgb, var(--ct-gold-b) 10%, transparent); border: 1px solid color-mix(in srgb, var(--ct-gold-b) 45%, transparent);
     }
     .dhikr-change svg { width: 15px; height: 15px; }
@@ -229,8 +228,10 @@
     .dk-nav svg { width: 22px; height: 22px; opacity: .7; }
     .dk-nav:active { transform: scale(.88); }
     [dir="rtl"] .dk-nav svg { transform: scaleX(-1); }
-    .dk-fav { position: absolute; top: 14px; inset-inline-end: 46px; width: 34px; height: 34px; }
-    .dk-fav svg { width: 19px; height: 19px; color: var(--ct-gold-b); }
+    /* bookmark: a round button beside the chip, never over the text */
+    .dk-fav { width: 32px; height: 32px; justify-self: auto;
+        background: color-mix(in srgb, var(--ct-gold-b) 10%, transparent); border: 1px solid color-mix(in srgb, var(--ct-gold-b) 45%, transparent); }
+    .dk-fav svg { width: 16px; height: 16px; color: var(--ct-gold-b); }
     .dk-fav[aria-pressed="true"] svg { fill: var(--ct-gold-b); }
 
     /* ===== counter: the whole zone counts a tap, not just the ring ===== */
@@ -405,8 +406,12 @@
 
     .meaning-item { margin-bottom: 20px; border-bottom: 1px solid var(--hairline); padding-bottom: 15px; }
     .meaning-item:last-child { border: none; }
-    .meaning-head { color: var(--primary-bright); font-weight: bold; font-size: 16px; margin-bottom: 5px; font-family: 'Amiri', serif; }
-    .meaning-desc { font-size: 14px; color: var(--text-main); opacity: .9; line-height: 1.6; }
+    .meaning-head { color: var(--text-main); font-weight: 700; font-size: 18px; line-height: 1.6; margin-bottom: 4px; font-family: 'Amiri', serif; }
+    .meaning-desc { font-size: 14.5px; color: var(--text-main); opacity: .92; line-height: 1.75; }
+    .meaning-desc b { color: var(--primary-bright); font-weight: 700; }
+    .meaning-source { margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .meaning-source::before { content: '— '; }
+    .meaning-group { font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--text-muted); padding: 6px 2px 10px; }
 
     /* ================= OVERLAYS ================= */
     #powerModeOverlay {
@@ -505,6 +510,14 @@
     .dhikr-sub { font-size: 11.5px; font-weight: 600; color: var(--text-muted); }
     .dhikr-item.active .dhikr-sub { color: rgba(255,255,255,.85); }
     .dhikr-empty { text-align: center; color: var(--text-muted); padding: 24px 0; }
+    .dhikr-add { margin-top: 6px; }
+    .dhikr-add-open {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 12px; border-radius: 14px;
+        background: transparent; border: 1.5px dashed color-mix(in srgb, var(--primary) 55%, transparent); color: var(--primary-bright);
+        font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .dhikr-add-open svg { width: 18px; height: 18px; }
+    .dhikr-add .inline-form[hidden], .dhikr-add-open[hidden] { display: none; }
 
     @media (prefers-reduced-motion: reduce) {
         .progress-wrapper.tick .count-number { animation: none !important; }
@@ -588,15 +601,19 @@
             <button type="button" class="dk-nav" onclick="stepDhikr(-1)" aria-label="الذكر السابق" data-i18n-aria="masbaha_prev">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
             </button>
-            <button type="button" class="dhikr-main" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">
-                <span class="dhikr-text" id="dhikrText">سبحان الله</span>
-                <span class="dhikr-change"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg><span data-i18n="masbaha_change">تغيير الذكر</span></span>
-            </button>
+            <div class="dhikr-center">
+                <button type="button" class="dhikr-face" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">
+                    <span class="dhikr-text" id="dhikrText">سبحان الله</span>
+                </button>
+                <div class="dhikr-tools">
+                    <button type="button" class="dhikr-change" onclick="openDhikrSheet()" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg><span data-i18n="masbaha_change">تغيير الذكر</span></button>
+                    <button type="button" class="dk-fav" id="favBtn" onclick="toggleFav()" aria-pressed="false" aria-label="المفضلة" data-i18n-aria="masbaha_fav">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>
+                    </button>
+                </div>
+            </div>
             <button type="button" class="dk-nav" onclick="stepDhikr(1)" aria-label="الذكر التالي" data-i18n-aria="masbaha_next">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            <button type="button" class="dk-fav" id="favBtn" onclick="toggleFav()" aria-pressed="false" aria-label="المفضلة" data-i18n-aria="masbaha_fav">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>
             </button>
         </div>
 
@@ -766,43 +783,101 @@
 </div>
 
 <div class="modal-overlay" id="meaningsModal" onclick="if(event.target===this) toggleMeanings()">
-    <div class="modal-content">
+    <div class="modal-content" role="dialog" aria-labelledby="meaningsTitle">
         <div class="modal-header">
-            <span class="modal-title" data-i18n="masbaha_meanings_title">معاني الأذكار</span>
-            <button class="close-btn" onclick="toggleMeanings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+            <span class="modal-title" id="meaningsTitle" data-i18n="masbaha_meanings_title">معاني الأذكار</span>
+            <button class="close-btn" onclick="toggleMeanings()" aria-label="إغلاق" data-i18n-aria="close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></button>
         </div>
-
+        <!-- each meaning with the book (or verse) it is taken from -->
+        <div class="meaning-group">الأكثر استخدامًا</div>
         <div class="meaning-item">
             <div class="meaning-head">سبحان الله</div>
-            <div class="meaning-desc">أنزه الله عن كل نقص وعيب، وعن مشابهة المخلوقين، وعن كل ما لا يليق بجلاله وكماله.</div>
+            <div class="meaning-desc">أُنزّه الله تعالى عن كل نقص وعيب، وعن مشابهة المخلوقين، وعن كل ما لا يليق بجلاله وكماله.</div>
+            <div class="meaning-source">ابن الأثير، النهاية في غريب الحديث (مادة: سبح)</div>
         </div>
         <div class="meaning-item">
             <div class="meaning-head">الحمد لله</div>
-            <div class="meaning-desc">إثبات كل صفات الكمال لله مع المحبة والتعظيم، وشكره على نعمه الظاهرة والباطنة.</div>
+            <div class="meaning-desc">الثناء على الله بصفات الكمال ونعوت الجلال، مع محبته وتعظيمه، والاعتراف بنعمه الظاهرة والباطنة وشكره عليها.</div>
+            <div class="meaning-source">ابن القيم، بدائع الفوائد</div>
         </div>
         <div class="meaning-item">
             <div class="meaning-head">لا إله إلا الله</div>
-            <div class="meaning-desc">لا معبود بحق في الوجود إلا الله، وهي كلمة التوحيد ومفتاح الجنة.</div>
+            <div class="meaning-desc">لا معبود بحق إلا الله؛ تنفي العبادة عن كل ما سواه وتثبتها له وحده. وهي كلمة التوحيد والإخلاص.</div>
+            <div class="meaning-source">ابن رجب، كلمة الإخلاص وتحقيق معناها</div>
+        </div>
+        <div class="meaning-group">التسبيح والتحميد</div>
+        <div class="meaning-item">
+            <div class="meaning-head">سبحان الله وبحمده</div>
+            <div class="meaning-desc">أُسبّح الله متلبّسًا بحمده؛ فالواو للحال: أنزّهه عن كل نقص، وأثني عليه بكل كمال في آنٍ واحد.</div>
+            <div class="meaning-source">ابن حجر، فتح الباري (شرح حديث: كلمتان خفيفتان)</div>
         </div>
         <div class="meaning-item">
+            <div class="meaning-head">سبحان الله وبحمده، سبحان الله العظيم</div>
+            <div class="meaning-desc">تسبيح مقرون بالحمد، ثم وصف الله بالعظمة؛ والعظيم: الذي له العظمة الكاملة في ذاته وأسمائه وصفاته، فلا يُحيط به أحد.</div>
+            <div class="meaning-source">ابن حجر، فتح الباري (شرح حديث: كلمتان خفيفتان)</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">سبحان الله العظيم وبحمده</div>
+            <div class="meaning-desc">بمعنى ما قبلها: تنزيه الله العظيم عن كل نقص مع حمده والثناء عليه.</div>
+            <div class="meaning-source">ابن حجر، فتح الباري (شرح حديث: كلمتان خفيفتان)</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">سبحان الله وبحمده، عدد خلقه، ورضا نفسه، وزنة عرشه، ومداد كلماته</div>
+            <div class="meaning-desc">تسبيح وحمد يبلغ عددَ مخلوقاته، وقدرَ ما يرضيه، وثِقَلَ عرشه، وقدرَ كلماته التي لا تنفد.</div>
+            <div class="meaning-source">النووي، شرح صحيح مسلم (كتاب الذكر والدعاء)</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</div>
+            <div class="meaning-desc">هي «الباقيات الصالحات» التي يبقى ثوابها؛ تجمع التنزيه والحمد والتوحيد والتكبير.</div>
+            <div class="meaning-source">ابن كثير، تفسير سورة الكهف (الآية 46)</div>
+        </div>
+        <div class="meaning-group">التهليل والتكبير</div>
+        <div class="meaning-item">
             <div class="meaning-head">الله أكبر</div>
-            <div class="meaning-desc">الله أعظم من كل شيء؛ أكبر من الدنيا وهمومها ومشاكلها.</div>
+            <div class="meaning-desc">الله أكبر من كل شيء ذاتًا وقدرًا وعظمة؛ فيصغر في قلب قائلها كل ما سواه.</div>
+            <div class="meaning-source">ابن الأثير، النهاية في غريب الحديث (مادة: كبر)</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، يحيي ويميت، وهو على كل شيء قدير</div>
+            <div class="meaning-desc"><b>وحده لا شريك له:</b> إفراده بالعبادة. <b>له الملك:</b> المُلك التام له وحده. <b>وله الحمد:</b> الحمد كله له. <b>يحيي ويميت:</b> بيده الحياة والموت. <b>وهو على كل شيء قدير:</b> لا يُعجزه شيء.</div>
+            <div class="meaning-source">ألفاظها في القرآن: سورة التغابن (الآية 1)، وسورة الحديد (الآية 2)</div>
         </div>
         <div class="meaning-item">
             <div class="meaning-head">لا حول ولا قوة إلا بالله</div>
-            <div class="meaning-desc">لا قدرة على التحول من حال إلى حال (كالمعصية للطاعة)، ولا قوة على القيام بأمر إلا بعون الله.</div>
+            <div class="meaning-desc">لا تحوّل من حال إلى حال، ولا قدرة على شيء إلا بالله. وفُسّرت: لا حول عن معصية الله إلا بعصمته، ولا قوة على طاعته إلا بمعونته؛ وهي كلمة استسلام وتفويض إلى الله.</div>
+            <div class="meaning-source">النووي، شرح صحيح مسلم (كتاب الذكر والدعاء)</div>
         </div>
         <div class="meaning-item">
-            <div class="meaning-head">سبحان الله وبحمده</div>
-            <div class="meaning-desc">جمع بين التنزيه عن النقص (سبحان الله) والثناء بالكمال (والحمد لله).</div>
+            <div class="meaning-head">رضيت بالله ربًّا، وبالإسلام دينًا، وبمحمد ﷺ رسولًا</div>
+            <div class="meaning-desc"><b>بالله ربًّا:</b> الرضا بتدبيره وقضائه. <b>وبالإسلام دينًا:</b> لا يبتغي دينًا غيره. <b>وبمحمد ﷺ رسولًا:</b> الانقياد له واتباع ما جاء به.</div>
+            <div class="meaning-source">ابن القيم، مدارج السالكين (منزلة الرضا)</div>
+        </div>
+        <div class="meaning-group">الاستغفار والدعاء</div>
+        <div class="meaning-item">
+            <div class="meaning-head">أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه</div>
+            <div class="meaning-desc"><b>أستغفر الله:</b> أطلب منه ستر الذنب والتجاوز عنه. <b>الحي:</b> الذي له الحياة الكاملة فلا يموت. <b>القيوم:</b> القائم بنفسه، المقيم لغيره. <b>وأتوب إليه:</b> أرجع إليه نادمًا، عازمًا على ألا أعود.</div>
+            <div class="meaning-source">ابن كثير، تفسير آية الكرسي (سورة البقرة: 255)</div>
         </div>
         <div class="meaning-item">
-            <div class="meaning-head">أستغفر الله العظيم...</div>
-            <div class="meaning-desc">
-                <b>الحي:</b> الذي له الحياة الكاملة التي لم تسبق بعدم ولا يلحقها زوال.<br>
-                <b>القيوم:</b> القائم بنفسه والمقيم لغيره.<br>
-                <b>وأتوب إليه:</b> أرجع إليه نادماً عازماً على عدم العودة للذنب.
-            </div>
+            <div class="meaning-head">أستغفر الله وأتوب إليه</div>
+            <div class="meaning-desc">الاستغفار: طلب المغفرة، وهي ستر الذنب والتجاوز عنه. والتوبة: الإقلاع عن الذنب، والندم عليه، والعزم على ألا يعود إليه، وردّ الحقوق إلى أهلها.</div>
+            <div class="meaning-source">النووي، رياض الصالحين (باب التوبة)</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">لا إله إلا أنت سبحانك إني كنت من الظالمين</div>
+            <div class="meaning-desc">دعاء يونس عليه السلام في بطن الحوت؛ يجمع التوحيد (لا إله إلا أنت)، والتنزيه (سبحانك)، والاعتراف بالذنب (إني كنت من الظالمين).</div>
+            <div class="meaning-source">سورة الأنبياء (الآية 87)</div>
+        </div>
+        <div class="meaning-item">
+            <div class="meaning-head">يا حي يا قيوم برحمتك أستغيث</div>
+            <div class="meaning-desc">نداءٌ لله باسمَيه الحي والقيوم: <b>الحي</b> الذي لا يموت، و<b>القيوم</b> القائم بتدبير خلقه؛ <b>برحمتك أستغيث:</b> أطلب الغوث والعون متوسلًا برحمتك.</div>
+            <div class="meaning-source">ابن كثير، تفسير آية الكرسي (سورة البقرة: 255)</div>
+        </div>
+        <div class="meaning-group">الصلاة على النبي ﷺ</div>
+        <div class="meaning-item">
+            <div class="meaning-head">اللهم صلِّ على سيدنا محمد</div>
+            <div class="meaning-desc">صلاة الله على نبيه: ثناؤه عليه عند الملائكة؛ فمعناها: اللهم أثنِ عليه في الملأ الأعلى.</div>
+            <div class="meaning-source">قول أبي العالية، ذكره البخاري في صحيحه (كتاب التفسير، سورة الأحزاب)</div>
         </div>
     </div>
 </div>
@@ -851,8 +926,9 @@
 
     // how the picker groups the adhkar (custom ones are listed last)
     const DHIKR_GROUPS = [
-        { key: 'masbaha_group_tasbeeh', label: 'التسبيح والتحميد', ids: ['subhan', 'hamd', 'subhanwabihamdih', 'subhanazeem', 'ghars', 'adadkhalqih', 'baqiyat'] },
-        { key: 'masbaha_group_tahleel', label: 'التهليل والتكبير', ids: ['tahleel', 'takbeer', 'wahdahu', 'hawqala', 'radeetu'] },
+        { key: 'masbaha_group_frequent', label: 'الأكثر استخدامًا', ids: ['subhan', 'hamd', 'tahleel'] },
+        { key: 'masbaha_group_tasbeeh', label: 'التسبيح والتحميد', ids: ['subhanwabihamdih', 'subhanazeem', 'ghars', 'adadkhalqih', 'baqiyat'] },
+        { key: 'masbaha_group_tahleel', label: 'التهليل والتكبير', ids: ['takbeer', 'wahdahu', 'hawqala', 'radeetu'] },
         { key: 'masbaha_group_istighfar', label: 'الاستغفار والدعاء', ids: ['istighfar', 'tawbah', 'dhannoon', 'hayyqayyum'] },
         { key: 'masbaha_group_salawat', label: 'الصلاة على النبي ﷺ', ids: ['salawat'] }
     ];
@@ -1263,8 +1339,32 @@
             });
         });
         if (!shown) list.innerHTML = '<div class="dhikr-empty">' + tr('audio_no_results', 'لا توجد نتائج') + '</div>';
+        list.appendChild(addDhikrRow());
         document.getElementById("dhikrSheetCount").textContent = sel.options.length;
     }
+    // "Add your own dhikr" at the end of the list: a row that opens a field in place.
+    function addDhikrRow() {
+        const box = document.createElement('div');
+        box.className = 'dhikr-add';
+        const open = document.createElement('button');
+        open.type = 'button'; open.className = 'dhikr-add-open';
+        open.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+        const lab = document.createElement('span'); lab.textContent = tr('masbaha_add_dhikr', 'إضافة ذكر خاص'); open.appendChild(lab);
+        const form = document.createElement('div'); form.className = 'inline-form'; form.hidden = true;
+        const input = document.createElement('input');
+        input.type = 'text'; input.id = 'pickerDhikrInput'; input.enterKeyHint = 'done';
+        input.placeholder = tr('masbaha_add_dhikr_placeholder', 'أدخل نص الذكر هنا...');
+        const add = document.createElement('button');
+        add.type = 'button'; add.className = 'btn-action btn-inline'; add.textContent = tr('masbaha_add_to_list', 'إضافة للقائمة');
+        const submit = () => { if (addCustomDhikr(input.value)) closeDhikrSheet(); else input.focus(); };
+        add.onclick = submit;
+        input.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } };
+        open.onclick = () => { open.hidden = true; form.hidden = false; input.focus(); };
+        form.appendChild(input); form.appendChild(add);
+        box.appendChild(open); box.appendChild(form);
+        return box;
+    }
+
     function openDhikrSheet() {
         const m = document.getElementById("dhikrSheet");
         if (m.classList.contains("open")) return;
@@ -1450,20 +1550,30 @@
     }
 
     // --- Custom Dhikr ---
-    function addCustomDhikr() {
+    // Add your own dhikr (from settings, or with `text` from the picker).
+    // Returns true when a dhikr was added or found; the counter switches to it.
+    function addCustomDhikr(text) {
+        const fromSettings = typeof text !== 'string';
         const input = document.getElementById("customDhikrInput");
-        const text = input.value.trim();
-        if(!text) return;
-        const id = "custom_" + Date.now();
-        const newDhikr = { id: id, text: text };
-        let customs = JSON.parse(localStorage.getItem("customDhikrs") || "[]");
-        customs.push(newDhikr);
-        localStorage.setItem("customDhikrs", JSON.stringify(customs));
-        appendDhikrOption(newDhikr);
-        input.value = "";
-        document.getElementById("dhikrSelect").value = id;
+        text = (fromSettings ? input.value : text).trim().replace(/\s+/g, ' ');
+        if (!text) return false;
+        const select = document.getElementById("dhikrSelect");
+        // the same words already in the list: just switch to them
+        const same = [...select.options].find(o => normAr(o.text) === normAr(text));
+        let id = same && same.value;
+        if (!id) {
+            id = "custom_" + Date.now();
+            const newDhikr = { id: id, text: text };
+            let customs = JSON.parse(localStorage.getItem("customDhikrs") || "[]");
+            customs.push(newDhikr);
+            localStorage.setItem("customDhikrs", JSON.stringify(customs));
+            appendDhikrOption(newDhikr);
+        }
+        if (fromSettings) input.value = "";
+        select.value = id;
         changeDhikr();
-        toggleSettings();
+        if (fromSettings && document.getElementById("settingsModal").classList.contains("open")) toggleSettings();
+        return true;
     }
 
     function loadCustomDhikrs() {

@@ -179,6 +179,7 @@ export default {
   'masbaha_long_exit': 'LONG_PRESS_TO_EXIT',
   'masbaha_pick_dhikr': 'اختر الذكر',
   'masbaha_search': 'ابحث عن ذكر...',
+  'masbaha_group_frequent': 'الأكثر استخدامًا',
   'masbaha_group_tasbeeh': 'التسبيح والتحميد',
   'masbaha_group_tahleel': 'التهليل والتكبير',
   'masbaha_group_istighfar': 'الاستغفار والدعاء',
