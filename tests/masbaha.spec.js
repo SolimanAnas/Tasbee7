@@ -56,6 +56,47 @@ test.describe('masbaha', () => {
     await expect(page.locator('#count')).toHaveText('1');
   });
 
+  test('power mode: taps count, a held press shows the exit ring under the finger and does not count', async ({ page }) => {
+    await open(page, 'dark');
+    await page.evaluate(() => enterPowerMode());
+    const count = () => page.locator('#powerCount').innerText();
+    const before = Number(await count());
+
+    await page.mouse.click(200, 300);
+    await expect(page.locator('#powerCount')).toHaveText(String(before + 1));
+    await expect(page.locator('#exitCircle')).not.toHaveClass(/holding/);
+
+    // hold, then let go early: the ring appears where the press is, nothing is counted
+    await page.mouse.move(300, 220);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await expect(page.locator('#exitCircle')).toHaveClass(/holding/);
+    const pos = await page.evaluate(() => {
+      const c = document.getElementById('exitCircle');
+      return [c.style.getPropertyValue('--x'), c.style.getPropertyValue('--y')];
+    });
+    expect(pos).toEqual(['300px', '220px']);
+    await page.mouse.up();
+    await expect(page.locator('#exitCircle')).not.toHaveClass(/holding/);
+    await expect(page.locator('#powerModeOverlay')).toHaveClass(/active/);
+    await expect(page.locator('#powerCount')).toHaveText(String(before + 1));
+
+    // near an edge the ring is kept on screen
+    await page.mouse.move(5, 5);
+    await page.mouse.down();
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => document.getElementById('exitCircle').style.getPropertyValue('--x'))).toBe('80px');
+    await page.mouse.up();
+
+    // hold three seconds: leaves the mode, and the lifted finger counts nothing
+    await page.mouse.move(200, 400);
+    await page.mouse.down();
+    await expect(page.locator('#powerModeOverlay')).not.toHaveClass(/active/, { timeout: 4000 });
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+    await expect(page.locator('#count')).toHaveText(String(before + 1));
+  });
+
   test('custom adhkar appear in their own group', async ({ page }) => {
     await page.addInitScript(() => {
       try { localStorage.setItem('customDhikrs', JSON.stringify([{ id: 'custom_1', text: 'ذكر تجريبي' }])); } catch (e) {}
