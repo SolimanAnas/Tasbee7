@@ -141,15 +141,14 @@
         position: relative; z-index: 1;
     }
 
-    @keyframes mRise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-
     /* ================= TOP BAR ================= */
+    /* home · page title · settings — the dhikr itself has its own card below */
     .top-bar {
-        display: flex; gap: 12px; align-items: center; margin-bottom: 18px; flex-shrink: 0; z-index: 10;
-        animation: mRise .5s cubic-bezier(.22,1,.36,1) both;
+        display: grid; grid-template-columns: 48px 1fr 48px; gap: 12px; align-items: center;
+        margin-bottom: 14px; flex-shrink: 0; z-index: 10;
     }
     .icon-btn {
-        width: 48px; height: 48px; flex-shrink: 0;
+        width: 48px; height: 48px; flex-shrink: 0; padding: 0;
         display: flex; align-items: center; justify-content: center;
         background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; color: var(--text-main); cursor: pointer;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -158,112 +157,124 @@
     .icon-btn:active { transform: scale(0.9); background: var(--glass-2); }
     @media (hover:hover) { .icon-btn:hover { border-color: var(--primary); } }
     .icon-btn svg { width: 23px; height: 23px; }
+    .page-title { margin: 0; text-align: center; font-size: 18px; font-weight: 800; color: var(--text-main); letter-spacing: 0; }
 
-    .dhikr-select-wrapper {
-        flex: 1; position: relative; overflow: hidden;
-        background: linear-gradient(135deg, var(--glass-2), var(--glass));
-        border: 1px solid var(--glass-border); border-radius: 16px;
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    }
-    .dhikr-select-wrapper::before {
-        content: '۞'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-        color: var(--accent2); opacity: .6; font-family: 'Amiri', serif; font-size: 15px; pointer-events: none; z-index: 1;
-    }
     #dhikrSelect { display: none; }   /* the list of adhkar; shown through the picker sheet */
-    .dhikr-picker {
-        width: 100%; min-height: 48px; padding: 12px 38px; background: transparent; border: none; color: var(--text-main);
-        font-family: 'Amiri', serif; font-size: 16.5px; font-weight: 700; cursor: pointer; line-height: 1.3;
-        text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; display: block;
-    }
-    .select-arrow { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: .75; font-size: 11px; color: var(--accent2); }
 
     /* ================= MAIN AREA ================= */
     .main-area {
-        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-        width: 100%; overflow-y: auto; padding-bottom: 20px;
+        flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;
+        width: 100%; overflow-y: auto; overscroll-behavior: contain;
+        padding-bottom: calc(44px + env(safe-area-inset-bottom));   /* clear of the screen edge and the gesture bar */
+        scrollbar-width: none;
     }
+    .main-area::-webkit-scrollbar { display: none; }
 
-    /* ================= COUNTER ================= */
-    .counter-anchor {
-        position: relative; width: min(78vw, 312px); height: min(78vw, 312px); margin: auto; flex-shrink: 0;
-        animation: mRise .6s .12s cubic-bezier(.22,1,.36,1) both;
+    /* ===== the dhikr being recited: shown in full, tap to change ===== */
+    .dhikr-card {
+        width: 100%; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;
+        padding: 14px 18px 10px; border-radius: 22px; cursor: pointer; font: inherit; color: var(--text-main);
+        background: linear-gradient(180deg, var(--glass-2), var(--glass));
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        transition: transform .15s ease, border-color .2s;
     }
+    .dhikr-card:active { transform: scale(.985); }
+    @media (hover:hover) { .dhikr-card:hover { border-color: var(--primary); } }
+    .dhikr-text {
+        font-family: 'Amiri', serif; font-weight: 700; font-size: 23px; line-height: 1.6; text-align: center;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .dhikr-text.long { font-size: 19px; line-height: 1.65; }
+    .dhikr-change { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 700; color: var(--primary-bright); }
+    .dhikr-change svg { width: 14px; height: 14px; }
+
+    /* ===== counter: the whole zone counts a tap, not just the ring ===== */
+    .counter-zone {
+        flex: 1 1 auto; min-height: 210px; position: relative;
+        display: grid; place-items: center; cursor: pointer; border-radius: 28px;
+        container-type: size; touch-action: manipulation; -webkit-user-select: none; user-select: none;
+    }
+    .counter-zone:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
     .progress-wrapper {
-        width: 100%; height: 100%; cursor: pointer; border-radius: 50%; position: relative; z-index: 1;
+        position: relative; aspect-ratio: 1;
+        width: min(72vw, 300px);
+        width: min(100cqw, 100cqh, 320px);
         transition: transform 0.12s;
     }
-    .progress-wrapper:active { transform: scale(0.97); }
-    .progress-wrapper svg { transform: rotate(-90deg); width: 100%; height: 100%; overflow: visible; }
+    .counter-zone:active .progress-wrapper { transform: scale(0.975); }
+    .progress-wrapper svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 
-    .progress-wrapper circle { fill: none; stroke-linecap: round; }
-    .bead-circle { stroke: var(--accent2); stroke-width: 3; opacity: .28; stroke-dasharray: 1.6 11.4; }  /* tasbih beads */
-    .bg-circle { stroke: var(--ring-track); stroke-width: 10; }
     /* ring colours follow the theme */
-    #gradEmerald stop:first-child, #gradient stop:first-child { stop-color: var(--ring-a); }
-    #gradEmerald stop:last-child, #gradient stop:last-child { stop-color: var(--ring-b); }
-    #gradComplete stop:first-child { stop-color: var(--ring-done-a); }
-    #gradComplete stop:last-child { stop-color: var(--ring-done-b); }
-    .fg-circle {
-        stroke: url(#gradEmerald); stroke-width: 10;
-        filter: drop-shadow(0 0 7px var(--primary-glow));
-        transition: stroke-dashoffset 0.12s linear, filter 0.3s ease;
+    #gradEmerald stop:first-child { stop-color: var(--ring-a); }
+    #gradEmerald stop:last-child { stop-color: var(--ring-b); }
+    .ring-track { fill: none; stroke: var(--ring-track); stroke-width: 3; }
+    .ring-arc {
+        fill: none; stroke: url(#gradEmerald); stroke-width: 3; stroke-linecap: round;
+        transform: rotate(-90deg); transform-origin: 100px 100px;
+        transition: stroke-dashoffset 0.12s linear;
     }
-    .progress-wrapper.complete .fg-circle { filter: drop-shadow(0 0 18px var(--accent2-glow)); }
+    [dir="rtl"] .ring-arc { transform: scale(-1, 1) rotate(-90deg); }   /* fills the way Arabic reads */
 
-    /* per-tap ripple */
-    .progress-wrapper::after {
-        content: ''; position: absolute; inset: 9%; border-radius: 50%;
-        border: 2px solid var(--primary-bright); opacity: 0; pointer-events: none;
-    }
-    .progress-wrapper.tick::after { animation: tapRipple .5s ease-out; }
-    @keyframes tapRipple { 0% { opacity:.5; transform:scale(.9); } 100% { opacity:0; transform:scale(1.08); } }
+    /* the misbaha: 33 beads and the imam bead at the top; beads light as you count */
+    .bead { fill: var(--ring-track); stroke: var(--glass-border); stroke-width: .6; transition: fill .2s ease, transform .2s ease; transform-box: fill-box; transform-origin: center; }
+    .bead.lit { fill: var(--ring-b); stroke: none; }
+    .bead.now { fill: var(--ring-a); transform: scale(1.45); filter: drop-shadow(0 0 3px var(--primary-glow)); }
+    .imam { fill: var(--accent2); opacity: .85; }
+    .progress-wrapper.complete .bead.lit { fill: var(--ring-done-b); }
+    .progress-wrapper.complete .ring-arc { stroke: var(--ring-done-b); }
 
     .counter-content {
         position: absolute; inset: 0; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; pointer-events: none;
+        align-items: center; justify-content: center; gap: 4px; pointer-events: none; text-align: center;
     }
-    .count-label { font-size: 12px; color: var(--text-muted); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 6px; }
+    .count-label { font-size: 13px; font-weight: 700; color: var(--text-muted); min-height: 1.2em; }
     .count-number {
-        font-size: clamp(62px, 16vw, 94px); font-weight: 800; line-height: 1; letter-spacing: -2px;
+        font-size: clamp(56px, 22cqw, 92px); font-weight: 800; line-height: 1; letter-spacing: -1px;
+        font-variant-numeric: tabular-nums;
         background: var(--count-grad);
         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         text-shadow: var(--count-shadow);
     }
-    .progress-wrapper.tick .count-number { animation: numPop .32s cubic-bezier(.34,1.56,.64,1); }
-    @keyframes numPop { 0% { transform:scale(1); } 45% { transform:scale(1.14); } 100% { transform:scale(1); } }
+    .progress-wrapper.tick .count-number { animation: numPop .28s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes numPop { 0% { transform:scale(1); } 45% { transform:scale(1.1); } 100% { transform:scale(1); } }
     .target-pill {
-        margin-top: 12px; font-size: 13px; font-weight: 600;
+        margin-top: 6px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
         background: var(--pill-bg); color: var(--pill-ink);
-        border: 1px solid var(--pill-bd); padding: 5px 14px; border-radius: 999px;
+        border: 1px solid var(--pill-bd); padding: 4px 14px; border-radius: 999px;
     }
 
-    .mini-reset-btn, .mini-power-btn {
-        position: absolute; bottom: 5%; width: 46px; height: 46px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20;
-        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        background: var(--mini-bg); box-shadow: 0 6px 16px rgba(0,0,0,0.2); transition: transform .15s, background .2s;
+    /* ===== actions: labelled, below the ring, away from where you tap ===== */
+    .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex-shrink: 0; }
+    .act {
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+        min-height: 60px; padding: 8px 4px; border-radius: 18px; cursor: pointer;
+        background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-main);
+        font-family: 'Tajawal', sans-serif; font-size: clamp(10.5px, 3.1vw, 12px); font-weight: 700; line-height: 1.2;
+        white-space: nowrap; min-width: 0;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        transition: transform .15s ease, background .2s, opacity .2s;
     }
-    .mini-reset-btn { left: 1%; border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; }
-    .mini-power-btn { right: 1%; border: 1px solid var(--primary-glow); color: var(--primary-bright); }
-    .mini-reset-btn:active { transform: scale(0.9); background: rgba(239, 68, 68, 0.2); }
-    .mini-power-btn:active { transform: scale(0.9); background: rgba(16, 185, 129, 0.2); }
-    .mini-reset-btn svg, .mini-power-btn svg { width: 18px; height: 18px; }
+    .act svg { width: 21px; height: 21px; color: var(--primary-bright); }
+    .act:active { transform: scale(.93); background: var(--glass-2); }
+    .act:disabled { opacity: .45; cursor: default; }
+    .act.danger svg { color: #ef4444; }
+    .act-target b { font-variant-numeric: tabular-nums; }
 
     /* ================= VIRTUE CARD ================= */
     .hadith-card {
-        width: 100%; position: relative; overflow: hidden;
+        width: 100%; flex-shrink: 0; position: relative;
         background: linear-gradient(180deg, var(--glass-2), var(--glass));
-        border: 1px solid var(--glass-border); border-radius: 22px; padding: 22px 20px 20px;
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); text-align: center; flex-shrink: 0;
-        margin-top: 22px; margin-bottom: calc(56px + env(safe-area-inset-bottom));   /* clear of the screen edge and the gesture bar */
-        animation: mRise .6s .2s cubic-bezier(.22,1,.36,1) both;
+        border: 1px solid var(--glass-border); border-radius: 22px; padding: 14px 18px 16px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); text-align: center;
     }
-    .hadith-card::before {
-        content: '۞'; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-        color: var(--accent2); opacity: .5; font-family: 'Amiri', serif; font-size: 15px;
-    }
-    .hadith-title { font-size: 12px; color: var(--accent2-bright); letter-spacing: .16em; text-transform: uppercase; margin: 6px 0 10px; font-weight: 700; }
-    .hadith-text { font-family: 'Amiri', serif; font-size: 18px; line-height: 1.95; color: var(--text-main); }
+    .hadith-title { font-size: 13px; color: var(--primary-bright); margin: 0 0 6px; font-weight: 800; }
+    .hadith-text { font-family: 'Amiri', serif; font-size: 17.5px; line-height: 1.9; color: var(--text-main); }
+    .hadith-source { margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
+    .hadith-source:empty { display: none; }
+
+    /* screen-reader only (the count is announced after each tap) */
+    .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
     /* ================= MODALS & FORMS ================= */
     .modal-overlay {
@@ -320,13 +331,14 @@
     .btn-action { background: var(--primary); color: var(--on-primary); border: none; padding: 12px 20px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; transition: 0.2s; font-family: inherit; }
     .btn-muted { background: var(--muted-btn) !important; color: var(--muted-btn-ink) !important; }
     .btn-action:active { transform: scale(0.98); opacity: 0.9; }
-    .reset-btn-full { width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    .stats-table td.stats-empty { text-align: center !important; color: var(--text-muted) !important; font-weight: 600 !important; font-family: inherit !important; }
 
     .stats-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
     .stats-table td { padding: 9px 0; border-bottom: 1px solid var(--hairline); font-size: 14px; color: var(--text-muted); }
     .stats-table td:first-child { padding-left: 10px; white-space: normal; word-break: break-word; line-height: 1.5; }
     .stats-table td:last-child { text-align: left; color: var(--text-main); font-weight: bold; font-family: sans-serif; white-space: nowrap; }
-    .total-row { display: flex; justify-content: space-between; font-weight: bold; color: var(--accent2-bright); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); font-size: 16px; }
+    .total-row { display: flex; justify-content: space-between; font-weight: 800; color: var(--text-main); font-size: 15px; }
+    #grandTotalDisplay { color: var(--primary-bright); font-variant-numeric: tabular-nums; }
 
     .meaning-item { margin-bottom: 20px; border-bottom: 1px solid var(--hairline); padding-bottom: 15px; }
     .meaning-item:last-child { border: none; }
@@ -364,9 +376,42 @@
     #toast.show { transform: translateX(-50%) translateY(0); }
     #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 
-    .about-section { text-align: center; padding: 10px 0; }
+    .about-section { text-align: center; padding: 6px 0 4px; }
     .app-version { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
     .dev-credit { font-family: 'Amiri', serif; font-size: 15px; color: var(--accent2-bright); letter-spacing: .5px; font-weight: bold; }
+
+    /* ===== settings rows ===== */
+    label.setting-row { cursor: pointer; }
+    .total-row { margin-top: 0; padding-top: 12px; border-top: 1px solid var(--glass-border); }
+    .set-link {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; margin-bottom: 6px;
+        padding: 13px 14px; border-radius: 16px; background: var(--field-bg); border: 1px solid var(--glass-border);
+        color: var(--text-main); font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; text-align: start; list-style: none;
+    }
+    .set-link::-webkit-details-marker { display: none; }
+    .set-link:active { transform: scale(.99); }
+    .set-link .chev { width: 18px; height: 18px; opacity: .45; flex: none; transition: transform .2s; }
+    [dir="rtl"] .set-link .chev { transform: scaleX(-1); }
+    .stats-details[open] > .set-link .chev { transform: rotate(90deg); }
+    .stats-details .stats-table { margin: 0 0 8px; }
+    .set-link.danger { color: #ef4444; border-color: rgba(239,68,68,.22); justify-content: center; }
+    .inline-form { display: flex; gap: 8px; align-items: stretch; }
+    .inline-form input { flex: 1; min-width: 0; width: auto; }
+    .btn-inline { width: auto; margin-top: 0; flex: none; padding: 12px 16px; }
+    .form-note { font-size: 12.5px; color: var(--primary-bright); margin-top: 8px; font-weight: 600; }
+
+    /* ===== target sheet ===== */
+    .target-chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+    .target-chip {
+        min-height: 52px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--field-bg);
+        color: var(--text-main); font-family: 'Tajawal', sans-serif; font-size: 18px; font-weight: 800; cursor: pointer;
+        font-variant-numeric: tabular-nums; transition: transform .15s, background .2s;
+    }
+    .target-chip:active { transform: scale(.94); }
+    .target-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 14px var(--primary-glow); }
+
+    /* beads count the way the page reads */
+    [dir="rtl"] .beads { transform: scale(-1, 1); transform-origin: 100px 100px; }
 
     /* ===== theme selector (same as the audio page) ===== */
     .theme-pill-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 5px; background: var(--field-bg); border-radius: 18px; border: 1px solid var(--glass-border); }
@@ -401,8 +446,8 @@
     .dhikr-empty { text-align: center; color: var(--text-muted); padding: 24px 0; }
 
     @media (prefers-reduced-motion: reduce) {
-        .top-bar, .counter-anchor, .hadith-card,
-        .progress-wrapper.tick::after, .progress-wrapper.tick .count-number { animation: none !important; }
+        .progress-wrapper.tick .count-number { animation: none !important; }
+        .bead, .ring-arc, .progress-wrapper { transition: none !important; }
     }
 </style>
 </head>
@@ -427,14 +472,18 @@
 <div class="app-container" id="mainApp">
 
     <div class="top-bar">
-        <div class="icon-btn" onclick="goHome()" title="الرئيسية" data-i18n-title="home">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button type="button" class="icon-btn" onclick="goHome()" title="الرئيسية" data-i18n-title="home" aria-label="الرئيسية" data-i18n-aria="home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-        </div>
+        </button>
+        <h1 class="page-title" data-i18n="card_tasbih">المسبحة</h1>
+        <button type="button" class="icon-btn" onclick="toggleSettings()" title="الإعدادات" data-i18n-title="settings" aria-label="الإعدادات" data-i18n-aria="settings">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+    </div>
 
-        <div class="dhikr-select-wrapper">
             <!-- the adhkar list (data); chosen through the picker sheet below -->
             <select id="dhikrSelect" onchange="changeDhikr()" aria-hidden="true" tabindex="-1">
                 <option value="subhan">سبحان الله</option>
@@ -455,70 +504,70 @@
                 <option value="dhannoon">لا إله إلا أنت سبحانك إني كنت من الظالمين</option>
                 <option value="hayyqayyum">يا حي يا قيوم برحمتك أستغيث</option>
             </select>
-            <button type="button" class="dhikr-picker" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">سبحان الله</button>
-            <span class="select-arrow" aria-hidden="true">▼</span>
-        </div>
-
-        <div class="icon-btn" onclick="toggleSettings()" title="الإعدادات" data-i18n-title="settings">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </div>
-    </div>
 
     <div class="main-area">
-        <div class="counter-anchor">
-            <div class="progress-wrapper" onclick="increment()">
-                <svg viewBox="0 0 200 200">
+        <!-- the dhikr being recited, in full; tap to choose another -->
+        <button type="button" class="dhikr-card" id="dhikrPickerBtn" onclick="openDhikrSheet()" aria-haspopup="dialog">
+            <span class="dhikr-text" id="dhikrText">سبحان الله</span>
+            <span class="dhikr-change"><span data-i18n="masbaha_change">تغيير الذكر</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+        </button>
+
+        <!-- tap anywhere in this zone to count -->
+        <div class="counter-zone" id="counterZone" role="button" tabindex="0" onclick="increment()"
+             aria-label="سبّح، اضغط للعد" data-i18n-aria="masbaha_count_aria" aria-describedby="countAnnounce">
+            <div class="progress-wrapper">
+                <svg viewBox="0 0 200 200" aria-hidden="true">
                     <defs>
                         <linearGradient id="gradEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stop-color="#34d399" />
                             <stop offset="100%" stop-color="#059669" />
                         </linearGradient>
-                        <linearGradient id="gradComplete" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#7dd3fc" />
-                            <stop offset="100%" stop-color="#0ea5e9" />
-                        </linearGradient>
-                        <!-- kept for backward compatibility -->
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#34d399" />
-                            <stop offset="100%" stop-color="#059669" />
-                        </linearGradient>
                     </defs>
-                    <circle class="bead-circle" cx="100" cy="100" r="90" />
-                    <circle class="bg-circle" cx="100" cy="100" r="90" />
-                    <circle class="fg-circle" id="progressCircle" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="565.48" />
+                    <circle class="ring-track" cx="100" cy="100" r="77" />
+                    <circle class="ring-arc" id="progressCircle" cx="100" cy="100" r="77" stroke-dasharray="483.8" stroke-dashoffset="483.8" />
+                    <g class="beads" id="beads"></g>
                 </svg>
                 <div class="counter-content">
-                    <span class="count-label" data-i18n="masbaha_counter">عدد التكرار</span>
+                    <span class="count-label" id="countLabel"></span>
                     <span class="count-number" id="count">0</span>
-                    <div class="target-pill">الهدف: <span id="targetDisplay">33</span></div>
+                    <span class="target-pill" id="roundProgress"></span>
                 </div>
             </div>
-
-            <div class="mini-reset-btn" onclick="openResetModal(event)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-            </div>
-
-            <div class="mini-power-btn" onclick="enterPowerMode()" title="وضع توفير الطاقة">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            </div>
+            <span class="sr-only" id="countAnnounce" aria-live="polite"></span>
         </div>
 
-        <div class="hadith-card">
-            <div class="hadith-title" data-i18n="masbaha_virtue">فضل الذكر</div>
+        <div class="actions">
+            <button type="button" class="act" id="undoBtn" onclick="undoTap()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                <span data-i18n="masbaha_undo">تراجع</span>
+            </button>
+            <button type="button" class="act act-target" onclick="openTargetSheet()" aria-haspopup="dialog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+                <span id="targetBtnLabel">الهدف 33</span>
+            </button>
+            <button type="button" class="act danger" onclick="openResetModal(event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                <span data-i18n="masbaha_reset_short">تصفير</span>
+            </button>
+            <button type="button" class="act" onclick="enterPowerMode()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <span data-i18n="masbaha_power">توفير الطاقة</span>
+            </button>
+        </div>
+
+        <section class="hadith-card" aria-labelledby="virtueTitle">
+            <h2 class="hadith-title" id="virtueTitle" data-i18n="masbaha_virtue">فضل الذكر</h2>
             <div class="hadith-text" id="hintBox">...</div>
-        </div>
+            <div class="hadith-source" id="hintSource"></div>
+        </section>
     </div>
 </div>
 
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) toggleSettings()">
-    <div class="modal-content">
+    <div class="modal-content" role="dialog" aria-labelledby="settingsTitle">
         <div class="modal-header">
-            <span class="modal-title" data-i18n="settings">الإعدادات</span>
-            <button class="close-btn" onclick="toggleSettings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+            <span class="modal-title" id="settingsTitle" data-i18n="settings">الإعدادات</span>
+            <button class="close-btn" onclick="toggleSettings()" aria-label="إغلاق" data-i18n-aria="close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></button>
         </div>
 
         <div class="setting-group">
@@ -540,63 +589,76 @@
         </div>
 
         <div class="setting-group">
-            <span class="group-title">عام</span>
-            <div class="setting-row">
-                <span class="setting-label" data-i18n="masbaha_daily_target">الهدف اليومي</span>
-                <input type="number" id="targetInput" min="1" onchange="saveTarget()">
-            </div>
-            <div class="setting-row">
+            <span class="group-title" data-i18n="masbaha_sec_counter">العداد</span>
+            <label class="setting-row">
                 <span class="setting-label" data-i18n="masbaha_sound">الصوت</span>
-                <label class="switch">
+                <span class="switch">
                     <input type="checkbox" id="soundToggle" onchange="saveSettings()">
                     <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-row">
+                </span>
+            </label>
+            <label class="setting-row">
                 <span class="setting-label" data-i18n="masbaha_vibration">الاهتزاز</span>
-                <label class="switch">
+                <span class="switch">
                     <input type="checkbox" id="vibrateToggle" onchange="saveSettings()">
                     <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-
-        <div class="setting-group">
-            <span class="group-title">الإحصائيات الكلية (مدى الحياة)</span>
-            <table class="stats-table" id="statsTable"></table>
-            <div class="total-row">
-                <span data-i18n="masbaha_total">المجموع الكلي</span>
-                <span id="grandTotalDisplay">0</span>
-            </div>
-            <button class="btn-action" onclick="DhikrStats.share()" data-i18n="ds_share">مشاركة إنجاز الأسبوع</button>
-            <button class="btn-action" style="background:#ef4444; margin-top:15px; font-size:12px" onclick="openResetStatsModal()" data-i18n="masbaha_reset_all">تصفير الإحصائيات بالكامل</button>
-        </div>
-
-        <div class="setting-group">
-            <span class="group-title">معلومات</span>
-            <button class="btn-action" onclick="toggleMeanings()" data-i18n-html="masbaha_show_meanings"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> عرض معاني الأذكار</button>
+                </span>
+            </label>
         </div>
 
         <div class="setting-group">
             <span class="group-title" data-i18n="masbaha_add_dhikr">إضافة ذكر خاص</span>
-            <input type="text" id="customDhikrInput" placeholder="أدخل نص الذكر هنا..." data-i18n-placeholder="masbaha_add_dhikr_placeholder">
-            <button class="btn-action" onclick="addCustomDhikr()" data-i18n="masbaha_add_to_list">إضافة للقائمة</button>
+            <div class="inline-form">
+                <input type="text" id="customDhikrInput" placeholder="أدخل نص الذكر هنا..." data-i18n-placeholder="masbaha_add_dhikr_placeholder" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomDhikr()}">
+                <button class="btn-action btn-inline" onclick="addCustomDhikr()" data-i18n="masbaha_add_to_list">إضافة للقائمة</button>
+            </div>
         </div>
 
         <div class="setting-group">
             <span class="group-title" data-i18n="masbaha_daily_reminder">التذكير اليومي</span>
-            <div class="setting-row">
+            <div class="inline-form">
                 <input type="time" id="reminderTime">
+                <button class="btn-action btn-inline" onclick="setReminder()" data-i18n="masbaha_save_reminder">حفظ التذكير</button>
             </div>
-            <button class="btn-action" onclick="setReminder()" data-i18n="masbaha_save_reminder">حفظ التذكير</button>
-                <div id="reminderStatus" style="font-size: 12px; color: var(--primary); margin-top: 5px; display: none;" data-i18n-html="masbaha_reminder_active">تم تفعيل التذكير <img src="../img/SVG/check-circle.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+            <div id="reminderStatus" class="form-note" style="display: none;" data-i18n-html="masbaha_reminder_active">تم تفعيل التذكير <img src="../img/SVG/check-circle.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
         </div>
 
-        <button class="reset-btn-full" onclick="openResetModal(null)" data-i18n="masbaha_reset_counter">تصفير العداد الحالي</button>
-        <br><br>
+        <div class="setting-group">
+            <span class="group-title" data-i18n="masbaha_sec_stats">الإحصائيات</span>
+            <div class="setting-row total-row">
+                <span data-i18n="masbaha_total">المجموع الكلي</span>
+                <span id="grandTotalDisplay">0</span>
+            </div>
+            <details class="stats-details">
+                <summary class="set-link"><span data-i18n="masbaha_stats_details">التفاصيل لكل ذكر</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+                <table class="stats-table" id="statsTable"></table>
+            </details>
+            <button type="button" class="set-link" onclick="DhikrStats.share()"><span data-i18n="ds_share">مشاركة إنجاز الأسبوع</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            <button type="button" class="set-link" onclick="toggleMeanings()"><span data-i18n-html="masbaha_show_meanings"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> عرض معاني الأذكار</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+
+        <div class="setting-group">
+            <button type="button" class="set-link danger" onclick="openResetStatsModal()"><span data-i18n="masbaha_reset_all">تصفير الإحصائيات بالكامل</span></button>
+        </div>
+
         <div class="about-section">
             <div class="app-version"> <img src="../img/SVG/heart.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> </div>
-            <div class="dev-credit">   لا تنسونا من صالح دعائكم </div>
+            <div class="dev-credit">لا تنسونا من صالح دعائكم</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="targetSheet" onclick="if(event.target===this) closeTargetSheet()">
+    <div class="modal-content" role="dialog" aria-labelledby="targetSheetTitle">
+        <div class="modal-header">
+            <span class="modal-title" id="targetSheetTitle" data-i18n="masbaha_target_title">هدف هذا الذكر</span>
+            <button class="close-btn" onclick="closeTargetSheet()" aria-label="إغلاق" data-i18n-aria="close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="target-chips" id="targetChips"></div>
+        <span class="group-title" data-i18n="masbaha_target_other">عدد آخر</span>
+        <div class="inline-form">
+            <input type="number" id="targetInput" min="1" max="100000" inputmode="numeric" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();saveCustomTarget()}">
+            <button class="btn-action btn-inline" onclick="saveCustomTarget()" data-i18n="masbaha_save">حفظ</button>
         </div>
     </div>
 </div>
@@ -729,12 +791,16 @@
     const customVerse = `«وَالذَّاكِرِينَ اللَّهَ كَثِيرًا وَالذَّاكِرَاتِ أَعَدَّ اللَّهُ لَهُمْ مَغْفِرَةً وَأَجْرًا عَظِيمًا»`;
 
     let currentDhikr = localStorage.getItem("currentDhikr") || "subhan";
-    const fullCircle = 565.48;
+    const fullCircle = 483.8;   // ring arc circumference (r = 77)
+    const BEADS = 33;           // a misbaha of 33 beads
 
     // --- Sound & Haptic ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioCtx = null;        // created on the first sound, after a tap (browsers block it before)
     function playSoftClick() {
         if(!document.getElementById("soundToggle").checked) return;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        if (!audioCtx) audioCtx = new AC();
         if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
@@ -754,6 +820,7 @@
         if (!isVibrateOn || !navigator.vibrate) return;
         if (type === 'tap') navigator.vibrate(20);
         else if (type === 'success') navigator.vibrate([100, 50, 100, 50, 100]);
+        else if (type === 'undo') navigator.vibrate([12, 40, 12]);
     }
 
     // Per-tap visual feedback (ripple + number pop), re-triggered each tap via reflow
@@ -774,9 +841,11 @@
             currentDhikr = document.getElementById("dhikrSelect").options[0].value;
             document.getElementById("dhikrSelect").value = currentDhikr;
         }
+        renderBeads();
         updatePickerLabel();
         markTheme(document.documentElement.getAttribute('data-theme'));
         document.getElementById("dhikrSearch").addEventListener('input', renderDhikrList);
+        document.addEventListener('keydown', onKey);
 
         const savedSound = localStorage.getItem("soundPref");
         const savedVibrate = localStorage.getItem("vibratePref");
@@ -816,29 +885,64 @@
         document.getElementById("count").innerText = count;
         document.getElementById("powerCount").innerText = count;
         document.getElementById("targetInput").value = target;
-        document.getElementById("targetDisplay").innerText = target;
+        document.getElementById("targetBtnLabel").textContent = tr('masbaha_target_short', 'الهدف {n}', { n: target });
         updateProgress(count, target);
         showHint();
     }
 
-    function updateProgress(count, target) {
-        target = parseInt(target);
-        let displayCount = count % target;
-        if(count > 0 && displayCount === 0) displayCount = target;
+    // The 33 beads around the ring and the imam bead at the top (built once).
+    function renderBeads() {
+        const g = document.getElementById("beads");
+        if (!g || g.childElementCount) return;
+        const NS = 'http://www.w3.org/2000/svg';
+        const slots = BEADS + 1;            // slot 0 is the imam bead
+        for (let i = 1; i <= BEADS; i++) {
+            const a = (-90 + i * 360 / slots) * Math.PI / 180;
+            const c = document.createElementNS(NS, 'circle');
+            c.setAttribute('class', 'bead');
+            c.setAttribute('cx', (100 + 90 * Math.cos(a)).toFixed(2));
+            c.setAttribute('cy', (100 + 90 * Math.sin(a)).toFixed(2));
+            c.setAttribute('r', '4.1');
+            g.appendChild(c);
+        }
+        const imam = document.createElementNS(NS, 'ellipse');
+        imam.setAttribute('class', 'imam');
+        imam.setAttribute('cx', '100'); imam.setAttribute('cy', '10');
+        imam.setAttribute('rx', '3.4'); imam.setAttribute('ry', '6.6');
+        g.appendChild(imam);
+    }
 
-        const percent = target ? Math.min(displayCount / target, 1) : 0;
-        const offset = fullCircle - (fullCircle * percent);
+    // Ring, beads and the labels inside the ring for `count` taps on a target.
+    function updateProgress(count, target) {
+        target = parseInt(target) || 33;
+        count = parseInt(count) || 0;
+        let inRound = count % target;
+        if (count > 0 && inRound === 0) inRound = target;
+        const round = count === 0 ? 0 : Math.ceil(count / target);
+        const done = count > 0 && count % target === 0;
+
+        const percent = Math.min(inRound / target, 1);
         const circle = document.getElementById("progressCircle");
         const wrapper = document.querySelector(".progress-wrapper");
-        circle.style.strokeDashoffset = offset;
+        circle.style.strokeDashoffset = fullCircle - fullCircle * percent;
+        wrapper.classList.toggle("complete", done);
 
-        if(count > 0 && count % target === 0) {
-            circle.style.stroke = "url(#gradComplete)";    // completed → azure ring
-            if (wrapper) wrapper.classList.add("complete");
-        } else {
-            circle.style.stroke = "url(#gradEmerald)";    // in progress → emerald ring
-            if (wrapper) wrapper.classList.remove("complete");
-        }
+        const lit = Math.round(percent * BEADS);
+        document.querySelectorAll('#beads .bead').forEach((b, i) => {
+            b.classList.toggle('lit', i < lit);
+            b.classList.toggle('now', i === lit - 1 && !done);
+        });
+
+        document.getElementById("countLabel").textContent =
+            count === 0 ? tr('masbaha_tap_hint', 'اضغط للتسبيح') : tr('masbaha_round', 'الدورة {n}', { n: round });
+        document.getElementById("roundProgress").textContent =
+            tr('masbaha_progress', '{n} من {target}', { n: inRound, target });
+        document.getElementById("undoBtn").disabled = count === 0;
+    }
+
+    function announce(count) {
+        const el = document.getElementById("countAnnounce");
+        if (el) el.textContent = String(count);
     }
 
     function increment() {
@@ -870,13 +974,46 @@
         playSoftClick();
         pulseTick();
         updateProgress(count, target);
+        announce(count);
 
         if(target > 0 && count % target === 0) {
             triggerHaptic('success');
-            triggerConfetti();
+            if (target >= 7) triggerConfetti();   // not every few taps on the short adhkar
         } else {
             triggerHaptic('tap');
         }
+    }
+
+    // Take back the last tap (a slip of the finger): the counter, the totals,
+    // today's count and the weekly log all go back by one.
+    function undoTap() {
+        let count = parseInt(localStorage.getItem(cKey()) || 0);
+        if (count <= 0) return;
+        count--;
+        localStorage.setItem(cKey(), count);
+        const dec = k => { const v = parseInt(localStorage.getItem(k) || 0); if (v > 0) localStorage.setItem(k, v - 1); };
+        dec(totalKey(currentDhikr));
+        dec("grand_total");
+        checkDailyReset();
+        dec("masbaha_today");
+        if (window.DhikrStats && DhikrStats.untap) DhikrStats.untap(currentDhikr);
+        document.getElementById("count").innerText = count;
+        document.getElementById("powerCount").innerText = count;
+        updateProgress(count, localStorage.getItem(tKey()));
+        announce(count);
+        triggerHaptic('undo');
+    }
+
+    // Keyboard: Space / Enter / ↑ / + count, Backspace / ↓ / − take one back.
+    function onKey(e) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (document.querySelector('.modal-overlay.open, .modal-overlay.active, #powerModeOverlay.active')) return;
+        const tag = (e.target && e.target.tagName) || '';
+        if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+        const onButton = /BUTTON|A/.test(tag);
+        if ((e.key === ' ' || e.key === 'Enter') && !onButton) { e.preventDefault(); increment(); }
+        else if (e.key === 'ArrowUp' || e.key === '+') { e.preventDefault(); increment(); }
+        else if (e.key === 'Backspace' || e.key === 'ArrowDown' || e.key === '-') { e.preventDefault(); undoTap(); }
     }
 
     function changeDhikr() {
@@ -899,8 +1036,12 @@
     function updatePickerLabel() {
         const sel = document.getElementById("dhikrSelect");
         const opt = sel.selectedOptions[0] || sel.options[0];
-        const btn = document.getElementById("dhikrPickerBtn");
-        if (opt && btn) { btn.textContent = opt.text; btn.title = opt.text; }
+        const el = document.getElementById("dhikrText");
+        if (opt && el) {
+            el.textContent = opt.text;
+            el.classList.toggle('long', opt.text.length > 34);
+            document.getElementById("dhikrPickerBtn").setAttribute('aria-label', opt.text + '، ' + tr('masbaha_change', 'تغيير الذكر'));
+        }
     }
     // search ignores diacritics, tatweel and alef/yeh/teh-marbuta forms
     function normAr(x) {
@@ -992,21 +1133,57 @@
         }
     });
 
-    function saveTarget() {
-        const newTarget = document.getElementById("targetInput").value;
-        localStorage.setItem(tKey(), newTarget);
-        document.getElementById("targetDisplay").innerText = newTarget;
-        updateProgress(parseInt(document.getElementById("count").innerText), newTarget);
+    function saveTarget(value) {
+        const n = parseInt(value != null ? value : document.getElementById("targetInput").value);
+        if (!(n >= 1 && n <= 100000)) { document.getElementById("targetInput").focus(); return false; }
+        localStorage.setItem(tKey(), n);
+        loadCounter();
+        return true;
     }
+
+    // ===== Target sheet: common counts in one tap, or any number =====
+    const TARGET_CHOICES = [3, 7, 10, 33, 99, 100, 1000];
+    function renderTargetChips() {
+        const box = document.getElementById("targetChips");
+        const cur = parseInt(localStorage.getItem(tKey())) || 33;
+        box.innerHTML = '';
+        TARGET_CHOICES.forEach(n => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'target-chip' + (n === cur ? ' active' : '');
+            b.textContent = n.toLocaleString('en-US');
+            if (n === cur) b.setAttribute('aria-pressed', 'true');
+            b.onclick = () => { saveTarget(n); closeTargetSheet(); };
+            box.appendChild(b);
+        });
+        document.getElementById("targetInput").value = cur;
+    }
+    function openTargetSheet() {
+        const m = document.getElementById("targetSheet");
+        if (m.classList.contains("open")) return;
+        renderTargetChips();
+        m.classList.add("open");
+        if (window.BackClose) BackClose.opened(() => m.classList.remove("open"));
+    }
+    function closeTargetSheet() {
+        const m = document.getElementById("targetSheet");
+        if (m.classList.contains("open") && window.BackClose) BackClose.closed();
+        m.classList.remove("open");
+    }
+    function saveCustomTarget() { if (saveTarget()) closeTargetSheet(); }
 
     function saveSettings() {
         localStorage.setItem("soundPref", document.getElementById("soundToggle").checked);
         localStorage.setItem("vibratePref", document.getElementById("vibrateToggle").checked);
     }
 
+    // The virtue, with its source (the trailing "(رواه …)") on a line of its own.
     function showHint() {
-        if(currentDhikr.startsWith("custom_")) document.getElementById("hintBox").innerText = customVerse;
-        else document.getElementById("hintBox").innerText = hints[currentDhikr] || "";
+        let text = currentDhikr.startsWith("custom_") ? customVerse : (hints[currentDhikr] || "");
+        let source = '';
+        const m = /\s*\(([^()]+)\)\s*$/.exec(text);
+        if (m) { source = m[1]; text = text.slice(0, m.index); }
+        document.getElementById("hintBox").innerText = text;
+        document.getElementById("hintSource").textContent = source;
     }
 
     function toggleSettings() {
@@ -1089,16 +1266,22 @@
         table.innerHTML = "";
         const select = document.getElementById("dhikrSelect");
         let grandTotal = 0;
-        for (let i = 0; i < select.options.length; i++) {
-            let key = select.options[i].value;
-            let name = select.options[i].text;
-            let count = parseInt(localStorage.getItem(totalKey(key)) || 0);
-            let row = table.insertRow();
-            let cellName = row.insertCell(0);
-            let cellCount = row.insertCell(1);
-            cellName.innerText = name;
-            cellCount.innerText = count.toLocaleString('en-US');
+        const rows = [];
+        for (const o of select.options) {
+            const count = parseInt(localStorage.getItem(totalKey(o.value)) || 0);
             grandTotal += count;
+            if (count > 0) rows.push([o.text, count]);
+        }
+        rows.sort((a, b) => b[1] - a[1]);   // the adhkar you say most first
+        rows.forEach(([name, count]) => {
+            const row = table.insertRow();
+            row.insertCell(0).innerText = name;
+            row.insertCell(1).innerText = count.toLocaleString('en-US');
+        });
+        if (!rows.length) {
+            const c = table.insertRow().insertCell(0);
+            c.colSpan = 2; c.className = 'stats-empty';
+            c.innerText = tr('masbaha_stats_empty', 'لم تُسجَّل تسبيحات بعد');
         }
         localStorage.setItem("grand_total", grandTotal);
         document.getElementById("grandTotalDisplay").innerText = grandTotal.toLocaleString('en-US');
@@ -1284,7 +1467,12 @@
 
 <script src="../js/i18n.js"></script>
 <script>
-    if (window.I18n) I18n.init();
+    if (window.I18n) {
+        // labels built in script (round, target, progress) follow the language once it has loaded
+        const relabel = () => { if (typeof loadCounter === 'function' && document.getElementById('beads').childElementCount) { loadCounter(); updatePickerLabel(); } };
+        Promise.resolve(I18n.init()).then(relabel);
+        window.addEventListener('langchange', relabel);
+    }
 </script>
 <script>
     if ('serviceWorker' in navigator) {
