@@ -1,8 +1,10 @@
 // Audio and radio players on wide, short landscape screens: car head units
 // (800×480 to 1920×720) and phones held sideways. One screen with no
-// scrolling; the player in two columns with a line between — the title and
-// the controls on the reading side, the art beside them — the pickers in
-// view, big tap targets; phones in portrait keep their layout.
+// scrolling; the player in two balanced columns with a line between — the
+// title and the controls on the reading side, the art beside them — radio's
+// live indicator above the station name, the pickers in view and alike (an
+// icon tile on the reading side of each), big tap targets; phones in
+// portrait keep their layout. Also: the shuffle icon is the 🔀 shape.
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = 'http://localhost:8080';
@@ -25,6 +27,12 @@ async function open(page, file, { width, height, lang = 'ar' }) {
       title: box('#nowSurah') || box('#nowStation'),
       divider: getComputedStyle(document.querySelector('.hero-now')).borderInlineStartStyle,
       sideDisplay: getComputedStyle(document.querySelector('.hero-side')).display,
+      badge: box('#liveBadge'),
+      cards: [...document.querySelectorAll('.sel-row > .sel-card, .app > .sel-card')].filter(c => c.offsetParent).map(c => {
+        const r = c.getBoundingClientRect(), icon = c.querySelector('.sel-icon, .offl-entry-icon'), text = c.querySelector('.sel-text');
+        const ib = icon && icon.offsetWidth ? icon.getBoundingClientRect() : null, tb = text.getBoundingClientRect();
+        return { h: r.height, iconStart: !!ib && (getComputedStyle(document.documentElement).direction === 'rtl' ? ib.left >= tb.right - 1 : ib.right <= tb.left + 1) };
+      }),
       mini: !!document.querySelector('.mini.show'),
     };
   });
@@ -50,8 +58,19 @@ test.describe('players on landscape screens', () => {
         expect(s.pickers.b).toBeLessThanOrEqual(s.vh);
         expect(s.play.w).toBeGreaterThanOrEqual(car ? 72 : 60);    // phones sideways: still well over 44 px
         expect(s.skip.w).toBeGreaterThanOrEqual(car ? 56 : 46);
-        expect(Math.min(s.action.w, s.action.h)).toBeGreaterThanOrEqual(car ? 46 : 44);
+        expect(Math.min(s.action.w, s.action.h)).toBeGreaterThanOrEqual(44);   // the lighter secondary bar
         expect(s.mini).toBe(false);
+        // the pickers alike: the same height, an icon tile on the reading side of each
+        for (const c of s.cards) {
+          expect(Math.abs(c.h - s.cards[0].h)).toBeLessThanOrEqual(1);
+          expect(c.iconStart).toBe(true);
+        }
+        // radio: the live indicator just above the station name, over the controls
+        if (file === 'radio.html') {
+          expect(s.badge.b).toBeLessThanOrEqual(s.title.t + 1);
+          expect(s.title.t - s.badge.b).toBeLessThan(40);
+          expect(Math.abs((s.badge.l + s.badge.r) / 2 - (s.controls.l + s.controls.r) / 2)).toBeLessThan(4);
+        }
       });
     }
 
@@ -105,5 +124,15 @@ test.describe('players on landscape screens', () => {
     const r = await page.locator('#stationSheet').boundingBox();
     expect(r.width).toBeLessThanOrEqual(760);
     expect(Math.abs(r.x + r.width / 2 - 640)).toBeLessThan(2);
+  });
+});
+
+test.describe('player icons', () => {
+  test('the shuffle icon is the 🔀 shape (two arrows swapping lanes) on every player page', async ({ request }) => {
+    for (const file of ['audio.html', 'audio-download.html', 'audio2.html', 'audio3.html']) {
+      const html = await (await request.get(`${BASE_URL}/pages/${file}`)).text();
+      expect(html, file).toContain('M2 16.5h3C9.6 16.5 10.4 7.5 15 7.5h6');            // one arrow over the other
+      expect(html, file).not.toContain('x1="4" y1="20" x2="21" y2="3"');                 // the old diagonal (an ✕)
+    }
   });
 });

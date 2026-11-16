@@ -848,13 +848,15 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 /* ============================================================
    LANDSCAPE — wide, short screens: car head units (800×480 to
    1920×720), tablets and phones held sideways. One screen, no
-   scrolling, big targets. The player card splits in two with a
-   line between: the title and the controls on the reading side,
-   the art with the reciter under it beside them; the pickers sit
-   in one row under the card.
+   scrolling, big targets. The player card splits in two balanced
+   columns with a line between: the title, the progress and the
+   controls on the reading side (the transport first, the secondary
+   actions below a clear gap), the art large in the other column
+   with the reciter under it; the pickers sit in one row under the
+   card, each an icon tile, a label and value, and a chevron.
    ============================================================ */
 .hero-side{display:contents}   /* phones: the card stays one column */
-.art-caption{display:none}
+.art-caption,.sel-icon,.offl-entry .sel-arrow{display:none}
 @media (orientation:landscape) and (min-width:700px) and (max-height:820px){
   body{
     padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
@@ -870,31 +872,32 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   /* the translate icon is a masked div sized inline */
   .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
 
-  /* the controls on the reading side (first column), the art beside them */
+  /* two balanced columns: the controls on the reading side, the art beside them */
   .hero-card{
-    display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
-    column-gap:clamp(14px,2.6vw,36px);padding:clamp(10px,2.4vh,26px) clamp(16px,2.4vw,36px);
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
   }
   .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
-  .hero-controls{grid-column:1;grid-row:1;gap:clamp(8px,2vh,22px)}
-  .hero-now{grid-column:2;grid-row:1;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(14px,2.6vw,36px)}
+  .hero-controls{grid-column:1;grid-row:1}
+  .hero-now{grid-column:2;grid-row:1;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
   .now-playing-badge{position:absolute;top:clamp(10px,2vh,18px);inset-inline-end:clamp(14px,2vw,24px);margin:0;z-index:3;
     font-size:clamp(11px,2vh,15px);padding:clamp(4px,.8vh,7px) clamp(11px,1.6vw,16px)}
   .now-playing-badge .badge-dot{width:clamp(6px,1.1vh,9px);height:clamp(6px,1.1vh,9px)}
 
-  /* the art takes the height it has; the reciter under it */
-  .mandala-container{--art:clamp(140px,40vh,320px);width:var(--art);height:var(--art);margin:0 auto}
+  /* the art: as large as its column and the height allow, centred with the reciter under it */
+  .mandala-container{--art:min(clamp(140px,46vh,340px),30vw);width:var(--art);height:var(--art);margin:0 auto}
   .m-album-wrap{width:calc(var(--art) * .913);height:calc(var(--art) * .913)}
-  .art-caption{display:block;max-width:100%;margin-top:clamp(6px,1.8vh,16px);text-align:center;
+  .art-caption{display:block;max-width:100%;margin-top:clamp(8px,2.2vh,20px);text-align:center;
     font-size:clamp(14px,2.7vh,20px);font-weight:600;color:var(--accent-main);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  /* the title and the reciter at the top of the controls */
-  .track-info{margin:0;min-height:0}
-  #nowSurah{font-size:clamp(1.6rem,6.4vh,3.3rem);margin-bottom:2px}
-  /* the title wraps (two lines at most) instead of scrolling */
-  #nowSurah{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3}
-  #nowReciter{font-size:clamp(14px,3vh,23px)}
+  /* the title leads: large and bold, the reciter clearly secondary under it */
+  .track-info{margin:0 0 clamp(12px,3vh,28px);min-height:0}
+  #nowSurah{font-size:clamp(1.8rem,7vh,3.6rem);font-weight:700;margin:0;
+    white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+  #nowReciter{font-size:clamp(13px,2.5vh,19px);font-weight:600;opacity:.9;margin-top:clamp(2px,.7vh,8px)}
+
+  /* primary: the progress and the transport, one group */
   .track-error{margin:0;padding:6px 12px;font-size:15px}
   .progress-section{margin:0;width:100%}
   /* a recitation that can't load: its message takes the progress bar's place (00:00 then) */
@@ -905,31 +908,37 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   .progress-section input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-8px}
   .progress-section input[type=range]::-moz-range-track{height:8px}
   .progress-section input[type=range]::-moz-range-thumb{width:24px;height:24px}
-  .controls-main{margin:0;gap:clamp(24px,5vw,64px)}
+  .controls-main{margin:clamp(6px,1.6vh,16px) 0 0;gap:clamp(24px,5vw,64px)}
   .play-pause-btn{width:clamp(72px,16vh,116px);height:clamp(72px,16vh,116px)}
   .play-pause-btn svg{width:clamp(30px,5.4vh,42px);height:clamp(30px,5.4vh,42px)}
   .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
   .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
 
-  /* repeat · download · favourite · shuffle · speed: one bar in equal parts with a line between */
+  /* secondary: below a clear gap, lighter — repeat · download · favourite · shuffle · speed in equal parts */
   .controls-secondary{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
-    margin:0;padding:clamp(3px,.8vh,8px) 6px;max-width:640px;border-radius:clamp(14px,2.4vh,20px)}
-  .controls-secondary .action-btn{position:relative;width:100%;height:clamp(46px,8.4vh,64px);border-radius:12px}
-  .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:24%;bottom:24%;
+    margin:clamp(12px,3.2vh,34px) 0 0;padding:clamp(2px,.6vh,6px) 6px;max-width:600px;
+    background:rgba(var(--accent-rgb),.04);border-radius:clamp(14px,2.4vh,20px)}
+  .controls-secondary .action-btn{position:relative;width:100%;height:clamp(44px,8vh,60px);border-radius:12px}
+  .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
     border-inline-start:1px solid var(--glass-border)}
-  .action-btn svg{width:clamp(22px,3.8vh,28px);height:clamp(22px,3.8vh,28px)}
-  #speedBtn{font-size:clamp(15px,2.6vh,19px)}
+  .action-btn svg{width:clamp(21px,3.6vh,26px);height:clamp(21px,3.6vh,26px)}
+  #speedBtn{font-size:clamp(14px,2.5vh,18px)}
 
-  /* the pickers: one row, as many columns as cards shown */
+  /* the pickers: one row, each an icon tile, a label and value, and a chevron */
   .sel-row{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none;gap:clamp(8px,1.4vw,16px)}
   .offl-entry{grid-column:auto}
-  .sel-card{min-height:clamp(64px,12.5vh,100px);padding:8px clamp(14px,2vw,24px);border-radius:clamp(16px,2.6vh,22px)}
-  .sel-label{font-size:clamp(12px,2.1vh,16px)}
-  .sel-value{font-size:clamp(17px,3.1vh,23px)}
+  .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
+  .sel-icon,.offl-entry-icon,.offl-entry-ring{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px)}
+  .sel-icon{display:flex;flex:none;align-items:center;justify-content:center;border-radius:clamp(10px,1.8vh,14px);
+    background:var(--accent-muted);border:1px solid rgba(var(--accent-rgb),.2);color:var(--accent-main)}
+  .sel-icon svg{width:52%;height:52%}
+  .offl-entry-icon{order:-1}                      /* its tile at the start, like the others */
+  .offl-entry .sel-arrow{display:block}
+  .sel-arrow{width:clamp(15px,2.6vh,20px);height:clamp(15px,2.6vh,20px);opacity:.6}
+  .sel-label{font-size:clamp(12px,2.1vh,15px)}
+  .sel-value,.offl-entry .sel-value{font-size:clamp(16px,3vh,22px)}
   .sel-value-wrap{line-height:1.5;min-height:1.5em}
-  .offl-entry .sel-value{font-size:clamp(15px,2.8vh,21px)}
-  .offl-entry-icon,.offl-entry-ring{width:clamp(40px,8.4vh,64px);height:clamp(40px,8.4vh,64px)}
-  .offl-entry-dl,.offl-entry-ok{width:clamp(18px,3.4vh,28px);height:clamp(18px,3.4vh,28px)}
+  .offl-entry-dl,.offl-entry-ok{width:clamp(18px,3.4vh,24px);height:clamp(18px,3.4vh,24px)}
 
   /* lists open as a centred panel, not across the whole wide screen */
   .bottom-sheet{width:min(100%,760px);margin-inline:auto}
@@ -941,17 +950,19 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   .header{padding:2px 10px}
   .header .icon-btn{min-width:42px;min-height:42px}
   .hero-card{padding:6px 16px}
-  .hero-controls{gap:5px}
-  .mandala-container{--art:clamp(110px,36vh,300px)}
-  #nowSurah{font-size:1.35rem}
+  .mandala-container{--art:min(clamp(110px,40vh,300px),28vw)}
+  .track-info{margin-bottom:6px}
+  #nowSurah{font-size:1.45rem}
   #nowReciter,.art-caption{font-size:13px}
   .track-error{padding:4px 10px;font-size:13px}
   .progress-section input[type=range]{height:22px}
+  .controls-main{margin-top:2px}
   .play-pause-btn{width:62px;height:62px}
   .skip-btn{width:48px;height:48px}
-  .controls-secondary{padding:2px 6px}
+  .controls-secondary{margin-top:6px;padding:2px 6px}
   .controls-secondary .action-btn{height:44px}
-  .sel-card{min-height:50px;padding:5px 14px}
+  .sel-card{min-height:50px;padding:4px 12px}
+  .sel-icon,.offl-entry-icon,.offl-entry-ring{width:34px;height:34px}
 }
 </style>
 <script type="application/ld+json">
@@ -1130,7 +1141,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
       <button class="action-btn" id="shuffleBtn" onclick="haptic();toggleShuffle()" title="عشوائي" aria-label="عشوائي">
-        <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        <svg viewBox="0 0 24 24"><!-- shuffle 🔀: two arrows swap lanes (one passes under) and both point on --><path d="M2 16.5h3C9.6 16.5 10.4 7.5 15 7.5h6"/><path d="M18 4.5l3 3-3 3"/><path d="M2 7.5h3c1.47 0 2.55.92 3.5 2.17"/><path d="M11.5 14.33c.95 1.25 2.03 2.17 3.5 2.17h6"/><path d="M18 13.5l3 3-3 3"/></svg>
       </button>
       <button class="action-btn" id="speedBtn" onclick="haptic();toggleSpeed()" aria-label="سرعة التلاوة">1x</button>
     </div>
@@ -1140,8 +1151,9 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 
   <!-- ── SELECTION ROW ── -->
   <div class="sel-row">
-    <!-- Reciter Card -->
+    <!-- Reciter Card (the icon tiles show on wide landscape screens) -->
     <div class="sel-card card" role="button" tabindex="0" onclick="haptic();openReciterSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openReciterSheet()}">
+      <span class="sel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21.5"/><line x1="8.5" y1="21.5" x2="15.5" y2="21.5"/></svg></span>
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_reciter">القارئ</span>
         <div class="sel-value-wrap"><span class="sel-value" id="reciterSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -1150,6 +1162,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     </div>
     <!-- Surah Card -->
     <div class="sel-card card" role="button" tabindex="0" onclick="haptic();openJuzSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openJuzSheet()}">
+      <span class="sel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h6a3.5 3.5 0 0 1 3.5 3.5v12a2.5 2.5 0 0 0-2.5-2.5h-7z"/><path d="M21.5 4.5h-6A3.5 3.5 0 0 0 12 8v12a2.5 2.5 0 0 1 2.5-2.5h7z"/></svg></span>
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_surah">السورة</span>
         <div class="sel-value-wrap"><span class="sel-value" id="juzSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -1168,6 +1181,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <svg class="offl-entry-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <svg class="offl-entry-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </span>
+      <svg class="sel-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
   </div>
 
