@@ -3,6 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint (applied in the load
+// event, the page showed its default first and then switched). themeMode is
+// shared by every page: light, dark, sepia or plain-dark (OLED black); "warm"
+// is the adhkar page's old name for sepia. Each page shows the nearest theme
+// it has (HAS): sepia as light, OLED as dark where it has no such theme.
+// zadPageTheme() is used again by the page's own code.
+(function () {
+  var HAS = ['light', 'dark'], DEFAULT = 'light', ALIAS = {};
+  var d = document.documentElement, t = null, l = null;
+  window.zadPageTheme = function (m) {
+    if (m === 'warm') m = 'sepia';
+    if (m === 'oled') m = 'plain-dark';
+    if (['light', 'dark', 'sepia', 'plain-dark'].indexOf(m) < 0) return DEFAULT;
+    if (HAS.indexOf(m) < 0) m = m === 'sepia' ? 'light' : 'dark';
+    return ALIAS[m] || m;
+  };
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  d.setAttribute('data-theme', zadPageTheme(t));
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
   <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
   <title>الإشعارات الذكية — زاد المسلم | Smart Notifications</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
@@ -140,7 +162,7 @@
     .location-card .toggle-row { border-color: rgba(255,255,255,0.1); }
   </style>
 </head>
-<body data-theme="light">
+<body>
 
   <header class="top-bar">
     <button class="icon-btn" onclick="window.location.href='../index.html'" title="الرئيسية"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
@@ -341,14 +363,16 @@
   <script>
     // Theme logic
     function initTheme() {
-      const savedTheme = localStorage.getItem('themeMode') || 'light';
+      const savedTheme = zadPageTheme(localStorage.getItem('themeMode'));
+      document.documentElement.setAttribute('data-theme', savedTheme);
       document.body.setAttribute('data-theme', savedTheme);
       updateThemeIcon(savedTheme);
     }
 
     function toggleTheme() {
-      const currentTheme = document.body.getAttribute('data-theme');
+      const currentTheme = document.documentElement.getAttribute('data-theme');
       const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
       document.body.setAttribute('data-theme', newTheme);
       localStorage.setItem('themeMode', newTheme);
       updateThemeIcon(newTheme);
