@@ -212,8 +212,15 @@ export default {
   azkar_tap_hint: "Tap to count",
   'azkar_of': 'of',
   'azkar_index_counter': "{current} of {total}",
+  'azkar_pick_title': "Choose a dhikr",
+  'azkar_pick_summary': "{done} of {total} completed",
+  'azkar_pick_open': "Go to a dhikr",
+  'azkar_pick_done': "completed",
   'azkar_auto': 'Auto',
   'azkar_font_size': 'Font Size',
+  'azkar_autofit': "Auto-fit text",
+  'azkar_autofit_label': "Size the text automatically so the whole dhikr fits the card",
+  'azkar_autofit_hint': "Changing the size by hand (A- / A+, the slider or pinching) turns auto-fit off.",
   'azkar_theme': 'Theme',
   'azkar_theme_dark': 'Dark',
   'azkar_theme_warm': 'Warm',
@@ -805,6 +812,7 @@ export default {
   'azkar_prev': `Previous`,
   'azkar_ruqyah': `Ruqyah`,
   'azkar_translation': `Translation`,
+  'azkar_translation_show': "Show the dhikr's translation",
   'azkar_warm': `Warm`,
 
   // Hisn Al-Muslim page

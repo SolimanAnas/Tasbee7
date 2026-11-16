@@ -199,8 +199,15 @@ export default {
   azkar_tap_hint: "گننے کے لیے دبائیں",
   'azkar_of': 'میں سے',
   'azkar_index_counter': "{current} / {total}",
+  'azkar_pick_title': "ذکر منتخب کریں",
+  'azkar_pick_summary': "{total} میں سے {done} مکمل",
+  'azkar_pick_open': "کسی ذکر پر جائیں",
+  'azkar_pick_done': "مکمل",
   'azkar_auto': 'خودکار',
   'azkar_font_size': 'فونٹ سائز',
+  'azkar_autofit': "متن خودکار فٹ کریں",
+  'azkar_autofit_label': "متن کا سائز خودکار طور پر ایسا رکھیں کہ پورا ذکر کارڈ میں آ جائے",
+  'azkar_autofit_hint': "سائز ہاتھ سے بدلنے (⁦A- / A+⁩، سلائیڈر یا دو انگلیوں) سے خودکار فٹ بند ہو جاتا ہے۔",
   'azkar_theme': 'تھیم',
   'azkar_theme_dark': 'گہرا',
   'azkar_theme_warm': 'گرم',
@@ -777,6 +784,7 @@ export default {
   'azkar_prev': `پچھلا`,
   'azkar_ruqyah': `رقیہ`,
   'azkar_translation': `ترجمہ`,
+  'azkar_translation_show': "ذکر کا ترجمہ دکھائیں",
   'azkar_warm': `گرم`,
 
   // Hisn Al-Muslim page

@@ -42,6 +42,19 @@ test.describe('adhkar layout', () => {
     expect(area.y).toBeGreaterThanOrEqual(zoom.y + zoom.height);
   });
 
+  test('the translation is in Settings, not the header; Back closes it and stays on the page', async ({ page, context }) => {
+    await openWithInsets(page, context);
+    await expect(page.locator('.top-bar .icon-btn')).toHaveCount(4);
+    await page.locator('.top-bar .icon-btn[onclick="openSettings()"]').tap();
+    await page.locator('#translationBtn').tap();
+    await expect(page.locator('#translationModal')).toHaveClass(/active/);
+    await expect(page.locator('#settingsModal')).not.toHaveClass(/active/);
+    await expect(page.locator('#englishText')).not.toBeEmpty();
+    await page.evaluate(() => history.back());
+    await expect(page.locator('#translationModal')).not.toHaveClass(/active/);
+    expect(page.url()).toContain('/pages/azkar.html');
+  });
+
   test('in English, Previous is on the left and Next on the right', async ({ page, context }) => {
     await openWithInsets(page, context, { lang: 'en' });
     const [prev, next] = await Promise.all([box(page, '#prevBtn'), box(page, '#nextBtn')]);

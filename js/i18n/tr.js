@@ -199,8 +199,15 @@ export default {
   azkar_tap_hint: "Saymak için dokun",
   'azkar_of': '/',
   'azkar_index_counter': "{current} / {total}",
+  'azkar_pick_title': "Zikir seç",
+  'azkar_pick_summary': "{total} zikirden {done} tamamlandı",
+  'azkar_pick_open': "Bir zikre git",
+  'azkar_pick_done': "tamamlandı",
   'azkar_auto': 'Otomatik',
   'azkar_font_size': 'Yazı Tipi Boyutu',
+  'azkar_autofit': "Yazıyı otomatik sığdır",
+  'azkar_autofit_label': "Zikrin tamamı karta sığacak şekilde yazıyı otomatik boyutlandır",
+  'azkar_autofit_hint': "Boyutu elle değiştirmek (A- / A+, kaydırıcı veya iki parmakla) otomatik sığdırmayı kapatır.",
   'azkar_theme': 'Tema',
   'azkar_theme_dark': 'Karanlık',
   'azkar_theme_warm': 'Sıcak',
@@ -777,6 +784,7 @@ export default {
   'azkar_prev': `Önceki`,
   'azkar_ruqyah': `Rukye`,
   'azkar_translation': `Çeviri`,
+  'azkar_translation_show': "Zikrin çevirisini göster",
   'azkar_warm': `Sıcak`,
 
   // Hisn Al-Muslim page

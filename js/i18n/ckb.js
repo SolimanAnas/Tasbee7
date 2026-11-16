@@ -212,8 +212,15 @@ export default {
   azkar_tap_hint: "بۆ ژماردن دەستبکە",
   'azkar_of': 'لە',
   'azkar_index_counter': "{current} لە {total}",
+  'azkar_pick_title': "بیرخستنەوەیەک هەڵبژێرە",
+  'azkar_pick_summary': "{done} لە {total} تەواو کرا",
+  'azkar_pick_open': "چوون بۆ بیرخستنەوەیەک",
+  'azkar_pick_done': "تەواوبوو",
   'azkar_auto': 'خۆکار',
   'azkar_font_size': 'قەبارەی فۆنت',
+  'azkar_autofit': "گونجاندنی خۆکاری نووسین",
+  'azkar_autofit_label': "قەبارەی نووسین بە خۆکار بگۆڕە تا هەموو بیرخستنەوەکە لە کارتەکەدا دەربکەوێت",
+  'azkar_autofit_hint': "گۆڕینی قەبارە بە دەست (⁦A- / A+⁩، شریتەکە یان بە دوو پەنجە) گونجاندنی خۆکار دەکوژێنێتەوە.",
   'azkar_theme': 'ڕووکار',
   'azkar_theme_dark': 'تاریک',
   'azkar_theme_warm': 'گەرم',
@@ -805,6 +812,7 @@ export default {
   'azkar_prev': `پێشوو`,
   'azkar_ruqyah': `ڕوۆخیا`,
   'azkar_translation': `وەرگێڕان`,
+  'azkar_translation_show': "پیشاندانی وەرگێڕانی بیرخستنەوە",
   'azkar_warm': `گەرم`,
 
   // Hisn Al-Muslim page

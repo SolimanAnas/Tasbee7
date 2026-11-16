@@ -212,8 +212,15 @@ export default {
   azkar_tap_hint: "اضغط للعدّ",
   'azkar_of': 'من',
   'azkar_index_counter': "{current} من {total}",
+  'azkar_pick_title': "اختر الذكر",
+  'azkar_pick_summary': "أتممت {done} من {total}",
+  'azkar_pick_open': "الانتقال إلى ذكر",
+  'azkar_pick_done': "مكتمل",
   'azkar_auto': 'تلقائي',
   'azkar_font_size': 'حجم الخط',
+  'azkar_autofit': "ملاءمة الخط تلقائياً",
+  'azkar_autofit_label': "ملاءمة حجم الخط تلقائياً ليظهر الذكر كاملاً في البطاقة",
+  'azkar_autofit_hint': "تغيير الحجم يدوياً (⁦A- / A+⁩ أو الشريط أو التكبير بإصبعين) يوقف الملاءمة التلقائية.",
   'azkar_theme': 'المظهر',
   'azkar_theme_dark': 'داكن',
   'azkar_theme_warm': 'دافئ',
@@ -805,6 +812,7 @@ export default {
   'azkar_prev': `السابق`,
   'azkar_ruqyah': `الرقية`,
   'azkar_translation': `الترجمة`,
+  'azkar_translation_show': "عرض ترجمة الذكر",
   'azkar_warm': `دافئ`,
 
   // Hisn Al-Muslim page
