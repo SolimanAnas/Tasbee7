@@ -135,12 +135,12 @@
 
   // ---- Radio station names (index aligned to RADIO_STATIONS order) --------
   const STATION_LATIN = [
-    'Holy Quran Radio – Cairo (Live)', 'Holy Quran Radio – Cairo', 'Holy Quran Radio – Makkah', 'Holy Quran Radio – Sharjah',
-    'General Radio – Various Reciters', 'Humble Recitations Radio', 'Ruqyah Radio',
+    'Holy Quran Radio – Cairo (Live)', 'Holy Quran Radio – Makkah', 'Holy Quran Radio – Sharjah',
+    'General Radio – Various Reciters', 'Mustafa Ismail', 'Humble Recitations Radio', 'Ruqyah Radio',
     'Morning Adhkar', 'Evening Adhkar', 'Surah Al-Baqarah – Various Reciters',
     'Short Selected Recitations', 'Abdul Basit Abdul Samad (Murattal)',
     'Mohamed Siddiq Al-Minshawi (Mujawwad)', 'Mahmoud Khalil Al-Hussary (Murattal)',
-    'Mahmoud Khalil Al-Hussary (Mujawwad)', 'Mustafa Ismail', 'Mahmoud Ali Al-Banna (Mujawwad)',
+    'Mahmoud Khalil Al-Hussary (Mujawwad)', 'Mahmoud Ali Al-Banna (Mujawwad)',
     'Mohammed Al-Tablawi', 'Ahmad Nuaina', 'Abdul Rahman Al-Sudais', 'Maher Al-Muaiqly',
     'Yasser Al-Dosari', 'Mohammed Ayyoub – Special Recitation', 'Salah Al-Budair',
     'Abdul Mohsen Al-Qasim', 'Ali bin Abdul Rahman Al-Hudhaify', 'Abdullah Al-Matroud',
