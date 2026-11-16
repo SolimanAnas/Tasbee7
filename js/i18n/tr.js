@@ -199,6 +199,8 @@ export default {
   azkar_tap_hint: "Saymak için dokun",
   'azkar_of': '/',
   'azkar_index_counter': "{current} / {total}",
+  'player_layout_wide': "Yatay düzen",
+  'player_rotate_hint': "Cihazınızı yatay çevirin",
   'azkar_pick_title': "Zikir seç",
   'azkar_pick_summary': "{total} zikirden {done} tamamlandı",
   'azkar_pick_open': "Bir zikre git",

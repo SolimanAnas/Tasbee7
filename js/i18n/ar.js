@@ -212,6 +212,8 @@ export default {
   azkar_tap_hint: "اضغط للعدّ",
   'azkar_of': 'من',
   'azkar_index_counter': "{current} من {total}",
+  'player_layout_wide': "العرض الأفقي",
+  'player_rotate_hint': "أدِر الجهاز إلى الوضع الأفقي",
   'azkar_pick_title': "اختر الذكر",
   'azkar_pick_summary': "أتممت {done} من {total}",
   'azkar_pick_open': "الانتقال إلى ذكر",

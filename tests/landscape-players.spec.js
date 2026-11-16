@@ -127,6 +127,61 @@ test.describe('players on landscape screens', () => {
   });
 });
 
+test.describe('layout button and seek bar', () => {
+  test.use({ serviceWorkers: 'block', hasTouch: true });
+  const state = page => page.evaluate(() => ({
+    wide: document.documentElement.classList.contains('player-wide'),
+    pressed: document.getElementById('layoutBtn').getAttribute('aria-pressed'),
+    saved: localStorage.getItem('playerLayout'),
+  }));
+
+  test('on a car screen the button switches to the vertical layout and back, and it is remembered', async ({ page }) => {
+    await open(page, 'audio.html', { width: 1280, height: 720 });
+    expect(await state(page)).toEqual({ wide: true, pressed: 'true', saved: null });
+    await page.locator('#layoutBtn').click();
+    await expect.poll(() => state(page)).toEqual({ wide: false, pressed: 'false', saved: 'tall' });
+    await page.reload({ waitUntil: 'load' });
+    expect(await state(page)).toEqual({ wide: false, pressed: 'false', saved: 'tall' });   // before the first paint
+    await page.locator('#layoutBtn').click();
+    await expect.poll(() => state(page)).toEqual({ wide: true, pressed: 'true', saved: 'wide' });
+  });
+
+  test('an upright screen wide enough for two columns (a foldable) switches to the wide layout; radio follows', async ({ page }) => {
+    await open(page, 'audio.html', { width: 818, height: 889 });
+    expect((await state(page)).wide).toBe(false);
+    await page.locator('#layoutBtn').click();
+    await expect.poll(() => state(page)).toEqual({ wide: true, pressed: 'true', saved: 'wide' });
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
+    await page.goto(`${BASE_URL}/pages/radio.html`, { waitUntil: 'load' });
+    expect(await state(page)).toEqual({ wide: true, pressed: 'true', saved: 'wide' });
+  });
+
+  test('on a narrow phone that cannot turn here, it asks to turn the device and saves nothing', async ({ page }) => {
+    await open(page, 'audio.html', { width: 390, height: 844 });
+    await page.locator('#layoutBtn').click();
+    await expect(page.locator('.toast.show')).toContainText('أدِر الجهاز');
+    expect(await state(page)).toEqual({ wide: false, pressed: 'false', saved: null });
+  });
+
+  test('the seek bar paints played and buffered on its track, so the taller wide-layout slider shows no block', async ({ page }) => {
+    await open(page, 'audio.html', { width: 1000, height: 720 });
+    const r = await page.evaluate(() => {
+      Object.defineProperty(audio, 'duration', { configurable: true, get: () => 1411 });
+      Object.defineProperty(audio, 'currentTime', { configurable: true, get: () => 68, set: () => {} });
+      Object.defineProperty(audio, 'buffered', { configurable: true, get: () => ({ length: 1, start: () => 0, end: () => 190 }) });
+      updateProgressBar();
+      const bar = document.getElementById('progress');
+      return { inline: bar.style.background, box: getComputedStyle(bar).backgroundImage, height: parseFloat(getComputedStyle(bar).height),
+        pct: parseFloat(bar.style.getPropertyValue('--pct')), buf: parseFloat(bar.style.getPropertyValue('--buf')) };
+    });
+    expect(r.height).toBeGreaterThan(20);          // the big touch area
+    expect(r.inline).toBe('');                      // nothing painted on the slider box
+    expect(r.box).toBe('none');
+    expect(r.pct).toBeCloseTo(68 / 1411 * 100, 1);
+    expect(r.buf).toBeCloseTo(190 / 1411 * 100, 1);
+  });
+});
+
 test.describe('player icons', () => {
   test('the shuffle icon is the 🔀 shape (two arrows swapping lanes) on every player page', async ({ request }) => {
     for (const file of ['audio.html', 'audio-download.html', 'audio2.html', 'audio3.html']) {

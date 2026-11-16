@@ -212,6 +212,8 @@ export default {
   azkar_tap_hint: "Tap to count",
   'azkar_of': 'of',
   'azkar_index_counter': "{current} of {total}",
+  'player_layout_wide': "Landscape layout",
+  'player_rotate_hint': "Turn your device sideways",
   'azkar_pick_title': "Choose a dhikr",
   'azkar_pick_summary': "{done} of {total} completed",
   'azkar_pick_open': "Go to a dhikr",
