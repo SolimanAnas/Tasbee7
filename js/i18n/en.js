@@ -809,6 +809,7 @@ export default {
   'azkar_prev': `Previous`,
   'azkar_ruqyah': `Ruqyah`,
   'azkar_translation': `Translation`,
+  'azkar_translation_show': "Show the dhikr's translation",
   'azkar_warm': `Warm`,
 
   // Hisn Al-Muslim page

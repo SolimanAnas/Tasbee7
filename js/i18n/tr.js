@@ -781,6 +781,7 @@ export default {
   'azkar_prev': `Önceki`,
   'azkar_ruqyah': `Rukye`,
   'azkar_translation': `Çeviri`,
+  'azkar_translation_show': "Zikrin çevirisini göster",
   'azkar_warm': `Sıcak`,
 
   // Hisn Al-Muslim page

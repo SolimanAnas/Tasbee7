@@ -781,6 +781,7 @@ export default {
   'azkar_prev': `پچھلا`,
   'azkar_ruqyah': `رقیہ`,
   'azkar_translation': `ترجمہ`,
+  'azkar_translation_show': "ذکر کا ترجمہ دکھائیں",
   'azkar_warm': `گرم`,
 
   // Hisn Al-Muslim page

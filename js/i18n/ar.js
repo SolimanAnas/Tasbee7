@@ -809,6 +809,7 @@ export default {
   'azkar_prev': `السابق`,
   'azkar_ruqyah': `الرقية`,
   'azkar_translation': `الترجمة`,
+  'azkar_translation_show': "عرض ترجمة الذكر",
   'azkar_warm': `دافئ`,
 
   // Hisn Al-Muslim page

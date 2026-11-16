@@ -809,6 +809,7 @@ export default {
   'azkar_prev': `پێشوو`,
   'azkar_ruqyah': `ڕوۆخیا`,
   'azkar_translation': `وەرگێڕان`,
+  'azkar_translation_show': "پیشاندانی وەرگێڕانی بیرخستنەوە",
   'azkar_warm': `گەرم`,
 
   // Hisn Al-Muslim page

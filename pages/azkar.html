@@ -143,7 +143,7 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* five buttons + the counter must fit narrow phones (overflowed below ~400px) */
+  /* four buttons + the counter must fit narrow phones (five overflowed below ~400px) */
   gap: clamp(5px, 2vw, 10px);
   /* below the status bar / notch / Dynamic Island (viewport-fit=cover draws under them) */
   padding: max(16px, calc(env(safe-area-inset-top) + 8px)) max(clamp(10px, 4vw, 16px), env(safe-area-inset-right)) 10px max(clamp(10px, 4vw, 16px), env(safe-area-inset-left));
@@ -1127,9 +1127,6 @@ button.zikr-index-counter::before {   /* 44 px tall tap area, nothing moves */
 
   <div class="top-bar-group end">
     <div class="icon-btn" onclick="shareZikrCard()" title="مشاركة كصورة" data-i18n-title="sc_title"><img src="../img/SVG/share.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
-    <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">
-      <div style="width:24px;height:24px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
-    </div>
     <div class="icon-btn" onclick="openSettings()" title="الإعدادات" data-i18n-title="settings"><img src="../img/SVG/settings.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
   </div>
 </div>
@@ -1236,7 +1233,15 @@ button.zikr-index-counter::before {   /* 44 px tall tap area, nothing moves */
   <div class="modal-content">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <h2 style="margin:0;font-size:20px;font-weight:700;color:var(--text-primary);" data-i18n="settings">الإعدادات</h2>
-      <div class="close" onclick="closeSettings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+      <div class="close" style="margin:0" onclick="closeSettings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    </div>
+
+    <div class="settings-row">
+      <h3 data-i18n="azkar_translation">الترجمة</h3>
+      <button type="button" class="btn" id="translationBtn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="openTranslationFromSettings()">
+        <span aria-hidden="true" style="width:22px;height:22px;flex:0 0 auto;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></span>
+        <span data-i18n="azkar_translation_show">عرض ترجمة الذكر</span>
+      </button>
     </div>
 
     <div class="settings-row">
@@ -1703,9 +1708,12 @@ function autoLoop() {
 }
 
 /* Translation Modal */
-function openTranslation() {
+// From Settings: the translation takes over its back-button entry (closed()+opened()
+// in one tick would strip the page's own history entry).
+function openTranslationFromSettings() {
+  document.getElementById("settingsModal").classList.remove("active");
   document.getElementById("translationModal").classList.add("active");
-  if (window.BackClose) BackClose.opened(closeTranslation);
+  if (window.BackClose) BackClose.swap(closeTranslation);
 }
 
 function closeTranslation() {
