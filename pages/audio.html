@@ -844,6 +844,115 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 .offl-file-pct{flex:none;color:var(--text-secondary);font-variant-numeric:tabular-nums}
 .offl-file-bar{height:4px;border-radius:4px;background:var(--track-bg);overflow:hidden}
 .offl-file-bar i{display:block;height:100%;background:var(--accent-main);opacity:.75;border-radius:4px;transition:width .25s linear}
+
+/* ============================================================
+   LANDSCAPE — wide, short screens: car head units (800×480 to
+   1920×720), tablets and phones held sideways. One screen, no
+   scrolling, big targets. The player card splits in two with a
+   line between: the title and the controls on the reading side,
+   the art with the reciter under it beside them; the pickers sit
+   in one row under the card.
+   ============================================================ */
+.hero-side{display:contents}   /* phones: the card stays one column */
+.art-caption{display:none}
+@media (orientation:landscape) and (min-width:700px) and (max-height:820px){
+  body{
+    padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  }
+  .app{
+    max-width:1400px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.8vh,16px);
+  }
+  .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
+  .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
+  .header .icon-btn{min-width:48px;min-height:48px}
+  .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
+  /* the translate icon is a masked div sized inline */
+  .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
+
+  /* the controls on the reading side (first column), the art beside them */
+  .hero-card{
+    display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);
+    column-gap:clamp(14px,2.6vw,36px);padding:clamp(10px,2.4vh,26px) clamp(16px,2.4vw,36px);
+  }
+  .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
+  .hero-controls{grid-column:1;grid-row:1;gap:clamp(8px,2vh,22px)}
+  .hero-now{grid-column:2;grid-row:1;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(14px,2.6vw,36px)}
+  .now-playing-badge{position:absolute;top:clamp(10px,2vh,18px);inset-inline-end:clamp(14px,2vw,24px);margin:0;z-index:3;
+    font-size:clamp(11px,2vh,15px);padding:clamp(4px,.8vh,7px) clamp(11px,1.6vw,16px)}
+  .now-playing-badge .badge-dot{width:clamp(6px,1.1vh,9px);height:clamp(6px,1.1vh,9px)}
+
+  /* the art takes the height it has; the reciter under it */
+  .mandala-container{--art:clamp(140px,40vh,320px);width:var(--art);height:var(--art);margin:0 auto}
+  .m-album-wrap{width:calc(var(--art) * .913);height:calc(var(--art) * .913)}
+  .art-caption{display:block;max-width:100%;margin-top:clamp(6px,1.8vh,16px);text-align:center;
+    font-size:clamp(14px,2.7vh,20px);font-weight:600;color:var(--accent-main);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* the title and the reciter at the top of the controls */
+  .track-info{margin:0;min-height:0}
+  #nowSurah{font-size:clamp(1.6rem,6.4vh,3.3rem);margin-bottom:2px}
+  /* the title wraps (two lines at most) instead of scrolling */
+  #nowSurah{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3}
+  #nowReciter{font-size:clamp(14px,3vh,23px)}
+  .track-error{margin:0;padding:6px 12px;font-size:15px}
+  .progress-section{margin:0;width:100%}
+  /* a recitation that can't load: its message takes the progress bar's place (00:00 then) */
+  .track-error:not([hidden]) ~ .progress-section{display:none}
+  .time{font-size:clamp(13px,2.1vh,16px);width:58px}
+  .progress-section input[type=range]{height:28px}
+  .progress-section input[type=range]::-webkit-slider-runnable-track{height:8px}
+  .progress-section input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-8px}
+  .progress-section input[type=range]::-moz-range-track{height:8px}
+  .progress-section input[type=range]::-moz-range-thumb{width:24px;height:24px}
+  .controls-main{margin:0;gap:clamp(24px,5vw,64px)}
+  .play-pause-btn{width:clamp(72px,16vh,116px);height:clamp(72px,16vh,116px)}
+  .play-pause-btn svg{width:clamp(30px,5.4vh,42px);height:clamp(30px,5.4vh,42px)}
+  .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
+  .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
+
+  /* repeat · download · favourite · shuffle · speed: one bar in equal parts with a line between */
+  .controls-secondary{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+    margin:0;padding:clamp(3px,.8vh,8px) 6px;max-width:640px;border-radius:clamp(14px,2.4vh,20px)}
+  .controls-secondary .action-btn{position:relative;width:100%;height:clamp(46px,8.4vh,64px);border-radius:12px}
+  .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:24%;bottom:24%;
+    border-inline-start:1px solid var(--glass-border)}
+  .action-btn svg{width:clamp(22px,3.8vh,28px);height:clamp(22px,3.8vh,28px)}
+  #speedBtn{font-size:clamp(15px,2.6vh,19px)}
+
+  /* the pickers: one row, as many columns as cards shown */
+  .sel-row{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none;gap:clamp(8px,1.4vw,16px)}
+  .offl-entry{grid-column:auto}
+  .sel-card{min-height:clamp(64px,12.5vh,100px);padding:8px clamp(14px,2vw,24px);border-radius:clamp(16px,2.6vh,22px)}
+  .sel-label{font-size:clamp(12px,2.1vh,16px)}
+  .sel-value{font-size:clamp(17px,3.1vh,23px)}
+  .sel-value-wrap{line-height:1.5;min-height:1.5em}
+  .offl-entry .sel-value{font-size:clamp(15px,2.8vh,21px)}
+  .offl-entry-icon,.offl-entry-ring{width:clamp(40px,8.4vh,64px);height:clamp(40px,8.4vh,64px)}
+  .offl-entry-dl,.offl-entry-ok{width:clamp(18px,3.4vh,28px);height:clamp(18px,3.4vh,28px)}
+
+  /* lists open as a centred panel, not across the whole wide screen */
+  .bottom-sheet{width:min(100%,760px);margin-inline:auto}
+}
+/* phones held sideways (≈360–440 px tall): the same layout, tighter */
+@media (orientation:landscape) and (min-width:700px) and (max-height:440px){
+  body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+  .app{gap:5px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
+  .header{padding:2px 10px}
+  .header .icon-btn{min-width:42px;min-height:42px}
+  .hero-card{padding:6px 16px}
+  .hero-controls{gap:5px}
+  .mandala-container{--art:clamp(110px,36vh,300px)}
+  #nowSurah{font-size:1.35rem}
+  #nowReciter,.art-caption{font-size:13px}
+  .track-error{padding:4px 10px;font-size:13px}
+  .progress-section input[type=range]{height:22px}
+  .play-pause-btn{width:62px;height:62px}
+  .skip-btn{width:48px;height:48px}
+  .controls-secondary{padding:2px 6px}
+  .controls-secondary .action-btn{height:44px}
+  .sel-card{min-height:50px;padding:5px 14px}
+}
 </style>
 <script type="application/ld+json">
 {
@@ -927,6 +1036,8 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       <span>جارٍ التشغيل</span>
     </div>
 
+    <!-- two halves: side by side on wide landscape screens, a plain column otherwise (display: contents) -->
+    <div class="hero-side hero-now">
     <!-- Mandala Visual -->
     <div class="mandala-container" id="mandalaContainer">
       <div class="mandala-glow"></div>
@@ -961,6 +1072,11 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       </div>
     </div>
 
+    <!-- the reciter under the art (wide landscape screens only; a copy of #nowReciter) -->
+    <div class="art-caption" aria-hidden="true"></div>
+    </div>
+    <div class="hero-side hero-controls">
+
     <!-- Track Info -->
     <div class="track-info">
       <div class="hero-surah-wrap">
@@ -968,6 +1084,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       </div>
       <div id="nowReciter">—</div>
     </div>
+
 
     <!-- Inline track error (replaces the old silent auto-skip) -->
     <div class="track-error" id="trackError" role="alert" hidden>
@@ -1016,6 +1133,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
       </button>
       <button class="action-btn" id="speedBtn" onclick="haptic();toggleSpeed()" aria-label="سرعة التلاوة">1x</button>
+    </div>
     </div>
 
   </section>
@@ -1481,7 +1599,7 @@ function setHeroTicker(text){
   const el=document.getElementById('nowSurah');if(!el)return;
   el.classList.remove('ticker-active');
   el.style.removeProperty('--ticker-dur');
-  el.textContent=text;
+  el.textContent=text;el.dataset.text=text;
   requestAnimationFrame(()=>{
     const wrap=el.parentElement;if(!wrap)return;
     if(el.scrollWidth>wrap.offsetWidth+2){
@@ -1494,6 +1612,21 @@ function setHeroTicker(text){
   });
 }
 
+// Wide landscape screens: the title wraps (two lines at most) instead of
+// scrolling; crossing into or out of that layout lays the titles out again.
+(function(){
+  const mq=matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
+  const relayout=()=>{const el=document.getElementById('nowSurah');if(el&&el.dataset.text)setHeroTicker(el.dataset.text)};
+  if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);
+})();
+// The reciter under the art (wide landscape screens): a copy of #nowReciter,
+// kept in step wherever the name is set.
+(function(){
+  const src=document.getElementById('nowReciter'),cap=document.querySelector('.art-caption');
+  if(!src||!cap)return;
+  const sync=()=>{cap.textContent=src.textContent};
+  sync();new MutationObserver(sync).observe(src,{childList:true,characterData:true,subtree:true});
+})();
 function setSelTicker(elId,text){
   const el=document.getElementById(elId);if(!el)return;
   el.classList.remove('ticker-active');
