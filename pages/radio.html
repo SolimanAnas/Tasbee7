@@ -547,6 +547,111 @@ body.calm .waveform::before{animation-play-state:paused!important}
 
 /* Install prompt */
 #install-prompt{display:none}
+
+/* ============================================================
+   LANDSCAPE — wide, short screens: car head units (800×480 to
+   1920×720), tablets and phones held sideways. One screen, no
+   scrolling, big targets. The player card splits in two balanced
+   columns with a line between: a small live indicator, the station
+   name and the controls on the reading side (the transport first,
+   favourite / sleep timer below a clear gap), the art large in the
+   other column; the station picker in a row under the card.
+   ============================================================ */
+.hero-side{display:contents}   /* phones: the card stays one column */
+@media (orientation:landscape) and (min-width:700px) and (max-height:820px){
+  body{
+    padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  }
+  .app{
+    max-width:1400px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.8vh,16px);
+  }
+  .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
+  .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
+  .header .icon-btn{min-width:48px;min-height:48px}
+  .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
+  /* the translate icon is a masked div sized inline */
+  .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
+
+  /* two balanced columns: the live indicator over the controls on the
+     reading side, the art beside them (spanning both rows) */
+  .hero-card{
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto;align-content:center;
+    column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
+  }
+  .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
+  .hero-controls{grid-column:1;grid-row:2;align-self:start}
+  .hero-now{grid-column:2;grid-row:1 / span 2;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
+
+  /* live: a small, quiet indicator above the station name — grey when
+     stopped, amber while connecting, red with a pulsing dot and the time on air */
+  .live-badge{grid-column:1;grid-row:1;justify-self:center;align-self:end;margin:0 0 clamp(6px,1.6vh,14px);
+    font-size:clamp(.7rem,1.9vh,.88rem);letter-spacing:.06em;padding:clamp(3px,.6vh,5px) clamp(10px,1.4vw,14px);
+    background:rgba(255,255,255,.05);color:var(--text-secondary);border-color:var(--glass-border)}
+  .live-dot{background:var(--text-secondary);opacity:.7}
+  body.is-playing .live-badge{background:rgba(239,68,68,.12);color:var(--live-color);border-color:rgba(239,68,68,.28);box-shadow:none}
+  body.is-playing .live-dot{background:var(--live-color);opacity:1}
+  body.is-connecting .live-badge{background:rgba(245,158,11,.12);color:#d97706;border-color:rgba(245,158,11,.28)}
+  body.is-connecting .live-dot{background:#f59e0b;opacity:1}
+
+  /* the art: as large as its column and the height allow */
+  .mandala-wrap{--art:min(clamp(150px,48vh,350px),30vw);margin-bottom:clamp(4px,1.4vh,10px)}
+  .waveform{margin:0 auto}
+
+  /* the station name leads: large and bold, the category clearly secondary */
+  .track-info{margin:0 0 clamp(12px,3vh,28px)}
+  #nowStation{font-size:clamp(1.8rem,7vh,3.4rem);font-weight:700;
+    white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+  .now-cat{font-size:clamp(.8rem,2.4vh,1.1rem);margin-top:clamp(2px,.7vh,8px);opacity:.9}
+
+  /* primary: the transport */
+  .radio-error{margin:0 0 clamp(4px,1vh,10px);padding:6px 12px;font-size:15px}
+  .controls-main{margin:0;gap:clamp(24px,5vw,64px)}
+  .play-pause-btn{width:clamp(76px,16vh,116px);height:clamp(76px,16vh,116px)}
+  .play-pause-btn svg{width:clamp(32px,5.6vh,44px);height:clamp(32px,5.6vh,44px)}
+  .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
+  .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
+
+  /* secondary: below a clear gap, lighter — favourite · sleep timer in two equal parts */
+  .controls-secondary{display:grid;grid-template-columns:1fr 1fr;width:min(100%,320px);gap:0;
+    margin:clamp(12px,3.2vh,34px) 0 0;padding:clamp(2px,.6vh,6px) 6px;
+    background:rgba(var(--accent-rgb),.04);border:1px solid var(--glass-border);border-radius:clamp(14px,2.4vh,20px)}
+  .controls-secondary .action-btn{width:100%;height:clamp(44px,8vh,60px);border-radius:12px;background:none;border:none}
+  .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
+    border-inline-start:1px solid var(--glass-border)}
+  .action-btn svg{width:clamp(22px,3.7vh,27px);height:clamp(22px,3.7vh,27px)}
+  .sleep-badge{top:4px;inset-inline-end:auto;inset-inline-start:calc(50% + 6px)}
+
+  /* the station picker: the icon tile, the label and value, the chevron */
+  .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
+  .sel-icon{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px);flex:none;border-radius:clamp(10px,1.8vh,14px)}
+  .sel-icon svg{width:52%;height:52%}
+  .sel-chevron{width:clamp(16px,2.8vh,22px);height:clamp(16px,2.8vh,22px)}
+  .sel-label{font-size:clamp(12px,2.1vh,15px)}
+  .sel-value{font-size:clamp(16px,3vh,22px)}
+
+  /* the station list and the sleep timer open as a centred panel */
+  .bottom-sheet{width:min(100%,760px);margin-inline:auto}
+}
+/* phones held sideways (≈360–440 px tall): the same layout, tighter */
+@media (orientation:landscape) and (min-width:700px) and (max-height:440px){
+  body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+  .app{gap:6px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
+  .header{padding:2px 10px}
+  .header .icon-btn{min-width:42px;min-height:42px}
+  .hero-card{padding:6px 16px}
+  .mandala-wrap{--art:min(clamp(120px,44vh,330px),28vw)}
+  .live-badge{margin-bottom:4px}
+  .track-info{margin-bottom:6px}
+  #nowStation{font-size:1.45rem}
+  .radio-error{padding:4px 10px;font-size:13px}
+  .play-pause-btn{width:64px;height:64px}
+  .skip-btn{width:50px;height:50px}
+  .controls-secondary{margin-top:6px;padding:2px 6px}
+  .controls-secondary .action-btn{height:44px}
+  .sel-card{min-height:50px;padding:4px 14px}
+  .sel-icon{width:34px;height:34px}
+}
 </style>
 </head>
 <body>
@@ -599,6 +704,8 @@ body.calm .waveform::before{animation-play-state:paused!important}
       <span class="live-time" id="liveTime"></span>
     </div>
 
+    <!-- two halves: side by side on wide landscape screens, a plain column otherwise (display: contents) -->
+    <div class="hero-side hero-now">
     <!-- Mandala + album art -->
     <div class="mandala-wrap" id="mandalaWrap" role="button" tabindex="0" aria-pressed="false"
          aria-label="إيقاف / تشغيل الحركة" data-i18n-title="radio_motion_toggle"
@@ -621,6 +728,9 @@ body.calm .waveform::before{animation-play-state:paused!important}
       <div class="bar"></div><div class="bar"></div><div class="bar"></div>
       <div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
+
+    </div>
+    <div class="hero-side hero-controls">
 
     <!-- Station name -->
     <div class="track-info">
@@ -665,6 +775,7 @@ body.calm .waveform::before{animation-play-state:paused!important}
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <span class="sleep-badge" id="sleepBadge" hidden></span>
       </button>
+    </div>
     </div>
 
   </div>
@@ -799,7 +910,7 @@ function closeAllSheets(){
 // ── ticker helpers ────────────────────────────────────────
 function ticker(el,text,speed,minDur){
   if(!el)return;
-  el.classList.remove('ticker-active');el.style.removeProperty('--ticker-dur');el.textContent=text;
+  el.classList.remove('ticker-active');el.style.removeProperty('--ticker-dur');el.textContent=text;el.dataset.text=text;
   requestAnimationFrame(()=>{
     const wrap=el.parentElement;if(!wrap)return;
     if(el.scrollWidth>wrap.offsetWidth+2){
@@ -811,6 +922,13 @@ function ticker(el,text,speed,minDur){
 }
 function setHeroTicker(text){ticker(document.getElementById('nowStation'),text,80,5)}
 function setSelTicker(text){ticker(document.getElementById('stationSelectBtn'),text,70,4)}
+// Wide landscape screens: the title wraps (two lines at most) instead of
+// scrolling; crossing into or out of that layout lays the titles out again.
+(function(){
+  const mq=matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
+  const relayout=()=>{['nowStation','stationSelectBtn'].forEach(id=>{const el=document.getElementById(id);if(el&&el.dataset.text)(id==='nowStation'?setHeroTicker:setSelTicker)(el.dataset.text)})};
+  if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);
+})();
 
 // ── mandala dots (generate once) ─────────────────────────
 // orbit radius follows the art size (it shrinks on short screens)
