@@ -1,5 +1,9 @@
 const RADIO_STATIONS = [
   {
+    "name": "إذاعة القرآن الكريم - القاهرة (بث مباشر)",
+    "url": "https://stream.radiojar.com/8s5u5tpdtwzuv"
+  },
+  {
     "name": "إذاعة القرآن الكريم - القاهرة",
     "url": "https://backup.qurango.net/radio/mustafa_ismail"
   },

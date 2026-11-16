@@ -135,7 +135,7 @@
 
   // ---- Radio station names (index aligned to RADIO_STATIONS order) --------
   const STATION_LATIN = [
-    'Holy Quran Radio – Cairo', 'Holy Quran Radio – Makkah', 'Holy Quran Radio – Sharjah',
+    'Holy Quran Radio – Cairo (Live)', 'Holy Quran Radio – Cairo', 'Holy Quran Radio – Makkah', 'Holy Quran Radio – Sharjah',
     'General Radio – Various Reciters', 'Humble Recitations Radio', 'Ruqyah Radio',
     'Morning Adhkar', 'Evening Adhkar', 'Surah Al-Baqarah – Various Reciters',
     'Short Selected Recitations', 'Abdul Basit Abdul Samad (Murattal)',
