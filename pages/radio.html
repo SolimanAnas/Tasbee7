@@ -4,14 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
-// Theme and reading direction before the first paint: the theme was applied
-// in the load event (setTheme), so the page showed its default theme (and right-to-left) first,
-// then switched. Same rule as the page's own code below, which still runs.
+// Theme and reading direction before the first paint (applied in the load
+// event, the page showed its default first and then switched). themeMode is
+// shared by every page: light, dark, sepia or plain-dark (OLED black); "warm"
+// is the adhkar page's old name for sepia. Each page shows the nearest theme
+// it has (HAS): sepia as light, OLED as dark where it has no such theme.
+// zadPageTheme() is used again by the page's own code.
 (function () {
+  var HAS = ['light', 'dark', 'sepia'], DEFAULT = 'dark', ALIAS = {};
   var d = document.documentElement, t = null, l = null;
+  window.zadPageTheme = function (m) {
+    if (m === 'warm') m = 'sepia';
+    if (m === 'oled') m = 'plain-dark';
+    if (['light', 'dark', 'sepia', 'plain-dark'].indexOf(m) < 0) return DEFAULT;
+    if (HAS.indexOf(m) < 0) m = m === 'sepia' ? 'light' : 'dark';
+    return ALIAS[m] || m;
+  };
   try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
-  t = t || 'dark';
-  d.setAttribute('data-theme', t);
+  d.setAttribute('data-theme', zadPageTheme(t));
   if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
 })();
 </script>
@@ -766,8 +776,11 @@ function cycleTheme(){
   setTheme(THEMES[(THEMES.indexOf(cur)+1)%THEMES.length]);
 }
 function setTheme(theme){
-  document.documentElement.setAttribute('data-theme',theme);
+  applyTheme(theme);
   localStorage.setItem('themeMode',theme);
+}
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
   updateThemeIcon(theme);
 }
 function updateThemeIcon(theme){
@@ -775,7 +788,8 @@ function updateThemeIcon(theme){
   document.getElementById('themeIconMoon').style.display=theme==='dark'?'block':'none';
   document.getElementById('themeIconSepia').style.display=theme==='sepia'?'block':'none';
 }
-window.addEventListener('storage',e=>{if(e.key==='themeMode'&&e.newValue)setTheme(e.newValue)});
+// another tab changed the theme: show it here without saving it back
+window.addEventListener('storage',e=>{if(e.key==='themeMode'&&e.newValue)applyTheme(zadPageTheme(e.newValue))});
 
 // ── sheets ────────────────────────────────────────────────
 function openSheet(id){
@@ -1336,7 +1350,7 @@ window.addEventListener('langchange',()=>{
   if(document.getElementById('stationSheet').classList.contains('active'))renderStationSheet();
 });
 window.addEventListener('load',()=>{
-  setTheme(localStorage.getItem('themeMode')||'dark');
+  applyTheme(zadPageTheme(localStorage.getItem('themeMode')));   // not saved back: the choice stays as it is
   init();
 });
 </script>

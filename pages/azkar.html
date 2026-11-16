@@ -7,14 +7,25 @@
      whole screen zoomed and cropped. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <script>
-// Theme and reading direction before the first paint: the theme was applied
-// in the load event (setTheme), so the page showed its default theme (and right-to-left) first,
-// then switched. Same rule as the page's own code below, which still runs.
+// Theme and reading direction before the first paint (applied in the load
+// event, the page showed its default first and then switched). themeMode is
+// shared by every page: light, dark, sepia or plain-dark (OLED black); "warm"
+// is the adhkar page's old name for sepia. Each page shows the nearest theme
+// it has (HAS): sepia as light, OLED as dark where it has no such theme.
+// (its sepia is called "warm" here).
+// zadPageTheme() is used again by the page's own code.
 (function () {
+  var HAS = ['light', 'dark', 'sepia'], DEFAULT = 'dark', ALIAS = { sepia: 'warm' };
   var d = document.documentElement, t = null, l = null;
+  window.zadPageTheme = function (m) {
+    if (m === 'warm') m = 'sepia';
+    if (m === 'oled') m = 'plain-dark';
+    if (['light', 'dark', 'sepia', 'plain-dark'].indexOf(m) < 0) return DEFAULT;
+    if (HAS.indexOf(m) < 0) m = m === 'sepia' ? 'light' : 'dark';
+    return ALIAS[m] || m;
+  };
   try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
-  t = t || 'dark';
-  d.setAttribute('data-theme', t);
+  d.setAttribute('data-theme', zadPageTheme(t));
   if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
 })();
 </script>
@@ -1865,9 +1876,14 @@ function fitZikrText() {
 })();
 
 /* Theme Logic */
+// mode: this page's theme (dark / warm / light). themeMode is shared with the
+// other pages, so the choice is saved under the shared name: warm → sepia.
 function setTheme(mode) {
+  applyTheme(mode);
+  try { localStorage.setItem("themeMode", mode === 'warm' ? 'sepia' : mode); } catch (e) { /* ignore */ }
+}
+function applyTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
-  localStorage.setItem("themeMode", mode);
 
   const metaThemeColor = document.querySelector("meta[name=theme-color]");
   if(mode === 'light') metaThemeColor.setAttribute("content", "#F4F6F8");
@@ -2239,8 +2255,8 @@ window.addEventListener("load", () => {
     document.getElementById("fontSizeSlider").value = savedSize;
   }
 
-  const savedTheme = localStorage.getItem("themeMode") || 'dark';
-  setTheme(savedTheme);
+  // the nearest theme this page has; the saved choice is left as it is
+  applyTheme(zadPageTheme(localStorage.getItem("themeMode")));
 
   // reflect saved swipe-nav preference in the settings toggle
   document.getElementById("swipeNavToggle").checked = swipeNavEnabled;

@@ -1,6 +1,7 @@
 /* theme-manager.js — single source of truth for the app-wide theme.
  *
- * Canonical storage: localStorage 'themeMode' ∈ 'dark' | 'light' | 'sepia'.
+ * Canonical storage: localStorage 'themeMode' ∈ 'dark' | 'light' | 'sepia'
+ * (the home page adds 'plain-dark', OLED black, shown here as dark).
  * Migrates the legacy per-page keys on first load (appThemeIndex, appThemeIdx,
  * appTheme) so an old choice carries over, then keeps everything on themeMode —
  * the user's theme finally follows them across pages.
@@ -27,8 +28,12 @@
 
   let alias = {};
 
+  // themeMode can also hold the home page's OLED theme (plain-dark, or the
+  // older "oled") and the adhkar page's old name for sepia ("warm"): these
+  // pages show the nearest theme they have.
   function normalize(mode) {
     if (THEMES.includes(mode)) return mode;
+    if (mode === 'plain-dark' || mode === 'oled') return 'dark';
     return mode === 'warm' ? 'sepia' : 'light';
   }
 
