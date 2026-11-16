@@ -212,6 +212,8 @@ export default {
   azkar_tap_hint: "بۆ ژماردن دەستبکە",
   'azkar_of': 'لە',
   'azkar_index_counter': "{current} لە {total}",
+  'player_layout_wide': "پیشاندانی ئاسۆیی",
+  'player_rotate_hint': "ئامێرەکەت بە ئاسۆیی بسوڕێنە",
   'azkar_pick_title': "بیرخستنەوەیەک هەڵبژێرە",
   'azkar_pick_summary': "{done} لە {total} تەواو کرا",
   'azkar_pick_open': "چوون بۆ بیرخستنەوەیەک",

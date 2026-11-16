@@ -199,6 +199,8 @@ export default {
   azkar_tap_hint: "گننے کے لیے دبائیں",
   'azkar_of': 'میں سے',
   'azkar_index_counter': "{current} / {total}",
+  'player_layout_wide': "افقی ترتیب",
+  'player_rotate_hint': "اپنا آلہ افقی گھمائیں",
   'azkar_pick_title': "ذکر منتخب کریں",
   'azkar_pick_summary': "{total} میں سے {done} مکمل",
   'azkar_pick_open': "کسی ذکر پر جائیں",
