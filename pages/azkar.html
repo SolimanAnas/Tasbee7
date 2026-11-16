@@ -356,6 +356,10 @@ body::before {
   background:color-mix(in srgb, var(--glass) 55%, transparent); color:var(--text-secondary);
   font:700 13px/1 'Tajawal',sans-serif; cursor:pointer; opacity:.6; padding:0; }
 .zoom-btns button:active{ transform:scale(.9); opacity:1; }
+.zoom-btns button svg{ width:17px; height:17px; display:block; margin:auto; fill:none; stroke:currentColor;
+  stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+/* auto-fit on: the text is sized to the card for every dhikr */
+.zoom-btns button.on{ opacity:1; color:var(--bg-surface); background:var(--accent-main); border-color:transparent; }
 
 /* reset this dhikr's count (shown once it has been counted) */
 .count-reset{ position:absolute; bottom:2px; inset-inline-start:-30px; z-index:3; width:32px; height:32px; border-radius:50%;
@@ -1151,6 +1155,10 @@ button.zikr-index-counter::before {   /* 44 px tall tap area, nothing moves */
     <div class="zoom-btns" onclick="event.stopPropagation()">
       <button type="button" onclick="zoomStep(-2)" aria-label="تصغير الخط" data-i18n-aria="azkar_zoom_out">A-</button>
       <button type="button" onclick="zoomStep(2)" aria-label="تكبير الخط" data-i18n-aria="azkar_zoom_in">A+</button>
+      <button type="button" id="autoFitBtn" onclick="setAutoFit(!autoFit, true)" aria-pressed="false"
+              aria-label="ملاءمة الخط تلقائياً" data-i18n-aria="azkar_autofit" title="ملاءمة الخط تلقائياً" data-i18n-title="azkar_autofit">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5h4M16 4h4v4M20 15v4h-4M8 20H4v-4"/><path d="M9.5 15.5 12 8.5l2.5 7M10.3 13.3h3.4"/></svg>
+      </button>
     </div>
     <div class="zikr-scroll-area">
       <div class="zikr-text" id="arabicText"></div>
@@ -1246,8 +1254,16 @@ button.zikr-index-counter::before {   /* 44 px tall tap area, nothing moves */
 
     <div class="settings-row">
       <h3 data-i18n="azkar_font_size">حجم الخط</h3>
-      <input type="range" min="22" max="40" value="28" id="fontSizeSlider" aria-label="حجم الخط" data-i18n-aria="a11y_font_size"
+      <input type="range" min="16" max="40" value="28" id="fontSizeSlider" aria-label="حجم الخط" data-i18n-aria="a11y_font_size"
              oninput="changeFontSize(this.value)">
+      <label class="toggle-row" style="margin-top:14px;">
+        <span data-i18n="azkar_autofit_label">ملاءمة حجم الخط تلقائياً ليظهر الذكر كاملاً في البطاقة</span>
+        <span class="switch">
+          <input type="checkbox" id="autoFitToggle" onchange="setAutoFit(this.checked, true)">
+          <span class="slider"></span>
+        </span>
+      </label>
+      <p class="settings-hint" data-i18n="azkar_autofit_hint">تغيير الحجم يدوياً (⁦A- / A+⁩ أو الشريط أو التكبير بإصبعين) يوقف الملاءمة التلقائية.</p>
     </div>
 
     <div class="settings-row">
@@ -1444,7 +1460,7 @@ let pinchInitialDistance = 0;
 let pinchInitialSize = 28;
 let isPinching = false;
 let multiTouchOccurred = false; // true if the current gesture ever used 2+ fingers
-const FONT_MIN = 22;
+const FONT_MIN = 16;
 const FONT_MAX = 40;
 
 function getDistance(t1, t2) {
@@ -1468,6 +1484,7 @@ swipeArea.addEventListener("touchstart", e => {
 
 swipeArea.addEventListener("touchmove", e => {
   if (isPinching && e.touches.length === 2) {
+    if (autoFit) setAutoFit(false, false);
     const dist = getDistance(e.touches[0], e.touches[1]);
     if (pinchInitialDistance > 0) {
       const scale = dist / pinchInitialDistance;
@@ -1523,6 +1540,7 @@ function loadZikr() {
     if(azkarData && azkarData[currentIndex]){
         document.getElementById("arabicText").innerText = azkarData[currentIndex].arabic;
         renderZikrSource(azkarData[currentIndex]);
+        fitZikrText();
         document.getElementById("englishText").innerText = azkarData[currentIndex].english;
 
         const currentNum = currentIndex + 1;
@@ -1728,6 +1746,8 @@ function openSettings() {
   const savedSize = localStorage.getItem("zikrFontSize") || 28;
   document.getElementById("fontSizeSlider").value = savedSize;
   document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
+  syncAutoFitUi();
+  if (autoFit) document.getElementById("fontSizeSlider").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--zikr-size'), 10) || savedSize;
   updateAudioSourceUI();
 }
 
@@ -1754,9 +1774,83 @@ function closeSettings() {
 }
 
 function changeFontSize(size) {
+  if (autoFit) setAutoFit(false, false);   // sized by hand: auto-fit off, keep going from here
   document.documentElement.style.setProperty('--zikr-size', size + 'px');
   localStorage.setItem("zikrFontSize", size);
 }
+
+/* --- Auto-fit: the largest text size at which the whole dhikr (and its
+   collapsed «فضل الذكر») fits the card without scrolling. Short adhkar
+   grow up to FONT_MAX, long ones shrink down to FONT_MIN and scroll only
+   if they still don't fit there. The size chosen by hand stays saved in
+   zikrFontSize and comes back when auto-fit is turned off. --- */
+let autoFit = false;
+try { autoFit = localStorage.getItem('zikrAutoFit') === '1'; } catch (e) { /* private mode */ }
+let lastFitBox = '';
+function syncAutoFitUi() {
+  const b = document.getElementById('autoFitBtn');
+  if (b) { b.classList.toggle('on', autoFit); b.setAttribute('aria-pressed', autoFit ? 'true' : 'false'); }
+  const tg = document.getElementById('autoFitToggle');
+  if (tg) tg.checked = autoFit;
+}
+function setAutoFit(on, restore) {
+  autoFit = !!on;
+  try { localStorage.setItem('zikrAutoFit', autoFit ? '1' : '0'); } catch (e) { /* ignore */ }
+  syncAutoFitUi();
+  if (autoFit) { lastFitBox = ''; fitZikrText(); }
+  else if (restore) {
+    let size = 28;
+    try { size = parseInt(localStorage.getItem('zikrFontSize'), 10) || 28; } catch (e) { /* ignore */ }
+    document.documentElement.style.setProperty('--zikr-size', size + 'px');
+    const slider = document.getElementById('fontSizeSlider');
+    if (slider) slider.value = size;
+  }
+}
+function fitZikrText() {
+  if (!autoFit) return;
+  const area = document.querySelector('.zikr-scroll-area');
+  const text = document.getElementById('arabicText');
+  const src = document.getElementById('zikrSrc');
+  if (!area || !text || !text.textContent.trim() || !area.clientHeight) return;
+  const root = document.documentElement;
+  const wasOpen = src && src.classList.contains('open');
+  if (wasOpen) src.classList.remove('open');                 // fit with «فضل الذكر» folded
+  const acs = getComputedStyle(area);
+  // keep clear of the scroll area's faded top and bottom edges
+  const avail = area.clientHeight - parseFloat(acs.paddingTop) - parseFloat(acs.paddingBottom) - 24;
+  let srcH = 0;
+  if (src && !src.hidden) { const c = getComputedStyle(src); srcH = src.offsetHeight + parseFloat(c.marginTop) + parseFloat(c.marginBottom); }
+  const fits = px => {
+    root.style.setProperty('--zikr-size', px + 'px');
+    return text.offsetHeight + srcH <= avail && text.scrollWidth <= text.clientWidth + 1;
+  };
+  let best;
+  if (fits(FONT_MAX)) best = FONT_MAX;
+  else if (!fits(FONT_MIN)) best = FONT_MIN;
+  else {
+    let lo = FONT_MIN, hi = FONT_MAX;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (fits(mid)) lo = mid; else hi = mid; }
+    best = lo;
+  }
+  root.style.setProperty('--zikr-size', best + 'px');
+  if (wasOpen) src.classList.add('open');
+  const slider = document.getElementById('fontSizeSlider');
+  if (slider) slider.value = best;
+  lastFitBox = area.clientWidth + 'x' + area.clientHeight;
+}
+// refit when the card changes size (rotation, the audio player opening) and once Amiri has loaded
+(function () {
+  const area = document.querySelector('.zikr-scroll-area');
+  if (area && window.ResizeObserver) {
+    new ResizeObserver(() => {
+      if (autoFit && area.clientWidth + 'x' + area.clientHeight !== lastFitBox) requestAnimationFrame(fitZikrText);
+    }).observe(area);
+  }
+  if (document.fonts) {
+    if (document.fonts.ready) document.fonts.ready.then(() => { lastFitBox = ''; fitZikrText(); });
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { lastFitBox = ''; fitZikrText(); });
+  }
+})();
 
 /* Theme Logic */
 function setTheme(mode) {
@@ -2138,6 +2232,7 @@ window.addEventListener("load", () => {
 
   // reflect saved swipe-nav preference in the settings toggle
   document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
+  syncAutoFitUi();
 });
 </script>
 
