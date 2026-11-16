@@ -1,7 +1,8 @@
-// Home page: the saved theme (and reading direction) are in place from the
-// first paint. They used to be applied in the load event, after every image
-// and the language file, so the page showed the dark default first and then
-// switched.
+// Home page: the saved theme, the reading direction and the prayer card's arch
+// are in place from the first paint. The theme used to be applied in the load
+// event (after every image and the language file), so the page showed the dark
+// default first and then switched; the arch waited for the scripts at the end
+// of the page, so the card showed as a plain rectangle first.
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = 'http://localhost:8080';
@@ -28,6 +29,10 @@ async function openMidLoad(page, { theme, lang } = {}) {
     bg: getComputedStyle(document.body).backgroundColor,
     dir: document.documentElement.dir,
     lang: document.documentElement.lang,
+    arch: (() => {
+      const w = document.getElementById('prayerWidget'), d = document.getElementById('pwOutline').getAttribute('d') || '';
+      return { clip: w.style.clipPath.startsWith('path('), outline: d.length > 50 };
+    })(),
   }));
 }
 
@@ -58,6 +63,12 @@ test.describe('home page first paint', () => {
     expect(s.loaded).toBe(false);
     expect(s.dir).toBe('ltr');
     expect(s.lang).toBe('en');
+  });
+
+  test('the prayer card has its arch (clip and outline) before the page has finished loading', async ({ page }) => {
+    const s = await openMidLoad(page, { theme: 'light' });
+    expect(s.loaded).toBe(false);
+    expect(s.arch).toEqual({ clip: true, outline: true });
   });
 
   test('after loading, the theme buttons show the saved theme', async ({ page }) => {
