@@ -15,6 +15,33 @@
   if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
 })();
 </script>
+<script>
+// Player layout before the first paint: the wide two-column layout on wide,
+// short landscape screens (car head units, tablets, phones held sideways); the
+// header button switches between it and the vertical layout (playerLayout:
+// "wide" / "tall", shared by the audio and radio pages). Two columns need at
+// least 700 px of width.
+(function () {
+  var d = document.documentElement, KEY = 'playerLayout', mode = null;
+  try { mode = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+  var auto = matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
+  var fits = function () { return innerWidth >= 700; };
+  function apply() {
+    var wide = mode === 'wide' ? fits() : mode === 'tall' ? false : auto.matches;
+    if (d.classList.contains('player-wide') === wide) return;
+    d.classList.toggle('player-wide', wide);
+    try { window.dispatchEvent(new Event('playerlayoutchange')); } catch (e) { /* old browsers */ }
+  }
+  apply();
+  if (auto.addEventListener) auto.addEventListener('change', apply); else if (auto.addListener) auto.addListener(apply);
+  window.addEventListener('resize', apply);
+  window.zadLayout = {
+    isWide: function () { return d.classList.contains('player-wide'); },
+    fits: fits,
+    set: function (m) { mode = m; try { localStorage.setItem(KEY, m); } catch (e) { /* ignore */ } apply(); }
+  };
+})();
+</script>
 <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#0F172A">
 <title>القرآن الكريم — استمع لأكثر من 200 قارئ | زاد المسلم</title>
@@ -344,6 +371,11 @@ input[type=range]::-webkit-slider-thumb{
 }
 input[type=range]:active::-webkit-slider-thumb{transform:scale(1.25);box-shadow:0 0 0 5px var(--accent-muted)}
 input[type=range]::-moz-range-track{height:5px;border-radius:4px;background:var(--track-bg)}
+/* the seek bar: played and buffered painted on the track (from --pct / --buf), so
+   a taller slider (a bigger touch area) never paints a block behind the bar */
+#progress{--pct:0%;--buf:0%}
+#progress::-webkit-slider-runnable-track{background:linear-gradient(to right,var(--accent-main) 0 var(--pct),rgba(255,255,255,.35) var(--pct) var(--buf),var(--track-bg) var(--buf) 100%)}
+#progress::-moz-range-track{background:linear-gradient(to right,var(--accent-main) 0 var(--pct),rgba(255,255,255,.35) var(--pct) var(--buf),var(--track-bg) var(--buf) 100%)}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent-main);border:none;box-shadow:0 0 0 3px var(--accent-muted)}
 
 /* ============================================================
@@ -856,113 +888,126 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
    card, each an icon tile, a label and value, and a chevron.
    ============================================================ */
 .hero-side{display:contents}   /* phones: the card stays one column */
+.layout-btn[aria-pressed="true"]{color:var(--accent-main)}
 .art-caption,.sel-icon,.offl-entry .sel-arrow{display:none}
-@media (orientation:landscape) and (min-width:700px) and (max-height:820px){
-  body{
+/* the wide layout: html.player-wide (set before the first paint: by the screen
+   shape, or by the header button — see the script in <head>) */
+  html.player-wide body{
     padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
   }
-  .app{
+  html.player-wide .app{
     max-width:1400px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
     display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.8vh,16px);
   }
-  .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
-  .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
-  .header .icon-btn{min-width:48px;min-height:48px}
-  .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
+  html.player-wide .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
+  html.player-wide .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
+  html.player-wide .header .icon-btn{min-width:48px;min-height:48px}
+  html.player-wide .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
   /* the translate icon is a masked div sized inline */
-  .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
+  html.player-wide .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
 
   /* two balanced columns: the controls on the reading side, the art beside them */
-  .hero-card{
+  html.player-wide .hero-card{
     display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
     column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
   }
-  .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
-  .hero-controls{grid-column:1;grid-row:1}
-  .hero-now{grid-column:2;grid-row:1;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
-  .now-playing-badge{position:absolute;top:clamp(10px,2vh,18px);inset-inline-end:clamp(14px,2vw,24px);margin:0;z-index:3;
+  html.player-wide .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
+  /* the controls' parts sit on the card's own grid: title, transport and the
+     secondary bar beside the art; the seek bar along the bottom, under both
+     columns (the error message takes its place when a recitation can't load) */
+  html.player-wide .hero-card{grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr) auto}
+  html.player-wide .hero-controls{display:contents}
+  html.player-wide .track-info{grid-column:1;grid-row:2;justify-self:center;width:100%}
+  html.player-wide .controls-main{grid-column:1;grid-row:3}
+  html.player-wide .controls-secondary{grid-column:1;grid-row:4;justify-self:center;width:100%}
+  html.player-wide .progress-section,html.player-wide .track-error{grid-column:1 / -1;grid-row:6;justify-self:center}
+  html.player-wide .track-error{margin-top:clamp(8px,2vh,20px)!important}
+  html.player-wide .hero-now{grid-column:2;grid-row:1 / 6;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
+  html.player-wide .now-playing-badge{position:absolute;top:clamp(10px,2vh,18px);inset-inline-end:clamp(14px,2vw,24px);margin:0;z-index:3;
     font-size:clamp(11px,2vh,15px);padding:clamp(4px,.8vh,7px) clamp(11px,1.6vw,16px)}
-  .now-playing-badge .badge-dot{width:clamp(6px,1.1vh,9px);height:clamp(6px,1.1vh,9px)}
+  html.player-wide .now-playing-badge .badge-dot{width:clamp(6px,1.1vh,9px);height:clamp(6px,1.1vh,9px)}
 
   /* the art: as large as its column and the height allow, centred with the reciter under it */
-  .mandala-container{--art:min(clamp(140px,46vh,340px),30vw);width:var(--art);height:var(--art);margin:0 auto}
-  .m-album-wrap{width:calc(var(--art) * .913);height:calc(var(--art) * .913)}
-  .art-caption{display:block;max-width:100%;margin-top:clamp(8px,2.2vh,20px);text-align:center;
+  html.player-wide .mandala-container{--art:min(clamp(140px,calc(46vh - 24px),340px),30vw);width:var(--art);height:var(--art);margin:0 auto}
+  html.player-wide .m-album-wrap{width:calc(var(--art) * .913);height:calc(var(--art) * .913)}
+  html.player-wide .art-caption{display:block;max-width:100%;margin-top:clamp(8px,2.2vh,20px);text-align:center;
     font-size:clamp(14px,2.7vh,20px);font-weight:600;color:var(--accent-main);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* the title leads: large and bold, the reciter clearly secondary under it */
-  .track-info{margin:0 0 clamp(12px,3vh,28px);min-height:0}
-  #nowSurah{font-size:clamp(1.8rem,7vh,3.6rem);font-weight:700;margin:0;
+  html.player-wide .track-info{margin:0 0 clamp(12px,3vh,28px);min-height:0}
+  html.player-wide #nowSurah{font-size:clamp(1.8rem,7vh,3.6rem);font-weight:700;margin:0;
     white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
-  #nowReciter{font-size:clamp(13px,2.5vh,19px);font-weight:600;opacity:.9;margin-top:clamp(2px,.7vh,8px)}
+  html.player-wide #nowReciter{font-size:clamp(13px,2.5vh,19px);font-weight:600;opacity:.9;margin-top:clamp(2px,.7vh,8px)}
 
   /* primary: the progress and the transport, one group */
-  .track-error{margin:0;padding:6px 12px;font-size:15px}
-  .progress-section{margin:0;width:100%}
+  html.player-wide .track-error{margin:0;padding:6px 12px;font-size:15px}
+  html.player-wide .progress-section{margin:clamp(8px,2.2vh,22px) 0 0;width:100%}
   /* a recitation that can't load: its message takes the progress bar's place (00:00 then) */
-  .track-error:not([hidden]) ~ .progress-section{display:none}
-  .time{font-size:clamp(13px,2.1vh,16px);width:58px}
-  .progress-section input[type=range]{height:28px}
-  .progress-section input[type=range]::-webkit-slider-runnable-track{height:8px}
-  .progress-section input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-8px}
-  .progress-section input[type=range]::-moz-range-track{height:8px}
-  .progress-section input[type=range]::-moz-range-thumb{width:24px;height:24px}
-  .controls-main{margin:clamp(6px,1.6vh,16px) 0 0;gap:clamp(24px,5vw,64px)}
-  .play-pause-btn{width:clamp(72px,16vh,116px);height:clamp(72px,16vh,116px)}
-  .play-pause-btn svg{width:clamp(30px,5.4vh,42px);height:clamp(30px,5.4vh,42px)}
-  .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
-  .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
+  html.player-wide .track-error:not([hidden]) ~ .progress-section{display:none}
+  html.player-wide .time{font-size:clamp(13px,2.1vh,16px);width:58px}
+  html.player-wide .progress-section input[type=range]{height:28px}
+  html.player-wide .progress-section input[type=range]::-webkit-slider-runnable-track{height:8px}
+  html.player-wide .progress-section input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-8px}
+  html.player-wide .progress-section input[type=range]::-moz-range-track{height:8px}
+  html.player-wide .progress-section input[type=range]::-moz-range-thumb{width:24px;height:24px}
+  html.player-wide .controls-main{margin:clamp(6px,1.6vh,16px) 0 0;gap:clamp(24px,5vw,64px)}
+  html.player-wide .play-pause-btn{width:clamp(72px,16vh,116px);height:clamp(72px,16vh,116px)}
+  html.player-wide .play-pause-btn svg{width:clamp(30px,5.4vh,42px);height:clamp(30px,5.4vh,42px)}
+  html.player-wide .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
+  html.player-wide .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
 
   /* secondary: below a clear gap, lighter — repeat · download · favourite · shuffle · speed in equal parts */
-  .controls-secondary{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+  html.player-wide .controls-secondary{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
     margin:clamp(12px,3.2vh,34px) 0 0;padding:clamp(2px,.6vh,6px) 6px;max-width:600px;
     background:rgba(var(--accent-rgb),.04);border-radius:clamp(14px,2.4vh,20px)}
-  .controls-secondary .action-btn{position:relative;width:100%;height:clamp(44px,8vh,60px);border-radius:12px}
-  .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
+  html.player-wide .controls-secondary .action-btn{position:relative;width:100%;height:clamp(44px,8vh,60px);border-radius:12px}
+  html.player-wide .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
     border-inline-start:1px solid var(--glass-border)}
-  .action-btn svg{width:clamp(21px,3.6vh,26px);height:clamp(21px,3.6vh,26px)}
-  #speedBtn{font-size:clamp(14px,2.5vh,18px)}
+  html.player-wide .action-btn svg{width:clamp(21px,3.6vh,26px);height:clamp(21px,3.6vh,26px)}
+  html.player-wide #speedBtn{font-size:clamp(14px,2.5vh,18px)}
 
   /* the pickers: one row, each an icon tile, a label and value, and a chevron */
-  .sel-row{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none;gap:clamp(8px,1.4vw,16px)}
-  .offl-entry{grid-column:auto}
-  .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
-  .sel-icon,.offl-entry-icon,.offl-entry-ring{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px)}
-  .sel-icon{display:flex;flex:none;align-items:center;justify-content:center;border-radius:clamp(10px,1.8vh,14px);
+  html.player-wide .sel-row{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none;gap:clamp(8px,1.4vw,16px)}
+  html.player-wide .offl-entry{grid-column:auto}
+  html.player-wide .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
+  html.player-wide .sel-icon,html.player-wide .offl-entry-icon,html.player-wide .offl-entry-ring{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px)}
+  html.player-wide .sel-icon{display:flex;flex:none;align-items:center;justify-content:center;border-radius:clamp(10px,1.8vh,14px);
     background:var(--accent-muted);border:1px solid rgba(var(--accent-rgb),.2);color:var(--accent-main)}
-  .sel-icon svg{width:52%;height:52%}
-  .offl-entry-icon{order:-1}                      /* its tile at the start, like the others */
-  .offl-entry .sel-arrow{display:block}
-  .sel-arrow{width:clamp(15px,2.6vh,20px);height:clamp(15px,2.6vh,20px);opacity:.6}
-  .sel-label{font-size:clamp(12px,2.1vh,15px)}
-  .sel-value,.offl-entry .sel-value{font-size:clamp(16px,3vh,22px)}
-  .sel-value-wrap{line-height:1.5;min-height:1.5em}
-  .offl-entry-dl,.offl-entry-ok{width:clamp(18px,3.4vh,24px);height:clamp(18px,3.4vh,24px)}
+  html.player-wide .sel-icon svg{width:52%;height:52%}
+  html.player-wide .offl-entry-icon{order:-1}                      /* its tile at the start, like the others */
+  html.player-wide .offl-entry .sel-arrow{display:block}
+  html.player-wide .sel-arrow{width:clamp(15px,2.6vh,20px);height:clamp(15px,2.6vh,20px);opacity:.6}
+  html.player-wide .sel-label{font-size:clamp(12px,2.1vh,15px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.player-wide .sel-value,html.player-wide .offl-entry .sel-value{font-size:clamp(16px,3vh,22px)}
+  html.player-wide .sel-value-wrap{line-height:1.5;min-height:1.5em}
+  html.player-wide .offl-entry-dl,html.player-wide .offl-entry-ok{width:clamp(18px,3.4vh,24px);height:clamp(18px,3.4vh,24px)}
 
   /* lists open as a centred panel, not across the whole wide screen */
-  .bottom-sheet{width:min(100%,760px);margin-inline:auto}
-}
+  html.player-wide .bottom-sheet{width:min(100%,760px);margin-inline:auto}
+
 /* phones held sideways (≈360–440 px tall): the same layout, tighter */
-@media (orientation:landscape) and (min-width:700px) and (max-height:440px){
-  body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
-  .app{gap:5px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
-  .header{padding:2px 10px}
-  .header .icon-btn{min-width:42px;min-height:42px}
-  .hero-card{padding:6px 16px}
-  .mandala-container{--art:min(clamp(110px,40vh,300px),28vw)}
-  .track-info{margin-bottom:6px}
-  #nowSurah{font-size:1.45rem}
-  #nowReciter,.art-caption{font-size:13px}
-  .track-error{padding:4px 10px;font-size:13px}
-  .progress-section input[type=range]{height:22px}
-  .controls-main{margin-top:2px}
-  .play-pause-btn{width:62px;height:62px}
-  .skip-btn{width:48px;height:48px}
-  .controls-secondary{margin-top:6px;padding:2px 6px}
-  .controls-secondary .action-btn{height:44px}
-  .sel-card{min-height:50px;padding:4px 12px}
-  .sel-icon,.offl-entry-icon,.offl-entry-ring{width:34px;height:34px}
+@media (max-height:440px){
+  html.player-wide body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+  html.player-wide .app{gap:5px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
+  html.player-wide .header{padding:2px 10px}
+  html.player-wide .header .icon-btn{min-width:42px;min-height:42px}
+  html.player-wide .hero-card{padding:6px 16px}
+  html.player-wide .mandala-container{--art:min(clamp(110px,calc(40vh - 8px),300px),28vw)}
+  html.player-wide .track-info{margin-bottom:6px}
+  html.player-wide #nowSurah{font-size:1.45rem}
+  html.player-wide #nowReciter,html.player-wide .art-caption{font-size:13px}
+  html.player-wide .track-error{padding:4px 10px;font-size:13px}
+  html.player-wide .progress-section input[type=range]{height:22px}
+  html.player-wide .progress-section{margin-top:3px}
+  html.player-wide .track-error{margin-top:3px!important}
+  html.player-wide .controls-main{margin-top:2px}
+  html.player-wide .play-pause-btn{width:62px;height:62px}
+  html.player-wide .skip-btn{width:48px;height:48px}
+  html.player-wide .controls-secondary{margin-top:6px;padding:2px 6px}
+  html.player-wide .controls-secondary .action-btn{height:44px}
+  html.player-wide .sel-card{min-height:50px;padding:4px 12px}
+  html.player-wide .sel-icon,html.player-wide .offl-entry-icon,html.player-wide .offl-entry-ring{width:34px;height:34px}
 }
 </style>
 <script type="application/ld+json">
@@ -1029,6 +1074,9 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     </button>
     <div class="header-title" data-i18n="audio_header">الاستماع للقرآن</div>
     <div style="display:flex;gap:2px">
+      <button class="icon-btn layout-btn" id="layoutBtn" onclick="haptic();toggleLayout()" aria-pressed="false" aria-label="العرض الأفقي" title="العرض الأفقي" data-i18n-aria="player_layout_wide" data-i18n-title="player_layout_wide">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7.5" width="11" height="14.5" rx="2"/><line x1="7.5" y1="18.5" x2="9.5" y2="18.5"/><path d="M13 2.5a7.5 7.5 0 0 1 7.5 7.5"/><path d="M18.3 7.8l2.2 2.2 2.2-2.2"/></svg>
+      </button>
       <button class="icon-btn" onclick="haptic();I18n.openLangSheet()" aria-label="Language">
         <div style="width:22px;height:22px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
       </button>
@@ -1626,13 +1674,33 @@ function setHeroTicker(text){
   });
 }
 
-// Wide landscape screens: the title wraps (two lines at most) instead of
-// scrolling; crossing into or out of that layout lays the titles out again.
-(function(){
-  const mq=matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
-  const relayout=()=>{const el=document.getElementById('nowSurah');if(el&&el.dataset.text)setHeroTicker(el.dataset.text)};
-  if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);
-})();
+// The wide layout: the title wraps (two lines at most) instead of scrolling;
+// switching into or out of that layout lays the titles out again.
+window.addEventListener('playerlayoutchange',()=>{const el=document.getElementById('nowSurah');if(el&&el.dataset.text)setHeroTicker(el.dataset.text)});
+// The header layout button: the wide two-column layout and the vertical one.
+// It first tries to turn the screen (allowed in the installed app and in full
+// screen); if the screen can't turn, the layout switches in place when the
+// screen is wide enough for two columns, otherwise it asks to turn the device.
+function syncLayoutBtn(){const b=document.getElementById('layoutBtn');if(b&&window.zadLayout)b.setAttribute('aria-pressed',zadLayout.isWide()?'true':'false')}
+function waitWide(ms){return new Promise(done=>{const t0=Date.now();(function check(){if(zadLayout.fits()||Date.now()-t0>ms)return done(zadLayout.fits());setTimeout(check,100)})()})}
+async function toggleLayout(){
+  if(!window.zadLayout)return;
+  const toWide=!zadLayout.isWide();
+  let turned=false;
+  try{
+    if(screen.orientation&&screen.orientation.lock){
+      await Promise.race([screen.orientation.lock(toWide?'landscape':'portrait'),new Promise((_,no)=>setTimeout(()=>no(new Error('timeout')),1500))]);
+      turned=true;
+    }
+  }catch(e){/* not allowed here (a browser tab) or not supported */}
+  // too narrow for two columns: only if the screen really turned (a lock can
+  // succeed without the screen turning)
+  if(toWide&&!(zadLayout.fits()||(turned&&await waitWide(1200)))){showToast(t('player_rotate_hint'));return}
+  zadLayout.set(toWide?'wide':'tall');
+  syncLayoutBtn();
+}
+window.addEventListener('playerlayoutchange',syncLayoutBtn);
+syncLayoutBtn();
 // The reciter under the art (wide landscape screens): a copy of #nowReciter,
 // kept in step wherever the name is set.
 (function(){
@@ -2028,7 +2096,7 @@ function prepareTrack(userInitiated=false,allowAuto=true){
     document.getElementById('miniSurah').innerText=juzDisp;
     document.getElementById('miniReciter').innerText=reciterDisp;
     document.getElementById('progress').value=0;
-    document.getElementById('progress').style.background='transparent';
+    document.getElementById('progress').style.setProperty('--pct','0%');document.getElementById('progress').style.setProperty('--buf','0%');
     checkFavStatus();
     localStorage.setItem('lastTrack',url);
     localStorage.setItem('lastSurah',juzName);
@@ -2214,8 +2282,8 @@ function updateProgressBar(){
   }
   document.getElementById('progress').value=pct;
   document.getElementById('currentTime').innerText=formatTime(audio.currentTime);
-  document.getElementById('progress').style.background=
-    `linear-gradient(to right,var(--accent-main) 0%,var(--accent-main) ${pct}%,rgba(255,255,255,.35) ${pct}%,rgba(255,255,255,.35) ${bufPct}%,var(--track-bg) ${bufPct}%,var(--track-bg) 100%)`;
+  const bar=document.getElementById('progress');
+  bar.style.setProperty('--pct',pct+'%');bar.style.setProperty('--buf',Math.max(pct,bufPct)+'%');
   updateMiniProgress();
 }
 audio.addEventListener('timeupdate',updateProgressBar);

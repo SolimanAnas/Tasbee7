@@ -15,6 +15,33 @@
   if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
 })();
 </script>
+<script>
+// Player layout before the first paint: the wide two-column layout on wide,
+// short landscape screens (car head units, tablets, phones held sideways); the
+// header button switches between it and the vertical layout (playerLayout:
+// "wide" / "tall", shared by the audio and radio pages). Two columns need at
+// least 700 px of width.
+(function () {
+  var d = document.documentElement, KEY = 'playerLayout', mode = null;
+  try { mode = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+  var auto = matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
+  var fits = function () { return innerWidth >= 700; };
+  function apply() {
+    var wide = mode === 'wide' ? fits() : mode === 'tall' ? false : auto.matches;
+    if (d.classList.contains('player-wide') === wide) return;
+    d.classList.toggle('player-wide', wide);
+    try { window.dispatchEvent(new Event('playerlayoutchange')); } catch (e) { /* old browsers */ }
+  }
+  apply();
+  if (auto.addEventListener) auto.addEventListener('change', apply); else if (auto.addListener) auto.addListener(apply);
+  window.addEventListener('resize', apply);
+  window.zadLayout = {
+    isWide: function () { return d.classList.contains('player-wide'); },
+    fits: fits,
+    set: function (m) { mode = m; try { localStorage.setItem(KEY, m); } catch (e) { /* ignore */ } apply(); }
+  };
+})();
+</script>
 <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#0F172A">
 <title>إذاعة القرآن الكريم — زاد المسلم | Live Quran Radio</title>
@@ -558,99 +585,101 @@ body.calm .waveform::before{animation-play-state:paused!important}
    other column; the station picker in a row under the card.
    ============================================================ */
 .hero-side{display:contents}   /* phones: the card stays one column */
-@media (orientation:landscape) and (min-width:700px) and (max-height:820px){
-  body{
+.layout-btn[aria-pressed="true"]{color:var(--accent-main)}
+/* the wide layout: html.player-wide (set before the first paint: by the screen
+   shape, or by the header button — see the script in <head>) */
+  html.player-wide body{
     padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
   }
-  .app{
+  html.player-wide .app{
     max-width:1400px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
     display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.8vh,16px);
   }
-  .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
-  .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
-  .header .icon-btn{min-width:48px;min-height:48px}
-  .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
+  html.player-wide .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
+  html.player-wide .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
+  html.player-wide .header .icon-btn{min-width:48px;min-height:48px}
+  html.player-wide .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
   /* the translate icon is a masked div sized inline */
-  .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
+  html.player-wide .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
 
   /* two balanced columns: the live indicator over the controls on the
      reading side, the art beside them (spanning both rows) */
-  .hero-card{
+  html.player-wide .hero-card{
     display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto;align-content:center;
     column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
   }
-  .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
-  .hero-controls{grid-column:1;grid-row:2;align-self:start}
-  .hero-now{grid-column:2;grid-row:1 / span 2;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
+  html.player-wide .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
+  html.player-wide .hero-controls{grid-column:1;grid-row:2;align-self:start}
+  html.player-wide .hero-now{grid-column:2;grid-row:1 / span 2;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
 
   /* live: a small, quiet indicator above the station name — grey when
      stopped, amber while connecting, red with a pulsing dot and the time on air */
-  .live-badge{grid-column:1;grid-row:1;justify-self:center;align-self:end;margin:0 0 clamp(6px,1.6vh,14px);
+  html.player-wide .live-badge{grid-column:1;grid-row:1;justify-self:center;align-self:end;margin:0 0 clamp(6px,1.6vh,14px);
     font-size:clamp(.7rem,1.9vh,.88rem);letter-spacing:.06em;padding:clamp(3px,.6vh,5px) clamp(10px,1.4vw,14px);
     background:rgba(255,255,255,.05);color:var(--text-secondary);border-color:var(--glass-border)}
-  .live-dot{background:var(--text-secondary);opacity:.7}
-  body.is-playing .live-badge{background:rgba(239,68,68,.12);color:var(--live-color);border-color:rgba(239,68,68,.28);box-shadow:none}
-  body.is-playing .live-dot{background:var(--live-color);opacity:1}
-  body.is-connecting .live-badge{background:rgba(245,158,11,.12);color:#d97706;border-color:rgba(245,158,11,.28)}
-  body.is-connecting .live-dot{background:#f59e0b;opacity:1}
+  html.player-wide .live-dot{background:var(--text-secondary);opacity:.7}
+  html.player-wide body.is-playing .live-badge{background:rgba(239,68,68,.12);color:var(--live-color);border-color:rgba(239,68,68,.28);box-shadow:none}
+  html.player-wide body.is-playing .live-dot{background:var(--live-color);opacity:1}
+  html.player-wide body.is-connecting .live-badge{background:rgba(245,158,11,.12);color:#d97706;border-color:rgba(245,158,11,.28)}
+  html.player-wide body.is-connecting .live-dot{background:#f59e0b;opacity:1}
 
   /* the art: as large as its column and the height allow */
-  .mandala-wrap{--art:min(clamp(150px,48vh,350px),30vw);margin-bottom:clamp(4px,1.4vh,10px)}
-  .waveform{margin:0 auto}
+  html.player-wide .mandala-wrap{--art:min(clamp(150px,48vh,350px),30vw);margin-bottom:clamp(4px,1.4vh,10px)}
+  html.player-wide .waveform{margin:0 auto}
 
   /* the station name leads: large and bold, the category clearly secondary */
-  .track-info{margin:0 0 clamp(12px,3vh,28px)}
-  #nowStation{font-size:clamp(1.8rem,7vh,3.4rem);font-weight:700;
+  html.player-wide .track-info{margin:0 0 clamp(12px,3vh,28px)}
+  html.player-wide #nowStation{font-size:clamp(1.8rem,7vh,3.4rem);font-weight:700;
     white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
-  .now-cat{font-size:clamp(.8rem,2.4vh,1.1rem);margin-top:clamp(2px,.7vh,8px);opacity:.9}
+  html.player-wide .now-cat{font-size:clamp(.8rem,2.4vh,1.1rem);margin-top:clamp(2px,.7vh,8px);opacity:.9}
 
   /* primary: the transport */
-  .radio-error{margin:0 0 clamp(4px,1vh,10px);padding:6px 12px;font-size:15px}
-  .controls-main{margin:0;gap:clamp(24px,5vw,64px)}
-  .play-pause-btn{width:clamp(76px,16vh,116px);height:clamp(76px,16vh,116px)}
-  .play-pause-btn svg{width:clamp(32px,5.6vh,44px);height:clamp(32px,5.6vh,44px)}
-  .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
-  .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
+  html.player-wide .radio-error{margin:0 0 clamp(4px,1vh,10px);padding:6px 12px;font-size:15px}
+  html.player-wide .controls-main{margin:0;gap:clamp(24px,5vw,64px)}
+  html.player-wide .play-pause-btn{width:clamp(76px,16vh,116px);height:clamp(76px,16vh,116px)}
+  html.player-wide .play-pause-btn svg{width:clamp(32px,5.6vh,44px);height:clamp(32px,5.6vh,44px)}
+  html.player-wide .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
+  html.player-wide .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
 
   /* secondary: below a clear gap, lighter — favourite · sleep timer in two equal parts */
-  .controls-secondary{display:grid;grid-template-columns:1fr 1fr;width:min(100%,320px);gap:0;
+  html.player-wide .controls-secondary{display:grid;grid-template-columns:1fr 1fr;width:min(100%,320px);gap:0;
     margin:clamp(12px,3.2vh,34px) 0 0;padding:clamp(2px,.6vh,6px) 6px;
     background:rgba(var(--accent-rgb),.04);border:1px solid var(--glass-border);border-radius:clamp(14px,2.4vh,20px)}
-  .controls-secondary .action-btn{width:100%;height:clamp(44px,8vh,60px);border-radius:12px;background:none;border:none}
-  .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
+  html.player-wide .controls-secondary .action-btn{width:100%;height:clamp(44px,8vh,60px);border-radius:12px;background:none;border:none}
+  html.player-wide .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
     border-inline-start:1px solid var(--glass-border)}
-  .action-btn svg{width:clamp(22px,3.7vh,27px);height:clamp(22px,3.7vh,27px)}
-  .sleep-badge{top:4px;inset-inline-end:auto;inset-inline-start:calc(50% + 6px)}
+  html.player-wide .action-btn svg{width:clamp(22px,3.7vh,27px);height:clamp(22px,3.7vh,27px)}
+  html.player-wide .sleep-badge{top:4px;inset-inline-end:auto;inset-inline-start:calc(50% + 6px)}
 
   /* the station picker: the icon tile, the label and value, the chevron */
-  .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
-  .sel-icon{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px);flex:none;border-radius:clamp(10px,1.8vh,14px)}
-  .sel-icon svg{width:52%;height:52%}
-  .sel-chevron{width:clamp(16px,2.8vh,22px);height:clamp(16px,2.8vh,22px)}
-  .sel-label{font-size:clamp(12px,2.1vh,15px)}
-  .sel-value{font-size:clamp(16px,3vh,22px)}
+  html.player-wide .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
+  html.player-wide .sel-icon{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px);flex:none;border-radius:clamp(10px,1.8vh,14px)}
+  html.player-wide .sel-icon svg{width:52%;height:52%}
+  html.player-wide .sel-chevron{width:clamp(16px,2.8vh,22px);height:clamp(16px,2.8vh,22px)}
+  html.player-wide .sel-label{font-size:clamp(12px,2.1vh,15px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.player-wide .sel-value{font-size:clamp(16px,3vh,22px)}
 
   /* the station list and the sleep timer open as a centred panel */
-  .bottom-sheet{width:min(100%,760px);margin-inline:auto}
-}
+  html.player-wide .bottom-sheet{width:min(100%,760px);margin-inline:auto}
+
 /* phones held sideways (≈360–440 px tall): the same layout, tighter */
-@media (orientation:landscape) and (min-width:700px) and (max-height:440px){
-  body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
-  .app{gap:6px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
-  .header{padding:2px 10px}
-  .header .icon-btn{min-width:42px;min-height:42px}
-  .hero-card{padding:6px 16px}
-  .mandala-wrap{--art:min(clamp(120px,44vh,330px),28vw)}
-  .live-badge{margin-bottom:4px}
-  .track-info{margin-bottom:6px}
-  #nowStation{font-size:1.45rem}
-  .radio-error{padding:4px 10px;font-size:13px}
-  .play-pause-btn{width:64px;height:64px}
-  .skip-btn{width:50px;height:50px}
-  .controls-secondary{margin-top:6px;padding:2px 6px}
-  .controls-secondary .action-btn{height:44px}
-  .sel-card{min-height:50px;padding:4px 14px}
-  .sel-icon{width:34px;height:34px}
+@media (max-height:440px){
+  html.player-wide body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+  html.player-wide .app{gap:6px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
+  html.player-wide .header{padding:2px 10px}
+  html.player-wide .header .icon-btn{min-width:42px;min-height:42px}
+  html.player-wide .hero-card{padding:6px 16px}
+  html.player-wide .mandala-wrap{--art:min(clamp(120px,44vh,330px),28vw)}
+  html.player-wide .live-badge{margin-bottom:4px}
+  html.player-wide .track-info{margin-bottom:6px}
+  html.player-wide #nowStation{font-size:1.45rem}
+  html.player-wide .radio-error{padding:4px 10px;font-size:13px}
+  html.player-wide .play-pause-btn{width:64px;height:64px}
+  html.player-wide .skip-btn{width:50px;height:50px}
+  html.player-wide .controls-secondary{margin-top:6px;padding:2px 6px}
+  html.player-wide .controls-secondary .action-btn{height:44px}
+  html.player-wide .sel-card{min-height:50px;padding:4px 14px}
+  html.player-wide .sel-icon{width:34px;height:34px}
 }
 </style>
 </head>
@@ -684,6 +713,9 @@ body.calm .waveform::before{animation-play-state:paused!important}
       </button>
       <button class="icon-btn" onclick="if(window.I18n)I18n.openLangSheet()" title="اللغة" aria-label="اللغة">
         <div style="width:22px;height:22px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
+      </button>
+      <button class="icon-btn layout-btn" id="layoutBtn" onclick="haptic();toggleLayout()" aria-pressed="false" aria-label="العرض الأفقي" title="العرض الأفقي" data-i18n-aria="player_layout_wide" data-i18n-title="player_layout_wide">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7.5" width="11" height="14.5" rx="2"/><line x1="7.5" y1="18.5" x2="9.5" y2="18.5"/><path d="M13 2.5a7.5 7.5 0 0 1 7.5 7.5"/><path d="M18.3 7.8l2.2 2.2 2.2-2.2"/></svg>
       </button>
     </div>
     <div class="header-title" data-i18n="radio_header">راديو القرآن</div>
@@ -922,13 +954,33 @@ function ticker(el,text,speed,minDur){
 }
 function setHeroTicker(text){ticker(document.getElementById('nowStation'),text,80,5)}
 function setSelTicker(text){ticker(document.getElementById('stationSelectBtn'),text,70,4)}
-// Wide landscape screens: the title wraps (two lines at most) instead of
-// scrolling; crossing into or out of that layout lays the titles out again.
-(function(){
-  const mq=matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
-  const relayout=()=>{['nowStation','stationSelectBtn'].forEach(id=>{const el=document.getElementById(id);if(el&&el.dataset.text)(id==='nowStation'?setHeroTicker:setSelTicker)(el.dataset.text)})};
-  if(mq.addEventListener)mq.addEventListener('change',relayout);else if(mq.addListener)mq.addListener(relayout);
-})();
+// The wide layout: the name wraps (two lines at most) instead of scrolling;
+// switching into or out of that layout lays the names out again.
+window.addEventListener('playerlayoutchange',()=>{['nowStation','stationSelectBtn'].forEach(id=>{const el=document.getElementById(id);if(el&&el.dataset.text)(id==='nowStation'?setHeroTicker:setSelTicker)(el.dataset.text)})});
+// The header layout button: the wide two-column layout and the vertical one.
+// It first tries to turn the screen (allowed in the installed app and in full
+// screen); if the screen can't turn, the layout switches in place when the
+// screen is wide enough for two columns, otherwise it asks to turn the device.
+function syncLayoutBtn(){const b=document.getElementById('layoutBtn');if(b&&window.zadLayout)b.setAttribute('aria-pressed',zadLayout.isWide()?'true':'false')}
+function waitWide(ms){return new Promise(done=>{const t0=Date.now();(function check(){if(zadLayout.fits()||Date.now()-t0>ms)return done(zadLayout.fits());setTimeout(check,100)})()})}
+async function toggleLayout(){
+  if(!window.zadLayout)return;
+  const toWide=!zadLayout.isWide();
+  let turned=false;
+  try{
+    if(screen.orientation&&screen.orientation.lock){
+      await Promise.race([screen.orientation.lock(toWide?'landscape':'portrait'),new Promise((_,no)=>setTimeout(()=>no(new Error('timeout')),1500))]);
+      turned=true;
+    }
+  }catch(e){/* not allowed here (a browser tab) or not supported */}
+  // too narrow for two columns: only if the screen really turned (a lock can
+  // succeed without the screen turning)
+  if(toWide&&!(zadLayout.fits()||(turned&&await waitWide(1200)))){showToast(rt('player_rotate_hint','أدِر الجهاز إلى الوضع الأفقي'));return}
+  zadLayout.set(toWide?'wide':'tall');
+  syncLayoutBtn();
+}
+window.addEventListener('playerlayoutchange',syncLayoutBtn);
+syncLayoutBtn();
 
 // ── mandala dots (generate once) ─────────────────────────
 // orbit radius follows the art size (it shrinks on short screens)
