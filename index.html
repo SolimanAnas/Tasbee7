@@ -3,6 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint. Applying them in the
+// load event (after every image and the language file) showed the page in the
+// dark default, right-to-left, and then switched. Same rules as setTheme() /
+// normalizeTheme() and I18n below, which still run on load.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  if (!t) {
+    try { t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { t = 'dark'; }
+  } else if (['light', 'dark', 'sepia', 'plain-dark'].indexOf(t) < 0) {
+    t = t === 'warm' ? 'sepia' : 'light';   // e.g. azkar's "warm" shares the themeMode key
+  }
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
 <style>html{touch-action:pan-x pan-y}</style>  <!-- the home page doesn't pinch-zoom or double-tap-zoom on touch screens (iOS ignores user-scalable=no); computers still zoom with Ctrl/⌘ + / − -->
 <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <title data-i18n="meta_title">زاد المسلم — Zad Al-Muslim | Islamic Companion App</title>
@@ -977,6 +994,56 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
     <div class="prayer-cards" id="homePrayerChips" role="list"></div>
   </div>
   </div>
+<script>
+// The arch is drawn as soon as the card is parsed. In the script at the end of
+// the page it waited for a dozen scripts above it (cities, adhan, i18n, …), and
+// the card showed as a plain rectangle until then. Reshaped on every size change.
+function prayerArchPath(W, H, archH) {
+  const y0 = archH, R = Math.min(30, (H - y0) / 2);
+  const aw = Math.min(W * 0.5, 210), cx = W / 2, a = aw / 2, h = archH;
+  const L = x => (cx - x).toFixed(1), Rx = x => (cx + x).toFixed(1), Y = v => v.toFixed(1);
+  return [
+    `M0 ${Y(y0 + R)}`,
+    `Q0 ${Y(y0)} ${R} ${Y(y0)}`,
+    `L${L(a)} ${Y(y0)}`,
+    // small notch, then the shoulder
+    `C${L(a * 0.93)} ${Y(y0)} ${L(a * 0.9)} ${Y(y0 - h * 0.08)} ${L(a * 0.76)} ${Y(y0 - h * 0.12)}`,
+    // the dome rising towards the centre
+    `C${L(a * 0.62)} ${Y(y0 - h * 0.16)} ${L(a * 0.55)} ${Y(y0 - h * 0.5)} ${L(a * 0.3)} ${Y(y0 - h * 0.56)}`,
+    `C${L(a * 0.14)} ${Y(y0 - h * 0.6)} ${L(a * 0.07)} ${Y(y0 - h * 0.66)} ${L(0)} ${Y(1.5)}`,
+    `C${Rx(a * 0.07)} ${Y(y0 - h * 0.66)} ${Rx(a * 0.14)} ${Y(y0 - h * 0.6)} ${Rx(a * 0.3)} ${Y(y0 - h * 0.56)}`,
+    `C${Rx(a * 0.55)} ${Y(y0 - h * 0.5)} ${Rx(a * 0.62)} ${Y(y0 - h * 0.16)} ${Rx(a * 0.76)} ${Y(y0 - h * 0.12)}`,
+    `C${Rx(a * 0.9)} ${Y(y0 - h * 0.08)} ${Rx(a * 0.93)} ${Y(y0)} ${Rx(a)} ${Y(y0)}`,
+    `L${W - R} ${Y(y0)}`,
+    `Q${W} ${Y(y0)} ${W} ${Y(y0 + R)}`,
+    `L${W} ${H - R}`,
+    `Q${W} ${H} ${W - R} ${H}`,
+    `L${R} ${H}`,
+    `Q0 ${H} 0 ${H - R}`,
+    'Z'
+  ].join(' ');
+}
+function shapePrayerWidget() {
+  const el = document.getElementById('prayerWidget');
+  if (!el) return;
+  const W = el.offsetWidth, H = el.offsetHeight;
+  if (!W || !H) return;
+  const archH = parseFloat(getComputedStyle(el).getPropertyValue('--arch-h')) || 40;
+  const d = prayerArchPath(W, H, archH);
+  el.style.clipPath = `path('${d}')`;
+  const svg = document.getElementById('pwFrame');
+  if (svg) {
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    document.getElementById('pwOutline').setAttribute('d', d);
+    document.getElementById('pwGlint').setAttribute('d', d);
+  }
+}
+if (window.ResizeObserver) {
+  const pw = document.getElementById('prayerWidget');
+  if (pw) new ResizeObserver(shapePrayerWidget).observe(pw);
+}
+shapePrayerWidget();
+</script>
 
   <div class="quran-hero" id="quranHero" onclick="handleQuranClick()" role="button" tabindex="0"
        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleQuranClick();}">
@@ -1745,51 +1812,6 @@ function updateUIWithPrayerTimes(lat, lng) {
 // Rounded body with an onion arch in the middle of the top edge, traced from
 // the design asset (arch ≈ half the width, finial at the top). Computed from
 // the card's real size so the arch never stretches.
-function prayerArchPath(W, H, archH) {
-  const y0 = archH, R = Math.min(30, (H - y0) / 2);
-  const aw = Math.min(W * 0.5, 210), cx = W / 2, a = aw / 2, h = archH;
-  const L = x => (cx - x).toFixed(1), Rx = x => (cx + x).toFixed(1), Y = v => v.toFixed(1);
-  return [
-    `M0 ${Y(y0 + R)}`,
-    `Q0 ${Y(y0)} ${R} ${Y(y0)}`,
-    `L${L(a)} ${Y(y0)}`,
-    // small notch, then the shoulder
-    `C${L(a * 0.93)} ${Y(y0)} ${L(a * 0.9)} ${Y(y0 - h * 0.08)} ${L(a * 0.76)} ${Y(y0 - h * 0.12)}`,
-    // the dome rising towards the centre
-    `C${L(a * 0.62)} ${Y(y0 - h * 0.16)} ${L(a * 0.55)} ${Y(y0 - h * 0.5)} ${L(a * 0.3)} ${Y(y0 - h * 0.56)}`,
-    `C${L(a * 0.14)} ${Y(y0 - h * 0.6)} ${L(a * 0.07)} ${Y(y0 - h * 0.66)} ${L(0)} ${Y(1.5)}`,
-    `C${Rx(a * 0.07)} ${Y(y0 - h * 0.66)} ${Rx(a * 0.14)} ${Y(y0 - h * 0.6)} ${Rx(a * 0.3)} ${Y(y0 - h * 0.56)}`,
-    `C${Rx(a * 0.55)} ${Y(y0 - h * 0.5)} ${Rx(a * 0.62)} ${Y(y0 - h * 0.16)} ${Rx(a * 0.76)} ${Y(y0 - h * 0.12)}`,
-    `C${Rx(a * 0.9)} ${Y(y0 - h * 0.08)} ${Rx(a * 0.93)} ${Y(y0)} ${Rx(a)} ${Y(y0)}`,
-    `L${W - R} ${Y(y0)}`,
-    `Q${W} ${Y(y0)} ${W} ${Y(y0 + R)}`,
-    `L${W} ${H - R}`,
-    `Q${W} ${H} ${W - R} ${H}`,
-    `L${R} ${H}`,
-    `Q0 ${H} 0 ${H - R}`,
-    'Z'
-  ].join(' ');
-}
-function shapePrayerWidget() {
-  const el = document.getElementById('prayerWidget');
-  if (!el) return;
-  const W = el.offsetWidth, H = el.offsetHeight;
-  if (!W || !H) return;
-  const archH = parseFloat(getComputedStyle(el).getPropertyValue('--arch-h')) || 40;
-  const d = prayerArchPath(W, H, archH);
-  el.style.clipPath = `path('${d}')`;
-  const svg = document.getElementById('pwFrame');
-  if (svg) {
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    document.getElementById('pwOutline').setAttribute('d', d);
-    document.getElementById('pwGlint').setAttribute('d', d);
-  }
-}
-if (window.ResizeObserver) {
-  const pw = document.getElementById('prayerWidget');
-  if (pw) new ResizeObserver(shapePrayerWidget).observe(pw);
-}
-shapePrayerWidget();
 
 function refreshPrayerTimes() {
   const lat = localStorage.getItem('prayer_lat'), lng = localStorage.getItem('prayer_lng');
