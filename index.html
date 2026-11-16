@@ -3,6 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint. Applying them in the
+// load event (after every image and the language file) showed the page in the
+// dark default, right-to-left, and then switched. Same rules as setTheme() /
+// normalizeTheme() and I18n below, which still run on load.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  if (!t) {
+    try { t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { t = 'dark'; }
+  } else if (['light', 'dark', 'sepia', 'plain-dark'].indexOf(t) < 0) {
+    t = t === 'warm' ? 'sepia' : 'light';   // e.g. azkar's "warm" shares the themeMode key
+  }
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
 <style>html{touch-action:pan-x pan-y}</style>  <!-- the home page doesn't pinch-zoom or double-tap-zoom on touch screens (iOS ignores user-scalable=no); computers still zoom with Ctrl/⌘ + / − -->
 <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <title data-i18n="meta_title">زاد المسلم — Zad Al-Muslim | Islamic Companion App</title>
