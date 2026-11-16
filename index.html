@@ -325,35 +325,58 @@ input, textarea, select {
 }
 
 
-/* ======================== PRAYER CARD: arched night scene ========================
-   Dark themes: a night sky with a mosque; light: the same scene by day;
-   sepia: at golden hour. Framed by
-   an arch (traced from the design asset, drawn as a path so it stays crisp and
-   its proportions don't stretch with the width). shapePrayerWidget() sets the
-   clip path and the outline from the card's size. */
-.pw-wrap { margin: calc(env(safe-area-inset-top) + 10px) var(--spacing-md) var(--spacing-sm); filter: drop-shadow(0 10px 22px rgba(4, 12, 40, .35)); }
+/* ======================== PRAYER CARD: framed scene ========================
+   The card is a picture: a gold frame with an arch, two minarets and a lake
+   scene (night for the dark themes, day for light, golden hour for sepia;
+   images/prayer-frame-*.webp, 1200 × 630). It is drawn as a border image in
+   three bands so it never distorts:
+     top    — image rows 0–503: arch, minarets, sky, skyline (scales with the width)
+     middle — rows 503–532: plain water, stretched only if the content needs it
+     bottom — rows 532–630: the rounded bottom of the frame
+   Everything is measured in --u, 1 % of the card's width (cqw of .pw-wrap):
+   the header sits between the minarets, below the frame's top edge, and the
+   prayer times sit on the water. */
+.pw-wrap {
+  margin: calc(env(safe-area-inset-top) + 10px) var(--spacing-md) var(--spacing-sm);
+  filter: drop-shadow(0 10px 22px rgba(4, 12, 40, .35));
+  container-type: inline-size;
+}
 .prayer-widget {
-  --arch-h: 32px;
+  --u: calc((min(100vw, 480px) - 2 * var(--spacing-md)) / 100);   /* without container units */
   position: relative; margin: 0;
-  padding: calc(var(--arch-h) + 4px) 16px 10px;
-  border: 0; border-radius: 0; box-shadow: none;
-  /* the picture, then its navy continued below it */
-  background:
-    url('images/prayer-scene.webp') center calc(var(--arch-h) - 8px) / 100% auto no-repeat,
-    linear-gradient(#001341 0%, #00163f 40%, #001b4e 100%);
+  display: flex; flex-direction: column;
+  min-height: calc(var(--u) * 52.5);                               /* the picture's own height */
+  padding: calc(var(--u) * 14.5) calc(var(--u) * 3.5) calc(var(--u) * 2.8);
+  border-radius: 0; box-shadow: none; background: none;
+  border: 1px solid transparent;
+  --pw-frame: url('images/prayer-frame-dark.webp');
+  border-image-source: var(--pw-frame);
+  border-image-slice: 503 0 98 fill;
+  border-image-width: calc(var(--u) * 41.917) 0 calc(var(--u) * 8.167);
+  border-image-repeat: stretch;
   color: #fff;
   -webkit-backdrop-filter: none; backdrop-filter: none;
 }
+@supports (width: 1cqw) { .prayer-widget { --u: 1cqw; } }
+[data-theme="light"] .prayer-widget { --pw-frame: url('images/prayer-frame-light.webp'); }
+[data-theme="sepia"] .prayer-widget { --pw-frame: url('images/prayer-frame-sepia.webp'); }
 .prayer-widget:active { transform: scale(0.985); }
-.pw-frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: visible; }
-.pw-frame path { fill: none; stroke: rgba(214, 196, 255, .55); stroke-width: 3; }
-.prayer-widget .prayer-header-info { position: relative; z-index: 1; }
+/* the countdown, the date and the place: between the minarets, above the skyline */
+.prayer-widget .prayer-header-info {
+  padding: 0 calc(var(--u) * 6.5); min-height: calc(var(--u) * 15); gap: calc(var(--u) * 2);
+}
+.prayer-widget .prayer-timer { font-size: clamp(1.1rem, calc(var(--u) * 6.6), 1.45rem); }
+.prayer-widget .prayer-meta { min-width: 0; }
+.prayer-widget .prayer-hijri { font-size: clamp(.72rem, calc(var(--u) * 3.75), .85rem); }
+.prayer-widget :is(.prayer-hijri, .prayer-city) { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.prayer-widget .prayer-city, .prayer-widget .prayer-next-label { font-size: clamp(.68rem, calc(var(--u) * 3.35), .75rem); }
+.prayer-widget .prayer-header-info { position: relative; z-index: 1; display: flex; }
 .prayer-widget .prayer-timer { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.45); }
 .prayer-widget .prayer-next-label { color: rgba(255,255,255,.88); text-shadow: 0 1px 6px rgba(0,0,0,.5); }
 .prayer-widget .prayer-hijri { color: #3ddc97; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
 .prayer-widget .prayer-city { color: rgba(255,255,255,.85); }
-/* space for the mosque between the text and the prayer times */
-.prayer-widget .prayer-cards { position: relative; z-index: 1; margin-top: 20px; }
+/* the prayer times: on the water, at the bottom of the frame */
+.prayer-widget .prayer-cards { position: relative; z-index: 1; margin-top: auto; }
 /* compact chips: less padding, smaller icon */
 .prayer-widget .prayer-card { padding: 4px 1px; gap: 1px; }
 .prayer-widget .prayer-card .pc-icon { width: 13px; height: 13px; }
@@ -367,22 +390,10 @@ input, textarea, select {
   background: linear-gradient(160deg, var(--primary), var(--primary-grad-end));
   border-color: color-mix(in srgb, var(--primary) 60%, transparent); color: var(--on-primary);
 }
-/* light and sepia themes: the same scene by day / at golden hour. The sky at
-   the top keeps white text; the pale lower part takes light chips with dark text. */
-[data-theme="light"] .prayer-widget {
-  background:
-    url('images/prayer-scene-light.webp') center calc(var(--arch-h) - 8px) / 100% auto no-repeat,
-    linear-gradient(#1798fa 0%, #1798fa 22%, #b9ddfc 55%, #e3f0fd 100%);
-}
-[data-theme="sepia"] .prayer-widget {
-  background:
-    url('images/prayer-scene-sepia.webp') center calc(var(--arch-h) - 8px) / 100% auto no-repeat,
-    linear-gradient(#875e3f 0%, #875e3f 22%, #c48f58 55%, #cb9865 100%);
-}
+/* light and sepia themes: the same scene by day / at golden hour. The sky
+   keeps white text; the water takes light chips with dark text. */
 [data-theme="light"] .pw-wrap { filter: drop-shadow(0 10px 22px rgba(20, 80, 160, .22)); }
 [data-theme="sepia"] .pw-wrap { filter: drop-shadow(0 10px 22px rgba(90, 55, 15, .25)); }
-[data-theme="light"] .pw-frame path { stroke: rgba(255, 255, 255, .75); }
-[data-theme="sepia"] .pw-frame path { stroke: rgba(255, 236, 200, .7); }
 /* the city and the "time left" line can fall on the bright skyline */
 [data-theme="light"] .prayer-widget :is(.prayer-timer, .prayer-next-label, .prayer-city, .prayer-hijri),
 [data-theme="sepia"] .prayer-widget :is(.prayer-timer, .prayer-next-label, .prayer-city, .prayer-hijri) {
@@ -412,11 +423,19 @@ input, textarea, select {
 
 
 /* ===== Prayer card: glossy light sweep =====
-   One orchestrated moment, every 7 s: a soft band of light crosses the card
-   like a reflection on glass while a glint runs along the arch outline, both
-   moving in the reading direction. A faint static sheen sits at the top.
-   Transform / dash-offset only (no layout work); off with reduced motion. */
+   Every 7 s a soft band of light crosses the card like a reflection on glass,
+   in the reading direction; a faint static sheen sits at the top. Transform
+   only (no layout work); off with reduced motion. */
 .pw-sheen { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+/* prayer card: the sweep lights the picture only (frame, minarets and arch
+   included), masked by the frame picture itself; the picture has its own
+   lighting, so no static sheen */
+.prayer-widget .pw-sheen {
+  inset: -1px;
+  -webkit-mask: var(--pw-frame) 0 0 / 100% 100% no-repeat;
+          mask: var(--pw-frame) 0 0 / 100% 100% no-repeat;
+}
+.prayer-widget .pw-sheen::after { display: none; }
 [dir="rtl"] .pw-sheen { transform: scaleX(-1); }
 .pw-sheen::after {               /* static glass sheen */
   content: ''; position: absolute; inset: 0;
@@ -437,20 +456,8 @@ input, textarea, select {
   26%       { opacity: 1; }
   30%, 100% { transform: translateX(300%) skewX(-16deg); opacity: 0; }
 }
-.pw-glint {
-  fill: none; stroke: #fff; stroke-width: 3.5; stroke-linecap: round;
-  stroke-dasharray: .09 .91; stroke-dashoffset: 1; opacity: 0;
-  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px rgba(255,255,255,.7));
-  animation: pwGlint 7s cubic-bezier(.45,.05,.25,1) .9s infinite;
-}
-[dir="rtl"] .pw-glint { animation-name: pwGlintRtl; }
-/* the path starts at the top of the left side and runs clockwise: the top
-   edge with the arch is roughly its first 40 %. Offset 1 → .58 moves the glint
-   from the top-left corner to the top-right one. */
-@keyframes pwGlint    { 0% { stroke-dashoffset: 1; opacity: 0; } 4% { opacity: 1; } 26% { opacity: 1; } 30%, 100% { stroke-dashoffset: .58; opacity: 0; } }
-@keyframes pwGlintRtl { 0% { stroke-dashoffset: .58; opacity: 0; } 4% { opacity: 1; } 26% { opacity: 1; } 30%, 100% { stroke-dashoffset: 1; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .pw-sheen::before, .pw-glint { animation: none; opacity: 0; }
+  .pw-sheen::before { animation: none; opacity: 0; }
 }
 
 /* ======================== QURAN HERO CARD ======================== */
@@ -974,8 +981,6 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
 
   <div class="pw-wrap">
   <div class="prayer-widget" id="prayerWidget" onclick="openPrayerModal()">
-    <!-- arched frame: shape drawn by shapePrayerWidget() from the widget's size -->
-    <svg class="pw-frame" id="pwFrame" aria-hidden="true" preserveAspectRatio="none"><path id="pwOutline"/><path id="pwGlint" class="pw-glint" pathLength="1"/></svg>
     <!-- glossy light sweep (decorative) -->
     <span class="pw-sheen" aria-hidden="true"></span>
     <div class="prayer-header-info">
@@ -994,56 +999,6 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
     <div class="prayer-cards" id="homePrayerChips" role="list"></div>
   </div>
   </div>
-<script>
-// The arch is drawn as soon as the card is parsed. In the script at the end of
-// the page it waited for a dozen scripts above it (cities, adhan, i18n, …), and
-// the card showed as a plain rectangle until then. Reshaped on every size change.
-function prayerArchPath(W, H, archH) {
-  const y0 = archH, R = Math.min(30, (H - y0) / 2);
-  const aw = Math.min(W * 0.5, 210), cx = W / 2, a = aw / 2, h = archH;
-  const L = x => (cx - x).toFixed(1), Rx = x => (cx + x).toFixed(1), Y = v => v.toFixed(1);
-  return [
-    `M0 ${Y(y0 + R)}`,
-    `Q0 ${Y(y0)} ${R} ${Y(y0)}`,
-    `L${L(a)} ${Y(y0)}`,
-    // small notch, then the shoulder
-    `C${L(a * 0.93)} ${Y(y0)} ${L(a * 0.9)} ${Y(y0 - h * 0.08)} ${L(a * 0.76)} ${Y(y0 - h * 0.12)}`,
-    // the dome rising towards the centre
-    `C${L(a * 0.62)} ${Y(y0 - h * 0.16)} ${L(a * 0.55)} ${Y(y0 - h * 0.5)} ${L(a * 0.3)} ${Y(y0 - h * 0.56)}`,
-    `C${L(a * 0.14)} ${Y(y0 - h * 0.6)} ${L(a * 0.07)} ${Y(y0 - h * 0.66)} ${L(0)} ${Y(1.5)}`,
-    `C${Rx(a * 0.07)} ${Y(y0 - h * 0.66)} ${Rx(a * 0.14)} ${Y(y0 - h * 0.6)} ${Rx(a * 0.3)} ${Y(y0 - h * 0.56)}`,
-    `C${Rx(a * 0.55)} ${Y(y0 - h * 0.5)} ${Rx(a * 0.62)} ${Y(y0 - h * 0.16)} ${Rx(a * 0.76)} ${Y(y0 - h * 0.12)}`,
-    `C${Rx(a * 0.9)} ${Y(y0 - h * 0.08)} ${Rx(a * 0.93)} ${Y(y0)} ${Rx(a)} ${Y(y0)}`,
-    `L${W - R} ${Y(y0)}`,
-    `Q${W} ${Y(y0)} ${W} ${Y(y0 + R)}`,
-    `L${W} ${H - R}`,
-    `Q${W} ${H} ${W - R} ${H}`,
-    `L${R} ${H}`,
-    `Q0 ${H} 0 ${H - R}`,
-    'Z'
-  ].join(' ');
-}
-function shapePrayerWidget() {
-  const el = document.getElementById('prayerWidget');
-  if (!el) return;
-  const W = el.offsetWidth, H = el.offsetHeight;
-  if (!W || !H) return;
-  const archH = parseFloat(getComputedStyle(el).getPropertyValue('--arch-h')) || 40;
-  const d = prayerArchPath(W, H, archH);
-  el.style.clipPath = `path('${d}')`;
-  const svg = document.getElementById('pwFrame');
-  if (svg) {
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    document.getElementById('pwOutline').setAttribute('d', d);
-    document.getElementById('pwGlint').setAttribute('d', d);
-  }
-}
-if (window.ResizeObserver) {
-  const pw = document.getElementById('prayerWidget');
-  if (pw) new ResizeObserver(shapePrayerWidget).observe(pw);
-}
-shapePrayerWidget();
-</script>
 
   <div class="quran-hero" id="quranHero" onclick="handleQuranClick()" role="button" tabindex="0"
        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleQuranClick();}">
