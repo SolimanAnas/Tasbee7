@@ -145,16 +145,11 @@ body::before {
   align-items: center;
   /* five buttons + the counter must fit narrow phones (overflowed below ~400px) */
   gap: clamp(5px, 2vw, 10px);
-  padding: 16px clamp(10px, 4vw, 16px) 10px;
+  /* below the status bar / notch / Dynamic Island (viewport-fit=cover draws under them) */
+  padding: max(16px, calc(env(safe-area-inset-top) + 8px)) max(clamp(10px, 4vw, 16px), env(safe-area-inset-right)) 10px max(clamp(10px, 4vw, 16px), env(safe-area-inset-left));
   flex-shrink: 0;
   position: relative;
   z-index: 20;
-}
-
-@supports (-webkit-touch-callout: none) and (padding-top: env(safe-area-inset-top)) {
-  .top-bar {
-    padding-top: 30px;
-  }
 }
 
 .top-bar-group {
@@ -268,7 +263,8 @@ body::before {
   align-items:center;
   justify-content:flex-start;
   gap:14px;
-  padding: 4px 16px 84px;
+  /* --stack-h: the fixed controls + player + bottom inset, measured in script */
+  padding: 4px 16px calc(var(--stack-h, calc(70px + env(safe-area-inset-bottom))) + 12px);
   overflow-y:auto;
   position: relative;
   z-index: 1;
@@ -493,6 +489,8 @@ body::before {
   transition: margin-bottom 0.3s ease;
 }
 
+[dir="ltr"] .controls { flex-direction: row-reverse; }
+
 body.player-active .controls {
   margin-bottom: 0;             /* mini-player below provides the spacing */
 }
@@ -501,9 +499,6 @@ body.player-active .controls {
   transition: padding-bottom 0.3s ease;
 }
 
-body.player-active .page-wrapper {
-  padding-bottom: 150px;
-}
 
 .btn{
   padding:12px 20px;
@@ -991,10 +986,12 @@ body::after {
   font-family:'Amiri',serif; font-size:17px; line-height:1; color:var(--gold);
   opacity:.55; z-index:2; pointer-events:none;
 }
+/* a strip at the top of the card holds the ornament and A-/A+; the text scrolls below it */
+.zikr-container { padding-top:44px; }
 .zikr-scroll-area {
-  padding-top:16px;
-  -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
-          mask-image:linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
+  padding-top:4px;
+  -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 24px), transparent 100%);
+          mask-image:linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 24px), transparent 100%);
 }
 .zikr-text { line-height:2.5; letter-spacing:.2px; max-width:42ch; margin-inline:auto; }
 :root .zikr-text { text-shadow:0 1px 18px rgba(0,0,0,.35); }
@@ -2011,6 +2008,18 @@ window.addEventListener("load", () => {
   </script>
   <script src="../js/sw-update.js"></script>
 <script src="../js/net-status.js"></script>
+<script>
+  // Keep the page's content clear of the fixed controls: their real height
+  // (buttons, mini player, bottom safe area) becomes --stack-h.
+  (function () {
+    const stack = document.querySelector('.bottom-stack');
+    if (!stack) return;
+    const set = () => document.documentElement.style.setProperty('--stack-h', Math.ceil(stack.getBoundingClientRect().height) + 'px');
+    set();
+    if (window.ResizeObserver) new ResizeObserver(set).observe(stack);
+    window.addEventListener('resize', set);
+  })();
+</script>
 <script src="../js/tap-a11y.js"></script>
 </body>
 </html>
