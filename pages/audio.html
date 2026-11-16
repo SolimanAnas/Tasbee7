@@ -912,14 +912,23 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
   }
   html.player-wide .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
-  html.player-wide .hero-controls{grid-column:1;grid-row:1}
-  html.player-wide .hero-now{grid-column:2;grid-row:1;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
+  /* the controls' parts sit on the card's own grid: title, transport and the
+     secondary bar beside the art; the seek bar along the bottom, under both
+     columns (the error message takes its place when a recitation can't load) */
+  html.player-wide .hero-card{grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr) auto}
+  html.player-wide .hero-controls{display:contents}
+  html.player-wide .track-info{grid-column:1;grid-row:2;justify-self:center;width:100%}
+  html.player-wide .controls-main{grid-column:1;grid-row:3}
+  html.player-wide .controls-secondary{grid-column:1;grid-row:4;justify-self:center;width:100%}
+  html.player-wide .progress-section,html.player-wide .track-error{grid-column:1 / -1;grid-row:6;justify-self:center}
+  html.player-wide .track-error{margin-top:clamp(8px,2vh,20px)!important}
+  html.player-wide .hero-now{grid-column:2;grid-row:1 / 6;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
   html.player-wide .now-playing-badge{position:absolute;top:clamp(10px,2vh,18px);inset-inline-end:clamp(14px,2vw,24px);margin:0;z-index:3;
     font-size:clamp(11px,2vh,15px);padding:clamp(4px,.8vh,7px) clamp(11px,1.6vw,16px)}
   html.player-wide .now-playing-badge .badge-dot{width:clamp(6px,1.1vh,9px);height:clamp(6px,1.1vh,9px)}
 
   /* the art: as large as its column and the height allow, centred with the reciter under it */
-  html.player-wide .mandala-container{--art:min(clamp(140px,46vh,340px),30vw);width:var(--art);height:var(--art);margin:0 auto}
+  html.player-wide .mandala-container{--art:min(clamp(140px,calc(46vh - 24px),340px),30vw);width:var(--art);height:var(--art);margin:0 auto}
   html.player-wide .m-album-wrap{width:calc(var(--art) * .913);height:calc(var(--art) * .913)}
   html.player-wide .art-caption{display:block;max-width:100%;margin-top:clamp(8px,2.2vh,20px);text-align:center;
     font-size:clamp(14px,2.7vh,20px);font-weight:600;color:var(--accent-main);
@@ -933,7 +942,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 
   /* primary: the progress and the transport, one group */
   html.player-wide .track-error{margin:0;padding:6px 12px;font-size:15px}
-  html.player-wide .progress-section{margin:0;width:100%}
+  html.player-wide .progress-section{margin:clamp(8px,2.2vh,22px) 0 0;width:100%}
   /* a recitation that can't load: its message takes the progress bar's place (00:00 then) */
   html.player-wide .track-error:not([hidden]) ~ .progress-section{display:none}
   html.player-wide .time{font-size:clamp(13px,2.1vh,16px);width:58px}
@@ -984,12 +993,14 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   html.player-wide .header{padding:2px 10px}
   html.player-wide .header .icon-btn{min-width:42px;min-height:42px}
   html.player-wide .hero-card{padding:6px 16px}
-  html.player-wide .mandala-container{--art:min(clamp(110px,40vh,300px),28vw)}
+  html.player-wide .mandala-container{--art:min(clamp(110px,calc(40vh - 8px),300px),28vw)}
   html.player-wide .track-info{margin-bottom:6px}
   html.player-wide #nowSurah{font-size:1.45rem}
   html.player-wide #nowReciter,html.player-wide .art-caption{font-size:13px}
   html.player-wide .track-error{padding:4px 10px;font-size:13px}
   html.player-wide .progress-section input[type=range]{height:22px}
+  html.player-wide .progress-section{margin-top:3px}
+  html.player-wide .track-error{margin-top:3px!important}
   html.player-wide .controls-main{margin-top:2px}
   html.player-wide .play-pause-btn{width:62px;height:62px}
   html.player-wide .skip-btn{width:48px;height:48px}

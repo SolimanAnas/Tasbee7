@@ -20,9 +20,16 @@ async function open(page, file, { width, height, lang = 'ar' }) {
   return page.evaluate(() => {
     const box = s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; };
     const de = document.documentElement;
+    // the controls column: its own box, or (audio, where its parts sit on the card's
+    // grid) the parts beside the art — not the seek bar / error along the bottom
+    const column = () => {
+      const c = box('.hero-controls'); if (c && c.w) return c;
+      const parts = ['.track-info', '.controls-main', '.controls-secondary'].map(box).filter(r => r && r.w);
+      return { l: Math.min(...parts.map(r => r.l)), r: Math.max(...parts.map(r => r.r)), t: Math.min(...parts.map(r => r.t)), b: Math.max(...parts.map(r => r.b)) };
+    };
     return {
       overflow: Math.max(de.scrollHeight, document.body.scrollHeight) - innerHeight, vh: innerHeight,
-      now: box('.hero-now'), controls: box('.hero-controls'), pickers: box('.sel-row') || box('.app > .sel-card'),
+      now: box('.hero-now'), controls: column(), pickers: box('.sel-row') || box('.app > .sel-card'),
       play: box('.play-pause-btn'), skip: box('.skip-btn'), action: box('.controls-secondary .action-btn'),
       title: box('#nowSurah') || box('#nowStation'),
       divider: getComputedStyle(document.querySelector('.hero-now')).borderInlineStartStyle,
@@ -161,6 +168,24 @@ test.describe('layout button and seek bar', () => {
     await page.locator('#layoutBtn').click();
     await expect(page.locator('.toast.show')).toContainText('أدِر الجهاز');
     expect(await state(page)).toEqual({ wide: false, pressed: 'false', saved: null });
+  });
+
+  test('the seek bar runs along the bottom of the player, under both columns, almost the full width', async ({ page }) => {
+    for (const [width, height] of [[1280, 720], [800, 480], [844, 390]]) {
+      await open(page, 'audio.html', { width, height });
+      const r = await page.evaluate(() => {
+        document.getElementById('trackError').hidden = true;
+        const b = s => document.querySelector(s).getBoundingClientRect();
+        const card = b('.hero-card'), bar = b('.progress-section'), now = b('.hero-now'), sec = b('.controls-secondary');
+        return { cardW: card.width, barW: bar.width, barTop: bar.top, nowBottom: now.bottom, secBottom: sec.bottom, barBottom: bar.bottom, cardBottom: card.bottom,
+          overflow: document.documentElement.scrollHeight - innerHeight };
+      });
+      expect(r.barW / r.cardW).toBeGreaterThan(0.85);
+      expect(r.barTop).toBeGreaterThanOrEqual(r.nowBottom - 1);
+      expect(r.barTop).toBeGreaterThanOrEqual(r.secBottom);
+      expect(r.barBottom).toBeLessThanOrEqual(r.cardBottom);
+      expect(r.overflow).toBeLessThanOrEqual(1);
+    }
   });
 
   test('the seek bar paints played and buffered on its track, so the taller wide-layout slider shows no block', async ({ page }) => {
