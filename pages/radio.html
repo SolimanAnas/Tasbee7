@@ -32,6 +32,10 @@
     d.classList.toggle('player-wide', wide);
     try { window.dispatchEvent(new Event('playerlayoutchange')); } catch (e) { /* old browsers */ }
   }
+  // the layout button only on big screens (foldables, tablets, car head units,
+  // computers): by the device's screen, so turning a phone doesn't change it
+  var sw = screen.width || innerWidth, sh = screen.height || innerHeight;
+  d.classList.toggle('big-screen', Math.min(sw, sh) >= 480 && Math.max(sw, sh) >= 700);
   apply();
   if (auto.addEventListener) auto.addEventListener('change', apply); else if (auto.addListener) auto.addListener(apply);
   window.addEventListener('resize', apply);
@@ -586,6 +590,7 @@ body.calm .waveform::before{animation-play-state:paused!important}
    ============================================================ */
 .hero-side{display:contents}   /* phones: the card stays one column */
 .layout-btn[aria-pressed="true"]{color:var(--accent-main)}
+html:not(.big-screen) .layout-btn{display:none}   /* regular phones: no layout button */
 /* the wide layout: html.player-wide (set before the first paint: by the screen
    shape, or by the header button — see the script in <head>) */
   html.player-wide body{
