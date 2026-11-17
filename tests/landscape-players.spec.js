@@ -163,11 +163,15 @@ test.describe('layout button and seek bar', () => {
     expect(await state(page)).toEqual({ wide: true, pressed: 'true', saved: 'wide' });
   });
 
-  test('on a narrow phone that cannot turn here, it asks to turn the device and saves nothing', async ({ page }) => {
-    await open(page, 'audio.html', { width: 390, height: 844 });
-    await page.locator('#layoutBtn').click();
-    await expect(page.locator('.toast.show')).toContainText('أدِر الجهاز');
-    expect(await state(page)).toEqual({ wide: false, pressed: 'false', saved: null });
+  test('regular phones have no layout button, in either orientation; big screens do', async ({ page }) => {
+    for (const [width, height] of [[390, 844], [844, 390], [412, 915]]) {
+      await open(page, 'audio.html', { width, height });
+      await expect(page.locator('#layoutBtn')).toBeHidden();
+    }
+    for (const [width, height] of [[818, 889], [800, 480], [1280, 720]]) {
+      await open(page, 'radio.html', { width, height });
+      await expect(page.locator('#layoutBtn')).toBeVisible();
+    }
   });
 
   test('the seek bar runs along the bottom of the player, under both columns, almost the full width', async ({ page }) => {
