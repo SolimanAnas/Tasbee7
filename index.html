@@ -127,7 +127,7 @@
   --spacing-lg: 24px;
 
   /* Home type scale (Tajawal ships regular ≤500 and bold ≥600) */
-  --fs-section: 1.0625rem;   /* 17px — section headings */
+  --fs-section: 1.125rem;    /* 18px — section headings */
   --fs-label: 0.875rem;      /* 14px — card labels, list view */
   --fs-label-sm: 0.6875rem;  /* 11px — card labels, 4-per-row view */
   --lh-heading: 1.3;
@@ -135,10 +135,10 @@
   /* Home grid rhythm */
   --grid-gap: 10px;
   --section-gap: 20px;
-  --card-h: 64px;            /* list view: every card the same height */
-  --card-h-sm: 92px;         /* 4-per-row view */
-  --card-icon-sm: 44px;
-  --card-icon: 44px;         /* icons are optically balanced inside this box */
+  --card-h: 58px;            /* list view: every card the same height */
+  --card-h-sm: 80px;         /* 4-per-row view */
+  --card-icon-sm: 36px;
+  --card-icon: 40px;         /* icons are optically balanced inside this box */
 
   --ease-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
   --ease-smooth: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -688,10 +688,6 @@ input, textarea, select {
 }
 @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-.feature-card { background: rgba(255, 255, 255, 0.20); }
-[data-theme="dark"] .feature-card { background: rgba(255, 255, 255, 0.20); }
-[data-theme="sepia"] .feature-card { background: rgba(255, 248, 236, 0.42); }
-[data-theme="oled"] .feature-card { background: rgba(255, 255, 255, 0.20); }
 .feature-card:active { transform: scale(0.96); background: var(--surface-raised); }
 
 .fc-icon-wrap {
@@ -767,65 +763,83 @@ input, textarea, select {
 body.home-compact .grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
 body.home-compact .feature-card {
   flex-direction: column; justify-content: flex-start; gap: 6px;
-  padding: 10px 4px 0; height: var(--card-h-sm);
+  padding: 8px 4px 0; height: var(--card-h-sm);
 }
 body.home-compact .fc-icon-wrap { width: var(--card-icon-sm); height: var(--card-icon-sm); }
 body.home-compact .fc-icon-wrap svg { width: 18px; height: 18px; }
 body.home-compact .fc-text { flex: none; width: 100%; font-size: var(--fs-label-sm); font-weight: 700; line-height: 1.25; text-align: center; }
 body.home-compact .new-badge { top: -6px; font-size: 0.55rem; padding: 3px 6px; }
 
-/* ======================== SEPIA: CHAMPAGNE GLASS ========================
-   A paler champagne wash over the bokeh, frosted cream glass cards with a
-   bright edge, a larger scale, and gold gradients for the accents. */
+/* ======================== GLASS CARDS ========================
+   Every theme: translucent glass cards with a bright edge and a soft
+   shadow (no blur, so the background stays as it is), a gradient accent,
+   and a matching glass nav bar. Colours come from the --card-* / --accent-grad tokens below. */
+:root {
+  --card-glass: rgba(255, 255, 255, 0.52);
+  --card-glass-press: rgba(255, 255, 255, 0.62);
+  --card-glass-solid: rgba(255, 255, 255, 0.94);
+  --card-edge: rgba(255, 255, 255, 0.72);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 24px -12px rgba(20, 70, 140, 0.38);
+  --card-ink: #10284D;
+  --card-ink-glow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  --card-icon-shadow: rgba(20, 60, 120, 0.25);
+  --accent-grad: linear-gradient(160deg, #5AB0F5, #1565C0);
+}
+[data-theme="dark"] {            /* purple */
+  --card-glass: rgba(46, 36, 92, 0.52);
+  --card-glass-press: rgba(62, 50, 118, 0.55);
+  --card-glass-solid: rgba(38, 30, 78, 0.96);
+  --card-edge: rgba(196, 181, 253, 0.22);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 26px -12px rgba(5, 0, 25, 0.75);
+  --card-ink: #F3F0FF;
+  --card-ink-glow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  --card-icon-shadow: rgba(0, 0, 0, 0.45);
+  --accent-grad: linear-gradient(160deg, #A78BFA, #6D28D9);
+}
+[data-theme="plain-dark"] {      /* black */
+  --card-glass: rgba(255, 255, 255, 0.07);
+  --card-glass-press: rgba(255, 255, 255, 0.11);
+  --card-glass-solid: #161616;
+  --card-edge: rgba(255, 255, 255, 0.12);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px -12px rgba(0, 0, 0, 0.9);
+  --card-ink: #F1F5F9;
+  --card-ink-glow: none;
+  --card-icon-shadow: rgba(0, 0, 0, 0.6);
+  --accent-grad: linear-gradient(160deg, #34D399, #059669);
+}
 [data-theme="sepia"] {
-  --card-h: 66px;
-  --card-icon: 48px;
-  --card-h-sm: 90px;
-  --card-icon-sm: 42px;
-  --fs-label: 0.9375rem;      /* 15px */
-  --fs-label-sm: 0.6875rem;   /* 11px */
-  --fs-section: 1.125rem;     /* 18px */
-  --grid-gap: 10px;
-  --gold-grad: linear-gradient(160deg, #E2B04F, #A8721F);
-  --glass-bg: rgba(255, 248, 236, 0.42);
-  --glass-edge: rgba(255, 255, 255, 0.58);
-  --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 10px 24px -12px rgba(110, 70, 20, 0.45);
+  --card-glass: rgba(255, 248, 236, 0.55);
+  --card-glass-press: rgba(255, 248, 236, 0.62);
+  --card-glass-solid: rgba(255, 248, 236, 0.92);
+  --card-edge: rgba(255, 255, 255, 0.58);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 10px 24px -12px rgba(110, 70, 20, 0.45);
+  --card-ink: #3B2412;
+  --card-ink-glow: 0 1px 0 rgba(255, 245, 225, 0.6);
+  --card-icon-shadow: rgba(90, 55, 15, 0.28);
+  --accent-grad: linear-gradient(160deg, #E2B04F, #A8721F);
 }
-[data-theme="sepia"] body {
-  background-image: linear-gradient(180deg, rgba(250, 238, 218, 0.55), rgba(240, 222, 194, 0.42)), var(--bg-image);
-}
-[data-theme="sepia"] .feature-card {
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(22px) saturate(1.3); backdrop-filter: blur(22px) saturate(1.3);
-  border: 1px solid var(--glass-edge);
-  border-radius: 20px;
-  box-shadow: var(--glass-shadow);
+.feature-card {
+  background: var(--card-glass);
+  -webkit-backdrop-filter: none; backdrop-filter: none;   /* the background stays sharp */
+  border: 1px solid var(--card-edge);
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
   padding: 0 12px; gap: 10px;
 }
-[data-theme="sepia"] .feature-card:active { background: rgba(255, 248, 236, 0.62); }
-[data-theme="sepia"] .fc-text { color: #3B2412; font-weight: 800; line-height: 1.3; }
-[data-theme="sepia"] .fc-icon-wrap img { filter: drop-shadow(0 4px 6px rgba(90, 55, 15, .28)); }
-[data-theme="sepia"] .section-title { color: #3B2412; font-weight: 800; text-shadow: 0 1px 0 rgba(255, 245, 225, .6); }
-[data-theme="sepia"] .section-title::before { width: 5px; background: var(--gold-grad); }
-[data-theme="sepia"] .view-switch { background: var(--glass-bg); border-color: var(--glass-edge); box-shadow: var(--glass-shadow); }
-[data-theme="sepia"] .view-switch .vs-thumb { background: var(--gold-grad); }
-[data-theme="sepia"] .prayer-widget .prayer-card.is-next { background: var(--gold-grad); border-color: rgba(255, 235, 190, .7); }
-[data-theme="sepia"] .bottom-nav {
-  --nav-h: 70px;
-  --nav-bg: rgba(255, 248, 236, 0.5);
-  --nav-border: rgba(255, 255, 255, 0.6);
-  --nav-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 14px 30px -10px rgba(110, 70, 20, 0.45);
-  --nav-muted: #5E4122;
-  --nav-active: #8A5A16;
-  --nav-pill: rgba(226, 176, 79, 0.28);
-}
-[data-theme="sepia"] .nav-label { font-size: 0.75rem; }
-[data-theme="sepia"] .nav-item svg, [data-theme="sepia"] .nav-item .icon-mask { width: 26px; height: 26px; }
+.feature-card.glass-panel { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.feature-card:active { background: var(--card-glass-press); }
+.fc-text { color: var(--card-ink); font-weight: 800; line-height: 1.3; }
+.fc-icon-wrap img { filter: drop-shadow(0 4px 6px var(--card-icon-shadow)); }
+.section-title { color: var(--card-ink); font-weight: 800; text-shadow: var(--card-ink-glow); }
+.section-title::before { width: 5px; background: var(--accent-grad); }
+.view-switch { background: var(--card-glass); border-color: var(--card-edge); box-shadow: var(--card-shadow); }
+.view-switch .vs-thumb { background: var(--accent-grad); }
+:root .prayer-widget .prayer-card.is-next { background: var(--accent-grad); border-color: color-mix(in srgb, #fff 45%, transparent); }
 /* When the system asks for less transparency, use solid surfaces. */
 @media (prefers-reduced-transparency: reduce) {
-  [data-theme="sepia"] .feature-card, [data-theme="sepia"] .bottom-nav { -webkit-backdrop-filter: none; backdrop-filter: none; }
-  [data-theme="sepia"] .feature-card { background: rgba(255, 248, 236, 0.9); }
-  [data-theme="sepia"] .bottom-nav { --nav-bg: rgba(255, 248, 236, 0.95); }
+  .bottom-nav { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .feature-card { background: var(--card-glass-solid); }
+  .bottom-nav { --nav-bg: var(--card-glass-solid); }
 }
 @keyframes cardSwap { from { opacity: 0; transform: scale(.88); } to { opacity: 1; transform: none; } }
 body.home-swap .feature-card { animation: cardSwap .34s var(--ease-smooth) backwards; }
@@ -953,6 +967,43 @@ body.home-swap .feature-card { animation: cardSwap .34s var(--ease-smooth) backw
 @media (prefers-reduced-motion: reduce) {
   .nav-pill, .nav-item, .nav-item svg, .nav-item .icon-mask { transition: none; }
 }
+
+/* Glass nav bar: per-theme surface to match the glass cards */
+.bottom-nav {
+  --nav-h: 70px;
+  --nav-bg: rgba(255, 255, 255, 0.5);
+  --nav-border: rgba(255, 255, 255, 0.72);
+  --nav-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 14px 30px -10px rgba(20, 70, 140, 0.4);
+  --nav-muted: #4A5D78;
+  --nav-active: #1565C0;
+  --nav-pill: rgba(30, 136, 229, 0.18);
+}
+[data-theme="dark"] .bottom-nav {
+  --nav-bg: rgba(36, 28, 72, 0.55);
+  --nav-border: rgba(196, 181, 253, 0.22);
+  --nav-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 14px 30px -10px rgba(5, 0, 25, 0.8);
+  --nav-muted: #B5AED6;
+  --nav-active: #D4C8FF;
+  --nav-pill: rgba(139, 92, 246, 0.30);
+}
+[data-theme="plain-dark"] .bottom-nav {
+  --nav-bg: rgba(28, 28, 28, 0.72);
+  --nav-border: rgba(255, 255, 255, 0.10);
+  --nav-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 30px -10px rgba(0, 0, 0, 0.9);
+  --nav-muted: #9AA0A8;
+  --nav-active: #34D399;
+  --nav-pill: rgba(16, 185, 129, 0.20);
+}
+[data-theme="sepia"] .bottom-nav {
+  --nav-bg: rgba(255, 248, 236, 0.5);
+  --nav-border: rgba(255, 255, 255, 0.6);
+  --nav-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 14px 30px -10px rgba(110, 70, 20, 0.45);
+  --nav-muted: #5E4122;
+  --nav-active: #8A5A16;
+  --nav-pill: rgba(226, 176, 79, 0.28);
+}
+.nav-label { font-size: 0.75rem; }
+.nav-item svg, .nav-item .icon-mask { width: 26px; height: 26px; }
 
 /* ======================== BOTTOM SHEETS & MODALS ======================== */
 .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity var(--ease-smooth); }
