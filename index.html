@@ -669,15 +669,16 @@ input, textarea, select {
 .feature-card:active { transform: scale(0.96); background: var(--surface-raised); }
 
 .fc-icon-wrap {
-  width: 36px; height: 36px;
-  border-radius: var(--radius-sm);
+  width: 42px; height: 44px;
+  border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
   background: var(--primary) !important;
   color: #ffffff !important;
   flex-shrink: 0;
 }
 .fc-icon-wrap svg { width: 20px; height: 20px; stroke: #ffffff; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.fc-icon-wrap img { width: 22px !important; height: 22px !important; filter: invert(1) brightness(1000%); }
+.fc-icon-wrap { background: transparent !important; }
+.fc-icon-wrap img { width: 100% !important; height: 100% !important; object-fit: fill; filter: none; display: block; }
 
 .icon-mask {
   width: 22px; height: 22px;
@@ -735,7 +736,7 @@ body.home-compact .feature-card {
   flex-direction: column; justify-content: center; gap: 5px;
   padding: 9px 2px 8px; min-height: 0;
 }
-body.home-compact .fc-icon-wrap { width: 34px; height: 34px; }
+body.home-compact .fc-icon-wrap { width: 40px; height: 42px; }
 body.home-compact .fc-icon-wrap svg { width: 18px; height: 18px; }
 body.home-compact .fc-text { font-size: 0.68rem; line-height: 1.2; }
 body.home-compact .new-badge { top: -6px; font-size: 0.55rem; padding: 3px 6px; }
@@ -1029,31 +1030,15 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
   </div>
   <div class="grid">
     <div class="feature-card glass-panel" onclick="go('pages/audio.html')">
-      <div class="fc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="audio" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_quran_audio">الاستماع للقرآن</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/radio.html')">
-      <div class="fc-icon-wrap">
-        <svg style="fill: #FFFFFF !important; stroke: none !important;" viewBox="0 0 200 200" width="100%" height="100%">
-          <g>
-            <path d="M 140 60 L 90 20" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="20" y="60" width="160" height="115" rx="20" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 50 92 L 85 92" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 50 117.5 L 85 117.5" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 50 143 L 85 143" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="140" cy="117.5" r="22" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-          </g>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="radio" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_radio">إذاعة القرآن</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/takrar.html')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="takrar" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_memorization">التحفيظ</div>
     </div>
     <!-- تقرير التسميع — hidden for now
@@ -1067,12 +1052,7 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
     </div>
     -->
     <div class="feature-card glass-panel" onclick="go('pages/azkar.html?type=ruqia')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="M13 7a5.5 5.5 0 0 1 0 10 7 7 0 0 0 0-10z"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="ruqyah" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_ruqyah">الرقية الشرعية</div>
     </div>
   </div>
@@ -1081,57 +1061,27 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
   <div class="section-title" data-i18n="section_azkar">الأذكار والأدعية</div>
   <div class="grid">
     <div class="feature-card glass-panel" onclick="go('pages/azkar.html?type=morning')">
-      <div class="fc-icon-wrap">
-       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-       </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="morning" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_morning">أذكار الصباح</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/azkar.html?type=night')">
-      <div class="fc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="night" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_evening">أذكار المساء</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/hisn.html')">
-      <div class="fc-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="hisn" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_hisn">حصن المسلم</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/duaa.html')">
-      <div class="fc-icon-wrap">
-        <img src="icons/duaa.svg" alt="">
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="duaa" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_duaa">بستان الدعاء</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/azkar.html?type=sleeping')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 4v16"/>
-          <path d="M2 8h18a2 2 0 0 1 2 2v10"/>
-          <path d="M2 17h20"/>
-          <path d="M6 8v9"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="sleeping" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_sleeping">أذكار النوم</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/azkar.html?type=salah')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-          <line x1="6" y1="7" x2="8" y2="7"/>
-          <line x1="6" y1="10" x2="8" y2="10"/>
-          <line x1="16" y1="7" x2="18" y2="7"/>
-          <line x1="16" y1="10" x2="18" y2="10"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="salah" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_post_prayer">أذكار بعد الصلاة</div>
     </div>
   </div>
@@ -1140,102 +1090,54 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
   <div class="section-title" data-i18n="section_tools">أدوات ومواقيت</div>
   <div class="grid">
     <div class="feature-card glass-panel" onclick="go('pages/masbaha.html')">
-      <div class="fc-icon-wrap">
-        <svg style="fill: #FFFFFF !important; stroke: none !important;" viewBox="0 0 200 200" width="100%" height="100%">
-          <g>
-            <path d="M 65 20 L 135 20 A 35 35 0 0 1 170 55 L 170 85 C 170 120 150 130 140 155 A 40 40 0 0 1 60 155 C 50 130 30 120 30 85 L 30 55 A 35 35 0 0 1 65 20 Z" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="46" y="44" width="108" height="48" rx="10" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="63" y="58" width="6" height="20" rx="3" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="131" y="58" width="6" height="20" rx="3" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="100" cy="155" r="16" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="145" cy="115" r="5" fill="#FFFFFF"/>
-          </g>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="masbaha" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_tasbih">المسبحة</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/thabat.html')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 21v-9"/>
-          <path d="M12 13C12 8 8.5 5 3.5 5c0 5 3.5 8 8.5 8z"/>
-          <path d="M12 11c0-4 3-6.5 8.5-6.5 0 4.5-3 7-8.5 6.5z"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="thabat" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_thabat">ثبات</div>
       <span class="new-badge" data-i18n="badge_new">جديد</span>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/qibla.html')">
-      <div class="fc-icon-wrap">
-        <svg style="fill: #FFFFFF !important; stroke: none !important;" viewBox="0 0 338.605 338.605" width="100%" height="100%">
-          <g fill="#FFFFFF">
-            <path d="M169.303,0.001C75.949,0.001,0,75.949,0,169.303s75.949,169.302,169.303,169.302s169.303-75.949,169.303-169.302 S262.656,0.001,169.303,0.001z M169.303,320c-83.095,0-150.697-67.603-150.697-150.698S86.208,18.605,169.303,18.605 S320,86.208,320,169.303S252.397,320,169.303,320z"/>
-            <path d="M169.303,27.22C90.958,27.22,27.22,90.958,27.22,169.303s63.738,142.083,142.083,142.083s142.083-63.738,142.083-142.083 S247.647,27.22,169.303,27.22z M301.309,189.066l-9.702-1.71l-1.201,6.816l9.708,1.711c-1.095,5.393-2.516,10.668-4.24,15.805 l-9.258-3.369l-2.367,6.504l9.255,3.369c-2.015,5.1-4.335,10.046-6.939,14.817l-8.509-4.912l-3.459,5.994l8.494,4.903 c-2.863,4.657-6.005,9.124-9.399,13.382l-7.492-6.286l-4.449,5.302l7.486,6.282c-3.615,4.085-7.477,7.946-11.561,11.562 l-6.286-7.488l-5.301,4.449l6.29,7.493c-4.258,3.396-8.726,6.538-13.384,9.401l-4.901-8.492l-5.994,3.46l4.909,8.506 c-4.771,2.603-9.718,4.924-14.818,6.939l-3.369-9.254l-6.504,2.368l3.37,9.255c-5.138,1.725-10.412,3.146-15.805,4.24l-1.714-9.705 l-6.816,1.203l1.713,9.698c-5.339,0.796-10.777,1.28-16.301,1.421v-26.382h-6.922v26.382c-5.523-0.141-10.964-0.625-16.303-1.421 l1.714-9.697l-6.814-1.204l-1.716,9.705c-5.393-1.094-10.668-2.515-15.806-4.24l3.371-9.254l-6.502-2.369l-3.371,9.254 c-5.101-2.015-10.046-4.336-14.818-6.939l4.91-8.506l-5.994-3.46l-4.901,8.492c-4.658-2.863-9.126-6.005-13.384-9.401l6.288-7.493 l-5.301-4.449l-6.284,7.488c-4.085-3.616-7.946-7.477-11.562-11.562l7.486-6.282l-4.449-5.302l-7.492,6.286 c-3.395-4.257-6.537-8.725-9.399-13.382l8.494-4.902l-3.459-5.994l-8.509,4.911c-2.604-4.771-4.925-9.717-6.939-14.817l9.254-3.368 l-2.367-6.504l-9.256,3.369c-1.725-5.137-3.146-10.412-4.24-15.805l9.708-1.711l-1.201-6.816l-9.702,1.71 c-0.797-5.339-1.28-10.779-1.422-16.303h26.381v-6.921H35.875c0.142-5.524,0.625-10.963,1.422-16.302l9.702,1.711l1.201-6.816 l-9.708-1.711c1.095-5.393,2.516-10.668,4.24-15.806l9.256,3.369l2.367-6.504l-9.254-3.368c2.016-5.1,4.336-10.046,6.939-14.817 l8.509,4.911l3.459-5.994l-8.494-4.903c2.862-4.657,6.005-9.125,9.399-13.382l7.492,6.286l4.449-5.302l-7.486-6.282 c3.615-4.084,7.477-7.946,11.562-11.562l6.286,7.489l5.301-4.449l-6.29-7.494c4.258-3.396,8.726-6.538,13.384-9.401l4.901,8.492 l5.994-3.46l-4.909-8.506c4.771-2.603,9.718-4.924,14.818-6.939l3.369,9.255l6.504-2.367l-3.37-9.258 c5.137-1.725,10.412-3.146,15.805-4.24l1.714,9.708l6.816-1.203l-1.713-9.702c5.339-0.796,10.777-1.28,16.301-1.421v9.846h6.922 v-9.846c5.523,0.141,10.962,0.625,16.301,1.421l-1.713,9.702l6.816,1.203l1.714-9.708c5.393,1.094,10.667,2.515,15.804,4.239 l-3.369,9.258l6.504,2.367l3.368-9.256c5.101,2.015,10.048,4.336,14.819,6.939l-4.909,8.508l5.994,3.459l4.9-8.493 c4.658,2.863,9.126,6.005,13.384,9.401l-6.289,7.495l5.301,4.449l6.285-7.49c4.085,3.617,7.946,7.479,11.563,11.563l-7.486,6.283 l4.449,5.302l7.492-6.287c3.395,4.257,6.536,8.724,9.398,13.381l-8.494,4.905l3.461,5.993l8.508-4.913 c2.603,4.772,4.924,9.718,6.939,14.818l-9.255,3.37l2.367,6.503l9.258-3.371c1.725,5.138,3.146,10.413,4.24,15.807l-9.708,1.711 l1.201,6.816l9.702-1.711c0.797,5.339,1.28,10.778,1.422,16.302H276.35v6.921h26.381 C302.589,178.287,302.105,183.727,301.309,189.066z"/>
-            <path d="M189.766,191.022c4.402-1.555,7.948-7.063,9.68-14.091l-21.099,7.1C181.032,189.691,185.278,192.607,189.766,191.022z"/>
-            <path d="M215.203,182.132c4.328-1.53,7.828-6.876,9.592-13.73l-20.868,7.022C206.612,180.9,210.797,183.691,215.203,182.132z"/>
-            <path d="M148.846,191.022c4.482,1.585,8.732-1.331,11.414-6.992l-21.1-7.1C140.893,183.958,144.441,189.468,148.846,191.022z"/>
-            <path d="M123.4,182.132c4.415,1.559,8.594-1.232,11.281-6.709l-20.868-7.022C115.573,175.255,119.073,180.602,123.4,182.132z"/>
-            <path d="M215.471,193.755c-6.798,2.403-13.084-5.339-14.318-17.397l-0.145,0.049c0.6,12.244-4.198,23.842-10.974,26.239 c-6.861,2.424-13.194-5.477-14.35-17.718l-6.379,2.146l-6.377-2.146c-1.156,12.241-7.492,20.141-14.348,17.717 c-6.785-2.397-11.584-13.997-10.981-26.241l-0.146-0.049c-1.234,12.06-7.52,19.802-14.319,17.399 c-6.713-2.375-11.483-13.792-10.984-25.914l-1.959-0.659v44.239l59.115,19.897l59.115-19.897v-44.239l-1.959,0.659 C226.96,179.962,222.189,191.379,215.471,193.755z"/>
-            <path d="M110.15,128.777l0.039,0.013v23.872l59.115,19.897l59.115-19.897v-23.873l0.035-0.012l-59.15-21.49L110.15,128.777z M169.305,142.929l-42.667-14.35l42.667-15.501l42.664,15.501L169.305,142.929z"/>
-            <polygon points="201.225,110.545 169.303,52.664 137.381,110.436 169.303,91.635 "/>
-          </g>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="qibla" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_qibla">اتجاه القبلة</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/video-maker.html')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="5" width="15" height="14" rx="2"/>
-          <path d="M17 10l5-3v10l-5-3z"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="video" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_video_maker">صانع الفيديو</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/hadith-viewer.html')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          <line x1="9" y1="7" x2="15" y2="7"/>
-          <line x1="9" y1="11" x2="13" y2="11"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="hadith" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_hadith">موسوعة الحديث</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/nawawi.html')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/>
-          <path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>
-          <path d="M17 7.5l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="nawawi" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_nawawi">الأربعون النووية</div>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/qudsi.html')">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/>
-          <path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>
-          <path d="M16.5 6.6a2.2 2.2 0 1 0 1.9 3.3 1.8 1.8 0 1 1-1.9-3.3z"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="qudsi" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_qudsi">الأربعون القدسية</div>
     </div>
     <div class="feature-card glass-panel" onclick="openPrayerModal()">
-      <div class="fc-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"/>
-          <polyline points="12 7 12 12"/>
-          <line x1="12" y1="12" x2="16.5" y2="12"/>
-        </svg>
-      </div>
+      <div class="fc-icon-wrap"><img class="home-ic" data-ic="prayer" alt="" width="192" height="200" decoding="async"></div>
       <div class="fc-text" data-i18n="card_prayer_times">مواعيد الصلاة</div>
     </div>
 
   </div>
 </div>
+
+<script>
+// Home tiles have one icon set per theme: icons/home/<theme>/<name>.webp
+function applyHomeIcons(theme) {
+  theme = theme || document.documentElement.getAttribute('data-theme') || 'dark';
+  if (['light', 'dark', 'sepia', 'plain-dark'].indexOf(theme) < 0) theme = 'dark';
+  document.querySelectorAll('img.home-ic').forEach(function (img) {
+    var src = 'icons/home/' + theme + '/' + img.dataset.ic + '.webp';
+    if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+  });
+}
+applyHomeIcons();
+</script>
 
 <nav class="bottom-nav">
   <div class="nav-item" onclick="I18n.openLangSheet()">
@@ -2128,6 +2030,7 @@ function normalizeTheme(mode) {
 function setTheme(mode, persist = true) {
   mode = normalizeTheme(mode);
   document.documentElement.setAttribute('data-theme', mode);
+  if (typeof applyHomeIcons === 'function') applyHomeIcons(mode);
   // On load we don't persist (persist=false) so a value set by another page
   // (e.g. azkar's "warm") is kept for that page rather than overwritten here.
   if (persist) localStorage.setItem('themeMode', mode);
