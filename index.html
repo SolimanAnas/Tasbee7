@@ -137,7 +137,7 @@
   --section-gap: 20px;
   --card-h: 64px;            /* list view: every card the same height */
   --card-h-sm: 92px;         /* 4-per-row view */
-  --card-icon: 40px;
+  --card-icon: 44px;         /* icons are optically balanced inside this box */
 
   --ease-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
   --ease-smooth: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -270,7 +270,7 @@ input, textarea, select {
   width: 100%; max-width: 480px;
   display: flex; flex-direction: column;
   flex: 1;
-  padding-bottom: 74px;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));   /* clears the floating nav */
 }
 
 /* ======================== HEADER ======================== */
@@ -788,60 +788,116 @@ body.home-swap .feature-card { animation: cardSwap .34s var(--ease-smooth) backw
   font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer;
 }
 
-/* ======================== BOTTOM NAVIGATION ======================== */
+/* ======================== BOTTOM NAVIGATION ========================
+   Floating pill bar: a fully rounded container that floats above the page,
+   a softly tinted pill that slides behind the tab whose panel is open, and
+   muted icons/labels for the other tabs. Colours come from --nav-* tokens
+   set per theme below. */
 .bottom-nav {
+  --nav-h: 64px;
+  --nav-pad: 6px;
+  --nav-bg: rgba(255, 255, 255, 0.82);
+  --nav-border: rgba(255, 255, 255, 0.7);
+  --nav-shadow: 0 10px 28px -6px rgba(15, 40, 80, 0.22), 0 2px 6px rgba(15, 40, 80, 0.06);
+  --nav-muted: #6B7A90;
+  --nav-active: var(--primary);
+  --nav-pill: color-mix(in srgb, var(--primary) 14%, transparent);
   position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  height: 58px;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  width: calc(100% - 32px); max-width: 420px;
+  height: var(--nav-h);
+  padding: var(--nav-pad);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  align-items: stretch;
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid var(--nav-border);
+  border-radius: 999px;
+  box-shadow: var(--nav-shadow);
   z-index: 40;
 }
-[data-theme="dark"] .bottom-nav { background: rgba(0, 0, 0, 0.2); }
-[data-theme="sepia"] .bottom-nav {
-  /* solid parchment: the blurred brown glass made the icons hard to see */
-  background: rgba(251, 245, 232, 0.96); border-top-color: rgba(120, 82, 32, 0.22);
-  box-shadow: 0 -6px 18px rgba(90, 60, 20, 0.10);
+[data-theme="dark"] .bottom-nav {             /* purple */
+  --nav-bg: rgba(28, 22, 56, 0.80);
+  --nav-border: rgba(167, 139, 250, 0.18);
+  --nav-shadow: 0 12px 30px -6px rgba(8, 4, 24, 0.6), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --nav-muted: #A39DC0;
+  --nav-active: #C4B5FD;
+  --nav-pill: rgba(139, 92, 246, 0.24);
 }
-[data-theme="sepia"] .nav-item { color: #6b4e2c; }
-[data-theme="sepia"] .nav-item.active { color: var(--primary); }
-[data-theme="sepia"] .nav-label { font-weight: 700; }
-[data-theme="oled"] .bottom-nav { background: rgba(0, 0, 0, 0.2); }
+[data-theme="plain-dark"] .bottom-nav {       /* black */
+  --nav-bg: rgba(22, 22, 22, 0.92);
+  --nav-border: rgba(255, 255, 255, 0.08);
+  --nav-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.4);
+  --nav-muted: #8A8F98;
+  --nav-active: #34D399;
+  --nav-pill: rgba(16, 185, 129, 0.18);
+}
+[data-theme="sepia"] .bottom-nav {
+  --nav-bg: rgba(253, 247, 234, 0.94);
+  --nav-border: rgba(120, 82, 32, 0.16);
+  --nav-shadow: 0 10px 28px -6px rgba(90, 55, 15, 0.30), 0 2px 6px rgba(90, 55, 15, 0.08);
+  --nav-muted: #8A6E4E;
+  --nav-active: #8E5F1E;
+  --nav-pill: rgba(176, 125, 43, 0.18);
+}
+
+/* the sliding pill behind the active tab */
+.nav-pill {
+  position: absolute; top: var(--nav-pad); bottom: var(--nav-pad); left: 0;
+  width: 0; border-radius: 999px;
+  background: var(--nav-pill);
+  opacity: 0;
+  transition: transform .42s cubic-bezier(.34, 1.3, .64, 1), width .42s cubic-bezier(.34, 1.3, .64, 1), opacity .25s ease;
+  pointer-events: none;
+}
+.bottom-nav.has-active .nav-pill { opacity: 1; }
 
 .nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 2px;
-  height: 100%;
-  width: 75px;
-  color: var(--on-surface-variant);
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; min-width: 0;
+  border-radius: 999px;
+  color: var(--nav-muted);
   cursor: pointer;
-  transition: color var(--ease-smooth);
+  -webkit-tap-highlight-color: transparent;
+  transition: color .25s ease;
 }
-.nav-item svg { width: 24px; height: 24px; display: block; }
-.nav-item.active { color: var(--primary); }
+.nav-item:active { transform: scale(0.94); }
+.nav-item:focus-visible { outline: 2px solid var(--nav-active); outline-offset: -2px; }
+.nav-item.active { color: var(--nav-active); }
+
+/* Icons: one 24px box for all four, same stroke and colour.
+   The artwork is unchanged; each is only centred in the same box. */
 .nav-item svg, .nav-item .icon-mask {
-  width: 24px; height: 24px;
-  stroke-width: 2; stroke: currentColor; fill: none;
+  width: 24px; height: 24px; flex: none;
   display: block; margin: 0 auto;
+  stroke: currentColor; stroke-width: 2; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .3s cubic-bezier(.34, 1.4, .64, 1);
 }
-.nav-item.active svg { fill: currentColor; stroke: none; }
-.nav-item.active .icon-mask { background-color: var(--primary); }
+.nav-item.active svg, .nav-item.active .icon-mask { transform: translateY(-1px); }
+.nav-item .icon-mask { background-color: currentColor; }
 /* Themed translate icon — uses the app's .icon-mask pattern (background-color:
-   currentColor + mask) so it follows the nav colour, → --primary when active,
-   exactly like the sibling icons. The translate.svg file is untouched. */
+   currentColor + mask) so it follows the nav colour exactly like the sibling
+   icons. The translate.svg file is untouched. */
 .nav-translate-icon {
   -webkit-mask-image: url('img/translate.svg');
           mask-image: url('img/translate.svg');
 }
-.nav-label { font-size: 0.65rem; font-weight: 600; }
+/* Optical balance (measured ink inside the 24px box): translate fills
+   23×22 px, so it is scaled down to the ~20–21 px of clock and gear; the
+   bars glyph is only 14×18 px of thin strokes, so it is scaled up a little
+   with a slightly firmer stroke. Proportions and artwork are unchanged. */
+.nav-translate-icon { -webkit-mask-size: 88%; mask-size: 88%; }
+.nav-item[data-nav="stats"] svg { scale: 1.14; stroke-width: 2.2; }
+.nav-label {
+  font-size: 0.6875rem; font-weight: 700; line-height: 1.2;
+  white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill, .nav-item, .nav-item svg, .nav-item .icon-mask { transition: none; }
+}
 
 /* ======================== BOTTOM SHEETS & MODALS ======================== */
 .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity var(--ease-smooth); }
@@ -1159,20 +1215,21 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
 </div>
 
 
-<nav class="bottom-nav">
-  <div class="nav-item" onclick="I18n.openLangSheet()">
+<nav class="bottom-nav" id="bottomNav">
+  <span class="nav-pill" aria-hidden="true"></span>
+  <div class="nav-item" data-nav="lang" onclick="I18n.openLangSheet()">
     <span class="icon-mask nav-translate-icon" aria-hidden="true"></span>
     <span class="nav-label" data-i18n="nav_language">اللغة</span>
   </div>
-  <div class="nav-item" onclick="openPrayerModal()">
+  <div class="nav-item" data-nav="times" onclick="openPrayerModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
     <span class="nav-label" data-i18n="nav_times">المواقيت</span>
   </div>
-  <div class="nav-item" onclick="openStatsSheet()">
+  <div class="nav-item" data-nav="stats" onclick="openStatsSheet()">
     <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     <span class="nav-label" data-i18n="nav_achievements">إنجازاتي</span>
   </div>
-  <div class="nav-item" onclick="openSettingsSheet()">
+  <div class="nav-item" data-nav="settings" onclick="openSettingsSheet()">
     <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
       <circle cx="12" cy="12" r="3"/>
@@ -2229,5 +2286,55 @@ if ('serviceWorker' in navigator) {
 
 <!-- Install prompt (PWA / Play Store / iOS) rendered by js/pwa-install.js -->
 <script src="js/net-status.js"></script>
+
+<script>
+// Floating nav: the pill follows the tab whose panel is open (visual only —
+// each tab keeps its own onclick). It clears when every panel is closed.
+(function () {
+  var nav = document.getElementById('bottomNav');
+  if (!nav) return;
+  var pill = nav.querySelector('.nav-pill');
+  var items = Array.prototype.slice.call(nav.querySelectorAll('.nav-item'));
+  var isOpen = {
+    lang: function () { return !!document.getElementById('i18nLangSheetWrap'); },
+    times: function () { var m = document.getElementById('prayerModal'); return !!(m && m.classList.contains('active')); },
+    stats: function () { var m = document.getElementById('statsSheet'); return !!(m && m.classList.contains('active')); },
+    settings: function () { var m = document.getElementById('settingsSheet'); return !!(m && m.classList.contains('active')); }
+  };
+  var pending = null;   // tab just tapped, until its panel shows up
+  function anyPanelOpen() {
+    return !!document.querySelector('#sheetOverlay.active, .modal-overlay.active, #i18nLangSheetWrap');
+  }
+  function place(item) {
+    items.forEach(function (it) {
+      var on = it === item;
+      it.classList.toggle('active', on);
+      if (on) it.setAttribute('aria-current', 'true'); else it.removeAttribute('aria-current');
+    });
+    nav.classList.toggle('has-active', !!item);
+    if (item) {
+      pill.style.width = item.offsetWidth + 'px';
+      pill.style.transform = 'translateX(' + item.offsetLeft + 'px)';
+    }
+  }
+  function sync() {
+    var current = null;
+    items.forEach(function (it) { var f = isOpen[it.dataset.nav]; if (f && f()) current = it; });
+    if (!current && pending && anyPanelOpen()) current = pending;
+    if (!anyPanelOpen()) pending = null;
+    place(current);
+  }
+  items.forEach(function (it) {
+    it.addEventListener('click', function () { pending = it; place(it); setTimeout(sync, 60); });
+  });
+  var mo = new MutationObserver(sync);
+  mo.observe(document.body, { childList: true });
+  ['sheetOverlay', 'prayerModal', 'statsSheet', 'settingsSheet'].forEach(function (id) {
+    var el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['class'] });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(function (el) { mo.observe(el, { attributes: true, attributeFilter: ['class'] }); });
+  window.addEventListener('resize', function () { var a = nav.querySelector('.nav-item.active'); if (a) place(a); });
+})();
+</script>
 </body>
 </html>
