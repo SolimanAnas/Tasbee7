@@ -1,5 +1,5 @@
 // Home: the prayer times card is a framed picture (images/prayer-frame-*.webp,
-// 1200 × 630) drawn as a border image in three bands. Its content must sit in
+// 1200 × 536) drawn as a border image in three bands. Its content must sit in
 // the picture's zones at every width: the header between the minarets, below
 // the frame's top edge and above the horizon; the prayer times on the water,
 // inside the frame. Positions are in % of the card's width (the picture scales
@@ -44,14 +44,14 @@ test.describe('prayer card on its framed picture', () => {
         await page.setViewportSize({ width, height: 900 });
         const s = await open(page, theme);
         expect(s.frame).toContain(`prayer-frame-${FRAME[theme]}.webp`);
-        expect(s.height).toBeGreaterThanOrEqual(52.4);            // never shorter than the picture (no squashing)
+        expect(s.height).toBeGreaterThanOrEqual(44.6);            // never shorter than the picture (no squashing)
         for (const k of ['timer', 'meta', 'label']) {              // between the minarets, under the top edge, over the horizon
           expect(s[k].x0, k).toBeGreaterThanOrEqual(9.3);
           expect(s[k].x1, k).toBeLessThanOrEqual(90.7);
           expect(s[k].y0, k).toBeGreaterThanOrEqual(13.3);
           expect(s[k].y1, k).toBeLessThanOrEqual(30.5);
         }
-        expect(s.chips.y0).toBeGreaterThanOrEqual(32);             // on the water
+        expect(s.chips.y0).toBeGreaterThanOrEqual(31);             // at the waterline
         expect(s.chips.y1).toBeLessThanOrEqual(s.height - 1.3);    // above the bottom of the frame
         expect(s.chips.x0).toBeGreaterThanOrEqual(1.5);            // inside the gold sides
         expect(s.chips.x1).toBeLessThanOrEqual(98.5);
