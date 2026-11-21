@@ -352,11 +352,13 @@ input, textarea, select {
 /* ======================== PRAYER CARD: framed scene ========================
    The card is a picture: a gold frame with an arch, two minarets and a lake
    scene (night for the dark themes, day for light, golden hour for sepia;
-   images/prayer-frame-*.webp, 1200 × 630). It is drawn as a border image in
+   images/prayer-frame-*.webp, 1200 × 536). It is drawn as a border image in
    three bands so it never distorts:
-     top    — image rows 0–503: arch, minarets, sky, skyline (scales with the width)
-     middle — rows 503–532: plain water, stretched only if the content needs it
-     bottom — rows 532–630: the rounded bottom of the frame
+     top    — image rows 0–409: arch, minarets, sky, skyline (scales with the width)
+     middle — rows 409–438: plain water, stretched only if the content needs it
+     bottom — rows 438–536: the rounded bottom of the frame
+   (94 rows of open water were taken out of the pictures to make the card
+   about 15 % shorter; the arch, skyline and frame are unchanged.)
    Everything is measured in --u, 1 % of the card's width (cqw of .pw-wrap):
    the header sits between the minarets, below the frame's top edge, and the
    prayer times sit on the water. */
@@ -369,14 +371,15 @@ input, textarea, select {
   --u: calc((min(100vw, 480px) - 2 * var(--spacing-md)) / 100);   /* without container units */
   position: relative; margin: 0;
   display: flex; flex-direction: column;
-  min-height: calc(var(--u) * 52.5);                               /* the picture's own height */
-  padding: calc(var(--u) * 14.5) calc(var(--u) * 3.5) calc(var(--u) * 2.8);
+  min-height: calc(var(--u) * 44.667);                             /* the picture's own height */
+  padding: calc(var(--u) * 14.5) calc(var(--u) * 3.5) calc(var(--u) * 1.9);
+  gap: 0;                                                          /* the header's own height sets where the times start */
   border-radius: 0; box-shadow: none; background: none;
   border: 1px solid transparent;
   --pw-frame: url('images/prayer-frame-dark.webp');
   border-image-source: var(--pw-frame);
-  border-image-slice: 503 0 98 fill;
-  border-image-width: calc(var(--u) * 41.917) 0 calc(var(--u) * 8.167);
+  border-image-slice: 409 0 98 fill;
+  border-image-width: calc(var(--u) * 34.083) 0 calc(var(--u) * 8.167);
   border-image-repeat: stretch;
   color: #fff;
   -webkit-backdrop-filter: none; backdrop-filter: none;
@@ -387,7 +390,7 @@ input, textarea, select {
 .prayer-widget:active { transform: scale(0.985); }
 /* the countdown, the date and the place: between the minarets, above the skyline */
 .prayer-widget .prayer-header-info {
-  padding: 0 calc(var(--u) * 6.5); min-height: calc(var(--u) * 15); gap: calc(var(--u) * 2);
+  padding: 0 calc(var(--u) * 6.5); min-height: calc(var(--u) * 16.6); gap: calc(var(--u) * 2);   /* times start at the waterline */
 }
 .prayer-widget .prayer-timer { font-size: clamp(1.1rem, calc(var(--u) * 6.6), 1.45rem); }
 .prayer-widget .prayer-meta { min-width: 0; }
@@ -402,8 +405,8 @@ input, textarea, select {
 /* the prayer times: on the water, at the bottom of the frame */
 .prayer-widget .prayer-cards { position: relative; z-index: 1; margin-top: auto; }
 /* compact chips: less padding, smaller icon */
-.prayer-widget .prayer-card { padding: 4px 1px; gap: 1px; }
-.prayer-widget .prayer-card .pc-icon { width: 13px; height: 13px; }
+.prayer-widget .prayer-card { padding: 3px 1px 2px; gap: 0; }
+.prayer-widget .prayer-card .pc-icon { width: 12px; height: 12px; }
 .prayer-widget .prayer-card {
   background: rgba(10, 22, 58, .62); border-color: rgba(255,255,255,.16); color: rgba(255,255,255,.8);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
@@ -775,22 +778,22 @@ body.home-compact .new-badge { top: -6px; font-size: 0.55rem; padding: 3px 6px; 
    shadow (no blur, so the background stays as it is), a gradient accent,
    and a matching glass nav bar. Colours come from the --card-* / --accent-grad tokens below. */
 :root {
-  --card-glass: rgba(255, 255, 255, 0.52);
-  --card-glass-press: rgba(255, 255, 255, 0.62);
+  --card-glass: rgba(255, 255, 255, 0.59);
+  --card-glass-press: rgba(255, 255, 255, 0.70);
   --card-glass-solid: rgba(255, 255, 255, 0.94);
   --card-edge: rgba(255, 255, 255, 0.72);
-  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 24px -12px rgba(20, 70, 140, 0.38);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(20, 70, 140, 0.08), 0 6px 16px -8px rgba(20, 70, 140, 0.24);
   --card-ink: #10284D;
   --card-ink-glow: 0 1px 0 rgba(255, 255, 255, 0.6);
   --card-icon-shadow: rgba(20, 60, 120, 0.25);
   --accent-grad: linear-gradient(160deg, #5AB0F5, #1565C0);
 }
 [data-theme="dark"] {            /* purple */
-  --card-glass: rgba(46, 36, 92, 0.52);
-  --card-glass-press: rgba(62, 50, 118, 0.55);
+  --card-glass: rgba(46, 36, 92, 0.59);
+  --card-glass-press: rgba(62, 50, 118, 0.68);
   --card-glass-solid: rgba(38, 30, 78, 0.96);
   --card-edge: rgba(196, 181, 253, 0.22);
-  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 26px -12px rgba(5, 0, 25, 0.75);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.22), 0 6px 16px -8px rgba(5, 0, 25, 0.55);
   --card-ink: #F3F0FF;
   --card-ink-glow: 0 1px 6px rgba(0, 0, 0, 0.35);
   --card-icon-shadow: rgba(0, 0, 0, 0.45);
