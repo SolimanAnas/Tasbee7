@@ -36,7 +36,7 @@ SAY = {
     "ayah to": "[[ ˈɑːjə ]] to",
     "adhkar before": "[[ ʌðkˈɑːɹ ]] before",
     "dhikr.": "[[ ðˈɪkɚ. ]]",
-    "Mushaf.": "[[ mˈʊʃæf. ]]",
+    "Mushaf.": "[[ mˈʊshæf. ]]",   # mus-haf: s + h, never "sh"
     "Zad Al-Muslim on": "[[ zˈɑːd ælmˈʊslɪm ]] on",
 }
 

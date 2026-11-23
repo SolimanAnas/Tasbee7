@@ -46,7 +46,7 @@ Every frame is a pure function of time: `renderFrame(t)` sets all state from `t`
 - **Look:** the sky behind the phone follows the time of day, with the sun arcing across and the moon at night.
 - **Captures:** everything on the phone is a fresh capture of the **current** app (`r-*.png`, taken in the light, sepia and dark themes).
 - **Shorts layout:** headlines, the counter, the QR code and the call to action stay clear of YouTube's own overlays (the bottom title strip and the right-hand buttons). Shorts descriptions don't make links clickable, so the reel ends on a QR code and "Search 'Zad Al-Muslim' on Google Play".
-- **Sound:** Piper `joe` narration with IPA fixes for adhkar, dhikr, Mushaf, ayah and Zad Al-Muslim (checked by Whisper given that vocabulary). "Read hadith" swallowed the h, so the line uses "explore hadith". Non-tonal sound design only.
+- **Sound:** Piper `joe` narration with IPA fixes for adhkar, dhikr, Mushaf ("mus-haf", s + h, never "sh"), ayah and Zad Al-Muslim (checked by Whisper given that vocabulary). "Read hadith" swallowed the h, so the line uses "explore hadith". Non-tonal sound design only.
 - **Upload kit:** `output/youtube/` holds English captions (`.en.srt`), a title, a description and settings.
 
 ```bash
