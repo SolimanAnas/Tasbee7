@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zad Al-Muslim — "Your whole day" YouTube Shorts reel</title>
+<!--
+  42 s vertical (1080×1920) reel for YouTube Shorts, English, no music.
+  Render: node scripts/render.cjs --page=reel.html --fmt=vertical
+  Every phone screen is a genuine capture of the current app (r-*.png,
+  scripts/capture-screens.cjs). Key content stays inside the Shorts safe area
+  (clear of the title strip at the bottom and the action buttons on the right).
+-->
+<link rel="stylesheet" href="styles.css">
+<style>
+  .chip-time { position: absolute; display: inline-flex; align-items: center; gap: 14px; padding: 12px 26px 12px 20px;
+    border-radius: 999px; background: rgba(4, 22, 17, 0.42); border: 1px solid rgba(230, 207, 156, 0.4);
+    font-family: 'Manrope', sans-serif; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold-soft); white-space: nowrap; backdrop-filter: blur(6px); }
+  .chip-time svg { width: 1.5em; height: 1.5em; }
+  .sub { position: absolute; left: 0; right: 0; text-align: center; font-family: 'Manrope', sans-serif;
+    font-weight: 500; color: rgba(244, 237, 223, 0.86); }
+  .caps-line { position: absolute; left: 0; right: 0; text-align: center; font-family: 'Manrope', sans-serif;
+    font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-soft); }
+  #topscrim { position: absolute; left: 0; top: 0; width: 1080px; height: 760px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(2, 10, 8, 0.55), rgba(2, 10, 8, 0.25) 55%, rgba(2, 10, 8, 0)); }
+  .txt { text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35); }
+</style>
+</head>
+<body>
+<div id="frame">
+  <canvas id="bg"></canvas>
+  <div id="topscrim"></div>
+  <div id="world" class="layer"><div id="anchor" class="anchor"></div></div>
+  <canvas id="glow"></canvas>
+  <div id="type" class="layer"></div>
+  <div id="vignette" class="layer"></div>
+  <canvas id="grain"></canvas>
+</div>
+<script src="lib.js"></script>
+<script src="phone.js"></script>
+<script src="fx.js"></script>
+<script src="reel-scenes.js"></script>
+</body>
+</html>

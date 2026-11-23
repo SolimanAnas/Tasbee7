@@ -38,6 +38,28 @@ scripts/verify.py     ← QA report
 
 Every frame is a pure function of time: `renderFrame(t)` sets all state from `t`. Frames can therefore be rendered in any order, split across workers, and re-rendered one at a time. To preview any moment in a browser, serve `promo/` and open `src/index.html?fmt=vertical&t=12.5`.
 
+## YouTube Shorts reel: "Your whole day, in one app" (English, no music)
+
+`output/zad-al-muslim-shorts-your-day.mp4` is a 43 s, 1080×1920 reel for YouTube Shorts.
+
+- **Story:** it follows one day: dawn (prayer times), morning (adhkar), on the go (recitation and live radio), midday (Mushaf), afternoon (Masbaha counting 30→33 by real taps), evening (Hadith, live Qibla compass), night (sleep adhkar), share (Ayah Video Maker), then the light, sepia and dark themes and an end card.
+- **Look:** the sky behind the phone follows the time of day, with the sun arcing across and the moon at night.
+- **Captures:** everything on the phone is a fresh capture of the **current** app (`r-*.png`, taken in the light, sepia and dark themes).
+- **Shorts layout:** headlines, the counter, the QR code and the call to action stay clear of YouTube's own overlays (the bottom title strip and the right-hand buttons). Shorts descriptions don't make links clickable, so the reel ends on a QR code and "Search 'Zad Al-Muslim' on Google Play".
+- **Sound:** Piper `joe` narration with IPA fixes for adhkar, dhikr, Mushaf, ayah and Zad Al-Muslim (checked by Whisper given that vocabulary). "Read hadith" swallowed the h, so the line uses "explore hadith". Non-tonal sound design only.
+- **Upload kit:** `output/youtube/` holds English captions (`.en.srt`), a title, a description and settings.
+
+```bash
+node scripts/capture-screens.cjs --only=r-home-light,r-home-sepia,r-home-dark,r-azkar,r-audio,r-radio,r-quran,r-masbaha-30,r-masbaha-31,r-masbaha-32,r-masbaha-33,r-hadith,r-qibla-compass,r-sleeping,r-video-maker
+.venv/bin/python scripts/make-voiceover.py --reel --voice en_US-joe-medium.onnx --piper .venv/bin/piper
+.venv/bin/python scripts/make-reel-audio.py
+node scripts/render.cjs --page=reel.html --fmt=vertical
+scripts/mux.sh reel-vertical zad-al-muslim-shorts-your-day.mp4 8M mix-reel.flac
+python scripts/make-srt.py audio/vo-timing-reel.json output/youtube/zad-al-muslim-shorts-your-day.en.srt
+```
+
+Playwright is pinned to **1.63.0** to match the Chromium build (1243) installed in this environment.
+
 ## Ayah Video Maker promo (Arabic, story 9:16)
 
 `output/zad-al-muslim-video-maker-story-ar.mp4` is a 30 s, 1080×1920 promo for the app's **Ayah Video Maker** (`pages/video-maker.html`), which makes ayah clips for status and stories. It has no music, and its storyboard is `output/zad-al-muslim-video-maker-storyboard.md`.

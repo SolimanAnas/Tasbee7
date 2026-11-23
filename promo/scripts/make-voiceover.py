@@ -33,6 +33,11 @@ SAY = {
     "Zad Al-Muslim.": "[[ zˈɑːd ælmˈʊslɪm. ]]",
     "ayah.": "[[ ˈɑːjə. ]]",
     "Ayah": "[[ ˈɑːjə ]]",
+    "ayah to": "[[ ˈɑːjə ]] to",
+    "adhkar before": "[[ ʌðkˈɑːɹ ]] before",
+    "dhikr.": "[[ ðˈɪkɚ. ]]",
+    "Mushaf.": "[[ mˈʊʃæf. ]]",
+    "Zad Al-Muslim on": "[[ zˈɑːd ælmˈʊslɪm ]] on",
 }
 
 # (start second, text, length_scale) — start times follow the edit in src/timeline.js
@@ -90,14 +95,35 @@ VM_LINES = [
 ]
 
 
+# "Your whole day" YouTube Shorts reel (--reel, 43 s, src/reel-scenes.js).
+REEL_DURATION = 43.0
+REEL_LINES = [
+    (0.25, "Your whole day, in one app.", 1.0),
+    (2.75, "At dawn, your prayer times, wherever you are.", 1.0),
+    (5.75, "In the morning, your adhkar, ready to read and count.", 1.0),
+    (8.75, "On the go, beautiful recitation, and live Quran radio.", 1.0),
+    (12.95, "At midday, open the Mushaf.", 1.04),
+    (17.15, "In the afternoon, keep your dhikr.", 1.04),
+    (21.45, "In the evening, explore hadith, and find the qibla, anywhere.", 0.95),  # "read hadith" swallowed the h
+    (25.75, "And at night, the adhkar before sleep.", 1.04),
+    (29.55, "Share an ayah to your status, in seconds.", 1.02),
+    (32.95, "Light, sepia, or dark.", 1.04),
+    (35.55, "Zad Al-Muslim.", 1.06),
+    (37.10, "Free, ad-free, and it works offline.", 1.02),
+    (39.90, "Search Zad Al-Muslim on Google Play.", 1.04),
+]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--voice", required=True)
     ap.add_argument("--piper", default="piper")
     ap.add_argument("--vm", action="store_true", help="Ayah Video Maker promo narration (outputs *-vm files)")
+    ap.add_argument("--reel", action="store_true", help="'Your whole day' Shorts reel narration (outputs *-reel files)")
     args = ap.parse_args()
-    lines, suffix = (VM_LINES, "-vm") if args.vm else (LINES, "")
-    track = np.zeros(int((VM_DURATION if args.vm else DURATION) * SR), dtype=np.float32)
+    lines, suffix, dur = ((REEL_LINES, "-reel", REEL_DURATION) if args.reel else
+                          (VM_LINES, "-vm", VM_DURATION) if args.vm else (LINES, "", DURATION))
+    track = np.zeros(int(dur * SR), dtype=np.float32)
     timing = []
     prev_end = 0
     for start, text, ls in lines:

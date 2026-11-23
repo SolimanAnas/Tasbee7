@@ -72,6 +72,33 @@ SHOTS.push(...SHOTS
 // Qibla start screen instead.
 SHOTS.push({ id: 'qibla-ar', url: '/pages/qibla.html', lang: 'ar' });
 
+// YouTube Shorts reel (src/reel.html): the current app, English, across its
+// light / sepia / dark themes. Prefixed r- so the earlier cuts keep their captures.
+SHOTS.push(
+  { id: 'r-home-light', url: '/index.html', lang: 'en', theme: 'light', wait: 3000 },
+  { id: 'r-home-sepia', url: '/index.html', lang: 'en', theme: 'sepia', wait: 3000 },
+  { id: 'r-home-dark', url: '/index.html', lang: 'en', theme: 'dark', wait: 3000 },
+  { id: 'r-azkar', url: '/pages/azkar.html', lang: 'en', theme: 'light', wait: 2500 },
+  { id: 'r-audio', url: '/pages/audio.html', lang: 'en', theme: 'dark', wait: 3000 },
+  { id: 'r-radio', url: '/pages/radio.html', lang: 'en', theme: 'dark', wait: 3000 },
+  { id: 'r-quran', url: '/pages/quran.html', lang: 'en', theme: 'light', ls: { lastPage: '1' }, wait: 3500 },
+  { id: 'r-masbaha', url: '/pages/masbaha.html', lang: 'en', theme: 'sepia', wait: 2500 },
+  { id: 'r-hadith', url: '/pages/hadith.html', lang: 'en', theme: 'sepia', wait: 3000 },
+  { id: 'r-qibla', url: '/pages/qibla.html', lang: 'en', theme: 'dark' },
+  { id: 'r-sleeping', url: '/pages/sleeping.html', lang: 'en', theme: 'dark' },
+  { id: 'r-video-maker', url: '/pages/video-maker.html', lang: 'en', theme: 'dark', wait: 3000 },
+  // real taps on the redesigned counter (#counterZone): 30 → 33
+  ...[30, 31, 32, 33].map(n => ({
+    id: `r-masbaha-${n}`, url: '/pages/masbaha.html', lang: 'en', theme: 'sepia', wait: 2500,
+    act: async page => {
+      for (let i = 0; i < n; i++) { await page.click('#counterZone'); await page.waitForTimeout(40); }
+      await page.waitForTimeout(900);
+    },
+  })),
+  // running compass, compass sensor emulated as for qibla-compass (London, facing the Qibla)
+  { ...SHOTS.find(x => x.id === 'qibla-compass'), id: 'r-qibla-compass', theme: 'dark' },
+);
+
 function serve() {
   return http.createServer((req, res) => {
     const p = decodeURIComponent(req.url.split('?')[0].split('#')[0]);
