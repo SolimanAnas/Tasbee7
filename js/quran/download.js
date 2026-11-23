@@ -36,10 +36,59 @@
     let dlSelected  = new Set(['mushaf-colored']);
     let dlRunning   = false;
 
+    // First visit: the reader sees a page straight away. The offer to save the
+    // mushaf comes later, as a small card that doesn't cover the page, once they
+    // have turned a few pages (so they know what they'd be saving). "Later"
+    // waits three days; the second "later" means no — the download stays in
+    // the settings. Choosing opens the usual selection.
+    const DL_OFFER_AFTER_TURNS = 3;
+    const DL_SNOOZE_KEY = 'quranV3DlSnooze';
+    const DL_DISMISS_KEY = 'quranV3DlDismissed';
+    let dlTurns = 0, dlOfferShown = false;
+
     function dlInit() {
       if (localStorage.getItem(DL_KEY)) return;
       dlBuildCards();
-      setTimeout(() => document.getElementById('dlModal')?.classList.add('active'), 800);
+    }
+
+    function dlOfferDue() {
+      if (dlOfferShown || dlRunning) return false;
+      try {
+        if (localStorage.getItem(DL_KEY)) return false;
+        if (Date.now() < parseInt(localStorage.getItem(DL_SNOOZE_KEY) || '0', 10)) return false;
+      } catch (e) { return false; }
+      return !document.querySelector('.modal-overlay.active, #dlModal.active');
+    }
+
+    // Called by the page renderer after every page change.
+    function dlNotePageTurn() {
+      dlTurns++;
+      if (dlTurns <= DL_OFFER_AFTER_TURNS || !dlOfferDue()) return;
+      dlOfferShown = true;
+      const card = document.getElementById('dlOffer');
+      if (card) card.classList.add('show');
+    }
+
+    function dlOfferHide() { document.getElementById('dlOffer')?.classList.remove('show'); }
+
+    function dlOfferAccept() {
+      dlOfferHide();
+      dlSelected = new Set([currentMushafVariant]);
+      dlBuildCards();
+      document.getElementById('dlSelectSection').style.display   = 'block';
+      document.getElementById('dlProgressSection').style.display = 'none';
+      document.getElementById('dlDoneSection').style.display     = 'none';
+      document.getElementById('dlModal')?.classList.add('active');
+    }
+
+    function dlOfferLater() {
+      dlOfferHide();
+      try {
+        const n = parseInt(localStorage.getItem(DL_DISMISS_KEY) || '0', 10) + 1;
+        localStorage.setItem(DL_DISMISS_KEY, String(n));
+        if (n >= 2) localStorage.setItem(DL_KEY, '1');
+        else localStorage.setItem(DL_SNOOZE_KEY, String(Date.now() + 3 * 24 * 3600 * 1000));
+      } catch (e) {}
     }
 
     function dlBuildCards() {

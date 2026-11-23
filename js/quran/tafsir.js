@@ -160,6 +160,53 @@
       document.getElementById('tafsirSheetBackdrop').classList.remove('visible');
     }
 
+    function tafsirEscapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // data/quran.json (precached), loaded once and only when the network copy
+    // of an ayah isn't available.
+    let tafsirLocalQuran = null;
+    async function tafsirLocalAyah(surah, ayah) {
+      try {
+        if (!tafsirLocalQuran) {
+          tafsirLocalQuran = fetch('../data/quran.json').then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          });
+          tafsirLocalQuran.catch(() => { tafsirLocalQuran = null; });
+        }
+        const list = await tafsirLocalQuran;
+        const v = list.find(x => x.surah === Number(surah) && x.ayah === Number(ayah));
+        if (!v) return '';
+        let text = String(v.text_uthmani || '').replace(/^\uFEFF/, '').trim();
+        // The file prefixes the basmala (4 words) to ayah 1 of every surah
+        // except Al-Fatihah, where it is the ayah, and At-Tawbah, which has none.
+        if (v.ayah === 1 && v.surah !== 1 && v.surah !== 9) {
+          const words = text.split(/\s+/);
+          if (words.length > 4) text = words.slice(4).join(' ');
+        }
+        return text;
+      } catch (_) {
+        return '';
+      }
+    }
+
+    async function tafsirAyahQuote(surah, ayah) {
+      if (navigator.onLine !== false) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 6000);
+          const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`, { signal: controller.signal });
+          clearTimeout(timer);
+          const data = await res.json();
+          if (data.code === 200 && data.data && data.data.text) return data.data.text;
+        } catch (_) { /* fall through to the local text */ }
+      }
+      return tafsirLocalAyah(surah, ayah);
+    }
+
     async function contextShowTafsir(isNavigation = false) {
       if(!isNavigation) closeContextMenu();
       if(!windowCurrentAyahGlobal) { showCustomToast("الرجاء تحديد آية أولاً"); return; }
@@ -173,16 +220,18 @@
         contentDiv.innerHTML = typeof tafsirDropdownHTML === 'function'
           ? tafsirDropdownHTML(tafsirSelectedDB) + '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>'
           : '<div style="text-align:center; padding:30px; color:var(--accent);">جاري التحميل...</div>';
-        const [ayaTextRes, tafText] = await Promise.all([
-          fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/quran-simple`),
+        // The tafsir books are on the device; only the ayah quoted above the
+        // tafsir comes from the network. Without a connection (or if that
+        // request fails) the quote is taken from the app's own Quran text, so
+        // the sheet still opens.
+        const [ayahText, tafText] = await Promise.all([
+          tafsirAyahQuote(surah, ayah),
           getTafsirText(tafsirSelectedDB, surah, ayah)
         ]);
-        const ayaData = await ayaTextRes.json();
-        const ayahText = (ayaData.code === 200) ? ayaData.data.text : '';
         const tafsirText = tafText || 'لم يتم العثور على تفسير لهذه الآية.';
         let html = typeof tafsirDropdownHTML === 'function' ? tafsirDropdownHTML(tafsirSelectedDB) : '';
         html += `<div style="font-weight:700; margin-bottom:12px; color:var(--text-secondary); text-align:center; font-size:0.95rem; font-family:'Tajawal',sans-serif;">الآية ${ayah}</div>`;
-        html += `<div class="imlaei-text">﴿ ${ayahText} ﴾</div>`;
+        if (ayahText) html += `<div class="imlaei-text">﴿ ${tafsirEscapeHtml(ayahText)} ﴾</div>`;
         html += `<div style="text-align:justify; font-size:1.1rem; line-height:2; border-top:1px dashed var(--glass-border); padding-top:16px;">${tafsirText.replace(/\n/g, '<br>')}</div>`;
         contentDiv.innerHTML = html;
         highlightAyah(surah, ayah);

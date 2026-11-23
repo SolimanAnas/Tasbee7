@@ -10,7 +10,7 @@ const appGlobals = {
   adhan: 'readonly', Capacitor: 'readonly', Hls: 'readonly', initSqlJs: 'readonly', ort: 'readonly',
   // app modules (classic-script globals)
   NotificationSystem: 'writable', ThemeManager: 'readonly', PrayerService: 'readonly',
-  Toast: 'readonly', I18n: 'readonly', AudioCache: 'readonly', TasmeeEngine: 'readonly',
+  Toast: 'readonly', I18n: 'readonly', AudioCache: 'readonly', QuranTextSource: 'writable', TasmeeEngine: 'readonly',
   TasmeeMatcher: 'readonly', TasmeeStore: 'readonly', buildNotificationSchedule: 'readonly',
   cityCoordinatesMap: 'readonly', t: 'readonly', RADIO_STATIONS: 'readonly',
 };
@@ -39,7 +39,7 @@ const browserGlobals = {
 export default [
   {
     ignores: ['node_modules/**', 'dist/**', 'data/adhan.js', 'js/medina2.data.js',
-              'js/quranpages.data.js', 'js/plugins/**', 'archive/**', 'mushaf*/**'],
+              'js/quranpages.data.js', 'js/plugins/**', 'js/vendor/**', 'archive/**', 'mushaf*/**'],
   },
   {
     files: ['js/**/*.js', 'sw.js'],

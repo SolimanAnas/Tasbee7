@@ -2,7 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint: the theme was applied
+// in the load event (applySettingsUI), so the page showed its default theme (and right-to-left) first,
+// then switched. Same rule as the page's own code below, which still runs.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  t = t || 'light';
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
+<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <title>المنشاوي المصحف الجديد — استمع للقرآن الكريم بصوت كبار القراء | زاد المسلم</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
 <meta name="description" content="استمع للقرآن الكريم بأكثر من 200 قارئ بينهم الشيخ محمد صديق المنشاوي المصحف الجديد (تسجيل نادر بعد 60 سنة)، عبدالباسط عبدالصمد، الحصري، السديس، ماهر المعيقلي، سعد الغامدي، مشاري العفاسي.">
@@ -46,8 +59,7 @@
 }
 </script>
 <link rel="icon" href="../icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/fonts.css">
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root {
@@ -640,7 +652,7 @@ body::before {
 
       <div class="controls-secondary">
         <button class="action-chip" id="shuffleBtn" onclick="haptic(); toggleShuffle()" title="تشغيل عشوائي">
-          <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          <svg viewBox="0 0 24 24"><!-- shuffle 🔀: two arrows swap lanes (one passes under) and both point on --><path d="M2 16.5h3C9.6 16.5 10.4 7.5 15 7.5h6"/><path d="M18 4.5l3 3-3 3"/><path d="M2 7.5h3c1.47 0 2.55.92 3.5 2.17"/><path d="M11.5 14.33c.95 1.25 2.03 2.17 3.5 2.17h6"/><path d="M18 13.5l3 3-3 3"/></svg>
         </button>
         <button class="action-chip" id="repeatBtn" onclick="haptic(); toggleRepeat()" title="تكرار">
           <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
@@ -1496,5 +1508,6 @@ window.addEventListener('langchange', function() {
   });
 })();
 </script>
+<script src="../js/net-status.js"></script>
 </body>
 </html>

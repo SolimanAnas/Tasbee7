@@ -59,6 +59,10 @@ function _v2Digits(n) {
 }
 
 // ── Quran text (local, offline) ───────────────────────────────────────
+// Surah names in data/quran.json use the Uthmani sukun (U+06E1, «عِمۡرَانَ») and once the
+// alef wasla (U+0671, «ٱلْفَاتِحَةِ»); the UI font (Tajawal) has no glyph for either and
+// draws boxes. Show the ordinary sukun and a plain alef instead.
+function uiSurahName(n) { return String(n || '').replace(/\u06E1/g, '\u0652').replace(/\u0671/g, '\u0627'); }
 async function _v2LoadQuranText() {
   if (_v2.quranIndex) return _v2.quranIndex;
   const res = await fetch('../data/quran.json');
@@ -71,7 +75,7 @@ async function _v2LoadQuranText() {
     if (v.ayah === 1 && v.surah !== 1 && v.surah !== 9 && words.length > _V2_BASMALA_WORDS) {
       words = words.slice(_V2_BASMALA_WORDS);
     }
-    idx[v.surah + '_' + v.ayah] = { words, surahName: v.surah_name };
+    idx[v.surah + '_' + v.ayah] = { words, surahName: uiSurahName(v.surah_name) };
   });
   _v2.quranIndex = idx;
   return idx;

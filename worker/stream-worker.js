@@ -1,3 +1,5 @@
+const ALLOWED_PREFIXES = ['/smcquranlive/'];
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -20,11 +22,26 @@ export default {
       });
     }
 
+    // Only the stations the app plays (js/radio-stations.js); the playlist's
+    // chunklists and segments live under the same prefix. Anything else would
+    // make this an open relay on our Cloudflare quota.
+    if (!ALLOWED_PREFIXES.some(p => path.startsWith(p)) || path.includes('..') ||
+        (request.method !== 'GET' && request.method !== 'HEAD')) {
+      return new Response('Not found', { status: 404, headers: corsHeaders });
+    }
+
     const upstreamUrl = `https://svs.itworkscdn.net${path}${url.search}`;
+
+    // Forward only what streaming needs — never the client's cookies, auth or
+    // Cloudflare headers.
+    const fwd = new Headers();
+    const range = request.headers.get('Range');
+    if (range) fwd.set('Range', range);
+    fwd.set('User-Agent', request.headers.get('User-Agent') || 'Mozilla/5.0');
 
     const upstreamResponse = await fetch(upstreamUrl, {
       method: request.method,
-      headers: request.headers,
+      headers: fwd,
     });
 
     const responseHeaders = new Headers(upstreamResponse.headers);

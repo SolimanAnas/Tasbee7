@@ -2,7 +2,23 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- Page zoom stays off here: the zikr card has its own pinch-to-resize text
+     (and a font-size slider), and a page pinch that missed the card left the
+     whole screen zoomed and cropped. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint: the theme was applied
+// in the load event (setTheme), so the page showed its default theme (and right-to-left) first,
+// then switched. Same rule as the page's own code below, which still runs.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  t = t || 'dark';
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
+<style>html{touch-action:pan-x pan-y}</style>  <!-- no page pinch-zoom on touch screens (iOS ignores user-scalable=no); pinching the dhikr card resizes its text instead. Computers zoom with Ctrl/⌘ + / − as usual. -->
 <meta name="theme-color" content="#0F172A">
 <title>الأذكار — زاد المسلم | Adhkar & Supplications</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
@@ -42,9 +58,8 @@
 <meta name="i18n-title" content="azkar_title">
   <link rel="icon" href="../icons/icon-192.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/fonts.css">
+
 
 <style>
 /* --- THEME VARIABLES --- */
@@ -140,23 +155,20 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 16px 16px 10px;
+  /* four buttons + the counter must fit narrow phones (five overflowed below ~400px) */
+  gap: clamp(5px, 2vw, 10px);
+  /* below the status bar / notch / Dynamic Island (viewport-fit=cover draws under them) */
+  padding: max(16px, calc(env(safe-area-inset-top) + 8px)) max(clamp(10px, 4vw, 16px), env(safe-area-inset-right)) 10px max(clamp(10px, 4vw, 16px), env(safe-area-inset-left));
   flex-shrink: 0;
   position: relative;
   z-index: 20;
 }
 
-@supports (-webkit-touch-callout: none) and (padding-top: env(safe-area-inset-top)) {
-  .top-bar {
-    padding-top: 30px;
-  }
-}
-
 .top-bar-group {
   display: flex;
-  gap: 10px;
-  flex: 1;
+  gap: clamp(5px, 2vw, 10px);
+  /* sized to its buttons (an equal share let the 3-button group spill into the counter) */
+  flex: 0 0 auto;
   align-items: center;
 }
 
@@ -169,13 +181,14 @@ body::before {
   cursor:pointer;
   user-select:none;
   position: relative;
-  width: 44px;
-  height: 44px;
+  flex-shrink: 0;
+  width: clamp(36px, 10.5vw, 44px);
+  height: clamp(36px, 10.5vw, 44px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  border-radius: 14px;
+  font-size: clamp(17px, 4.8vw, 20px);
+  border-radius: clamp(12px, 3.4vw, 14px);
   background: var(--glass);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px);
@@ -210,17 +223,17 @@ body::before {
 
 /* The Counter Badge (1 من 20) */
 .zikr-index-counter {
-  font-size: 15px;
+  font-size: clamp(13px, 3.6vw, 15px);
   font-weight: 700;
   color: var(--text-primary);
   background: var(--glass);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  padding: 8px 18px;
+  padding: 8px clamp(10px, 3.5vw, 18px);
   border-radius: 22px;
   text-align: center;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   white-space: nowrap;
   letter-spacing: 0.3px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.10);
@@ -262,7 +275,8 @@ body::before {
   align-items:center;
   justify-content:flex-start;
   gap:14px;
-  padding: 4px 20px 170px;
+  /* --stack-h: the fixed controls + player + bottom inset, measured in script */
+  padding: 4px 16px calc(var(--stack-h, calc(70px + env(safe-area-inset-bottom))) + 12px);
   overflow-y:auto;
   position: relative;
   z-index: 1;
@@ -272,10 +286,8 @@ body::before {
 .zikr-container {
   width: 100%;
   max-width: 700px;
-  min-height: 280px;
-  height: 50vh;
-  max-height: 520px;
-  flex-grow: 1;
+  min-height: 300px;
+  flex: 1 1 auto;              /* fills everything between the top bar and the ring */
   background: var(--glass);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(20px);
@@ -333,6 +345,50 @@ body::before {
   margin: auto 0;
   width: 100%;
 }
+
+/* ===== فضل الذكر under the dhikr (tap to expand) ===== */
+.zikr-src{
+  margin:10px auto 4px; max-width:560px; width:100%; padding:8px 12px; border-radius:14px;
+  font-family:'Tajawal',sans-serif; font-size:.8rem; line-height:1.75; text-align:start; cursor:pointer;
+  background:var(--ambient); border:1px solid var(--glass-border); color:var(--text-secondary);
+}
+.zikr-src .zs-line{ display:flex; align-items:flex-start; gap:8px; }
+.zikr-src .zs-badge{ flex-shrink:0; padding:1px 9px; border-radius:999px; font-weight:800; font-size:.72rem;
+  background:var(--gold, var(--accent-main)); color:#1b1405; margin-top:2px; }
+.zikr-src .zs-text{ flex:1; min-width:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.zikr-src .zs-chev{ width:14px; height:14px; flex-shrink:0; margin-top:5px; fill:none; stroke:currentColor; stroke-width:2.2; transition:transform .2s; }
+.zikr-src .zs-more{ display:none; margin-top:4px; font-size:.72rem; opacity:.8; }
+.zikr-src.open .zs-more{ display:block; }
+.zikr-src.open .zs-text{ display:block; }
+.zikr-src.open .zs-chev{ transform:rotate(180deg); }
+
+/* small see-through zoom buttons on the card (pinch still works) */
+.zoom-btns{ position:absolute; top:8px; inset-inline-end:10px; z-index:3; display:flex; gap:6px; }
+.zoom-btns button{ width:30px; height:30px; border-radius:50%; border:1px solid var(--glass-border);
+  background:color-mix(in srgb, var(--glass) 55%, transparent); color:var(--text-secondary);
+  font:700 13px/1 'Tajawal',sans-serif; cursor:pointer; opacity:.6; padding:0; }
+.zoom-btns button:active{ transform:scale(.9); opacity:1; }
+.zoom-btns button svg{ width:17px; height:17px; display:block; margin:auto; fill:none; stroke:currentColor;
+  stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+/* auto-fit on: the text is sized to the card for every dhikr */
+.zoom-btns button.on{ opacity:1; color:var(--bg-surface); background:var(--accent-main); border-color:transparent; }
+
+/* reset this dhikr's count (shown once it has been counted) */
+.count-reset{ position:absolute; bottom:2px; inset-inline-start:-30px; z-index:3; width:32px; height:32px; border-radius:50%;
+  border:1px solid var(--glass-border); background:color-mix(in srgb, var(--glass) 70%, transparent);
+  color:var(--text-secondary); display:grid; place-items:center; cursor:pointer; padding:0; }
+.count-reset svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.count-reset[hidden]{ display:none; }
+
+/* all adhkar of the list done: small banner with "reset all" */
+.done-toast{ position:fixed; top:150px; left:50%; transform:translateX(-50%); z-index:60; white-space:nowrap; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 14px; border-radius:999px;
+  background:color-mix(in srgb, var(--glass) 90%, transparent); border:1px solid var(--glass-border);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); font-size:.85rem; font-weight:700;
+  box-shadow:0 8px 24px -10px rgba(0,0,0,.5); }
+.done-toast[hidden]{ display:none; }
+.done-toast button{ border:0; border-radius:999px; padding:6px 14px; font:700 .8rem 'Tajawal',sans-serif; cursor:pointer;
+  background:var(--accent-main); color:#fff; }
+.controls .btn:disabled{ opacity:.35; pointer-events:none; }
 
 /* ===== Circle styles ===== */
 .counter-anchor {
@@ -449,6 +505,8 @@ body::before {
   transition: margin-bottom 0.3s ease;
 }
 
+[dir="ltr"] .controls { flex-direction: row-reverse; }
+
 body.player-active .controls {
   margin-bottom: 0;             /* mini-player below provides the spacing */
 }
@@ -457,9 +515,6 @@ body.player-active .controls {
   transition: padding-bottom 0.3s ease;
 }
 
-body.player-active .page-wrapper {
-  padding-bottom: 230px;
-}
 
 .btn{
   padding:12px 20px;
@@ -925,7 +980,9 @@ body::after {
 @keyframes uiRise { from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
 .top-bar         { animation:uiRise .5s cubic-bezier(.22,1,.36,1) both; }
 .session-progress{ animation:uiRise .5s .05s cubic-bezier(.22,1,.36,1) both; }
-.counter-anchor  { animation:uiRise .55s .14s cubic-bezier(.22,1,.36,1) both; }
+/* backwards, not both: a transform left on the ring after the entrance made it a
+   separate layer, and Chrome cropped its glow into a visible square. */
+.counter-anchor  { animation:uiRise .55s .14s cubic-bezier(.22,1,.36,1) backwards; }
 .bottom-stack    { animation:uiRise .55s .2s cubic-bezier(.22,1,.36,1) both; }
 
 /* Counter badge → refined pill */
@@ -945,20 +1002,36 @@ body::after {
   font-family:'Amiri',serif; font-size:17px; line-height:1; color:var(--gold);
   opacity:.55; z-index:2; pointer-events:none;
 }
+/* a strip at the top of the card holds the ornament and A-/A+; the text scrolls below it */
+.zikr-container { padding-top:44px; }
 .zikr-scroll-area {
-  padding-top:16px;
-  -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
-          mask-image:linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
+  padding-top:4px;
+  -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 24px), transparent 100%);
+          mask-image:linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 24px), transparent 100%);
 }
 .zikr-text { line-height:2.5; letter-spacing:.2px; max-width:42ch; margin-inline:auto; }
 :root .zikr-text { text-shadow:0 1px 18px rgba(0,0,0,.35); }
 [data-theme="light"] .zikr-text, [data-theme="warm"] .zikr-text { text-shadow:none; }
 
 /* Hero counter ring */
-.counter-anchor { width:min(46vw,200px); height:min(46vw,200px); }
+.counter-anchor { width:min(32vw,132px); height:min(32vw,132px); }
+.count-number { font-size:clamp(24px, 6vw, 32px); }
 .bg-circle { stroke-width:9; opacity:.45; }
 .fg-circle { stroke:url(#ringGrad); stroke-width:9; filter:drop-shadow(0 0 7px var(--gold-soft)); }
-.progress-wrapper { box-shadow:0 0 90px -30px var(--gold); }
+/* Ring glow: a radial gradient that fades to nothing inside its own circle,
+   instead of a wide blurred box-shadow (which rendered with a square edge). */
+.progress-wrapper { box-shadow:none; }
+.counter-anchor::before {
+  content:''; position:absolute; inset:-38%; border-radius:50%; pointer-events:none; z-index:0;
+  /* halo: clear in the middle, strongest at the ring (≈57% of this radius) */
+  background:radial-gradient(circle closest-side,
+    transparent 38%,
+    color-mix(in srgb, var(--gold) 22%, transparent) 57%,
+    color-mix(in srgb, var(--gold) 8%, transparent) 76%,
+    transparent 100%);
+}
+/* let the ring's own drop-shadow extend past the SVG box instead of being cut square */
+.progress-wrapper svg { overflow:visible; }
 .progress-wrapper::after {           /* per-tap ripple */
   content:''; position:absolute; inset:5%; border-radius:50%;
   border:2px solid var(--gold); opacity:0; pointer-events:none;
@@ -987,7 +1060,72 @@ body::after {
   .top-bar, .session-progress, .counter-anchor, .bottom-stack,
   .progress-wrapper.tick::after, .progress-wrapper.tick .count-number { animation:none; }
 }
+/* ===== Touch targets (P1-3) =====
+   Small controls get an invisible 44×44 px tap area from a pseudo-element:
+   nothing moves or changes size on screen. Taps on a pseudo-element go to its
+   element, so handlers see the same event target as before. A control that is
+   already 44 px or larger gets no extra area (the min() resolves to 0). */
+.icon-btn { position: relative; }
+.icon-btn::before { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }   /* ::after is the "audio playing" dot */
+.zoom-btns button { position: relative; }
+.zoom-btns button::after { content: ""; position: absolute; inset: -8px -4px; }   /* only 6 px between A− and A+ */
+
+/* ===== Dhikr picker: the «1 من 31» badge opens a list of the whole set ===== */
+button.zikr-index-counter {
+  font-family: inherit; line-height: 1.25; cursor: pointer; position: relative;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: transform .15s ease, background .2s ease;
+}
+button.zikr-index-counter[hidden] { display: none; }
+button.zikr-index-counter:active { transform: scale(.95); }
+button.zikr-index-counter::before {   /* 44 px tall tap area, nothing moves */
+  content: ""; position: absolute; left: 0; right: 0;
+  top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px));
+}
+.zi-chev { width: 12px; height: 12px; flex: 0 0 auto; fill: none; stroke: var(--gold); stroke-width: 2.6;
+  stroke-linecap: round; stroke-linejoin: round; opacity: .9; margin-top: 1px; }
+
+.jump-sheet { padding: 20px 12px 8px; display: flex; flex-direction: column; overflow: hidden;
+  max-height: min(80vh, 720px); border-radius: 24px; }
+.jump-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 0 8px 4px; }
+.jump-head h2 { margin: 0; font-size: 19px; font-weight: 700; color: var(--text-primary); }
+.jump-sum { margin-top: 4px; font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.jump-head .close { margin: 0; border: none; padding: 0; flex: 0 0 auto; width: 40px; height: 40px; }
+.jump-meter { height: 4px; margin: 10px 8px 4px; border-radius: 999px; background: var(--accent-muted); overflow: hidden; }
+.jump-meter > div { height: 100%; width: 0; border-radius: inherit;
+  background: linear-gradient(90deg, var(--ring-a), var(--ring-b)); }
+.jump-list { list-style: none; margin: 0; padding: 8px 2px 8px; overflow-y: auto; overscroll-behavior: contain;
+  position: relative; display: flex; flex-direction: column; gap: 6px; }
+.jump-list::-webkit-scrollbar { width: 4px; }
+.jump-list::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 4px; }
+.jump-row { width: 100%; min-height: 58px; display: flex; align-items: center; gap: 12px; padding: 9px 12px;
+  border-radius: 16px; border: 1px solid transparent; cursor: pointer; font: inherit; text-align: start;
+  color: var(--text-primary); background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  transition: background .15s ease, transform .1s ease; }
+.jump-row:active { transform: scale(.985); }
+.jump-row.is-current { border-color: color-mix(in srgb, var(--accent-main) 65%, transparent);
+  background: color-mix(in srgb, var(--accent-main) 13%, transparent); }
+.jr-num { flex: 0 0 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent); }
+.jr-num svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.8;
+  stroke-linecap: round; stroke-linejoin: round; }
+.is-done .jr-num { color: var(--accent-main); background: color-mix(in srgb, var(--accent-main) 18%, transparent); }
+.is-current .jr-num { color: var(--bg-surface); background: var(--accent-main); }
+.jr-text { flex: 1; min-width: 0; font-family: 'Amiri', serif; font-size: 16px; line-height: 2.2; text-align: right;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.is-done:not(.is-current) .jr-text { color: var(--text-secondary); }
+.jr-count { flex: 0 0 auto; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--text-secondary); padding: 3px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent); }
+.jr-count:empty { display: none; }
+.jr-count.partial { color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); }
+.jr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .jump-row, button.zikr-index-counter { transition: none; } }
+
 </style>
+<link rel="stylesheet" href="../css/a11y.css">
 </head>
 
 <body>
@@ -998,12 +1136,13 @@ body::after {
     <div class="icon-btn" id="soundBtn" title="تشغيل الصوت" data-i18n-title="azkar_play_sound"><img src="../img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
   </div>
 
-  <div class="zikr-index-counter" id="zikrIndexCounter"></div>
+  <button type="button" class="zikr-index-counter" id="zikrIndexBtn" hidden onclick="openJump()" aria-haspopup="dialog">
+    <span id="zikrIndexCounter"></span>
+    <svg class="zi-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
 
   <div class="top-bar-group end">
-    <div class="icon-btn" onclick="openTranslation()" title="الترجمة" data-i18n-title="azkar_translation">
-      <div style="width:24px;height:24px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
-    </div>
+    <div class="icon-btn" onclick="shareZikrCard()" title="مشاركة كصورة" data-i18n-title="sc_title"><img src="../img/SVG/share.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
     <div class="icon-btn" onclick="openSettings()" title="الإعدادات" data-i18n-title="settings"><img src="../img/SVG/settings.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
   </div>
 </div>
@@ -1025,12 +1164,25 @@ body::after {
   </div>
 
   <div class="zikr-container fade-in" onclick="increment()">
+    <div class="zoom-btns" onclick="event.stopPropagation()">
+      <button type="button" onclick="zoomStep(-2)" aria-label="تصغير الخط" data-i18n-aria="azkar_zoom_out">A-</button>
+      <button type="button" onclick="zoomStep(2)" aria-label="تكبير الخط" data-i18n-aria="azkar_zoom_in">A+</button>
+      <button type="button" id="autoFitBtn" onclick="setAutoFit(!autoFit, true)" aria-pressed="false"
+              aria-label="ملاءمة الخط تلقائياً" data-i18n-aria="azkar_autofit" title="ملاءمة الخط تلقائياً" data-i18n-title="azkar_autofit">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5h4M16 4h4v4M20 15v4h-4M8 20H4v-4"/><path d="M9.5 15.5 12 8.5l2.5 7M10.3 13.3h3.4"/></svg>
+      </button>
+    </div>
     <div class="zikr-scroll-area">
       <div class="zikr-text" id="arabicText"></div>
+      <!-- فضل الذكر; tapping it expands the text (and must not count) -->
+      <div class="zikr-src" id="zikrSrc" hidden onclick="event.stopPropagation(); if (this.classList.toggle('open')) this.scrollIntoView({ block: 'nearest', behavior: 'smooth' })"></div>
     </div>
   </div>
 
   <div class="counter-anchor">
+    <button type="button" class="count-reset" id="countReset" hidden onclick="resetCurrent()" aria-label="إعادة العدّ" data-i18n-aria="azkar_reset" title="إعادة العدّ" data-i18n-title="azkar_reset">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </button>
     <div class="progress-wrapper" onclick="increment()">
       <svg viewBox="0 0 200 200">
         <defs>
@@ -1052,11 +1204,15 @@ body::after {
 
 </div>
 
+  <div class="done-toast" id="doneToast" hidden>
+    <span data-i18n="azkar_all_done">أتممت الأذكار، تقبّل الله</span>
+    <button type="button" onclick="resetAll()" data-i18n="azkar_reset_all">إعادة الكل</button>
+  </div>
 <div class="bottom-stack">
   <div class="controls">
-    <button class="btn" onclick="next()" data-i18n="azkar_next">التالي</button>
+    <button class="btn" id="nextBtn" onclick="next()" data-i18n="azkar_next">التالي</button>
     <button class="btn" id="autoBtn" onclick="toggleAuto()" data-i18n="azkar_auto">تلقائي</button>
-    <button class="btn" onclick="prev()" data-i18n="azkar_prev">السابق</button>
+    <button class="btn" id="prevBtn" onclick="prev()" data-i18n="azkar_prev">السابق</button>
   </div>
 
   <!-- Floating Mini Audio Player -->
@@ -1078,17 +1234,48 @@ body::after {
   </div>
 </div>
 
+<!-- Dhikr picker: opened from the «1 من 31» badge -->
+<div class="modal" id="jumpModal" onclick="if(event.target===this) closeJump()">
+  <div class="modal-content jump-sheet" role="dialog" aria-modal="true" aria-labelledby="jumpTitle">
+    <div class="jump-head">
+      <div>
+        <h2 id="jumpTitle" data-i18n="azkar_pick_title">اختر الذكر</h2>
+        <div class="jump-sum" id="jumpSummary"></div>
+      </div>
+      <button type="button" class="close" onclick="closeJump()" aria-label="إغلاق" data-i18n-aria="azkar_close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    </div>
+    <div class="jump-meter" aria-hidden="true"><div id="jumpMeterFill"></div></div>
+    <ol class="jump-list" id="jumpList"></ol>
+  </div>
+</div>
+
 <div class="modal" id="settingsModal" onclick="if(event.target===this) closeSettings()">
   <div class="modal-content">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <h2 style="margin:0;font-size:20px;font-weight:700;color:var(--text-primary);" data-i18n="settings">الإعدادات</h2>
-      <div class="close" onclick="closeSettings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+      <div class="close" style="margin:0" onclick="closeSettings()"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
+    </div>
+
+    <div class="settings-row">
+      <h3 data-i18n="azkar_translation">الترجمة</h3>
+      <button type="button" class="btn" id="translationBtn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="openTranslationFromSettings()">
+        <span aria-hidden="true" style="width:22px;height:22px;flex:0 0 auto;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></span>
+        <span data-i18n="azkar_translation_show">عرض ترجمة الذكر</span>
+      </button>
     </div>
 
     <div class="settings-row">
       <h3 data-i18n="azkar_font_size">حجم الخط</h3>
-      <input type="range" min="22" max="40" value="28" id="fontSizeSlider"
+      <input type="range" min="16" max="40" value="28" id="fontSizeSlider" aria-label="حجم الخط" data-i18n-aria="a11y_font_size"
              oninput="changeFontSize(this.value)">
+      <label class="toggle-row" style="margin-top:14px;">
+        <span data-i18n="azkar_autofit_label">ملاءمة حجم الخط تلقائياً ليظهر الذكر كاملاً في البطاقة</span>
+        <span class="switch">
+          <input type="checkbox" id="autoFitToggle" onchange="setAutoFit(this.checked, true)">
+          <span class="slider"></span>
+        </span>
+      </label>
+      <p class="settings-hint" data-i18n="azkar_autofit_hint">تغيير الحجم يدوياً (⁦A- / A+⁩ أو الشريط أو التكبير بإصبعين) يوقف الملاءمة التلقائية.</p>
     </div>
 
     <div class="settings-row">
@@ -1157,9 +1344,12 @@ body::after {
 <script src="../js/i18n.js"></script>
 <script>if (window.I18n) I18n.init();</script>
 <script src="../js/back-close.js"></script>
+<script src="../js/share-card.js"></script>
+<script src="../js/dhikr-stats.js"></script>
 <script>
 let currentIndex = 0;
 let currentCount = 0;
+let autoNextTimer = 0;   // the move to the next dhikr after the last tap
 let autoMode = false;
 let touchStartX = 0;
 let touchEndX = 0;
@@ -1191,6 +1381,67 @@ function loadAzkarData() {
 }
 loadAzkarData();
 
+/* --- فضل الذكر of the current zikr (assets/azkar.json: fadl, source) --- */
+function renderZikrSource(z) {
+  const el = document.getElementById('zikrSrc');
+  if (!el) return;
+  if (!z || !z.fadl) { el.hidden = true; return; }
+  const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  el.className = 'zikr-src';
+  el.innerHTML = `<span class="zs-line"><span class="zs-badge">${esc(t('azkar_fadl'))}</span><span class="zs-text">${esc(z.fadl)}</span>` +
+    `<svg class="zs-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>` +
+    (z.source ? `<span class="zs-more">${esc(z.source)}</span>` : '');
+  el.hidden = false;
+}
+
+/* --- Counts are kept for the rest of the day, per list (morning / night / …) --- */
+const COUNTS_KEY = 'azkar_counts_' + type;
+let savedCounts = {};
+try {
+  const c = JSON.parse(localStorage.getItem(COUNTS_KEY) || 'null');
+  if (c && c.date === new Date().toDateString()) savedCounts = c.counts || {};
+} catch (e) { /* private mode */ }
+function saveCounts() {
+  const today = new Date().toDateString();
+  try { localStorage.setItem(COUNTS_KEY, JSON.stringify({ date: today, counts: savedCounts })); } catch (e) { /* ignore */ }
+}
+function allDone() {
+  return !!azkarData && azkarData.every((z, i) => (savedCounts[i] || 0) >= z.count);
+}
+function syncCountUi() {
+  const r = document.getElementById('countReset');
+  if (r) r.hidden = !(currentCount > 0);
+  const dt = document.getElementById('doneToast');
+  if (dt) dt.hidden = !allDone();
+  const pb = document.getElementById('prevBtn'), nb = document.getElementById('nextBtn');
+  if (pb) pb.disabled = currentIndex <= 0;
+  if (nb) nb.disabled = !azkarData || currentIndex >= azkarData.length - 1;
+}
+function resetCurrent() {
+  currentCount = 0; delete savedCounts[currentIndex]; saveCounts();
+  updateProgress(); syncCountUi();
+}
+function resetAll() {
+  savedCounts = {}; saveCounts();
+  currentIndex = 0; loadZikr();
+}
+function zoomStep(d) {
+  const cur = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--zikr-size')) || 28;
+  const size = Math.max(FONT_MIN, Math.min(FONT_MAX, cur + d));
+  changeFontSize(size);
+  const slider = document.getElementById('fontSizeSlider');
+  if (slider) slider.value = size;
+}
+
+/* --- Share the current zikr as an image card --- */
+const CARD_TITLE_KEYS = { morning: 'card_morning', night: 'card_evening', sleeping: 'card_sleeping', salah: 'card_post_prayer', ruqia: 'sc_ruqia' };
+function shareZikrCard() {
+  const z = azkarData && azkarData[currentIndex];
+  if (!z || !window.ShareCard) return;
+  const key = CARD_TITLE_KEYS[type];
+  ShareCard.open({ text: z.arabic, translation: z.english, title: key ? t(key) : '', source: z.source ? z.source.split(' — ')[0] : '', repeat: z.count });
+}
+
 /* --- Image Modal for salah type --- */
 function openImageModal() {
   document.getElementById('posterFrame').src = `../pages/salah.html`;
@@ -1221,7 +1472,7 @@ let pinchInitialDistance = 0;
 let pinchInitialSize = 28;
 let isPinching = false;
 let multiTouchOccurred = false; // true if the current gesture ever used 2+ fingers
-const FONT_MIN = 22;
+const FONT_MIN = 16;
 const FONT_MAX = 40;
 
 function getDistance(t1, t2) {
@@ -1245,6 +1496,7 @@ swipeArea.addEventListener("touchstart", e => {
 
 swipeArea.addEventListener("touchmove", e => {
   if (isPinching && e.touches.length === 2) {
+    if (autoFit) setAutoFit(false, false);
     const dist = getDistance(e.touches[0], e.touches[1]);
     if (pinchInitialDistance > 0) {
       const scale = dist / pinchInitialDistance;
@@ -1296,17 +1548,25 @@ function loadZikr() {
   container.classList.add("fade-out");
 
   setTimeout(() => {
-    currentCount = 0;
+    currentCount = Math.min(savedCounts[currentIndex] || 0, azkarData && azkarData[currentIndex] ? azkarData[currentIndex].count : 0);
     if(azkarData && azkarData[currentIndex]){
         document.getElementById("arabicText").innerText = azkarData[currentIndex].arabic;
+        renderZikrSource(azkarData[currentIndex]);
+        fitZikrText();
         document.getElementById("englishText").innerText = azkarData[currentIndex].english;
 
         const currentNum = currentIndex + 1;
         const totalNum = azkarData.length;
-        document.getElementById("zikrIndexCounter").innerText = t('azkar_index_counter', { current: currentNum, total: totalNum });
+        const indexText = t('azkar_index_counter', { current: currentNum, total: totalNum });
+        document.getElementById("zikrIndexCounter").innerText = indexText;
+        const indexBtn = document.getElementById("zikrIndexBtn");
+        indexBtn.hidden = false;
+        indexBtn.setAttribute('aria-label', indexText + ' — ' + t('azkar_pick_open'));
+        indexBtn.title = t('azkar_pick_open');
         updateSessionProgress();
     }
     updateProgress();
+    syncCountUi();
 
     // --- السطر الجديد لإعادة التمرير إلى الأعلى ---
     document.querySelector(".zikr-scroll-area").scrollTop = 0;
@@ -1346,11 +1606,14 @@ function increment() {
   const target = azkarData[currentIndex].count;
   if (currentCount < target) {
     currentCount++;
+    savedCounts[currentIndex] = currentCount; saveCounts();
+    syncCountUi();
 
     // --- تحديث إحصائيات الأذكار لتعمل مع الصفحة الرئيسية ---
     checkDailyResetAzkar();
     let todayAzkar = parseInt(localStorage.getItem("azkar_today") || "0");
     localStorage.setItem("azkar_today", todayAzkar + 1);
+    if (window.DhikrStats) DhikrStats.sync();   // dated history for the weekly stats card
 
     let totalAzkar = parseInt(localStorage.getItem("total_azkar") || "0");
     localStorage.setItem("total_azkar", totalAzkar + 1);
@@ -1363,7 +1626,7 @@ function increment() {
         navigator.vibrate([30, 40, 60]);
       }
       triggerGlow();
-      setTimeout(next, 600);
+      if (currentIndex < azkarData.length - 1) autoNextTimer = setTimeout(next, 600);
     }
   }
 }
@@ -1398,6 +1661,64 @@ function prev() {
   }
 }
 
+/* --- Dhikr picker: every dhikr of the set with how far it is counted --- */
+const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function renderJumpList() {
+  const list = document.getElementById('jumpList');
+  const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let done = 0;
+  list.innerHTML = azkarData.map((z, i) => {
+    const target = z.count || 1;
+    const n = Math.min(savedCounts[i] || 0, target);
+    const isDone = n >= target;
+    if (isDone) done++;
+    const cls = 'jump-row' + (i === currentIndex ? ' is-current' : '') + (isDone ? ' is-done' : '');
+    const count = isDone ? '' : n > 0 ? `<span class="jr-count partial" dir="ltr">${n}/${target}</span>`
+      : target > 1 ? `<span class="jr-count" dir="ltr">×${target}</span>` : '';
+    const preview = String(z.arabic || '').replace(/\s+/g, ' ').trim();
+    return `<li><button type="button" class="${cls}" data-i="${i}"${i === currentIndex ? ' aria-current="true"' : ''}>` +
+      `<span class="jr-num">${isDone ? CHECK_SVG + `<span class="jr-sr">${i + 1} ${esc(t('azkar_pick_done'))}</span>` : i + 1}</span>` +
+      `<span class="jr-text" dir="rtl" lang="ar">${esc(preview)}</span>${count}</button></li>`;
+  }).join('');
+  document.getElementById('jumpSummary').textContent = t('azkar_pick_summary', { done, total: azkarData.length });
+  document.getElementById('jumpMeterFill').style.width = (done / azkarData.length * 100) + '%';
+}
+function openJump() {
+  if (!azkarData || !azkarData.length) return;
+  renderJumpList();
+  document.getElementById('jumpModal').classList.add('active');
+  if (window.BackClose) BackClose.opened(closeJump);
+  const list = document.getElementById('jumpList');
+  const row = list.querySelector('.is-current');
+  if (row) {
+    list.scrollTop = row.offsetTop - (list.clientHeight - row.offsetHeight) / 2;
+    row.focus({ preventScroll: true });
+  }
+}
+function closeJump() {
+  const modal = document.getElementById('jumpModal');
+  if (!modal.classList.contains('active')) return;
+  if (window.BackClose) BackClose.closed();
+  modal.classList.remove('active');
+  const btn = document.getElementById('zikrIndexBtn');
+  if (btn) btn.focus({ preventScroll: true });
+}
+function jumpTo(i) {
+  closeJump();
+  if (!azkarData || !azkarData[i]) return;
+  clearTimeout(autoNextTimer);
+  if (i === currentIndex) return;
+  currentIndex = i;
+  loadZikr();
+}
+document.getElementById('jumpList').addEventListener('click', e => {
+  const row = e.target.closest('.jump-row');
+  if (row) jumpTo(+row.dataset.i);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('jumpModal').classList.contains('active')) closeJump();
+});
+
 function toggleAuto() {
   autoMode = !autoMode;
   const autoBtn = document.getElementById("autoBtn");
@@ -1417,9 +1738,12 @@ function autoLoop() {
 }
 
 /* Translation Modal */
-function openTranslation() {
+// From Settings: the translation takes over its back-button entry (closed()+opened()
+// in one tick would strip the page's own history entry).
+function openTranslationFromSettings() {
+  document.getElementById("settingsModal").classList.remove("active");
   document.getElementById("translationModal").classList.add("active");
-  if (window.BackClose) BackClose.opened(closeTranslation);
+  if (window.BackClose) BackClose.swap(closeTranslation);
 }
 
 function closeTranslation() {
@@ -1434,6 +1758,8 @@ function openSettings() {
   const savedSize = localStorage.getItem("zikrFontSize") || 28;
   document.getElementById("fontSizeSlider").value = savedSize;
   document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
+  syncAutoFitUi();
+  if (autoFit) document.getElementById("fontSizeSlider").value = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--zikr-size'), 10) || savedSize;
   updateAudioSourceUI();
 }
 
@@ -1460,9 +1786,83 @@ function closeSettings() {
 }
 
 function changeFontSize(size) {
+  if (autoFit) setAutoFit(false, false);   // sized by hand: auto-fit off, keep going from here
   document.documentElement.style.setProperty('--zikr-size', size + 'px');
   localStorage.setItem("zikrFontSize", size);
 }
+
+/* --- Auto-fit: the largest text size at which the whole dhikr (and its
+   collapsed «فضل الذكر») fits the card without scrolling. Short adhkar
+   grow up to FONT_MAX, long ones shrink down to FONT_MIN and scroll only
+   if they still don't fit there. The size chosen by hand stays saved in
+   zikrFontSize and comes back when auto-fit is turned off. --- */
+let autoFit = false;
+try { autoFit = localStorage.getItem('zikrAutoFit') === '1'; } catch (e) { /* private mode */ }
+let lastFitBox = '';
+function syncAutoFitUi() {
+  const b = document.getElementById('autoFitBtn');
+  if (b) { b.classList.toggle('on', autoFit); b.setAttribute('aria-pressed', autoFit ? 'true' : 'false'); }
+  const tg = document.getElementById('autoFitToggle');
+  if (tg) tg.checked = autoFit;
+}
+function setAutoFit(on, restore) {
+  autoFit = !!on;
+  try { localStorage.setItem('zikrAutoFit', autoFit ? '1' : '0'); } catch (e) { /* ignore */ }
+  syncAutoFitUi();
+  if (autoFit) { lastFitBox = ''; fitZikrText(); }
+  else if (restore) {
+    let size = 28;
+    try { size = parseInt(localStorage.getItem('zikrFontSize'), 10) || 28; } catch (e) { /* ignore */ }
+    document.documentElement.style.setProperty('--zikr-size', size + 'px');
+    const slider = document.getElementById('fontSizeSlider');
+    if (slider) slider.value = size;
+  }
+}
+function fitZikrText() {
+  if (!autoFit) return;
+  const area = document.querySelector('.zikr-scroll-area');
+  const text = document.getElementById('arabicText');
+  const src = document.getElementById('zikrSrc');
+  if (!area || !text || !text.textContent.trim() || !area.clientHeight) return;
+  const root = document.documentElement;
+  const wasOpen = src && src.classList.contains('open');
+  if (wasOpen) src.classList.remove('open');                 // fit with «فضل الذكر» folded
+  const acs = getComputedStyle(area);
+  // keep clear of the scroll area's faded top and bottom edges
+  const avail = area.clientHeight - parseFloat(acs.paddingTop) - parseFloat(acs.paddingBottom) - 24;
+  let srcH = 0;
+  if (src && !src.hidden) { const c = getComputedStyle(src); srcH = src.offsetHeight + parseFloat(c.marginTop) + parseFloat(c.marginBottom); }
+  const fits = px => {
+    root.style.setProperty('--zikr-size', px + 'px');
+    return text.offsetHeight + srcH <= avail && text.scrollWidth <= text.clientWidth + 1;
+  };
+  let best;
+  if (fits(FONT_MAX)) best = FONT_MAX;
+  else if (!fits(FONT_MIN)) best = FONT_MIN;
+  else {
+    let lo = FONT_MIN, hi = FONT_MAX;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (fits(mid)) lo = mid; else hi = mid; }
+    best = lo;
+  }
+  root.style.setProperty('--zikr-size', best + 'px');
+  if (wasOpen) src.classList.add('open');
+  const slider = document.getElementById('fontSizeSlider');
+  if (slider) slider.value = best;
+  lastFitBox = area.clientWidth + 'x' + area.clientHeight;
+}
+// refit when the card changes size (rotation, the audio player opening) and once Amiri has loaded
+(function () {
+  const area = document.querySelector('.zikr-scroll-area');
+  if (area && window.ResizeObserver) {
+    new ResizeObserver(() => {
+      if (autoFit && area.clientWidth + 'x' + area.clientHeight !== lastFitBox) requestAnimationFrame(fitZikrText);
+    }).observe(area);
+  }
+  if (document.fonts) {
+    if (document.fonts.ready) document.fonts.ready.then(() => { lastFitBox = ''; fitZikrText(); });
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { lastFitBox = ''; fitZikrText(); });
+  }
+})();
 
 /* Theme Logic */
 function setTheme(mode) {
@@ -1844,6 +2244,7 @@ window.addEventListener("load", () => {
 
   // reflect saved swipe-nav preference in the settings toggle
   document.getElementById("swipeNavToggle").checked = swipeNavEnabled;
+  syncAutoFitUi();
 });
 </script>
 
@@ -1857,5 +2258,19 @@ window.addEventListener("load", () => {
     }
   </script>
   <script src="../js/sw-update.js"></script>
+<script src="../js/net-status.js"></script>
+<script>
+  // Keep the page's content clear of the fixed controls: their real height
+  // (buttons, mini player, bottom safe area) becomes --stack-h.
+  (function () {
+    const stack = document.querySelector('.bottom-stack');
+    if (!stack) return;
+    const set = () => document.documentElement.style.setProperty('--stack-h', Math.ceil(stack.getBoundingClientRect().height) + 'px');
+    set();
+    if (window.ResizeObserver) new ResizeObserver(set).observe(stack);
+    window.addEventListener('resize', set);
+  })();
+</script>
+<script src="../js/tap-a11y.js"></script>
 </body>
 </html>

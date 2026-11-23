@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
   <title>المصحف الشريف — تسميع متطور | زاد المسلم</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
   <meta name="description" content="اقرأ المصحف الشريف بـ 5 نسخ مختلفة: المدني، المدني الأخضر، المدني البني، المدني 1420، والملون بالتجويد. مع أداة تسميع متطورة لتتبع أخطاء الحفظ وتقييم التلاوة. Read the Holy Quran with 5 mushaf variants including Tajweed-colored, with Tasmee' recitation assessment.">
@@ -41,14 +42,15 @@
   <link rel="icon" href="../icons/icon-192.png">
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#FAF6EE">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/fonts.css">
   <link rel="stylesheet" href="../css/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script src="../js/vendor/sql-wasm.js"></script>
   <script src="../js/quranpages.data.js"></script>
   <script src="../js/medina2.data.js"></script>
 
   <link rel="stylesheet" href="../css/quran-v4.css">
   <link rel="stylesheet" href="../css/tasmee-pro-v2.css">
+<link rel="stylesheet" href="../css/a11y.css">
 </head>
 <body>
 
@@ -1527,6 +1529,21 @@
     <!-- Hidden link for variant switching -->
   <a id="quranTextLink" href="quran-text.html" style="display:none"></a>
 
+  <!-- ===== OFFER TO SAVE THE MUSHAF (after a few page turns, js/quran/download.js) ===== -->
+  <div id="dlOffer" class="dl-offer" role="region" aria-label="حفظ المصحف للقراءة دون اتصال">
+    <div class="dl-offer-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </div>
+    <div class="dl-offer-body">
+      <div class="dl-offer-title">اقرأ المصحف دون اتصال</div>
+      <div class="dl-offer-sub">احفظ صفحاته على جهازك</div>
+    </div>
+    <button type="button" class="dl-offer-go" onclick="dlOfferAccept()">احفظ</button>
+    <button type="button" class="dl-offer-later" onclick="dlOfferLater()" aria-label="لاحقاً">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
   <!-- ===== DOWNLOAD COMPLETION TOAST ===== -->
   <div id="dlCompleteToast">
     <div class="dl-toast-inner">
@@ -1539,7 +1556,7 @@
         <div class="dl-toast-title">تمّ حفظ المصحف بنجاح <img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></div>
         <div class="dl-toast-sub" id="dlToastSub"></div>
       </div>
-      <button class="dl-toast-x" onclick="hideDlCompleteToast()">
+      <button class="dl-toast-x" onclick="hideDlCompleteToast()" aria-label="إغلاق">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
@@ -1549,5 +1566,7 @@
   </div>
 
   <script src="../js/svg-injector.js"></script>
+<script src="../js/net-status.js"></script>
+<script src="../js/tap-a11y.js"></script>
 </body>
 </html>

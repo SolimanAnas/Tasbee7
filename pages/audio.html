@@ -2,7 +2,51 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint: the theme was applied
+// in the load event (applySettingsUI), so the page showed its default theme (and right-to-left) first,
+// then switched. Same rule as the page's own code below, which still runs.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  t = t || 'light';
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
+<script>
+// Player layout before the first paint: the wide two-column layout on wide,
+// short landscape screens (car head units, tablets, phones held sideways); the
+// header button switches between it and the vertical layout (playerLayout:
+// "wide" / "tall", shared by the audio and radio pages). Two columns need at
+// least 700 px of width.
+(function () {
+  var d = document.documentElement, KEY = 'playerLayout', mode = null;
+  try { mode = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+  var auto = matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
+  var fits = function () { return innerWidth >= 700; };
+  function apply() {
+    var wide = mode === 'wide' ? fits() : mode === 'tall' ? false : auto.matches;
+    if (d.classList.contains('player-wide') === wide) return;
+    d.classList.toggle('player-wide', wide);
+    try { window.dispatchEvent(new Event('playerlayoutchange')); } catch (e) { /* old browsers */ }
+  }
+  // the layout button only on big screens (foldables, tablets, car head units,
+  // computers): by the device's screen, so turning a phone doesn't change it
+  var sw = screen.width || innerWidth, sh = screen.height || innerHeight;
+  d.classList.toggle('big-screen', Math.min(sw, sh) >= 480 && Math.max(sw, sh) >= 700);
+  apply();
+  if (auto.addEventListener) auto.addEventListener('change', apply); else if (auto.addListener) auto.addListener(apply);
+  window.addEventListener('resize', apply);
+  window.zadLayout = {
+    isWide: function () { return d.classList.contains('player-wide'); },
+    fits: fits,
+    set: function (m) { mode = m; try { localStorage.setItem(KEY, m); } catch (e) { /* ignore */ } apply(); }
+  };
+})();
+</script>
+<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#0F172A">
 <title>القرآن الكريم — استمع لأكثر من 200 قارئ | زاد المسلم</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
@@ -19,8 +63,7 @@
 <meta property="og:site_name" content="زاد المسلم">
 <meta property="twitter:card" content="summary_large_image">
 <link rel="icon" href="../icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/fonts.css">
 <style>
 /* ============================================================
    THEME VARIABLES
@@ -332,6 +375,11 @@ input[type=range]::-webkit-slider-thumb{
 }
 input[type=range]:active::-webkit-slider-thumb{transform:scale(1.25);box-shadow:0 0 0 5px var(--accent-muted)}
 input[type=range]::-moz-range-track{height:5px;border-radius:4px;background:var(--track-bg)}
+/* the seek bar: played and buffered painted on the track (from --pct / --buf), so
+   a taller slider (a bigger touch area) never paints a block behind the bar */
+#progress{--pct:0%;--buf:0%}
+#progress::-webkit-slider-runnable-track{background:linear-gradient(to right,var(--accent-main) 0 var(--pct),rgba(255,255,255,.35) var(--pct) var(--buf),var(--track-bg) var(--buf) 100%)}
+#progress::-moz-range-track{background:linear-gradient(to right,var(--accent-main) 0 var(--pct),rgba(255,255,255,.35) var(--pct) var(--buf),var(--track-bg) var(--buf) 100%)}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent-main);border:none;box-shadow:0 0 0 3px var(--accent-muted)}
 
 /* ============================================================
@@ -740,6 +788,11 @@ body.is-buffering .buffer-ring{opacity:1;animation:bufSpin .8s linear infinite}
 .sel-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sel-sub{font-size:12px;font-weight:600;color:var(--text-secondary)}
 .selection-item.active .sel-sub{color:rgba(255,255,255,.85)}
+/* saved for offline listening: a small floppy-disk mark at the row's end (far left in Arabic) */
+.sel-saved{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-muted);color:var(--accent-main)}
+.sel-saved svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.selection-item.active .sel-saved{background:rgba(255,255,255,.22);color:#fff}
 .sel-eq{flex:none;display:none;align-items:flex-end;gap:2px;height:16px}
 .sel-eq i{width:3px;background:currentColor;border-radius:2px;height:40%;animation:eqBar .9s ease-in-out infinite}
 .sel-eq i:nth-child(2){animation-delay:.2s}.sel-eq i:nth-child(3){animation-delay:.4s}
@@ -758,6 +811,209 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 }
 
 /* Install prompt rendered by ../js/pwa-install.js */
+/* ===== Touch targets (P1-3) =====
+   Small controls get an invisible 44×44 px tap area from a pseudo-element:
+   nothing moves or changes size on screen. Taps on a pseudo-element go to its
+   element, so handlers see the same event target as before. A control that is
+   already 44 px or larger gets no extra area (the min() resolves to 0). */
+.icon-btn, .action-btn, .track-error-retry { position: relative; }
+.icon-btn::after, .action-btn::after, .track-error-retry::after { content: ""; position: absolute; top: min(0px, calc(50% - 22px)); bottom: min(0px, calc(50% - 22px)); left: min(0px, calc(50% - 22px)); right: min(0px, calc(50% - 22px)); }
+
+
+/* ===== Full mushaf download sheet (js/audio-offline.js) ===== */
+.offl-card{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:18px;background:var(--list-hover);border:1px solid var(--glass-border)}
+.offl-card.is-done{border-color:var(--accent-main)}
+.offl-head{display:flex;align-items:center;gap:12px}
+.offl-photo{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 0 3px var(--accent-muted)}
+.offl-who{flex:1;min-width:0}
+.offl-name{font-size:16px;font-weight:800;color:var(--text-primary);line-height:1.35}
+.offl-meta{font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:2px}
+.offl-check{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent-main);display:grid;place-items:center}
+.offl-check svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.offl-bar{height:6px;border-radius:6px;background:var(--track-bg);overflow:hidden}
+.offl-bar i{display:block;height:100%;background:var(--accent-main);border-radius:6px;transition:width .4s ease}
+.offl-status{font-size:13px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums}
+.offl-note{font-size:12.5px;font-weight:600;line-height:1.55;color:var(--text-secondary)}
+.offl-note.warn{color:#b45309;background:rgba(245,158,11,.12);border-radius:12px;padding:9px 12px}
+[data-theme="dark"] .offl-note.warn{color:#fbbf24}
+.offl-actions{display:flex;gap:8px}
+.offl-btn{flex:1;min-height:46px;border:none;border-radius:14px;background:var(--accent-main);color:#fff;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer}
+.offl-btn:disabled{opacity:.45;cursor:default}
+.offl-btn.ghost{flex:0 0 auto;padding:0 18px;background:transparent;color:var(--danger);border:1px solid var(--glass-border)}
+.offl-btn:active{transform:scale(.98)}
+.offl-hint{font-size:11.5px;font-weight:600;color:var(--text-secondary)}
+.offl-row{display:flex;align-items:center;gap:6px;border-radius:14px;background:var(--list-hover);border:1px solid var(--glass-border)}
+.offl-row.current{border-color:var(--accent-main)}
+.offl-row-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;background:none;border:none;font:inherit;text-align:start;cursor:pointer;color:var(--text-primary)}
+.offl-row-name{font-size:14.5px;font-weight:700}
+.offl-row-sub{font-size:12px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.offl-row-del{flex:none;width:44px;height:44px;margin-inline-end:4px;border:none;border-radius:12px;background:none;color:var(--danger);display:grid;place-items:center;cursor:pointer}
+.offl-row-del svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.offl-empty{font-size:13px;color:var(--text-secondary);padding:6px 2px}
+
+/* ===== Full mushaf download: card under the selectors ===== */
+.offl-entry{grid-column:1 / -1}
+.offl-entry-icon{position:relative;flex:none;width:40px;height:40px;display:grid;place-items:center}
+.offl-entry-icon>svg{grid-area:1/1}
+.offl-entry-ring{width:40px;height:40px;transform:rotate(-90deg)}
+[dir="rtl"] .offl-entry-ring{transform:scaleX(-1) rotate(-90deg)}
+.offl-entry-ring circle{fill:none;stroke-width:3}
+.offl-entry-ring .track{stroke:var(--accent-muted)}
+.offl-entry-ring .fill{stroke:var(--accent-main);stroke-linecap:round;stroke-dasharray:106.8;stroke-dashoffset:106.8;transition:stroke-dashoffset .4s ease}
+.offl-entry-dl,.offl-entry-ok{width:18px;height:18px;fill:none;stroke:var(--accent-main);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.offl-entry-ok{display:none;stroke:#fff;stroke-width:3}
+.offl-entry[data-state="idle"] .offl-entry-icon{border-radius:50%;background:var(--accent-main)}
+.offl-entry[data-state="idle"] .offl-entry-ring{display:none}
+.offl-entry[data-state="idle"] .offl-entry-dl{stroke:#fff}
+.offl-entry[data-state="done"] .offl-entry-icon{border-radius:50%;background:var(--accent-main)}
+.offl-entry[data-state="done"] .offl-entry-ring,.offl-entry[data-state="done"] .offl-entry-dl{display:none}
+.offl-entry[data-state="done"] .offl-entry-ok{display:block}
+.offl-entry[data-state="running"] .offl-entry-dl{animation:offlBob 1.2s ease-in-out infinite}
+@keyframes offlBob{50%{transform:translateY(2px)}}
+@media (prefers-reduced-motion:reduce){.offl-entry[data-state="running"] .offl-entry-dl{animation:none}}
+.offl-entry .sel-value{font-size:14px}
+/* per-surah progress in the sheet */
+.offl-files{display:flex;flex-direction:column;gap:8px}
+.offl-file{display:flex;flex-direction:column;gap:4px}
+.offl-file-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;font-weight:700;color:var(--text-primary)}
+.offl-file-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.offl-file-pct{flex:none;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.offl-file-bar{height:4px;border-radius:4px;background:var(--track-bg);overflow:hidden}
+.offl-file-bar i{display:block;height:100%;background:var(--accent-main);opacity:.75;border-radius:4px;transition:width .25s linear}
+
+/* ============================================================
+   LANDSCAPE — wide, short screens: car head units (800×480 to
+   1920×720), tablets and phones held sideways. One screen, no
+   scrolling, big targets. The player card splits in two balanced
+   columns with a line between: the title, the progress and the
+   controls on the reading side (the transport first, the secondary
+   actions below a clear gap), the art large in the other column
+   with the reciter under it; the pickers sit in one row under the
+   card, each an icon tile, a label and value, and a chevron.
+   ============================================================ */
+.hero-side{display:contents}   /* phones: the card stays one column */
+.layout-btn[aria-pressed="true"]{color:var(--accent-main)}
+html:not(.big-screen) .layout-btn{display:none}   /* regular phones: no layout button */
+.art-caption,.sel-icon,.offl-entry .sel-arrow{display:none}
+/* the wide layout: html.player-wide (set before the first paint: by the screen
+   shape, or by the header button — see the script in <head>) */
+  html.player-wide body{
+    padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  }
+  html.player-wide .app{
+    max-width:1400px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.8vh,16px);
+  }
+  html.player-wide .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
+  html.player-wide .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
+  html.player-wide .header .icon-btn{min-width:48px;min-height:48px}
+  html.player-wide .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
+  /* the translate icon is a masked div sized inline */
+  html.player-wide .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
+
+  /* two balanced columns: the controls on the reading side, the art beside them */
+  html.player-wide .hero-card{
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
+  }
+  html.player-wide .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
+  /* the controls' parts sit on the card's own grid: title, transport and the
+     secondary bar beside the art; the seek bar along the bottom, under both
+     columns (the error message takes its place when a recitation can't load) */
+  html.player-wide .hero-card{grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr) auto}
+  html.player-wide .hero-controls{display:contents}
+  html.player-wide .track-info{grid-column:1;grid-row:2;justify-self:center;width:100%}
+  html.player-wide .controls-main{grid-column:1;grid-row:3}
+  html.player-wide .controls-secondary{grid-column:1;grid-row:4;justify-self:center;width:100%}
+  html.player-wide .progress-section,html.player-wide .track-error{grid-column:1 / -1;grid-row:6;justify-self:center}
+  html.player-wide .track-error{margin-top:clamp(8px,2vh,20px)!important}
+  html.player-wide .hero-now{grid-column:2;grid-row:1 / 6;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
+  html.player-wide .now-playing-badge{position:absolute;top:clamp(10px,2vh,18px);inset-inline-end:clamp(14px,2vw,24px);margin:0;z-index:3;
+    font-size:clamp(11px,2vh,15px);padding:clamp(4px,.8vh,7px) clamp(11px,1.6vw,16px)}
+  html.player-wide .now-playing-badge .badge-dot{width:clamp(6px,1.1vh,9px);height:clamp(6px,1.1vh,9px)}
+
+  /* the art: as large as its column and the height allow, centred with the reciter under it */
+  html.player-wide .mandala-container{--art:min(clamp(140px,calc(46vh - 24px),340px),30vw);width:var(--art);height:var(--art);margin:0 auto}
+  html.player-wide .m-album-wrap{width:calc(var(--art) * .913);height:calc(var(--art) * .913)}
+  html.player-wide .art-caption{display:block;max-width:100%;margin-top:clamp(8px,2.2vh,20px);text-align:center;
+    font-size:clamp(14px,2.7vh,20px);font-weight:600;color:var(--accent-main);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* the title leads: large and bold, the reciter clearly secondary under it */
+  html.player-wide .track-info{margin:0 0 clamp(12px,3vh,28px);min-height:0}
+  html.player-wide #nowSurah{font-size:clamp(1.8rem,7vh,3.6rem);font-weight:700;margin:0;
+    white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+  html.player-wide #nowReciter{font-size:clamp(13px,2.5vh,19px);font-weight:600;opacity:.9;margin-top:clamp(2px,.7vh,8px)}
+
+  /* primary: the progress and the transport, one group */
+  html.player-wide .track-error{margin:0;padding:6px 12px;font-size:15px}
+  html.player-wide .progress-section{margin:clamp(8px,2.2vh,22px) 0 0;width:100%}
+  /* a recitation that can't load: its message takes the progress bar's place (00:00 then) */
+  html.player-wide .track-error:not([hidden]) ~ .progress-section{display:none}
+  html.player-wide .time{font-size:clamp(13px,2.1vh,16px);width:58px}
+  html.player-wide .progress-section input[type=range]{height:28px}
+  html.player-wide .progress-section input[type=range]::-webkit-slider-runnable-track{height:8px}
+  html.player-wide .progress-section input[type=range]::-webkit-slider-thumb{width:24px;height:24px;margin-top:-8px}
+  html.player-wide .progress-section input[type=range]::-moz-range-track{height:8px}
+  html.player-wide .progress-section input[type=range]::-moz-range-thumb{width:24px;height:24px}
+  html.player-wide .controls-main{margin:clamp(6px,1.6vh,16px) 0 0;gap:clamp(24px,5vw,64px)}
+  html.player-wide .play-pause-btn{width:clamp(72px,16vh,116px);height:clamp(72px,16vh,116px)}
+  html.player-wide .play-pause-btn svg{width:clamp(30px,5.4vh,42px);height:clamp(30px,5.4vh,42px)}
+  html.player-wide .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
+  html.player-wide .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
+
+  /* secondary: below a clear gap, lighter — repeat · download · favourite · shuffle · speed in equal parts */
+  html.player-wide .controls-secondary{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+    margin:clamp(12px,3.2vh,34px) 0 0;padding:clamp(2px,.6vh,6px) 6px;max-width:600px;
+    background:rgba(var(--accent-rgb),.04);border-radius:clamp(14px,2.4vh,20px)}
+  html.player-wide .controls-secondary .action-btn{position:relative;width:100%;height:clamp(44px,8vh,60px);border-radius:12px}
+  html.player-wide .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
+    border-inline-start:1px solid var(--glass-border)}
+  html.player-wide .action-btn svg{width:clamp(21px,3.6vh,26px);height:clamp(21px,3.6vh,26px)}
+  html.player-wide #speedBtn{font-size:clamp(14px,2.5vh,18px)}
+
+  /* the pickers: one row, each an icon tile, a label and value, and a chevron */
+  html.player-wide .sel-row{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:none;gap:clamp(8px,1.4vw,16px)}
+  html.player-wide .offl-entry{grid-column:auto}
+  html.player-wide .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
+  html.player-wide .sel-icon,html.player-wide .offl-entry-icon,html.player-wide .offl-entry-ring{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px)}
+  html.player-wide .sel-icon{display:flex;flex:none;align-items:center;justify-content:center;border-radius:clamp(10px,1.8vh,14px);
+    background:var(--accent-muted);border:1px solid rgba(var(--accent-rgb),.2);color:var(--accent-main)}
+  html.player-wide .sel-icon svg{width:52%;height:52%}
+  html.player-wide .offl-entry-icon{order:-1}                      /* its tile at the start, like the others */
+  html.player-wide .offl-entry .sel-arrow{display:block}
+  html.player-wide .sel-arrow{width:clamp(15px,2.6vh,20px);height:clamp(15px,2.6vh,20px);opacity:.6}
+  html.player-wide .sel-label{font-size:clamp(12px,2.1vh,15px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.player-wide .sel-value,html.player-wide .offl-entry .sel-value{font-size:clamp(16px,3vh,22px)}
+  html.player-wide .sel-value-wrap{line-height:1.5;min-height:1.5em}
+  html.player-wide .offl-entry-dl,html.player-wide .offl-entry-ok{width:clamp(18px,3.4vh,24px);height:clamp(18px,3.4vh,24px)}
+
+  /* lists open as a centred panel, not across the whole wide screen */
+  html.player-wide .bottom-sheet{width:min(100%,760px);margin-inline:auto}
+
+/* phones held sideways (≈360–440 px tall): the same layout, tighter */
+@media (max-height:440px){
+  html.player-wide body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+  html.player-wide .app{gap:5px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
+  html.player-wide .header{padding:2px 10px}
+  html.player-wide .header .icon-btn{min-width:42px;min-height:42px}
+  html.player-wide .hero-card{padding:6px 16px}
+  html.player-wide .mandala-container{--art:min(clamp(110px,calc(40vh - 8px),300px),28vw)}
+  html.player-wide .track-info{margin-bottom:6px}
+  html.player-wide #nowSurah{font-size:1.45rem}
+  html.player-wide #nowReciter,html.player-wide .art-caption{font-size:13px}
+  html.player-wide .track-error{padding:4px 10px;font-size:13px}
+  html.player-wide .progress-section input[type=range]{height:22px}
+  html.player-wide .progress-section{margin-top:3px}
+  html.player-wide .track-error{margin-top:3px!important}
+  html.player-wide .controls-main{margin-top:2px}
+  html.player-wide .play-pause-btn{width:62px;height:62px}
+  html.player-wide .skip-btn{width:48px;height:48px}
+  html.player-wide .controls-secondary{margin-top:6px;padding:2px 6px}
+  html.player-wide .controls-secondary .action-btn{height:44px}
+  html.player-wide .sel-card{min-height:50px;padding:4px 12px}
+  html.player-wide .sel-icon,html.player-wide .offl-entry-icon,html.player-wide .offl-entry-ring{width:34px;height:34px}
+}
 </style>
 <script type="application/ld+json">
 {
@@ -790,6 +1046,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   ]
 }
 </script>
+<link rel="stylesheet" href="../css/a11y.css">
 </head>
 <body>
 
@@ -822,10 +1079,13 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     </button>
     <div class="header-title" data-i18n="audio_header">الاستماع للقرآن</div>
     <div style="display:flex;gap:2px">
+      <button class="icon-btn layout-btn" id="layoutBtn" onclick="haptic();toggleLayout()" aria-pressed="false" aria-label="العرض الأفقي" title="العرض الأفقي" data-i18n-aria="player_layout_wide" data-i18n-title="player_layout_wide">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7.5" width="11" height="14.5" rx="2"/><line x1="7.5" y1="18.5" x2="9.5" y2="18.5"/><path d="M13 2.5a7.5 7.5 0 0 1 7.5 7.5"/><path d="M18.3 7.8l2.2 2.2 2.2-2.2"/></svg>
+      </button>
       <button class="icon-btn" onclick="haptic();I18n.openLangSheet()" aria-label="Language">
         <div style="width:22px;height:22px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
       </button>
-      <button class="icon-btn" onclick="haptic();openSheet('settingsSheet',true)">
+      <button class="icon-btn" onclick="haptic();openSheet('settingsSheet',true)" aria-label="الإعدادات" data-i18n-aria="settings">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </div>
@@ -840,6 +1100,8 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       <span>جارٍ التشغيل</span>
     </div>
 
+    <!-- two halves: side by side on wide landscape screens, a plain column otherwise (display: contents) -->
+    <div class="hero-side hero-now">
     <!-- Mandala Visual -->
     <div class="mandala-container" id="mandalaContainer">
       <div class="mandala-glow"></div>
@@ -862,7 +1124,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 
       <!-- Album art (rotates when playing) -->
       <div class="m-album-wrap" id="mandalaAlbum">
-        <img class="m-album" id="albumArt" src="../images/album.png" alt="">
+        <img class="m-album" id="albumArt" src="../images/album.png" alt="" decoding="async">
       </div>
 
       <!-- Waveform bars (visible when playing) -->
@@ -874,6 +1136,11 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       </div>
     </div>
 
+    <!-- the reciter under the art (wide landscape screens only; a copy of #nowReciter) -->
+    <div class="art-caption" aria-hidden="true"></div>
+    </div>
+    <div class="hero-side hero-controls">
+
     <!-- Track Info -->
     <div class="track-info">
       <div class="hero-surah-wrap">
@@ -881,6 +1148,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
       </div>
       <div id="nowReciter">—</div>
     </div>
+
 
     <!-- Inline track error (replaces the old silent auto-skip) -->
     <div class="track-error" id="trackError" role="alert" hidden>
@@ -893,7 +1161,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     <div class="progress-section">
       <div class="progress-container">
         <span class="time" id="currentTime">00:00</span>
-        <input type="range" id="progress" value="0" min="0" max="100" step="0.1">
+        <input type="range" id="progress" value="0" min="0" max="100" step="0.1" aria-label="موضع التلاوة" data-i18n-aria="a11y_seek">
         <span class="time" id="durationTime">00:00</span>
       </div>
     </div>
@@ -926,17 +1194,19 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
       <button class="action-btn" id="shuffleBtn" onclick="haptic();toggleShuffle()" title="عشوائي" aria-label="عشوائي">
-        <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        <svg viewBox="0 0 24 24"><!-- shuffle 🔀: two arrows swap lanes (one passes under) and both point on --><path d="M2 16.5h3C9.6 16.5 10.4 7.5 15 7.5h6"/><path d="M18 4.5l3 3-3 3"/><path d="M2 7.5h3c1.47 0 2.55.92 3.5 2.17"/><path d="M11.5 14.33c.95 1.25 2.03 2.17 3.5 2.17h6"/><path d="M18 13.5l3 3-3 3"/></svg>
       </button>
       <button class="action-btn" id="speedBtn" onclick="haptic();toggleSpeed()" aria-label="سرعة التلاوة">1x</button>
+    </div>
     </div>
 
   </section>
 
   <!-- ── SELECTION ROW ── -->
   <div class="sel-row">
-    <!-- Reciter Card -->
+    <!-- Reciter Card (the icon tiles show on wide landscape screens) -->
     <div class="sel-card card" role="button" tabindex="0" onclick="haptic();openReciterSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openReciterSheet()}">
+      <span class="sel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><line x1="12" y1="17.5" x2="12" y2="21.5"/><line x1="8.5" y1="21.5" x2="15.5" y2="21.5"/></svg></span>
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_reciter">القارئ</span>
         <div class="sel-value-wrap"><span class="sel-value" id="reciterSelectBtn" data-i18n="loading">جاري...</span></div>
@@ -945,11 +1215,26 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     </div>
     <!-- Surah Card -->
     <div class="sel-card card" role="button" tabindex="0" onclick="haptic();openJuzSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openJuzSheet()}">
+      <span class="sel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h6a3.5 3.5 0 0 1 3.5 3.5v12a2.5 2.5 0 0 0-2.5-2.5h-7z"/><path d="M21.5 4.5h-6A3.5 3.5 0 0 0 12 8v12a2.5 2.5 0 0 1 2.5-2.5h7z"/></svg></span>
       <div class="sel-text">
         <span class="sel-label" data-i18n="audio_choose_surah">السورة</span>
         <div class="sel-value-wrap"><span class="sel-value" id="juzSelectBtn" data-i18n="loading">جاري...</span></div>
       </div>
       <svg class="sel-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <!-- Full mushaf download for the current reciter (js/audio-offline.js) -->
+    <div class="sel-card card offl-entry" id="offlineCard" role="button" tabindex="0" data-state="idle"
+         onclick="haptic();AudioOffline.openSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();AudioOffline.openSheet()}">
+      <div class="sel-text">
+        <span class="sel-label" data-i18n="offl_card_label">للاستماع دون اتصال</span>
+        <div class="sel-value-wrap"><span class="sel-value" id="offlineCardText" data-i18n="offl_title">تحميل المصحف كاملاً</span></div>
+      </div>
+      <span class="offl-entry-icon" aria-hidden="true">
+        <svg class="offl-entry-ring" viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="17"/><circle class="fill" id="offlineCardRing" cx="20" cy="20" r="17"/></svg>
+        <svg class="offl-entry-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg class="offl-entry-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <svg class="sel-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
   </div>
 
@@ -964,7 +1249,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
 <div id="selectionSheet" class="bottom-sheet">
   <div class="sheet-header">
     <h2 id="selectionSheetTitle">العنوان</h2>
-    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px">
+    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px" aria-label="إغلاق" data-i18n-aria="close">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -981,7 +1266,7 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   <div class="drag-handle"></div>
   <div class="sheet-header">
     <h2 data-i18n="settings">الإعدادات</h2>
-    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px">
+    <button class="icon-btn" onclick="closeAllSheets()" style="width:36px;height:36px" aria-label="إغلاق" data-i18n-aria="close">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -1040,6 +1325,16 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
     <!-- ── TOOLS ── -->
     <div class="settings-section">
       <div class="settings-section-label">أدوات</div>
+      <div class="settings-row" id="offlineRow" onclick="haptic();AudioOffline.openSheet()">
+        <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:#10b981">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="settings-row-content">
+          <div class="settings-row-title" data-i18n="offl_title">تحميل المصحف كاملاً</div>
+          <div class="settings-row-sub" id="offlineRowSub">احفظ تلاوة كاملة للاستماع دون اتصال</div>
+        </div>
+        <svg class="settings-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
       <div class="settings-row" onclick="haptic();openSheet('timerSheet',false)">
         <div class="settings-row-icon" style="background:rgba(16,185,129,.11);color:#10b981">
           <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -1089,11 +1384,23 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
   </div>
 </div>
 
+<!-- Full mushaf download (js/audio-offline.js renders the body) -->
+<div id="offlineSheet" class="bottom-sheet">
+  <div class="drag-handle"></div>
+  <div class="sheet-header">
+    <h2 data-i18n="offl_title">تحميل المصحف كاملاً</h2>
+    <button class="icon-btn" onclick="openSheet('settingsSheet',true)" style="width:36px;height:36px" aria-label="إغلاق" data-i18n-aria="close">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="settings-body" id="offlineBody"></div>
+</div>
+
 <!-- Sleep Timer Sheet -->
 <div id="timerSheet" class="bottom-sheet">
   <div class="sheet-header">
     <h2 data-i18n="audio_sleep_title">مؤقت النوم</h2>
-    <button class="icon-btn" onclick="openSheet('settingsSheet',true)" style="width:36px;height:36px">
+    <button class="icon-btn" onclick="openSheet('settingsSheet',true)" style="width:36px;height:36px" aria-label="الإعدادات" data-i18n-aria="settings">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -1117,13 +1424,13 @@ body.is-playing .selection-item.active .sel-eq{display:flex}
         <button class="timer-preset-btn" onclick="haptic();setPresetTimer(30)"><span>30</span><small>min</small></button>
       </div>
       <div style="display:flex;gap:18px;align-items:center;margin-top:8px">
-        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();cancelSleepTimer()">
+        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();cancelSleepTimer()" aria-label="إلغاء المؤقت" data-i18n-aria="radio_sleep_cancel">
           <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
         </button>
         <button class="play-pause-btn" style="width:68px;height:68px" onclick="haptic();startCustomTimer()">
           <svg viewBox="0 0 24 24" width="28" fill="currentColor" id="timerPlayIcon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </button>
-        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();closeAllSheets()">
+        <button class="icon-btn" style="background:var(--list-hover);width:50px;height:50px;border-radius:50%" onclick="haptic();closeAllSheets()" aria-label="إغلاق" data-i18n-aria="close">
           <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </button>
       </div>
@@ -1359,7 +1666,7 @@ function setHeroTicker(text){
   const el=document.getElementById('nowSurah');if(!el)return;
   el.classList.remove('ticker-active');
   el.style.removeProperty('--ticker-dur');
-  el.textContent=text;
+  el.textContent=text;el.dataset.text=text;
   requestAnimationFrame(()=>{
     const wrap=el.parentElement;if(!wrap)return;
     if(el.scrollWidth>wrap.offsetWidth+2){
@@ -1372,6 +1679,41 @@ function setHeroTicker(text){
   });
 }
 
+// The wide layout: the title wraps (two lines at most) instead of scrolling;
+// switching into or out of that layout lays the titles out again.
+window.addEventListener('playerlayoutchange',()=>{const el=document.getElementById('nowSurah');if(el&&el.dataset.text)setHeroTicker(el.dataset.text)});
+// The header layout button: the wide two-column layout and the vertical one.
+// It first tries to turn the screen (allowed in the installed app and in full
+// screen); if the screen can't turn, the layout switches in place when the
+// screen is wide enough for two columns, otherwise it asks to turn the device.
+function syncLayoutBtn(){const b=document.getElementById('layoutBtn');if(b&&window.zadLayout)b.setAttribute('aria-pressed',zadLayout.isWide()?'true':'false')}
+function waitWide(ms){return new Promise(done=>{const t0=Date.now();(function check(){if(zadLayout.fits()||Date.now()-t0>ms)return done(zadLayout.fits());setTimeout(check,100)})()})}
+async function toggleLayout(){
+  if(!window.zadLayout)return;
+  const toWide=!zadLayout.isWide();
+  let turned=false;
+  try{
+    if(screen.orientation&&screen.orientation.lock){
+      await Promise.race([screen.orientation.lock(toWide?'landscape':'portrait'),new Promise((_,no)=>setTimeout(()=>no(new Error('timeout')),1500))]);
+      turned=true;
+    }
+  }catch(e){/* not allowed here (a browser tab) or not supported */}
+  // too narrow for two columns: only if the screen really turned (a lock can
+  // succeed without the screen turning)
+  if(toWide&&!(zadLayout.fits()||(turned&&await waitWide(1200)))){showToast(t('player_rotate_hint'));return}
+  zadLayout.set(toWide?'wide':'tall');
+  syncLayoutBtn();
+}
+window.addEventListener('playerlayoutchange',syncLayoutBtn);
+syncLayoutBtn();
+// The reciter under the art (wide landscape screens): a copy of #nowReciter,
+// kept in step wherever the name is set.
+(function(){
+  const src=document.getElementById('nowReciter'),cap=document.querySelector('.art-caption');
+  if(!src||!cap)return;
+  const sync=()=>{cap.textContent=src.textContent};
+  sync();new MutationObserver(sync).observe(src,{childList:true,characterData:true,subtree:true});
+})();
 function setSelTicker(elId,text){
   const el=document.getElementById(elId);if(!el)return;
   el.classList.remove('ticker-active');
@@ -1393,7 +1735,41 @@ function setSelTicker(elId,text){
 // ============================================================
 //  VISUAL HELPERS (new in audio3)
 // ============================================================
-function updateVisuals(reciterDisp,juzDisp){
+// r: the reciter now showing (defaults to the selected one)
+function updateVisuals(reciterDisp,juzDisp,r){
+  setAlbumArt(r!==undefined?r:appData.reciters[selectedReciterIndex]);
+}
+
+// Album art: the reciter's photo (`photo` in json/audio-*.json: a square
+// WebP in images/reciters/, path from the site root), with the default disc
+// art when a reciter has none or the photo can't be loaded.
+const DEFAULT_ART='../images/album.png';
+const albumArt=document.getElementById('albumArt');
+let artWanted='';  // photo URL asked for ('' = default art)
+let artShown='';   // photo URL actually loaded and on screen
+function setAlbumArt(r){
+  const want=r&&r.photo?new URL('../'+r.photo,location.href).href:'';
+  if(want===artWanted)return;
+  artWanted=want;artShown='';
+  albumArt.classList.toggle('is-photo',!!want);
+  albumArt.src=want||DEFAULT_ART;
+  setMediaArtwork();
+}
+albumArt.addEventListener('load',()=>{
+  artShown=artWanted&&albumArt.classList.contains('is-photo')?albumArt.src:'';
+  setMediaArtwork();syncIsland();
+});
+albumArt.addEventListener('error',()=>{
+  if(!albumArt.classList.contains('is-photo'))return;
+  // keep artWanted so the same reciter doesn't retry on every track
+  albumArt.classList.remove('is-photo');albumArt.src=DEFAULT_ART;
+});
+function mediaArtwork(){
+  return artShown?[{src:artShown,sizes:'320x320',type:'image/webp'}]:[{src:'../icons/icon_512.png',sizes:'512x512',type:'image/png'}];
+}
+function setMediaArtwork(){
+  if(!('mediaSession'in navigator)||!navigator.mediaSession.metadata)return;
+  try{navigator.mediaSession.metadata.artwork=mediaArtwork()}catch(e){}
 }
 
 function triggerMandalaChange(){
@@ -1459,16 +1835,42 @@ async function loadMultipleJSONs(){
       let data=await res.json();
       if(data&&data.reciters)appData.reciters.push(...data.reciters);
     }
-    if(appData.reciters.length>0)initData();
+    if(appData.reciters.length>0){
+      initData();
+      if(window.AudioOffline)AudioOffline.init({
+        reciters:()=>appData.reciters,
+        tracksFor:tracksForReciter,
+        nameOf:reciterDisplay,
+        currentIndex:()=>selectedReciterIndex,
+        onChange:updateOfflineRow,
+        openReciter:openSavedReciter
+      });
+    }
     else throw new Error('No data');
   }catch(e){reciterSelectBtn.textContent=t('audio_load_error')}
+}
+
+// «المصحف الجديد» used to be 60 multi-surah tracks (GitHub release, often
+// unreachable); it is now one file per surah. A saved track from the old
+// list (last played, favourites) resumes at the first surah of that track
+// still in the new list. Index = old track number.
+const MINSHAWI_NEW_OLD_TRACK_SURAH=[0,1,2,2,2,2,2,3,3,3,4,4,4,5,5,5,6,6,7,7,7,8,9,9,10,11,11,12,12,14,16,17,17,18,19,20,22,0,25,25,26,27,28,30,32,0,36,37,39,40,41,43,46,49,53,56,59,64,68,73,79,88];
+function upgradedTrack(u){
+  const m=/\/al-minshawy-new\/(\d+)\.mp3$/.exec(u||'');
+  if(!m)return null;
+  const s=MINSHAWI_NEW_OLD_TRACK_SURAH[+m[1]];
+  const r=appData.reciters.find(x=>x.id==='minshawi_new');
+  return (s&&r&&(r.items||[]).find(i=>surahNum(i)===s))||null;
 }
 
 function initData(){
   if(appData.reciters.length===0)return;
   let lastTrack=localStorage.getItem('lastTrack');
+  const moved=upgradedTrack(lastTrack);
+  if(moved){lastTrack=moved.url;localStorage.setItem('lastTrack',lastTrack);localStorage.setItem('lastSurah',moved.name)}
+  let fi=-1;
   if(lastTrack&&lastTrack.startsWith('http')){
-    let fi=appData.reciters.findIndex(r=>{
+    fi=appData.reciters.findIndex(r=>{
       if(r.type==='surah')return lastTrack.startsWith(r.baseUrl);
       if(r.items)return r.items.some(i=>i.url===lastTrack);
       return false;
@@ -1478,12 +1880,14 @@ function initData(){
   const rd=reciterShortDisplay(appData.reciters[selectedReciterIndex]);
   setSelTicker('reciterSelectBtn',rd);
   buildJuzData();
-  if(lastTrack&&lastTrack.startsWith('http')){
-    let fj=currentJuzData.findIndex(j=>j.url===lastTrack);
-    if(fj!==-1){selectedJuzIndex=fj;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[fj]))}
+  // Only restore a track that is still in the lists: a link that was removed
+  // would otherwise play under whichever reciter happens to be first.
+  const fj=fi!==-1?currentJuzData.findIndex(j=>j.url===lastTrack):-1;
+  if(fj!==-1){
+    selectedJuzIndex=fj;setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[fj]));
     currentTrackUrl=lastTrack;audio.src=lastTrack;
     const rd2=reciterDisplay(appData.reciters[selectedReciterIndex]);
-    const jd=fj!==-1?juzDisplay(currentJuzData[fj]):(localStorage.getItem('lastSurah')||'');
+    const jd=juzDisplay(currentJuzData[fj]);
     setHeroTicker(jd);
     document.getElementById('nowReciter').innerText=rd2;
     document.getElementById('miniSurah').innerText=jd;
@@ -1493,21 +1897,42 @@ function initData(){
   }else{prepareTrack(false,false)}
 }
 
-function buildJuzData(){
-  currentJuzData=[];
-  let reciter=appData.reciters[selectedReciterIndex];
+// Every track of a reciter, in order (also used by the full-mushaf download).
+function tracksForReciter(reciter){
+  if(!reciter)return [];
   let arrayData=reciter.items||reciter.juz;
-  if((reciter.type==='juz'||reciter.type==='custom'||!reciter.type)&&arrayData){
-    currentJuzData=arrayData;
-  }else if(reciter.type==='surah'){
+  if((reciter.type==='juz'||reciter.type==='custom'||!reciter.type)&&arrayData)return arrayData;
+  const out=[];
+  if(reciter.type==='surah'){
     surahNames.forEach((name,index)=>{
       let num=index+1;
+      // missing: surahs the host only has as a broken/cut-off file
+      if(reciter.missing&&reciter.missing.includes(num))return;
       let sn=num<10?'00'+num:num<100?'0'+num:num;
       // overrides: per-surah URL for the odd file a host names differently
       const url=(reciter.overrides&&reciter.overrides[sn])||reciter.baseUrl+sn+'.mp3';
-      currentJuzData.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});
+      out.push({name:`${num} - سورة ${name}`,url,originalName:'سورة '+name,number:num});
     });
   }
+  return out;
+}
+function updateOfflineRow(){
+  if(!window.AudioOffline)return;
+  const el=document.getElementById('offlineRowSub');
+  if(el)el.textContent=AudioOffline.summary(selectedReciterIndex);
+  // the card under the reciter / surah selectors
+  const card=document.getElementById('offlineCard');
+  if(!card)return;
+  const st=AudioOffline.cardState(selectedReciterIndex);
+  card.dataset.state=st.state;
+  const txt=document.getElementById('offlineCardText');
+  if(txt&&st.text)txt.textContent=st.text;
+  const ring=document.getElementById('offlineCardRing');
+  if(ring)ring.style.strokeDashoffset=(106.8*(1-st.pct/100)).toFixed(1);
+}
+function buildJuzData(){
+  currentJuzData=tracksForReciter(appData.reciters[selectedReciterIndex]);
+  updateOfflineRow();
   // Sync strip badge
   const dlsCount=document.getElementById('dlsCount');
   if(dlsCount)dlsCount.textContent=currentJuzData.length?currentJuzData.length+' ملف':'—';
@@ -1522,7 +1947,9 @@ function normAr(s){
     .replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي')
     .replace(/[\s\-_()·.،,]+/g,'');
 }
-function makeSelRow({num,title,sub,active,onPick}){
+// floppy disk: "saved on this device"
+const SAVED_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11.2L21 7.8V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 3v4.2a1.3 1.3 0 0 0 1.3 1.3h5.4A1.3 1.3 0 0 0 16 7.2V3"/><path d="M13.4 4.9v1.7"/><path d="M7 21v-5.2A1.3 1.3 0 0 1 8.3 14.5h7.4a1.3 1.3 0 0 1 1.3 1.3V21"/></svg>';
+function makeSelRow({num,title,sub,active,saved,onPick}){
   const div=document.createElement('div');
   div.className='selection-item'+(active?' active':'');
   div.setAttribute('role','option');div.tabIndex=0;
@@ -1532,13 +1959,18 @@ function makeSelRow({num,title,sub,active,onPick}){
   const ti=document.createElement('span');ti.className='sel-title';ti.textContent=title;main.appendChild(ti);
   if(sub){const su=document.createElement('span');su.className='sel-sub';su.textContent=sub;main.appendChild(su)}
   div.appendChild(main);
+  if(saved){
+    const sv=document.createElement('span');sv.className='sel-saved';
+    sv.setAttribute('role','img');sv.setAttribute('aria-label',t('offl_saved_badge'));sv.title=t('offl_saved_badge');
+    sv.innerHTML=SAVED_ICON;div.appendChild(sv);
+  }
   const eq=document.createElement('span');eq.className='sel-eq';eq.setAttribute('aria-hidden','true');eq.innerHTML='<i></i><i></i><i></i>';div.appendChild(eq);
   div.onclick=onPick;
   div.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick()}};
   return div;
 }
 function reciterSubtitle(r){
-  if(r.type==='surah')return t('audio_n_surahs',{n:114});
+  if(r.type==='surah')return t('audio_n_surahs',{n:114-(r.missing||[]).length});
   const n=(r.items||r.juz||[]).length;
   return r.type==='juz'?t('audio_n_parts',{n}):t('audio_n_clips',{n});
 }
@@ -1549,28 +1981,40 @@ function setSheetTitle(text,count){
 }
 function emptyRow(){return `<div class="selection-item" style="justify-content:center">${t('audio_no_results')}</div>`}
 
+// Make reciter `oi` the current one, keeping the same surah where it has it.
+function selectReciter(oi){
+  const r=appData.reciters[oi];if(!r)return;
+  selectedReciterIndex=oi;
+  setSelTicker('reciterSelectBtn',reciterShortDisplay(r));
+  errorRetryCount=0;
+  let prevJuzName=currentJuzData[selectedJuzIndex]?.name,prevNum=surahNum(currentJuzData[selectedJuzIndex]);
+  buildJuzData();
+  let ni=currentJuzData.findIndex(j=>j.name===prevJuzName);
+  // keep the same surah across reciters even when the labels differ
+  if(ni===-1&&prevNum)ni=currentJuzData.findIndex(j=>surahNum(j)===prevNum);
+  selectedJuzIndex=ni!==-1?ni:0;
+  setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[selectedJuzIndex]));
+}
+// From «المصاحف المحفوظة»: switch the player to that reciter and show its tracks.
+function openSavedReciter(oi){
+  haptic();
+  if(oi!==selectedReciterIndex){selectReciter(oi);prepareTrack(false,false)}   // load, don't play: the listener picks a surah
+  openJuzSheet();
+}
 function renderReciterList(filterText=''){
   const list=document.getElementById('selectionList');list.innerHTML='';
   const q=normAr(filterText);
   const filtered=[];
   appData.reciters.forEach((r,oi)=>{if(!q||normAr(r.name).includes(q)||normAr(reciterDisplay(r)).includes(q)||normAr(r.englishName).includes(q))filtered.push([r,oi])});
   if(filtered.length===0){list.innerHTML=emptyRow();return}
+  // recitations saved for offline listening come first (stable: the rest keep their order)
+  const isSaved=r=>!!(window.AudioOffline&&AudioOffline.isReciterSaved(r));
+  const savedSet=new Set(filtered.filter(([r])=>isSaved(r)).map(([,oi])=>oi));
+  filtered.sort((a,b)=>savedSet.has(b[1])-savedSet.has(a[1]));
   const frag=document.createDocumentFragment();
   filtered.forEach(([r,oi])=>{
-    const pick=()=>{
-      haptic();selectedReciterIndex=oi;
-      const rd=reciterShortDisplay(r);setSelTicker('reciterSelectBtn',rd);
-      errorRetryCount=0;
-      let prevJuzName=currentJuzData[selectedJuzIndex]?.name,prevNum=surahNum(currentJuzData[selectedJuzIndex]);
-      buildJuzData();
-      let ni=currentJuzData.findIndex(j=>j.name===prevJuzName);
-      // keep the same surah across reciters even when the labels differ
-      if(ni===-1&&prevNum)ni=currentJuzData.findIndex(j=>surahNum(j)===prevNum);
-      selectedJuzIndex=ni!==-1?ni:0;
-      setSelTicker('juzSelectBtn',juzDisplay(currentJuzData[selectedJuzIndex]));
-      closeAllSheets();prepareTrack(true);
-    };
-    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r),active:oi===selectedReciterIndex,onPick:pick}));
+    const pick=()=>{haptic();selectReciter(oi);closeAllSheets();prepareTrack(true)};
+    frag.appendChild(makeSelRow({title:reciterDisplay(r),sub:reciterSubtitle(r),active:oi===selectedReciterIndex,saved:savedSet.has(oi),onPick:pick}));
   });
   list.appendChild(frag);
 }
@@ -1622,7 +2066,8 @@ function renderJuzList(filterText=''){
   const frag=document.createDocumentFragment();
   filtered.forEach(([j,oi,num])=>{
     const pick=()=>{haptic();selectedJuzIndex=oi;setSelTicker('juzSelectBtn',juzDisplay(j));errorRetryCount=0;closeAllSheets();prepareTrack(true)};
-    frag.appendChild(makeSelRow({num,title:juzTitle(j),active:oi===selectedJuzIndex,onPick:pick}));
+    const saved=!!(window.AudioOffline&&AudioOffline.isSaved(j.url));
+    frag.appendChild(makeSelRow({num,title:juzTitle(j),active:oi===selectedJuzIndex,saved,onPick:pick}));
   });
   list.appendChild(frag);
 }
@@ -1656,7 +2101,7 @@ function prepareTrack(userInitiated=false,allowAuto=true){
     document.getElementById('miniSurah').innerText=juzDisp;
     document.getElementById('miniReciter').innerText=reciterDisp;
     document.getElementById('progress').value=0;
-    document.getElementById('progress').style.background='transparent';
+    document.getElementById('progress').style.setProperty('--pct','0%');document.getElementById('progress').style.setProperty('--buf','0%');
     checkFavStatus();
     localStorage.setItem('lastTrack',url);
     localStorage.setItem('lastSurah',juzName);
@@ -1688,7 +2133,7 @@ function toggleRepeat(){isRepeat=!isRepeat;document.getElementById('repeatBtn').
 
 function updateMediaSession(title,artist){
   if('mediaSession'in navigator){
-    navigator.mediaSession.metadata=new MediaMetadata({title:title||t('audio_media_title'),artist:artist||t('audio_media_artist'),album:t('audio_media_album'),artwork:[{src:'../icons/icon_512.png',sizes:'512x512',type:'image/png'}]});
+    navigator.mediaSession.metadata=new MediaMetadata({title:title||t('audio_media_title'),artist:artist||t('audio_media_artist'),album:t('audio_media_album'),artwork:mediaArtwork()});
     navigator.mediaSession.setActionHandler('play',()=>togglePlay());
     navigator.mediaSession.setActionHandler('pause',()=>togglePlay());
     navigator.mediaSession.setActionHandler('previoustrack',()=>{haptic();playPrevTrack()});
@@ -1842,8 +2287,8 @@ function updateProgressBar(){
   }
   document.getElementById('progress').value=pct;
   document.getElementById('currentTime').innerText=formatTime(audio.currentTime);
-  document.getElementById('progress').style.background=
-    `linear-gradient(to right,var(--accent-main) 0%,var(--accent-main) ${pct}%,rgba(255,255,255,.35) ${pct}%,rgba(255,255,255,.35) ${bufPct}%,var(--track-bg) ${bufPct}%,var(--track-bg) 100%)`;
+  const bar=document.getElementById('progress');
+  bar.style.setProperty('--pct',pct+'%');bar.style.setProperty('--buf',Math.max(pct,bufPct)+'%');
   updateMiniProgress();
 }
 audio.addEventListener('timeupdate',updateProgressBar);
@@ -1885,7 +2330,22 @@ async function downloadTrack(){
 // ============================================================
 //  FAVORITES
 // ============================================================
-function readFavs(){try{const f=JSON.parse(localStorage.getItem('favorites')||'[]');return Array.isArray(f)?f:[]}catch(e){return[]}}
+function readFavs(){
+  let f;
+  try{f=JSON.parse(localStorage.getItem('favorites')||'[]')}catch(e){return[]}
+  if(!Array.isArray(f))return[];
+  // move favourites from the old «المصحف الجديد» tracks to their surah
+  let changed=false;const seen=new Set();
+  f=f.filter(x=>{
+    if(!x||!x.url)return false;
+    const moved=upgradedTrack(x.url);
+    if(moved){x.url=moved.url;x.surah=moved.name;changed=true}
+    if(seen.has(x.url)){changed=true;return false}
+    seen.add(x.url);return true;
+  });
+  if(changed)try{localStorage.setItem('favorites',JSON.stringify(f))}catch(e){}
+  return f;
+}
 function openFavSheet(){
   sheetMode=null;
   const favs=readFavs();
@@ -1935,7 +2395,7 @@ function playFromFav(url,surah,reciter){
   document.getElementById('nowReciter').innerText=reciterDisp;
   document.getElementById('miniSurah').innerText=surahDisp;
   document.getElementById('miniReciter').innerText=reciterDisp;
-  updateVisuals(reciterDisp,surahDisp);
+  updateVisuals(reciterDisp,surahDisp,rObj||null);
   errorRetryCount=0;audio.play().catch(()=>{});closeAllSheets();
 }
 function removeFav(index,e){e.stopPropagation();let favs=readFavs();favs.splice(index,1);localStorage.setItem('favorites',JSON.stringify(favs));openFavSheet();checkFavStatus()}
@@ -1963,7 +2423,9 @@ function syncIsland(){
     subtitle:err&&!err.hidden?document.getElementById('trackErrorText').textContent:document.getElementById('miniReciter').innerText,
     playing:!audio.paused,
     progress:audio.duration?audio.currentTime/audio.duration*100:0,
-    art:document.getElementById('albumArt').src
+    // the default art until the photo has actually loaded (no broken image)
+    art:artShown||new URL(DEFAULT_ART,location.href).href,
+    photo:!!artShown
   });
 }
 let lastIslandSync=0;
@@ -2038,5 +2500,8 @@ window.addEventListener('langchange',()=>{
 <script src="../js/sw-update.js"></script>
 
 <!-- Install prompt (PWA / Play Store / iOS) rendered by pwa-install.js -->
+<script src="../js/net-status.js"></script>
+<script src="../js/tap-a11y.js"></script>
+<script src="../js/audio-offline.js"></script>
 </body>
 </html>

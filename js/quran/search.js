@@ -6,6 +6,13 @@
       return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    // Text from the search API (and what the user typed) is shown as text,
+    // never parsed as markup.
+    function _searchEscapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     function _searchSafeRegex(pattern, flags) {
       try {
         return new RegExp(pattern, flags);
@@ -117,15 +124,15 @@
               html += display.map(m => {
                 const normText = normalizeArabic(m.text);
                 const idx = normText.indexOf(normalizedQuery);
-                let displayText = m.text;
+                let displayText = _searchEscapeHtml(m.text);
                 if (idx !== -1) {
                   const re = _searchSafeRegex(_searchEscapeRegex(normalizedQuery).split('').join('[ً-ٟ]*?'), 'gi');
-                  if (re) displayText = m.text.replace(re, match => `<span class="search-highlight">${match}</span>`);
+                  if (re) displayText = displayText.replace(re, match => `<span class="search-highlight">${match}</span>`);
                 }
-                return `<div class="search-result-item" onclick="jumpToSearchResult(${m.number})">
+                return `<div class="search-result-item" onclick="jumpToSearchResult(${Number(m.number) || 0})">
                   <div class="res-meta">
                     <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    ${(SURAH_MAP.find(s => s.number === m.surah.number)?.name) || m.surah.name.replace(/سورة|سُورَةُ/g, '').trim()} — آية ${m.numberInSurah}
+                    ${(SURAH_MAP.find(s => s.number === m.surah.number)?.name) || _searchEscapeHtml(m.surah.name.replace(/سورة|سُورَةُ/g, '').trim())} — آية ${Number(m.numberInSurah) || ''}
                   </div>
                   <div class="res-text">${displayText}</div>
                 </div>`;
@@ -136,7 +143,7 @@
                 const surahInfo = SURAH_MAP.find(s => s.number === m.surah);
                 const surahName = surahInfo ? surahInfo.name : ('سورة ' + m.surah);
                 const page = surahInfo ? surahInfo.page : 1;
-                let displayText = m.text;
+                let displayText = _searchEscapeHtml(m.text);
                 const re = _searchSafeRegex(_searchEscapeRegex(normalizedQuery).split('').join('[ً-ٟ]*?'), 'gi');
                 if (re) displayText = displayText.replace(re, match => `<span class="search-highlight">${match}</span>`);
                 return `<div class="search-result-item" onclick="goToPage(${page}); toggleSearchOverlay('close');">
@@ -153,7 +160,7 @@
               html += `<div style="text-align:center;padding:10px;color:var(--text-hint);font-size:0.85rem;">و ${ayahMatches.length - 25} نتيجة أخرى...</div>`;
             }
           } else if (surahResults.length === 0) {
-            html = `<div class="search-empty">لا توجد نتائج لـ "<strong>${query}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">حاول بكلمة مختلفة</span></div>`;
+            html = `<div class="search-empty">لا توجد نتائج لـ "<strong>${_searchEscapeHtml(query)}</strong>"<br><span style="font-size:0.8rem;opacity:0.6;">حاول بكلمة مختلفة</span></div>`;
           }
           resultsDiv.innerHTML = html;
         }).catch(() => {

@@ -1,0 +1,11 @@
+/* a11y.css — shared accessibility basics.
+ *
+ * Keyboard focus is always visible. :where() keeps this at zero specificity,
+ * so a page that styles its own focus ring still wins; pages must not remove
+ * the outline for keyboard users (use :focus:not(:focus-visible) for mouse
+ * and touch instead of :focus { outline: none }).
+ */
+:where(a, button, input, select, textarea, summary, [role="button"], [role="switch"], [role="tab"], [tabindex]):focus-visible {
+  outline: 2px solid var(--accent, var(--accent-main, #10b981));
+  outline-offset: 2px;
+}

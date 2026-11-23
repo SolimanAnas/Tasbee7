@@ -1,7 +1,7 @@
 const RADIO_STATIONS = [
   {
-    "name": "إذاعة القرآن الكريم - القاهرة",
-    "url": "https://backup.qurango.net/radio/mustafa_ismail"
+    "name": "إذاعة القرآن الكريم - القاهرة (بث مباشر)",
+    "url": "https://stream.radiojar.com/8s5u5tpdtwzuv"
   },
   {
     "name": "إذاعة القرآن الكريم - مكة",
@@ -19,6 +19,10 @@ const RADIO_STATIONS = [
   {
     "name": "-الإذاعة العامة - اذاعة متنوعة لمختلف القراء",
     "url": "https://backup.qurango.net/radio/mix"
+  },
+  {
+    "name": "إذاعة مصطفى إسماعيل",
+    "url": "https://backup.qurango.net/radio/mustafa_ismail"
   },
   {
     "name": "إذاعة -تلاوات خاشعة-",
@@ -59,10 +63,6 @@ const RADIO_STATIONS = [
   {
     "name": "إذاعة محمود خليل الحصري (تجويد)",
     "url": "https://backup.qurango.net/radio/mahmoud_khalil_alhussary_mojawwad"
-  },
-  {
-    "name": "إذاعة مصطفى إسماعيل",
-    "url": "https://backup.qurango.net/radio/mustafa_ismail"
   },
   {
     "name": "إذاعة محمود علي البنا (تجويد)",

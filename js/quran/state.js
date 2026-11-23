@@ -34,7 +34,7 @@
 
     async function initDatabase() {
       try {
-        const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+        const SQL = await initSqlJs({ locateFile: file => `../js/vendor/${file}` });
         window.SQL = SQL;
         let view;
         if (window.__SQLITE_DATA_B64__) {

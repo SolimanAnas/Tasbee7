@@ -2,7 +2,51 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint: the theme was applied
+// in the load event (setTheme), so the page showed its default theme (and right-to-left) first,
+// then switched. Same rule as the page's own code below, which still runs.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  t = t || 'dark';
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
+<script>
+// Player layout before the first paint: the wide two-column layout on wide,
+// short landscape screens (car head units, tablets, phones held sideways); the
+// header button switches between it and the vertical layout (playerLayout:
+// "wide" / "tall", shared by the audio and radio pages). Two columns need at
+// least 700 px of width.
+(function () {
+  var d = document.documentElement, KEY = 'playerLayout', mode = null;
+  try { mode = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+  var auto = matchMedia('(orientation:landscape) and (min-width:700px) and (max-height:820px)');
+  var fits = function () { return innerWidth >= 700; };
+  function apply() {
+    var wide = mode === 'wide' ? fits() : mode === 'tall' ? false : auto.matches;
+    if (d.classList.contains('player-wide') === wide) return;
+    d.classList.toggle('player-wide', wide);
+    try { window.dispatchEvent(new Event('playerlayoutchange')); } catch (e) { /* old browsers */ }
+  }
+  // the layout button only on big screens (foldables, tablets, car head units,
+  // computers): by the device's screen, so turning a phone doesn't change it
+  var sw = screen.width || innerWidth, sh = screen.height || innerHeight;
+  d.classList.toggle('big-screen', Math.min(sw, sh) >= 480 && Math.max(sw, sh) >= 700);
+  apply();
+  if (auto.addEventListener) auto.addEventListener('change', apply); else if (auto.addListener) auto.addListener(apply);
+  window.addEventListener('resize', apply);
+  window.zadLayout = {
+    isWide: function () { return d.classList.contains('player-wide'); },
+    fits: fits,
+    set: function (m) { mode = m; try { localStorage.setItem(KEY, m); } catch (e) { /* ignore */ } apply(); }
+  };
+})();
+</script>
+<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#0F172A">
 <title>إذاعة القرآن الكريم — زاد المسلم | Live Quran Radio</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
@@ -16,11 +60,13 @@
 <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
 <meta property="og:site_name" content="زاد المسلم">
 <link rel="icon" href="../icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/fonts.css">
 <!-- Pinned exact version: @latest auto-updates third-party code with full DOM
      access (supply-chain risk + spontaneous breakage). Bump deliberately. -->
-<script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<!-- async, not defer: a deferred CDN script holds back DOMContentLoaded until it
+     downloads, so a slow jsDelivr froze the whole page. hlsPending() covers the
+     moment before it arrives. -->
+<script async id="hlsLib" src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js" onerror="this.dataset.failed='1'"></script>
 <script src="../js/radio-stations.js"></script>
 <style>
 /* ============================================================
@@ -532,6 +578,114 @@ body.calm .waveform::before{animation-play-state:paused!important}
 
 /* Install prompt */
 #install-prompt{display:none}
+
+/* ============================================================
+   LANDSCAPE — wide, short screens: car head units (800×480 to
+   1920×720), tablets and phones held sideways. One screen, no
+   scrolling, big targets. The player card splits in two balanced
+   columns with a line between: a small live indicator, the station
+   name and the controls on the reading side (the transport first,
+   favourite / sleep timer below a clear gap), the art large in the
+   other column; the station picker in a row under the card.
+   ============================================================ */
+.hero-side{display:contents}   /* phones: the card stays one column */
+.layout-btn[aria-pressed="true"]{color:var(--accent-main)}
+html:not(.big-screen) .layout-btn{display:none}   /* regular phones: no layout button */
+/* the wide layout: html.player-wide (set before the first paint: by the screen
+   shape, or by the header button — see the script in <head>) */
+  html.player-wide body{
+    padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  }
+  html.player-wide .app{
+    max-width:1400px;min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.8vh,16px);
+  }
+  html.player-wide .header{padding:clamp(4px,1.1vh,10px) clamp(12px,2vw,24px)}
+  html.player-wide .header-title{font-size:clamp(1.2rem,3.4vh,1.7rem)}
+  html.player-wide .header .icon-btn{min-width:48px;min-height:48px}
+  html.player-wide .header .icon-btn svg{width:clamp(24px,4.6vh,34px);height:clamp(24px,4.6vh,34px)}
+  /* the translate icon is a masked div sized inline */
+  html.player-wide .header .icon-btn>div{width:clamp(24px,4.6vh,34px)!important;height:clamp(24px,4.6vh,34px)!important}
+
+  /* two balanced columns: the live indicator over the controls on the
+     reading side, the art beside them (spanning both rows) */
+  html.player-wide .hero-card{
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto;align-content:center;
+    column-gap:clamp(16px,3vw,44px);padding:clamp(12px,2.6vh,28px) clamp(18px,2.6vw,40px);
+  }
+  html.player-wide .hero-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%}
+  html.player-wide .hero-controls{grid-column:1;grid-row:2;align-self:start}
+  html.player-wide .hero-now{grid-column:2;grid-row:1 / span 2;align-self:stretch;border-inline-start:1px solid var(--glass-border);padding-inline-start:clamp(16px,3vw,44px)}
+
+  /* live: a small, quiet indicator above the station name — grey when
+     stopped, amber while connecting, red with a pulsing dot and the time on air */
+  html.player-wide .live-badge{grid-column:1;grid-row:1;justify-self:center;align-self:end;margin:0 0 clamp(6px,1.6vh,14px);
+    font-size:clamp(.7rem,1.9vh,.88rem);letter-spacing:.06em;padding:clamp(3px,.6vh,5px) clamp(10px,1.4vw,14px);
+    background:rgba(255,255,255,.05);color:var(--text-secondary);border-color:var(--glass-border)}
+  html.player-wide .live-dot{background:var(--text-secondary);opacity:.7}
+  html.player-wide body.is-playing .live-badge{background:rgba(239,68,68,.12);color:var(--live-color);border-color:rgba(239,68,68,.28);box-shadow:none}
+  html.player-wide body.is-playing .live-dot{background:var(--live-color);opacity:1}
+  html.player-wide body.is-connecting .live-badge{background:rgba(245,158,11,.12);color:#d97706;border-color:rgba(245,158,11,.28)}
+  html.player-wide body.is-connecting .live-dot{background:#f59e0b;opacity:1}
+
+  /* the art: as large as its column and the height allow */
+  html.player-wide .mandala-wrap{--art:min(clamp(150px,48vh,350px),30vw);margin-bottom:clamp(4px,1.4vh,10px)}
+  html.player-wide .waveform{margin:0 auto}
+
+  /* the station name leads: large and bold, the category clearly secondary */
+  html.player-wide .track-info{margin:0 0 clamp(12px,3vh,28px)}
+  html.player-wide #nowStation{font-size:clamp(1.8rem,7vh,3.4rem);font-weight:700;
+    white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+  html.player-wide .now-cat{font-size:clamp(.8rem,2.4vh,1.1rem);margin-top:clamp(2px,.7vh,8px);opacity:.9}
+
+  /* primary: the transport */
+  html.player-wide .radio-error{margin:0 0 clamp(4px,1vh,10px);padding:6px 12px;font-size:15px}
+  html.player-wide .controls-main{margin:0;gap:clamp(24px,5vw,64px)}
+  html.player-wide .play-pause-btn{width:clamp(76px,16vh,116px);height:clamp(76px,16vh,116px)}
+  html.player-wide .play-pause-btn svg{width:clamp(32px,5.6vh,44px);height:clamp(32px,5.6vh,44px)}
+  html.player-wide .skip-btn{width:clamp(56px,11.5vh,84px);height:clamp(56px,11.5vh,84px)}
+  html.player-wide .skip-btn svg{width:clamp(26px,4.4vh,34px);height:clamp(26px,4.4vh,34px)}
+
+  /* secondary: below a clear gap, lighter — favourite · sleep timer in two equal parts */
+  html.player-wide .controls-secondary{display:grid;grid-template-columns:1fr 1fr;width:min(100%,320px);gap:0;
+    margin:clamp(12px,3.2vh,34px) 0 0;padding:clamp(2px,.6vh,6px) 6px;
+    background:rgba(var(--accent-rgb),.04);border:1px solid var(--glass-border);border-radius:clamp(14px,2.4vh,20px)}
+  html.player-wide .controls-secondary .action-btn{width:100%;height:clamp(44px,8vh,60px);border-radius:12px;background:none;border:none}
+  html.player-wide .controls-secondary .action-btn+.action-btn::before{content:'';position:absolute;inset-inline-start:0;top:26%;bottom:26%;
+    border-inline-start:1px solid var(--glass-border)}
+  html.player-wide .action-btn svg{width:clamp(22px,3.7vh,27px);height:clamp(22px,3.7vh,27px)}
+  html.player-wide .sleep-badge{top:4px;inset-inline-end:auto;inset-inline-start:calc(50% + 6px)}
+
+  /* the station picker: the icon tile, the label and value, the chevron */
+  html.player-wide .sel-card{min-height:clamp(64px,12.5vh,96px);padding:8px clamp(12px,1.8vw,22px);gap:clamp(10px,1.4vw,16px);border-radius:clamp(16px,2.6vh,22px)}
+  html.player-wide .sel-icon{width:clamp(40px,8vh,54px);height:clamp(40px,8vh,54px);flex:none;border-radius:clamp(10px,1.8vh,14px)}
+  html.player-wide .sel-icon svg{width:52%;height:52%}
+  html.player-wide .sel-chevron{width:clamp(16px,2.8vh,22px);height:clamp(16px,2.8vh,22px)}
+  html.player-wide .sel-label{font-size:clamp(12px,2.1vh,15px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html.player-wide .sel-value{font-size:clamp(16px,3vh,22px)}
+
+  /* the station list and the sleep timer open as a centred panel */
+  html.player-wide .bottom-sheet{width:min(100%,760px);margin-inline:auto}
+
+/* phones held sideways (≈360–440 px tall): the same layout, tighter */
+@media (max-height:440px){
+  html.player-wide body{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+  html.player-wide .app{gap:6px;min-height:calc(100dvh - max(6px,env(safe-area-inset-top)) - max(6px,env(safe-area-inset-bottom)))}
+  html.player-wide .header{padding:2px 10px}
+  html.player-wide .header .icon-btn{min-width:42px;min-height:42px}
+  html.player-wide .hero-card{padding:6px 16px}
+  html.player-wide .mandala-wrap{--art:min(clamp(120px,44vh,330px),28vw)}
+  html.player-wide .live-badge{margin-bottom:4px}
+  html.player-wide .track-info{margin-bottom:6px}
+  html.player-wide #nowStation{font-size:1.45rem}
+  html.player-wide .radio-error{padding:4px 10px;font-size:13px}
+  html.player-wide .play-pause-btn{width:64px;height:64px}
+  html.player-wide .skip-btn{width:50px;height:50px}
+  html.player-wide .controls-secondary{margin-top:6px;padding:2px 6px}
+  html.player-wide .controls-secondary .action-btn{height:44px}
+  html.player-wide .sel-card{min-height:50px;padding:4px 14px}
+  html.player-wide .sel-icon{width:34px;height:34px}
+}
 </style>
 </head>
 <body>
@@ -565,6 +719,9 @@ body.calm .waveform::before{animation-play-state:paused!important}
       <button class="icon-btn" onclick="if(window.I18n)I18n.openLangSheet()" title="اللغة" aria-label="اللغة">
         <div style="width:22px;height:22px;background:currentColor;-webkit-mask:url('../img/translate.svg') no-repeat center/contain;mask:url('../img/translate.svg') no-repeat center/contain;"></div>
       </button>
+      <button class="icon-btn layout-btn" id="layoutBtn" onclick="haptic();toggleLayout()" aria-pressed="false" aria-label="العرض الأفقي" title="العرض الأفقي" data-i18n-aria="player_layout_wide" data-i18n-title="player_layout_wide">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7.5" width="11" height="14.5" rx="2"/><line x1="7.5" y1="18.5" x2="9.5" y2="18.5"/><path d="M13 2.5a7.5 7.5 0 0 1 7.5 7.5"/><path d="M18.3 7.8l2.2 2.2 2.2-2.2"/></svg>
+      </button>
     </div>
     <div class="header-title" data-i18n="radio_header">راديو القرآن</div>
     <button class="icon-btn" onclick="openStationSheet('fav')" title="المفضلة" aria-label="المفضلة" data-i18n-title="radio_fav_title">
@@ -584,6 +741,8 @@ body.calm .waveform::before{animation-play-state:paused!important}
       <span class="live-time" id="liveTime"></span>
     </div>
 
+    <!-- two halves: side by side on wide landscape screens, a plain column otherwise (display: contents) -->
+    <div class="hero-side hero-now">
     <!-- Mandala + album art -->
     <div class="mandala-wrap" id="mandalaWrap" role="button" tabindex="0" aria-pressed="false"
          aria-label="إيقاف / تشغيل الحركة" data-i18n-title="radio_motion_toggle"
@@ -606,6 +765,9 @@ body.calm .waveform::before{animation-play-state:paused!important}
       <div class="bar"></div><div class="bar"></div><div class="bar"></div>
       <div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
+
+    </div>
+    <div class="hero-side hero-controls">
 
     <!-- Station name -->
     <div class="track-info">
@@ -650,6 +812,7 @@ body.calm .waveform::before{animation-play-state:paused!important}
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <span class="sleep-badge" id="sleepBadge" hidden></span>
       </button>
+    </div>
     </div>
 
   </div>
@@ -784,7 +947,7 @@ function closeAllSheets(){
 // ── ticker helpers ────────────────────────────────────────
 function ticker(el,text,speed,minDur){
   if(!el)return;
-  el.classList.remove('ticker-active');el.style.removeProperty('--ticker-dur');el.textContent=text;
+  el.classList.remove('ticker-active');el.style.removeProperty('--ticker-dur');el.textContent=text;el.dataset.text=text;
   requestAnimationFrame(()=>{
     const wrap=el.parentElement;if(!wrap)return;
     if(el.scrollWidth>wrap.offsetWidth+2){
@@ -796,6 +959,33 @@ function ticker(el,text,speed,minDur){
 }
 function setHeroTicker(text){ticker(document.getElementById('nowStation'),text,80,5)}
 function setSelTicker(text){ticker(document.getElementById('stationSelectBtn'),text,70,4)}
+// The wide layout: the name wraps (two lines at most) instead of scrolling;
+// switching into or out of that layout lays the names out again.
+window.addEventListener('playerlayoutchange',()=>{['nowStation','stationSelectBtn'].forEach(id=>{const el=document.getElementById(id);if(el&&el.dataset.text)(id==='nowStation'?setHeroTicker:setSelTicker)(el.dataset.text)})});
+// The header layout button: the wide two-column layout and the vertical one.
+// It first tries to turn the screen (allowed in the installed app and in full
+// screen); if the screen can't turn, the layout switches in place when the
+// screen is wide enough for two columns, otherwise it asks to turn the device.
+function syncLayoutBtn(){const b=document.getElementById('layoutBtn');if(b&&window.zadLayout)b.setAttribute('aria-pressed',zadLayout.isWide()?'true':'false')}
+function waitWide(ms){return new Promise(done=>{const t0=Date.now();(function check(){if(zadLayout.fits()||Date.now()-t0>ms)return done(zadLayout.fits());setTimeout(check,100)})()})}
+async function toggleLayout(){
+  if(!window.zadLayout)return;
+  const toWide=!zadLayout.isWide();
+  let turned=false;
+  try{
+    if(screen.orientation&&screen.orientation.lock){
+      await Promise.race([screen.orientation.lock(toWide?'landscape':'portrait'),new Promise((_,no)=>setTimeout(()=>no(new Error('timeout')),1500))]);
+      turned=true;
+    }
+  }catch(e){/* not allowed here (a browser tab) or not supported */}
+  // too narrow for two columns: only if the screen really turned (a lock can
+  // succeed without the screen turning)
+  if(toWide&&!(zadLayout.fits()||(turned&&await waitWide(1200)))){showToast(rt('player_rotate_hint','أدِر الجهاز إلى الوضع الأفقي'));return}
+  zadLayout.set(toWide?'wide':'tall');
+  syncLayoutBtn();
+}
+window.addEventListener('playerlayoutchange',syncLayoutBtn);
+syncLayoutBtn();
 
 // ── mandala dots (generate once) ─────────────────────────
 // orbit radius follows the art size (it shrinks on short screens)
@@ -909,8 +1099,10 @@ function altHostUrl(url){
 //  - explicit `fallbacks` (e.g. Sharjah: audio-only AAC on two CDN hosts, then HLS)
 //  - qurango stations: the same path on both hosts
 // URLs this browser can't decode are skipped up front.
+// hls.js loads async; true while it is still on its way.
+function hlsPending(){const s=document.getElementById('hlsLib');return !window.Hls&&!!s&&!s.dataset.failed}
 function canPlayUrl(u){
-  if(/\.m3u8(\?|$)/.test(u))return supportsNativeHLS()||!!(window.Hls&&Hls.isSupported());
+  if(/\.m3u8(\?|$)/.test(u))return supportsNativeHLS()||hlsPending()||!!(window.Hls&&Hls.isSupported());
   if(/icecast\.audio|\.aac(\?|$)/.test(u))return audio.canPlayType('audio/aac')!==''||audio.canPlayType('audio/aacp')!=='';
   return true;
 }
@@ -956,6 +1148,13 @@ function startPlayback(){
   userWantsPlay=true;hideRadioError();clearTimeout(reconnectTimer);
   if(state!=='reconnecting')setState('connecting');
   const url=streamUrl();
+  // Tapped play before hls.js arrived: start as soon as it does.
+  if(audio.dataset.loadedUrl!==url&&/\.m3u8(\?|$)/.test(url)&&!supportsNativeHLS()&&hlsPending()){
+    const lib=document.getElementById('hlsLib');
+    const resume=()=>{lib.removeEventListener('load',resume);lib.removeEventListener('error',resume);if(userWantsPlay)startPlayback()};
+    lib.addEventListener('load',resume);lib.addEventListener('error',resume);
+    return;
+  }
   if(audio.dataset.loadedUrl!==url&&!loadStream(url)){userWantsPlay=false;setState('stopped');return}
   const seq=++loadSeq;
   armStallWatch();
@@ -1335,5 +1534,6 @@ window.addEventListener('load',()=>{
 </script>
 <script src="../js/sw-update.js"></script>
 <!-- Install prompt rendered by pwa-install.js -->
+<script src="../js/net-status.js"></script>
 </body>
 </html>

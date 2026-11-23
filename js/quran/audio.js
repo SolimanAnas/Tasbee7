@@ -117,6 +117,8 @@
 
     async function fetchAudioData(surah, ayah) {
       const reference = `${surah}:${ayah}`;
+      // No connection: answer at once instead of waiting out the timeout.
+      if (navigator.onLine === false) return null;
       try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), AUDIO_FETCH_TIMEOUT);
@@ -169,10 +171,17 @@
       windowCurrentAyahGlobal = { surah: parseInt(surah), ayah: parseInt(ayah) };
       const data = await fetchAudioData(surah, ayah);
       if(!data) {
+          // Ayah recitation is streamed, so it needs a connection. Stop here:
+          // skipping ahead would race through every remaining ayah of the mushaf.
+          if (navigator.onLine === false) {
+            stopAudio();
+            showCustomToast("لا يوجد اتصال بالإنترنت — الاستماع للآيات يحتاج إلى اتصال");
+            return;
+          }
           try {
             const next = await getNextAyahDb(surah, ayah);
             if (next) { startPlayback(next.surah, next.ayah); }
-            else { stopAudio(); showCustomToast("تم اختراق القرآن الكريم"); }
+            else { stopAudio(); showCustomToast("تم ختم القرآن الكريم"); }
           } catch (_) {
             stopAudio();
           }
@@ -252,7 +261,7 @@
              if (next) {
                  startPlayback(next.surah, next.ayah);
              } else {
-                 stopAudio(); showCustomToast("تم اختراق القرآن الكريم");
+                 stopAudio(); showCustomToast("تم ختم القرآن الكريم");
              }
          }
        } catch (e) {

@@ -19,6 +19,8 @@ const MIME = {
   '.pdf': 'application/pdf',
   '.ico': 'image/x-icon',
   '.onnx': 'application/octet-stream',
+  '.wasm': 'application/wasm',
+  '.db': 'application/octet-stream',
 };
 
 const server = http.createServer((req, res) => {

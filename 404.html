@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl" data-theme="paper">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
 <title>الصفحة غير موجودة · زاد المسلم</title>
 <meta name="theme-color" content="#1A7040">
 <link rel="manifest" href="/Tasbee7/manifest.json">
@@ -180,8 +181,8 @@
       <figcaption class="ayah-ref">﴿ سُورَةُ الإسراء · ٩٧ ﴾</figcaption>
     </figure>
 
-    <h1>عذراً، هذه الصفحة غير موجودة</h1>
-    <p class="lede">ربّما ضلّت الصفحة طريقها… لكنّ الطريق إلى الرئيسيّة واضحٌ بإذن الله.</p>
+    <h1 id="msgTitle">عذراً، هذه الصفحة غير موجودة</h1>
+    <p class="lede" id="msgLede">ربّما ضلّت الصفحة طريقها… لكنّ الطريق إلى الرئيسيّة واضحٌ بإذن الله.</p>
 
     <nav class="actions">
       <a class="btn btn-home" href="/Tasbee7/index.html">
@@ -207,5 +208,20 @@
     </div>
 
   </main>
+<script>
+// The service worker also shows this page when a page that was never opened
+// (so never saved) is requested with no connection. Say that, rather than
+// "not found", and reload by itself once the connection is back.
+(function () {
+  if (navigator.onLine !== false) return;
+  document.title = 'لا يوجد اتصال · زاد المسلم';
+  var code = document.querySelector('.code');
+  if (code) code.style.display = 'none';
+  document.getElementById('msgTitle').textContent = 'لا يوجد اتصال بالإنترنت';
+  document.getElementById('msgLede').textContent =
+    'هذه الصفحة لم تُحفَظ على جهازك بعد. الصفحات المحفوظة تعمل دون اتصال، وستُفتح هذه الصفحة تلقائياً عند عودة الاتصال.';
+  window.addEventListener('online', function () { location.reload(); });
+})();
+</script>
 </body>
 </html>

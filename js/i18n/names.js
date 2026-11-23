@@ -129,17 +129,18 @@
     '46': 'Salah Bukhatir', '48': 'Adel Rayyan', '49': 'Abdul Bari Al-Thubaiti',
     '50': 'Abdul Bari Mohammad', '55': 'Abdul Aziz Al-Ahmad', '57': 'Abdullah Al-Buraimi',
     '58': 'Abdullah Al-Buaijan', '59': 'Abdullah Al-Matroud', '60': 'Abdullah Basfar',
-    '61': 'Abdullah Khayyat'
+    '61': 'Abdullah Khayyat',
+    'muhammad-abadh': 'Mohamed Obada'
   };
 
   // ---- Radio station names (index aligned to RADIO_STATIONS order) --------
   const STATION_LATIN = [
-    'Holy Quran Radio – Cairo', 'Holy Quran Radio – Makkah', 'Holy Quran Radio – Sharjah',
-    'General Radio – Various Reciters', 'Humble Recitations Radio', 'Ruqyah Radio',
+    'Holy Quran Radio – Cairo (Live)', 'Holy Quran Radio – Makkah', 'Holy Quran Radio – Sharjah',
+    'General Radio – Various Reciters', 'Mustafa Ismail', 'Humble Recitations Radio', 'Ruqyah Radio',
     'Morning Adhkar', 'Evening Adhkar', 'Surah Al-Baqarah – Various Reciters',
     'Short Selected Recitations', 'Abdul Basit Abdul Samad (Murattal)',
     'Mohamed Siddiq Al-Minshawi (Mujawwad)', 'Mahmoud Khalil Al-Hussary (Murattal)',
-    'Mahmoud Khalil Al-Hussary (Mujawwad)', 'Mustafa Ismail', 'Mahmoud Ali Al-Banna (Mujawwad)',
+    'Mahmoud Khalil Al-Hussary (Mujawwad)', 'Mahmoud Ali Al-Banna (Mujawwad)',
     'Mohammed Al-Tablawi', 'Ahmad Nuaina', 'Abdul Rahman Al-Sudais', 'Maher Al-Muaiqly',
     'Yasser Al-Dosari', 'Mohammed Ayyoub – Special Recitation', 'Salah Al-Budair',
     'Abdul Mohsen Al-Qasim', 'Ali bin Abdul Rahman Al-Hudhaify', 'Abdullah Al-Matroud',

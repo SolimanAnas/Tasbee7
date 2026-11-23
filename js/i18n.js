@@ -237,6 +237,7 @@ const I18n = (() => {
       }
       wrap.classList.remove('open');
       setTimeout(() => wrap.remove(), 320);
+      if (typeof opts.onClose === 'function') setTimeout(opts.onClose, 340);
     };
     wrap.addEventListener('click', e => {
       const row = e.target.closest('[data-lang]');
@@ -246,8 +247,13 @@ const I18n = (() => {
   }
 
   // Show the picker automatically the very first time (no language chosen yet).
-  function maybeFirstRun() {
-    try { if (!localStorage.getItem(STORAGE_KEY)) openLangSheet({ firstRun: true }); } catch (e) {}
+  // onDone runs after the sheet closes (language chosen or sheet dismissed), so
+  // the page can continue its first-run steps. Returns true when it was shown.
+  function maybeFirstRun(onDone) {
+    try {
+      if (!localStorage.getItem(STORAGE_KEY)) { openLangSheet({ firstRun: true, onClose: onDone }); return true; }
+    } catch (e) {}
+    return false;
   }
 
   return { t, name, init, setLang, getLang, isRTL, applyTranslations, loadLang, createSwitcher, openLangSheet, maybeFirstRun };

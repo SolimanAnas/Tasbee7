@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+// Theme and reading direction before the first paint: the theme was applied
+// in the load event, so the page showed its default theme (and right-to-left) first,
+// then switched. Same rule as the page's own code below, which still runs.
+(function () {
+  var d = document.documentElement, t = null, l = null;
+  try { t = localStorage.getItem('themeMode'); l = localStorage.getItem('zad_lang'); } catch (e) { /* storage blocked */ }
+  if (!t || ['dark', 'light', 'plain-dark'].indexOf(t) < 0) t = 'dark';
+  d.setAttribute('data-theme', t);
+  if (l) { d.lang = l; d.dir = ['ar', 'ckb', 'ur'].indexOf(l) < 0 ? 'ltr' : 'rtl'; }
+})();
+</script>
 <title>سياسة الخصوصية — زاد المسلم | Privacy Policy</title>
 <link rel="stylesheet" href="../css/svg-theme.css">
 <meta name="description" content="سياسة الخصوصية لتطبيق زاد المسلم. Privacy Policy for the Zad Al-Muslim app: what data is stored, what is sent, and how notifications work.">
@@ -17,8 +29,7 @@
 <link rel="icon" href="../icons/icon-192.png">
 <meta name="theme-color" content="#10b981">
 <link rel="manifest" href="../manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/fonts.css">
 
 <style>
 :root {
@@ -227,5 +238,6 @@ window.addEventListener("pageshow", () => {
 </script>
 <script src="../js/i18n.js"></script>
 <script>if (window.I18n) I18n.init();</script>
+<script src="../js/net-status.js"></script>
 </body>
 </html>
