@@ -33,6 +33,16 @@
   font-weight: 400 700;
   font-display: swap;
 }
+/* The text mushaf's own font (quran-text.html's MadinahFont: KFGQPC Hafs Uthmanic
+   script, colour version with its ayah medallions). It is made for the King Fahd
+   Complex "QPC Hafs" encoding (data/quran-qpc.json); Amiri stays as the fallback
+   for the Tanzil text of data/quran.json if that file cannot be loaded. */
+@font-face {
+  font-family: 'MushafFont';
+  src: url('../fonts/uthmani-colored.ttf') format('truetype'),
+       url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
+  font-display: swap;
+}
 :root {
   --bg-image: url('../images/Background-light.webp');
   --bg-surface: rgba(255, 255, 255, 0.45);
@@ -197,6 +207,10 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
   padding:4px 12px; border-radius:12px; background:var(--gold-soft); display:inline-block;
 }
 .ayah-loading { color:var(--text-secondary); font-size:14px; padding:20px; }
+/* Mushaf text: only when the QPC Hafs text is in use (see loadQuran). */
+.qpc .ayah-arabic, .qpc .unit-text, .qpc .opt-ayah { font-family:'MushafFont', 'Amiri', serif; }
+.qpc .ayah-arabic { line-height:2.1; word-spacing:0; }
+.ayah-arabic .ayah-num { font-family:'MushafFont', 'Amiri', serif; white-space:nowrap; margin-inline-start:6px; }
 
 /* ===== Player dock (fixed bottom, like the audio page's mini player) ===== */
 .dock {
@@ -886,6 +900,7 @@ label { font-size:14px; color:var(--accent-main); font-weight:bold; }
 
 <script src="../js/i18n.js"></script>
 <script src="../js/quran-structure.js"></script>
+<script src="../js/quran-text-source.js"></script>
 <script src="../js/theme-manager.js"></script>
 <script src="../js/back-close.js"></script>
 <script>
@@ -1090,7 +1105,7 @@ const PREF_GROUPS = {
   unitLabel: {
     title: 'takrar_unit_label', desc: 'takrar_unit_label_desc',
     icon: '<path d="M4 6h16M4 12h10M4 18h7"/>',
-    options: () => [['text', `<span class="opt-ayah">وَإِذِ ٱسْتَسْقَىٰ…</span>`], ['ref', t('takrar_unit_label_ref')]]
+    options: () => [['text', `<span class="opt-ayah">وَإِذِ ٱسۡتَسۡقَىٰ…</span>`], ['ref', t('takrar_unit_label_ref')]]
   },
   fontSize: {
     title: 'takrar_font_size', icon: '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
@@ -1156,15 +1171,35 @@ function resetTakrar() {
   location.reload();
 }
 
-/* ---------- Local Quran text (precached data/quran.json) ---------- */
-let QURAN = null, _quranLoading = null;
+/* ---------- Local Quran text (precached data/quran.json + data/quran-qpc.json) ----------
+   The text is shown like the text mushaf: the mushaf font with the King Fahd
+   Complex "QPC Hafs" encoding it is made for (data/quran-qpc.json, built and
+   verified by scripts/build-quran-qpc.cjs). Each QPC ayah is used only if its
+   letters are exactly those of the checked data/quran.json; otherwise, or if the
+   file is missing, the page keeps the quran.json text in Amiri. */
+let QURAN = null, QPC = false, _quranLoading = null;
 function loadQuran() {
   if (QURAN) return Promise.resolve(QURAN);
   if (!_quranLoading) {
-    _quranLoading = fetch('../data/quran.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(list => {
+    _quranLoading = fetch('../data/quran.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(async list => {
       const m = new Map();
       for (const x of list) m.set(x.surah * 1000 + x.ayah, x.text_uthmani);
-      return (QURAN = m);
+      QURAN = m;
+      try {
+        const L = window.QuranTextSource && QuranTextSource.letters;
+        const r = await fetch('../data/quran-qpc.json');
+        const qpc = r.ok && (await r.json()).surahs;
+        if (!L || !Array.isArray(qpc) || qpc.length !== 114) throw 0;
+        const q = new Map();
+        for (const x of list) {
+          const t = qpc[x.surah - 1] && qpc[x.surah - 1][x.ayah - 1];
+          if (typeof t !== 'string' || L(t) !== L(localAyah(x.surah, x.ayah))) throw 0;
+          q.set(x.surah * 1000 + x.ayah, t);
+        }
+        QURAN = q; QPC = true;
+        document.documentElement.classList.add('qpc');
+      } catch (e) { QURAN = m; QPC = false; }
+      return QURAN;
     }).catch(e => { _quranLoading = null; throw e; });
   }
   return _quranLoading;
@@ -1175,6 +1210,7 @@ function localAyah(s, a) {
   let x = QURAN && QURAN.get(s * 1000 + a);
   if (!x) return '';
   x = x.replace(/^﻿/, '');
+  if (QPC) return x; // the QPC text has no prefixed basmala
   // The data prefixes ayah 1 of each surah (except al-Fatiha) with the basmala; drop it.
   if (a === 1 && s !== 1) {
     const w = x.split(/\s+/);
@@ -1611,10 +1647,12 @@ async function fetchAyahText(surah, ayah) {
   const key = surah + ':' + ayah;
   if (ayahCache[key] !== undefined) return ayahCache[key];
   try {
-    const r = await fetch(`https://api.quran.com/api/v4/verses/by_key/${surah}:${ayah}?language=ar&fields=text_uthmani`);
+    // Same encoding as the local text: QPC Hafs for the mushaf font, else Tanzil Uthmani for Amiri.
+    const field = QPC ? 'text_qpc_hafs' : 'text_uthmani';
+    const r = await fetch(`https://api.quran.com/api/v4/verses/by_key/${surah}:${ayah}?language=ar&fields=${field}`);
     if (!r.ok) throw 0;
     const d = await r.json();
-    const text = d.verse && d.verse.text_uthmani ? d.verse.text_uthmani : '';
+    const text = d.verse && d.verse[field] ? String(d.verse[field]).replace(/[\s\u00A0]*[\u0660-\u0669]+\s*$/, '') : '';
     ayahCache[key] = text;
     return text;
   } catch(e) { return ''; }
@@ -1631,6 +1669,14 @@ async function showAyahText(surah, ayah) {
   const text = (await loadQuran().catch(() => null) && localAyah(surah, ayah)) || await fetchAyahText(surah, ayah);
   if (myToken !== showAyahText._t) return;
   txt.textContent = text || t('takrar_ayah_load_error');
+  // The ayah medallion, drawn by the mushaf font from Arabic-Indic digits as in quran-text.html.
+  if (text && QPC) {
+    const num = document.createElement('span');
+    num.className = 'ayah-num';
+    num.textContent = String(ayah).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    txt.appendChild(document.createTextNode('\u00A0'));
+    txt.appendChild(num);
+  }
 }
 showAyahText._t = 0;
 

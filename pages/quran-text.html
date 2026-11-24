@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>html{touch-action:manipulation}</style>  <!-- pinch-zoom on, double-tap zoom off -->
+  <!-- No browser zoom on this page: a pinch resizes the Quran text (font size)
+       instead of magnifying the whole page; scrolling still works. -->
+  <style>html{touch-action:pan-x pan-y}</style>
   <title>القرآن الكريم النصي — قراءة وتسميع | زاد المسلم</title>
   <link rel="stylesheet" href="../css/svg-theme.css">
   <meta name="description" content="قراءة القرآن الكريم بالنص العثماني مع تلوين التجويد وأداة تسميع وحفظ متطورة. كل سورة وآية بخط عثماني واضح مع إمكانية التكرار والتقييم. Quran text with Uthmani script and Tajweed coloring, with advanced Tasmee' recitation and memorization tool.">
@@ -50,7 +52,7 @@
     /* ========== الخطوط المحلية ========== */
     @font-face {
       font-family: 'MadinahFont';
-      src: url('../fonts/uthmani-colored.ttf') format('opentype'),
+      src: url('../fonts/uthmani-colored.ttf') format('truetype'),
            url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
@@ -120,11 +122,6 @@
       display: inline !important;
     }
 
-    .stop-mark {
-      color: var(--accent) !important;
-      font-size: 0.85em !important;
-      margin: 0 2px !important;
-    }
 
     /* All numbers forced to use UthmanicHafs font */
     span.ayah-number {
@@ -783,7 +780,7 @@
                 <option value="MadinahFont" style="font-family: 'MadinahFont', sans-serif;"><img src="../img/SVG/quran.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> الخط العثماني (مجمع الملك فهد)</option>
                 <option value="ScheherazadeFont" style="font-family: 'ScheherazadeFont', serif;"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط شهرذاد (Scheherazade)</option>
                 <option value="AmiriFont" style="font-family: 'AmiriFont', serif;"><img src="../img/SVG/file-text.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط أميري (Amiri)</option>
-                <option value="UrduFont" style="font-family: 'UrduFont', sans-serif;"><img src="../img/SVG/flag.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط أردو (Almushaf)</option>
+                <option value="UrduFont" style="font-family: 'UrduFont', sans-serif;"><img src="../img/SVG/flag.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط اردو (Indo-Pak)</option>
               </select>
             </div>
           </div>
@@ -1097,8 +1094,25 @@
     }
     document.addEventListener('touchstart', () => hideZoomHint(true), { passive: true });
 
+    // Pinch / ctrl+wheel resize the text, never the page (same range as the slider).
+    const FONT_MIN = 20, FONT_MAX = 80;
     let initialPinchDistance = null;
     let initialPinchFontSize = null;
+    // iOS Safari zooms the page on its own gesture events even with touch-action set.
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(t =>
+      document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+    // Desktop: ctrl + wheel (and trackpad pinch, which arrives as ctrl + wheel) sizes the text.
+    let wheelSaveTimer = null, wheelSize = null;   // fractional size, so small trackpad steps add up
+    document.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      if (wheelSize === null || Math.round(wheelSize) !== fontSize) wheelSize = fontSize;
+      wheelSize = Math.min(FONT_MAX, Math.max(FONT_MIN, wheelSize * Math.exp(-e.deltaY / 200)));
+      const next = Math.round(wheelSize);
+      if (next !== fontSize) { fontSize = next; applyTextSettings(); }
+      clearTimeout(wheelSaveTimer);
+      wheelSaveTimer = setTimeout(() => { try { localStorage.setItem('quranFontSize', fontSize); } catch (err) {} }, 300);
+    }, { passive: false });
     const pinchArea = document.getElementById('textContainer');
 
     if (pinchArea) {
@@ -1115,7 +1129,7 @@
                 if(e.cancelable) e.preventDefault(); 
                 const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 let newFontSize = initialPinchFontSize * (currentDistance / initialPinchDistance);
-                if (newFontSize < 16) newFontSize = 16; if (newFontSize > 80) newFontSize = 80;
+                newFontSize = Math.min(FONT_MAX, Math.max(FONT_MIN, newFontSize));
                 if (Math.abs(newFontSize - fontSize) > 1) { fontSize = Math.round(newFontSize); applyTextSettings(); }
             }
         }, { passive: false });
@@ -1328,13 +1342,17 @@
 
     function cleanAndFormatAyahText(apiText) {
         if (!apiText) return "";
-        // Shown as text: nothing in the source string is ever parsed as markup.
-        // (The only markup in the result is the stop-mark span added below.)
+        // Shown as text: nothing in the source string is ever parsed as markup,
+        // and the result has no markup at all.
         let t = escHtml(apiText);
         t = t.replace(/[\u06DD\u06F0-\u06F9\u0660-\u0669\uFD3E\uFD3F\(\)\s]+$/g, '');
         t = t.replace(/[\u25CC]/g, '');
+        // Pause marks (ۖ ۗ ۘ ۙ ۚ ۛ ۜ) stay on their word, as in the printed mushaf.
+        // They used to be pushed onto a separate &nbsp; in a coloured span: that
+        // cut them off from their letter (they floated over the gap, and in Amiri
+        // landed on the line above); a span alone still drops or misplaces the
+        // mark in Amiri and Scheherazade. So they are plain text, same ink.
         t = t.replace(/\s+([\u06D6-\u06DC\u06DF-\u06ED])/g, '$1');
-        t = t.replace(/([\u06D6-\u06DB])/g, '&nbsp;<span class="stop-mark">$1</span>');
         t = t.replace(/([\u064E\u064F\u0650\u064B\u064C\u064D])([\u0651])/g, '$2$1');
         return t.trim();
     }

@@ -71,6 +71,8 @@
 
   let surahs = [];        // [{ n, name, nameEn, ayat: [text...] }]
   let basmalaText = '';
+  // Mushaf font + its QPC Hafs text; falls back to Scheherazade + data/quran.json.
+  let QFONT = 'QuranFont';
   let reciters = [];
   let bgImages = [];      // filenames from the manifest
   let bgImg = null;       // loaded Image for the current 'i:' background
@@ -191,6 +193,26 @@
       if (s.n === 1 || !s.ayat[0]) continue;
       const w = s.ayat[0].split(/\s+/);
       if (w.slice(0, 4).map(bareLetters).join(' ') === 'بسم الله الرحمن الرحيم') s.ayat[0] = w.slice(4).join(' ');
+    }
+    // The mushaf font (fonts/uthmani-colored.ttf) is made for the King Fahd
+    // Complex "QPC Hafs" encoding, so draw that text, exactly as the text mushaf
+    // does. data/quran-qpc.json is built and verified letter for letter against
+    // data/quran.json by scripts/build-quran-qpc.cjs; it is checked again here
+    // (ayah counts and letters) and any mismatch keeps the quran.json text.
+    try {
+      const res = await fetch('../data/quran-qpc.json');
+      const qpc = (await res.json()).surahs;
+      const L = window.QuranTextSource && QuranTextSource.letters;
+      if (!L || !Array.isArray(qpc) || qpc.length !== 114) throw new Error('qpc');
+      surahs.forEach((s, i) => {
+        if (!Array.isArray(qpc[i]) || qpc[i].length !== s.ayat.length) throw new Error('qpc');
+        s.ayat.forEach((t, j) => { if (L(qpc[i][j]) !== L(t)) throw new Error('qpc ' + (i + 1) + ':' + (j + 1)); });
+      });
+      surahs.forEach((s, i) => { s.ayat = qpc[i].slice(); });
+      basmalaText = qpc[0][0];
+      QFONT = 'QuranFont';
+    } catch (e) {
+      QFONT = 'QuranFallback';
     }
   }
 
@@ -424,15 +446,16 @@
     const key = [seg.surah, seg.ayah, w, h, state.fontMul, state.caption].join('|');
     if (layoutCache.has(key)) return layoutCache.get(key);
     const words = seg.text.split(/\s+/).filter(Boolean);
-    // U+06DD (end of ayah) + Arabic-Indic digits renders as the font's ayah
-    // medallion; the NBSP keeps the marker from wrapping onto its own line.
-    if (seg.num != null && words.length) words[words.length - 1] += '\u00A0\u06DD' + arDigits(seg.num);
+    // Ayah medallion: the mushaf font draws Arabic-Indic digits as one (as in
+    // quran-text.html); Scheherazade needs U+06DD before them. The NBSP keeps the
+    // marker from wrapping onto its own line.
+    if (seg.num != null && words.length) words[words.length - 1] += '\u00A0' + (QFONT === 'QuranFont' ? '' : '\u06DD') + arDigits(seg.num);
     const maxW = w * 0.84;
     const maxH = h * (state.caption ? 0.6 : 0.7);
     let size = Math.min(w, h) * 0.085 * state.fontMul;
     let lines;
     for (;;) {
-      c.font = size + 'px QuranFont';
+      c.font = size + 'px ' + QFONT;
       lines = wrapWords(c, words, maxW);
       if (lines.length * size * 1.8 <= maxH || size <= 22) break;
       size *= 0.94;
@@ -449,7 +472,7 @@
     const L = layoutText(c, seg, w, h);
     c.save();
     c.globalAlpha = alpha;
-    c.font = L.size + 'px QuranFont';
+    c.font = L.size + 'px ' + QFONT;
     c.direction = 'rtl';
     c.textAlign = 'center';
     c.textBaseline = 'middle';
@@ -502,7 +525,7 @@
     c.stroke();
     c.fillStyle = 'rgba(255,255,255,0.95)';
     if (arabicNames()) {
-      c.font = (base * 0.045) + 'px QuranFont';
+      c.font = (base * 0.045) + 'px ' + QFONT;
       c.fillText(s.name, w / 2, y);
     } else {
       c.font = (base * 0.04) + 'px VMTajawal';
@@ -970,6 +993,7 @@
     $('vm' + kind + 'Search').value = '';
     if (kind === 'Surah') renderSurahList();
     else if (kind === 'Popular') renderPopularList();
+    else if (kind === 'Search') renderSearchList();
     else renderReciterList();
     $('vmPickOverlay').classList.add('active');
     $('vm' + kind + 'Sheet').classList.add('active');
@@ -1019,6 +1043,34 @@
     }
     $('vmPopularList').innerHTML = html || '<div class="sheet-empty">' + esc(tr('takrar_no_results')) + '</div>';
   }
+  // ---------- 🔎 search the whole Quran (local text, works offline) ----------
+  const SEARCH_MAX = 60;
+  let searchIndex = null;
+  const searchNorm = t => normalize(bareLetters(t || '')).replace(/[\u06D6-\u06ED]/g, '').replace(/\s+/g, ' ').trim();
+  function buildSearchIndex() {
+    searchIndex = [];
+    for (const s of surahs) s.ayat.forEach((t, i) => { if (t) searchIndex.push({ s: s.n, a: i + 1, t, n: searchNorm(t) }); });
+  }
+  function renderSearchList() {
+    const q = searchNorm($('vmSearchSearch').value);
+    const box = $('vmSearchList');
+    if (!q) { box.innerHTML = '<div class="sheet-empty">' + esc(tr('vm_search_quran_hint')) + '</div>'; return; }
+    if (!searchIndex) buildSearchIndex();
+    const hits = [];
+    let total = 0;
+    for (const r of searchIndex) {
+      if (r.n.includes(q)) { total++; if (hits.length < SEARCH_MAX) hits.push(r); }
+    }
+    if (!hits.length) { box.innerHTML = '<div class="sheet-empty">' + esc(tr('takrar_no_results')) + '</div>'; return; }
+    const num = n => (arabicNames() ? arDigits(n) : String(n));
+    box.innerHTML = hits.map(r => {
+      const words = r.t.split(/\s+/);
+      const text = words.map(w => esc(w)).map((w, i) => (searchNorm(words[i]) && q.split(' ').some(p => p && searchNorm(words[i]).includes(p))) ? '<mark class="search-hl">' + w + '</mark>' : w).join(' ');
+      return '<button type="button" class="sheet-item pop-row" data-pop="' + r.s + ':' + r.a + ':' + r.a + '">' +
+        '<span class="pop-meta">' + esc(surahLabel(surahs[r.s - 1])) + ' · ' + num(r.a) + '</span>' +
+        '<span class="pop-text" style="white-space:normal;">' + text + '</span></button>';
+    }).join('') + (total > hits.length ? '<div class="sheet-empty">' + esc(total + ' / ' + hits.length) + '</div>' : '');
+  }
   function choosePopular(key) {
     const [s, from, to] = key.split(':').map(Number);
     closePick();
@@ -1063,6 +1115,10 @@
     $('vmSurahBtn').onclick = () => openPick('Surah');
     $('vmReciterBtn').onclick = () => openPick('Reciter');
     $('vmPopularBtn').onclick = () => openPick('Popular');
+    $('vmSearchBtn').onclick = () => openPick('Search');
+    let searchTimer = null;
+    $('vmSearchSearch').oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderSearchList, 150); };
+    $('vmSearchList').onclick = e => { const b = e.target.closest('[data-pop]'); if (b) choosePopular(b.dataset.pop); };
     $('vmPopularSearch').oninput = renderPopularList;
     $('vmPopularList').onclick = e => { const b = e.target.closest('[data-pop]'); if (b) choosePopular(b.dataset.pop); };
     document.querySelectorAll('#vmPopularFilter .filter-chip').forEach(b => {
@@ -1321,7 +1377,7 @@
     bindControls();
     // Canvas text silently falls back to a system font if drawn before the
     // webfont is ready, so wait for both faces before the first frame.
-    try { await Promise.all([document.fonts.load('40px QuranFont'), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
+    try { await Promise.all([document.fonts.load('40px ' + QFONT), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
     selectBackground(state.bg);
   }
 
@@ -1329,7 +1385,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 2;   // 2: multi-picture slideshow
+  const BUILD = 4;   // 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
   window.VM = { build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
   init();
 })();
