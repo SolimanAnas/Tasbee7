@@ -673,6 +673,8 @@
           <button class="action-btn" onclick="copySelectedAyah()"><span style="font-size:1.2rem;"><img src="../img/SVG/copy.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> نسخ الآية</button>
           <button class="action-btn" onclick="fetchTranslation()"><span style="font-size:1.2rem;"><img src="../img/SVG/globe.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> ترجمة (English)</button>
           <button class="action-btn" onclick="fetchTafsir('ar.muyassar')"><span style="font-size:1.2rem;"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> التفسير</button>
+          <button class="action-btn" onclick="shareSelectedAyah()"><span style="font-size:1.2rem;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.125em"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span> مشاركة كصورة</button>
+          <button class="action-btn" onclick="makeVideoFromAyah()"><span style="font-size:1.2rem;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.125em"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg></span> صنع فيديو</button>
       </div>
 
       <div class="tafsir-selector-row">
@@ -930,6 +932,8 @@
   <script src="../js/quran-common.js"></script>
   <script src="../js/dhikr-stats.js"></script>
   <script src="../js/quran-text-source.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/share-card.js"></script>
 
   <script>
     let fontSize = 40; 
@@ -1308,6 +1312,30 @@
 
     function playSelectedAyah() { closeAyahMenu(); if (!audioBarActive) toggleAudioBar(); playAyah(selectedAyahLocalIndex); }
     
+    // The selected ayah's place in the mushaf (surah, ayah, plain text) from
+    // the app's own verified text.
+    function selectedAyahRecord() {
+      return loadSearchData().then(data => data[selectedAyahGlobalNumber - 1] || null);
+    }
+    // Image card (js/share-card.js). The card draws with Amiri, so it gets the
+    // quran.json text, the encoding Amiri is made for.
+    function shareSelectedAyah() {
+      const title = document.getElementById('ayahMenuTitle').textContent;
+      selectedAyahRecord().then(a => {
+        if (!a || !window.ShareCard) { showCustomToast('تعذرت المشاركة.'); return; }
+        closeAyahMenu();
+        ShareCard.open({ text: a.text + ' \u06DD' + a.numberInSurah.toLocaleString('ar-EG'), title: 'القرآن الكريم', source: title });
+      }).catch(() => showCustomToast('تعذرت المشاركة.'));
+    }
+    // The ayah video maker, opened on this ayah (pages/video-maker.html?s=&a=).
+    function makeVideoFromAyah() {
+      selectedAyahRecord().then(a => {
+        if (!a) return;
+        stopAudio();
+        location.href = 'video-maker.html?s=' + a.surah + '&a=' + a.numberInSurah;
+      });
+    }
+
     function copySelectedAyah() {
         const cleanText = selectedAyahText.replace(/<[^>]*>?/gm, '');
         const fullText = `${cleanText} ﴿${document.getElementById('ayahMenuTitle').textContent}﴾`;
