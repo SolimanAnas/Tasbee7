@@ -252,6 +252,24 @@
     .trans-credit { font-size: 0.78rem; color: var(--text-secondary); padding: 10px 4px 0; line-height: 1.6; }
     .trans-credit a, .trans-src a { color: var(--accent); }
     .trans-src { font-size: 0.75rem; opacity: 0.75; margin-top: 8px; }
+    /* Today's wird bar (js/wird-core.js) */
+    .wird-bar { position: fixed; left: 12px; right: 12px; bottom: calc(52px + env(safe-area-inset-bottom)); margin: 0 auto; max-width: 480px; z-index: 80;
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 12px; border-radius: 16px; background: var(--glass-bg, rgba(248, 243, 232, 0.95));
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--accent); box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      font-family: 'Tajawal', system-ui, sans-serif; color: var(--text-primary); }
+    .wird-bar[hidden] { display: none; }
+    body.audio-open .wird-bar { display: none; }
+    .wird-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+    .wird-title { font-size: 0.84rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wird-track { height: 5px; border-radius: 5px; background: rgba(128,128,128,0.2); overflow: hidden; }
+    .wird-track i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 5px; transition: width .3s; }
+    .wird-rec { flex: none; border: none; border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 0.82rem; font-weight: 800; cursor: pointer;
+      background: rgba(128,128,128,0.14); color: var(--text-primary); }
+    .wird-rec.ready { background: var(--accent); color: #fff; }
+    .wird-rec:disabled { opacity: 0.6; cursor: default; }
+    .wird-link, .wird-x { flex: none; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+      color: var(--accent); background: none; border: none; font-size: 1.2rem; text-decoration: none; cursor: pointer; }
+    .wird-x { color: var(--text-secondary); }
     /* An ayah reached from search: a soft glow that fades out. */
     .ayah-wrapper.search-flash { animation: searchFlash 2.6s ease-out; }
     @keyframes searchFlash { 0%, 35% { background: rgba(255, 213, 79, 0.55); } 100% { background: transparent; } }
@@ -662,6 +680,20 @@
 
   <div id="customToast" class="custom-toast"></div>
 
+  <!-- Today's Qur'an wird (ثبات), shown when the mushaf is opened on it: the range,
+       the pages of it read here today, and recording it once done. -->
+  <div class="wird-bar" id="wirdBar" hidden>
+    <div class="wird-main">
+      <span class="wird-title" id="wirdTitle"></span>
+      <span class="wird-track"><i id="wirdFill"></i></span>
+    </div>
+    <button type="button" class="wird-rec" id="wirdRec" onclick="recordWirdHere()"></button>
+    <a class="wird-link" href="thabat.html" id="wirdLink" data-i18n-title="qt_wird_open" title="ثبات" aria-label="ثبات">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10M12 20V10M12 10c0-3 2.5-5.5 6-6-.2 3.6-2.8 6-6 6zM12 13c0-2.5-2-4.6-5-5 .1 3 2.2 5 5 5z"/></svg>
+    </a>
+    <button type="button" class="wird-x" onclick="hideWirdBar()" data-i18n-aria="qt_close" aria-label="إغلاق">×</button>
+  </div>
+
   <div id="ayahMenuOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;" onclick="closeAyahMenu()"></div>
   <div class="ayah-bottom-sheet" id="ayahBottomSheet">
       <div class="drag-handle"></div>
@@ -952,6 +984,7 @@
   <script src="../js/quran-common.js"></script>
   <script src="../js/dhikr-stats.js"></script>
   <script src="../js/quran-text-source.js"></script>
+  <script src="../js/wird-core.js"></script>
   <script src="../js/i18n.js"></script>
   <script src="../js/i18n/names.js"></script>
   <script src="../js/share-card.js"></script>
@@ -1732,6 +1765,7 @@
       applyTextSettings();
       setupLongPressForAyahs();
       renderPageTranslations();
+      updateWirdBar();
       if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
       if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
     }
@@ -1975,6 +2009,65 @@
         orgNav(newPage, dir);
         setTimeout(() => { updateToggleLink(); updateSurahProgress(); updatePageLabels(); }, 300);
     };
+
+    // ===== Today's Qur'an wird (ثبات, js/wird-core.js) =====
+    // Opened from the wird (?wird=1) the mushaf shows a small bar: today's pages,
+    // how many of them were opened here today, and a button that records the
+    // wird in the same journey, with the same rules as in ثبات. Only the range
+    // and the progress are shown — never a journey name (ثبات can be PIN-locked).
+    let wirdBarOn = false;
+    try { wirdBarOn = new URLSearchParams(location.search).get('wird') === '1' || sessionStorage.getItem('qtWirdBar') === '1'; } catch (e) { /* storage blocked */ }
+    const wirdSeenKey = () => 'qt_wird_seen_' + WirdCore.dayKey();
+    function wirdSeen() {
+      try { return JSON.parse(localStorage.getItem(wirdSeenKey()) || '[]'); } catch (e) { return []; }
+    }
+    // pages of today's range, in reading order (it may run past 604 into the next khatma)
+    function wirdPages(t) {
+      const out = [];
+      for (let i = 0; i < t.target; i++) out.push(((t.from - 1 + i) % 604) + 1);
+      return out;
+    }
+    function updateWirdBar() {
+      const bar = document.getElementById('wirdBar');
+      if (!bar || !window.WirdCore) return;
+      const S = WirdCore.load(), j = WirdCore.wirdOf(S);
+      if (!wirdBarOn || !j) { bar.hidden = true; return; }
+      try { sessionStorage.setItem('qtWirdBar', '1'); } catch (e) { /* storage blocked */ }
+      const t = WirdCore.today(j), pages = wirdPages(t);
+      // this page counts as read when it is part of today's wird
+      let seen = wirdSeen();
+      if (pages.includes(currentPage) && !seen.includes(currentPage)) {
+        seen.push(currentPage);
+        try { localStorage.setItem(wirdSeenKey(), JSON.stringify(seen)); } catch (e) { /* storage blocked */ }
+      }
+      const opened = pages.filter(p => seen.includes(p)).length;
+      const read = Math.max(t.read, Math.min(t.target, t.read + opened));
+      document.getElementById('wirdTitle').textContent = T('qt_wird_range', { a: num(t.from), b: num(pages[pages.length - 1]) }) +
+        ' · ' + (t.done ? T('qt_wird_done_short') : num(Math.min(read, t.target)) + '/' + num(t.target));
+      document.getElementById('wirdFill').style.width = Math.round(Math.min(1, (t.done ? t.target : read) / t.target) * 100) + '%';
+      const rec = document.getElementById('wirdRec');
+      rec.disabled = t.done;
+      rec.textContent = t.done ? '✓' : T('qt_wird_record');
+      // the last page of the wird reached (or every page opened): invite to record it
+      rec.classList.toggle('ready', !t.done && (currentPage === pages[pages.length - 1] || opened >= pages.length));
+      bar.hidden = false;
+    }
+    function recordWirdHere() {
+      const S = WirdCore.load(), j = WirdCore.wirdOf(S);   // fresh: ثبات may have changed it
+      if (!j) return;
+      const t = WirdCore.today(j);
+      if (t.done) return;
+      const { khatma } = WirdCore.record(j, t.left || t.target);
+      try { WirdCore.save(S); } catch (e) { showCustomToast(T('qt_wird_save_error')); return; }
+      showCustomToast(T(khatma ? 'qt_wird_khatma' : 'qt_wird_marked'));
+      if (window.DhikrStats) DhikrStats.sync();
+      updateWirdBar();
+    }
+    function hideWirdBar() {
+      wirdBarOn = false;
+      try { sessionStorage.removeItem('qtWirdBar'); } catch (e) { /* storage blocked */ }
+      updateWirdBar();
+    }
 
     // Repeat / speed option labels in the UI language.
     function localizeAudioOptions() {

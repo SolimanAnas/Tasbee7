@@ -8,6 +8,7 @@
 (function () {
   'use strict';
   const KEY = 'thabat_v1';
+  const WirdCore = window.WirdCore;   // js/wird-core.js: the wird rules shared with the mushaf
   const MILES = [1, 3, 7, 14, 30, 60, 90, 180, 365];
   // Cover pictures by name (new artwork first). Journeys saved with a number (1–8) keep
   // the same picture: cN.
@@ -92,7 +93,9 @@
     const starts = SURAHS.filter(x => x.page === p);
     return starts.length ? starts[0] : SURAHS.filter(x => x.page < p).pop() || SURAHS[0] || { name: '' };
   }
-  const wirdEnd = j => Math.min(PAGES, j.quran.pos + j.quran.daily - 1);
+  // today's amount: the khatma goal's share when there is one (js/wird-core.js), else the set amount
+  const dailyOf = j => WirdCore.dailyFor(j);
+  const wirdEnd = j => WirdCore.today(j).to;
   const surahSpan = (a, b) => { const x = surahAt(a).name, y = surahAt(b).name; return x === y ? x : `${x} — ${y}`; };
   // a days count for growth and milestones: days of the current stretch, or days the wird was read
   const jDays = j => (isQ(j) ? qDays(j) : streakDays(cur(j)));
@@ -145,13 +148,13 @@
       <svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>`;
   }
   function quranCard(j) {
-    const Q = j.quran, done = !!Q.log[dayKey()], d = qDays(j);
+    const Q = j.quran, done = WirdCore.today(j).done, d = qDays(j);
     const pct = Math.round((Q.pos - 1) / PAGES * 100);
     return `<button class="card j-card quran" data-id="${j.id}">
         <img class="j-cover" src="${coverImg(j.cover, true)}" alt="">
         <span class="j-body">
           <span class="j-name">${esc(j.name)}</span>
-          <span class="j-kind ${done ? 'q-ok' : ''}">${done ? esc(T('th_q_done_today', 'أتممت ورد اليوم، تقبّل الله')) : esc(T('th_q_today_range', 'ورد اليوم: ص {a}–{b}', { a: num(Q.pos), b: num(wirdEnd(j)) }))}</span>
+          <span class="j-kind ${done ? 'q-ok' : ''}">${done ? esc(T('th_q_done_today', 'أتممت ورد اليوم، تقبّل الله')) : esc(T('th_q_today_range', 'ورد اليوم: ص {a}–{b}', { a: num(Q.pos), b: num(Math.max(Q.pos, wirdEnd(j))) }))}</span>
           <span class="j-next"><span class="j-bar"><i style="width:${pct}%"></i></span>
             <small>${esc(T('th_q_khatma_pct', 'الختمة {k}: {p}%', { k: num(Q.khatmat + 1), p: num(pct) }))}</small></span>
         </span>
@@ -309,11 +312,14 @@
   // ---- the Qur'an wird view: its own mushaf look ----
   let qAmount = 0;              // pages chosen for today in the wird card
   function renderQuranView(j) {
-    const Q = j.quran, today = dayKey(), done = Q.log[today] || 0;
-    if (!qAmount) qAmount = Q.daily;
+    const Q = j.quran, today = dayKey(), TD = WirdCore.today(j);
+    const read = Q.log[today] || 0, done = TD.done ? read : 0;
+    // what is left of today's wird (the whole of it before any reading)
+    if (!qAmount) qAmount = Math.max(1, TD.left || TD.target);
     const a = Q.pos, b = Math.min(PAGES, a + qAmount - 1);
     const pct = (Q.pos - 1) / PAGES, R = 2 * Math.PI * 42;
-    const leftPages = PAGES - Q.pos + 1, eta = now() + Math.ceil(leftPages / Q.daily) * DAY;
+    const leftPages = PAGES - Q.pos + 1;
+    const eta = Q.goal ? new Date(Q.goal.end + 'T12:00').getTime() : now() + Math.ceil(leftPages / dailyOf(j)) * DAY;
     const yKey = dayKey(noon() - DAY);
     const missedYesterday = !Q.log[yKey] && qDays(j) > 0 && j.created < noon() - DAY / 2;
     const quote = C.quran.length ? C.quran[(Math.floor(noon() / DAY) + qDays(j)) % C.quran.length] : null;
@@ -332,11 +338,12 @@
               <span>${esc(T('th_q_done_pages', 'قرأت {n}، تقبّل الله منك', { n: pagesLabel(done) }))}</span></div>
             <div class="m-range small">${esc(T('th_q_tomorrow', 'وردك القادم من صفحة {p}', { p: num(Q.pos) }))} · ${esc(surahAt(Q.pos).name)}</div>
             <div class="m-acts">
-              <a class="btn gold" href="quran-text.html?page=${Q.pos}">${esc(T('th_q_open', 'افتح المصحف'))}</a>
+              <a class="btn gold" href="quran-text.html?page=${Q.pos}&wird=1">${esc(T('th_q_open', 'افتح المصحف'))}</a>
               ${Q.undo && Q.undo.k === today ? `<button class="btn ghost" onclick="undoWird()">${esc(T('th_q_undo', 'تراجع'))}</button>` : ''}
             </div>
-            <button class="link-btn" onclick="markWird(true)">${esc(T('th_q_more', 'قرأت المزيد؟ سجّل {n} أخرى', { n: pagesLabel(Q.daily) }))}</button>`
+            <button class="link-btn" onclick="markWird(true)">${esc(T('th_q_more', 'قرأت المزيد؟ سجّل {n} أخرى', { n: pagesLabel(dailyOf(j)) }))}</button>`
           : `
+            ${read ? `<div class="m-range small">${esc(T('th_q_part', 'قرأت {n} من ورد اليوم، وبقي {m}', { n: pagesLabel(read), m: pagesLabel(TD.left) }))}</div>` : ''}
             <div class="m-range"><span>${esc(T('th_q_from', 'من صفحة'))}</span> <b>${num(a)}</b> <span>${esc(T('th_q_to', 'إلى'))}</span> <b>${num(b)}</b></div>
             <div class="m-surah">${esc(surahSpan(a, b))}</div>
             <div class="stepper m-step">
@@ -345,7 +352,7 @@
               <button type="button" onclick="qStep(1)" aria-label="+">+</button>
             </div>
             <div class="m-acts">
-              <a class="btn ghost" href="quran-text.html?page=${a}">${esc(T('th_q_open', 'افتح المصحف'))}</a>
+              <a class="btn ghost" href="quran-text.html?page=${a}&wird=1">${esc(T('th_q_open', 'افتح المصحف'))}</a>
               <button class="btn gold" onclick="markWird()">${CHECK.replace('<svg', '<svg class="i"')}${esc(T('th_q_mark', 'أتممت وردي'))}</button>
             </div>`}
         </div>
@@ -362,6 +369,10 @@
             <div><b>${esc(T('th_q_khatma', 'الختمة {k}', { k: num(Q.khatmat + 1) }))}</b>
               <small>${esc(T('th_q_page_of', 'صفحة {p} من {t}', { p: num(Q.pos - 1), t: num(PAGES) }))}</small>
               <small>${esc(T('th_q_eta', 'تتمّها بإذن الله نحو {d}', { d: fmtDate(eta) }))}</small>
+              ${Q.goal ? `<small class="${TD.overdue ? 'q-late' : 'q-ok'}">${esc(TD.overdue
+                ? T('th_q_goal_late', 'مضى موعد الهدف — أكمل ما بقي، أو عدّل الهدف')
+                : T('th_q_goal_left', 'هدفك: ختمة في {d} — بقي {l}، وورد اليوم {p}', { d: daysLabel(Q.goal.days), l: daysLabel(TD.daysLeft), p: pagesLabel(TD.target) }))}</small>
+              <small>${esc(T('th_q_per_prayer', 'نحو {n} بعد كل صلاة', { n: pagesLabel(Math.max(1, Math.ceil(TD.target / 5))) }))}</small>` : ''}
               ${Q.khatmat ? `<small class="q-ok">${esc(T('th_q_khatmat', 'ختمات أتممتها: {n}', { n: num(Q.khatmat) }))}</small>` : ''}</div>
           </div>
           <div class="card q-streak">
@@ -382,17 +393,13 @@
   // the unit after a number on the stepper: 1 صفحة, 2–10 صفحات, 11+ صفحة
   const pagesWord = n => (lang() === 'ar' ? (n === 1 || n > 10 ? 'صفحة' : 'صفحات') : T(n === 1 ? 'th_page' : 'th_pages', n === 1 ? 'صفحة' : 'صفحات'));
   const pagesLabel = n => counted(n, ['صفحة واحدة', 'صفحتين', 'صفحات', 'صفحة'], 'th_page_one', 'th_page_many');
-  window.qStep = d => { const j = byId(window.curId); if (!j) return; qAmount = Math.max(1, Math.min(PAGES, (qAmount || j.quran.daily) + d)); renderQuranView(j); };
+  window.qStep = d => { const j = byId(window.curId); if (!j) return; qAmount = Math.max(1, Math.min(PAGES, (qAmount || dailyOf(j)) + d)); renderQuranView(j); };
   // record a reading: today's chosen amount, another portion (more), or yesterday's missed wird
   window.markWird = function (more, makeup) {
     const j = byId(window.curId); if (!j || !isQ(j)) return;
     const Q = j.quran, k = makeup ? dayKey(noon() - DAY) : dayKey();
-    const n = more || makeup ? Q.daily : (qAmount || Q.daily);
-    Q.undo = { k: dayKey(), day: k, pos: Q.pos, khatmat: Q.khatmat, prev: Q.log[k] || 0 };
-    Q.log[k] = (Q.log[k] || 0) + n;
-    Q.pos += n;
-    let khatma = false;
-    if (Q.pos > PAGES) { Q.khatmat++; Q.pos = ((Q.pos - 1) % PAGES) + 1; khatma = true; }
+    const n = more || makeup ? dailyOf(j) : (qAmount || dailyOf(j));
+    const { khatma } = WirdCore.record(j, n, k);
     qAmount = 0;
     save(); renderQuranView(j);
     if (khatma) showWin({ pic: coverImg('mushaf'), title: T('th_q_khatma_done', 'ختمتَ القرآن، الحمد لله'), text: T('th_q_khatma_text', 'أتممت الختمة {n} بتوفيق الله، فابدأ الختمة التالية من سورة الفاتحة.', { n: num(Q.khatmat) }), quote: C.quran.find(x => x.ar.indexOf('شفيعًا') > 0) });
@@ -400,9 +407,8 @@
   };
   window.undoWird = function () {
     const j = byId(window.curId); if (!j) return;
-    const Q = j.quran, u = Q.undo; if (!u || u.k !== dayKey()) return;
-    if (u.prev) Q.log[u.day] = u.prev; else delete Q.log[u.day];
-    Q.pos = u.pos; Q.khatmat = u.khatmat; delete Q.undo;
+    if (!WirdCore.undo(j)) return;
+    qAmount = 0;
     save(); renderQuranView(j);
   };
 
@@ -479,7 +485,8 @@
   window.closeSheet = () => { if (!openSheetId) return; if (window.BackClose) BackClose.closed(); closeSheetUi(); };
 
   // new / edit
-  let editId = null, fKind = 'quit', fCover = 'ember', coverPicked = false, fWird = 2;
+  let editId = null, fKind = 'quit', fCover = 'ember', coverPicked = false, fWird = 2, fGoal = 0;
+  const GOALS = [0, 7, 10, 15, 30, 60];      // days for one khatma; 0: no goal, a daily amount instead
   const WIRD = [[1, 'th_w1', 'صفحة'], [2, 'th_w2', 'صفحتان'], [4, 'th_w4', '4 صفحات'], [10, 'th_w10', 'نصف جزء'], [20, 'th_w20', 'جزء']];
   $('fCovers').innerHTML = COVERS.map(k => `<button type="button" data-c="${k}"><img src="${coverImg(k, true)}" alt="" loading="lazy"></button>`).join('');
   $('fCovers').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fCover = b.dataset.c; coverPicked = true; syncForm(); } });
@@ -490,7 +497,10 @@
     syncForm();
   });
   $('fWirdChips').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fWird = +b.dataset.n; syncForm(); } });
-  window.wirdStep = d => { fWird = Math.max(1, Math.min(PAGES, fWird + d)); syncForm(); };
+  window.wirdStep = d => { fWird = Math.max(1, Math.min(PAGES, fWird + d)); fGoal = 0; syncForm(); };
+  $('fGoalChips').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fGoal = +b.dataset.d; syncForm(); } });
+  $('fGoalN').addEventListener('input', () => { const d = parseInt($('fGoalN').value, 10); fGoal = d >= 1 && d <= 3650 ? d : 0; syncForm(true); });
+  $('fPage').addEventListener('input', () => { if (fGoal) syncForm(true); });
   $('fSurah').innerHTML = SURAHS.map(x => `<option value="${x.page}">${x.number}. ${esc(x.name)}</option>`).join('');
   $('fSurah').addEventListener('change', () => { $('fPage').value = $('fSurah').value; });
   $('fPage').addEventListener('input', () => { const p = +$('fPage').value; if (p >= 1 && p <= PAGES) $('fSurah').value = String(surahAt(p).page); });
@@ -501,7 +511,7 @@
     const mo = Math.round(d / 30);
     return T('th_khatma_months', 'ختمة كل {n}', { n: counted(mo, ['شهر', 'شهرين', 'أشهر', 'شهرًا'], 'th_month_one', 'th_month_many') });
   }
-  function syncForm() {
+  function syncForm(keepGoalInput) {
     const q = fKind === 'quran';
     document.querySelectorAll('#fCovers button').forEach(b => b.classList.toggle('on', b.dataset.c === fCover));
     document.querySelectorAll('#fKind button').forEach(b => b.classList.toggle('on', b.dataset.k === fKind));
@@ -512,6 +522,15 @@
     $('fWirdN').textContent = num(fWird);
     $('fWirdU').textContent = pagesWord(fWird);
     $('fWirdHint').textContent = khatmaEvery(fWird);
+    // khatma goal: chips + any number of days; the daily amount then follows the goal
+    $('fGoalChips').innerHTML = GOALS.map(d => `<button type="button" data-d="${d}" class="${d === fGoal ? 'on' : ''}">${esc(d ? daysLabel(d) : T('th_goal_none', 'بلا هدف'))}</button>`).join('');
+    if (!keepGoalInput) $('fGoalN').value = fGoal && !GOALS.includes(fGoal) ? fGoal : '';
+    const start = Math.max(1, Math.min(PAGES, parseInt($('fPage').value, 10) || 1));
+    const per = fGoal ? Math.ceil((PAGES - start + 1) / fGoal) : 0;
+    $('fGoalHint').textContent = fGoal
+      ? T('th_goal_hint', 'نحو {n} كل يوم ({p} بعد كل صلاة)، ويتعدّل الورد تلقائيًا إن تقدّمت أو تأخّرت', { n: pagesLabel(per), p: pagesLabel(Math.max(1, Math.ceil(per / 5))) })
+      : T('th_goal_hint_none', 'اختر مدة الختمة، فيُحسب وردك اليومي منها');
+    document.querySelector('#formSheet .wird-amount').classList.toggle('by-goal', !!fGoal);
     $('fWhy').placeholder = q ? T('th_f_why_ph_q', 'لماذا تريد هذا الورد؟ مثلًا: أن يكون القرآن ربيع قلبي…') : T('th_f_why_ph', 'لماذا بدأت؟ اكتب ما يذكّرك حين تضعف…');
   }
   window.openForm = function (id, kind) {
@@ -528,6 +547,7 @@
     fCover = j ? coverKey(j.cover) : DEF_COVER[fKind];
     coverPicked = !!j;
     fWird = j && isQ(j) ? j.quran.daily : 2;
+    fGoal = j && isQ(j) && j.quran.goal ? j.quran.goal.days : 0;
     const pos = j && isQ(j) ? j.quran.pos : 1;
     $('fPage').value = pos; $('fSurah').value = String(surahAt(pos).page);
     // a journey keeps its kind: the Qur'an wird and the timed journeys are kept differently
@@ -545,7 +565,12 @@
     if (editId) {
       const j = byId(editId);
       Object.assign(j, { name, why: $('fWhy').value.trim(), cover: fCover });
-      if (isQ(j)) { j.quran.daily = fWird; j.quran.pos = page; }
+      if (isQ(j)) {
+        j.quran.daily = fWird; j.quran.pos = page;
+        // a changed goal starts from today; an unchanged one keeps its end date
+        if (!fGoal) delete j.quran.goal;
+        else if (!j.quran.goal || j.quran.goal.days !== fGoal) WirdCore.setGoal(j, fGoal);
+      }
       else {
         j.kind = fKind;
         if (cur(j).start !== start) { cur(j).start = start; cur(j).seen = MILES.filter(m => streakDays(cur(j)) >= m); }
@@ -553,6 +578,7 @@
     } else if (q) {
       S.journeys.unshift({ id: 'j' + now().toString(36), name, why: $('fWhy').value.trim(), kind: 'quran', cover: fCover, created: now(),
         streaks: [{ start: now(), seen: [] }], quran: { daily: fWird, pos: page, start: page, khatmat: 0, log: {} } });
+      if (fGoal) WirdCore.setGoal(S.journeys[0], fGoal);
     } else {
       const s = { start };
       s.seen = MILES.filter(m => streakDays(s) >= m);   // a back-dated start does not replay old milestones
