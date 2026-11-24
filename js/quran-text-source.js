@@ -13,7 +13,11 @@
  *     nothing but Arabic script. If any ayah on the page differs or is
  *     missing, the whole page is shown from the local text;
  *   • with no connection the page is the local text. Only the recitation
- *     (audio URLs) needs the network.
+ *     (audio URLs) needs the network. For the Madinah font the local text is
+ *     the app's own copy of the QPC Hafs encoding (data/quran-qpc.json, built
+ *     and verified by scripts/build-quran-qpc.cjs), checked ayah by ayah the
+ *     same way — the Madinah font misdraws the Tanzil encoding of quran.json
+ *     (dotted circles for the small high rounded zero, misplaced marks).
  *
  * This file never changes the Quran text: it selects which copy to show and
  * removes the basmala that data/quran.json prefixes to the first ayah of a
@@ -178,6 +182,25 @@
     };
   }
 
+  /**
+   * The local page in the QPC Hafs encoding the Madinah font needs.
+   * @param {{ayahs:Array, audio:Array, source:string, rejected:string|null}} result  composePage() output with source 'local'
+   * @param {{surahs:string[][]}} qpc  data/quran-qpc.json
+   * @returns the same result with every ayah's text from `qpc` when each one
+   *   has exactly the letters of the local text; otherwise `result` unchanged.
+   */
+  function withLocalQpc(result, qpc) {
+    const surahs = qpc && qpc.surahs;
+    if (!Array.isArray(surahs)) return result;
+    const texts = [];
+    for (const a of result.ayahs) {
+      const t = surahs[a.surah - 1] && surahs[a.surah - 1][a.numberInSurah - 1];
+      if (!isQuranScript(t) || letters(t) !== letters(a.text)) return result;
+      texts.push(t);
+    }
+    return Object.assign({}, result, { ayahs: result.ayahs.map((a, i) => Object.assign({}, a, { text: texts[i] })) });
+  }
+
   // ---- browser side: loading -------------------------------------------------
 
   let indexPromise = null;
@@ -194,6 +217,18 @@
       indexPromise.catch(() => { indexPromise = null; }); // allow a later retry
     }
     return indexPromise;
+  }
+
+  let qpcPromise = null;
+  function loadLocalQpc(base) {
+    if (!qpcPromise) {
+      qpcPromise = fetch((base || '../') + 'data/quran-qpc.json').then(r => {
+        if (!r.ok) throw new Error('quran-qpc.json: HTTP ' + r.status);
+        return r.json();
+      });
+      qpcPromise.catch(() => { qpcPromise = null; });
+    }
+    return qpcPromise;
   }
 
   function fetchJson(url, timeoutMs) {
@@ -245,7 +280,8 @@
       if (result.rejected && typeof console !== 'undefined') {
         console.warn('Quran text: fetched text for ' + result.rejected + ' did not match the local text — page ' + page + ' shown from the local copy.');
       }
-      return result;
+      if (encoding !== 'qpc' || result.source !== 'local') return result;
+      return loadLocalQpc(base).then(qpc => withLocalQpc(result, qpc), () => result);
     });
   }
 
@@ -255,6 +291,7 @@
     ayahOwnText: ayahOwnText,
     createIndex: createIndex,
     composePage: composePage,
+    withLocalQpc: withLocalQpc,
     loadIndex: loadIndex,
     getPage: getPage
   };

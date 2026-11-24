@@ -123,6 +123,26 @@ test('matching fetched text is used, with the local numbering', () => {
   }
 });
 
+test('offline Madinah page uses the local QPC text, letter-checked ayah by ayah', () => {
+  const qpc = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'quran-qpc.json'), 'utf8'));
+  for (const p of [1, 2, 237, 604]) {
+    const local = Source.composePage(index.pageAyahs(p), null);
+    const out = Source.withLocalQpc(local, qpc);
+    out.ayahs.forEach((a, i) => {
+      assert.strictEqual(a.text, qpc.surahs[a.surah - 1][a.numberInSurah - 1]);
+      assert.strictEqual(a.key, local.ayahs[i].key);
+      assert.strictEqual(Source.letters(a.text), Source.letters(local.ayahs[i].text));
+    });
+  }
+  // One altered ayah: the whole page keeps the quran.json text.
+  const local = Source.composePage(index.pageAyahs(237), null);
+  const last = local.ayahs[local.ayahs.length - 1];
+  const bad = JSON.parse(JSON.stringify(qpc));
+  bad.surahs[last.surah - 1][last.numberInSurah - 1] += ' وَ';
+  assert.strictEqual(Source.withLocalQpc(local, bad), local);
+  assert.strictEqual(Source.withLocalQpc(local, null), local);
+});
+
 test('a page with swapped, missing, altered or injected text is shown from the local copy', () => {
   const local = index.pageAyahs(2);
   const good = remoteFor(2, 'qpc');

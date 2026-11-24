@@ -47,3 +47,10 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 - `images/reciters/*.webp` — reciter photos used as album art in the Quran audio player,
   taken from [way2quran.com](https://way2quran.com) (الطريق إلى القرآن), cropped square and
   resized to at most 320 px. The pictures remain the property of their owners.
+
+## Quran fonts and text
+
+- `data/quran-qpc.json` — the King Fahd Complex "QPC Hafs" encoding of the Quran text, as served
+  by the Quran.com API, verified letter for letter against `data/quran.json`
+  (`scripts/build-quran-qpc.cjs`). Drawn with the KFGQPC Hafs font in the video maker, takrar and
+  the offline text mushaf.
