@@ -1474,7 +1474,7 @@ export default {
   "qt_tasmee_from_here": "لەم ئایەتەوە تاقیکردنەوە",
   "qt_listen": "گوێگرتن",
   "qt_copy": "لەبەرگرتنەوەی ئایەت",
-  "qt_translation": "وەرگێڕان (ئینگلیزی)",
+  "qt_translation": "وەرگێڕان",
   "qt_tafsir": "تەفسیر",
   "qt_share_image": "هاوبەشکردن وەک وێنە",
   "qt_make_video": "ڤیدیۆ دروستکردن",
@@ -1560,4 +1560,8 @@ export default {
   "qt_stat_close": "نزیک",
   "qt_stat_missed": "لەبیرچوو",
   "qt_stat_total": "کۆ",
+  "qt_translation_choice": "وەرگێڕان",
+  "qt_trans_under_ayah": "وەرگێڕان لە ژێر هەر ئایەتێک",
+  "qt_trans_missing": "ئەم وەرگێڕانە دەقی ئەم ئایەتەی تێدا نییە.",
+  "qt_trans_credit": "وەرگێڕانەکان لە <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">پڕۆژەی تەنزیل</a> (Tanzil.net)ەوەن، وەک خاوەنەکانیان بڵاویان کردوونەتەوە.",
 };

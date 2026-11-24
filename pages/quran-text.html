@@ -244,6 +244,14 @@
     .search-result-item .res-meta { font-size: 12.5px; font-weight: bold; color: var(--accent); margin-bottom: 4px; }
     .search-result-item .res-text { font-size: 1.35rem; line-height: 2; direction: rtl; }
     .search-more { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.08); color: var(--accent); font-family: inherit; font-weight: bold; cursor: pointer; }
+    /* Translation under each ayah (reading mode). The Quran text keeps its own
+       font and size; the translation is a quieter block below it. */
+    .ayah-trans { display: block; font-family: 'Tajawal', system-ui, sans-serif; font-size: max(15px, 0.4em); line-height: 1.75; font-weight: 400;
+      color: var(--text-secondary); margin: 2px 4px 18px; padding: 8px 12px; border-inline-start: 3px solid var(--accent); border-radius: 6px; background: rgba(128,128,128,0.06); text-align: start; }
+    .ayah-trans.missing { font-style: italic; opacity: 0.7; }
+    .trans-credit { font-size: 0.78rem; color: var(--text-secondary); padding: 10px 4px 0; line-height: 1.6; }
+    .trans-credit a, .trans-src a { color: var(--accent); }
+    .trans-src { font-size: 0.75rem; opacity: 0.75; margin-top: 8px; }
     /* An ayah reached from search: a soft glow that fades out. */
     .ayah-wrapper.search-flash { animation: searchFlash 2.6s ease-out; }
     @keyframes searchFlash { 0%, 35% { background: rgba(255, 213, 79, 0.55); } 100% { background: transparent; } }
@@ -851,6 +859,13 @@
                   <option value="REAL_DARK" data-i18n="qt_color_oled"><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> وضع ليلي حقيقي (OLED)</option>
               </select>
           </div></div>
+          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/globe.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_translation_choice">الترجمة</span></div><div class="setting-control">
+              <select id="translationSelect" class="custom-select" onchange="changeTranslation(this.value)"></select>
+          </div></div>
+          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/text.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_trans_under_ayah">الترجمة تحت كل آية</span></div><div class="setting-control">
+              <label class="tasmee-toggle"><input type="checkbox" id="transUnderAyah" onchange="toggleTranslationUnderAyah(this.checked)"><span class="tasmee-toggle-slider"></span></label>
+          </div></div>
+          <div class="trans-credit" data-i18n-html="qt_trans_credit">الترجمات من <a href="https://tanzil.net/trans/" target="_blank" rel="noopener">مشروع تنزيل</a> (Tanzil.net)، كما نشرها أصحابها.</div>
           
           <div class="setting-row" style="cursor: pointer;" onclick="closeModal(settingsModal); OfflineDownload.open();">
             <div class="setting-label"><img src="../img/SVG/download.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_offline_mode">الوضع بدون إنترنت</span></div>
@@ -1387,14 +1402,115 @@
             .catch(() => { box.textContent = T('qt_tafsir_error'); });
     }
 
+    // ===== Translations (offline) =====
+    // One per app language, from the Tanzil Project (data/translations/*.json,
+    // built and checked by scripts/build-translations.cjs). Fetched the first
+    // time it is used, then kept in a cache that app updates do not clear.
+    const TRANSLATIONS = [
+      { id: 'en.sahih',     lang: 'en',  dir: 'ltr', name: 'English — Saheeh International' },
+      { id: 'tr.diyanet',   lang: 'tr',  dir: 'ltr', name: 'Türkçe — Diyanet İşleri' },
+      { id: 'ur.junagarhi', lang: 'ur',  dir: 'rtl', name: 'اردو — محمد جوناگڑھی' },
+      { id: 'ku.asan',      lang: 'ckb', dir: 'rtl', name: 'کوردی — بورهان محمد-ئەمین' },
+      { id: 'ar.muyassar',  lang: 'ar',  dir: 'rtl', name: 'العربية — التفسير الميسر' },
+    ];
+    const TRANS_CACHE = 'quran-offline-translations-v1';   // "quran-offline" caches survive SW updates
+    const transLoaded = {};
+    function transSpec(id) { return TRANSLATIONS.find(t => t.id === id) || null; }
+    function currentTranslationId() {
+      let id = null;
+      try { id = localStorage.getItem('quranTranslation'); } catch (e) { /* storage blocked */ }
+      if (transSpec(id)) return id;
+      const byLang = TRANSLATIONS.find(t => t.lang === uiLang());
+      return (byLang || TRANSLATIONS[0]).id;
+    }
+    function loadTranslation(id) {
+      if (!transLoaded[id]) {
+        const url = new URL('../data/translations/' + id + '.json', location.href).href;
+        transLoaded[id] = fetch(url).then(res => {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          if (window.caches) { const copy = res.clone(); caches.open(TRANS_CACHE).then(c => c.put(url, copy)).catch(() => {}); }
+          return res.json();
+        }).then(t => {
+          if (!t || t.id !== id || !Array.isArray(t.surahs) || t.surahs.length !== 114) throw new Error('bad translation file');
+          return t;
+        });
+        transLoaded[id].catch(() => { delete transLoaded[id]; });   // allow a retry
+      }
+      return transLoaded[id];
+    }
+    // The translation of one ayah ('' where the published translation has none).
+    function translationOf(t, surah, ayah) {
+      const a = t.surahs[surah - 1] && t.surahs[surah - 1][ayah - 1];
+      return typeof a === 'string' ? a.trim() : '';
+    }
+
     function fetchTranslation() {
         currentAyahViewMode = 'translation'; const box = document.getElementById('ayahResultBox');
         box.textContent = T('qt_translation_loading'); box.classList.add('active');
-        
-        fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahGlobalNumber}/en.asad`)
-            .then(res => res.json())
-            .then(data => { if (data.code === 200) showApiText(box, 'English (Muhammad Asad)', data.data.text, true); })
-            .catch(() => { box.textContent = T('qt_translation_error'); });
+        const id = currentTranslationId(), spec = transSpec(id);
+        Promise.all([loadTranslation(id), selectedAyahRecord()]).then(([t, a]) => {
+            if (!a || currentAyahViewMode !== 'translation') return;
+            const text = translationOf(t, a.surah, a.numberInSurah);
+            box.textContent = '';
+            const head = document.createElement('strong');
+            head.style.color = 'var(--accent)';
+            head.textContent = spec.name + ':';
+            const body = document.createElement('div');
+            body.style.whiteSpace = 'pre-line'; body.style.marginTop = '10px';
+            body.dir = spec.dir; body.style.textAlign = 'start';
+            if (spec.dir === 'ltr') body.style.fontFamily = 'Tajawal, system-ui, sans-serif';
+            body.textContent = text || T('qt_trans_missing');
+            const src = document.createElement('div');
+            src.className = 'trans-src';
+            src.textContent = (t.translator ? t.translator + ' · ' : '') + 'Tanzil.net';
+            box.append(head, body, src);
+        }).catch(() => { box.textContent = T('qt_translation_error'); });
+    }
+
+    // Reading mode: the translation under every ayah of the page.
+    let transUnderAyah = false;
+    try { transUnderAyah = localStorage.getItem('quranTransUnder') === '1'; } catch (e) { /* storage blocked */ }
+    function renderPageTranslations() {
+      document.querySelectorAll('#textContainer .ayah-trans').forEach(el => el.remove());
+      if (!transUnderAyah || !currentPageAyahsData.length) return;
+      const id = currentTranslationId(), spec = transSpec(id), page = currentPage;
+      Promise.all([loadTranslation(id), loadSearchData()]).then(([t, data]) => {
+        if (page !== currentPage || !transUnderAyah) return;
+        document.querySelectorAll('#textContainer .ayah-trans').forEach(el => el.remove());
+        currentPageAyahsData.forEach((a, i) => {
+          const rec = data[a.number - 1];
+          const wrap = document.getElementById('ayah-wrapper-' + i);
+          if (!rec || !wrap) return;
+          const text = translationOf(t, rec.surah, rec.numberInSurah);
+          const div = document.createElement('div');
+          div.className = 'ayah-trans' + (text ? '' : ' missing');
+          div.dir = spec.dir;
+          div.lang = spec.lang;
+          div.textContent = text || T('qt_trans_missing');
+          wrap.after(div);
+        });
+      }).catch(() => showCustomToast(T('qt_translation_error')));
+    }
+    function toggleTranslationUnderAyah(on) {
+      transUnderAyah = !!on;
+      try { localStorage.setItem('quranTransUnder', on ? '1' : '0'); } catch (e) { /* storage blocked */ }
+      renderPageTranslations();
+    }
+    function changeTranslation(id) {
+      if (!transSpec(id)) return;
+      try { localStorage.setItem('quranTranslation', id); } catch (e) { /* storage blocked */ }
+      renderPageTranslations();
+      if (currentAyahViewMode === 'translation') fetchTranslation();
+    }
+    function fillTranslationSettings() {
+      const sel = document.getElementById('translationSelect');
+      if (sel) {
+        sel.innerHTML = '';
+        TRANSLATIONS.forEach(t => { const o = document.createElement('option'); o.value = t.id; o.textContent = t.name; sel.appendChild(o); });
+        sel.value = currentTranslationId();
+      }
+      const cb = document.getElementById('transUnderAyah');
+      if (cb) cb.checked = transUnderAyah;
     }
 
     function toggleAudioBar() { audioBarActive = !audioBarActive; document.getElementById('audioBar').classList.toggle('active', audioBarActive); document.body.classList.toggle('audio-open', audioBarActive); }
@@ -1615,6 +1731,7 @@
       prefetchNextPage();
       applyTextSettings();
       setupLongPressForAyahs();
+      renderPageTranslations();
       if (continueAutoScroll) { setTimeout(() => { if(continueAutoScroll) startAutoScroll(); }, 1500); }
       if (window._tasmeeRenderCb) { const cb = window._tasmeeRenderCb; window._tasmeeRenderCb = null; setTimeout(cb, 100); }
     }
@@ -1876,6 +1993,7 @@
       // The dictionary first, so the first page is drawn in the UI language.
       try { if (window.I18n) await I18n.init(); } catch (e) { /* Arabic fallback */ }
       localizeAudioOptions();
+      fillTranslationSettings();
       updateAudioNow();
       const tp = document.getElementById('tasmeeProgressText');
       if (tp) tp.textContent = T('qt_words_progress', { done: num(0), total: num(0) });

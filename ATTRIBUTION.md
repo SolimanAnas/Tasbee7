@@ -54,3 +54,10 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
   by the Quran.com API, verified letter for letter against `data/quran.json`
   (`scripts/build-quran-qpc.cjs`). Drawn with the KFGQPC Hafs font in the video maker, takrar and
   the offline text mushaf.
+- `data/translations/*.json` — Quran translations from the [Tanzil Project](https://tanzil.net/trans/),
+  stored as published (`scripts/build-translations.cjs`): Saheeh International (`en.sahih`),
+  Diyanet İşleri (`tr.diyanet`), Muhammad Junagarhi (`ur.junagarhi`), Burhan Muhammad-Amin
+  (`ku.asan`; its published text has no translation for 108:3, shown as such) and al-Tafsir
+  al-Muyassar (`ar.muyassar`). Tanzil's terms: non-commercial use only (this app is free, with no
+  ads or payments); apps using more than three of them link back to https://tanzil.net/trans/ —
+  the text mushaf's settings do.

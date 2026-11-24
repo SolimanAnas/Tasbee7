@@ -1474,7 +1474,7 @@ export default {
   "qt_tasmee_from_here": "التسميع من هذه الآية",
   "qt_listen": "استماع للآية",
   "qt_copy": "نسخ الآية",
-  "qt_translation": "ترجمة (English)",
+  "qt_translation": "الترجمة",
   "qt_tafsir": "التفسير",
   "qt_share_image": "مشاركة كصورة",
   "qt_make_video": "صنع فيديو",
@@ -1560,4 +1560,8 @@ export default {
   "qt_stat_close": "قريب",
   "qt_stat_missed": "مفقود",
   "qt_stat_total": "المجموع",
+  "qt_translation_choice": "الترجمة",
+  "qt_trans_under_ayah": "الترجمة تحت كل آية",
+  "qt_trans_missing": "لا يوجد نص لهذه الآية في هذه الترجمة.",
+  "qt_trans_credit": "الترجمات من <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">مشروع تنزيل</a> (Tanzil.net)، كما نشرها أصحابها.",
 };

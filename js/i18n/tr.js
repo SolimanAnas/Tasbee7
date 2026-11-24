@@ -1446,7 +1446,7 @@ export default {
   "qt_tasmee_from_here": "Bu ayetten ezber kontrolü",
   "qt_listen": "Dinle",
   "qt_copy": "Ayeti kopyala",
-  "qt_translation": "Çeviri (İngilizce)",
+  "qt_translation": "Çeviri",
   "qt_tafsir": "Tefsir",
   "qt_share_image": "Görsel olarak paylaş",
   "qt_make_video": "Video oluştur",
@@ -1532,4 +1532,8 @@ export default {
   "qt_stat_close": "Yakın",
   "qt_stat_missed": "Atlanan",
   "qt_stat_total": "Toplam",
+  "qt_translation_choice": "Çeviri",
+  "qt_trans_under_ayah": "Her ayetin altında çeviri",
+  "qt_trans_missing": "Bu çeviride bu ayet için metin yok.",
+  "qt_trans_credit": "Çeviriler <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">Tanzil Projesi</a>'nden (Tanzil.net), yazarlarının yayımladığı şekliyle.",
 };

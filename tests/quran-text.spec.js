@@ -267,3 +267,28 @@ test('the page follows the app language (English)', async ({ page }) => {
   expect(texts.length).toBe(5);
   texts.slice(1).forEach((t, i) => sameLetters(t, stored(2, i + 2)));
 });
+
+test.describe('translations (offline)', () => {
+  test('the ayah menu shows the translation for the app language, with no connection', async ({ page }) => {
+    await blockNetwork(page);
+    await page.addInitScript(() => { try { localStorage.setItem('qtZoomHintDone', '1'); localStorage.setItem('zad_lang', 'en'); localStorage.setItem('zad_lang_chosen', '1'); } catch { /* storage blocked */ } });
+    await openPage(page, 2);
+    await page.evaluate(() => { openAyahMenu(1); fetchTranslation(); });
+    await expect(page.locator('#ayahResultBox')).toContainText('This is the Book about which there is no doubt');
+    await expect(page.locator('#ayahResultBox')).toContainText('Saheeh International');
+  });
+
+  test('reading mode puts a translation under every ayah, and says where the translation has none', async ({ page }) => {
+    await blockNetwork(page);
+    await page.addInitScript(() => { try { localStorage.setItem('qtZoomHintDone', '1'); localStorage.setItem('quranTransUnder', '1'); localStorage.setItem('quranTranslation', 'ku.asan'); } catch { /* storage blocked */ } });
+    await openPage(page, 602);   // Quraysh, al-Ma'un, al-Kawthar
+    const blocks = page.locator('#textContainer .ayah-trans');
+    await expect(blocks).toHaveCount(await page.locator('.ayah-wrapper').count());
+    // ku.asan publishes no text for 108:3: shown as such, not invented.
+    await expect(page.locator('#textContainer .ayah-trans.missing')).toHaveCount(1);
+    // Each block follows its own ayah.
+    expect(await page.evaluate(() => [...document.querySelectorAll('.ayah-wrapper')].every(w => w.nextElementSibling && w.nextElementSibling.classList.contains('ayah-trans')))).toBe(true);
+    await page.evaluate(() => toggleTranslationUnderAyah(false));
+    await expect(blocks).toHaveCount(0);
+  });
+});

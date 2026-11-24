@@ -1474,7 +1474,7 @@ export default {
   "qt_tasmee_from_here": "Recite from this ayah",
   "qt_listen": "Listen",
   "qt_copy": "Copy ayah",
-  "qt_translation": "Translation (English)",
+  "qt_translation": "Translation",
   "qt_tafsir": "Tafsir",
   "qt_share_image": "Share as image",
   "qt_make_video": "Make a video",
@@ -1560,4 +1560,8 @@ export default {
   "qt_stat_close": "Close",
   "qt_stat_missed": "Missed",
   "qt_stat_total": "Total",
+  "qt_translation_choice": "Translation",
+  "qt_trans_under_ayah": "Translation under each ayah",
+  "qt_trans_missing": "This translation has no text for this ayah.",
+  "qt_trans_credit": "Translations from the <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">Tanzil Project</a> (Tanzil.net), as published by their authors.",
 };

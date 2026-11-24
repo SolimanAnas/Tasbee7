@@ -1446,7 +1446,7 @@ export default {
   "qt_tasmee_from_here": "اس آیت سے تسمیع",
   "qt_listen": "آیت سنیں",
   "qt_copy": "آیت کاپی کریں",
-  "qt_translation": "ترجمہ (انگریزی)",
+  "qt_translation": "ترجمہ",
   "qt_tafsir": "تفسیر",
   "qt_share_image": "تصویر کے طور پر شیئر",
   "qt_make_video": "ویڈیو بنائیں",
@@ -1532,4 +1532,8 @@ export default {
   "qt_stat_close": "قریب",
   "qt_stat_missed": "چھوٹا ہوا",
   "qt_stat_total": "کل",
+  "qt_translation_choice": "ترجمہ",
+  "qt_trans_under_ayah": "ہر آیت کے نیچے ترجمہ",
+  "qt_trans_missing": "اس ترجمے میں اس آیت کا متن نہیں ہے۔",
+  "qt_trans_credit": "تراجم <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">تنزیل پروجیکٹ</a> (Tanzil.net) سے، جیسے ان کے مصنفین نے شائع کیے۔",
 };
