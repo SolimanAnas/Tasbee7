@@ -23,11 +23,20 @@
 <link rel="stylesheet" href="../css/fonts.css">
 <style>
 /* Local copies so the canvas can draw offline (canvas text never falls back gracefully). */
-/* Scheherazade: mushaf-style naskh with full support for quran.json's Quranic marks
-   (۫ ۬ ۭ, pause marks, dagger alif) and an ayah medallion for U+06DD. Amiri and the
-   KFGQPC Hafs fonts misplace or box several of those marks. */
+/* QuranFont is the text mushaf's own font (quran-text.html's MadinahFont): the KFGQPC
+   Hafs Uthmanic script, colour version, with its ayah medallions. It is made for the
+   King Fahd Complex "QPC Hafs" encoding of the text (data/quran-qpc.json), which the
+   video draws; other encodings (Tanzil) misplace or box some of its marks. */
 @font-face {
   font-family: 'QuranFont';
+  src: url('../fonts/uthmani-colored.ttf') format('truetype'),
+       url('../fonts/UthmanicHafs_V20.ttf') format('truetype');
+  font-display: block;
+}
+/* Fallback for the Tanzil text in data/quran.json, used only if quran-qpc.json
+   could not be loaded: Scheherazade supports all of that encoding's marks. */
+@font-face {
+  font-family: 'QuranFallback';
   src: url('../fonts/Scheherazade.ttf') format('truetype');
   font-display: block;
 }
@@ -691,6 +700,7 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
 <script src="../js/back-close.js"></script>
 <script src="../js/reciters.js"></script>
 <script src="../js/surah-map.js"></script>
+<script src="../js/quran-text-source.js"></script>
 <script src="../js/popular-ayat.js"></script>
 <script src="../js/mp4-faststart.js"></script>
 <script src="../js/video-maker.js"></script>
@@ -702,7 +712,7 @@ function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 3;
+  var NEED = 4;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
