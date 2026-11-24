@@ -102,6 +102,9 @@
       vm_share_text: 'صُنع بتطبيق زاد المسلم', vm_share_page: 'اصنع فيديو مثله',
       takrar_no_results: 'لا نتائج', takrar_style_all: 'الكل', vm_max_bgs: 'الحد الأقصى {n} صور',
       vm_cat_famous: 'آيات مشهورة', vm_cat_surahs: 'سور قصيرة', vm_cat_duas: 'أدعية قرآنية', vm_cat_comfort: 'طمأنينة وتذكير',
+      vm_bg_add: 'أضف صورة أو فيديو من جهازك', vm_bg_add_short: 'إضافة', vm_bg_delete: 'حذف', vm_bg_adding: 'جارٍ إضافة الخلفية...',
+      vm_bg_bad: 'تعذّر فتح هذا الملف — اختر صورة أو فيديو', vm_bg_too_big: 'الفيديو كبير جداً — الحد {n} ميغابايت',
+      vm_bg_max: 'لديك {n} خلفيات خاصة — احذف واحدة أولاً', vm_bg_no_space: 'لا توجد مساحة كافية على الجهاز',
     },
     en: {
       vm_title: 'Ayah Video Maker', vm_preview: 'Preview', vm_stop: 'Stop', vm_done: 'Video ready',
@@ -113,6 +116,9 @@
       vm_share_text: 'Made with Zad Al-Muslim App', vm_share_page: 'Make your own',
       takrar_no_results: 'No results', takrar_style_all: 'All', vm_max_bgs: 'Up to {n} pictures',
       vm_cat_famous: 'Famous ayat', vm_cat_surahs: 'Short surahs', vm_cat_duas: 'Quranic duas', vm_cat_comfort: 'Comfort & reminders',
+      vm_bg_add: 'Add a picture or video from your device', vm_bg_add_short: 'Add', vm_bg_delete: 'Delete', vm_bg_adding: 'Adding the background…',
+      vm_bg_bad: "Couldn't open this file — choose a picture or a video", vm_bg_too_big: 'The video is too large — up to {n} MB',
+      vm_bg_max: 'You have {n} backgrounds of your own — delete one first', vm_bg_no_space: 'Not enough storage on this device',
     },
   };
   function tr(k, p) {
@@ -224,6 +230,151 @@
     } catch (e) { bgImages = []; }
   }
 
+  // ---------- the user's own backgrounds ----------
+  // Pictures and videos the user adds stay on this device: kept in IndexedDB,
+  // shown through blob: URLs, never uploaded anywhere. They take names like
+  // 'user:<id>.jpg' / 'user:<id>.mp4' so the rest of this file treats them
+  // exactly like the built-in files ('i:' / 'v:' ids, isVideoFile, thumbFor).
+  const USER_PREFIX = 'user:';
+  const USER_DB = 'vm-user-backgrounds';
+  const USER_MAX = 12;                       // own backgrounds kept at once
+  const USER_VIDEO_MB = 80;                  // largest video accepted
+  const USER_IMAGE_EDGE = 2160;              // pictures are scaled to this long edge (story is 1080×1920)
+  const userUrls = new Map();                // name -> blob: URL (also '<name>.thumb.webp' for videos)
+  let userBgs = [];                          // names, newest first
+  const isUserBg = f => typeof f === 'string' && f.startsWith(USER_PREFIX);
+  // Where a background file is read from: the app's folder, or the user's blob.
+  const bgSrc = f => (isUserBg(f) ? (userUrls.get(f) || '') : BG_DIR + encodeURI(f));
+
+  function userDb() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) { reject(new Error('no IndexedDB')); return; }
+      const req = indexedDB.open(USER_DB, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('files', { keyPath: 'name' });
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  function userTx(mode, fn) {
+    return userDb().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction('files', mode);
+      const out = fn(tx.objectStore('files'));
+      tx.oncomplete = () => { db.close(); resolve(out && 'result' in out ? out.result : undefined); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+      tx.onabort = () => { db.close(); reject(tx.error || new Error('aborted')); };
+    }));
+  }
+  function registerUserBg(rec) {
+    userUrls.set(rec.name, URL.createObjectURL(rec.blob));
+    if (rec.thumb) userUrls.set(thumbFor(rec.name), URL.createObjectURL(rec.thumb));
+  }
+  async function loadUserBackgrounds() {
+    try {
+      const all = (await userTx('readonly', store => store.getAll())) || [];
+      all.sort((a, b) => (b.at || 0) - (a.at || 0));
+      all.forEach(registerUserBg);
+      userBgs = all.map(r => r.name);
+    } catch { userBgs = []; }
+    bgImages = userBgs.concat(bgImages.filter(f => !isUserBg(f)));
+  }
+
+  const canvasBlob = (cv, type, q) => new Promise(res => cv.toBlob(res, type, q));
+  // A picture, upright (EXIF orientation applied) and no larger than needed.
+  // Re-encoding also drops the file's metadata (location, camera).
+  async function prepareImage(file) {
+    let src;
+    try { src = await window.createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch {
+      src = await new Promise((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
+    const w0 = src.width || src.naturalWidth, h0 = src.height || src.naturalHeight;
+    if (!w0 || !h0) throw new Error('empty image');
+    const k = Math.min(1, USER_IMAGE_EDGE / Math.max(w0, h0));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
+    cv.getContext('2d').drawImage(src, 0, 0, cv.width, cv.height);
+    if (src.close) src.close();
+    const blob = await canvasBlob(cv, 'image/jpeg', 0.9);
+    if (!blob) throw new Error('encode failed');
+    return blob;
+  }
+  // A still from half a second in, for the thumbnail strip and the idle preview.
+  function videoThumb(file) {
+    return new Promise((resolve, reject) => {
+      const v = document.createElement('video');
+      const url = URL.createObjectURL(file);
+      const done = (fn, arg) => { URL.revokeObjectURL(url); v.removeAttribute('src'); v.load(); fn(arg); };
+      v.muted = true; v.playsInline = true; v.preload = 'auto';
+      v.onloadeddata = () => { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); };
+      v.onseeked = async () => {
+        try {
+          const k = 640 / Math.max(v.videoWidth, v.videoHeight);
+          const cv = document.createElement('canvas');
+          cv.width = Math.round(v.videoWidth * k); cv.height = Math.round(v.videoHeight * k);
+          cv.getContext('2d').drawImage(v, 0, 0, cv.width, cv.height);
+          const blob = await canvasBlob(cv, 'image/jpeg', 0.85);
+          blob ? done(resolve, blob) : done(reject, new Error('thumb failed'));
+        } catch (e) { done(reject, e); }
+      };
+      v.onerror = () => done(reject, new Error('unreadable video'));
+      v.src = url;
+    });
+  }
+  async function addUserFiles(files) {
+    const list = Array.from(files || []);
+    if (!list.length) return;
+    let added = null;
+    for (const file of list) {
+      if (userBgs.length >= USER_MAX) { setStatus(tr('vm_bg_max', { n: USER_MAX }), true); break; }
+      const isVideo = /^video\//.test(file.type);
+      if (!isVideo && !/^image\//.test(file.type)) { setStatus(tr('vm_bg_bad'), true); continue; }
+      if (isVideo && file.size > USER_VIDEO_MB * 1048576) { setStatus(tr('vm_bg_too_big', { n: USER_VIDEO_MB }), true); continue; }
+      setStatus(tr('vm_bg_adding'));
+      try {
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        const rec = isVideo
+          ? { name: USER_PREFIX + id + (/webm/.test(file.type) ? '.webm' : '.mp4'), blob: file, thumb: await videoThumb(file), at: Date.now() }
+          : { name: USER_PREFIX + id + '.jpg', blob: await prepareImage(file), at: Date.now() };
+        await userTx('readwrite', store => store.put(rec));
+        registerUserBg(rec);
+        userBgs.unshift(rec.name);
+        bgImages = userBgs.concat(bgImages.filter(f => !isUserBg(f)));
+        added = rec.name;
+        setStatus('');
+      } catch (e) {
+        console.warn('[video-maker] could not add background', e);
+        setStatus(tr(/quota/i.test(String(e && e.name)) ? 'vm_bg_no_space' : 'vm_bg_bad'), true);
+      }
+    }
+    fillBackgrounds();
+    if (added) {
+      const id = (isVideoFile(added) ? 'v:' : 'i:') + added;
+      if (state.multiBg) { if (id.startsWith('i:') && !state.bgs.includes(id)) toggleSlide(id); else markBackgrounds(); }
+      else selectBackground(id);
+      const tile = document.querySelector('#vmBgs .bg-thumb[data-bg="' + window.CSS.escape(id) + '"]');
+      if (tile) tile.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }
+  async function deleteUserBg(name) {
+    try { await userTx('readwrite', store => store.delete(name)); } catch { /* already gone */ }
+    [name, thumbFor(name)].forEach(k => { const u = userUrls.get(k); if (u) URL.revokeObjectURL(u); userUrls.delete(k); });
+    userBgs = userBgs.filter(n => n !== name);
+    bgImages = bgImages.filter(f => f !== name);
+    const ids = ['i:' + name, 'v:' + name];
+    ids.forEach(id => imgCache.delete(id));
+    const before = state.bgs.length;
+    state.bgs = state.bgs.filter(id => !ids.includes(id));
+    fillBackgrounds();
+    if (ids.includes(state.bg)) selectBackground('g0');
+    else markBackgrounds();
+    if (state.bgs.length !== before) onChange(); else saveSettings();
+  }
+
   // ---------- audio ----------
   let actx = null;
   function audioCtx() {
@@ -318,7 +469,7 @@
     if (!img) {
       img = new Image();
       img.onload = () => renderIdle();
-      img.src = BG_DIR + encodeURI(id.slice(2));
+      img.src = bgSrc(id.slice(2));
       imgCache.set(id, img);
     }
     return img;
@@ -1163,15 +1314,41 @@
       b.onclick = () => tapBackground(id);
       strip.appendChild(b);
     };
-    bgImages.filter(isVideoFile).forEach(f => add('v:' + f, `url("${BG_DIR}${encodeURI(thumbFor(f))}")`, true));
-    bgImages.filter(f => !isVideoFile(f)).forEach(f => add('i:' + f, `url("${BG_DIR}${encodeURI(f)}")`));
+    // "+": add a picture or video from the device.
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'bg-thumb bg-add';
+    plus.title = tr('vm_bg_add');
+    plus.setAttribute('aria-label', tr('vm_bg_add'));
+    plus.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>' + esc(tr('vm_bg_add_short')) + '</span>';
+    plus.onclick = () => $('vmBgFile').click();
+    strip.appendChild(plus);
+    const cssUrl = u => `url("${String(u).replace(/["\\]/g, '\\$&')}")`;
+    // The user's own, newest first, each with a delete control.
+    userBgs.forEach(f => {
+      const video = isVideoFile(f);
+      add((video ? 'v:' : 'i:') + f, cssUrl(bgSrc(video ? thumbFor(f) : f)), video);
+      const tile = strip.lastElementChild;
+      tile.classList.add('is-user');
+      const del = document.createElement('span');
+      del.className = 'bg-del';
+      del.setAttribute('role', 'button');
+      del.setAttribute('aria-label', tr('vm_bg_delete'));
+      del.title = tr('vm_bg_delete');
+      del.textContent = '×';
+      del.onclick = e => { e.stopPropagation(); deleteUserBg(f); };
+      tile.appendChild(del);
+    });
+    const builtIn = bgImages.filter(f => !isUserBg(f));
+    builtIn.filter(isVideoFile).forEach(f => add('v:' + f, `url("${BG_DIR}${encodeURI(thumbFor(f))}")`, true));
+    builtIn.filter(f => !isVideoFile(f)).forEach(f => add('i:' + f, `url("${BG_DIR}${encodeURI(f)}")`));
     GRADIENTS.forEach((g, i) => add('g' + i, `linear-gradient(160deg, ${g.stops.join(', ')})`));
   }
 
   // Order numbers / ✓ on the thumbnails; videos and gradients are dimmed in multi mode.
   function markBackgrounds() {
     const order = state.multiBg ? slideIds() : [];
-    document.querySelectorAll('#vmBgs .bg-thumb').forEach(b => {
+    document.querySelectorAll('#vmBgs .bg-thumb[data-bg]').forEach(b => {
       const n = order.indexOf(b.dataset.bg);
       b.classList.toggle('active', state.multiBg ? n >= 0 : b.dataset.bg === state.bg);
       if (n >= 0) b.dataset.order = n + 1; else delete b.dataset.order;
@@ -1227,7 +1404,7 @@
       const img = new Image();
       img.onload = () => { if (state.bg === id) { bgImg = img; renderIdle(); } };
       img.onerror = () => { if (state.bg === id) { bgImg = null; renderIdle(); } };
-      img.src = BG_DIR + encodeURI(id.slice(2));
+      img.src = bgSrc(id.slice(2));
       bgImg = null;
     } else if (id.startsWith('v:') && !bgVideo) {
       const v = document.createElement('video');
@@ -1240,11 +1417,11 @@
       // Show a still from half a second in while idle — frame 0 is often a fade from black.
       v.addEventListener('loadeddata', () => { if (state.bg === id && !playing) v.currentTime = 0.5; renderIdle(); });
       v.addEventListener('seeked', renderIdle);
-      v.src = BG_DIR + encodeURI(id.slice(2));
+      v.src = bgSrc(id.slice(2));
       bgVideo = v;
       const poster = new Image();
       poster.onload = () => { if (state.bg === id) renderIdle(); };
-      poster.src = BG_DIR + encodeURI(thumbFor(id.slice(2)));
+      poster.src = bgSrc(thumbFor(id.slice(2)));
       bgPoster = poster;
     }
     renderIdle();
@@ -1293,6 +1470,7 @@
     $('vmBranding').onchange = () => { state.branding = $('vmBranding').checked; onChange(); };
     $('vmPanel').onchange = () => { state.textPanel = $('vmPanel').checked; onChange(); };
     $('vmMotion').onchange = () => { state.motion = $('vmMotion').checked; onChange(); };
+    $('vmBgFile').onchange = e => { addUserFiles(e.target.files); e.target.value = ''; };
     $('vmMultiBg').onchange = () => setMultiBg($('vmMultiBg').checked);
     document.querySelectorAll('.stepper button').forEach(b => {
       b.onclick = () => {
@@ -1363,6 +1541,7 @@
     sizeCanvas();
     try {
       await Promise.all([loadQuran(), loadBackgrounds(), i18nReady]);
+      await loadUserBackgrounds();
     } catch (e) {
       console.error('[video-maker] init failed', e);
       setStatus(tr('vm_err_audio'), true);
@@ -1394,7 +1573,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 4;   // 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  const BUILD = 5;   // 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
   window.VM = { build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
   init();
 })();
