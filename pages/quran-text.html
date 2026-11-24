@@ -238,7 +238,16 @@
     .search-results-container { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .search-results-container::-webkit-scrollbar { display: none; }
     .search-result-item { background: rgba(128, 128, 128, 0.05); padding: 14px; border-radius: 16px; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.2s; }
-    .search-highlight { background-color: rgba(255, 213, 79, 0.6); color: #000; border-radius: 4px; padding: 0 4px; }
+    .search-highlight { background-color: rgba(255, 213, 79, 0.6); color: #000; border-radius: 4px; padding: 0 2px; }
+    .search-note { text-align: center; padding: 20px; opacity: 0.7; font-size: 14px; }
+    .search-count { text-align: center; margin-bottom: 4px; color: var(--accent); font-weight: bold; font-size: 14px; }
+    .search-result-item .res-meta { font-size: 12.5px; font-weight: bold; color: var(--accent); margin-bottom: 4px; }
+    .search-result-item .res-text { font-size: 1.35rem; line-height: 2; direction: rtl; }
+    .search-more { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.08); color: var(--accent); font-family: inherit; font-weight: bold; cursor: pointer; }
+    /* An ayah reached from search: a soft glow that fades out. */
+    .ayah-wrapper.search-flash { animation: searchFlash 2.6s ease-out; }
+    @keyframes searchFlash { 0%, 35% { background: rgba(255, 213, 79, 0.55); } 100% { background: transparent; } }
+    @media (prefers-reduced-motion: reduce) { .ayah-wrapper.search-flash { animation: none; background: rgba(255, 213, 79, 0.4); } }
 
     /* ========== SURAH FRAME & METADATA ========== */
     .surah-separator { width: 100%; display: flex; flex-direction: column; align-items: center; margin: 2px 0 2px 0; }
@@ -570,11 +579,11 @@
 
   <div class="search-overlay" id="searchOverlay">
     <div class="search-bar-row">
-      <input type="text" id="searchInput" placeholder="ابحث عن كلمة (مطابقة تامة)..." oninput="handleGlobalSearch(this.value)">
+      <input type="text" id="searchInput" placeholder="ابحث في القرآن (بدون إنترنت)..." oninput="handleGlobalSearch(this.value)">
       <button class="close-search-btn" onclick="toggleSearchOverlay('close')" title="إغلاق"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
     </div>
     <div class="search-results-container" id="searchResults">
-      <div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>
+      <div class="search-note">اكتب كلمة أو جزءاً من آية للبحث في القرآن كله...</div>
     </div>
   </div>
 
@@ -1428,6 +1437,7 @@
       txtCont.scrollTop = 0;
       if (autoPlayNextPage) { playAyah(0); autoPlayNextPage = false; }
       handlePendingAyahAction();
+      if (pendingFlashAyah) { const n = pendingFlashAyah; pendingFlashAyah = 0; setTimeout(() => flashAyah(n), 350); }
       prefetchNextPage();
       applyTextSettings();
       setupLongPressForAyahs();
@@ -1476,53 +1486,142 @@
 
     let searchOverlayActive = false; 
     let searchTimeout = null;
+
+    // ===== Search (offline) =====
+    // Searches the app's own verified text (data/quran.json, via QuranTextSource),
+    // so it works with no connection. Diacritics, pause marks and the hamza /
+    // alef / ta-marbuta / alef-maqsura variants are ignored. Two passes: an exact
+    // pass on the letters, then a loose pass that also ignores alefs, so words
+    // typed in common spelling (رزقناهم، الصلاة، السماوات) find their Uthmani
+    // spelling (رَزَقۡنَٰهُمۡ، ٱلصَّلَوٰةَ، ٱلسَّمَٰوَٰتِ). Exact hits are listed first.
+    // Results are shown in the reader's font and its matching encoding.
+    const SEARCH_PAGE = 50;
+    let searchData = null, searchQpc = null, searchHits = [], searchShown = 0, searchQuery = null;
+    const searchNorm = t => String(t || '')
+      .replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ‌-‏﻿]/g, '')
+      .replace(/[ٱأإآ]/g, 'ا').replace(/ة/g, 'ه')
+      .replace(/[ىئ]/g, 'ي').replace(/ؤ/g, 'و')
+      .replace(/\s+/g, ' ').trim();
+    // Loose form: no alefs at all, and a final وه / اه (صلوة، زكوة) read as ه.
+    const searchLoose = n => n.split(' ').map(w => w.replace(/ا/g, '').replace(/[و]ه$/, 'ه')).join(' ');
+
+    function loadSearchData() {
+      if (searchData) return Promise.resolve(searchData);
+      return QuranTextSource.loadIndex().then(index => {
+        searchData = index.allAyahs().map(a => {
+          const n = searchNorm(a.text);
+          return Object.assign(a, { page: index.pageOf(a.surah, a.numberInSurah), n: n, l: searchLoose(n) });
+        });
+        return searchData;
+      });
+    }
+    // The Madinah font needs the QPC text (data/quran-qpc.json, letter-checked
+    // against quran.json by QuranTextSource); other fonts show quran.json's.
+    function loadSearchQpc() {
+      if (searchQpc) return Promise.resolve(searchQpc);
+      return fetch('../data/quran-qpc.json').then(r => r.json()).then(j => (searchQpc = j)).catch(() => null);
+    }
+    function displayTextFor(a) {
+      if (textEncodingForFont() === 'qpc' && searchQpc && searchQpc.surahs) {
+        const t = searchQpc.surahs[a.surah - 1] && searchQpc.surahs[a.surah - 1][a.numberInSurah - 1];
+        if (QuranTextSource.isQuranScript(t) && QuranTextSource.letters(t) === QuranTextSource.letters(a.text)) return t;
+      }
+      return a.text;
+    }
+
     function toggleSearchOverlay(action = 'toggle') {
       const overlay = document.getElementById('searchOverlay');
-      if (action === 'close' || action === 'jump') { searchOverlayActive = false; } 
+      if (action === 'close' || action === 'jump') { searchOverlayActive = false; }
       else { searchOverlayActive = !searchOverlayActive; }
       overlay.classList.toggle('active', searchOverlayActive);
-      if (searchOverlayActive) { document.getElementById('searchInput').focus(); } 
-      else if (action === 'close') { 
-          document.getElementById('searchInput').value = ''; 
-          document.getElementById('searchResults').innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>'; 
+      if (searchOverlayActive) { document.getElementById('searchInput').focus(); loadSearchData().catch(() => {}); loadSearchQpc(); }
+      else if (action === 'close') {
+          document.getElementById('searchInput').value = '';
+          searchHint();
       }
+    }
+    function searchHint(msg) {
+      document.getElementById('searchResults').innerHTML = '<div class="search-note">' + escHtml(msg || 'اكتب كلمة أو جزءاً من آية للبحث في القرآن كله...') + '</div>';
     }
 
     function handleGlobalSearch(query) {
-      query = query.trim(); 
-      const resD = document.getElementById('searchResults');
-      if (!query) { resD.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث...</div>'; return; }
-      resD.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color: var(--accent);">جاري البحث... ⏳</div>';
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-          // The query goes into a URL path and two regexes: encode / escape it.
-          const qRe = escRegex(query), qHtmlRe = escRegex(escHtml(query));
-          fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/quran-simple-clean`).then(res => res.json()).then(data => {
-              if (data.code === 200 && data.data.count > 0) {
-                  const exactRegex = new RegExp('(^|[^\\p{L}])' + qRe + '([^\\p{L}]|$)', 'ui'); 
-                  const matches = data.data.matches.filter(m => exactRegex.test(m.text));
-                  if (matches.length > 0) {
-                      let h = `<div style="text-align:center; margin-bottom: 10px; color: var(--accent); font-weight: bold; font-size: 14px;">تم العثور على ${matches.length} نتيجة</div>`;
-                      h += matches.map(m => `<div class="search-result-item" onclick="jumpToSearchResult(${parseInt(m.number, 10)})"><div class="res-meta">سورة ${escHtml(m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim())} - آية ${parseInt(m.numberInSurah, 10)}</div><div class="res-text">${escHtml(m.text).replace(new RegExp('(^|[^\\p{L}])(' + qHtmlRe + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div></div>`).join('');
-                      resD.innerHTML = h;
-                  } else { resD.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج مطابقة تماماً.</div>'; }
-              } else { resD.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج.</div>'; }
-          }).catch(() => { resD.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">خطأ في الاتصال.</div>'; });
-      }, 500); 
+      searchTimeout = setTimeout(() => runSearch(query), 180);
     }
-
-    function jumpToSearchResult(ayahNumber) {
-        const resD = document.getElementById('searchResults'); resD.innerHTML = '<div style="text-align:center; padding:30px; font-size:16px; color: var(--accent); font-weight:bold;">جاري الانتقال...</div>';
-        let cp = localStorage.getItem('ayah_page_v1_' + ayahNumber);
-        if (cp) { executeJump(parseInt(cp)); } 
-        else {
-            fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`).then(res => res.json()).then(data => { 
-                if (data.code === 200) { const tp = data.data.page; localStorage.setItem('ayah_page_v1_' + ayahNumber, tp); executeJump(tp); } 
-            }).catch(() => { resD.innerHTML = 'حدث خطأ.'; });
+    function runSearch(raw) {
+      const q = searchNorm(raw);
+      if (!q) { searchHint(); return; }
+      const resD = document.getElementById('searchResults');
+      Promise.all([loadSearchData(), loadSearchQpc()]).then(([data]) => {
+        if (searchNorm(document.getElementById('searchInput').value) !== q) return; // typing moved on
+        const ql = searchLoose(q);
+        const exact = [], loose = [];
+        for (const a of data) {
+          if (a.n.includes(q)) exact.push(a);
+          else if (ql && a.l.includes(ql)) loose.push(a);
         }
+        searchHits = exact.concat(loose);
+        searchQuery = { n: q.split(' '), l: ql.split(' ').filter(Boolean) };
+        searchShown = 0;
+        if (!searchHits.length) { searchHint('لا توجد نتائج لـ «' + raw.trim() + '»'); return; }
+        resD.innerHTML = '<div class="search-count">' + escHtml('عدد النتائج: ' + searchHits.length.toLocaleString('ar-EG')) + '</div>';
+        showMoreSearchResults();
+        resD.scrollTop = 0;
+      }).catch(() => searchHint('تعذر تحميل نص القرآن.'));
+    }
+    // Highlight the words that hold a query word (whole words only: a span
+    // inside a word would cut its marks off their letters).
+    function highlightWords(text) {
+      return text.split(' ').map(w => {
+        const n = searchNorm(w);
+        if (!n) return escHtml(w);
+        const l = searchLoose(n);
+        const hit = searchQuery.n.some(p => p && n.includes(p)) || searchQuery.l.some(p => p && l.includes(p));
+        return hit ? '<span class="search-highlight">' + escHtml(w) + '</span>' : escHtml(w);
+      }).join(' ');
+    }
+    function showMoreSearchResults() {
+      const resD = document.getElementById('searchResults');
+      const more = resD.querySelector('.search-more');
+      if (more) more.remove();
+      const slice = searchHits.slice(searchShown, searchShown + SEARCH_PAGE);
+      searchShown += slice.length;
+      const fontFam = getComputedStyle(document.getElementById('textContainer')).fontFamily;
+      const html = slice.map(a => {
+        const name = String(a.surahName).replace(/سورة|سُورَةُ|سُورَةِ/g, '').replace(/[ً-ٰٟۖ-ۭ]/g, '').replace(/ٱ/g, 'ا').trim();
+        return '<div class="search-result-item" data-page="' + a.page + '" data-number="' + a.number + '">' +
+          '<div class="res-meta">' + escHtml('سورة ' + name + ' - آية ' + a.numberInSurah.toLocaleString('ar-EG') + ' · صفحة ' + a.page.toLocaleString('ar-EG')) + '</div>' +
+          '<div class="res-text" style="font-family:' + escHtml(fontFam) + '">' + highlightWords(displayTextFor(a)) + '</div></div>';
+      }).join('');
+      resD.insertAdjacentHTML('beforeend', html);
+      if (searchShown < searchHits.length) {
+        resD.insertAdjacentHTML('beforeend', '<button type="button" class="search-more">' + escHtml('عرض المزيد (' + (searchHits.length - searchShown).toLocaleString('ar-EG') + ')') + '</button>');
+      }
+    }
+    document.getElementById('searchResults').addEventListener('click', e => {
+      if (e.target.closest('.search-more')) { showMoreSearchResults(); return; }
+      const item = e.target.closest('.search-result-item');
+      if (item) jumpToAyah(parseInt(item.dataset.page, 10), parseInt(item.dataset.number, 10));
+    });
+
+    // Go to an ayah's page and flash it there.
+    let pendingFlashAyah = 0;
+    function flashAyah(number) {
+      const i = currentPageAyahsData.findIndex(a => a.number === number);
+      const el = i >= 0 && document.getElementById('ayah-wrapper-' + i);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.remove('search-flash'); void el.offsetWidth; el.classList.add('search-flash');
+      setTimeout(() => el.classList.remove('search-flash'), 2600);
+    }
+    function jumpToAyah(page, number) {
+      if (!(page >= 1 && page <= 604)) return;
+      toggleSearchOverlay('jump');
+      if (page === currentPage) { flashAyah(number); return; }
+      pendingFlashAyah = number;
+      goToPage(page);
     }
 
-    function executeJump(targetPage) { toggleSearchOverlay('jump'); if (typeof goToPage === 'function') { goToPage(targetPage); } else { currentPage = targetPage; updateContent(); } showCustomToast(`تم الانتقال لصفحة ${targetPage}`); }
 
     function updateSurahProgress() {
       const surah = getCurrentSurah(); if (!surah) return;

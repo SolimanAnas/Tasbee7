@@ -143,7 +143,27 @@
       return list;
     }
 
-    return { pageAyahs: pageAyahs };
+    /** The page an ayah begins on (1…604), from the page map; 0 if unknown. */
+    function pageOf(surah, ayah) {
+      const i = indexOf.get(surah + ':' + ayah);
+      if (i === undefined) return 0;
+      let lo = 0, hi = starts.length - 1;          // last page whose first ayah is at or before i
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (starts[mid] <= i) lo = mid; else hi = mid - 1;
+      }
+      return lo + 1;
+    }
+
+    /** Every ayah of the mushaf, in order — for searching the local text. */
+    function allAyahs() {
+      return quran.map((v, i) => ({
+        key: v.surah + ':' + v.ayah, number: i + 1, surah: v.surah, numberInSurah: v.ayah,
+        surahName: v.surah_name, text: ayahOwnText(v)
+      }));
+    }
+
+    return { pageAyahs: pageAyahs, pageOf: pageOf, allAyahs: allAyahs };
   }
 
   /**
