@@ -1564,4 +1564,13 @@ export default {
   "qt_trans_under_ayah": "الترجمة تحت كل آية",
   "qt_trans_missing": "لا يوجد نص لهذه الآية في هذه الترجمة.",
   "qt_trans_credit": "الترجمات من <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">مشروع تنزيل</a> (Tanzil.net)، كما نشرها أصحابها.",
+  "vm_bg_add": "أضف صورة أو فيديو من جهازك",
+  "vm_bg_add_short": "إضافة",
+  "vm_bg_delete": "حذف",
+  "vm_bg_adding": "جارٍ إضافة الخلفية...",
+  "vm_bg_bad": "تعذّر فتح هذا الملف — اختر صورة أو فيديو",
+  "vm_bg_too_big": "الفيديو كبير جداً — الحد {n} ميغابايت",
+  "vm_bg_max": "لديك {n} خلفيات خاصة — احذف واحدة أولاً",
+  "vm_bg_no_space": "لا توجد مساحة كافية على الجهاز",
+  "vm_bg_private": "صورك وفيديوهاتك تبقى على جهازك ولا تُرفع إلى أي مكان.",
 };

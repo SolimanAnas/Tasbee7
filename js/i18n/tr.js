@@ -1536,4 +1536,13 @@ export default {
   "qt_trans_under_ayah": "Her ayetin altında çeviri",
   "qt_trans_missing": "Bu çeviride bu ayet için metin yok.",
   "qt_trans_credit": "Çeviriler <a href=\"https://tanzil.net/trans/\" target=\"_blank\" rel=\"noopener\">Tanzil Projesi</a>'nden (Tanzil.net), yazarlarının yayımladığı şekliyle.",
+  "vm_bg_add": "Cihazınızdan resim veya video ekleyin",
+  "vm_bg_add_short": "Ekle",
+  "vm_bg_delete": "Sil",
+  "vm_bg_adding": "Arka plan ekleniyor…",
+  "vm_bg_bad": "Bu dosya açılamadı — bir resim veya video seçin",
+  "vm_bg_too_big": "Video çok büyük — en fazla {n} MB",
+  "vm_bg_max": "{n} kendi arka planınız var — önce birini silin",
+  "vm_bg_no_space": "Bu cihazda yeterli alan yok",
+  "vm_bg_private": "Resimleriniz ve videolarınız cihazınızda kalır, hiçbir yere yüklenmez.",
 };

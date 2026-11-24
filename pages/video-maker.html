@@ -391,6 +391,18 @@ body.vm-pseudo-fs .action-bar { display:none; }
   color:#fff; font-size:12px; text-shadow:0 1px 3px #000;
 }
 
+/* "+" tile and the user's own backgrounds */
+.bg-add { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  border:2px dashed var(--accent-main); background:var(--accent-muted); color:var(--accent-main);
+  font-family:inherit; font-size:11.5px; font-weight:800; }
+.bg-add svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; }
+.bg-thumb.is-user .bg-del {
+  position:absolute; top:3px; inset-inline-end:3px; width:22px; height:22px; border-radius:50%;
+  background:rgba(0,0,0,.6); color:#fff; font-size:15px; line-height:21px; text-align:center; cursor:pointer;
+}
+.bg-thumb.is-user .bg-del::after { content:''; position:absolute; inset:-8px; }   /* larger tap area */
+.bg-private { font-size:11.5px; color:var(--text-secondary); margin:-2px 2px 6px; }
+
 /* Format picker with aspect-shaped icons */
 .formats { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
 .formats button {
@@ -548,6 +560,8 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
       <section class="card">
         <div class="step-head"><span class="step-num">3</span><span class="step-title" data-i18n="vm_background">الخلفية</span></div>
         <div class="bg-strip" id="vmBgs"></div>
+        <input type="file" id="vmBgFile" accept="image/*,video/*" multiple hidden>
+        <div class="bg-private" data-i18n="vm_bg_private">صورك وفيديوهاتك تبقى على جهازك ولا تُرفع إلى أي مكان.</div>
         <label class="switch-row">
           <span class="sw-text">
             <span class="sw-title" data-i18n="vm_multi_bg">عدة صور</span>
@@ -712,7 +726,7 @@ function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 4;
+  var NEED = 5;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
