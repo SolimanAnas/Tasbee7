@@ -10,6 +10,11 @@ const QURAN = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'quran.json'), 
 const REMOTE = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'fixtures', 'quran-encodings.json'), 'utf8'));
 const stored = (s, a) => QURAN.find(v => v.surah === s && v.ayah === a).text_uthmani;
 
+// Encoding-aware letter check (the same one the app uses): the QPC text the
+// Madinah font draws offline spells some letters differently (ي/ى, أ/ءا).
+const QTS = require(path.join(ROOT, 'js', 'quran-text-source.js'));
+const sameLetters = (a, b) => expect(QTS.letters(a)).toBe(QTS.letters(b));
+
 const PAGE_2 = ['2:1', '2:2', '2:3', '2:4', '2:5'];
 
 test.use({ serviceWorkers: 'block' });
@@ -192,4 +197,73 @@ test.describe('pinch-to-zoom hint', () => {
     await second.waitForTimeout(1500);
     expect(await shown(second)).toBe(false);
   });
+});
+
+test.describe('search (offline)', () => {
+  test('finds an ayah with no connection, common spelling included, and opens it', async ({ page }) => {
+    await blockNetwork(page);
+    await page.addInitScript(() => { try { localStorage.setItem('qtZoomHintDone', '1'); } catch { /* storage blocked */ } });
+    await openPage(page, 1);
+    await page.evaluate(() => toggleSearchOverlay('toggle'));
+
+    // «الصلاة» as typed finds the Uthmani «ٱلصَّلَوٰةَ» (2:3, page 2).
+    await page.fill('#searchInput', 'الصلاة');
+    const first = page.locator('#searchResults .search-result-item').first();
+    await expect(first).toHaveAttribute('data-number', '10');
+    await expect(first).toHaveAttribute('data-page', '2');
+    expect(await page.locator('#searchResults .search-highlight').count()).toBeGreaterThan(0);
+
+    // Ayat al-Kursi: open its page and flash the ayah.
+    await page.fill('#searchInput', 'لا تأخذه سنة');
+    const kursi = page.locator('#searchResults .search-result-item').first();
+    await expect(kursi).toHaveAttribute('data-number', '262');   // 2:255
+    await kursi.click();
+    await expect.poll(() => page.evaluate(() => currentPage)).toBe(42);
+    await expect(page.locator('.ayah-wrapper.search-flash')).toHaveCount(1);
+    const flashed = await page.locator('.ayah-wrapper.search-flash .ayah-text').textContent();
+    sameLetters(flashed, stored(2, 255));
+  });
+
+  test('what was typed is shown as text', async ({ page }) => {
+    await blockNetwork(page);
+    await openPage(page, 1);
+    await page.evaluate(() => toggleSearchOverlay('toggle'));
+    await page.fill('#searchInput', 'zz<img src=x onerror="window.__injected=1">');
+    await expect(page.locator('#searchResults .search-note')).toContainText('<img src=x');
+    expect(await page.locator('#searchResults img').count()).toBe(0);
+    expect(await page.evaluate(() => window.__injected)).toBeUndefined();
+  });
+});
+
+test('recitation repeats an ayah the chosen number of times', async ({ page }) => {
+  await blockNetwork(page);
+  await page.addInitScript(() => { try { localStorage.setItem('qtZoomHintDone', '1'); } catch { /* storage blocked */ } });
+  await openPage(page, 2);
+  // No real audio here: fake URLs, a no-op play(), and the "ended" event by hand.
+  await page.evaluate(() => {
+    pageAudioUrls = currentPageAyahsData.map((_, i) => 'https://audio.invalid/' + i + '.mp3');
+    audioPlayer.play = () => Promise.resolve();
+    changeRepeat('ayah:3');
+    playAyah(1);
+  });
+  const step = () => page.evaluate(() => { audioPlayer.onended(); return [currentAyahIndex, ayahPlaysDone]; });
+  expect(await step()).toEqual([1, 1]);
+  expect(await step()).toEqual([1, 2]);
+  expect(await step()).toEqual([2, 0]);   // third play done: on to the next ayah
+  await expect(page.locator('#audioNow')).toContainText('1');
+  await expect(page.locator('.ayah-wrapper.playing-highlight')).toHaveAttribute('id', 'ayah-wrapper-2');
+});
+
+test('the page follows the app language (English)', async ({ page }) => {
+  await blockNetwork(page);
+  await page.addInitScript(() => { try { localStorage.setItem('qtZoomHintDone', '1'); localStorage.setItem('zad_lang', 'en'); localStorage.setItem('zad_lang_chosen', '1'); } catch { /* storage blocked */ } });
+  await openPage(page, 2);
+  await expect(page.locator('#surahName')).toHaveText('Surah Al-Baqarah');
+  await expect(page.locator('.surah-meta')).toHaveText('Medinan • 286 ayat');
+  await expect(page.locator('#searchInput')).toHaveAttribute('placeholder', /Search the Quran/);
+  await expect(page.locator('#repeatSelect option[value="ayah:3"]')).toHaveText('Ayah ×3');
+  // The Quran itself stays Arabic (ayah 1's stored text carries the basmala the page draws apart).
+  const texts = await ayahTexts(page);
+  expect(texts.length).toBe(5);
+  texts.slice(1).forEach((t, i) => sameLetters(t, stored(2, i + 2)));
 });

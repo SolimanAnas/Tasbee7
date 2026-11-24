@@ -1377,7 +1377,7 @@
         state.surah = s; state.from = a;
         state.to = to >= a && to <= surahs[s - 1].ayat.length ? to : a;
       }
-    } catch (e) { /* no preset */ }
+    } catch { /* no preset */ }
     fillSurahs();
     fillReciters();
     fillBackgrounds();
