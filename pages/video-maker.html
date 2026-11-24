@@ -131,6 +131,14 @@ button { font-family: inherit; }
 .step-head { display:flex; align-items:center; gap:10px; }
 /* "✦ Popular" quick pick — a filled pill at the end of the step row. Solid accent
    fill + glow so it reads as a call to action against the glass card, in every theme. */
+.search-btn {
+  margin-inline-start:auto; flex-shrink:0; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;
+  border-radius:50%; cursor:pointer; border:1px solid var(--glass-border, rgba(128,128,128,.3)); background:rgba(128,128,128,.12); color:inherit; padding:0;
+}
+.search-btn:active { transform:scale(.92); }
+.search-btn:focus-visible { outline:2px solid var(--accent-main); outline-offset:3px; }
+.search-btn + .popular-btn { margin-inline-start:0; }
+.search-hl { background:rgba(255,213,79,.6); color:#000; border-radius:4px; padding:0 2px; }
 .popular-btn {
   margin-inline-start:auto; flex-shrink:0; display:inline-flex; align-items:center; gap:6px;
   padding:6px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;
@@ -484,6 +492,7 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
       <section class="card">
         <div class="step-head">
           <span class="step-num">1</span><span class="step-title" data-i18n="vm_step_ayat">الآيات</span>
+          <button type="button" class="search-btn" id="vmSearchBtn" aria-haspopup="dialog" data-i18n-title="vm_search" data-i18n-aria="vm_search" title="بحث في القرآن" aria-label="بحث في القرآن"><img src="../img/SVG/search.svg" alt="" style="width:18px;height:18px;"></button>
           <button type="button" class="popular-btn" id="vmPopularBtn" aria-haspopup="dialog">
             <svg class="spark" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6.6 5.4 11.4 12 12-6.6.6-11.4 5.4-12 12-.6-6.6-5.4-11.4-12-12C6.6 11.4 11.4 6.6 12 0z"/></svg><span data-i18n="vm_popular">الأكثر استخداماً</span>
           </button>
@@ -617,6 +626,14 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
     <div class="sheet-list" id="vmSurahList"></div>
   </div>
 </div>
+<div class="bottom-sheet" id="vmSearchSheet" role="dialog" aria-modal="true">
+  <div class="drag-handle"></div>
+  <div class="sheet-header"><h2 data-i18n="vm_search_title">بحث في القرآن</h2><button class="icon-btn" type="button" data-close-pick aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
+  <div class="sheet-content">
+    <input type="text" class="sheet-search" id="vmSearchSearch" placeholder="اكتب كلمة أو جزءاً من الآية..." data-i18n-placeholder="vm_search_quran_ph" autocomplete="off">
+    <div class="sheet-list" id="vmSearchList"></div>
+  </div>
+</div>
 <div class="bottom-sheet" id="vmPopularSheet" role="dialog" aria-modal="true">
   <div class="drag-handle"></div>
   <div class="sheet-header"><h2 data-i18n="vm_popular_title">آيات مختارة</h2><button class="icon-btn" type="button" data-close-pick aria-label="Close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
@@ -685,7 +702,7 @@ function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 2;
+  var NEED = 3;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab

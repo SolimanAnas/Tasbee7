@@ -970,6 +970,7 @@
     $('vm' + kind + 'Search').value = '';
     if (kind === 'Surah') renderSurahList();
     else if (kind === 'Popular') renderPopularList();
+    else if (kind === 'Search') renderSearchList();
     else renderReciterList();
     $('vmPickOverlay').classList.add('active');
     $('vm' + kind + 'Sheet').classList.add('active');
@@ -1019,6 +1020,34 @@
     }
     $('vmPopularList').innerHTML = html || '<div class="sheet-empty">' + esc(tr('takrar_no_results')) + '</div>';
   }
+  // ---------- 🔎 search the whole Quran (local text, works offline) ----------
+  const SEARCH_MAX = 60;
+  let searchIndex = null;
+  const searchNorm = t => normalize(bareLetters(t || '')).replace(/[\u06D6-\u06ED]/g, '').replace(/\s+/g, ' ').trim();
+  function buildSearchIndex() {
+    searchIndex = [];
+    for (const s of surahs) s.ayat.forEach((t, i) => { if (t) searchIndex.push({ s: s.n, a: i + 1, t, n: searchNorm(t) }); });
+  }
+  function renderSearchList() {
+    const q = searchNorm($('vmSearchSearch').value);
+    const box = $('vmSearchList');
+    if (!q) { box.innerHTML = '<div class="sheet-empty">' + esc(tr('vm_search_quran_hint')) + '</div>'; return; }
+    if (!searchIndex) buildSearchIndex();
+    const hits = [];
+    let total = 0;
+    for (const r of searchIndex) {
+      if (r.n.includes(q)) { total++; if (hits.length < SEARCH_MAX) hits.push(r); }
+    }
+    if (!hits.length) { box.innerHTML = '<div class="sheet-empty">' + esc(tr('takrar_no_results')) + '</div>'; return; }
+    const num = n => (arabicNames() ? arDigits(n) : String(n));
+    box.innerHTML = hits.map(r => {
+      const words = r.t.split(/\s+/);
+      const text = words.map(w => esc(w)).map((w, i) => (searchNorm(words[i]) && q.split(' ').some(p => p && searchNorm(words[i]).includes(p))) ? '<mark class="search-hl">' + w + '</mark>' : w).join(' ');
+      return '<button type="button" class="sheet-item pop-row" data-pop="' + r.s + ':' + r.a + ':' + r.a + '">' +
+        '<span class="pop-meta">' + esc(surahLabel(surahs[r.s - 1])) + ' · ' + num(r.a) + '</span>' +
+        '<span class="pop-text" style="white-space:normal;">' + text + '</span></button>';
+    }).join('') + (total > hits.length ? '<div class="sheet-empty">' + esc(total + ' / ' + hits.length) + '</div>' : '');
+  }
   function choosePopular(key) {
     const [s, from, to] = key.split(':').map(Number);
     closePick();
@@ -1063,6 +1092,10 @@
     $('vmSurahBtn').onclick = () => openPick('Surah');
     $('vmReciterBtn').onclick = () => openPick('Reciter');
     $('vmPopularBtn').onclick = () => openPick('Popular');
+    $('vmSearchBtn').onclick = () => openPick('Search');
+    let searchTimer = null;
+    $('vmSearchSearch').oninput = () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderSearchList, 150); };
+    $('vmSearchList').onclick = e => { const b = e.target.closest('[data-pop]'); if (b) choosePopular(b.dataset.pop); };
     $('vmPopularSearch').oninput = renderPopularList;
     $('vmPopularList').onclick = e => { const b = e.target.closest('[data-pop]'); if (b) choosePopular(b.dataset.pop); };
     document.querySelectorAll('#vmPopularFilter .filter-chip').forEach(b => {
@@ -1329,7 +1362,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 2;   // 2: multi-picture slideshow
+  const BUILD = 3;   // 3: Quran search sheet (2: multi-picture slideshow)
   window.VM = { build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
   init();
 })();
