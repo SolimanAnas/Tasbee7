@@ -6,11 +6,11 @@
   <style>html{touch-action:manipulation}</style>
   <meta name="theme-color" content="#0e201b" id="metaThemeColor">
   <title>تعلم التجويد — تحفة الأطفال والجزرية | زاد المسلم</title>
-  <meta name="description" content="تعلّم التجويد من متني تحفة الأطفال والمقدمة الجزرية: نص موثّق مشكول، وشرح مبسّط لكل بيت، وتلاوة المتن بصوت كبار القراء مع الاستماع بيتًا بيتًا.">
+  <meta name="description" content="تعلّم التجويد من متني تحفة الأطفال والمقدمة الجزرية: نص موثّق مشكول، وشرح مبسّط لكل بيت، والاستماع إلى المتن بأصوات كبار القراء بيتًا بيتًا، مع حفظ التسجيل للاستماع دون اتصال.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/tajweed.html">
   <meta property="og:title" content="تعلم التجويد | زاد المسلم">
-  <meta property="og:description" content="تحفة الأطفال والجزرية مع شرح مبسّط لكل بيت وتلاوة المتن.">
+  <meta property="og:description" content="تحفة الأطفال والجزرية مع شرح مبسّط لكل بيت والاستماع إلى المتن بيتًا بيتًا.">
   <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
   <link rel="stylesheet" href="../css/fonts.css">
   <link rel="stylesheet" href="../css/hadith-book.css">
@@ -23,7 +23,8 @@
     .hero-note { font-size: .74rem; opacity: .82; margin-top: 10px; line-height: 1.7; }
     /* ---------- chapters + options ---------- */
     .tj-bar { position: sticky; top: calc(max(10px, env(safe-area-inset-top)) + 61px); z-index: 5; margin: 14px -16px 0; padding: 8px 16px 6px;
-      background: linear-gradient(var(--bg) 72%, transparent); }
+      background: var(--bg); }
+    .tj-bar::after { content: ''; position: absolute; inset-inline: 0; top: 100%; height: 14px; background: linear-gradient(var(--bg), transparent); pointer-events: none; }
     .tj-chaps { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 2px 1px; }
     .tj-chaps::-webkit-scrollbar { display: none; }
     .tj-chap { flex: none; padding: 7px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; border: 1px solid var(--border); background: var(--solid); color: var(--text-muted); font-family: 'Amiri', serif; }
@@ -59,24 +60,86 @@
     .tj-src h3 { font-size: .9rem; color: var(--gold); margin-bottom: 4px; }
     .tj-src a { color: var(--accent); word-break: break-word; }
     .tj-src p + p { margin-top: 6px; }
+    .tj-continue { margin-top: 10px; padding: 7px 14px; border-radius: 999px; background: rgba(230,192,104,.16); border: 1px solid rgba(230,192,104,.45); color: #f3dc9f; font-weight: 700; font-size: .8rem; }
+    .tj-continue::before { content: '▶'; font-size: .62rem; margin-inline-end: 6px; }
+    .tj-continue[hidden] { display: none; }
+    /* the playing bayt: its progress along the bottom edge, a spinner while it loads */
+    .bayt { overflow: hidden; }
+    .b-prog { position: absolute; inset-inline: 0; bottom: 0; height: 3px; background: var(--accent); transform: scaleX(var(--p, 0)); transform-origin: right; opacity: 0; transition: opacity .2s; }
+    [dir="ltr"] .b-prog { transform-origin: left; }
+    .bayt.playing .b-prog { opacity: 1; }
+    .b-play .i-pause, body.tj-on .bayt.playing .b-play .i-play { display: none; }
+    body.tj-on .bayt.playing .b-play .i-pause { display: inline; }
+    .bayt.loading .b-play { position: relative; }
+    .bayt.loading .b-play svg { opacity: .35; }
+    .bayt.loading .b-play::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; border: 2px solid transparent; border-top-color: currentColor; animation: tjspin .8s linear infinite; }
+    @keyframes tjspin { to { transform: rotate(360deg); } }
+    /* long messages wrap instead of running off the screen */
+    .toast { white-space: normal; max-width: calc(100% - 32px); width: max-content; text-align: center; border-radius: 16px; line-height: 1.6; }
     /* ---------- player ---------- */
-    .tj-player { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 30; max-width: 800px; margin: 0 auto;
-      background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 18px;
-      box-shadow: 0 12px 30px -12px rgba(0,0,0,.45); padding: 9px 11px; display: flex; flex-direction: column; gap: 7px; }
-    .tp-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .tp-play { width: 42px; height: 42px; flex: none; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; }
-    .tp-play svg { width: 18px; height: 18px; fill: currentColor; }
-    .tp-btn { width: 36px; height: 36px; flex: none; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text); }
-    .tp-btn svg { width: 15px; height: 15px; fill: currentColor; }
-    .tp-ctrls { display: flex; align-items: center; gap: 6px; direction: ltr; }
-    .tp-info { flex: 1; min-width: 0; font-size: .8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-    .tp-info small { display: block; font-weight: 500; color: var(--text-muted); }
-    .tp-sel { max-width: 46%; min-width: 0; padding: 7px 8px; border-radius: 11px; border: 1px solid var(--border); background: var(--solid); color: var(--text); font: inherit; font-size: .8rem; }
-    .tp-rep { padding: 6px 9px; border-radius: 11px; border: 1px solid var(--border); background: var(--solid); color: var(--text); font: inherit; font-size: .78rem; }
-    .tp-seek { flex: 1; min-width: 60px; accent-color: var(--accent); }
-    .tp-time { flex: none; white-space: nowrap; font-size: .72rem; color: var(--text-muted); font-variant-numeric: tabular-nums; direction: ltr; }
-    .tj-player [hidden] { display: none !important; }   /* the Jazariyya has no per-bayt timings */
-    main { padding-bottom: 170px; }
+    .tj-player { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 30; max-width: 560px; margin: 0 auto;
+      background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 22px;
+      box-shadow: 0 14px 34px -14px rgba(0,0,0,.5); padding: 10px 14px 10px; }
+    .tp-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .tp-who { flex: 1; min-width: 0; text-align: start; padding: 2px 4px; border-radius: 12px; color: var(--text); }
+    .tp-info { display: block; font-size: .88rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tp-rname { display: flex; align-items: center; gap: 4px; margin-top: 1px; font-size: .76rem; color: var(--accent); font-weight: 700; min-width: 0; }
+    .tp-rname > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tp-rname svg { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .tp-ok { color: var(--accent); }
+    .tp-slow { flex: none; max-width: 48%; padding: 6px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; line-height: 1.35; background: var(--gold-soft); color: var(--gold); border: 1px solid var(--border); }
+    .tp-seekrow { display: flex; align-items: center; gap: 10px; margin-top: 6px; direction: ltr; }
+    .tp-seek { flex: 1; min-width: 60px; height: 22px; -webkit-appearance: none; appearance: none; background: transparent; }
+    .tp-seek::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--accent) var(--v, 0%), var(--border) var(--v, 0%)); }
+    .tp-seek::-moz-range-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--accent) var(--v, 0%), var(--border) var(--v, 0%)); }
+    .tp-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: var(--accent); border: 2px solid var(--solid); }
+    .tp-seek::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--solid); }
+    .tp-time { flex: none; white-space: nowrap; font-size: .7rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .tp-ctrls { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 4px; direction: ltr; }
+    .tp-play { position: relative; width: 50px; height: 50px; flex: none; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px -6px var(--accent); }
+    .tp-play svg { width: 20px; height: 20px; fill: currentColor; }
+    .tp-spin { position: absolute; inset: -4px; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--accent); opacity: 0; }
+    .tj-player.loading .tp-spin { opacity: 1; animation: tjspin .8s linear infinite; }
+    .tj-player.loading .tp-play svg { opacity: .55; }
+    .tp-btn { width: 42px; height: 42px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text); background: var(--accent-bg); }
+    .tp-btn svg { width: 17px; height: 17px; fill: currentColor; }
+    .tp-btn svg.stroke, .rc-save svg.stroke { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .tp-btn svg.stroke { width: 22px; height: 22px; }
+    .tp-btn svg text { fill: currentColor; stroke: none; font: 800 7.5px system-ui, sans-serif; }
+    .tp-chip { min-width: 46px; height: 32px; padding: 0 10px; flex: none; border-radius: 999px; border: 1px solid var(--border); font-weight: 800; font-size: .8rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .tp-chip.on { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    .tj-player [hidden] { display: none !important; }
+    .tj-player #tpRepeat[hidden] { display: inline-block !important; visibility: hidden; }   /* the Jazariyya has no per-bayt timings; keep the row balanced */
+    main { padding-bottom: 190px; }
+    /* ---------- reciter sheet ---------- */
+    .tj-sheet { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0); transition: background .2s; display: flex; align-items: flex-end; justify-content: center; }
+    .tj-sheet.open { background: rgba(0,0,0,.45); }
+    .tj-sheet[hidden] { display: none; }
+    .tj-sheet-card { width: 100%; max-width: 560px; max-height: 78vh; display: flex; flex-direction: column; background: var(--solid); border-radius: 24px 24px 0 0; border: 1px solid var(--border); border-bottom: 0;
+      padding: 8px 14px calc(14px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .22s ease-out; }
+    .tj-sheet.open .tj-sheet-card { transform: none; }
+    .tj-grab { width: 40px; height: 4px; border-radius: 4px; background: var(--border); margin: 0 auto 8px; }
+    .tj-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .tj-sheet-head h3 { font-size: 1rem; color: var(--text); }
+    .sheet-x { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); background: var(--accent-bg); }
+    .sheet-x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+    .tj-sheet-note { font-size: .76rem; line-height: 1.7; color: var(--text-muted); margin: 4px 0 8px; }
+    .rc-list { overflow-y: auto; overscroll-behavior: contain; margin: 0 -6px; padding: 0 6px; }
+    .rc { display: flex; align-items: center; gap: 8px; padding: 4px; border-radius: 14px; }
+    .rc + .rc { margin-top: 2px; }
+    .rc.on { background: var(--accent-bg); }
+    .rc-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 4px; text-align: start; color: var(--text); }
+    .rc-av { width: 38px; height: 38px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--gold); background: var(--gold-soft); font-family: 'Amiri', serif; font-size: 1.05rem; }
+    .rc.on .rc-av { background: var(--accent); color: #fff; }
+    .rc-name { min-width: 0; font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rc-name small { display: block; font-weight: 500; font-size: .72rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .rc-name small b { color: var(--accent); font-weight: 700; }
+    .rc-save { position: relative; width: 40px; height: 40px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); border: 1px solid var(--border); }
+    .rc-save svg { width: 19px; height: 19px; }
+    .rc-save.done { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .rc-save.busy { border-color: transparent; background: conic-gradient(var(--accent) calc(var(--pct) * 1%), var(--border) 0); }
+    .rc-save.busy::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--solid); }
+    .rc-pct { position: relative; font-size: .66rem; font-weight: 800; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body data-theme="dark">
@@ -105,6 +168,7 @@
       <button class="tab" role="tab" data-matn="jazariyya">المقدمة الجزرية<small data-i18n="tj_jaz_n">١٠٩ أبيات · للمتقدّمين</small></button>
     </div>
     <div class="hero-note" id="tjNote"></div>
+    <button class="tj-continue" id="tjContinue" hidden></button>
   </section>
 
   <div class="tj-bar">
@@ -120,19 +184,35 @@
 </main>
 
 <div class="tj-player" id="tjPlayer">
-  <div class="tp-row">
-    <div class="tp-ctrls">
-      <button class="tp-btn" id="tpPrev" aria-label="السابق" data-i18n-aria="tj_prev"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
-      <button class="tp-play" id="tpPlay" aria-label="تشغيل" data-i18n-aria="tj_play"><svg viewBox="0 0 24 24" id="tpIcon"><path d="M7 4v16l13-8z"/></svg></button>
-      <button class="tp-btn" id="tpNext" aria-label="التالي" data-i18n-aria="tj_next"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
-    </div>
-    <div class="tp-info" id="tpInfo">—</div>
-    <select class="tp-rep" id="tpRepeat" aria-label="تكرار" data-i18n-aria="tj_repeat"></select>
+  <div class="tp-top">
+    <button class="tp-who" id="tpReciter" aria-haspopup="dialog" aria-label="اختيار القارئ وحفظ التسجيل" data-i18n-aria="tj_pick_reciter">
+      <span class="tp-info" id="tpInfo">—</span>
+      <span class="tp-rname"><span id="tpReciterName"></span>
+        <svg class="tp-ok" id="tpSaved" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17 19 7"/></svg>
+        <svg class="tp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+    </button>
+    <button class="tp-slow" id="tpSlow" hidden data-i18n="tj_slow">الاتصال بطيء؟ احفظ التسجيل</button>
   </div>
-  <div class="tp-row">
-    <select class="tp-sel" id="tpReciter" aria-label="القارئ" data-i18n-aria="tj_reciter"></select>
+  <div class="tp-seekrow">
     <input type="range" class="tp-seek" id="tpSeek" min="0" max="1000" value="0" aria-label="الموضع" data-i18n-aria="tj_position">
     <span class="tp-time" id="tpTime">0:00</span>
+  </div>
+  <div class="tp-ctrls">
+    <button class="tp-chip" id="tpRepeat" aria-label="تكرار">×1</button>
+    <button class="tp-btn" id="tpPrev" aria-label="البيت السابق"></button>
+    <button class="tp-play" id="tpPlay" aria-label="تشغيل" data-i18n-aria="tj_play"><svg viewBox="0 0 24 24" id="tpIcon"><path d="M7 4v16l13-8z"/></svg><span class="tp-spin" aria-hidden="true"></span></button>
+    <button class="tp-btn" id="tpNext" aria-label="البيت التالي"></button>
+    <button class="tp-chip" id="tpSpeed" aria-label="السرعة">1×</button>
+  </div>
+</div>
+
+<div class="tj-sheet" id="tjSheet" hidden role="dialog" aria-modal="true" aria-labelledby="tjSheetTitle">
+  <div class="tj-sheet-card">
+    <div class="tj-grab"></div>
+    <div class="tj-sheet-head"><h3 id="tjSheetTitle">القرّاء</h3>
+      <button class="sheet-x" aria-label="إغلاق" data-i18n-aria="tj_close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <p class="tj-sheet-note" data-i18n="tj_save_hint">احفظ التسجيل على جهازك ليبدأ فورًا، وتنتقل بين الأبيات بلا انتظار، ويعمل دون اتصال.</p>
+    <div class="rc-list" id="tjRcList"></div>
   </div>
 </div>
 
