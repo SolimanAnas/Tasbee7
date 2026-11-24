@@ -838,6 +838,15 @@ body.home-compact .new-badge { top: -6px; font-size: 0.55rem; padding: 3px 6px; 
 .view-switch { background: var(--card-glass); border-color: var(--card-edge); box-shadow: var(--card-shadow); }
 .view-switch .vs-thumb { background: var(--accent-grad); }
 :root .prayer-widget .prayer-card.is-next { background: var(--accent-grad); border-color: color-mix(in srgb, #fff 45%, transparent); }
+/* ===== Download center ===== */
+#downloadsSheet .dl-intro { font-size: 13px; color: var(--text-secondary); margin: -4px 4px 10px; line-height: 1.6; }
+.dl-row { cursor: pointer; }
+.dl-row .dl-go { font-size: 1.4rem; color: var(--text-secondary); padding-inline-start: 8px; }
+.dl-row.saved .s-desc { color: var(--accent, #10b981); font-weight: 700; }
+.dl-row.busy { opacity: .75; pointer-events: none; }
+#downloadsSheet .dl-storage { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 12px; }
+[dir="ltr"] .dl-row .dl-go { transform: scaleX(-1); }
+
 /* When the system asks for less transparency, use solid surfaces. */
 @media (prefers-reduced-transparency: reduce) {
   .bottom-nav { -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -1254,6 +1263,21 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
     </div>
   </div>
 
+  <!-- ===== Section: Khatma & downloads ===== -->
+  <div class="section-title" data-i18n="section_khatma_dl">الختمة والتحميل</div>
+  <div class="grid">
+    <div class="feature-card glass-panel" onclick="go('pages/thabat.html?wird=1')">
+      <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/khatma.webp" alt="" width="192" height="192" decoding="async"></div>
+      <div class="fc-text" data-i18n="card_khatma">الختمة</div>
+      <span class="new-badge" data-i18n="badge_new">جديد</span>
+    </div>
+    <div class="feature-card glass-panel" onclick="openDownloadsSheet()">
+      <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/downloads.webp" alt="" width="192" height="192" decoding="async"></div>
+      <div class="fc-text" data-i18n="card_downloads">مركز التحميل</div>
+      <span class="new-badge" data-i18n="badge_new">جديد</span>
+    </div>
+  </div>
+
   <!-- ===== Section 2: Azkar & Duaa ===== -->
   <div class="section-title" data-i18n="section_azkar">الأذكار والأدعية</div>
   <div class="grid">
@@ -1481,6 +1505,47 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
       <div class="stat-card"><div class="stat-num" id="statStreak">0</div><div class="stat-lbl" data-i18n="stat_streak">أيام متتالية</div></div>
     </div>
     <button class="btn-primary" onclick="if (window.DhikrStats) DhikrStats.share()" data-i18n="ds_share">مشاركة إنجاز الأسبوع</button>
+  </div>
+</div>
+
+<!-- ======================== DOWNLOAD CENTER ======================== -->
+<!-- Everything the app can keep for use with no connection, in one place. -->
+<div id="downloadsSheet" class="bottom-sheet glass-panel">
+  <div class="drag-handle-wrap"><div class="drag-handle"></div></div>
+  <div class="sheet-header"><div class="sheet-title" data-i18n="dl_title">مركز التحميل</div></div>
+  <div class="sheet-content">
+    <div class="dl-intro" data-i18n="dl_intro">احفظ ما تحتاجه على جهازك ليعمل بدون إنترنت.</div>
+    <div class="setting-item dl-row" id="dlApp" onclick="openOfflineModal()">
+      <div class="setting-info">
+        <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <div class="s-text">
+          <div class="s-title" data-i18n="dl_app">التطبيق والمصحف بدون إنترنت</div>
+          <div class="s-desc" id="dlAppDesc" data-i18n="dl_app_desc">الصفحات والمصحف النصي والتفسير والأذكار وكتب الحديث</div>
+        </div>
+      </div>
+      <span class="dl-go" aria-hidden="true">›</span>
+    </div>
+    <div class="setting-item dl-row" id="dlAudio" onclick="closeAllSheets(); go('pages/audio.html?download=1')">
+      <div class="setting-info">
+        <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+        <div class="s-text">
+          <div class="s-title" data-i18n="dl_audio">تلاوة كاملة للاستماع بدون إنترنت</div>
+          <div class="s-desc" id="dlAudioDesc" data-i18n="dl_audio_desc">اختر قارئًا واحفظ المصحف كاملًا بصوته</div>
+        </div>
+      </div>
+      <span class="dl-go" aria-hidden="true">›</span>
+    </div>
+    <div class="setting-item dl-row" id="dlTrans" onclick="downloadTranslation()">
+      <div class="setting-info">
+        <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="s-text">
+          <div class="s-title" data-i18n="dl_trans">ترجمة معاني القرآن</div>
+          <div class="s-desc" id="dlTransDesc" data-i18n="dl_trans_desc"></div>
+        </div>
+      </div>
+      <span class="dl-go" aria-hidden="true">›</span>
+    </div>
+    <div class="dl-storage" id="dlStorage"></div>
   </div>
 </div>
 
@@ -2196,6 +2261,61 @@ function closeAllSheets() {
   document.querySelectorAll('.bottom-sheet').forEach(s=>{ s.style.transform=''; s.classList.remove('active'); });
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
   if(prayerModalInterval) { clearInterval(prayerModalInterval); prayerModalInterval = null; }
+}
+
+// ===== Download center (offline app, recitations, the translation) =====
+// The translation for the app language, as the text mushaf uses it: one file per
+// language (data/translations, Tanzil), kept in a cache app updates do not clear.
+const DL_TRANSLATIONS = { en: 'en.sahih', tr: 'tr.diyanet', ur: 'ur.junagarhi', ckb: 'ku.asan', ar: 'ar.muyassar' };
+const DL_TRANS_NAMES = { 'en.sahih': 'English — Saheeh International', 'tr.diyanet': 'Türkçe — Diyanet İşleri', 'ur.junagarhi': 'اردو — محمد جوناگڑھی', 'ku.asan': 'کوردی — بورهان محمد-ئەمین', 'ar.muyassar': 'العربية — التفسير الميسر' };
+const DL_TRANS_CACHE = 'quran-offline-translations-v1';
+function dlLang() { return (window.I18n && I18n.getLang && I18n.getLang()) || 'ar'; }
+function dlTransId() {
+  let id = null;
+  try { id = localStorage.getItem('quranTranslation'); } catch (e) { /* storage blocked */ }
+  return DL_TRANS_NAMES[id] ? id : (DL_TRANSLATIONS[dlLang()] || 'en.sahih');
+}
+function dlTransUrl(id) { return new URL('data/translations/' + id + '.json', location.href).href; }
+function dlFmt(bytes) { return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB'; }
+async function refreshDownloads() {
+  const id = dlTransId(), row = document.getElementById('dlTrans'), desc = document.getElementById('dlTransDesc');
+  let saved = false;
+  try { saved = !!(window.caches && await (await caches.open(DL_TRANS_CACHE)).match(dlTransUrl(id))); } catch (e) { /* no cache storage */ }
+  row.classList.toggle('saved', saved);
+  desc.textContent = DL_TRANS_NAMES[id] + ' · ' + (saved ? t('dl_saved') : t('dl_tap_to_save'));
+  const st = document.getElementById('dlStorage');
+  try {
+    const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null;
+    st.textContent = est && est.usage != null ? t('dl_storage', { used: dlFmt(est.usage) }) : '';
+  } catch (e) { st.textContent = ''; }
+}
+async function downloadTranslation() {
+  const id = dlTransId(), row = document.getElementById('dlTrans'), desc = document.getElementById('dlTransDesc');
+  if (row.classList.contains('saved')) { closeAllSheets(); go('pages/quran-text.html'); return; }
+  if (!window.caches) { desc.textContent = t('dl_unavailable'); return; }
+  row.classList.add('busy');
+  desc.textContent = DL_TRANS_NAMES[id] + ' · ' + t('dl_downloading');
+  try {
+    const res = await fetch(dlTransUrl(id), { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const body = await res.clone().json();
+    if (!body || body.id !== id || !Array.isArray(body.surahs) || body.surahs.length !== 114) throw new Error('bad file');
+    await (await caches.open(DL_TRANS_CACHE)).put(dlTransUrl(id), res);
+    // ask the browser to keep what was saved even when storage runs low
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  } catch (e) {
+    desc.textContent = DL_TRANS_NAMES[id] + ' · ' + t('dl_error');
+    row.classList.remove('busy');
+    return;
+  }
+  row.classList.remove('busy');
+  refreshDownloads();
+}
+function openDownloadsSheet() {
+  document.getElementById('sheetOverlay').classList.add('active');
+  document.getElementById('downloadsSheet').classList.add('active');
+  attachSheetDrag('downloadsSheet');
+  refreshDownloads();
 }
 
 // ===== Offline download modal =====

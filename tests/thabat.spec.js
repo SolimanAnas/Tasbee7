@@ -112,7 +112,7 @@ test('a Qur\'an wird journey: daily pages, the mushaf link, khatma and undo', as
   expect(q0.cover).toBe('mushaf');
   await page.locator('.j-card.quran').click();
   await expect(page.locator('#view')).toHaveClass(/qv/);
-  await expect(page.locator('.mushaf a.btn').first()).toHaveAttribute('href', 'quran-text.html?page=602');
+  await expect(page.locator('.mushaf a.btn').first()).toHaveAttribute('href', 'quran-text.html?page=602&wird=1');   // opens on the wird (the mushaf shows its bar)
   await page.locator('.mushaf .btn.gold').click();               // 4 pages from 602 → past 604: a khatma
   await expect(page.locator('#winModal')).toHaveClass(/open/);
   let q = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')).journeys[0].quran);
@@ -163,4 +163,33 @@ test('the "I made it through" button appears only when the ten minutes end', asy
   const d = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')));
   expect(d.overcome).toBe(1);
   expect(d.journeys[0].overcome).toBe(1);
+});
+
+test('a khatma goal sets the daily wird; the mushaf counts the pages and records the wird', async ({ page }) => {
+  await page.goto(URL);
+  await page.evaluate(() => localStorage.removeItem('thabat_v1'));
+  await page.reload();
+  await page.evaluate(() => openForm(null, 'quran'));
+  await page.locator('#fGoalChips button[data-d="30"]').click();
+  await expect(page.locator('#fGoalHint')).toContainText('21');
+  await page.locator('#fSave').click();
+  const q0 = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')).journeys[0].quran);
+  expect(q0).toMatchObject({ daily: 21, pos: 1 });
+  expect(q0.goal.days).toBe(30);
+
+  // the mushaf, opened from the wird
+  await page.goto(URL.replace('thabat.html', 'quran-text.html') + '?page=1&wird=1');
+  await expect(page.locator('#wirdBar')).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('#wirdTitle')).toContainText('1/21');
+  await page.evaluate(() => { currentPage = 21; updateContent(); });
+  await expect(page.locator('#wirdRec')).toHaveClass(/ready/);
+  await page.locator('#wirdRec').click();
+  const q1 = await page.evaluate(() => JSON.parse(localStorage.getItem('thabat_v1')).journeys[0].quran);
+  expect(q1.pos).toBe(22);
+  expect(Object.values(q1.log)).toEqual([21]);
+  await expect(page.locator('#wirdRec')).toBeDisabled();
+
+  // back in ثبات the day is done
+  await page.goto(URL);
+  await expect(page.locator('.j-card.quran .j-kind')).toHaveClass(/q-ok/);
 });
