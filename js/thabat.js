@@ -775,6 +775,13 @@
   function renderAll() { renderHome(); renderDaily(); renderLib(); if (window.curId) renderView(); }
   if (S.settings.pin) lock('unlock');
   renderAll();
+  // Opened for the Qur'an wird (home «الختمة», ?wird=1): its page, or the form to start one.
+  try {
+    if (new URLSearchParams(location.search).get('wird') === '1') {
+      const w = S.journeys.find(isQ);
+      if (w) openView(w.id); else window.openForm(null, 'quran');
+    }
+  } catch { /* no URL API */ }
   checkMilestones();
   function onLang() { document.documentElement.dir = 'rtl'; document.documentElement.classList.toggle('ui-ltr', ['en', 'tr'].includes(lang())); renderAll(); buildKeypad(); }
   window.addEventListener('langchange', onLang);

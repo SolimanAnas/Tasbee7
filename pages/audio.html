@@ -1845,6 +1845,8 @@ async function loadMultipleJSONs(){
         onChange:updateOfflineRow,
         openReciter:openSavedReciter
       });
+      // Opened from the download center (?download=1): straight to the download sheet.
+      if(window.AudioOffline&&new URLSearchParams(location.search).get('download')==='1')setTimeout(()=>AudioOffline.openSheet(),400);
     }
     else throw new Error('No data');
   }catch(e){reciterSelectBtn.textContent=t('audio_load_error')}
