@@ -274,8 +274,18 @@
     /* ========== AUDIO BAR FLOATING ========== */
     .audio-bar { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 15px; right: 15px; margin: 0 auto; max-width: 500px; background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--accent); border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 90; transform: translateY(150%); transition: transform 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .audio-bar.active { transform: translateY(0); }
-    .audio-controls { display: flex; gap: 10px; align-items: center; }
-    .audio-btn { background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    .audio-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 14px 12px; }
+    .audio-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+    .audio-now { flex: 1; min-width: 0; font-weight: bold; font-size: 0.95rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .audio-close { width: 34px; height: 34px; color: #ef4444; flex: none; }
+    .audio-reciter { max-width: 140px; font-size: 0.9rem; min-width: 0; }
+    .audio-opts { justify-content: flex-start; flex-wrap: wrap; }
+    .audio-opt { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: var(--text-secondary); }
+    .audio-opt .custom-select { padding: 6px 8px; font-size: 0.85rem; }
+    /* Keep the last lines readable above the open audio bar. */
+    body.audio-open #textContainer { padding-bottom: 190px; }
+    .audio-controls { display: flex; gap: 8px; align-items: center; }
+    .audio-btn { background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 42px; height: 42px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .audio-btn.primary { background: var(--accent); color: #fff; border: none; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
 
     /* ========== TASMEE' WORD SPANS ========== */
@@ -554,16 +564,27 @@
   </header>
 
   <div class="audio-bar" id="audioBar">
-    <div class="audio-controls">
-        <button class="audio-btn primary" onclick="togglePlayPause()" id="playPauseBtn">
-            <svg id="playIcon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+    <div class="audio-row">
+      <div class="audio-now" id="audioNow" aria-live="polite">التلاوة</div>
+      <button class="icon-btn audio-close" onclick="toggleAudioBar()" title="إغلاق" aria-label="إغلاق"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></button>
+    </div>
+    <div class="audio-row">
+      <div class="audio-controls">
+        <button class="audio-btn" onclick="playPrevAyah()" title="الآية السابقة" aria-label="الآية السابقة">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="7 4 17 12 7 20 7 4"></polygon><rect x="18" y="4" width="2.5" height="16" rx="1"></rect></svg>
+        </button>
+        <button class="audio-btn primary" onclick="togglePlayPause()" id="playPauseBtn" aria-label="تشغيل">
+            <svg id="playIcon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="transform:scaleX(-1)"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             <svg id="pauseIcon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
         </button>
-        <button class="audio-btn" onclick="stopAudio()" title="إيقاف التلاوة">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+        <button class="audio-btn" onclick="playNextAyah()" title="الآية التالية" aria-label="الآية التالية">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="17 4 7 12 17 20 17 4"></polygon><rect x="3.5" y="4" width="2.5" height="16" rx="1"></rect></svg>
         </button>
-    </div>
-    <select class="custom-select" style="max-width: 150px; font-size: 0.9rem;" id="reciterSelect" onchange="changeReciter(this.value)">
+        <button class="audio-btn" onclick="stopAudio()" title="إيقاف التلاوة" aria-label="إيقاف التلاوة">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+        </button>
+      </div>
+      <select class="custom-select audio-reciter" id="reciterSelect" onchange="changeReciter(this.value)" aria-label="القارئ">
         <option value="ar.minshawi">المنشاوي</option>
         <option value="ar.abdulbasitmurattal">عبد الباسط</option>
         <option value="ar.husary">الحصري</option>
@@ -573,8 +594,30 @@
         <option value="ar.ayyoub">محمد أيوب</option>
         <option value="ar.abdullahbasfar">عبد الله بصفر</option>
         <option value="ar.abdurrahmaansudais">السديس</option>
-    </select>
-    <button class="icon-btn" onclick="toggleAudioBar()" style="color:#ef4444;"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+      </select>
+    </div>
+    <div class="audio-row audio-opts">
+      <label class="audio-opt"><span>تكرار</span>
+        <select class="custom-select" id="repeatSelect" onchange="changeRepeat(this.value)">
+          <option value="off">بدون</option>
+          <option value="ayah:2">الآية ×٢</option>
+          <option value="ayah:3">الآية ×٣</option>
+          <option value="ayah:5">الآية ×٥</option>
+          <option value="ayah:10">الآية ×١٠</option>
+          <option value="ayah:inf">الآية دائماً</option>
+          <option value="page:inf">الصفحة دائماً</option>
+        </select>
+      </label>
+      <label class="audio-opt"><span>السرعة</span>
+        <select class="custom-select" id="speedSelect" onchange="changeSpeed(this.value)">
+          <option value="0.75">٠٫٧٥×</option>
+          <option value="1">١×</option>
+          <option value="1.25">١٫٢٥×</option>
+          <option value="1.5">١٫٥×</option>
+          <option value="2">٢×</option>
+        </select>
+      </label>
+    </div>
   </div>
 
   <div class="search-overlay" id="searchOverlay">
@@ -1310,7 +1353,68 @@
             .catch(() => { box.innerHTML = 'Failed to fetch translation.'; });
     }
 
-    function toggleAudioBar() { audioBarActive = !audioBarActive; document.getElementById('audioBar').classList.toggle('active', audioBarActive); }
+    function toggleAudioBar() { audioBarActive = !audioBarActive; document.getElementById('audioBar').classList.toggle('active', audioBarActive); document.body.classList.toggle('audio-open', audioBarActive); }
+
+    // ----- Repeat & speed (remembered) -----
+    // repeat: { kind: 'off' | 'ayah' | 'page', times: n | Infinity }
+    function parseRepeat(v) {
+      const [kind, n] = String(v || 'off').split(':');
+      if (kind !== 'ayah' && kind !== 'page') return { kind: 'off', times: 1, value: 'off' };
+      const times = n === 'inf' ? Infinity : Math.max(2, parseInt(n, 10) || 2);
+      return { kind: kind, times: times, value: v };
+    }
+    let audioRepeat = parseRepeat(localStorage.getItem('quranTextRepeat'));
+    let audioSpeed = parseFloat(localStorage.getItem('quranTextSpeed')) || 1;
+    let ayahPlaysDone = 0;   // times the current ayah has been played through
+    function changeRepeat(v) {
+      audioRepeat = parseRepeat(v); ayahPlaysDone = 0;
+      try { localStorage.setItem('quranTextRepeat', audioRepeat.value); } catch (e) {}
+      updateAudioNow();
+    }
+    function changeSpeed(v) {
+      audioSpeed = Math.min(2, Math.max(0.5, parseFloat(v) || 1));
+      audioPlayer.defaultPlaybackRate = audioSpeed; audioPlayer.playbackRate = audioSpeed;
+      try { localStorage.setItem('quranTextSpeed', String(audioSpeed)); } catch (e) {}
+    }
+    (function initAudioOptions() {
+      const rs = document.getElementById('repeatSelect'), ss = document.getElementById('speedSelect');
+      if (rs) rs.value = audioRepeat.value;
+      if (ss) { ss.value = String(audioSpeed); if (ss.value !== String(audioSpeed)) { audioSpeed = 1; ss.value = '1'; } }
+      audioPlayer.defaultPlaybackRate = audioSpeed;
+    })();
+
+    // "سورة البقرة · آية ٢٥٥ (٢ من ٣)" over the controls.
+    function ayahLabel(a) {
+      const name = String(a.surahName).replace(/سورة|سُورَةُ|سُورَةِ/g, '').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '').replace(/\u0671/g, '\u0627').trim();
+      return 'سورة ' + name + ' · آية ' + Number(a.numberInSurah).toLocaleString('ar-EG');
+    }
+    function updateAudioNow() {
+      const el = document.getElementById('audioNow');
+      if (!el) return;
+      const a = currentPageAyahsData[currentAyahIndex];
+      if (!a) { el.textContent = 'التلاوة'; return; }
+      let t = ayahLabel(a);
+      if (audioRepeat.kind === 'ayah') t += audioRepeat.times === Infinity ? ' · ∞' : ' · ' + (ayahPlaysDone + 1).toLocaleString('ar-EG') + ' من ' + audioRepeat.times.toLocaleString('ar-EG');
+      el.textContent = t;
+    }
+
+    // Follow the recited ayah, but not while the reader is scrolling by hand.
+    let lastManualScroll = 0;
+    (function watchManualScroll() {
+      const tc = document.getElementById('textContainer');
+      if (!tc) return;
+      const mark = () => { lastManualScroll = Date.now(); };
+      tc.addEventListener('touchmove', mark, { passive: true });
+      tc.addEventListener('wheel', mark, { passive: true });
+    })();
+
+    function playPrevAyah() {
+      if (!pageAudioUrls.length) return;
+      if (currentAyahIndex > 0) playAyah(currentAyahIndex - 1);
+      else if (currentPage > 1) { autoPlayLastOfPage = true; goToPage(currentPage - 1); }
+    }
+    function playNextAyah() { if (pageAudioUrls.length) playAyah(Math.max(0, currentAyahIndex) + 1); }
+    let autoPlayLastOfPage = false;
     function changeReciter(newReciter) { selectedReciter = newReciter; localStorage.setItem('quranReciter', newReciter); stopAudio(); renderText(); }
     function updatePlayBtnUI() { const playIcon = document.getElementById('playIcon'); const pauseIcon = document.getElementById('pauseIcon'); if (isPlaying) { playIcon.style.display = 'none'; pauseIcon.style.display = 'block'; } else { playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; } }
     
@@ -1329,23 +1433,49 @@
         // The text can come from the device; the recitation cannot. Stop here
         // rather than skipping ahead through pages that have no audio either.
         if (!pageAudioUrls[index]) { stopAudio(); showCustomToast("تأكد من الاتصال بالإنترنت لتشغيل التلاوة."); return; }
-        currentAyahIndex = index; audioPlayer.src = pageAudioUrls[index]; 
+        if (index < 0) index = 0;
+        if (index !== currentAyahIndex) ayahPlaysDone = 0;
+        currentAyahIndex = index; audioPlayer.src = pageAudioUrls[index];
+        audioPlayer.playbackRate = audioSpeed;
         audioPlayer.play().catch(e => showCustomToast("تأكد من الاتصال بالإنترنت لتشغيل التلاوة."));
-        isPlaying = true; updatePlayBtnUI(); updateMediaSession();
+        isPlaying = true; updatePlayBtnUI(); updateMediaSession(); updateAudioNow();
         
         document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('playing-highlight'));
         const activeAyah = document.getElementById(`ayah-wrapper-${index}`);
-        if (activeAyah) { activeAyah.classList.add('playing-highlight'); activeAyah.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        if (activeAyah) {
+          activeAyah.classList.add('playing-highlight');
+          if (Date.now() - lastManualScroll > 4000) activeAyah.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
-    function stopAudio() { audioPlayer.pause(); audioPlayer.currentTime = 0; isPlaying = false; currentAyahIndex = -1; autoPlayNextPage = false; updatePlayBtnUI(); document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('playing-highlight')); }
-    audioPlayer.onended = () => { playAyah(parseInt(currentAyahIndex) + 1); };
+    function stopAudio() { audioPlayer.pause(); audioPlayer.currentTime = 0; isPlaying = false; currentAyahIndex = -1; ayahPlaysDone = 0; autoPlayNextPage = false; autoPlayLastOfPage = false; updatePlayBtnUI(); updateAudioNow(); document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('playing-highlight')); }
+    audioPlayer.onended = () => {
+      // Repeat the ayah: replay it in place (same highlight, no re-scroll).
+      if (audioRepeat.kind === 'ayah' && ayahPlaysDone + 1 < audioRepeat.times) {
+        ayahPlaysDone++; updateAudioNow();
+        audioPlayer.currentTime = 0; audioPlayer.playbackRate = audioSpeed;
+        audioPlayer.play().catch(() => {});
+        return;
+      }
+      ayahPlaysDone = 0;
+      const next = parseInt(currentAyahIndex) + 1;
+      // Repeat the page: back to its first ayah instead of turning the page.
+      if (audioRepeat.kind === 'page' && next >= pageAudioUrls.length) { playAyah(0); return; }
+      playAyah(next);
+    };
 
     function updateMediaSession() {
         if ('mediaSession' in navigator) {
             const surah = getCurrentSurah(); const reciterName = document.getElementById('reciterSelect').options[document.getElementById('reciterSelect').selectedIndex].text;
+            const a = currentPageAyahsData[currentAyahIndex];
+            if (a && typeof MediaMetadata === 'function') {
+              navigator.mediaSession.metadata = new MediaMetadata({
+                title: ayahLabel(a), artist: reciterName, album: 'زاد المسلم — صفحة ' + currentPage,
+                artwork: [{ src: '../icons/icon-192.png', sizes: '192x192', type: 'image/png' }]
+              });
+            }
             navigator.mediaSession.setActionHandler('play', togglePlayPause); navigator.mediaSession.setActionHandler('pause', togglePlayPause);
-            navigator.mediaSession.setActionHandler('nexttrack', () => playAyah(parseInt(currentAyahIndex) + 1)); navigator.mediaSession.setActionHandler('previoustrack', () => playAyah(parseInt(currentAyahIndex) - 1));
+            navigator.mediaSession.setActionHandler('nexttrack', playNextAyah); navigator.mediaSession.setActionHandler('previoustrack', playPrevAyah);
         }
     }
 
@@ -1436,6 +1566,7 @@
       currentPageAyahsData = view.ayahsData;
       txtCont.scrollTop = 0;
       if (autoPlayNextPage) { playAyah(0); autoPlayNextPage = false; }
+      else if (autoPlayLastOfPage) { autoPlayLastOfPage = false; playAyah(pageAudioUrls.length - 1); }
       handlePendingAyahAction();
       if (pendingFlashAyah) { const n = pendingFlashAyah; pendingFlashAyah = 0; setTimeout(() => flashAyah(n), 350); }
       prefetchNextPage();
@@ -1676,7 +1807,7 @@
 
     const orgNav = typeof navigateTo === 'function' ? navigateTo : function(){};
     navigateTo = function(newPage, dir) {
-        stopAutoScroll(); if(!autoPlayNextPage) stopAudio();
+        stopAutoScroll(); if (!autoPlayNextPage && !autoPlayLastOfPage) stopAudio();
         if (tasmeeEngine && tasmeeEngine.isActive) {
             tasmeeEngine.endSession();
             showCustomToast('تم إنهاء التسميع عند تغيير الصفحة');
