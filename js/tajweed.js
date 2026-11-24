@@ -171,7 +171,8 @@
     $('tpNext').innerHTML = a.timed ? ICON.next : ICON.fwd10;
     $('tpPrev').setAttribute('aria-label', a.timed ? T('tj_prev', 'البيت السابق') : T('tj_back10', 'رجوع ١٠ ثوانٍ'));
     $('tpNext').setAttribute('aria-label', a.timed ? T('tj_next', 'البيت التالي') : T('tj_fwd10', 'تقديم ١٠ ثوانٍ'));
-    reciterIdx = Math.max(0, Math.min(store.get('reciter_' + matnId, 0), a.reciters.length - 1));
+    // the reader is kept by id (the list order can change); the first one otherwise
+    reciterIdx = Math.max(0, a.reciters.findIndex(r => r.id === store.get('reciter_id_' + matnId, '')));
     stop();
     selectReciter(reciterIdx, false);
     const last = store.get('last_' + matnId, 0);
@@ -259,7 +260,9 @@
     $('tpReciterName').textContent = shortName(r.name);
     $('tpSaved').toggleAttribute('hidden', !saved.has(r.url));
     if ('mediaSession' in navigator && window.MediaMetadata) {
-      try { navigator.mediaSession.metadata = new MediaMetadata({ title: line, artist: r.name, album: shortTitle(M.title) }); } catch { /* unsupported */ }
+      // the app icon on the lock screen / notification, as on the other audio pages
+      const art = [192, 512].map(n => ({ src: new URL(n === 192 ? '../icons/icon-192.png' : '../icons/icon_512.png', location.href).href, sizes: n + 'x' + n, type: 'image/png' }));
+      try { navigator.mediaSession.metadata = new MediaMetadata({ title: line, artist: r.name, album: shortTitle(M.title), artwork: art }); } catch { /* unsupported */ }
     }
   }
   function ensureSrc() {
@@ -413,7 +416,7 @@
   // ---------- reciter sheet ----------
   async function selectReciter(i, keepPlaying) {
     const wasPlaying = keepPlaying && !audio.paused, at = cur;
-    reciterIdx = i; store.set('reciter_' + matnId, i);
+    reciterIdx = i; store.set('reciter_id_' + matnId, M.audio.reciters[i].id);
     const r = rec();
     audio.pause(); pendingSeek = null; retries = 0;
     info();
@@ -446,7 +449,7 @@
     $('tjSheetTitle').textContent = T('tj_reciters_of', 'قرّاء {m}', { m: shortTitle(M.title) });
     $('tjRcList').innerHTML = M.audio.reciters.map((r, i) => `
       <div class="rc${i === reciterIdx ? ' on' : ''}" data-i="${i}">
-        <button class="rc-pick" data-i="${i}" aria-pressed="${i === reciterIdx}"><span class="rc-av">${esc(shortName(r.name).charAt(0))}</span>
+        <button class="rc-pick" data-i="${i}" aria-pressed="${i === reciterIdx}">
           <span class="rc-name">${esc(shortName(r.name))}<small><bdi dir="ltr">${fmt(r.duration)}</bdi> · <bdi dir="ltr">${mb(r.size)} MB</bdi>${saved.has(r.url) ? ' · <b>' + esc(T('tj_on_device', 'على الجهاز')) + '</b>' : ''}</small></span></button>
         <button class="rc-save${saving[r.url] ? ' busy' : ''}${saved.has(r.url) ? ' done' : ''}" data-i="${i}" aria-label="${esc(rowLabel(r))}" title="${esc(rowLabel(r))}" style="--pct:${saving[r.url] ? saving[r.url].pct : 0}">${rowState(r)}</button>
       </div>`).join('');

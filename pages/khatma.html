@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>html{touch-action:manipulation}</style>
+  <meta name="theme-color" content="#0e201b" id="metaThemeColor">
+  <title>الختمة — ورد القرآن اليومي | زاد المسلم</title>
+  <meta name="description" content="خطّط لختم القرآن: هدف بالأيام يُحسب منه وردك اليومي ويتعدّل تلقائيًا، وتقدّمك وسلسلة أيامك ومعدّلك، موصولًا بورد «ثبات» وبالمصحف.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/khatma.html">
+  <meta property="og:title" content="الختمة | زاد المسلم">
+  <meta property="og:description" content="وردك اليومي من القرآن وتقدّمك نحو الختم.">
+  <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/hadith-book.css">
+  <style>
+    /* ---------- hero: the khatma ring ---------- */
+    .kh-hero { display: flex; align-items: center; gap: 18px; text-align: start; padding: 20px 18px; }
+    .kh-ring { position: relative; width: 124px; height: 124px; flex: none; }
+    .kh-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .kh-ring circle { fill: none; stroke-width: 9; }
+    .kh-ring .r-bg { stroke: rgba(255,255,255,.12); }
+    .kh-ring .r-fg { stroke: #e6c068; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+    .kh-ring > span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .kh-ring b { font-size: 1.85rem; line-height: 1; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+    .kh-ring b i { font-style: normal; font-size: .9rem; color: #e6c068; margin-inline-start: 1px; }
+    .kh-ring small { font-size: .68rem; opacity: .8; margin-top: 3px; }
+    .kh-hero-txt { min-width: 0; flex: 1; }
+    .kh-hero-txt.solo { text-align: center; }
+    .kh-hero h1 { font-size: 1.75rem; }
+    .kh-when { margin-top: 8px; font-size: .8rem; line-height: 1.6; color: #f3dc9f; }
+    .kh-when.late { color: #fca5a5; }
+    .kh-done-n { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: rgba(230,192,104,.18); color: #f3dc9f; }
+    @media (max-width: 360px) { .kh-ring { width: 104px; height: 104px; } .kh-ring b { font-size: 1.5rem; } .kh-hero h1 { font-size: 1.45rem; } }
+
+    /* ---------- cards ---------- */
+    .kh-card { display: block; margin-top: 14px; border-radius: 20px; padding: 16px; background: var(--card-bg); border: 1px solid var(--border); box-shadow: var(--card-shadow); color: var(--text); text-decoration: none; }
+    .kh-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .kh-head h2, .kh-setup h2 { font-size: 1rem; font-weight: 800; }
+    .kh-pill { padding: 4px 11px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); font-weight: 800; font-size: .8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .kh-surahs { margin-top: 6px; font-family: 'Amiri', serif; font-size: 1.15rem; color: var(--accent); }
+    .kh-prog { height: 9px; border-radius: 99px; background: var(--accent-bg); margin-top: 12px; overflow: hidden; }
+    .kh-prog i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width .5s; }
+    [dir="rtl"] .kh-prog i { background: linear-gradient(-90deg, var(--accent), var(--gold)); margin-inline-start: 0; }
+    .kh-prog-txt { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: .78rem; color: var(--text-muted); }
+    .kh-next { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .kh-next-range { font-size: .9rem; color: var(--text-muted); }
+    .kh-next-range b { font-size: 1.25rem; color: var(--text); font-variant-numeric: tabular-nums; margin: 0 2px; }
+    .kh-step { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 999px; background: var(--solid); }
+    .kh-step button { width: 40px; height: 40px; font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+    .kh-step span { min-width: 82px; text-align: center; font-weight: 800; font-size: .9rem; }
+    .kh-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .kh-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 46px; padding: 9px 14px; border-radius: 14px; font-weight: 800; font-size: .9rem; text-decoration: none; text-align: center; line-height: 1.35;
+      background: var(--accent); color: #fff; border: 1px solid var(--accent); transition: transform .12s; }
+    .kh-btn:active { transform: scale(.97); }
+    .kh-btn svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .kh-btn.gold { background: #e6c068; border-color: #e6c068; color: #13241d; }
+    .kh-btn.ghost { background: transparent; color: var(--accent); border-color: var(--border); }
+    .kh-btn.sm { min-height: 38px; padding: 7px 14px; font-size: .82rem; flex: none; }
+    .kh-btn.wide { width: 100%; margin-top: 16px; }
+    .kh-link { display: block; margin: 10px auto 0; color: var(--text-muted); font-size: .8rem; text-decoration: underline; }
+    .kh-ok { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px; border-radius: 14px; background: var(--accent-bg); }
+    .kh-ok svg { width: 34px; height: 34px; flex: none; padding: 7px; border-radius: 50%; background: var(--accent); fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    .kh-ok b { display: block; color: var(--accent); }
+    .kh-ok span { font-size: .82rem; color: var(--text-muted); }
+    .kh-today.is-done { border-color: var(--accent); }
+    .kh-hint { display: flex; align-items: center; gap: 12px; border-style: dashed; border-color: var(--accent); }
+    .kh-hint > div { flex: 1; min-width: 0; }
+    .kh-hint b { display: block; font-size: .9rem; }
+    .kh-hint span { font-size: .8rem; color: var(--text-muted); }
+    .kh-missed b { display: block; font-size: .95rem; }
+    .kh-quote { margin: 8px 0 10px; font-family: 'Amiri', serif; font-size: 1.02rem; line-height: 1.9; color: var(--text); }
+    .kh-quote small { font-family: 'Tajawal', sans-serif; font-size: .72rem; color: var(--gold); margin-inline-start: 4px; }
+
+    /* ---------- goal ---------- */
+    .kh-goal-now { margin-top: 4px; font-size: .88rem; color: var(--text-muted); }
+    .kh-pace { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 12px; border-radius: 14px; background: var(--accent-bg); }
+    .kh-pace > div { flex: 1; min-width: 0; }
+    .kh-pace small { display: block; font-size: .7rem; color: var(--text-muted); }
+    .kh-pace b { font-size: .98rem; font-variant-numeric: tabular-nums; }
+    .kh-status { flex: none; padding: 4px 10px; border-radius: 999px; font-size: .74rem; font-weight: 800; }
+    .kh-status.ok { background: var(--accent); color: #fff; }
+    .kh-status.late { background: var(--gold-soft); color: var(--gold); }
+    .kh-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .kh-chips button { padding: 8px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--solid); font-weight: 700; font-size: .82rem; color: var(--text-muted); }
+    .kh-chips button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .kh-custom { display: flex; gap: 8px; margin-top: 10px; }
+    .kh-custom input { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--solid); color: var(--text); font: inherit; font-size: .88rem; }
+    .kh-note { margin-top: 10px; font-size: .74rem; line-height: 1.7; color: var(--text-muted); }
+
+    /* ---------- stats ---------- */
+    .kh-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+    .kh-stats.four { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 380px) { .kh-stats.four { grid-template-columns: repeat(2, 1fr); } }
+    .kh-tile { position: relative; display: block; padding: 12px 8px 10px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--border); box-shadow: var(--card-shadow); text-align: center; color: var(--text); text-decoration: none; }
+    .kh-tile b { display: block; font-size: 1.4rem; line-height: 1.2; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+    .kh-tile span { display: block; margin-top: 3px; font-size: .7rem; line-height: 1.35; color: var(--text-muted); }
+    .kh-tile.sm b { font-size: 1.15rem; color: var(--gold); }
+    .kh-tile i { display: block; width: 22px; height: 22px; margin: 0 auto 4px; background: var(--gold); opacity: .85;
+      -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+    .ic-fire { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2.5 1.2-4 2.5-5 .2 2 1 3 2 3.5C11 9 11 5.5 12 2z'/%3E%3C/svg%3E"); }
+    .ic-trophy { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h10v3h3v2a4 4 0 0 1-4 4 5 5 0 0 1-3 2.6V17h3v4H8v-4h3v-2.4A5 5 0 0 1 8 12a4 4 0 0 1-4-4V6h3zm-1 5a2 2 0 0 0 1 1.7V8zm12 0v1.7A2 2 0 0 0 19 8z'/%3E%3C/svg%3E"); }
+    .ic-week { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 20V11h3v9zm6.5 0V5h3v15zM17 20v-6h3v6z'/%3E%3C/svg%3E"); }
+    .ic-cal { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 2h2v2h6V2h2v2h3v17H4V4h3zm-1 7v10h12V9zm2 2h3v3H8z'/%3E%3C/svg%3E"); }
+    .ic-book { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 5c3-1.3 6-1.2 8.2.6V20c-2.2-1.6-5.2-1.8-8.2-.6zm18 0v14.4c-3-1.2-6-1-8.2.6V5.6C15 3.8 18 3.7 21 5z'/%3E%3C/svg%3E"); }
+    .ic-star { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m12 2 2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 16.9 5.9 20.4l1.5-6.8L2.2 9l6.9-.7z'/%3E%3C/svg%3E"); }
+
+    /* ---------- the last 14 days ---------- */
+    .kh-legend { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--text-muted); }
+    .kh-legend i { width: 16px; border-top: 2px dashed var(--gold); }
+    .kbars { position: relative; display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; height: 150px; margin-top: 12px; padding-bottom: 20px; direction: ltr; }
+    [dir="rtl"] .kbars { direction: rtl; }
+    .kb { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 0; }
+    .kb i { display: block; width: 100%; max-width: 22px; min-height: 2px; border-radius: 4px 4px 0 0; background: color-mix(in srgb, var(--accent) 28%, transparent); }
+    .kb.hit i { background: var(--accent); }
+    .kb .v { font-size: .62rem; font-weight: 700; color: var(--text-muted); font-variant-numeric: tabular-nums; line-height: 1.4; }
+    .kb small { position: absolute; bottom: -19px; font-size: .62rem; color: var(--text-muted); white-space: nowrap; }
+    .kb.today small { color: var(--accent); font-weight: 800; }
+    .kb.today i { box-shadow: 0 0 0 2px var(--accent); }
+    .tline { position: absolute; inset-inline: 0; bottom: calc(20px + (100% - 20px - 16px) * var(--t)); border-top: 2px dashed var(--gold); opacity: .7; pointer-events: none; }
+
+    /* ---------- 12 weeks ---------- */
+    .kh-scale { display: inline-flex; align-items: center; gap: 3px; font-size: .66rem; color: var(--text-muted); }
+    .kh-scale i { width: 10px; height: 10px; border-radius: 3px; }
+    .heat { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 4px; margin-top: 12px; }
+    .heat i { aspect-ratio: 1; border-radius: 4px; }
+    .l0 { background: var(--accent-bg); opacity: .55; }
+    .l1 { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+    .l2 { background: color-mix(in srgb, var(--accent) 72%, transparent); }
+    .l3 { background: var(--accent); }
+    .heat i.t { box-shadow: 0 0 0 2px var(--gold); }
+
+    /* ---------- links ---------- */
+    .kh-thabat, .kh-cont { display: flex; align-items: center; gap: 12px; }
+    .kh-thabat img { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; flex: none; }
+    .kh-thabat > span, .kh-cont > span:not(.kh-cont-ic) { flex: 1; min-width: 0; }
+    .kh-thabat b, .kh-cont b { display: block; font-size: .92rem; }
+    .kh-thabat small, .kh-cont small { display: block; font-size: .76rem; color: var(--text-muted); line-height: 1.5; }
+    .kh-thabat > svg, .kh-cont .chev { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    [dir="ltr"] .kh-thabat > svg, [dir="ltr"] .kh-cont .chev { transform: scaleX(-1); }
+    .kh-cont-ic { width: 44px; height: 44px; flex: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: var(--gold-soft); }
+    .kh-cont-ic svg { width: 22px; height: 22px; fill: none; stroke: var(--gold); stroke-width: 1.9; stroke-linejoin: round; }
+    .kh-sec { margin: 26px 4px 0; font-size: .95rem; color: var(--gold); }
+    .kh-week { margin-top: 10px; text-align: center; font-size: .78rem; color: var(--text-muted); }
+
+    /* ---------- start ---------- */
+    .kh-setup h2 + .kh-chips { margin-top: 10px; }
+    .kh-setup h2:not(:first-child) { margin-top: 20px; }
+    .kh-daily { margin-top: 14px; }
+    .kh-daily h3 { font-size: .88rem; margin-bottom: 8px; }
+    .kh-from { display: grid; gap: 8px; margin-top: 10px; }
+    .kh-from button { text-align: start; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--solid); }
+    .kh-from button b { display: block; font-size: .9rem; }
+    .kh-from button small { font-size: .76rem; color: var(--text-muted); }
+    .kh-from button.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--accent-bg); }
+    .kh-plan { margin-top: 14px; padding: 10px 12px; border-radius: 12px; background: var(--gold-soft); color: var(--text); font-size: .84rem; line-height: 1.7; }
+    [hidden] { display: none !important; }
+
+    /* ---------- khatma completed ---------- */
+    .kh-win { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.55); }
+    .kh-win-card { max-width: 380px; width: 100%; padding: 26px 20px 20px; border-radius: 24px; text-align: center; color: #fff;
+      background: linear-gradient(150deg, #0b3b2c 0%, #0f5a41 50%, #0a2f24 100%); border: 1px solid rgba(230,192,104,.45); box-shadow: 0 24px 60px -20px rgba(0,0,0,.7); }
+    .kh-win-card .orn { font-size: 2rem; color: #e6c068; }
+    .kh-win-card h2 { font-family: 'Amiri', serif; font-size: 1.6rem; margin-top: 4px; }
+    .kh-win-card p { margin-top: 8px; font-size: .9rem; line-height: 1.8; opacity: .9; }
+    .kh-win-card .kh-btn { margin-top: 18px; width: 100%; }
+    .toast { white-space: normal; max-width: calc(100% - 32px); width: max-content; text-align: center; border-radius: 16px; }
+  </style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <div class="toolbar">
+    <a href="../index.html" class="hbtn" aria-label="الرئيسية" title="الرئيسية" data-i18n-aria="home" data-i18n-title="home">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
+    </a>
+    <div class="htitle"><span data-i18n="kh_title">الختمة</span><small data-i18n="kh_sub">وردك اليومي من القرآن وتقدّمك نحو الختم</small></div>
+    <div class="theme-dock">
+      <button class="dot" data-set="light" style="background:#fbf3df;" onclick="setTheme('light')" aria-label="فاتح" data-i18n-aria="hb_theme_light"></button>
+      <button class="dot" data-set="sepia" style="background:#d9bf8a;" onclick="setTheme('sepia')" aria-label="عسلي" data-i18n-aria="hb_theme_sepia"></button>
+      <button class="dot" data-set="dark" style="background:#0e201b;" onclick="setTheme('dark')" aria-label="داكن" data-i18n-aria="hb_theme_dark"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero kh-hero" id="khHero" aria-live="polite"></section>
+  <div id="khBody"></div>
+  <div id="khActivity"></div>
+</main>
+
+<div class="kh-win" id="khWin" hidden role="dialog" aria-modal="true" aria-labelledby="khWinTitle">
+  <div class="kh-win-card">
+    <div class="orn" aria-hidden="true">۞</div>
+    <h2 id="khWinTitle"></h2>
+    <p id="khWinText"></p>
+    <button class="kh-btn gold" data-act="win-close" data-i18n="kh_win_ok">الحمد لله</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../js/theme-manager.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/surah-map.js"></script>
+<script src="../js/wird-core.js"></script>
+<script src="../js/dhikr-stats.js"></script>
+<script src="../js/khatma.js"></script>
+<script src="../js/net-status.js"></script>
+</body>
+</html>
