@@ -12,7 +12,11 @@ test.beforeEach(async ({ page }) => {
 
 test('the download center saves the translation for the app language', async ({ page }) => {
   await page.goto(`${BASE_URL}/index.html`, { waitUntil: 'load' });
-  await expect(page.locator('[data-i18n="section_khatma_dl"]')).toHaveText('Khatma & downloads');
+  // the khatma sits in «Quran & Recitation», the download center in «Tools» (prayer times are in the bottom bar)
+  const cardsOf = key => page.evaluate(k => { const t = [...document.querySelectorAll('.section-title')].find(x => x.dataset.i18n === k); return [...t.parentElement.nextElementSibling.querySelectorAll('.fc-text'), ...(t.nextElementSibling ? t.nextElementSibling.querySelectorAll('.fc-text') : [])].map(x => x.dataset.i18n); }, key);
+  expect(await cardsOf('section_quran')).toEqual(expect.arrayContaining(['card_khatma', 'card_tajweed']));
+  expect(await cardsOf('section_tools')).toContain('card_downloads');
+  expect(await cardsOf('section_tools')).not.toContain('card_prayer_times');
   await page.locator('.feature-card', { has: page.locator('[data-i18n="card_downloads"]') }).click();
   await expect(page.locator('#downloadsSheet')).toHaveClass(/active/);
   await expect(page.locator('#dlTransDesc')).toContainText('Saheeh International');
