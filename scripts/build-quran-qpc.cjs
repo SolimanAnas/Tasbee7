@@ -67,7 +67,7 @@ async function download() {
       const [s, a] = v.verse_key.split(':').map(Number);
       if (s !== n) throw new Error('unexpected verse ' + v.verse_key);
       // Drop the trailing ayah number (Arabic-Indic digits) the font turns into a medallion.
-      ayat[a - 1] = String(v.text_qpc_hafs).replace(/[\s ]*[٠-٩]+\s*$/, '').trim();
+      ayat[a - 1] = String(v.text_qpc_hafs).replace(/[\s\u00A0]*[\u0660-\u0669]+\s*$/, '').trim();
     }
     surahs.push(ayat);
     process.stdout.write('\r' + n + '/114');
