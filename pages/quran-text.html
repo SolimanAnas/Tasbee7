@@ -238,7 +238,16 @@
     .search-results-container { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .search-results-container::-webkit-scrollbar { display: none; }
     .search-result-item { background: rgba(128, 128, 128, 0.05); padding: 14px; border-radius: 16px; cursor: pointer; border: 1px solid var(--glass-border); transition: 0.2s; }
-    .search-highlight { background-color: rgba(255, 213, 79, 0.6); color: #000; border-radius: 4px; padding: 0 4px; }
+    .search-highlight { background-color: rgba(255, 213, 79, 0.6); color: #000; border-radius: 4px; padding: 0 2px; }
+    .search-note { text-align: center; padding: 20px; opacity: 0.7; font-size: 14px; }
+    .search-count { text-align: center; margin-bottom: 4px; color: var(--accent); font-weight: bold; font-size: 14px; }
+    .search-result-item .res-meta { font-size: 12.5px; font-weight: bold; color: var(--accent); margin-bottom: 4px; }
+    .search-result-item .res-text { font-size: 1.35rem; line-height: 2; direction: rtl; }
+    .search-more { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.08); color: var(--accent); font-family: inherit; font-weight: bold; cursor: pointer; }
+    /* An ayah reached from search: a soft glow that fades out. */
+    .ayah-wrapper.search-flash { animation: searchFlash 2.6s ease-out; }
+    @keyframes searchFlash { 0%, 35% { background: rgba(255, 213, 79, 0.55); } 100% { background: transparent; } }
+    @media (prefers-reduced-motion: reduce) { .ayah-wrapper.search-flash { animation: none; background: rgba(255, 213, 79, 0.4); } }
 
     /* ========== SURAH FRAME & METADATA ========== */
     .surah-separator { width: 100%; display: flex; flex-direction: column; align-items: center; margin: 2px 0 2px 0; }
@@ -265,8 +274,19 @@
     /* ========== AUDIO BAR FLOATING ========== */
     .audio-bar { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 15px; right: 15px; margin: 0 auto; max-width: 500px; background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--accent); border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 90; transform: translateY(150%); transition: transform 0.4s; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .audio-bar.active { transform: translateY(0); }
-    .audio-controls { display: flex; gap: 10px; align-items: center; }
-    .audio-btn { background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    .audio-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 14px 12px; }
+    .audio-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+    .audio-now { flex: 1; min-width: 0; font-weight: bold; font-size: 0.95rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .audio-close { width: 34px; height: 34px; color: #ef4444; flex: none; }
+    .audio-reciter { max-width: 140px; font-size: 0.9rem; min-width: 0; }
+    .audio-opts { justify-content: flex-start; flex-wrap: wrap; }
+    .audio-opt { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: var(--text-secondary); }
+    .audio-opt .custom-select { padding: 6px 8px; font-size: 0.85rem; }
+    /* Keep the last lines readable above the open audio bar. */
+    body.audio-open #textContainer { padding-bottom: 190px; }
+    /* Media controls are not mirrored: ⏮ ▶ ⏭ left to right in every language. */
+    .audio-controls { display: flex; gap: 8px; align-items: center; direction: ltr; }
+    .audio-btn { background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 42px; height: 42px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .audio-btn.primary { background: var(--accent); color: #fff; border: none; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
 
     /* ========== TASMEE' WORD SPANS ========== */
@@ -501,22 +521,22 @@
 
   <header id="appHeader">
     <div class="header-right">
-      <button class="icon-btn" onclick="goHome()" title="الرئيسية">
+      <button class="icon-btn" onclick="goHome()" title="الرئيسية" data-i18n-title="qt_home" data-i18n-aria="qt_home">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </button>
     </div>
 
     <div class="header-center">
-      <div id="surahName" class="nav-item surah-nav" onclick="openSurahSelector()" title="اختر سورة">الفاتحة</div>
+      <div id="surahName" class="nav-item surah-nav" onclick="openSurahSelector()" title="اختر سورة" data-i18n-title="qt_choose_surah" data-i18n-aria="qt_choose_surah">الفاتحة</div>
       <div class="meta-row">
-        <span id="juzName" class="nav-item juz-nav" onclick="openJuzSelector()" title="اختر جزء">الجزء ١</span>
+        <span id="juzName" class="nav-item juz-nav" onclick="openJuzSelector()" title="اختر جزء" data-i18n-title="qt_choose_juz" data-i18n-aria="qt_choose_juz">الجزء ١</span>
         <span class="divider">|</span>
-        <span id="pageName" class="nav-item page-nav" onclick="openPageSelector()" title="اختر صفحة">صفحة ١</span>
+        <span id="pageName" class="nav-item page-nav" onclick="openPageSelector()" title="اختر صفحة" data-i18n-title="qt_choose_page" data-i18n-aria="qt_choose_page">صفحة ١</span>
       </div>
     </div>
 
     <div class="header-left">
-      <button class="icon-btn" id="autoScrollBtn" onclick="toggleAutoScroll()" title="تمرير تلقائي">
+      <button class="icon-btn" id="autoScrollBtn" onclick="toggleAutoScroll()" title="تمرير تلقائي" data-i18n-title="qt_autoscroll" data-i18n-aria="qt_autoscroll">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="7 6 12 11 17 6"></polyline>
           <polyline points="7 12 12 17 17 12"></polyline>
@@ -524,19 +544,19 @@
         </svg>
       </button>
 
-      <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة">
+      <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()" title="إضافة علامة" data-i18n-title="qt_bookmark_add" data-i18n-aria="qt_bookmark_add">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </button>
 
-      <a id="viewToggleBtn" class="icon-btn" href="quran.html?page=1" title="التبديل للمصحف المصور" style="text-decoration: none; color: inherit;">
+      <a id="viewToggleBtn" class="icon-btn" href="quran.html?page=1" title="التبديل للمصحف المصور" data-i18n-title="qt_to_image_mushaf" data-i18n-aria="qt_to_image_mushaf" style="text-decoration: none; color: inherit;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
       </a>
 
-      <button class="icon-btn" id="tasmeeBtn" onclick="openTasmeeSetup()" title="وضع التسميع">
+      <button class="icon-btn" id="tasmeeBtn" onclick="openTasmeeSetup()" title="وضع التسميع" data-i18n-title="qt_tasmee_mode" data-i18n-aria="qt_tasmee_mode">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </button>
 
-      <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات">
+      <button class="icon-btn" onclick="openSettingsModal()" title="الإعدادات" data-i18n-title="qt_settings" data-i18n-aria="qt_settings">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" />
         </svg>
@@ -545,36 +565,69 @@
   </header>
 
   <div class="audio-bar" id="audioBar">
-    <div class="audio-controls">
-        <button class="audio-btn primary" onclick="togglePlayPause()" id="playPauseBtn">
+    <div class="audio-row">
+      <div class="audio-now" id="audioNow" aria-live="polite" data-i18n="qt_recitation">التلاوة</div>
+      <button class="icon-btn audio-close" onclick="toggleAudioBar()" title="إغلاق" aria-label="إغلاق" data-i18n-title="qt_close" data-i18n-aria="qt_close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;" alt=""></button>
+    </div>
+    <div class="audio-row">
+      <div class="audio-controls">
+        <button class="audio-btn" onclick="playPrevAyah()" title="الآية السابقة" aria-label="الآية السابقة" data-i18n-title="qt_prev_ayah" data-i18n-aria="qt_prev_ayah">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="17 4 7 12 17 20 17 4"></polygon><rect x="3.5" y="4" width="2.5" height="16" rx="1"></rect></svg>
+        </button>
+        <button class="audio-btn primary" onclick="togglePlayPause()" id="playPauseBtn" aria-label="تشغيل" data-i18n-aria="qt_play">
             <svg id="playIcon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             <svg id="pauseIcon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
         </button>
-        <button class="audio-btn" onclick="stopAudio()" title="إيقاف التلاوة">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+        <button class="audio-btn" onclick="playNextAyah()" title="الآية التالية" aria-label="الآية التالية" data-i18n-title="qt_next_ayah" data-i18n-aria="qt_next_ayah">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="7 4 17 12 7 20 7 4"></polygon><rect x="18" y="4" width="2.5" height="16" rx="1"></rect></svg>
         </button>
+        <button class="audio-btn" onclick="stopAudio()" title="إيقاف التلاوة" aria-label="إيقاف التلاوة" data-i18n-title="qt_stop" data-i18n-aria="qt_stop">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+        </button>
+      </div>
+      <select class="custom-select audio-reciter" id="reciterSelect" onchange="changeReciter(this.value)" aria-label="القارئ" data-i18n-aria="qt_reciter">
+        <option value="ar.minshawi" data-i18n="qt_rc_minshawi">المنشاوي</option>
+        <option value="ar.abdulbasitmurattal" data-i18n="qt_rc_abdulbasit">عبد الباسط</option>
+        <option value="ar.husary" data-i18n="qt_rc_husary">الحصري</option>
+        <option value="ar.alafasy" data-i18n="qt_rc_alafasy">العفاسي</option>
+        <option value="ar.mahermuaiqly" data-i18n="qt_rc_muaiqly">المعيقلي</option>
+        <option value="ar.hudhaify" data-i18n="qt_rc_hudhaify">الحذيفي</option>
+        <option value="ar.ayyoub" data-i18n="qt_rc_ayyoub">محمد أيوب</option>
+        <option value="ar.abdullahbasfar" data-i18n="qt_rc_basfar">عبد الله بصفر</option>
+        <option value="ar.abdurrahmaansudais" data-i18n="qt_rc_sudais">السديس</option>
+      </select>
     </div>
-    <select class="custom-select" style="max-width: 150px; font-size: 0.9rem;" id="reciterSelect" onchange="changeReciter(this.value)">
-        <option value="ar.minshawi">المنشاوي</option>
-        <option value="ar.abdulbasitmurattal">عبد الباسط</option>
-        <option value="ar.husary">الحصري</option>
-        <option value="ar.alafasy">العفاسي</option>
-        <option value="ar.mahermuaiqly">المعيقلي</option>
-        <option value="ar.hudhaify">الحذيفي</option>
-        <option value="ar.ayyoub">محمد أيوب</option>
-        <option value="ar.abdullahbasfar">عبد الله بصفر</option>
-        <option value="ar.abdurrahmaansudais">السديس</option>
-    </select>
-    <button class="icon-btn" onclick="toggleAudioBar()" style="color:#ef4444;"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    <div class="audio-row audio-opts">
+      <label class="audio-opt"><span data-i18n="qt_repeat">تكرار</span>
+        <select class="custom-select" id="repeatSelect" onchange="changeRepeat(this.value)">
+          <option value="off">بدون</option>
+          <option value="ayah:2">الآية ×٢</option>
+          <option value="ayah:3">الآية ×٣</option>
+          <option value="ayah:5">الآية ×٥</option>
+          <option value="ayah:10">الآية ×١٠</option>
+          <option value="ayah:inf">الآية دائماً</option>
+          <option value="page:inf">الصفحة دائماً</option>
+        </select>
+      </label>
+      <label class="audio-opt"><span data-i18n="qt_speed">السرعة</span>
+        <select class="custom-select" id="speedSelect" onchange="changeSpeed(this.value)">
+          <option value="0.75">٠٫٧٥×</option>
+          <option value="1">١×</option>
+          <option value="1.25">١٫٢٥×</option>
+          <option value="1.5">١٫٥×</option>
+          <option value="2">٢×</option>
+        </select>
+      </label>
+    </div>
   </div>
 
   <div class="search-overlay" id="searchOverlay">
     <div class="search-bar-row">
-      <input type="text" id="searchInput" placeholder="ابحث عن كلمة (مطابقة تامة)..." oninput="handleGlobalSearch(this.value)">
-      <button class="close-search-btn" onclick="toggleSearchOverlay('close')" title="إغلاق"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+      <input type="text" id="searchInput" placeholder="ابحث في القرآن (بدون إنترنت)..." data-i18n-placeholder="qt_search_ph" oninput="handleGlobalSearch(this.value)">
+      <button class="close-search-btn" onclick="toggleSearchOverlay('close')" title="إغلاق" data-i18n-title="qt_close" data-i18n-aria="qt_close"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
     </div>
     <div class="search-results-container" id="searchResults">
-      <div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>
+      <div class="search-note" data-i18n="qt_search_hint">اكتب كلمة أو جزءاً من آية للبحث في القرآن كله...</div>
     </div>
   </div>
 
@@ -582,7 +635,7 @@
     <span class="qt-touch qt-t1"></span><span class="qt-touch qt-t2"></span>
     <div class="qt-zoom-cap">
       <svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-7 7"/><path d="M10 20H4v-6"/><path d="M4 20l7-7"/></svg>
-      <span>باعد أو قرّب إصبعيك لتغيير حجم الخط</span>
+      <span data-i18n="qt_zoom_hint">باعد أو قرّب إصبعيك لتغيير حجم الخط</span>
     </div>
   </div>
 
@@ -608,8 +661,8 @@
       <div class="sheet-header">
           <span id="ayahMenuTitle">سورة - آية</span>
           <div style="display: flex; gap: 8px; align-items: center;">
-              <button class="icon-btn" onclick="closeAyahMenu(); toggleSearchOverlay('toggle');" title="بحث" style="width: 32px; height: 32px; font-size: 1.2rem;"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
-              <button class="icon-btn" onclick="openTasmeeFromAyah()" title="التسميع من هذه الآية" style="width:32px;height:32px;">
+              <button class="icon-btn" onclick="closeAyahMenu(); toggleSearchOverlay('toggle');" title="بحث" data-i18n-title="qt_search" data-i18n-aria="qt_search" style="width: 32px; height: 32px; font-size: 1.2rem;"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+              <button class="icon-btn" onclick="openTasmeeFromAyah()" title="التسميع من هذه الآية" data-i18n-title="qt_tasmee_from_here" data-i18n-aria="qt_tasmee_from_here" style="width:32px;height:32px;">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
               </button>
               <button class="icon-btn" onclick="closeAyahMenu()" style="width: 32px; height: 32px;"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
@@ -617,23 +670,25 @@
       </div>
       
       <div class="action-btn-group">
-          <button class="action-btn" onclick="playSelectedAyah()"><span style="font-size:1.2rem;"><img src="../img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> استماع للآية</button>
-          <button class="action-btn" onclick="copySelectedAyah()"><span style="font-size:1.2rem;"><img src="../img/SVG/copy.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> نسخ الآية</button>
-          <button class="action-btn" onclick="fetchTranslation()"><span style="font-size:1.2rem;"><img src="../img/SVG/globe.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> ترجمة (English)</button>
-          <button class="action-btn" onclick="fetchTafsir('ar.muyassar')"><span style="font-size:1.2rem;"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> التفسير</button>
+          <button class="action-btn" onclick="playSelectedAyah()"><span style="font-size:1.2rem;"><img src="../img/SVG/volume.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> <span data-i18n="qt_listen">استماع للآية</span></button>
+          <button class="action-btn" onclick="copySelectedAyah()"><span style="font-size:1.2rem;"><img src="../img/SVG/copy.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> <span data-i18n="qt_copy">نسخ الآية</span></button>
+          <button class="action-btn" onclick="fetchTranslation()"><span style="font-size:1.2rem;"><img src="../img/SVG/globe.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> <span data-i18n="qt_translation">ترجمة (English)</span></button>
+          <button class="action-btn" onclick="fetchTafsir('ar.muyassar')"><span style="font-size:1.2rem;"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></span> <span data-i18n="qt_tafsir">التفسير</span></button>
+          <button class="action-btn" onclick="shareSelectedAyah()"><span style="font-size:1.2rem;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.125em"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span> <span data-i18n="qt_share_image">مشاركة كصورة</span></button>
+          <button class="action-btn" onclick="makeVideoFromAyah()"><span style="font-size:1.2rem;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.125em"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg></span> <span data-i18n="qt_make_video">صنع فيديو</span></button>
       </div>
 
       <div class="tafsir-selector-row">
-          <span style="font-size: 0.95rem; font-weight: bold; color: var(--text-primary);">اختر التفسير:</span>
+          <span style="font-size: 0.95rem; font-weight: bold; color: var(--text-primary);"  data-i18n="qt_choose_tafsir">اختر التفسير:</span>
           <select id="tafsirSelect" class="custom-select" style="flex: 1;" onchange="if(currentAyahViewMode === 'tafsir') fetchTafsir()">
-             <option value="ar.muyassar">التفسير الميسر</option>
-             <option value="ar.jalalayn">تفسير الجلالين</option>
-             <option value="ar.qurtubi">تفسير القرطبي</option>
+             <option value="ar.muyassar" data-i18n="qt_tafsir_muyassar">التفسير الميسر</option>
+             <option value="ar.jalalayn" data-i18n="qt_tafsir_jalalayn">تفسير الجلالين</option>
+             <option value="ar.qurtubi" data-i18n="qt_tafsir_qurtubi">تفسير القرطبي</option>
           </select>
       </div>
 
-      <div class="result-box" id="ayahResultBox">اختر أحد الخيارات بالأعلى...</div>
-      <div class="swipe-hint">↔️ اسحب يميناً أو يساراً للتنقل بين الآيات</div>
+      <div class="result-box" id="ayahResultBox" data-i18n="qt_choose_option">اختر أحد الخيارات بالأعلى...</div>
+      <div class="swipe-hint" data-i18n="qt_swipe_hint">↔️ اسحب يميناً أو يساراً للتنقل بين الآيات</div>
   </div>
 
   <!-- ===== TASMEE' SETUP SHEET ===== -->
@@ -641,7 +696,7 @@
   <div class="ayah-bottom-sheet" id="tasmeeSetupSheet" style="z-index:1001;max-height:100dvh;height:100dvh;border-radius:0;border-top:none;display:flex;flex-direction:column;">
     <!-- Header -->
     <div class="sheet-header" style="padding-top:calc(env(safe-area-inset-top) + 10px);flex-shrink:0;border-bottom:1px solid var(--glass-border);">
-      <span style="font-size:1.1rem;font-weight:700;font-family:'Tajawal',sans-serif;">وضع التسميع</span>
+      <span style="font-size:1.1rem;font-weight:700;font-family:'Tajawal',sans-serif;" data-i18n="qt_tasmee_mode">وضع التسميع</span>
       <button class="icon-btn" onclick="closeTasmeeSetup()" style="width:34px;height:34px;font-size:1.1rem;"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
     </div>
 
@@ -651,37 +706,37 @@
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </div>
       <p style="font-size:0.85rem;color:var(--text-secondary);text-align:center;margin:0;font-family:'Tajawal',sans-serif;line-height:1.5;">
-        تلاوة من الحفظ — يستمع التطبيق ويُصحّح الكلمات في الوقت الفعلي
+        <span data-i18n="qt_tasmee_sub">تلاوة من الحفظ — يستمع التطبيق ويُصحّح الكلمات في الوقت الفعلي</span>
       </p>
     </div>
 
     <!-- Settings (scrollable) -->
     <div style="flex:1;overflow-y:auto;padding:0 0 8px;">
-      <div style="padding:6px 16px 4px;font-size:0.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em;font-family:'Tajawal',sans-serif;">النطاق</div>
+      <div style="padding:6px 16px 4px;font-size:0.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em;font-family:'Tajawal',sans-serif;" data-i18n="qt_range">النطاق</div>
 
       <div class="setting-row">
-        <div class="setting-label">نوع النطاق</div>
+        <div class="setting-label" data-i18n="qt_range_type">نوع النطاق</div>
         <div class="setting-control">
           <select id="tasmeeRangeSelect" class="custom-select" onchange="toggleTasmeeCustomRange(this.value)">
-            <option value="page">الصفحة الحالية</option>
-            <option value="custom">نطاق مخصص</option>
+            <option value="page" data-i18n="qt_range_page">الصفحة الحالية</option>
+            <option value="custom" data-i18n="qt_range_custom">نطاق مخصص</option>
           </select>
         </div>
       </div>
 
       <div id="tasmeeCustomRange" style="display:none;" class="setting-row">
-        <div class="setting-label">من آية</div>
+        <div class="setting-label" data-i18n="qt_from_ayah">من آية</div>
         <div class="setting-control" style="display:flex;gap:8px;align-items:center;">
           <input type="number" id="tasmeeFrom" class="custom-select" style="width:65px;text-align:center;" min="1" value="1">
-          <span style="color:var(--text-secondary);">إلى</span>
+          <span style="color:var(--text-secondary);" data-i18n="qt_to">إلى</span>
           <input type="number" id="tasmeeTo" class="custom-select" style="width:65px;text-align:center;" min="1" value="5">
         </div>
       </div>
 
-      <div style="padding:10px 16px 4px;font-size:0.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em;font-family:'Tajawal',sans-serif;border-top:1px solid var(--glass-border);margin-top:4px;">الخيارات</div>
+      <div style="padding:10px 16px 4px;font-size:0.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.05em;font-family:'Tajawal',sans-serif;border-top:1px solid var(--glass-border);margin-top:4px;" data-i18n="qt_options">الخيارات</div>
 
       <div class="setting-row">
-        <div class="setting-label">إخفاء النص — اختبار الحفظ</div>
+        <div class="setting-label" data-i18n="qt_hide_text">إخفاء النص — اختبار الحفظ</div>
         <div class="setting-control">
           <label class="tasmee-toggle">
             <input type="checkbox" id="tasmeeHideText">
@@ -691,7 +746,7 @@
       </div>
 
       <div class="setting-row">
-        <div class="setting-label">إظهار نهاية الآية ﴿٧﴾</div>
+        <div class="setting-label" data-i18n="qt_show_ayah_end">إظهار نهاية الآية ﴿٧﴾</div>
         <div class="setting-control">
           <label class="tasmee-toggle">
             <input type="checkbox" id="tasmeeShowAyahEnd" checked>
@@ -701,7 +756,7 @@
       </div>
 
       <div class="setting-row">
-        <div class="setting-label">الانتقال التلقائي للصفحة التالية</div>
+        <div class="setting-label" data-i18n="qt_auto_next_page">الانتقال التلقائي للصفحة التالية</div>
         <div class="setting-control">
           <label class="tasmee-toggle">
             <input type="checkbox" id="tasmeeAutoFlip" checked>
@@ -711,7 +766,7 @@
       </div>
 
       <div class="setting-row" style="border-bottom:none;">
-        <div class="setting-label">صوت التنبيه عند الإجابة</div>
+        <div class="setting-label" data-i18n="qt_answer_sound">صوت التنبيه عند الإجابة</div>
         <div class="setting-control">
           <label class="tasmee-toggle">
             <input type="checkbox" id="tasmeeAudioFeedback" checked>
@@ -725,7 +780,7 @@
     <div style="padding:12px 16px calc(12px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid var(--glass-border);">
       <button id="startTasmeeBtn" onclick="startTasmeeSession()" style="width:100%;padding:14px 20px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:1.05rem;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(26,112,64,0.3);">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        ابدأ التسميع
+        <span data-i18n="qt_tasmee_start">ابدأ التسميع</span>
       </button>
     </div>
   </div>
@@ -734,71 +789,75 @@
   <div class="tasmee-active-bar" id="tasmeeActiveBar">
     <div class="tasmee-mic-indicator" id="tasmeeMicIndicator"></div>
     <div class="tasmee-progress-text" id="tasmeeProgressText">٠ / ٠ كلمة</div>
-    <button class="audio-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()" title="إيقاف مؤقت" style="width:38px;height:38px;font-size:1rem;"><img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
-    <button class="audio-btn" onclick="endTasmeeSession()" title="إنهاء التسميع" style="width:38px;height:38px;font-size:0.8rem;background:rgba(217,64,64,0.12);color:var(--danger);">إنهاء</button>
+    <button class="audio-btn" id="tasmeePauseBtn" onclick="pauseOrResumeTasmee()" title="إيقاف مؤقت" data-i18n-title="qt_pause" data-i18n-aria="qt_pause" style="width:38px;height:38px;font-size:1rem;"><img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
+    <button class="audio-btn" onclick="endTasmeeSession()" title="إنهاء التسميع" data-i18n-title="qt_end_tasmee" data-i18n-aria="qt_end_tasmee" style="width:38px;height:38px;font-size:0.8rem;background:rgba(217,64,64,0.12);color:var(--danger);" data-i18n="qt_end">إنهاء</button>
   </div>
 
   <!-- ===== TASMEE' RESULTS MODAL ===== -->
   <div class="modal-overlay" id="tasmeeResultsModal" onclick="handleOverlayClick(event,'tasmeeResultsModal')">
     <div class="modal-content">
       <div class="modal-header">
-        <span>نتيجة التسميع</span>
+        <span data-i18n="qt_tasmee_result">نتيجة التسميع</span>
         <button class="close-btn" onclick="closeModal('tasmeeResultsModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button>
       </div>
       <div id="tasmeeResultsBody"></div>
       <div style="display:flex;gap:10px;margin-top:14px;">
-        <button class="offline-btn" style="flex:1;margin-top:0;" onclick="retryTasmeeSession()">إعادة التسميع</button>
-        <button class="offline-btn" style="flex:1;margin-top:0;background:rgba(128,128,128,0.15);color:var(--text-primary);" onclick="closeModal('tasmeeResultsModal')">إغلاق</button>
+        <button class="offline-btn" style="flex:1;margin-top:0;" onclick="retryTasmeeSession()" data-i18n="qt_tasmee_retry">إعادة التسميع</button>
+        <button class="offline-btn" style="flex:1;margin-top:0;background:rgba(128,128,128,0.15);color:var(--text-primary);" onclick="closeModal('tasmeeResultsModal')" data-i18n="qt_close">إغلاق</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event,'settingsModal')">
       <div class="modal-content">
-          <div class="modal-header"><span>الإعدادات</span><button class="close-btn" onclick="closeModal('settingsModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div>
+          <div class="modal-header"><span data-i18n="qt_settings">الإعدادات</span><button class="close-btn" onclick="closeModal('settingsModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div>
           
           <div class="setting-row" style="cursor: pointer;" onclick="openSurahSelector(); closeModal('settingsModal');">
-            <div class="setting-label"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> فهرس السور</div>
+            <div class="setting-label"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_surah_index">فهرس السور</span></div>
             <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
           </div>
 
           <div class="setting-row" style="cursor: pointer;" onclick="closeModal('settingsModal'); toggleSearchOverlay('toggle');">
-            <div class="setting-label"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> بحث في القرآن</div>
+            <div class="setting-label"><img src="../img/SVG/search.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_search_quran">بحث في القرآن</span></div>
             <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
           </div>
           
           <div class="setting-row" style="cursor: pointer;" onclick="openBookmarksModal(); closeModal('settingsModal');">
-            <div class="setting-label"><img src="../img/SVG/bookmark.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> المفضلة</div>
+            <div class="setting-label"><img src="../img/SVG/bookmark.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_favorites">المفضلة</span></div>
             <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
           </div>
 
-          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/text.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> حجم الخط</div><div class="setting-control"><input type="range" id="fontSizeSlider" class="range-slider" min="20" max="80" value="40" step="1" oninput="changeFontSizeSlider(this.value)"><span id="fontSizeDisplay" class="font-size-indicator">40</span></div></div>
+          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/text.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_font_size">حجم الخط</span></div><div class="setting-control"><input type="range" id="fontSizeSlider" class="range-slider" min="20" max="80" value="40" step="1" oninput="changeFontSizeSlider(this.value)"><span id="fontSizeDisplay" class="font-size-indicator">40</span></div></div>
           
-          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/palette.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> نوع الخط</div>
+          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/palette.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_font_type">نوع الخط</span></div>
             <div class="setting-control">
               <select id="fontFamilySelect" class="custom-select" onchange="changeFontFamily(this.value)">
-                <option value="MadinahFont" style="font-family: 'MadinahFont', sans-serif;"><img src="../img/SVG/quran.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> الخط العثماني (مجمع الملك فهد)</option>
-                <option value="ScheherazadeFont" style="font-family: 'ScheherazadeFont', serif;"><img src="../img/SVG/book.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط شهرذاد (Scheherazade)</option>
-                <option value="AmiriFont" style="font-family: 'AmiriFont', serif;"><img src="../img/SVG/file-text.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط أميري (Amiri)</option>
-                <option value="UrduFont" style="font-family: 'UrduFont', sans-serif;"><img src="../img/SVG/flag.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> خط اردو (Indo-Pak)</option>
+                <option value="MadinahFont" style="font-family: 'MadinahFont', sans-serif;" data-i18n="qt_font_madinah">الخط العثماني (مجمع الملك فهد)</option>
+                <option value="ScheherazadeFont" style="font-family: 'ScheherazadeFont', serif;" data-i18n="qt_font_scheherazade">خط شهرذاد (Scheherazade)</option>
+                <option value="AmiriFont" style="font-family: 'AmiriFont', serif;" data-i18n="qt_font_amiri">خط أميري (Amiri)</option>
+                <option value="UrduFont" style="font-family: 'UrduFont', sans-serif;" data-i18n="qt_font_urdu">خط اردو (Indo-Pak)</option>
               </select>
             </div>
           </div>
 
-          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/settings.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> سرعة التمرير</div><div class="setting-control"><input type="range" id="scrollSpeedSlider" class="range-slider" min="1" max="10" value="5" step="1" oninput="changeScrollSpeed(this.value)"><span id="scrollSpeedDisplay" class="font-size-indicator" style="background:#888;">5</span></div></div>
+          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/settings.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_scroll_speed">سرعة التمرير</span></div><div class="setting-control"><input type="range" id="scrollSpeedSlider" class="range-slider" min="1" max="10" value="5" step="1" oninput="changeScrollSpeed(this.value)"><span id="scrollSpeedDisplay" class="font-size-indicator" style="background:#888;">5</span></div></div>
 
-          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/palette.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> لون النص</div><div class="setting-control">
+          <div class="setting-row"><div class="setting-label"><img src="../img/SVG/palette.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_text_color">لون النص</span></div><div class="setting-control">
               <select id="textColorSelect" class="custom-select" onchange="changeTextColor(this.value)">
-                  <option value="#1e2a3a">أسود (فاتح)</option>
-                  <option value="#2a1f14">بني (داكن)</option>
-                  <option value="#1e3a5f">أزرق داكن</option>
-                  <option value="#5f4b3a">بني كلاسيكي</option>
-                  <option value="REAL_DARK"><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> وضع ليلي حقيقي (OLED)</option>
+                  <option value="#1e2a3a" data-i18n="qt_color_black">أسود (فاتح)</option>
+                  <option value="#2a1f14" data-i18n="qt_color_brown_dark">بني (داكن)</option>
+                  <option value="#1e3a5f" data-i18n="qt_color_navy">أزرق داكن</option>
+                  <option value="#5f4b3a" data-i18n="qt_color_brown">بني كلاسيكي</option>
+                  <option value="REAL_DARK" data-i18n="qt_color_oled"><img src="../img/SVG/moon.svg" class="option-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> وضع ليلي حقيقي (OLED)</option>
               </select>
           </div></div>
           
           <div class="setting-row" style="cursor: pointer;" onclick="closeModal(settingsModal); OfflineDownload.open();">
-            <div class="setting-label"><img src="../img/SVG/download.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> الوضع بدون إنترنت</div>
+            <div class="setting-label"><img src="../img/SVG/download.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_offline_mode">الوضع بدون إنترنت</span></div>
+            <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
+          </div>
+          <div class="setting-row" style="cursor: pointer;" onclick="closeModal('settingsModal'); if (window.I18n) I18n.openLangSheet();">
+            <div class="setting-label"><img src="../img/SVG/globe.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span data-i18n="qt_language">اللغة</span></div>
             <div class="setting-control"><span style="color: var(--text-muted); font-size: 1.5rem;">›</span></div>
           </div>
       </div>
@@ -837,20 +896,20 @@
     <div class="modal-content">
       <div class="modal-head">
         <div class="ofl-hero"><img src="../img/SVG/download.svg" alt=""></div>
-        <div class="ofl-title">التحميل للعمل بدون إنترنت</div>
-        <div class="ofl-sub">حمّل كل الصفحات والملفات لاستخدام التطبيق كاملاً بدون اتصال</div>
+        <div class="ofl-title" data-i18n="offline_title">التحميل للعمل بدون إنترنت</div>
+        <div class="ofl-sub" data-i18n="offline_subtitle">حمّل كل الصفحات والملفات لاستخدام التطبيق كاملاً بدون اتصال</div>
       </div>
 
       <div class="ofl-pill">
-        <span class="ofl-pill-lbl">حالة التحميل</span>
+        <span class="ofl-pill-lbl" data-i18n="offline_status_label">حالة التحميل</span>
         <span class="ofl-pill-val"><span class="ofl-dot" id="offlineDot"></span><span id="offlineStatusText">…</span></span>
       </div>
 
       <div class="ofl-list">
-        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/grid.svg" alt=""></span><span class="ofl-txt">الواجهة وجميع الصفحات</span></div>
-        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/book-open.svg" alt=""></span><span class="ofl-txt">المصحف النصي والتفسير</span></div>
-        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/azkar.svg" alt=""></span><span class="ofl-txt">الأذكار والأدعية</span></div>
-        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/hadith.svg" alt=""></span><span class="ofl-txt">كتب الحديث كاملة</span><span class="ofl-sz">~58 MB</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/grid.svg" alt=""></span><span class="ofl-txt" data-i18n="offline_item_app">الواجهة وجميع الصفحات</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/book-open.svg" alt=""></span><span class="ofl-txt" data-i18n="offline_item_quran">المصحف النصي والتفسير</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/azkar.svg" alt=""></span><span class="ofl-txt" data-i18n="offline_item_azkar">الأذكار والأدعية</span></div>
+        <div class="ofl-item"><span class="ofl-ic"><img src="../img/SVG/hadith.svg" alt=""></span><span class="ofl-txt" data-i18n="offline_item_hadith">كتب الحديث كاملة</span><span class="ofl-sz">~58 MB</span></div>
       </div>
 
       <div class="ofl-progress" id="offlineProgressWrap" style="display:none;">
@@ -860,26 +919,40 @@
 
       <button class="offline-btn" id="offlineDownloadBtn" onclick="OfflineDownload.start()">
         <img src="../img/SVG/download.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">
-        تحميل كل شيء للعمل بدون إنترنت
+        <span data-i18n="offline_download_all">تحميل كل شيء للعمل بدون إنترنت</span>
       </button>
       <div class="ofl-storage" id="offlineStorage"></div>
-      <button class="offline-btn offline-btn-secondary" onclick="closeModal('offlineModal')" style="margin-top:10px; background:transparent; color:var(--text-muted); border:1px solid var(--glass-border);">إغلاق</button>
+      <button class="offline-btn offline-btn-secondary" onclick="closeModal('offlineModal')" style="margin-top:10px; background:transparent; color:var(--text-muted); border:1px solid var(--glass-border);" data-i18n="qt_close">إغلاق</button>
     </div>
   </div>
 
-  <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')"><div class="modal-content"><div class="modal-header"><span>الذهاب لصفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div><div class="manual-input-group"><input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة" oninput="syncPickerWithInput()" onkeydown="if(event.key==='Enter') confirmPageSelection()"><button class="btn-go" onclick="confirmPageSelection()">انتقال</button></div></div></div>
-  <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')"><div class="modal-content"><div class="modal-header"><span>المفضلة</span><button class="close-btn" onclick="closeModal('bookmarksModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="selector-scroll" id="bookmarksList"></div></div></div>
-  <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')"><div class="modal-content"><div class="modal-header"><span>فهرس السور</span><button class="close-btn" onclick="closeModal('surahSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><input class="search-input" id="surahSearch" type="search" placeholder="ابحث عن سورة..." oninput="filterSurahs(this.value)" autocomplete="off"><div class="selector-scroll" id="surahList"></div></div></div>
-  <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')"><div class="modal-content"><div class="modal-header"><span>فهرس الأجزاء</span><button class="close-btn" onclick="closeModal('juzSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="selector-scroll" id="juzList"></div></div></div>
+  <div class="modal-overlay" id="pageSelectorModal" onclick="handleOverlayClick(event,'pageSelectorModal')"><div class="modal-content"><div class="modal-header"><span data-i18n="qt_goto_page">الذهاب لصفحة</span><button class="close-btn" onclick="closeModal('pageSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="picker-container"><div class="picker-highlight"></div><div class="picker-scroll" id="pagePickerScroll" onscroll="updatePickerInput()"></div></div><div class="manual-input-group"><input type="number" id="gotoPageInput" min="1" max="604" placeholder="رقم الصفحة" data-i18n-placeholder="qt_page_number_ph" oninput="syncPickerWithInput()" onkeydown="if(event.key==='Enter') confirmPageSelection()"><button class="btn-go" onclick="confirmPageSelection()" data-i18n="qt_go">انتقال</button></div></div></div>
+  <div class="modal-overlay" id="bookmarksModal" onclick="handleOverlayClick(event,'bookmarksModal')"><div class="modal-content"><div class="modal-header"><span data-i18n="qt_favorites">المفضلة</span><button class="close-btn" onclick="closeModal('bookmarksModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="selector-scroll" id="bookmarksList"></div></div></div>
+  <div class="modal-overlay" id="surahSelectorModal" onclick="handleOverlayClick(event,'surahSelectorModal')"><div class="modal-content"><div class="modal-header"><span data-i18n="qt_surah_index">فهرس السور</span><button class="close-btn" onclick="closeModal('surahSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><input class="search-input" id="surahSearch" type="search" placeholder="ابحث عن سورة..." data-i18n-placeholder="qt_search_surah_ph" oninput="filterSurahs(this.value)" autocomplete="off"><div class="selector-scroll" id="surahList"></div></div></div>
+  <div class="modal-overlay" id="juzSelectorModal" onclick="handleOverlayClick(event,'juzSelectorModal')"><div class="modal-content"><div class="modal-header"><span data-i18n="qt_juz_index">فهرس الأجزاء</span><button class="close-btn" onclick="closeModal('juzSelectorModal')"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;vertical-align:-0.125em;"></button></div><div class="selector-scroll" id="juzList"></div></div></div>
 
-  <div class="context-menu" id="contextMenu" style="display:none;"><div class="context-handle"></div><div class="context-info" id="contextInfo"></div><div class="context-buttons"><button class="context-btn primary" id="contextBookmarkBtn" onclick="contextToggleBookmark()"><img src="../img/SVG/star.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> إضافة للمفضلة</button></div></div>
+  <div class="context-menu" id="contextMenu" style="display:none;"><div class="context-handle"></div><div class="context-info" id="contextInfo"></div><div class="context-buttons"><button class="context-btn primary" id="contextBookmarkBtn" onclick="contextToggleBookmark()"><img src="../img/SVG/star.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;"> <span id="contextBookmarkLabel" data-i18n="qt_bm_add">☆ إضافة للمفضلة</span></button></div></div>
   <div id="contextOverlay" style="display:none;position:fixed;inset:0;z-index:199;" onclick="closeContextMenu()"></div>
 
   <script src="../js/quran-common.js"></script>
   <script src="../js/dhikr-stats.js"></script>
   <script src="../js/quran-text-source.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/i18n/names.js"></script>
+  <script src="../js/share-card.js"></script>
 
   <script>
+    // ----- UI language (js/i18n/*.js, qt_* keys) -----
+    // The Quran text, surah headers and ayah medallions stay Arabic; the
+    // interface around them follows the app language.
+    const T = (k, p) => (window.I18n ? I18n.t(k, p || {}) : k);
+    const uiLang = () => (window.I18n && I18n.getLang ? I18n.getLang() : 'ar');
+    // Interface numbers in Western digits, as the header always showed them;
+    // Arabic-Indic digits stay inside the mushaf (the ayah medallions).
+    const num = n => String(n);
+    const surahDisplay = (n, ar) => (window.I18n && n ? I18n.name('surahs', n, ar) : ar);
+    const plainSurahName = name => String(name || '').replace(/سورة|سُورَةُ|سُورَةِ/g, '').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '').replace(/\u0671/g, '\u0627').trim();
+
     let fontSize = 40; 
     let textColor = '#1e2a3a';
     let currentFont = localStorage.getItem('quranFontFamily') || 'MadinahFont';
@@ -1025,7 +1098,7 @@
 
     function toggleAutoScroll() {
         if (isAutoScrolling) { stopAutoScroll(); } 
-        else { continueAutoScroll = true; startAutoScroll(); showCustomToast(`تم تشغيل التمرير التلقائي <img src="../img/SVG/settings.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">`); }
+        else { continueAutoScroll = true; startAutoScroll(); showCustomToast(T('qt_autoscroll_on') + ` <img src="../img/SVG/settings.svg" class="setting-icon" style="width:1em;height:1em;vertical-align:-0.125em;">`); }
     }
 
     function startAutoScroll() {
@@ -1042,9 +1115,9 @@
             if (Math.ceil(txtCont.scrollTop + txtCont.clientHeight) >= txtCont.scrollHeight - 2) {
                 clearInterval(autoScrollInterval); 
                 if (currentPage < 604) {
-                    showCustomToast("جاري الانتقال للصفحة التالية...");
+                    showCustomToast(T('qt_to_next_page'));
                     currentPage++; updateContent(); 
-                } else { stopAutoScroll(); showCustomToast("نهاية المصحف."); }
+                } else { stopAutoScroll(); showCustomToast(T('qt_mushaf_end')); }
             } else { txtCont.scrollTop += 1; }
         }, speedMultiplier);
     }
@@ -1192,9 +1265,8 @@
         selectedAyahLocalIndex = index; 
         selectedAyahText = ayah.text;
         
-        let cleanName = ayah.surahName.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim();
-        cleanName = cleanName.replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED]/g, '');
-        document.getElementById('ayahMenuTitle').textContent = `سورة ${cleanName} - آية ${ayah.numberInSurah}`;
+        const cleanName = plainSurahName(ayah.surahName);
+        document.getElementById('ayahMenuTitle').textContent = T('qt_surah_ayah', { name: surahDisplay(ayah.surah, cleanName), n: num(ayah.numberInSurah) });
         
         const box = document.getElementById('ayahResultBox');
         document.getElementById('ayahMenuOverlay').style.display = 'block';
@@ -1202,7 +1274,7 @@
 
         if (currentAyahViewMode === 'tafsir') { fetchTafsir(); } 
         else if (currentAyahViewMode === 'translation') { fetchTranslation(); } 
-        else { box.classList.remove('active'); box.innerHTML = 'اختر أحد الخيارات بالأعلى...'; }
+        else { box.classList.remove('active'); box.textContent = T('qt_choose_option'); }
     }
 
     function closeAyahMenu() {
@@ -1228,12 +1300,12 @@
                         openAyahMenu(parseInt(selectedAyahLocalIndex) - 1);
                     } else {
                         if (currentPage > 1) {
-                            showCustomToast("جاري الانتقال للآية في الصفحة السابقة...");
+                            showCustomToast(T('qt_to_prev_page_ayah'));
                             pendingAyahAction = 'last';
                             currentPage--;
                             updateContent();
                         } else {
-                            showCustomToast("هذه أول آية في المصحف.");
+                            showCustomToast(T('qt_first_ayah'));
                         }
                     }
                 } else {
@@ -1241,12 +1313,12 @@
                         openAyahMenu(parseInt(selectedAyahLocalIndex) + 1);
                     } else {
                         if (currentPage < 604) {
-                            showCustomToast("جاري الانتقال للآية في الصفحة التالية...");
+                            showCustomToast(T('qt_to_next_page_ayah'));
                             pendingAyahAction = 'first';
                             currentPage++;
                             updateContent();
                         } else {
-                            showCustomToast("هذه آخر آية في المصحف.");
+                            showCustomToast(T('qt_last_ayah'));
                         }
                     }
                 }
@@ -1256,10 +1328,34 @@
 
     function playSelectedAyah() { closeAyahMenu(); if (!audioBarActive) toggleAudioBar(); playAyah(selectedAyahLocalIndex); }
     
+    // The selected ayah's place in the mushaf (surah, ayah, plain text) from
+    // the app's own verified text.
+    function selectedAyahRecord() {
+      return loadSearchData().then(data => data[selectedAyahGlobalNumber - 1] || null);
+    }
+    // Image card (js/share-card.js). The card draws with Amiri, so it gets the
+    // quran.json text, the encoding Amiri is made for.
+    function shareSelectedAyah() {
+      const title = document.getElementById('ayahMenuTitle').textContent;
+      selectedAyahRecord().then(a => {
+        if (!a || !window.ShareCard) { showCustomToast(T('qt_share_failed')); return; }
+        closeAyahMenu();
+        ShareCard.open({ text: a.text + ' \u06DD' + a.numberInSurah.toLocaleString('ar-EG'), title: T('qt_quran_title'), source: title });
+      }).catch(() => showCustomToast(T('qt_share_failed')));
+    }
+    // The ayah video maker, opened on this ayah (pages/video-maker.html?s=&a=).
+    function makeVideoFromAyah() {
+      selectedAyahRecord().then(a => {
+        if (!a) return;
+        stopAudio();
+        location.href = 'video-maker.html?s=' + a.surah + '&a=' + a.numberInSurah;
+      });
+    }
+
     function copySelectedAyah() {
         const cleanText = selectedAyahText.replace(/<[^>]*>?/gm, '');
         const fullText = `${cleanText} ﴿${document.getElementById('ayahMenuTitle').textContent}﴾`;
-        navigator.clipboard.writeText(fullText).then(() => { showCustomToast('تم نسخ الآية بنجاح <img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'); });
+        navigator.clipboard.writeText(fullText).then(() => { showCustomToast(T('qt_copied') + ' <img src="../img/SVG/check.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">'); });
     }
 
     // Third-party API text is shown as text, never parsed as HTML.
@@ -1280,7 +1376,7 @@
 
     function fetchTafsir(overrideId = null) {
         currentAyahViewMode = 'tafsir'; const box = document.getElementById('ayahResultBox');
-        box.innerHTML = 'جاري جلب التفسير... ⏳'; box.classList.add('active');
+        box.textContent = T('qt_tafsir_loading'); box.classList.add('active');
         let tafsirType = overrideId || document.getElementById('tafsirSelect').value;
         if(overrideId) document.getElementById('tafsirSelect').value = overrideId;
         let tafsirName = document.getElementById('tafsirSelect').options[document.getElementById('tafsirSelect').selectedIndex].text;
@@ -1288,25 +1384,85 @@
         fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahGlobalNumber}/${tafsirType}`)
             .then(res => res.json())
             .then(data => { if (data.code === 200) showApiText(box, tafsirName, data.data.text, false); })
-            .catch(() => { box.innerHTML = 'تعذر جلب التفسير. تأكد من الإنترنت.'; });
+            .catch(() => { box.textContent = T('qt_tafsir_error'); });
     }
 
     function fetchTranslation() {
         currentAyahViewMode = 'translation'; const box = document.getElementById('ayahResultBox');
-        box.innerHTML = 'Fetching translation... ⏳'; box.classList.add('active');
+        box.textContent = T('qt_translation_loading'); box.classList.add('active');
         
         fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahGlobalNumber}/en.asad`)
             .then(res => res.json())
             .then(data => { if (data.code === 200) showApiText(box, 'English (Muhammad Asad)', data.data.text, true); })
-            .catch(() => { box.innerHTML = 'Failed to fetch translation.'; });
+            .catch(() => { box.textContent = T('qt_translation_error'); });
     }
 
-    function toggleAudioBar() { audioBarActive = !audioBarActive; document.getElementById('audioBar').classList.toggle('active', audioBarActive); }
+    function toggleAudioBar() { audioBarActive = !audioBarActive; document.getElementById('audioBar').classList.toggle('active', audioBarActive); document.body.classList.toggle('audio-open', audioBarActive); }
+
+    // ----- Repeat & speed (remembered) -----
+    // repeat: { kind: 'off' | 'ayah' | 'page', times: n | Infinity }
+    function parseRepeat(v) {
+      const [kind, n] = String(v || 'off').split(':');
+      if (kind !== 'ayah' && kind !== 'page') return { kind: 'off', times: 1, value: 'off' };
+      const times = n === 'inf' ? Infinity : Math.max(2, parseInt(n, 10) || 2);
+      return { kind: kind, times: times, value: v };
+    }
+    let audioRepeat = parseRepeat(localStorage.getItem('quranTextRepeat'));
+    let audioSpeed = parseFloat(localStorage.getItem('quranTextSpeed')) || 1;
+    let ayahPlaysDone = 0;   // times the current ayah has been played through
+    function changeRepeat(v) {
+      audioRepeat = parseRepeat(v); ayahPlaysDone = 0;
+      try { localStorage.setItem('quranTextRepeat', audioRepeat.value); } catch (e) {}
+      updateAudioNow();
+    }
+    function changeSpeed(v) {
+      audioSpeed = Math.min(2, Math.max(0.5, parseFloat(v) || 1));
+      audioPlayer.defaultPlaybackRate = audioSpeed; audioPlayer.playbackRate = audioSpeed;
+      try { localStorage.setItem('quranTextSpeed', String(audioSpeed)); } catch (e) {}
+    }
+    (function initAudioOptions() {
+      const rs = document.getElementById('repeatSelect'), ss = document.getElementById('speedSelect');
+      if (rs) rs.value = audioRepeat.value;
+      if (ss) { ss.value = String(audioSpeed); if (ss.value !== String(audioSpeed)) { audioSpeed = 1; ss.value = '1'; } }
+      audioPlayer.defaultPlaybackRate = audioSpeed;
+    })();
+
+    // "سورة البقرة · آية ٢٥٥ (٢ من ٣)" over the controls.
+    function ayahLabel(a) {
+      return T('qt_surah_n', { name: surahDisplay(a.surah, plainSurahName(a.surahName)) }) + ' · ' + T('qt_ayah_short', { n: num(a.numberInSurah) });
+    }
+    function updateAudioNow() {
+      const el = document.getElementById('audioNow');
+      if (!el) return;
+      const a = currentPageAyahsData[currentAyahIndex];
+      if (!a) { el.textContent = T('qt_recitation'); return; }
+      let t = ayahLabel(a);
+      if (audioRepeat.kind === 'ayah') t += audioRepeat.times === Infinity ? ' · ∞' : ' · ' + T('qt_play_count', { i: num(ayahPlaysDone + 1), n: num(audioRepeat.times) });
+      el.textContent = t;
+    }
+
+    // Follow the recited ayah, but not while the reader is scrolling by hand.
+    let lastManualScroll = 0;
+    (function watchManualScroll() {
+      const tc = document.getElementById('textContainer');
+      if (!tc) return;
+      const mark = () => { lastManualScroll = Date.now(); };
+      tc.addEventListener('touchmove', mark, { passive: true });
+      tc.addEventListener('wheel', mark, { passive: true });
+    })();
+
+    function playPrevAyah() {
+      if (!pageAudioUrls.length) return;
+      if (currentAyahIndex > 0) playAyah(currentAyahIndex - 1);
+      else if (currentPage > 1) { autoPlayLastOfPage = true; goToPage(currentPage - 1); }
+    }
+    function playNextAyah() { if (pageAudioUrls.length) playAyah(Math.max(0, currentAyahIndex) + 1); }
+    let autoPlayLastOfPage = false;
     function changeReciter(newReciter) { selectedReciter = newReciter; localStorage.setItem('quranReciter', newReciter); stopAudio(); renderText(); }
     function updatePlayBtnUI() { const playIcon = document.getElementById('playIcon'); const pauseIcon = document.getElementById('pauseIcon'); if (isPlaying) { playIcon.style.display = 'none'; pauseIcon.style.display = 'block'; } else { playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; } }
     
     function togglePlayPause() { 
-        if (pageAudioUrls.length === 0) { showCustomToast("جاري تجهيز الصوت، يرجى الانتظار..."); return; } 
+        if (pageAudioUrls.length === 0) { showCustomToast(T('qt_audio_preparing')); return; } 
         if (isPlaying) { audioPlayer.pause(); isPlaying = false; updatePlayBtnUI(); } 
         else { if (currentAyahIndex === -1) currentAyahIndex = 0; playAyah(currentAyahIndex); } 
     }
@@ -1319,24 +1475,50 @@
         }
         // The text can come from the device; the recitation cannot. Stop here
         // rather than skipping ahead through pages that have no audio either.
-        if (!pageAudioUrls[index]) { stopAudio(); showCustomToast("تأكد من الاتصال بالإنترنت لتشغيل التلاوة."); return; }
-        currentAyahIndex = index; audioPlayer.src = pageAudioUrls[index]; 
-        audioPlayer.play().catch(e => showCustomToast("تأكد من الاتصال بالإنترنت لتشغيل التلاوة."));
-        isPlaying = true; updatePlayBtnUI(); updateMediaSession();
+        if (!pageAudioUrls[index]) { stopAudio(); showCustomToast(T('qt_audio_needs_net')); return; }
+        if (index < 0) index = 0;
+        if (index !== currentAyahIndex) ayahPlaysDone = 0;
+        currentAyahIndex = index; audioPlayer.src = pageAudioUrls[index];
+        audioPlayer.playbackRate = audioSpeed;
+        audioPlayer.play().catch(e => showCustomToast(T('qt_audio_needs_net')));
+        isPlaying = true; updatePlayBtnUI(); updateMediaSession(); updateAudioNow();
         
         document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('playing-highlight'));
         const activeAyah = document.getElementById(`ayah-wrapper-${index}`);
-        if (activeAyah) { activeAyah.classList.add('playing-highlight'); activeAyah.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        if (activeAyah) {
+          activeAyah.classList.add('playing-highlight');
+          if (Date.now() - lastManualScroll > 4000) activeAyah.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
-    function stopAudio() { audioPlayer.pause(); audioPlayer.currentTime = 0; isPlaying = false; currentAyahIndex = -1; autoPlayNextPage = false; updatePlayBtnUI(); document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('playing-highlight')); }
-    audioPlayer.onended = () => { playAyah(parseInt(currentAyahIndex) + 1); };
+    function stopAudio() { audioPlayer.pause(); audioPlayer.currentTime = 0; isPlaying = false; currentAyahIndex = -1; ayahPlaysDone = 0; autoPlayNextPage = false; autoPlayLastOfPage = false; updatePlayBtnUI(); updateAudioNow(); document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('playing-highlight')); }
+    audioPlayer.onended = () => {
+      // Repeat the ayah: replay it in place (same highlight, no re-scroll).
+      if (audioRepeat.kind === 'ayah' && ayahPlaysDone + 1 < audioRepeat.times) {
+        ayahPlaysDone++; updateAudioNow();
+        audioPlayer.currentTime = 0; audioPlayer.playbackRate = audioSpeed;
+        audioPlayer.play().catch(() => {});
+        return;
+      }
+      ayahPlaysDone = 0;
+      const next = parseInt(currentAyahIndex) + 1;
+      // Repeat the page: back to its first ayah instead of turning the page.
+      if (audioRepeat.kind === 'page' && next >= pageAudioUrls.length) { playAyah(0); return; }
+      playAyah(next);
+    };
 
     function updateMediaSession() {
         if ('mediaSession' in navigator) {
             const surah = getCurrentSurah(); const reciterName = document.getElementById('reciterSelect').options[document.getElementById('reciterSelect').selectedIndex].text;
+            const a = currentPageAyahsData[currentAyahIndex];
+            if (a && typeof MediaMetadata === 'function') {
+              navigator.mediaSession.metadata = new MediaMetadata({
+                title: ayahLabel(a), artist: reciterName, album: T('qt_app_page', { n: num(currentPage) }),
+                artwork: [{ src: '../icons/icon-192.png', sizes: '192x192', type: 'image/png' }]
+              });
+            }
             navigator.mediaSession.setActionHandler('play', togglePlayPause); navigator.mediaSession.setActionHandler('pause', togglePlayPause);
-            navigator.mediaSession.setActionHandler('nexttrack', () => playAyah(parseInt(currentAyahIndex) + 1)); navigator.mediaSession.setActionHandler('previoustrack', () => playAyah(parseInt(currentAyahIndex) - 1));
+            navigator.mediaSession.setActionHandler('nexttrack', playNextAyah); navigator.mediaSession.setActionHandler('previoustrack', playPrevAyah);
         }
     }
 
@@ -1367,15 +1549,15 @@
     // The Madinah font needs its own encoding of the text; the others share one.
     function textEncodingForFont() { return currentFont === 'MadinahFont' ? 'qpc' : 'uthmani'; }
 
-    const PAGE_CACHE_PREFIX = 'quran_text_v50_';
-    function pageCacheKey(page) { return `${PAGE_CACHE_PREFIX}${page}_${selectedReciter}_${textEncodingForFont()}`; }
+    const PAGE_CACHE_PREFIX = 'quran_text_v51_';
+    function pageCacheKey(page) { return `${PAGE_CACHE_PREFIX}${page}_${selectedReciter}_${textEncodingForFont()}_${uiLang()}`; }
 
     // Pages cached by earlier versions were stored as fetched, unverified.
     (function dropOldPageCaches() {
       try {
         for (let i = localStorage.length - 1; i >= 0; i--) {
           const k = localStorage.key(i);
-          if (k && (k.startsWith('quran_master_v') || k.startsWith('quran_page_master_v'))) localStorage.removeItem(k);
+          if (k && (k.startsWith('quran_master_v') || k.startsWith('quran_page_master_v') || k.startsWith('quran_text_v50_'))) localStorage.removeItem(k);
         }
       } catch (e) {}
     })();
@@ -1391,18 +1573,18 @@
         const text = cleanAndFormatAyahText(a.text);
         if (a.numberInSurah === 1) {
           const cleanSurahName = escHtml(String(a.surahName).replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim());
-          const metaText = a.meccan ? 'مكية' : 'مدنية';
+          const metaText = T(a.meccan ? 'qt_meccan' : 'qt_medinan');
           htmlContent += `
                     <div class="surah-separator">
                         <div class="surah-header-container">
                             <img src="../img/Sura_border.svg" class="surah-frame-img" alt="">
                             <div class="surah-title-text">سُورَةُ ${cleanSurahName}</div>
                         </div>
-                        <div class="surah-meta">${metaText} • آياتها ${Number(a.numberOfAyahs)}</div>
+                        <div class="surah-meta">${escHtml(metaText)} • ${escHtml(T('qt_ayah_count', { n: num(a.numberOfAyahs) }))}</div>
                     </div>`;
           if (a.surah !== 1 && a.surah !== 9) { htmlContent += `<div class="basmalah-container"><img class="basmalah-svg" src="../img/Basmala.svg" alt="بسم الله الرحمن الرحيم"></div>`; }
         }
-        ayahsData.push({ number: a.number, numberInSurah: a.numberInSurah, surahName: a.surahName, text: text });
+        ayahsData.push({ number: a.number, surah: a.surah, numberInSurah: a.numberInSurah, surahName: a.surahName, text: text });
         htmlContent += `<span class="ayah-wrapper" id="ayah-wrapper-${i}" data-index="${i}">
                     <span class="ayah-text">${text}</span> 
                     <span class="ayah-number">${Number(a.numberInSurah).toLocaleString('ar-EG')}</span>
@@ -1427,7 +1609,9 @@
       currentPageAyahsData = view.ayahsData;
       txtCont.scrollTop = 0;
       if (autoPlayNextPage) { playAyah(0); autoPlayNextPage = false; }
+      else if (autoPlayLastOfPage) { autoPlayLastOfPage = false; playAyah(pageAudioUrls.length - 1); }
       handlePendingAyahAction();
+      if (pendingFlashAyah) { const n = pendingFlashAyah; pendingFlashAyah = 0; setTimeout(() => flashAyah(n), 350); }
       prefetchNextPage();
       applyTextSettings();
       setupLongPressForAyahs();
@@ -1452,10 +1636,10 @@
           }
       } catch(e) { try { localStorage.removeItem(cacheKey); } catch (_) {} }
 
-      txtCont.innerHTML = '<div style="text-align:center; padding:50px; font-size:20px; color: var(--accent);">جاري تحميل النص والصوت...</div>';
+      txtCont.innerHTML = '<div style="text-align:center; padding:50px; font-size:20px; color: var(--accent);">' + escHtml(T('qt_loading_page')) + '</div>';
       QuranTextSource.getPage(page, selectedReciter, textEncodingForFont()).then(result => {
           if (page !== currentPage) return; // the reader moved on while this loaded
-          if (!result.ayahs.length) { txtCont.innerHTML = '<div style="text-align:center; padding:50px;">عذراً، لم يتم العثور على النص</div>'; return; }
+          if (!result.ayahs.length) { txtCont.innerHTML = '<div style="text-align:center; padding:50px;">' + escHtml(T('qt_page_not_found')) + '</div>'; return; }
           const view = buildPageView(result);
           cachePageView(page, view);
           showPageView(txtCont, view);
@@ -1476,53 +1660,142 @@
 
     let searchOverlayActive = false; 
     let searchTimeout = null;
+
+    // ===== Search (offline) =====
+    // Searches the app's own verified text (data/quran.json, via QuranTextSource),
+    // so it works with no connection. Diacritics, pause marks and the hamza /
+    // alef / ta-marbuta / alef-maqsura variants are ignored. Two passes: an exact
+    // pass on the letters, then a loose pass that also ignores alefs, so words
+    // typed in common spelling (رزقناهم، الصلاة، السماوات) find their Uthmani
+    // spelling (رَزَقۡنَٰهُمۡ، ٱلصَّلَوٰةَ، ٱلسَّمَٰوَٰتِ). Exact hits are listed first.
+    // Results are shown in the reader's font and its matching encoding.
+    const SEARCH_PAGE = 50;
+    let searchData = null, searchQpc = null, searchHits = [], searchShown = 0, searchQuery = null;
+    const searchNorm = t => String(t || '')
+      .replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ‌-‏﻿]/g, '')
+      .replace(/[ٱأإآ]/g, 'ا').replace(/ة/g, 'ه')
+      .replace(/[ىئ]/g, 'ي').replace(/ؤ/g, 'و')
+      .replace(/\s+/g, ' ').trim();
+    // Loose form: no alefs at all, and a final وه / اه (صلوة، زكوة) read as ه.
+    const searchLoose = n => n.split(' ').map(w => w.replace(/ا/g, '').replace(/[و]ه$/, 'ه')).join(' ');
+
+    function loadSearchData() {
+      if (searchData) return Promise.resolve(searchData);
+      return QuranTextSource.loadIndex().then(index => {
+        searchData = index.allAyahs().map(a => {
+          const n = searchNorm(a.text);
+          return Object.assign(a, { page: index.pageOf(a.surah, a.numberInSurah), n: n, l: searchLoose(n) });
+        });
+        return searchData;
+      });
+    }
+    // The Madinah font needs the QPC text (data/quran-qpc.json, letter-checked
+    // against quran.json by QuranTextSource); other fonts show quran.json's.
+    function loadSearchQpc() {
+      if (searchQpc) return Promise.resolve(searchQpc);
+      return fetch('../data/quran-qpc.json').then(r => r.json()).then(j => (searchQpc = j)).catch(() => null);
+    }
+    function displayTextFor(a) {
+      if (textEncodingForFont() === 'qpc' && searchQpc && searchQpc.surahs) {
+        const t = searchQpc.surahs[a.surah - 1] && searchQpc.surahs[a.surah - 1][a.numberInSurah - 1];
+        if (QuranTextSource.isQuranScript(t) && QuranTextSource.letters(t) === QuranTextSource.letters(a.text)) return t;
+      }
+      return a.text;
+    }
+
     function toggleSearchOverlay(action = 'toggle') {
       const overlay = document.getElementById('searchOverlay');
-      if (action === 'close' || action === 'jump') { searchOverlayActive = false; } 
+      if (action === 'close' || action === 'jump') { searchOverlayActive = false; }
       else { searchOverlayActive = !searchOverlayActive; }
       overlay.classList.toggle('active', searchOverlayActive);
-      if (searchOverlayActive) { document.getElementById('searchInput').focus(); } 
-      else if (action === 'close') { 
-          document.getElementById('searchInput').value = ''; 
-          document.getElementById('searchResults').innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث في جميع السور...</div>'; 
+      if (searchOverlayActive) { document.getElementById('searchInput').focus(); loadSearchData().catch(() => {}); loadSearchQpc(); }
+      else if (action === 'close') {
+          document.getElementById('searchInput').value = '';
+          searchHint();
       }
+    }
+    function searchHint(msg) {
+      document.getElementById('searchResults').innerHTML = '<div class="search-note">' + escHtml(msg || T('qt_search_hint')) + '</div>';
     }
 
     function handleGlobalSearch(query) {
-      query = query.trim(); 
-      const resD = document.getElementById('searchResults');
-      if (!query) { resD.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6; font-size:14px;">اكتب كلمة للبحث...</div>'; return; }
-      resD.innerHTML = '<div style="text-align:center; padding:20px; font-size:14px; color: var(--accent);">جاري البحث... ⏳</div>';
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-          // The query goes into a URL path and two regexes: encode / escape it.
-          const qRe = escRegex(query), qHtmlRe = escRegex(escHtml(query));
-          fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/quran-simple-clean`).then(res => res.json()).then(data => {
-              if (data.code === 200 && data.data.count > 0) {
-                  const exactRegex = new RegExp('(^|[^\\p{L}])' + qRe + '([^\\p{L}]|$)', 'ui'); 
-                  const matches = data.data.matches.filter(m => exactRegex.test(m.text));
-                  if (matches.length > 0) {
-                      let h = `<div style="text-align:center; margin-bottom: 10px; color: var(--accent); font-weight: bold; font-size: 14px;">تم العثور على ${matches.length} نتيجة</div>`;
-                      h += matches.map(m => `<div class="search-result-item" onclick="jumpToSearchResult(${parseInt(m.number, 10)})"><div class="res-meta">سورة ${escHtml(m.surah.name.replace(/سورة|سُورَةُ|سُورَةِ/g, '').trim())} - آية ${parseInt(m.numberInSurah, 10)}</div><div class="res-text">${escHtml(m.text).replace(new RegExp('(^|[^\\p{L}])(' + qHtmlRe + ')([^\\p{L}]|$)', 'gui'), '$1<span class="search-highlight">$2</span>$3')}</div></div>`).join('');
-                      resD.innerHTML = h;
-                  } else { resD.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج مطابقة تماماً.</div>'; }
-              } else { resD.innerHTML = '<div style="text-align:center; padding:20px;">لا توجد نتائج.</div>'; }
-          }).catch(() => { resD.innerHTML = '<div style="text-align:center; padding:20px; color:#ef4444;">خطأ في الاتصال.</div>'; });
-      }, 500); 
+      searchTimeout = setTimeout(() => runSearch(query), 180);
     }
-
-    function jumpToSearchResult(ayahNumber) {
-        const resD = document.getElementById('searchResults'); resD.innerHTML = '<div style="text-align:center; padding:30px; font-size:16px; color: var(--accent); font-weight:bold;">جاري الانتقال...</div>';
-        let cp = localStorage.getItem('ayah_page_v1_' + ayahNumber);
-        if (cp) { executeJump(parseInt(cp)); } 
-        else {
-            fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}`).then(res => res.json()).then(data => { 
-                if (data.code === 200) { const tp = data.data.page; localStorage.setItem('ayah_page_v1_' + ayahNumber, tp); executeJump(tp); } 
-            }).catch(() => { resD.innerHTML = 'حدث خطأ.'; });
+    function runSearch(raw) {
+      const q = searchNorm(raw);
+      if (!q) { searchHint(); return; }
+      const resD = document.getElementById('searchResults');
+      Promise.all([loadSearchData(), loadSearchQpc()]).then(([data]) => {
+        if (searchNorm(document.getElementById('searchInput').value) !== q) return; // typing moved on
+        const ql = searchLoose(q);
+        const exact = [], loose = [];
+        for (const a of data) {
+          if (a.n.includes(q)) exact.push(a);
+          else if (ql && a.l.includes(ql)) loose.push(a);
         }
+        searchHits = exact.concat(loose);
+        searchQuery = { n: q.split(' '), l: ql.split(' ').filter(Boolean) };
+        searchShown = 0;
+        if (!searchHits.length) { searchHint(T('qt_search_none', { q: raw.trim() })); return; }
+        resD.innerHTML = '<div class="search-count">' + escHtml(T('qt_search_count', { n: num(searchHits.length) })) + '</div>';
+        showMoreSearchResults();
+        resD.scrollTop = 0;
+      }).catch(() => searchHint(T('qt_search_load_error')));
+    }
+    // Highlight the words that hold a query word (whole words only: a span
+    // inside a word would cut its marks off their letters).
+    function highlightWords(text) {
+      return text.split(' ').map(w => {
+        const n = searchNorm(w);
+        if (!n) return escHtml(w);
+        const l = searchLoose(n);
+        const hit = searchQuery.n.some(p => p && n.includes(p)) || searchQuery.l.some(p => p && l.includes(p));
+        return hit ? '<span class="search-highlight">' + escHtml(w) + '</span>' : escHtml(w);
+      }).join(' ');
+    }
+    function showMoreSearchResults() {
+      const resD = document.getElementById('searchResults');
+      const more = resD.querySelector('.search-more');
+      if (more) more.remove();
+      const slice = searchHits.slice(searchShown, searchShown + SEARCH_PAGE);
+      searchShown += slice.length;
+      const fontFam = getComputedStyle(document.getElementById('textContainer')).fontFamily;
+      const html = slice.map(a => {
+        const name = surahDisplay(a.surah, plainSurahName(a.surahName));
+        return '<div class="search-result-item" data-page="' + a.page + '" data-number="' + a.number + '">' +
+          '<div class="res-meta">' + escHtml(T('qt_result_meta', { name: name, n: num(a.numberInSurah), page: num(a.page) })) + '</div>' +
+          '<div class="res-text" style="font-family:' + escHtml(fontFam) + '">' + highlightWords(displayTextFor(a)) + '</div></div>';
+      }).join('');
+      resD.insertAdjacentHTML('beforeend', html);
+      if (searchShown < searchHits.length) {
+        resD.insertAdjacentHTML('beforeend', '<button type="button" class="search-more">' + escHtml(T('qt_search_more', { n: num(searchHits.length - searchShown) })) + '</button>');
+      }
+    }
+    document.getElementById('searchResults').addEventListener('click', e => {
+      if (e.target.closest('.search-more')) { showMoreSearchResults(); return; }
+      const item = e.target.closest('.search-result-item');
+      if (item) jumpToAyah(parseInt(item.dataset.page, 10), parseInt(item.dataset.number, 10));
+    });
+
+    // Go to an ayah's page and flash it there.
+    let pendingFlashAyah = 0;
+    function flashAyah(number) {
+      const i = currentPageAyahsData.findIndex(a => a.number === number);
+      const el = i >= 0 && document.getElementById('ayah-wrapper-' + i);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.remove('search-flash'); void el.offsetWidth; el.classList.add('search-flash');
+      setTimeout(() => el.classList.remove('search-flash'), 2600);
+    }
+    function jumpToAyah(page, number) {
+      if (!(page >= 1 && page <= 604)) return;
+      toggleSearchOverlay('jump');
+      if (page === currentPage) { flashAyah(number); return; }
+      pendingFlashAyah = number;
+      goToPage(page);
     }
 
-    function executeJump(targetPage) { toggleSearchOverlay('jump'); if (typeof goToPage === 'function') { goToPage(targetPage); } else { currentPage = targetPage; updateContent(); } showCustomToast(`تم الانتقال لصفحة ${targetPage}`); }
 
     function updateSurahProgress() {
       const surah = getCurrentSurah(); if (!surah) return;
@@ -1532,7 +1805,7 @@
       const pp = Math.round(((currentPage - sp + 1) / (ep - sp + 1)) * 100);
       const fill = document.getElementById('progressFill'); const tooltip = document.getElementById('surahTooltip');
       if (fill) fill.style.height = (pp / 100) * 180 + 'px'; 
-      if (tooltip) tooltip.innerHTML = `${surah.name} - ${pp}%`;
+      if (tooltip) tooltip.textContent = `${surahDisplay(surah.number, surah.name)} - ${num(pp)}%`;
     }
 
     function showSurahInfo() {
@@ -1540,7 +1813,7 @@
       if (surah) { 
           const si = SURAH_MAP.findIndex(s => s.number === surah.number); 
           const next = SURAH_MAP[si + 1]; 
-          showCustomToast(`سورة ${surah.name}\nالصفحة ${currentPage} من ${surah.page} إلى ${next ? next.page - 1 : totalPages}`); 
+          showCustomToast(T('qt_surah_span', { name: surahDisplay(surah.number, surah.name), page: num(currentPage), from: num(surah.page), to: num(next ? next.page - 1 : totalPages) })); 
       }
     }
 
@@ -1550,8 +1823,8 @@
       const juzLabel = document.getElementById('juzLabel');
       const surahLabel = document.getElementById('surahLabel');
       const pageLabel = document.getElementById('pageLabel');
-      if (juzLabel && juz) juzLabel.textContent = `الجزء ${juz.number}`;
-      if (surahLabel && surah) surahLabel.textContent = surah.name; 
+      if (juzLabel && juz) juzLabel.textContent = T('qt_juz_n', { n: num(juz.number) });
+      if (surahLabel && surah) surahLabel.textContent = surahDisplay(surah.number, surah.name); 
       if (pageLabel) pageLabel.textContent = currentPage;
     }
 
@@ -1577,16 +1850,35 @@
 
     const orgNav = typeof navigateTo === 'function' ? navigateTo : function(){};
     navigateTo = function(newPage, dir) {
-        stopAutoScroll(); if(!autoPlayNextPage) stopAudio();
+        stopAutoScroll(); if (!autoPlayNextPage && !autoPlayLastOfPage) stopAudio();
         if (tasmeeEngine && tasmeeEngine.isActive) {
             tasmeeEngine.endSession();
-            showCustomToast('تم إنهاء التسميع عند تغيير الصفحة');
+            showCustomToast(T('qt_tasmee_ended_page'));
         }
         orgNav(newPage, dir);
         setTimeout(() => { updateToggleLink(); updateSurahProgress(); updatePageLabels(); }, 300);
     };
 
-    window.onload = function() {
+    // Repeat / speed option labels in the UI language.
+    function localizeAudioOptions() {
+      document.querySelectorAll('#repeatSelect option').forEach(o => {
+        const [kind, n] = o.value.split(':');
+        o.textContent = kind === 'off' ? T('qt_repeat_off')
+          : n === 'inf' ? T(kind === 'page' ? 'qt_repeat_page_always' : 'qt_repeat_ayah_always')
+          : T('qt_repeat_ayah_n', { n: num(n) });
+      });
+      document.querySelectorAll('#speedSelect option').forEach(o => { o.textContent = num(parseFloat(o.value)) + '×'; });
+    }
+    // A language picked from the settings sheet re-renders the page in it.
+    window.addEventListener('langchange', () => location.reload());
+
+    window.onload = async function() {
+      // The dictionary first, so the first page is drawn in the UI language.
+      try { if (window.I18n) await I18n.init(); } catch (e) { /* Arabic fallback */ }
+      localizeAudioOptions();
+      updateAudioNow();
+      const tp = document.getElementById('tasmeeProgressText');
+      if (tp) tp.textContent = T('qt_words_progress', { done: num(0), total: num(0) });
       if(typeof currentPage === 'undefined') { window.currentPage = 1; }
       if(typeof totalPages === 'undefined') { window.totalPages = 604; }
       if(typeof SURAH_MAP === 'undefined') { window.SURAH_MAP = []; }
@@ -1626,7 +1918,7 @@
     function openTasmeeSetup() {
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRec) {
-        showCustomToast('وضع التسميع غير مدعوم على هذا المتصفح — جرب Chrome أو Edge');
+        showCustomToast(T('qt_tasmee_unsupported'));
         return;
       }
       // Restore saved preferences
@@ -1691,7 +1983,7 @@
         ayahSlice = currentPageAyahsData.slice(from, Math.min(to, currentPageAyahsData.length));
       }
       if (ayahSlice.length === 0) {
-        showCustomToast('لا توجد آيات في النطاق المحدد. حمّل صفحة أولاً.');
+        showCustomToast(T('qt_tasmee_no_ayat'));
         return;
       }
       tasmeeLastAyahData = ayahSlice;
@@ -1705,7 +1997,7 @@
         audioFeedback: audioFb,
         onWordMatch: (_idx, _state, progress) => {
           const el = document.getElementById('tasmeeProgressText');
-          if (el) el.textContent = `${progress.done} / ${progress.total} كلمة`;
+          if (el) el.textContent = T('qt_words_progress', { done: num(progress.done), total: num(progress.total) });
           // Highlight the ayah currently being recited
           const domAyahIdx = progress.currentAyahIdx + tasmeeLastAyahOffset;
           if (progress.currentAyahIdx >= 0 && domAyahIdx !== tasmeeCurrentAyahHighlight) {
@@ -1735,7 +2027,7 @@
             tasmeeAutoAdvanceSettings = { hideText, audioFb };
             currentPage++;
             updateContent();
-            showCustomToast('انتهت الصفحة! جاري الانتقال للصفحة التالية...');
+            showCustomToast(T('qt_tasmee_page_done'));
             window._tasmeeRenderCb = () => _tasmeeAutoStart();
             return;
           }
@@ -1745,7 +2037,7 @@
 
       tasmeeEngine.startSession(ayahSlice, { hideText, ayahOffset })
         .then(() => {
-          document.getElementById('tasmeeProgressText').textContent = `٠ / ${tasmeeEngine._wordTokens.length} كلمة`;
+          document.getElementById('tasmeeProgressText').textContent = T('qt_words_progress', { done: num(0), total: num(tasmeeEngine._wordTokens.length) });
           document.getElementById('tasmeeMicIndicator').classList.remove('paused');
           document.getElementById('tasmeePauseBtn').innerHTML = '<img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
           document.getElementById('tasmeeActiveBar').classList.add('active');
@@ -1753,7 +2045,7 @@
         .catch(err => {
           if (btn) btn.disabled = false;
           tasmeeEngine = null;
-          showCustomToast('تعذر الوصول للميكروفون: ' + (err.message || err));
+          showCustomToast(T('qt_mic_error', { err: err.message || err }));
         });
     }
 
@@ -1796,7 +2088,7 @@
         audioFeedback: audioFb,
         onWordMatch: (_idx, _state, progress) => {
           const el = document.getElementById('tasmeeProgressText');
-          if (el) el.textContent = `${progress.done} / ${progress.total} كلمة`;
+          if (el) el.textContent = T('qt_words_progress', { done: num(progress.done), total: num(progress.total) });
           const domAyahIdx = progress.currentAyahIdx + tasmeeLastAyahOffset;
           if (progress.currentAyahIdx >= 0 && domAyahIdx !== tasmeeCurrentAyahHighlight) {
             if (tasmeeCurrentAyahHighlight >= 0) {
@@ -1823,7 +2115,7 @@
             tasmeeAutoAdvanceSettings = { hideText, audioFb };
             currentPage++;
             updateContent();
-            showCustomToast('انتهت الصفحة! جاري الانتقال للصفحة التالية...');
+            showCustomToast(T('qt_tasmee_page_done'));
             window._tasmeeRenderCb = () => _tasmeeAutoStart();
             return;
           }
@@ -1832,7 +2124,7 @@
       });
       tasmeeEngine.startSession(currentPageAyahsData, { hideText, ayahOffset: 0 })
         .then(() => {
-          document.getElementById('tasmeeProgressText').textContent = `٠ / ${tasmeeEngine._wordTokens.length} كلمة`;
+          document.getElementById('tasmeeProgressText').textContent = T('qt_words_progress', { done: num(0), total: num(tasmeeEngine._wordTokens.length) });
           document.getElementById('tasmeeMicIndicator').classList.remove('paused');
           document.getElementById('tasmeePauseBtn').innerHTML = '<img src="../img/SVG/pause.svg" class="action-icon" style="width:1em;height:1em;vertical-align:-0.125em;">';
           document.getElementById('tasmeeActiveBar').classList.add('active');
@@ -1840,7 +2132,7 @@
         .catch(err => {
           if (btn) btn.disabled = false;
           tasmeeEngine = null;
-          showCustomToast('تعذر بدء التسميع: ' + (err.message || err));
+          showCustomToast(T('qt_tasmee_start_error', { err: err.message || err }));
         });
     }
   </script>

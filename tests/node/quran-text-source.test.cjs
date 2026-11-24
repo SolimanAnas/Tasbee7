@@ -61,6 +61,17 @@ test('ayah text is the stored text, unchanged — only the prefixed basmala is l
   }
 });
 
+test('pageOf() finds the page each ayah is on, matching pageAyahs()', () => {
+  for (let p = 1; p <= 604; p++) {
+    for (const a of index.pageAyahs(p)) assert.strictEqual(index.pageOf(a.surah, a.numberInSurah), p, a.key);
+  }
+  assert.strictEqual(index.pageOf(1, 1), 1);
+  assert.strictEqual(index.pageOf(114, 6), 604);
+  assert.strictEqual(index.pageOf(115, 1), 0);
+  assert.strictEqual(index.pageOf(1, 8), 0);
+  assert.strictEqual(index.allAyahs().length, 6236);
+});
+
 test('surah facts come from the local files', () => {
   const a = index.pageAyahs(2)[0];
   assert.strictEqual(a.surah, 2);

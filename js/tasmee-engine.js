@@ -1,6 +1,16 @@
 /* AUTO-GENERATED from tasmee-engine.ts — do not edit directly. Regenerate: node scripts/transpile-tasmee.cjs */
 "use strict";
 /* TasmeeEngine — Quran recitation assessment engine */
+// UI string in the page language when js/i18n.js is loaded, else the Arabic.
+function tt(key, fallback) {
+    const I = window.I18n;
+    if (I && typeof I.t === 'function') {
+        const v = I.t(key);
+        if (v && v !== key)
+            return v;
+    }
+    return fallback;
+}
 class TasmeeEngine {
     constructor({ onWordMatch, onSessionEnd, audioFeedback = true } = {}) {
         this._options = { onWordMatch: onWordMatch || (() => { }), onSessionEnd: onSessionEnd || (() => { }), audioFeedback };
@@ -19,10 +29,10 @@ class TasmeeEngine {
     async startSession(ayahDataArray, { hideText = false, ayahOffset = 0 } = {}) {
         const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRec)
-            throw new Error('المتصفح لا يدعم التعرف على الكلام. استخدم Chrome أو Edge.');
+            throw new Error(tt('qt_err_no_speech', 'المتصفح لا يدعم التعرف على الكلام. استخدم Chrome أو Edge.'));
         this._wordTokens = this._buildWordIndex(ayahDataArray);
         if (this._wordTokens.length === 0)
-            throw new Error('لا توجد كلمات للتسميع في هذه الصفحة.');
+            throw new Error(tt('qt_err_no_words', 'لا توجد كلمات للتسميع في هذه الصفحة.'));
         this._expectedIdx = 0;
         this._ended = false;
         this.isPaused = false;
@@ -40,10 +50,10 @@ class TasmeeEngine {
                 this.isActive = false;
                 const name = err?.name || '';
                 if (name === 'NotAllowedError' || name === 'SecurityError') {
-                    throw new Error('تم رفض إذن المايكروفون. يرجى السماح بالوصول للمايكروفون من إعدادات المتصفح ثم إعادة المحاولة. (not-allowed)');
+                    throw new Error(tt('qt_err_mic_denied', 'تم رفض إذن المايكروفون. يرجى السماح بالوصول للمايكروفون من إعدادات المتصفح ثم إعادة المحاولة. (not-allowed)'));
                 }
                 if (name === 'NotFoundError' || name === 'NotReadableError') {
-                    throw new Error('تعذر الوصول للمايكروفون — تحقق من توصيل المايكروفون. (audio-capture)');
+                    throw new Error(tt('qt_err_mic_capture', 'تعذر الوصول للمايكروفون — تحقق من توصيل المايكروفون. (audio-capture)'));
                 }
                 // Other (transient) errors: fall through and let SpeechRecognition request its own permission.
             }
@@ -463,7 +473,7 @@ class TasmeeEngine {
         const emoji = pct >= 95 ? '🌟' : pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
         const missedWords = this._wordTokens.filter(t => t.state === 'missed').map(t => t.raw).join(' ');
         const missedHtml = missed > 0
-            ? `<div style="margin-top:8px;font-size:0.85rem;color:var(--text-secondary);">الكلمات المفقودة:</div>
+            ? `<div style="margin-top:8px;font-size:0.85rem;color:var(--text-secondary);">${tt('qt_tasmee_missed', 'الكلمات المفقودة:')}</div>
          <div class="tasmee-missed-list" dir="rtl">${missedWords}</div>`
             : '';
         const bodyEl = document.getElementById('tasmeeResultsBody');
@@ -471,24 +481,24 @@ class TasmeeEngine {
             bodyEl.innerHTML = `
         <div class="tasmee-score-ring">
           <div class="tasmee-score-number">${pctRounded}%</div>
-          <div class="tasmee-score-label">${emoji} نتيجتك في التسميع</div>
+          <div class="tasmee-score-label">${emoji} ${tt('qt_tasmee_your_score', 'نتيجتك في التسميع')}</div>
         </div>
         <div class="tasmee-stat-row">
           <div class="tasmee-stat">
             <div class="tasmee-stat-val" style="color:var(--accent);">${correct}</div>
-            <div class="tasmee-stat-lbl">صحيح</div>
+            <div class="tasmee-stat-lbl">${tt('qt_stat_correct', 'صحيح')}</div>
           </div>
           <div class="tasmee-stat">
             <div class="tasmee-stat-val" style="color:#D47A00;">${fuzzy}</div>
-            <div class="tasmee-stat-lbl">قريب</div>
+            <div class="tasmee-stat-lbl">${tt('qt_stat_close', 'قريب')}</div>
           </div>
           <div class="tasmee-stat">
             <div class="tasmee-stat-val" style="color:var(--danger);">${missed}</div>
-            <div class="tasmee-stat-lbl">مفقود</div>
+            <div class="tasmee-stat-lbl">${tt('qt_stat_missed', 'مفقود')}</div>
           </div>
           <div class="tasmee-stat">
             <div class="tasmee-stat-val" style="color:var(--text-secondary);">${total}</div>
-            <div class="tasmee-stat-lbl">المجموع</div>
+            <div class="tasmee-stat-lbl">${tt('qt_stat_total', 'المجموع')}</div>
           </div>
         </div>
         ${missedHtml}`;

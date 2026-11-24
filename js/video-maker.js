@@ -1369,6 +1369,15 @@
       return;
     }
     if (!surahs[state.surah - 1]) state.surah = 1;
+    // Opened for a given ayah (e.g. from the text mushaf): ?s=2&a=255[&to=257].
+    try {
+      const q = new URLSearchParams(location.search);
+      const s = parseInt(q.get('s'), 10), a = parseInt(q.get('a'), 10), to = parseInt(q.get('to'), 10);
+      if (surahs[s - 1] && a >= 1 && a <= surahs[s - 1].ayat.length) {
+        state.surah = s; state.from = a;
+        state.to = to >= a && to <= surahs[s - 1].ayat.length ? to : a;
+      }
+    } catch { /* no preset */ }
     fillSurahs();
     fillReciters();
     fillBackgrounds();

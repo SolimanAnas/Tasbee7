@@ -158,6 +158,21 @@ const juzName     = document.getElementById('juzName');
 const pageName    = document.getElementById('pageName');
 const bookmarkBtn = document.getElementById('bookmarkBtn');
 
+// UI strings: the page's language when it loads js/i18n.js (the text mushaf),
+// else the Arabic given here (the printed mushaf, which does not load it).
+function qcT(key, fallback, params) {
+  params = params || {};
+  if (window.I18n && typeof I18n.t === 'function') {
+    const s = I18n.t(key, params);
+    if (s && s !== key) return s;
+  }
+  let out = fallback;
+  Object.keys(params).forEach(k => { out = out.split('{' + k + '}').join(params[k]); });
+  return out;
+}
+const qcName = s => (window.I18n && typeof I18n.name === 'function' ? I18n.name('surahs', s.number, s.name) : s.name);
+const qcNum = n => (window.I18n && typeof I18n.getLang === 'function' && ['en', 'tr'].includes(I18n.getLang()) ? String(n) : n);
+
 // Helper functions
 const getCurrentSurah = () => [...SURAH_MAP].reverse().find(s => currentPage >= s.page);
 const getCurrentJuz   = () => [...JUZ_MAP].reverse().find(j => currentPage >= j.page);
@@ -175,9 +190,9 @@ function updateContent() {
 function updateMeta() {
   const surah = getCurrentSurah();
   const juz   = getCurrentJuz();
-  surahName.textContent = surah ? 'سورة ' + surah.name : '';
-  juzName.textContent   = juz ? `الجزء ${juz.number}` : '';
-  pageName.textContent  = `صفحة ${currentPage}`;
+  surahName.textContent = surah ? qcT('qt_surah_n', 'سورة {name}', { name: qcName(surah) }) : '';
+  juzName.textContent   = juz ? qcT('qt_juz_n', 'الجزء {n}', { n: qcNum(juz.number) }) : '';
+  pageName.textContent  = qcT('qt_page_n', 'صفحة {n}', { n: qcNum(currentPage) });
 }
 
 // ============================================================
@@ -353,14 +368,14 @@ function openContextMenu() {
   const juz   = getCurrentJuz();
 
   infoEl.innerHTML =
-    `<strong>صفحة ${currentPage}</strong><br>` +
-    (surah ? `سورة ${surah.name}` : '') +
-    (juz   ? ` | الجزء ${juz.number}` : '');
+    `<strong>${qcT('qt_page_n', 'صفحة {n}', { n: currentPage })}</strong><br>` +
+    (surah ? qcT('qt_surah_n', 'سورة {name}', { name: qcName(surah) }) : '') +
+    (juz   ? ' | ' + qcT('qt_juz_n', 'الجزء {n}', { n: juz.number }) : '');
 
   const isBookmarked = bookmarks.has(currentPage);
   const btn = document.getElementById('contextBookmarkBtn');
   if (!btn) return;
-  btn.textContent = isBookmarked ? '★ إزالة من المفضلة' : '☆ إضافة للمفضلة';
+  btn.textContent = isBookmarked ? qcT('qt_bm_remove', '★ إزالة من المفضلة') : qcT('qt_bm_add', '☆ إضافة للمفضلة');
   btn.style.color = isBookmarked ? '#f5b342' : '';
 
   document.getElementById('contextMenu').classList.add('active');
@@ -408,7 +423,7 @@ function openBookmarksModal() {
   list.innerHTML = '';
 
   if (bookmarks.size === 0) {
-    list.innerHTML = '<div class="empty-state">لا توجد صفحات في المفضلة</div>';
+    list.innerHTML = '<div class="empty-state">' + qcT('qt_bm_empty', 'لا توجد صفحات في المفضلة') + '</div>';
   } else {
     [...bookmarks].sort((a, b) => a - b).forEach(page => {
       const surah = [...SURAH_MAP].reverse().find(s => page >= s.page);
@@ -417,10 +432,10 @@ function openBookmarksModal() {
       const div = document.createElement('div');
       div.className = 'bookmark-item';
       div.innerHTML = `
-        <div class="bm-page">صفحة ${page}</div>
+        <div class="bm-page">${qcT('qt_page_n', 'صفحة {n}', { n: page })}</div>
         <div class="bm-surah">
-          ${surah ? 'سورة ' + surah.name : ''}
-          ${juz   ? ' | الجزء ' + juz.number : ''}
+          ${surah ? qcT('qt_surah_n', 'سورة {name}', { name: qcName(surah) }) : ''}
+          ${juz   ? ' | ' + qcT('qt_juz_n', 'الجزء {n}', { n: juz.number }) : ''}
         </div>`;
 
       div.onclick = () => {
@@ -450,7 +465,7 @@ function buildSurahList(surahs) {
   list.innerHTML = '';
 
   if (surahs.length === 0) {
-    list.innerHTML = '<div class="empty-state">لا توجد نتائج</div>';
+    list.innerHTML = '<div class="empty-state">' + qcT('qt_no_results', 'لا توجد نتائج') + '</div>';
     return;
   }
 
@@ -460,8 +475,8 @@ function buildSurahList(surahs) {
     div.className = 'selector-item';
     div.innerHTML = `
       <span class="num-badge">${s.number}</span>
-      <span class="name">سورة ${s.name}</span>
-      <span class="page-tag">ص ${s.page}</span>`;
+      <span class="name">${qcT('qt_surah_n', 'سورة {name}', { name: qcName(s) })}</span>
+      <span class="page-tag">${qcT('qt_page_short', 'ص {n}', { n: s.page })}</span>`;
 
     div.onclick = () => {
       goToPage(s.page);
@@ -475,9 +490,11 @@ function buildSurahList(surahs) {
 function filterSurahs(query) {
   const q = query.trim();
   if (!q) { buildSurahList(SURAH_MAP); return; }
+  const ql = q.toLowerCase();
   const filtered = SURAH_MAP.filter(s =>
     s.name.includes(q) ||
-    s.number.toString().includes(q)
+    s.number.toString().includes(q) ||
+    qcName(s).toLowerCase().includes(ql)   // Latin name in en / tr
   );
   buildSurahList(filtered);
 }
@@ -498,8 +515,8 @@ function openJuzSelector() {
     div.className = 'selector-item';
     div.innerHTML = `
       <span class="num-badge">${j.number}</span>
-      <span class="name">الجزء ${j.number}${surah ? ' — ' + surah.name : ''}</span>
-      <span class="page-tag">ص ${j.page}</span>`;
+      <span class="name">${qcT('qt_juz_n', 'الجزء {n}', { n: j.number })}${surah ? ' — ' + qcName(surah) : ''}</span>
+      <span class="page-tag">${qcT('qt_page_short', 'ص {n}', { n: j.page })}</span>`;
 
     div.onclick = () => {
       goToPage(j.page);
