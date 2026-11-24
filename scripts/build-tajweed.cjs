@@ -8,7 +8,7 @@
 //                          identical to the critical edition (Shamela 581) in abyat
 //                          1–106 and 108, chapter headings from that edition
 //   sharh-*.json           the simple explanation of each bayt (one per bayt)
-//   *-audio.json           recordings («مكتبة قرآني» on archive.org); for the Tuhfa
+//   *-audio.json           recordings («مكتبة قرآني» on archive.org) with their size; for the Tuhfa
 //                          with the published start/end of every bayt
 //
 // Checked: abyat numbered 1…N with both hemistichs, a chapter for each, a sharh
@@ -52,7 +52,8 @@ function build(m) {
   const extra = Object.keys(sharh).filter(k => !(k >= 1 && k <= m.count));
   if (extra.length) errors.push('sharh for unknown abyat: ' + extra.join(', '));
   for (const r of audio.reciters) {
-    if (!/^https:\/\/archive\.org\/download\//.test(r.url)) errors.push(`${r.id}: unexpected audio host`);
+    if (!/^https:\/\/archive\.org\/download\/(qurani-tohfat-alatfal|qurani-matn-al-jazariyyah)\//.test(r.url)) errors.push(`${r.id}: unexpected audio host`);   // sw.js lets these two items bypass it
+    if (!(Number.isInteger(r.size) && r.size > 0)) errors.push(`${r.id}: no file size`);
     if (m.timed) {
       if (!Array.isArray(r.abyat) || r.abyat.length !== m.count) { errors.push(`${r.id}: timings for ${r.abyat && r.abyat.length} abyat`); continue; }
       r.abyat.forEach(([s, e], i) => {
