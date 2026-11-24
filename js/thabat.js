@@ -380,6 +380,7 @@
             <small>${esc(T('th_q_longest', 'أطولها: {n}', { n: daysLabel(qLongest(j)) }))}</small>
           </div>
         </div>
+        <a class="card q-khatma-page" href="khatma.html">${esc(T('th_q_khatma_page', 'خطة الختمة وإحصاءاتها'))}<svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></a>
         <div class="card q-cal">
           <h3>${esc(T('th_q_cal', 'آخر أربعة أسابيع'))}</h3>
           <div class="cal">${days.map(k => `<i class="${Q.log[k] ? 'r' : ''}${k === today ? ' t' : ''}" title="${k}"></i>`).join('')}</div>

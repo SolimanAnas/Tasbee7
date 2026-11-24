@@ -35,6 +35,10 @@ const MUTUN = [
     timed: false },
 ];
 
+// these readers first in the reciter list (the owner's choice), the rest as published
+const FIRST = ['saad_al_ghamdi', 'yasser_salama', 'ahmed_alnafees', 'ayman_swaid'];
+const firstRank = id => { const i = FIRST.indexOf(id); return i < 0 ? FIRST.length : i; };
+
 function build(m) {
   const src = read(`${m.id}-source.json`);
   const sharh = read(`sharh-${m.id}.json`);
@@ -68,7 +72,7 @@ function build(m) {
     v: 1, id: m.id, title: m.title, author: m.author,
     source: src.source, sourceUrl: src.sourceUrl,
     sharhNote: 'شرح مبسّط من إعداد التطبيق للمبتدئين، ' + m.sharhRefs + '. يُراجَع مع شيخٍ متقن، والتلقّي هو الأصل في تعلّم التجويد.',
-    audio: { source: audio.source, timed: m.timed, reciters: audio.reciters },
+    audio: { source: audio.source, timed: m.timed, reciters: audio.reciters.map((r, i) => [r, i]).sort((a, b) => firstRank(a[0].id) - firstRank(b[0].id) || a[1] - b[1]).map(x => x[0]) },
     chapters, abyat,
   };
   return { out, errors };

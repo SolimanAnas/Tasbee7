@@ -30,14 +30,14 @@ test('the download center saves the translation for the app language', async ({ 
   await expect(page.locator('#dlAudio')).toHaveAttribute('onclick', /audio\.html\?download=1/);
 });
 
-test('the khatma card opens the wird, or the form to start one', async ({ page }) => {
+test('the khatma card opens the khatma page; ثبات still opens the wird with ?wird=1', async ({ page }) => {
   await page.goto(`${BASE_URL}/index.html`, { waitUntil: 'load' });
   await page.evaluate(() => localStorage.removeItem('thabat_v1'));
   await page.locator('.feature-card', { has: page.locator('[data-i18n="card_khatma"]') }).click();
-  await page.waitForURL(/thabat\.html\?wird=1/);
-  await expect(page.locator('#formSheet')).toHaveClass(/q-mode/);
+  await page.waitForURL(/khatma\.html/);
+  await expect(page.locator('.kh-setup')).toBeVisible();
 
-  // with a wird, the same link opens its page
+  // with a wird, ?wird=1 opens its page in ثبات
   await page.evaluate(() => localStorage.setItem('thabat_v1', JSON.stringify({ journeys: [{ id: 'jq', name: 'w', kind: 'quran', cover: 'mushaf', created: Date.now(), streaks: [{ start: Date.now(), seen: [] }], quran: { daily: 4, pos: 10, start: 1, khatmat: 0, log: {} } }], settings: {} })));
   await page.goto(`${BASE_URL}/pages/thabat.html?wird=1`, { waitUntil: 'load' });
   await expect(page.locator('#view')).toHaveClass(/qv/);

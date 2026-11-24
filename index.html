@@ -1048,6 +1048,39 @@ body.home-swap .feature-card { animation: cardSwap .34s var(--ease-smooth) backw
 .stat-card { background: var(--surface-raised); border-radius: var(--radius-md); padding: var(--spacing-lg) var(--spacing-md); text-align: center; }
 .stat-num { font-size: 2rem; font-weight: 800; color: var(--primary); line-height: 1; }
 .stat-lbl { font-size: 0.8rem; font-weight: 600; color: var(--on-surface-variant); margin-top: 8px; }
+/* «إنجازاتي»: the chart and the totals (js/achievements.js) */
+#statsSheet .stat-card { padding: var(--spacing-md) var(--spacing-sm); }
+#statsSheet .stat-num { font-size: 1.6rem; }
+.ach-sec { margin-top: var(--spacing-sm); font-size: .82rem; font-weight: 800; color: var(--on-surface-variant); }
+.ach-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-raised); margin-top: 6px; }
+.ach-seg button { padding: 8px 4px; border-radius: 10px; border: 0; background: transparent; color: var(--on-surface-variant); font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+.ach-seg button.on { background: var(--primary); color: var(--on-primary, #fff); }
+.ach-metrics { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.ach-metrics button { padding: 6px 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--on-surface-variant) 35%, transparent); background: transparent; color: var(--on-surface-variant); font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.ach-metrics button.on { border-color: var(--primary); color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.ach-chart { margin-top: 8px; padding: 12px 10px 8px; border-radius: var(--radius-md); background: var(--surface-raised); }
+.ach-read { font-size: .8rem; color: var(--on-surface-variant); min-height: 1.4em; }
+.ach-read b { font-size: 1.15rem; color: var(--on-surface); font-variant-numeric: tabular-nums; }
+.ach-bars { display: flex; align-items: stretch; gap: 3px; height: 130px; margin-top: 8px; padding-bottom: 18px; border-bottom: 1px solid color-mix(in srgb, var(--on-surface-variant) 25%, transparent); }
+.ab { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.ab i { display: block; width: 100%; max-width: 26px; border-radius: 4px 4px 0 0; background: color-mix(in srgb, var(--primary) 55%, transparent); transition: height .35s ease; }
+.ab.today i, .ab.sel i { background: var(--primary); }
+.ab.sel i { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary); }
+.ab small { position: absolute; bottom: -18px; font-size: .6rem; color: var(--on-surface-variant); white-space: nowrap; }
+.ab.today small { color: var(--primary); font-weight: 800; }
+.ach-bars.dense { gap: 2px; }
+.ach-sum, .ach-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.ach-totals { grid-template-columns: repeat(3, 1fr); }
+.ach-sum > div, .ach-totals > div { padding: 10px 4px; border-radius: var(--radius-md); background: var(--surface-raised); text-align: center; min-width: 0; }
+.ach-sum b, .ach-totals b { display: block; font-size: 1.05rem; font-weight: 800; color: var(--on-surface); font-variant-numeric: tabular-nums; }
+.ach-totals b { font-size: 1.2rem; color: var(--primary); }
+.ach-sum span, .ach-totals span { display: block; margin-top: 2px; font-size: .66rem; line-height: 1.3; color: var(--on-surface-variant); }
+.ach-khatma { display: block; margin-top: 8px; padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-raised); color: var(--on-surface); text-decoration: none; }
+.ak-top { display: flex; justify-content: space-between; align-items: center; font-size: .9rem; }
+.ak-top span { font-weight: 800; color: var(--primary); }
+.ak-bar { display: block; height: 7px; border-radius: 99px; margin-top: 8px; background: color-mix(in srgb, var(--primary) 18%, transparent); overflow: hidden; }
+.ak-bar i { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.ach-khatma small { display: block; margin-top: 6px; font-size: .72rem; color: var(--on-surface-variant); }
 
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 10001; opacity: 0; pointer-events: none; transition: opacity var(--ease-smooth); display: flex; align-items: center; justify-content: center; padding: var(--spacing-md); }
@@ -1266,7 +1299,7 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
       <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/ruqyah.webp" alt="" width="192" height="192" decoding="async"></div>
       <div class="fc-text" data-i18n="card_ruqyah">الرقية الشرعية</div>
     </div>
-    <div class="feature-card glass-panel" onclick="go('pages/thabat.html?wird=1')">
+    <div class="feature-card glass-panel" onclick="go('pages/khatma.html')">
       <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/khatma.webp" alt="" width="192" height="192" decoding="async"></div>
       <div class="fc-text" data-i18n="card_khatma">الختمة</div>
       <span class="new-badge" data-i18n="badge_new">جديد</span>
@@ -1492,14 +1525,16 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
 
 <div id="statsSheet" class="bottom-sheet glass-panel">
   <div class="drag-handle-wrap"><div class="drag-handle"></div></div>
-  <div class="sheet-header"><div class="sheet-title" data-i18n="stats_title">إنجازاتي اليومية</div></div>
+  <div class="sheet-header"><div class="sheet-title" data-i18n="nav_achievements">إنجازاتي</div></div>
   <div class="sheet-content">
+    <div class="ach-sec" data-i18n="ach_today_sec">اليوم</div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-num" id="statKhatma">0</div><div class="stat-lbl" data-i18n="stat_pages">صفحة قرآن</div></div>
       <div class="stat-card"><div class="stat-num" id="statAzkar">0</div><div class="stat-lbl" data-i18n="stat_adhkar">أذكار مقروءة</div></div>
       <div class="stat-card"><div class="stat-num" id="statMasbaha">0</div><div class="stat-lbl" data-i18n="stat_tasbihat">تسبيحة</div></div>
       <div class="stat-card"><div class="stat-num" id="statStreak">0</div><div class="stat-lbl" data-i18n="stat_streak">أيام متتالية</div></div>
     </div>
+    <div id="achBody"></div>
     <button class="btn-primary" onclick="if (window.DhikrStats) DhikrStats.share()" data-i18n="ds_share">مشاركة إنجاز الأسبوع</button>
   </div>
 </div>
@@ -1710,6 +1745,8 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
 <script src="js/i18n.js"></script>
 <script src="js/share-card.js"></script>
 <script src="js/dhikr-stats.js"></script>
+<script src="js/wird-core.js"></script>
+<script src="js/achievements.js"></script>
 <script src="js/plugins/capacitor-core.js"></script>
 <script src="js/plugins/capacitor-shim.js"></script>
 <script src="js/plugins/local-notifications.js"></script>
@@ -2251,7 +2288,7 @@ function attachSheetDrag(id) {
   sheet.addEventListener('touchend', te);
 }
 function openSettingsSheet() { document.getElementById('sheetOverlay').classList.add('active'); document.getElementById('settingsSheet').classList.add('active'); attachSheetDrag('settingsSheet'); }
-function openStatsSheet() { updateStats(); document.getElementById('sheetOverlay').classList.add('active'); document.getElementById('statsSheet').classList.add('active'); attachSheetDrag('statsSheet'); }
+function openStatsSheet() { updateStats(); if (window.Achievements) Achievements.render(); document.getElementById('sheetOverlay').classList.add('active'); document.getElementById('statsSheet').classList.add('active'); attachSheetDrag('statsSheet'); }
 function closeAllSheets() {
   document.getElementById('sheetOverlay').classList.remove('active');
   document.querySelectorAll('.bottom-sheet').forEach(s=>{ s.style.transform=''; s.classList.remove('active'); });

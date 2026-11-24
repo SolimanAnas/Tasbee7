@@ -50,6 +50,10 @@ test('a Tuhfa bayt plays from its published start and is followed', async ({ pag
   expect(await page.evaluate(() => TajweedPage.audio.currentTime)).toBeCloseTo(r.abyat[5][0], 1);
   await expect(page.locator('#b-6')).toHaveClass(/playing/);
   await expect(page.locator('#tpInfo')).toContainText('6');
+  // the lock screen shows the bayt, the reader and the app icon
+  const md = await page.evaluate(() => { const m = navigator.mediaSession.metadata; return m && { title: m.title, art: m.artwork.map(a => a.src) }; });
+  expect(md.title).toContain('6');
+  expect(md.art.some(s => s.endsWith('/icons/icon_512.png'))).toBe(true);
 });
 
 test('the reciter sheet lists every recording with its length and size', async ({ page }) => {
