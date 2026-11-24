@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>html{touch-action:manipulation}</style>
+  <meta name="theme-color" content="#0e201b" id="metaThemeColor">
+  <title>تعلم التجويد — تحفة الأطفال والجزرية | زاد المسلم</title>
+  <meta name="description" content="تعلّم التجويد من متني تحفة الأطفال والمقدمة الجزرية: نص موثّق مشكول، وشرح مبسّط لكل بيت، وتلاوة المتن بصوت كبار القراء مع الاستماع بيتًا بيتًا.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/tajweed.html">
+  <meta property="og:title" content="تعلم التجويد | زاد المسلم">
+  <meta property="og:description" content="تحفة الأطفال والجزرية مع شرح مبسّط لكل بيت وتلاوة المتن.">
+  <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/hadith-book.css">
+  <style>
+    /* ---------- matn tabs ---------- */
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .tab { padding: 10px 8px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(230,192,104,.25); color: #fff; font-weight: 800; font-size: .92rem; }
+    .tab small { display: block; font-weight: 500; font-size: .7rem; opacity: .8; }
+    .tab.on { background: #e6c068; color: #13241d; border-color: #e6c068; }
+    .hero-note { font-size: .74rem; opacity: .82; margin-top: 10px; line-height: 1.7; }
+    /* ---------- chapters + options ---------- */
+    .tj-bar { position: sticky; top: calc(max(10px, env(safe-area-inset-top)) + 61px); z-index: 5; margin: 14px -16px 0; padding: 8px 16px 6px;
+      background: linear-gradient(var(--bg) 72%, transparent); }
+    .tj-chaps { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 2px 1px; }
+    .tj-chaps::-webkit-scrollbar { display: none; }
+    .tj-chap { flex: none; padding: 7px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; border: 1px solid var(--border); background: var(--solid); color: var(--text-muted); font-family: 'Amiri', serif; }
+    .tj-chap.on { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    .tj-opts { display: flex; align-items: center; gap: 10px; margin-top: 7px; font-size: .8rem; color: var(--text-muted); }
+    .tj-opts label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .tj-opts input { accent-color: var(--accent); width: 16px; height: 16px; }
+    /* ---------- abyat ---------- */
+    .ch-title { margin: 22px 4px 8px; font-family: 'Amiri', serif; font-size: 1.25rem; color: var(--gold); text-align: center; }
+    .ch-title::before, .ch-title::after { content: '۞'; font-size: .8rem; margin: 0 8px; opacity: .7; }
+    .bayt { position: relative; margin-top: 10px; border-radius: 18px; padding: 12px 14px 12px; background: var(--card-bg); border: 1px solid var(--border); box-shadow: var(--card-shadow); scroll-margin-top: 150px; transition: border-color .25s, box-shadow .25s; }
+    .bayt.playing { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg), var(--card-shadow); }
+    .b-head { display: flex; align-items: center; gap: 8px; }
+    .b-num { min-width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .8rem; color: var(--gold); background: var(--gold-soft); }
+    .b-head .spacer { flex: 1; }
+    .b-play { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent-bg); color: var(--accent); }
+    .b-play svg { width: 15px; height: 15px; fill: currentColor; }
+    .bayt.playing .b-play { background: var(--accent); color: #fff; }
+    .b-text { font-family: 'Amiri', serif; font-size: 1.32rem; line-height: 2.05; text-align: center; margin-top: 4px; color: var(--text); }
+    .b-text .sh { display: block; }
+    @media (min-width: 640px) { .b-text { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } .b-text .sh:first-child { text-align: right; } .b-text .sh:last-child { text-align: left; } }
+    .b-sharh { margin-top: 8px; padding: 9px 12px; border-radius: 12px; background: var(--accent-bg); font-size: .92rem; line-height: 1.85; color: var(--text); }
+    .b-sharh b { color: var(--accent); font-size: .78rem; margin-inline-end: 4px; }
+    body.no-sharh .b-sharh, body.no-sharh .b-dabba { display: none; }
+    .b-dabba { margin-top: 7px; font-size: .86rem; }
+    .b-dabba summary { cursor: pointer; color: var(--gold); font-weight: 700; font-size: .8rem; list-style: none; }
+    .b-dabba summary::-webkit-details-marker { display: none; }
+    .b-dabba summary::before { content: '▸ '; }
+    .b-dabba[open] summary::before { content: '▾ '; }
+    .b-dabba p { margin-top: 6px; line-height: 1.85; color: var(--text-muted); white-space: pre-line; }
+    /* ---------- sources ---------- */
+    .tj-src { margin-top: 24px; border-radius: 18px; padding: 14px 16px; background: var(--card-bg); border: 1px solid var(--border); font-size: .82rem; line-height: 1.85; color: var(--text-muted); }
+    .tj-src h3 { font-size: .9rem; color: var(--gold); margin-bottom: 4px; }
+    .tj-src a { color: var(--accent); word-break: break-word; }
+    .tj-src p + p { margin-top: 6px; }
+    /* ---------- player ---------- */
+    .tj-player { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 30; max-width: 800px; margin: 0 auto;
+      background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 18px;
+      box-shadow: 0 12px 30px -12px rgba(0,0,0,.45); padding: 9px 11px; display: flex; flex-direction: column; gap: 7px; }
+    .tp-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .tp-play { width: 42px; height: 42px; flex: none; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+    .tp-play svg { width: 18px; height: 18px; fill: currentColor; }
+    .tp-btn { width: 36px; height: 36px; flex: none; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text); }
+    .tp-btn svg { width: 15px; height: 15px; fill: currentColor; }
+    .tp-ctrls { display: flex; align-items: center; gap: 6px; direction: ltr; }
+    .tp-info { flex: 1; min-width: 0; font-size: .8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .tp-info small { display: block; font-weight: 500; color: var(--text-muted); }
+    .tp-sel { max-width: 46%; min-width: 0; padding: 7px 8px; border-radius: 11px; border: 1px solid var(--border); background: var(--solid); color: var(--text); font: inherit; font-size: .8rem; }
+    .tp-rep { padding: 6px 9px; border-radius: 11px; border: 1px solid var(--border); background: var(--solid); color: var(--text); font: inherit; font-size: .78rem; }
+    .tp-seek { flex: 1; min-width: 60px; accent-color: var(--accent); }
+    .tp-time { flex: none; white-space: nowrap; font-size: .72rem; color: var(--text-muted); font-variant-numeric: tabular-nums; direction: ltr; }
+    .tj-player [hidden] { display: none !important; }   /* the Jazariyya has no per-bayt timings */
+    main { padding-bottom: 170px; }
+  </style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <div class="toolbar">
+    <a href="../index.html" class="hbtn" aria-label="الرئيسية" title="الرئيسية" data-i18n-aria="home" data-i18n-title="home">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
+    </a>
+    <div class="htitle"><span data-i18n="tj_title">تعلم التجويد</span><small data-i18n="tj_sub">متون التجويد مع شرح مبسّط لكل بيت</small></div>
+    <div class="theme-dock">
+      <button class="dot" data-set="light" style="background:#fbf3df;" onclick="setTheme('light')" aria-label="فاتح" data-i18n-aria="hb_theme_light"></button>
+      <button class="dot" data-set="sepia" style="background:#d9bf8a;" onclick="setTheme('sepia')" aria-label="عسلي" data-i18n-aria="hb_theme_sepia"></button>
+      <button class="dot" data-set="dark" style="background:#0e201b;" onclick="setTheme('dark')" aria-label="داكن" data-i18n-aria="hb_theme_dark"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-kicker" data-i18n="tj_kicker">متون التجويد</div>
+    <h1 id="tjTitle">تحفة الأطفال</h1>
+    <div class="hero-author" id="tjAuthor"></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-matn="tuhfa">تحفة الأطفال<small data-i18n="tj_tuhfa_n">٦١ بيتًا · للمبتدئين</small></button>
+      <button class="tab" role="tab" data-matn="jazariyya">المقدمة الجزرية<small data-i18n="tj_jaz_n">١٠٩ أبيات · للمتقدّمين</small></button>
+    </div>
+    <div class="hero-note" id="tjNote"></div>
+  </section>
+
+  <div class="tj-bar">
+    <div class="tj-chaps" id="tjChaps"></div>
+    <div class="tj-opts">
+      <label><input type="checkbox" id="tjHideSharh"> <span data-i18n="tj_hide_sharh">إخفاء الشرح (للحفظ)</span></label>
+    </div>
+  </div>
+
+  <div id="tjList" aria-live="polite"></div>
+
+  <section class="tj-src" id="tjSrc"></section>
+</main>
+
+<div class="tj-player" id="tjPlayer">
+  <div class="tp-row">
+    <div class="tp-ctrls">
+      <button class="tp-btn" id="tpPrev" aria-label="السابق" data-i18n-aria="tj_prev"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="tp-play" id="tpPlay" aria-label="تشغيل" data-i18n-aria="tj_play"><svg viewBox="0 0 24 24" id="tpIcon"><path d="M7 4v16l13-8z"/></svg></button>
+      <button class="tp-btn" id="tpNext" aria-label="التالي" data-i18n-aria="tj_next"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+    </div>
+    <div class="tp-info" id="tpInfo">—</div>
+    <select class="tp-rep" id="tpRepeat" aria-label="تكرار" data-i18n-aria="tj_repeat"></select>
+  </div>
+  <div class="tp-row">
+    <select class="tp-sel" id="tpReciter" aria-label="القارئ" data-i18n-aria="tj_reciter"></select>
+    <input type="range" class="tp-seek" id="tpSeek" min="0" max="1000" value="0" aria-label="الموضع" data-i18n-aria="tj_position">
+    <span class="tp-time" id="tpTime">0:00</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../js/theme-manager.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/tajweed.js"></script>
+<script src="../js/net-status.js"></script>
+</body>
+</html>

@@ -61,3 +61,18 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
   al-Muyassar (`ar.muyassar`). Tanzil's terms: non-commercial use only (this app is free, with no
   ads or payments); apps using more than three of them link back to https://tanzil.net/trans/ —
   the text mushaf's settings do.
+
+## Tajweed mutun (pages/tajweed.html)
+
+- `data/tajweed/tuhfa.json` — تحفة الأطفال للجمزوري, text and the short notes of Sheikh Ali Muhammad
+  al-Dabba' (d. 1380 AH / 1961), from al-Maktaba al-Shamela, book 9632 (https://shamela.ws/book/9632);
+  checked against the OpenITI copy of the same book (letter for letter except four known readings).
+- `data/tajweed/jazariyya.json` — المقدمة الجزرية, text from the qiraat-api repository
+  (https://github.com/QZTA/qiraat-api, `data/jazariyyah.txt`), identical to the critical edition in
+  al-Maktaba al-Shamela, book 581, whose chapter headings are used.
+- The simple explanation of each bayt was written for the app from the classical commentaries named on
+  the page (al-Dabba', al-Jamzuri's «فتح الأقفال», Ibn al-Nazim's «الحواشي المفهمة», al-Qari's
+  «المنح الفكرية»); it is marked on the page for review with a qualified teacher.
+- Recitations: «مكتبة قرآني» on archive.org (https://archive.org/details/qurani-tohfat-alatfal,
+  https://archive.org/details/qurani-matn-al-jazariyyah), streamed, with the published per-bayt timings
+  of the Tuhfa recordings.
