@@ -940,6 +940,8 @@ export default {
   'vm_to': "Bitiş ayeti",
   'vm_basmala': "Besmele ile başla",
   'vm_reciter': "Kâri",
+  'vm_duration': "Video süresi",
+  'vm_duration_fail': "Süre hesaplanamadı — bağlantını kontrol et",
   'vm_background': "Arka plan",
   'vm_format': "Format",
   'vm_format_story': "Durum / Hikâye",

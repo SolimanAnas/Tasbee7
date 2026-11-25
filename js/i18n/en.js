@@ -968,6 +968,8 @@ export default {
   'vm_to': "To ayah",
   'vm_basmala': "Start with Basmala",
   'vm_reciter': "Reciter",
+  'vm_duration': "Video length",
+  'vm_duration_fail': "Couldn't work out the length — check your connection",
   'vm_background': "Background",
   'vm_format': "Format",
   'vm_format_story': "Status / Story",
