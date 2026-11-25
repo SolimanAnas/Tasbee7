@@ -69,6 +69,15 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
   Arabic and Latin files. All under the SIL Open Font License 1.1; each font's licence is kept
   beside it as `fonts/extra/OFL-<font>.txt`. Declared in `css/tajweed-fonts.css` and served from the
   repo (never from Google Fonts), fetched only when chosen in the page's settings.
+## PDF books (pages/books.html)
+
+- `data/books/risala.json` — 19 books chosen from «رسالة الحرمين» (https://risala.prh.gov.sa), the
+  guidance material of the Presidency of Religious Affairs at the Masjid al-Haram and the Masjid
+  an-Nabawi. Titles, authors and summaries as published there (one author name given in full:
+  ثلاثة الأصول — الشيخ محمد بن عبد الوهاب التميمي, «الشيخ محمد التميمي» on the site). Each PDF
+  was downloaded and checked: a valid PDF whose cover shows that title and author; pages and
+  size measured. The PDFs are downloaded from the publisher's site; `images/books/*.webp` are
+  small copies of the publisher's covers, shown with the source credited on the page.
 
 ## Tajweed mutun (pages/tajweed.html)
 

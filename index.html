@@ -845,6 +845,7 @@ body.home-compact .new-badge { top: -6px; font-size: 0.55rem; padding: 3px 6px; 
 .dl-row.saved .s-desc { color: var(--accent, #10b981); font-weight: 700; }
 .dl-row.busy { opacity: .75; pointer-events: none; }
 #downloadsSheet .dl-storage { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 12px; }
+#downloadsSheet .dl-sec { margin: 14px 4px 6px; font-size: 13px; font-weight: 800; color: var(--text-secondary); }
 [dir="ltr"] .dl-row .dl-go { transform: scaleX(-1); }
 
 /* When the system asks for less transparency, use solid surfaces. */
@@ -1572,6 +1573,17 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
         <div class="s-text">
           <div class="s-title" data-i18n="dl_trans">ترجمة معاني القرآن</div>
           <div class="s-desc" id="dlTransDesc"></div>
+        </div>
+      </div>
+      <span class="dl-go" aria-hidden="true">›</span>
+    </div>
+    <div class="dl-sec" data-i18n="dl_books_sec">تحميل كتب PDF</div>
+    <div class="setting-item dl-row" id="dlBooks" onclick="closeAllSheets(); go('pages/books.html')">
+      <div class="setting-info">
+        <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5C5.5 4.5 8.5 4.6 11 6.4V20c-2.5-1.6-5.5-1.8-8-.6zM21 5.5c-2.5-1-5.5-.9-8 .9V20c2.5-1.6 5.5-1.8 8-.6z"/></svg></div>
+        <div class="s-text">
+          <div class="s-title" data-i18n="dl_books_risala">كتب رسالة الحرمين</div>
+          <div class="s-desc" id="dlBooksDesc">كتب مختارة في العقيدة والصلاة والحج والأذكار، مع المؤلف ونبذة عن كل كتاب</div>
         </div>
       </div>
       <span class="dl-go" aria-hidden="true">›</span>
@@ -2316,6 +2328,15 @@ async function refreshDownloads() {
   try { saved = !!(window.caches && await (await caches.open(DL_TRANS_CACHE)).match(dlTransUrl(id))); } catch (e) { /* no cache storage */ }
   row.classList.toggle('saved', saved);
   desc.textContent = DL_TRANS_NAMES[id] + ' · ' + (saved ? t('dl_saved') : t('dl_tap_to_save'));
+  // books kept for offline reading (pages/books.html)
+  try {
+    const n = window.caches ? (await (await caches.open('quran-offline-books-v1')).keys()).length : 0;
+    // the dictionary may still be loading: never show a raw key
+    const tr = (k, p, ar) => { const v = t(k, p); return v && v !== k ? v : ar; };
+    document.getElementById('dlBooksDesc').textContent = n
+      ? tr('dl_books_saved', { n }, 'الكتب المحفوظة على الجهاز: ' + n)
+      : tr('dl_books_desc', null, 'كتب مختارة في العقيدة والصلاة والحج والأذكار، مع المؤلف ونبذة عن كل كتاب');
+  } catch (e) { /* no cache storage */ }
   const st = document.getElementById('dlStorage');
   try {
     const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null;
