@@ -108,3 +108,44 @@ test('an interrupted play is not reported as a failure', async ({ page }) => {
   await page.waitForTimeout(300);
   await expect(page.locator('#toast')).not.toHaveClass(/show/);
 });
+
+test('settings: the matn and sharh fonts and sizes, served from the repo and kept', async ({ page }) => {
+  const fontHosts = [];
+  page.on('request', r => { if (/fonts\.(googleapis|gstatic)\.com|jsdelivr|unpkg/.test(r.url())) fontHosts.push(r.url()); });
+  const fontFiles = [];
+  page.on('response', r => { if (/\/fonts\/extra\/.+\.woff2$/.test(r.url()) && r.ok()) fontFiles.push(r.url().split('/').pop()); });
+  await page.goto(`${BASE_URL}/pages/tajweed.html?matn=tuhfa`, { waitUntil: 'load' });
+  await expect(page.locator('.bayt')).toHaveCount(61);
+  await page.click('#tjFontBtn');
+  await expect(page.locator('#tjSet')).toBeVisible();
+  await expect(page.locator('#setMatnFonts .font-card')).toHaveCount(9);
+  await expect(page.locator('#setPreview .b-text')).toContainText('يَقُولُ');
+  await page.click('[data-matn-font="Noto Naskh Arabic"]');
+  await page.click('[data-sharh-font="Cairo"]');
+  await page.click('[data-size="matn"][data-d="1"]');
+  await page.click('[data-size="matn"][data-d="1"]');
+  await expect(page.locator('#setMatnSize')).toHaveText('120%');
+  await page.locator('label.set-switch', { has: page.locator('#setDabbaOpen') }).click();
+  await expect(page.locator('#setDabbaOpen')).toBeChecked();
+  const css = () => page.evaluate(() => { const t = getComputedStyle(document.querySelector('#b-6 .b-text')), s = getComputedStyle(document.querySelector('#b-6 .b-sharh')); return [t.fontFamily, parseFloat(t.fontSize), s.fontFamily]; });
+  let [mf, size, sf] = await css();
+  expect(mf).toContain('Noto Naskh Arabic');
+  expect(sf).toContain('Cairo');
+  expect(size).toBeGreaterThan(24);
+  await expect.poll(() => page.evaluate(() => document.fonts.check('20px "Noto Naskh Arabic"', 'نون'))).toBe(true);
+  // kept after a reload
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('.bayt')).toHaveCount(61);
+  [mf, , sf] = await css();
+  expect(mf).toContain('Noto Naskh Arabic');
+  expect(sf).toContain('Cairo');
+  expect(await page.locator('.b-dabba').first().getAttribute('open')).not.toBeNull();
+  // the fonts came from the repo, never a font CDN
+  expect(fontHosts).toEqual([]);
+  expect(fontFiles.some(f => f.startsWith('noto-naskh-arabic-arabic-400'))).toBe(true);
+  // reset
+  await page.click('#tjSetBtn');
+  await page.click('#setReset');
+  [mf] = await css();
+  expect(mf).toContain('Amiri');
+});
