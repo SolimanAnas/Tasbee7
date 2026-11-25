@@ -36,9 +36,16 @@
   const STILL = { z: [1, 1], x: [0, 0], y: [0, 0] };
   const MAX_SLIDES = 10;  // pictures in one slideshow
   const XFADE = 0.9;      // crossfade between slideshow pictures (s)
-  // Warsh audio doesn't match the Hafs text we render, and muallim repeats
-  // every ayah — both would drift from the on-screen text.
-  const STYLES = ['murattal', 'mujawwad'];
+  // All four styles. Checked on everyayah.com for every one of the 6,236 ayat:
+  //  • muallim (Husary): a slower teaching recitation; every ayah is its own file, so the
+  //    text stays right (the video is just longer);
+  //  • warsh (al-Dosary, al-Jazaery): the same ayah numbering as the Hafs text we draw, so
+  //    ayah N sounds under ayah N — but some WORDS differ between the two readings (the page
+  //    says so under the reciter, and the video names the reading).
+  // Left out: Abdul Basit's Warsh — it numbers the ayat the Warsh way (missing and extra
+  // files in dozens of surahs), so its ayah N is not the text's ayah N.
+  const STYLES = ['murattal', 'mujawwad', 'muallim', 'warsh'];
+  const NOT_FOR_VIDEO = new Set(['warsh_basit']);
 
   const GRADIENTS = [
     { stops: ['#04291f', '#0b4d3a', '#06231b'], glow: 'rgba(230,192,104,0.28)' },
@@ -104,6 +111,7 @@
       vm_cat_famous: 'آيات مشهورة', vm_cat_surahs: 'سور قصيرة', vm_cat_duas: 'أدعية قرآنية', vm_cat_comfort: 'طمأنينة وتذكير',
       vm_bg_add: 'أضف صورة أو فيديو من جهازك', vm_bg_add_short: 'إضافة', vm_bg_delete: 'حذف', vm_bg_adding: 'جارٍ إضافة الخلفية...',
       vm_bg_bad: 'تعذّر فتح هذا الملف — اختر صورة أو فيديو', vm_bg_too_big: 'الفيديو كبير جداً — الحد {n} ميغابايت',
+      vm_note_warsh: 'قراءة ورش عن نافع: النص المعروض برواية حفص، وقد تختلف بعض الكلمات بين الروايتين.', vm_note_muallim: 'تلاوة تعليمية بوتيرة أبطأ، فيطول الفيديو.',
       vm_duration: 'مدة الفيديو', vm_duration_fail: 'تعذّر حساب المدة — تحقق من الاتصال',
       vm_bg_max: 'لديك {n} خلفيات خاصة — احذف واحدة أولاً', vm_bg_no_space: 'لا توجد مساحة كافية على الجهاز',
     },
@@ -119,6 +127,7 @@
       vm_cat_famous: 'Famous ayat', vm_cat_surahs: 'Short surahs', vm_cat_duas: 'Quranic duas', vm_cat_comfort: 'Comfort & reminders',
       vm_bg_add: 'Add a picture or video from your device', vm_bg_add_short: 'Add', vm_bg_delete: 'Delete', vm_bg_adding: 'Adding the background…',
       vm_bg_bad: "Couldn't open this file — choose a picture or a video", vm_bg_too_big: 'The video is too large — up to {n} MB',
+      vm_note_warsh: 'Warsh \u2018an Nafi\u2019 reading: the text shown is Hafs, and some words differ between the two readings.', vm_note_muallim: 'A slower, teaching-pace recitation, so the video is longer.',
       vm_duration: 'Video length', vm_duration_fail: "Couldn't work out the length — check your connection",
       vm_bg_max: 'You have {n} backgrounds of your own — delete one first', vm_bg_no_space: 'Not enough storage on this device',
     },
@@ -172,6 +181,8 @@
     return reciters.find(r => r.id === state.reciter) || reciters[0];
   }
   function reciterName(r) { return arabicNames() ? r.name : r.en; }
+  // On the video itself: «إبراهيم الدوسري · ورش» (the reading is named when it isn't plain Hafs murattal)
+  function reciterCaption(r) { return reciterName(r) + (r.style === 'warsh' || r.style === 'muallim' ? ' · ' + tr('takrar_style_' + r.style) : ''); }
   function surahObj() { return surahs[state.surah - 1]; }
   // Undecorated name ("البقرة") from js/surah-map.js — the same list takrar.html shows.
   function surahPlain(s) {
@@ -719,7 +730,7 @@
     }
     c.fillStyle = 'rgba(255,255,255,0.75)';
     c.font = (base * 0.03) + 'px VMTajawal';
-    c.fillText(reciterName(reciterObj()), w / 2, y + base * 0.055);
+    c.fillText(reciterCaption(reciterObj()), w / 2, y + base * 0.055);
     c.restore();
   }
 
@@ -1151,6 +1162,10 @@
     if (s) $('vmSurahLabel').innerHTML = '<span class="item-num">' + s.n + '.</span>' + esc(surahLabel(s));
     const r = reciterObj();
     if (r) $('vmReciterLabel').innerHTML = reciterHtml(r);
+    const note = $('vmReciterNote');
+    const key = r && ({ warsh: 'vm_note_warsh', muallim: 'vm_note_muallim' })[r.style];
+    note.hidden = !key;
+    note.textContent = key ? tr(key) : '';
   }
 
   function renderSurahList() {
@@ -1574,7 +1589,7 @@
     if (window.ThemeManager) ThemeManager.init();
     const i18nReady = window.I18n ? I18n.init() : Promise.resolve();
     loadSettings();
-    reciters = (window.EVERYAYAH_RECITERS || []).filter(r => STYLES.includes(r.style));
+    reciters = (window.EVERYAYAH_RECITERS || []).filter(r => STYLES.includes(r.style) && !NOT_FOR_VIDEO.has(r.id));
     sizeCanvas();
     try {
       await Promise.all([loadQuran(), loadBackgrounds(), i18nReady]);

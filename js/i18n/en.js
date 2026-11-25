@@ -968,6 +968,8 @@ export default {
   'vm_to': "To ayah",
   'vm_basmala': "Start with Basmala",
   'vm_reciter': "Reciter",
+  'vm_note_warsh': "Warsh ‘an Nafi’ reading: the text shown is Hafs, and some words differ between the two readings.",
+  'vm_note_muallim': "A slower, teaching-pace recitation, so the video is longer.",
   'vm_duration': "Video length",
   'vm_duration_fail': "Couldn't work out the length — check your connection",
   'vm_background': "Background",

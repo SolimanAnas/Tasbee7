@@ -940,6 +940,8 @@ export default {
   'vm_to': "Bitiş ayeti",
   'vm_basmala': "Besmele ile başla",
   'vm_reciter': "Kâri",
+  'vm_note_warsh': "Verş an Nâfi‘ kıraati: gösterilen metin Hafs’tır, iki kıraat arasında bazı kelimeler farklıdır.",
+  'vm_note_muallim': "Daha yavaş, öğretim hızında bir tilavet; bu yüzden video uzar.",
   'vm_duration': "Video süresi",
   'vm_duration_fail': "Süre hesaplanamadı — bağlantını kontrol et",
   'vm_background': "Arka plan",

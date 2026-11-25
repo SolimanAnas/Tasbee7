@@ -43,3 +43,31 @@ test('with no connection it says so, and never shows a wrong length', async ({ p
   await expect(page.locator('#vmDurValue')).toContainText('تعذّر');
   await expect(page.locator('#vmSummary')).not.toContainText(/[٠-٩]:[٠-٩]/);   // no length in the chip
 });
+
+test('Warsh and Muallim reciters: listed, noted, and Abdul Basit\'s Warsh (other ayah numbering) left out', async ({ page }) => {
+  await page.route(/everyayah\.com\/data\/.+\.mp3$/, route => route.fulfill({ status: 200, headers: { 'Content-Type': 'audio/wav', 'Access-Control-Allow-Origin': '*' }, body: wav(1.5) }));
+  await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+  await expect(waiting(page)).toHaveCount(0, { timeout: 20000 });
+  await expect(page.locator('#vmReciterNote')).toBeHidden();                    // a plain murattal reciter: no note
+  await page.click('#vmReciterBtn');
+  await expect(page.locator('#vmReciterFilter button')).toHaveText(['الكل', 'مرتل', 'مجوّد', 'معلّم', 'ورش']);
+  // Warsh: the two whose ayah numbering is the text's (not Abdul Basit's, which numbers the ayat the Warsh way)
+  await page.click('#vmReciterFilter [data-style="warsh"]');
+  await expect(page.locator('#vmReciterList .rc-name')).toHaveText(['إبراهيم الدوسري', 'ياسين الجزائري']);
+  await page.locator('#vmReciterList .sheet-item[data-reciter]').first().click();
+  await expect(page.locator('#vmReciterLabel')).toContainText('ورش');
+  await expect(page.locator('#vmReciterNote')).toBeVisible();
+  await expect(page.locator('#vmReciterNote')).toContainText('حفص');             // says the text shown is Hafs
+  await expect(waiting(page)).toHaveCount(0, { timeout: 20000 });
+  await expect(page.locator('#vmDurValue')).toHaveText('٠:١٢');                  // the length follows these reciters too
+  // Muallim
+  await page.click('#vmReciterBtn');
+  await page.click('#vmReciterFilter [data-style="muallim"]');
+  await expect(page.locator('#vmReciterList .sheet-item[data-reciter]')).toHaveCount(1);
+  await page.locator('#vmReciterList .sheet-item[data-reciter]').first().click();
+  await expect(page.locator('#vmReciterNote')).toContainText('أبطأ');
+  // the whole list: 42 as before + Husary Muallim + the two Warsh
+  await page.click('#vmReciterBtn');
+  await page.click('#vmReciterFilter [data-style="all"]');
+  await expect(page.locator('#vmReciterList .sheet-item[data-reciter]')).toHaveCount(45);
+});
