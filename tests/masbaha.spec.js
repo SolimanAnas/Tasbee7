@@ -37,11 +37,14 @@ test.describe('masbaha', () => {
     expect(total).toBeGreaterThanOrEqual(17);
     await expect(page.locator('#dhikrList .dhikr-item')).toHaveCount(total);
     await expect(page.locator('#dhikrList .dhikr-group-label')).toHaveCount(5);
-    // the most used three come first, under their own title
+    // the most used four come first, under their own title, in this order
     await expect(page.locator('#dhikrList .dhikr-group-label').first()).toHaveText('الأكثر استخدامًا');
     await expect(page.locator('#dhikrList .dhikr-title').nth(0)).toHaveText('سبحان الله');
     await expect(page.locator('#dhikrList .dhikr-title').nth(1)).toHaveText('الحمد لله');
-    await expect(page.locator('#dhikrList .dhikr-title').nth(2)).toHaveText('لا إله إلا الله');
+    await expect(page.locator('#dhikrList .dhikr-title').nth(2)).toHaveText('الله أكبر');
+    await expect(page.locator('#dhikrList .dhikr-title').nth(3)).toHaveText('لا إله إلا الله');
+    // الله أكبر appears once: it left «التهليل والتكبير»
+    await expect(page.locator('#dhikrList .dhikr-title', { hasText: /^الله أكبر$/ })).toHaveCount(1);
     await expect(page.locator('#dhikrList .dhikr-item.active')).toHaveCount(1);
 
     // search ignores diacritics and hamza forms
