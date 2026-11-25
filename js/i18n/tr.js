@@ -1769,4 +1769,13 @@ export default {
   "tj_slow": "Bağlantı yavaş mı? Kaydı indirin",
   "tj_pick_reciter": "Okuyucuyu seç ve kaydı indir",
   "card_tajweed": "Tecvid öğren",
+  "nh_title": "Arapça dilbilgisi öğren",
+  "nh_sub": "Metinler, her bölümün sade açıklamasıyla",
+  "nh_kicker": "Sade nahiv",
+  "nh_intro": "Arapça nahvin temellerine dair kısa klasik bir metin; her öğrenci buradan başlar: kelime türleri, i'rab ve alametleri, merfû, mansûb ve mecrûr isimler. Metin harekelidir; her bölümün altında örneklerle sade bir açıklama vardır.",
+  "nh_hide_sharh": "Açıklamayı gizle (ezber için)",
+  "nh_sharh": "Açıklama",
+  "nh_sources": "Kaynak",
+  "nh_error": "Metin yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.",
+  "card_nahw": "Nahiv öğren",
 };

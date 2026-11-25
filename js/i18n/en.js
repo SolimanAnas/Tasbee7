@@ -1797,4 +1797,13 @@ export default {
   "tj_slow": "Slow connection? Save the recording",
   "tj_pick_reciter": "Choose the reader and save the recording",
   "card_tajweed": "Learn Tajweed",
+  "nh_title": "Learn Arabic grammar",
+  "nh_sub": "Texts with a simple explanation of each passage",
+  "nh_kicker": "Simple grammar",
+  "nh_intro": "A short classic text on the foundations of Arabic grammar, where every student begins: the kinds of words, case endings and their signs, and the nouns in the nominative, accusative and genitive. The text is fully vowelled, with a simple explanation and examples under each passage.",
+  "nh_hide_sharh": "Hide the explanation (to memorise)",
+  "nh_sharh": "Explanation",
+  "nh_sources": "Source",
+  "nh_error": "Could not load the text. Check your connection and try again.",
+  "card_nahw": "Learn grammar",
 };

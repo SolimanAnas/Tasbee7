@@ -93,3 +93,12 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 - Recitations: «مكتبة قرآني» on archive.org (https://archive.org/details/qurani-tohfat-alatfal,
   https://archive.org/details/qurani-matn-al-jazariyyah), streamed, with the published per-bayt timings
   of the Tuhfa recordings.
+
+## Grammar mutun (pages/nahw.html)
+
+- `data/nahw/ajurrumiyya.json` — المقدمة الآجرومية لابن آجُرُّوم. The text follows «متن الآجرومية» (دار الصميعي)
+  in al-Maktaba al-Shamela, book 11371 (https://shamela.ws/book/11371), vowelled for the app and checked
+  letter for letter against it (four documented differences, listed in `scripts/build-nahw.cjs`), and against
+  the quotations in «التحفة السنية بشرح المقدمة الآجرومية» of Muhammad Muhyi al-Din Abd al-Hamid.
+- The simple explanation of each passage was written for the app, drawing on that commentary; it is marked on
+  the page for review with a qualified teacher.
