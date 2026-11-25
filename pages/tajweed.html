@@ -20,7 +20,20 @@
     .tab { padding: 10px 8px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(230,192,104,.25); color: #fff; font-weight: 800; font-size: .92rem; }
     .tab small { display: block; font-weight: 500; font-size: .7rem; opacity: .8; }
     .tab.on { background: #e6c068; color: #13241d; border-color: #e6c068; }
-    .hero-note { font-size: .74rem; opacity: .82; margin-top: 10px; line-height: 1.7; }
+    /* the matn card: a gold-framed arch over a mosque at dusk (images/tajweed-hero.webp, 720×1015);
+       the text sits inside the arch, above the scene */
+    .hero.tj-hero { max-width: 460px; margin: 0 auto; aspect-ratio: 720 / 1015; padding: 17% 10% 30%;
+      display: flex; flex-direction: column; justify-content: center;
+      background: url('../images/tajweed-hero.webp') center / 100% 100% no-repeat; border: 0; border-radius: 8.27% / 5.86%; box-shadow: 0 18px 40px -26px rgba(0,0,0,.7); }
+    .hero.tj-hero::after { display: none; }
+    .tj-hero h1 { font-size: 1.85rem; line-height: 1.35; text-shadow: 0 2px 10px rgba(0,0,0,.45); }
+    .tj-hero .hero-author { margin-top: 4px; }
+    .tj-hero .tabs { margin-top: 16px; }
+    .tj-hero .tab { background: rgba(4,30,24,.55); }
+    .tj-hero .tab.on { background: #e6c068; }
+    .tj-hero .tj-continue { align-self: center; }
+    @media (max-width: 360px) { .tj-hero h1 { font-size: 1.5rem; } .hero.tj-hero { padding-inline: 8%; } .tj-hero .tab { font-size: .82rem; padding: 8px 4px; } }
+    .hero-note { max-width: 460px; margin: 10px auto 0; padding: 0 6px; font-size: .74rem; line-height: 1.75; color: var(--text-muted); text-align: center; }
     /* ---------- chapters + options ---------- */
     .tj-bar { position: sticky; top: calc(max(10px, env(safe-area-inset-top)) + 61px); z-index: 5; margin: 14px -16px 0; padding: 8px 16px 6px;
       background: var(--bg); }
@@ -158,7 +171,7 @@
 </header>
 
 <main>
-  <section class="hero">
+  <section class="hero tj-hero">
     <div class="hero-kicker" data-i18n="tj_kicker">متون التجويد</div>
     <h1 id="tjTitle">تحفة الأطفال</h1>
     <div class="hero-author" id="tjAuthor"></div>
@@ -166,9 +179,9 @@
       <button class="tab" role="tab" data-matn="tuhfa">تحفة الأطفال<small data-i18n="tj_tuhfa_n">٦١ بيتًا · للمبتدئين</small></button>
       <button class="tab" role="tab" data-matn="jazariyya">المقدمة الجزرية<small data-i18n="tj_jaz_n">١٠٩ أبيات · للمتقدّمين</small></button>
     </div>
-    <div class="hero-note" id="tjNote"></div>
     <button class="tj-continue" id="tjContinue" hidden></button>
   </section>
+  <p class="hero-note" id="tjNote"></p>
 
   <div class="tj-bar">
     <div class="tj-chaps" id="tjChaps"></div>
