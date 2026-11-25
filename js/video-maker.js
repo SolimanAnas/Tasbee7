@@ -104,6 +104,7 @@
       vm_cat_famous: 'آيات مشهورة', vm_cat_surahs: 'سور قصيرة', vm_cat_duas: 'أدعية قرآنية', vm_cat_comfort: 'طمأنينة وتذكير',
       vm_bg_add: 'أضف صورة أو فيديو من جهازك', vm_bg_add_short: 'إضافة', vm_bg_delete: 'حذف', vm_bg_adding: 'جارٍ إضافة الخلفية...',
       vm_bg_bad: 'تعذّر فتح هذا الملف — اختر صورة أو فيديو', vm_bg_too_big: 'الفيديو كبير جداً — الحد {n} ميغابايت',
+      vm_duration: 'مدة الفيديو', vm_duration_fail: 'تعذّر حساب المدة — تحقق من الاتصال',
       vm_bg_max: 'لديك {n} خلفيات خاصة — احذف واحدة أولاً', vm_bg_no_space: 'لا توجد مساحة كافية على الجهاز',
     },
     en: {
@@ -118,6 +119,7 @@
       vm_cat_famous: 'Famous ayat', vm_cat_surahs: 'Short surahs', vm_cat_duas: 'Quranic duas', vm_cat_comfort: 'Comfort & reminders',
       vm_bg_add: 'Add a picture or video from your device', vm_bg_add_short: 'Add', vm_bg_delete: 'Delete', vm_bg_adding: 'Adding the background…',
       vm_bg_bad: "Couldn't open this file — choose a picture or a video", vm_bg_too_big: 'The video is too large — up to {n} MB',
+      vm_duration: 'Video length', vm_duration_fail: "Couldn't work out the length — check your connection",
       vm_bg_max: 'You have {n} backgrounds of your own — delete one first', vm_bg_no_space: 'Not enough storage on this device',
     },
   };
@@ -433,6 +435,39 @@
     });
     timeline = { key, items, total: t + TAIL };
     return timeline;
+  }
+
+  // ---------- video length ----------
+  // The recitation sets it: each ayah's recording back to back, plus the lead-in and the
+  // tail. Worked out from the real recordings (the timeline the preview and the export
+  // reuse, so they start at once afterwards), a moment after the last change.
+  let durTimer = 0, durFor = '', durTotal = 0;
+  function fmtDur(total) {
+    const sec = Math.max(1, Math.round(total));
+    const s = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    return arabicNames() ? arDigits(s) : s;
+  }
+  function paintDuration(mode) {          // 'wait' | 'ok' | 'fail'
+    const el = $('vmDurValue');
+    el.classList.toggle('wait', mode === 'wait');
+    el.classList.toggle('fail', mode === 'fail');
+    el.textContent = mode === 'ok' ? fmtDur(durTotal) : mode === 'fail' ? tr('vm_duration_fail') : '…';
+    updateSummary();
+  }
+  function updateDuration() {
+    clearTimeout(durTimer);
+    const key = timelineKey();
+    if (timeline && timeline.key === key) { durFor = key; durTotal = timeline.total; paintDuration('ok'); return; }
+    durFor = '';
+    paintDuration('wait');
+    durTimer = setTimeout(async () => {
+      try {
+        const tl = await buildTimeline();
+        if (timelineKey() === key) { durFor = key; durTotal = tl.total; paintDuration('ok'); }
+      } catch {
+        if (timelineKey() === key) paintDuration('fail');
+      }
+    }, 400);
   }
 
   // ---------- rendering ----------
@@ -875,7 +910,8 @@
     const num = n => (arabicNames() ? arDigits(n) : String(n));
     const range = state.from === state.to ? num(state.from) : num(state.from) + '–' + num(state.to);
     const name = arabicNames() ? surahPlain(s) : surahLatin(s);
-    $('vmSummary').textContent = name + ' · ' + range + ' · ' + { story: '9:16', square: '1:1', wide: '16:9' }[state.format];
+    $('vmSummary').textContent = name + ' · ' + range + ' · ' + { story: '9:16', square: '1:1', wide: '16:9' }[state.format] +
+      (durFor && durFor === timelineKey() ? ' · ' + fmtDur(durTotal) : '');
   }
 
   // Locks every control while exporting — a mid-recording change would alter the clip.
@@ -1450,6 +1486,7 @@
     stopPlayback();
     saveSettings();
     updateSummary();
+    updateDuration();
     renderIdle();
   }
 
@@ -1511,7 +1548,7 @@
     if (window.ResizeObserver) new ResizeObserver(layoutStage).observe($('vmStage'));
     else window.addEventListener('resize', layoutStage);
     window.addEventListener('langchange', () => {
-      fillSurahs(); fillReciters(); updatePreviewBtn(); updateSummary(); renderIdle();
+      fillSurahs(); fillReciters(); updatePreviewBtn(); updateSummary(); updateDuration(); renderIdle();
       if (pickSheet === 'Surah') renderSurahList();
       else if (pickSheet === 'Reciter') renderReciterList();
       else if (pickSheet === 'Popular') renderPopularList();
@@ -1567,6 +1604,7 @@
     // webfont is ready, so wait for both faces before the first frame.
     try { await Promise.all([document.fonts.load('40px ' + QFONT), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
     selectBackground(state.bg);
+    updateDuration();          // the length of the saved reciter + ayat, as soon as the page opens
   }
 
   appIcon.onload = () => renderIdle();

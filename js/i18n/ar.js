@@ -968,6 +968,8 @@ export default {
   'vm_to': "إلى آية",
   'vm_basmala': "البدء بالبسملة",
   'vm_reciter': "القارئ",
+  'vm_duration': "مدة الفيديو",
+  'vm_duration_fail': "تعذّر حساب المدة — تحقق من الاتصال",
   'vm_background': "الخلفية",
   'vm_format': "المقاس",
   'vm_format_story': "حالة / ستوري",

@@ -968,6 +968,8 @@ export default {
   'vm_to': "بۆ ئایەتی",
   'vm_basmala': "بە بسم الله دەست پێبکە",
   'vm_reciter': "قورئانخوێن",
+  'vm_duration': "ماوەی ڤیدیۆ",
+  'vm_duration_fail': "ماوەکە هەژمار نەکرا — پەیوەندی بپشکنە",
   'vm_background': "باکگراوند",
   'vm_format': "قەبارە",
   'vm_format_story': "ستۆری",

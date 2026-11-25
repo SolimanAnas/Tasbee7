@@ -940,6 +940,8 @@ export default {
   'vm_to': "آیت تک",
   'vm_basmala': "بسم اللہ سے شروع کریں",
   'vm_reciter': "قاری",
+  'vm_duration': "ویڈیو کی مدت",
+  'vm_duration_fail': "مدت معلوم نہیں ہو سکی — کنکشن چیک کریں",
   'vm_background': "پس منظر",
   'vm_format': "سائز",
   'vm_format_story': "اسٹیٹس / اسٹوری",
