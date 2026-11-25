@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>html{touch-action:manipulation}</style>
+  <meta name="theme-color" content="#0e201b" id="metaThemeColor">
+  <title>كتب رسالة الحرمين — تحميل كتب PDF | زاد المسلم</title>
+  <meta name="description" content="كتب مختارة من «رسالة الحرمين» (رئاسة الشؤون الدينية بالمسجد الحرام والمسجد النبوي) في العقيدة والصلاة والصيام والحج والأذكار: اقرأها أو حمّلها بصيغة PDF واحفظها للقراءة دون اتصال.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://solimananas.github.io/Tasbee7/pages/books.html">
+  <meta property="og:title" content="كتب رسالة الحرمين | زاد المسلم">
+  <meta property="og:description" content="تحميل كتب PDF مختارة من رسالة الحرمين.">
+  <meta property="og:image" content="https://solimananas.github.io/Tasbee7/og-image.png">
+  <link rel="stylesheet" href="../css/fonts.css">
+  <link rel="stylesheet" href="../css/hadith-book.css">
+  <style>
+    .hero.arch .stats { margin-top: 14px; }
+    .bk-all { margin-top: 12px; }
+    .bk-all[hidden] { display: none; }
+    /* ---------- book cards ---------- */
+    .bk-list { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 10px; }
+    @media (min-width: 720px) { .bk-list { grid-template-columns: 1fr 1fr; } }
+    .bk-cat { margin: 22px 4px 0; font-family: 'Amiri', serif; font-size: 1.2rem; color: var(--gold); }
+    .bk-cat small { display: inline-block; vertical-align: middle; min-width: 22px; padding: 1px 7px; margin-inline-start: 8px; border-radius: 999px; background: var(--gold-soft); font-family: 'Tajawal', sans-serif; font-size: .72rem; font-weight: 800; color: var(--gold); text-align: center; }
+    .bk { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 12px; border-radius: 18px; background: var(--card-bg); border: 1px solid var(--border); box-shadow: var(--card-shadow); }
+    .bk.is-saved { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+    .bk-cover { position: relative; width: 92px; aspect-ratio: 240 / 340; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 14px -8px rgba(0,0,0,.5); background: var(--accent-bg); }
+    .bk-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bk-cover .ok { position: absolute; bottom: 5px; inset-inline-start: 5px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--solid); }
+    .bk-cover .ok svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .bk-body { min-width: 0; display: flex; flex-direction: column; }
+    .bk h3 { font-family: 'Amiri', serif; font-size: 1.12rem; line-height: 1.5; color: var(--text); }
+    .bk-author { margin-top: 2px; font-size: .8rem; font-weight: 700; color: var(--accent); }
+    .bk-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; font-size: .72rem; color: var(--text-muted); }
+    .bk-meta span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+    .bk-meta svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .bk-desc { margin-top: 6px; font-size: .82rem; line-height: 1.75; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .bk-desc.open { -webkit-line-clamp: unset; display: block; }
+    .bk-more { align-self: flex-start; margin-top: 2px; font-size: .74rem; font-weight: 700; color: var(--gold); }
+    .bk-acts { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; }
+    .bk-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: .85rem; text-decoration: none;
+      border: 1px solid var(--border); background: var(--solid); color: var(--text); }
+    .bk-btn svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .bk-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .bk-btn.busy { position: relative; color: var(--accent); background: var(--accent-bg); border-color: var(--accent); font-variant-numeric: tabular-nums; }
+    .bk-btn.busy::before { content: ''; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: var(--pct, 0%); background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: inherit; transition: width .2s; }
+    .bk-btn.busy > * { position: relative; }
+    .bk-btn.done { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+    .bk-del { flex: none; width: 42px; min-height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--solid); color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; }
+    .bk-del svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .bk-empty { text-align: center; padding: 30px 10px; color: var(--text-muted); }
+    .bk-src { margin-top: 24px; padding: 14px 16px; border-radius: 18px; background: var(--card-bg); border: 1px solid var(--border); font-size: .8rem; line-height: 1.85; color: var(--text-muted); }
+    .bk-src a { color: var(--accent); word-break: break-word; }
+    .toast { white-space: normal; max-width: calc(100% - 32px); width: max-content; text-align: center; border-radius: 16px; }
+  </style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <div class="toolbar">
+    <a href="../index.html" class="hbtn" aria-label="الرئيسية" title="الرئيسية" data-i18n-aria="home" data-i18n-title="home">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
+    </a>
+    <div class="htitle"><span data-i18n="bk_title">تحميل كتب PDF</span><small data-i18n="bk_sub">اقرأ الكتب أو احفظها للقراءة دون اتصال</small></div>
+    <div class="theme-dock">
+      <button class="dot" data-set="light" style="background:#fbf3df;" onclick="setTheme('light')" aria-label="فاتح" data-i18n-aria="hb_theme_light"></button>
+      <button class="dot" data-set="sepia" style="background:#d9bf8a;" onclick="setTheme('sepia')" aria-label="عسلي" data-i18n-aria="hb_theme_sepia"></button>
+      <button class="dot" data-set="dark" style="background:#0e201b;" onclick="setTheme('dark')" aria-label="داكن" data-i18n-aria="hb_theme_dark"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero arch">
+    <div class="hero-kicker" data-i18n="bk_kicker">مكتبة الكتب</div>
+    <h1 id="bkTitle">كتب رسالة الحرمين</h1>
+    <div class="hero-author" id="bkPublisher">رئاسة الشؤون الدينية بالمسجد الحرام والمسجد النبوي</div>
+    <p class="hero-intro" id="bkIntro"></p>
+    <div class="stats">
+      <div class="stat"><b id="stBooks">–</b><span data-i18n="bk_stat_books">كتابًا</span></div>
+      <div class="stat"><b id="stSaved">–</b><span data-i18n="bk_stat_saved">محفوظ</span></div>
+      <div class="stat"><b id="stSize">–</b><span data-i18n="bk_stat_mb">ميغابايت محفوظة</span></div>
+    </div>
+    <div class="hero-actions">
+      <button class="pill-btn bk-all" id="bkAll"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg><span id="bkAllLabel">حفظ الكل</span></button>
+    </div>
+  </section>
+
+  <div class="controls">
+    <div class="search">
+      <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="bkSearch" placeholder="ابحث عن كتاب أو مؤلف" data-i18n-placeholder="bk_search" aria-label="ابحث عن كتاب أو مؤلف">
+    </div>
+    <div class="chips" id="bkChips" role="tablist"></div>
+  </div>
+
+  <div id="bkBody" aria-live="polite"><div class="bk-empty" data-i18n="bk_loading">جارٍ التحميل…</div></div>
+
+  <section class="bk-src" id="bkSrc"></section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../js/theme-manager.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/books.js"></script>
+<script src="../js/net-status.js"></script>
+</body>
+</html>

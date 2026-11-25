@@ -216,6 +216,8 @@ for (const lang of LANGS) {
 test('t() function handles parameter interpolation', async ({ page }) => {
   await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.I18n && window.I18n.getLang(), { timeout: 5000 });
+  // the language is known before its dictionary has loaded: wait for the strings themselves
+  await page.waitForFunction(() => window.t && window.t('prayer_next') !== 'prayer_next', { timeout: 5000 });
 
   const ar = await page.evaluate(() => {
     return window.t('prayer_next', { name: 'Fajr', time: '5 min' });
@@ -224,7 +226,8 @@ test('t() function handles parameter interpolation', async ({ page }) => {
   expect(ar).toContain('5 min');
 
   await page.evaluate(() => window.I18n.setLang('en'));
-  await page.waitForTimeout(300);
+  // wait for the English dictionary rather than a fixed delay
+  await expect.poll(() => page.evaluate(() => window.t('prayer_next', { name: 'Fajr', time: '5 min' }))).not.toBe(ar);
   const en = await page.evaluate(() => {
     return window.t('prayer_next', { name: 'Fajr', time: '5 min' });
   });
