@@ -1689,7 +1689,6 @@ export default {
   "kh_sub": "Your daily Qur'an wird and progress to completion",
   "kh_win_ok": "Alhamdulillah",
   "kh_ring_label": "{p}% of the khatma",
-  "kh_of_khatma": "of the khatma",
   "kh_goal_end": "Completion date {d} · {l} left",
   "kh_surah": "Surah {s}",
   "kh_pos": "Page {p} · Juz {j}",
