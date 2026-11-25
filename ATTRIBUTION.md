@@ -102,3 +102,6 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
   the quotations in «التحفة السنية بشرح المقدمة الآجرومية» of Muhammad Muhyi al-Din Abd al-Hamid.
 - The simple explanation of each passage was written for the app, drawing on that commentary; it is marked on
   the page for review with a qualified teacher.
+- `data/nahw/kids.json` — «تعلم النحو خطوة خطوة» (pages/nahw-kids.html): lessons, examples, parents' notes and
+  questions written for the app from the standard rules taught in school grammars and the mutun (the Ajurrumiyya
+  and its commentaries). Quranic examples are taken by reference from `data/quran.json`, never retyped.
