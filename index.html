@@ -649,6 +649,10 @@ input, textarea, select {
 }
 /* spacing between stacked sections */
 .grid + .section-title { margin-top: var(--section-gap); }
+/* a card left alone on the last row sits in the middle (e.g. مركز التحميل) */
+.grid > .feature-card:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc((100% - var(--grid-gap)) / 2); }
+body.home-compact .grid > .feature-card:last-child:nth-child(odd) { grid-column: auto; justify-self: stretch; width: auto; }
+body.home-compact .grid > .feature-card:last-child:nth-child(4n+1) { grid-column: 1 / -1; justify-self: center; width: calc((100% - 24px) / 4); }
 
 .grid {
   display: grid;
@@ -1286,11 +1290,6 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
       <div class="fc-text" data-i18n="card_tajweed">تعلم التجويد</div>
       <span class="new-badge" data-i18n="badge_new">جديد</span>
     </div>
-    <div class="feature-card glass-panel" onclick="go('pages/nahw-kids.html')">
-      <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/nahw.webp" alt="" width="192" height="192" decoding="async"></div>
-      <div class="fc-text" data-i18n="card_nahw">تعلم النحو</div>
-      <span class="new-badge" data-i18n="badge_new">جديد</span>
-    </div>
     <!-- تقرير التسميع — hidden for now
     <div class="feature-card glass-panel" onclick="go('pages/tasmee-dashboard.html')">
       <div class="fc-icon-wrap">
@@ -1373,6 +1372,11 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
     <div class="feature-card glass-panel" onclick="go('pages/hadith-viewer.html')">
       <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/hadith.webp" alt="" width="192" height="192" decoding="async"></div>
       <div class="fc-text" data-i18n="card_hadith">موسوعة الحديث</div>
+    </div>
+    <div class="feature-card glass-panel" onclick="go('pages/nahw-kids.html')">
+      <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/nahw.webp" alt="" width="192" height="192" decoding="async"></div>
+      <div class="fc-text" data-i18n="card_nahw">تعلم النحو</div>
+      <span class="new-badge" data-i18n="badge_new">جديد</span>
     </div>
     <div class="feature-card glass-panel" onclick="go('pages/nawawi.html')">
       <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/nawawi.webp" alt="" width="192" height="192" decoding="async"></div>
