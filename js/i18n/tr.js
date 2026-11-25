@@ -1649,7 +1649,6 @@ export default {
   "kh_sub": "Günlük Kur'an virdin ve hatme ilerleyişin",
   "kh_win_ok": "Elhamdülillah",
   "kh_ring_label": "Hatmin %{p}'i",
-  "kh_of_khatma": "hatimden",
   "kh_goal_end": "Hatim tarihi {d} · {l} kaldı",
   "kh_surah": "{s} Suresi",
   "kh_pos": "Sayfa {p} · {j}. cüz",
