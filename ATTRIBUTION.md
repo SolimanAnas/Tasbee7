@@ -62,6 +62,14 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
   ads or payments); apps using more than three of them link back to https://tanzil.net/trans/ —
   the text mushaf's settings do.
 
+## Reading fonts for «تعلم التجويد»
+
+- `fonts/extra/*.woff2` — Cairo, Almarai, IBM Plex Sans Arabic, El Messiri, Noto Naskh Arabic and
+  Markazi Text, from the `@fontsource` npm packages 5.3.0 (Google Fonts builds), regular and bold,
+  Arabic and Latin files. All under the SIL Open Font License 1.1; each font's licence is kept
+  beside it as `fonts/extra/OFL-<font>.txt`. Declared in `css/tajweed-fonts.css` and served from the
+  repo (never from Google Fonts), fetched only when chosen in the page's settings.
+
 ## Tajweed mutun (pages/tajweed.html)
 
 - `data/tajweed/tuhfa.json` — تحفة الأطفال للجمزوري, text and the short notes of Sheikh Ali Muhammad

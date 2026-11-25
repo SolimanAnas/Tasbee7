@@ -41,6 +41,8 @@
     document.querySelectorAll('.theme-dock .dot').forEach(d => d.classList.toggle('active', d.dataset.set === e.detail.theme));
   });
 
+  // the reader's display settings (fonts, sizes, display); see «settings» below
+  let SET = (() => { const d = { matn: 'Amiri', sharh: 'Tajawal', matnSize: 100, sharhSize: 100, dabbaOpen: false, follow: true }; const v = store.get('settings', null); return v && typeof v === 'object' ? Object.assign(d, v) : d; })();
   const cache = {};
   let M = null;                 // the matn on screen
   let matnId = null;
@@ -155,7 +157,7 @@
           ${M.audio.timed ? `<button class="b-play" data-i="${i}" aria-label="${esc(T('tj_play_bayt', 'استمع للبيت {n}', { n: b.n }))}"><svg viewBox="0 0 24 24"><path class="i-play" d="M7 4v16l13-8z"/><path class="i-pause" d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button>` : ''}</div>
         <div class="b-text" lang="ar" dir="rtl"><span class="sh">${esc(b.a)}</span><span class="sh">${esc(b.b)}</span></div>
         <div class="b-sharh" lang="ar" dir="rtl"><b>${esc(T('tj_sharh', 'الشرح:'))}</b>${esc(b.sharh)}</div>
-        ${b.dabba ? `<details class="b-dabba" lang="ar" dir="rtl"><summary>${esc(T('tj_dabba', 'شرح الشيخ الضبّاع'))}</summary>${b.dabba.map(t => `<p>${esc(t)}</p>`).join('')}</details>` : ''}
+        ${b.dabba ? `<details class="b-dabba" lang="ar" dir="rtl"${SET.dabbaOpen ? ' open' : ''}><summary>${esc(T('tj_dabba', 'شرح الشيخ الضبّاع'))}</summary>${b.dabba.map(t => `<p>${esc(t)}</p>`).join('')}</details>` : ''}
         ${M.audio.timed ? '<div class="b-prog"></div>' : ''}
       </article>`;
     });
@@ -246,7 +248,7 @@
     document.querySelectorAll('.bayt.playing').forEach(e => { e.classList.remove('playing'); e.style.removeProperty('--p'); });
     if (i < 0) return;
     const el = $('b-' + M.abyat[i].n);
-    if (el) { el.classList.add('playing'); if (scroll) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (el) { el.classList.add('playing'); if (scroll && SET.follow) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     store.set('last_' + matnId, M.abyat[i].n);
   }
   function info() {
@@ -501,16 +503,81 @@
     const i = Number(p.dataset.i);
     if (i === cur && !audio.paused) audio.pause(); else playBayt(i);
   });
-  $('tjHideSharh').checked = store.get('hideSharh', false);
-  document.body.classList.toggle('no-sharh', $('tjHideSharh').checked);
-  $('tjHideSharh').onchange = () => { const on = $('tjHideSharh').checked; document.body.classList.toggle('no-sharh', on); store.set('hideSharh', on); };
+  function setHideSharh(on) {
+    document.body.classList.toggle('no-sharh', on); store.set('hideSharh', on);
+    $('tjHideSharh').checked = $('setHideSharh').checked = on;
+  }
+  setHideSharh(store.get('hideSharh', false));
+  $('tjHideSharh').onchange = () => setHideSharh($('tjHideSharh').checked);
+  $('setHideSharh').onchange = () => setHideSharh($('setHideSharh').checked);
+
+  // ---------- settings: fonts, sizes, display ----------
+  // Fonts: bundled (fonts/, css/tajweed-fonts.css), fetched only once chosen.
+  // Checked with the vowelled text of both mutun: every character present and the
+  // marks well placed (Reem Kufi and Aref Ruqaa were left out: crowded marks).
+  const MATN_FONTS = [
+    ['Amiri', 'أميري'], ['Scheherazade New', 'شهرزاد'], ['Noto Naskh Arabic', 'نوتو نسخ'], ['Markazi Text', 'مركزي'],
+    ['El Messiri', 'المسيري'], ['IBM Plex Sans Arabic', 'بلكس'], ['Cairo', 'القاهرة'], ['Almarai', 'المراعي'], ['Tajawal', 'تجوال'],
+  ];
+  const SHARH_FONTS = [
+    ['Tajawal', 'تجوال'], ['Cairo', 'القاهرة'], ['Almarai', 'المراعي'], ['IBM Plex Sans Arabic', 'بلكس'],
+    ['El Messiri', 'المسيري'], ['Noto Naskh Arabic', 'نوتو نسخ'], ['Amiri', 'أميري'],
+  ];
+  const fontName = f => (['ar', 'ur', 'ckb'].includes(window.I18n ? I18n.getLang() : 'ar') ? f[1] : f[0].replace(' Arabic', '').replace(' New', '').replace(' Text', ''));
+  const DEF = { matn: 'Amiri', sharh: 'Tajawal', matnSize: 100, sharhSize: 100, dabbaOpen: false, follow: true };
+  function applySettings() {
+    if (!MATN_FONTS.some(f => f[0] === SET.matn)) SET.matn = DEF.matn;      // a font no longer offered
+    if (!SHARH_FONTS.some(f => f[0] === SET.sharh)) SET.sharh = DEF.sharh;
+    const b = document.body.style;
+    // ﷺ and anything a font lacks falls back to Amiri, which has every character of the texts
+    b.setProperty('--matn-font', `'${SET.matn}', 'Amiri', serif`);
+    b.setProperty('--sharh-font', SET.sharh === 'Tajawal' ? "'Tajawal', 'Amiri', sans-serif" : `'${SET.sharh}', 'Amiri', sans-serif`);
+    b.setProperty('--matn-size', (1.32 * SET.matnSize / 100).toFixed(3) + 'rem');
+    b.setProperty('--sharh-size', (0.92 * SET.sharhSize / 100).toFixed(3) + 'rem');
+    store.set('settings', SET);
+  }
+  function paintSettings() {
+    const sample = 'إِنْ تَسْكُنْ';   // short enough for the widest font in a card
+    $('setMatnFonts').innerHTML = MATN_FONTS.map(f => `<button class="font-card${f[0] === SET.matn ? ' on' : ''}" data-matn-font="${esc(f[0])}" aria-pressed="${f[0] === SET.matn}">
+      <span class="fs" lang="ar" dir="rtl" style="font-family:'${esc(f[0])}','Amiri',serif">${sample}</span><small>${esc(fontName(f))}</small></button>`).join('');
+    $('setSharhFonts').innerHTML = SHARH_FONTS.map(f => `<button class="${f[0] === SET.sharh ? 'on' : ''}" data-sharh-font="${esc(f[0])}" aria-pressed="${f[0] === SET.sharh}" style="font-family:'${esc(f[0])}','Amiri',sans-serif">${esc(fontName(f))}</button>`).join('');
+    $('setMatnSize').textContent = SET.matnSize + '%';
+    $('setSharhSize').textContent = SET.sharhSize + '%';
+    $('setDabbaOpen').checked = SET.dabbaOpen;
+    $('setFollow').checked = SET.follow;
+    // the first bayt of the matn on screen, as it will look
+    const b = M ? M.abyat[0] : null;
+    $('setPreview').innerHTML = b ? `<div class="b-text" lang="ar" dir="rtl"><span class="sh">${esc(b.a)}</span><span class="sh">${esc(b.b)}</span></div>
+      <div class="b-sharh" lang="ar" dir="rtl"><b>${esc(T('tj_sharh', 'الشرح:'))}</b>${esc(b.sharh)}</div>` : '';
+  }
+  function openSettings() {
+    paintSettings();
+    $('tjSet').hidden = false;
+    requestAnimationFrame(() => $('tjSet').classList.add('open'));
+  }
+  function closeSettings() { $('tjSet').classList.remove('open'); setTimeout(() => { $('tjSet').hidden = true; }, 220); }
+  $('tjSetBtn').onclick = openSettings;
+  $('tjFontBtn').onclick = openSettings;
+  $('tjSet').addEventListener('click', e => {
+    if (e.target === $('tjSet') || e.target.closest('.sheet-x')) { closeSettings(); return; }
+    const mf = e.target.closest('[data-matn-font]'), sf = e.target.closest('[data-sharh-font]'), sz = e.target.closest('[data-size]');
+    if (mf) SET.matn = mf.dataset.matnFont;
+    else if (sf) SET.sharh = sf.dataset.sharhFont;
+    else if (sz) { const k = sz.dataset.size + 'Size'; SET[k] = Math.max(80, Math.min(170, SET[k] + 10 * Number(sz.dataset.d))); }
+    else if (e.target.closest('#setReset')) { SET = Object.assign({}, DEF); setHideSharh(false); document.querySelectorAll('.b-dabba').forEach(d => { d.open = false; }); }
+    else return;
+    applySettings(); paintSettings();
+  });
+  $('setDabbaOpen').onchange = () => { SET.dabbaOpen = $('setDabbaOpen').checked; applySettings(); document.querySelectorAll('#tjList .b-dabba').forEach(d => { d.open = SET.dabbaOpen; }); };
+  $('setFollow').onchange = () => { SET.follow = $('setFollow').checked; applySettings(); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('tjSet').hidden) closeSettings(); });
 
   function toast(msg, ms) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms || 2600); }
 
   // ?matn=jazariyya opens that matn; otherwise the last one read.
   const want = (() => { try { return new URLSearchParams(location.search).get('matn'); } catch { return null; } })();
   const start = ['tuhfa', 'jazariyya'].includes(want) ? want : store.get('matn', 'tuhfa');
-  const go = () => { paintRepeat(); paintSpeed(); savedReady.then(() => show(['tuhfa', 'jazariyya'].includes(start) ? start : 'tuhfa')); };
+  const go = () => { applySettings(); paintRepeat(); paintSpeed(); savedReady.then(() => show(['tuhfa', 'jazariyya'].includes(start) ? start : 'tuhfa')); };
   if (window.I18n) I18n.init().then(go, go); else go();
   window.addEventListener('langchange', () => location.reload());
   window.TajweedPage = {
