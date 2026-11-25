@@ -16,23 +16,49 @@
   <link rel="stylesheet" href="../css/hadith-book.css">
   <style>
     /* ---------- hero: the khatma ring ---------- */
-    .kh-hero { display: flex; align-items: center; gap: 18px; text-align: start; padding: 20px 18px; }
-    .kh-ring { position: relative; width: 124px; height: 124px; flex: none; }
-    .kh-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .kh-ring circle { fill: none; stroke-width: 9; }
-    .kh-ring .r-bg { stroke: rgba(255,255,255,.12); }
-    .kh-ring .r-fg { stroke: #e6c068; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
-    .kh-ring > span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .kh-ring b { font-size: 1.85rem; line-height: 1; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
-    .kh-ring b i { font-style: normal; font-size: .9rem; color: #e6c068; margin-inline-start: 1px; }
-    .kh-ring small { font-size: .68rem; opacity: .8; margin-top: 3px; }
+    /* the khatma card: the home screen's Quran picture (arch, lantern and Quran; night blue,
+       sky, honey — images/quran-hero-*.webp). The picture holds the start-opposite third
+       (left in RTL, right in LTR: the -ltr copies), the text the open sky beside it. */
+    .hero.kh-hero {
+      --kh-ink: #fff; --kh-sub: rgba(255,255,255,.84); --kh-gold: #E3B85C; --kh-chip: rgba(255,255,255,.1); --kh-track: rgba(255,255,255,.16);
+      display: flex; align-items: center; text-align: start; aspect-ratio: 1000 / 415; min-width: 0; overflow: visible;   /* at least the picture's shape, taller when the text needs it (with overflow hidden, or a min-height, aspect-ratio would clip it or widen the card) */
+      padding: 16px 18px; padding-inline-end: 40%;
+      background: url('../images/quran-hero-dark.webp') left 0 bottom 12% / cover no-repeat, #0b1a3a;
+      border: 1px solid rgba(227,184,92,.35); color: var(--kh-ink);
+      box-shadow: 0 14px 30px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    .hero.kh-hero::after { display: none; }
+    html[dir="ltr"] .hero.kh-hero { background-image: url('../images/quran-hero-dark-ltr.webp'); background-position: right 0 bottom 12%; }
+    [data-theme="light"] .hero.kh-hero {
+      --kh-ink: #10261C; --kh-sub: #3d4a44; --kh-gold: #B8862E; --kh-chip: rgba(255,250,238,.92); --kh-track: rgba(16,38,28,.1);
+      background-color: #f6f3ec; background-image: url('../images/quran-hero-light.webp'); border-color: rgba(255,255,255,.95);
+      box-shadow: 0 14px 28px -14px rgba(20,80,160,.35), inset 0 1px 0 #fff;
+    }
+    html[dir="ltr"] [data-theme="light"] .hero.kh-hero, html[dir="ltr"][data-theme="light"] .hero.kh-hero { background-image: url('../images/quran-hero-light-ltr.webp'); }
+    [data-theme="sepia"] .hero.kh-hero {
+      --kh-ink: #2E1B08; --kh-sub: #5a3e1e; --kh-gold: #8a5a1c; --kh-chip: rgba(255,246,226,.9); --kh-track: rgba(46,27,8,.12);
+      background-color: #e9c99a; background-image: url('../images/quran-hero-sepia.webp'); border-color: rgba(255,240,212,.85);
+      box-shadow: 0 14px 28px -14px rgba(124,82,26,.5), inset 0 1px 0 rgba(255,250,236,.8);
+    }
+    html[dir="ltr"] [data-theme="sepia"] .hero.kh-hero, html[dir="ltr"][data-theme="sepia"] .hero.kh-hero { background-image: url('../images/quran-hero-sepia-ltr.webp'); }
     .kh-hero-txt { min-width: 0; flex: 1; }
-    .kh-hero-txt.solo { text-align: center; }
-    .kh-hero h1 { font-size: 1.75rem; }
-    .kh-when { margin-top: 8px; font-size: .8rem; line-height: 1.6; color: #f3dc9f; }
-    .kh-when.late { color: #fca5a5; }
-    .kh-done-n { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: rgba(230,192,104,.18); color: #f3dc9f; }
-    @media (max-width: 360px) { .kh-ring { width: 104px; height: 104px; } .kh-ring b { font-size: 1.5rem; } .kh-hero h1 { font-size: 1.45rem; } }
+    .kh-hero .hero-kicker { color: var(--kh-gold); }
+    .kh-hero h1 { font-size: 1.7rem; line-height: 1.35; color: var(--kh-ink); }
+    [data-theme="dark"] .kh-hero h1 { text-shadow: 0 2px 10px rgba(0,0,0,.45); }
+    .kh-hero .hero-author { color: var(--kh-sub); opacity: 1; }
+    .kh-when { margin-top: 4px; font-size: .78rem; line-height: 1.6; color: var(--kh-sub); }
+    .kh-when.late { color: #e05a4a; }
+    /* progress: the percentage and a slim gold bar, as on the home card */
+    .kh-ring { display: flex; align-items: center; gap: 9px; margin-top: 9px; }
+    .kh-ring b { flex: none; font-size: 1.45rem; line-height: 1; font-weight: 800; color: var(--kh-ink); font-variant-numeric: tabular-nums; }
+    .kh-ring b i { font-style: normal; font-size: .8rem; color: var(--kh-gold); margin-inline-start: 1px; }
+    .kh-hbar { flex: 1; height: 6px; border-radius: 99px; background: var(--kh-track); overflow: hidden; }
+    .kh-hbar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f3d98a, var(--kh-gold)); transition: width .8s ease; }
+    [dir="rtl"] .kh-hbar i { margin-inline-start: 0; background: linear-gradient(-90deg, #f3d98a, var(--kh-gold)); }
+    .kh-done-n { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; background: var(--kh-chip); border: 1px solid color-mix(in srgb, var(--kh-gold) 55%, transparent); color: var(--kh-ink); }
+    .kh-setup .kh-intro + h2 { margin-top: 0; }
+    .kh-intro { margin-bottom: 14px; font-size: .86rem; line-height: 1.8; color: var(--text-muted); }
+    @media (max-width: 360px) { .hero.kh-hero { padding-inline-end: 36%; } .kh-hero h1 { font-size: 1.4rem; } }
 
     /* ---------- cards ---------- */
     .kh-card { display: block; margin-top: 14px; border-radius: 20px; padding: 16px; background: var(--card-bg); border: 1px solid var(--border); box-shadow: var(--card-shadow); color: var(--text); text-decoration: none; }

@@ -106,21 +106,21 @@
   }
 
   function heroHtml() {
-    const Q = j.quran, pct = (Q.pos - 1) / PAGES, R = 2 * Math.PI * 52, TD = W.today(j);
+    const Q = j.quran, pct = (Q.pos - 1) / PAGES, TD = W.today(j);
     const s = surahAt(Q.pos);
     let when;
     if (Q.goal) when = TD.overdue ? T('th_q_goal_late', 'مضى موعد الهدف — أكمل ما بقي، أو عدّل الهدف')
       : T('kh_goal_end', 'موعد الختم {d} · بقي {l}', { d: fmtDate(Q.goal.end), l: days(TD.daysLeft) });
     else when = T('th_q_eta', 'تتمّها بإذن الله نحو {d}', { d: fmtDate(W.addDays(W.dayKey(), Math.ceil((PAGES - Q.pos + 1) / Math.max(0.5, pace() || W.dailyFor(j))) - 1)) });
+    const p100 = Math.round(pct * 1000) / 10;
     return `
-      <div class="kh-ring" role="img" aria-label="${esc(T('kh_ring_label', '{p}% من الختمة', { p: num(pct * 100) }))}">
-        <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="r-bg"/><circle cx="60" cy="60" r="52" class="r-fg" style="stroke-dasharray:${R};stroke-dashoffset:${R * (1 - pct)}"/></svg>
-        <span><b>${num(pct * 100)}<i>%</i></b><small>${esc(T('kh_of_khatma', 'من الختمة'))}</small></span>
-      </div>
       <div class="kh-hero-txt">
         <div class="hero-kicker">${esc(T('th_q_khatma', 'الختمة {k}', { k: num(Q.khatmat + 1) }))}</div>
         <h1>${esc(T('kh_surah', 'سورة {s}', { s: s.name }))}</h1>
         <div class="hero-author">${esc(T('kh_pos', 'صفحة {p} · الجزء {j}', { p: num(Q.pos), j: num(juzOf(Q.pos)) }))}</div>
+        <div class="kh-ring" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(p100)}" aria-label="${esc(T('kh_ring_label', '{p}% من الختمة', { p: num(pct * 100) }))}">
+          <b>${num(pct * 100)}<i>%</i></b><span class="kh-hbar"><i style="width:${p100}%"></i></span>
+        </div>
         <div class="kh-when ${Q.goal && TD.overdue ? 'late' : ''}">${esc(when)}</div>
         ${Q.khatmat ? `<div class="kh-done-n">${esc(T('th_q_khatmat', 'ختمات أتممتها: {n}', { n: num(Q.khatmat) }))}</div>` : ''}
       </div>`;
@@ -277,15 +277,16 @@
 
   // ---------- start a khatma ----------
   function setupHeroHtml() {
-    return `<div class="kh-hero-txt solo">
+    return `<div class="kh-hero-txt">
         <div class="hero-kicker">${esc(T('kh_title', 'الختمة'))}</div>
         <h1>${esc(T('kh_start_title', 'ابدأ ختمتك'))}</h1>
-        <p class="hero-intro">${esc(T('kh_start_intro', 'اختر مدة الختمة، فيُحسب وردك اليومي ويتعدّل إن تقدّمت أو تأخّرت. يُحفظ الورد في «ثبات»، ويتابعه المصحف صفحةً صفحة.'))}</p>
+        <div class="hero-author">${esc(T('kh_sub', 'وردك اليومي من القرآن وتقدّمك نحو الختم'))}</div>
       </div>`;
   }
   function setupHtml() {
     const lm = lastMushaf();
     return `<section class="kh-card kh-setup">
+        <p class="kh-intro">${esc(T('kh_start_intro', 'اختر مدة الختمة، فيُحسب وردك اليومي ويتعدّل إن تقدّمت أو تأخّرت. يُحفظ الورد في «ثبات»، ويتابعه المصحف صفحةً صفحة.'))}</p>
         <h2>${esc(T('kh_q_days', 'في كم يومًا تختم؟'))}</h2>
         <div class="kh-chips" id="khSetGoal">${GOALS.map(d => `<button data-goal="${d}">${esc(days(d))}</button>`).join('')}
           <button data-goal="0">${esc(T('kh_no_date', 'بلا موعد'))}</button></div>
