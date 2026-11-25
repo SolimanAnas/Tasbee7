@@ -649,6 +649,10 @@ input, textarea, select {
 }
 /* spacing between stacked sections */
 .grid + .section-title { margin-top: var(--section-gap); }
+/* a card left alone on the last row sits in the middle (e.g. مركز التحميل) */
+.grid > .feature-card:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc((100% - var(--grid-gap)) / 2); }
+body.home-compact .grid > .feature-card:last-child:nth-child(odd) { grid-column: auto; justify-self: stretch; width: auto; }
+body.home-compact .grid > .feature-card:last-child:nth-child(4n+1) { grid-column: 1 / -1; justify-self: center; width: calc((100% - 24px) / 4); }
 
 .grid {
   display: grid;
@@ -1369,6 +1373,11 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
       <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/hadith.webp" alt="" width="192" height="192" decoding="async"></div>
       <div class="fc-text" data-i18n="card_hadith">موسوعة الحديث</div>
     </div>
+    <div class="feature-card glass-panel" onclick="go('pages/nahw-kids.html')">
+      <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/nahw.webp" alt="" width="192" height="192" decoding="async"></div>
+      <div class="fc-text" data-i18n="card_nahw">تعلم النحو</div>
+      <span class="new-badge" data-i18n="badge_new">جديد</span>
+    </div>
     <div class="feature-card glass-panel" onclick="go('pages/nawawi.html')">
       <div class="fc-icon-wrap"><img class="home-ic" src="icons/home/nawawi.webp" alt="" width="192" height="192" decoding="async"></div>
       <div class="fc-text" data-i18n="card_nawawi">الأربعون النووية</div>
@@ -1464,14 +1473,6 @@ try { if (localStorage.getItem('homeGridCompact') === '1') document.body.classLi
         </div>
         <div class="s-text"><div class="s-title" data-i18n="setting_howto">طريقة الاستخدام</div></div>
       </div>
-    </div>
-
-    <div class="setting-item" onclick="go('pages/nahw-kids.html'); closeAllSheets();">
-      <div class="setting-info">
-        <div class="s-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V5.5"/><path d="M9 8h7M9 12h5"/></svg></div>
-        <div class="s-text"><div class="s-title" data-i18n="card_nahw">تعلم النحو</div></div>
-      </div>
-      <div class="setting-control"><span style="font-size:1.5rem; color:var(--on-surface-variant);">›</span></div>
     </div>
 
     <div class="setting-item" onclick="openOfflineModal()">
