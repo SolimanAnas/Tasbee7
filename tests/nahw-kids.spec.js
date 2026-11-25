@@ -53,11 +53,11 @@ test('answering every question right gives three stars, remembered on the path',
     const S = D.levels.find(l => l.id === lid).lessons.find(s => s.id === sid);
     await page.goto(`${PAGE}#${lid}/${sid}/q`, { waitUntil: 'load' });
     for (const q of S.quiz) await answer(page, q);
-    await expect(page.locator('#nkResult .rs-stars b')).toHaveCount(3);
+    await expect(page.locator('#nkResult .rs-stars .st.on')).toHaveCount(3);
     await expect(page.locator('#nkResult h2')).toContainText(String(S.quiz.length));
   }
   await page.goto(PAGE, { waitUntil: 'load' });
-  await expect(page.locator('a.ls[href="#l1/anwa"] .stars b')).toHaveCount(3);
+  await expect(page.locator('a.ls[href="#l1/anwa"] .stars .st.on')).toHaveCount(3);
   await expect(page.locator('.nk-stats b').first()).toHaveText(`2/${D.levels.reduce((n, l) => n + l.lessons.length, 0)}`);
 });
 

@@ -37,7 +37,10 @@
   const save = () => store.set('progress', P);
   let inQuiz = false;
 
-  const starsHtml = n => '<span class="stars" aria-label="' + n + '/3">' + [0, 1, 2].map(i => i < n ? '<b>★</b>' : '★').join('') + '</span>';
+  // stars and ticks are drawn as SVG (the app keeps symbol characters out of its pages)
+  const STAR = on => `<svg class="st${on ? ' on' : ''}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>`;
+  const TICK = '<svg class="tk" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17 19 7"/></svg>';
+  const starsHtml = n => '<span class="stars" role="img" aria-label="' + n + '/3">' + [0, 1, 2].map(i => STAR(i < n)).join('') + '</span>';
   const starsFor = pct => pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : pct >= 0.4 ? 1 : 0;
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const isArabicWord = s => /[ً-ْ]/.test(s);   // a vowelled option is shown in the Arabic text face
@@ -87,11 +90,11 @@
       h += `<section class="lv${L.id === openId ? ' open' : ''}" id="lv-${L.id}" style="--lc:${LEVEL_COLORS[li % LEVEL_COLORS.length]}">
         <button class="lv-head" aria-expanded="${L.id === openId}" data-lv="${L.id}"><span class="lv-n">${li + 1}</span>
           <span class="lv-t"><h2>${esc(L.title)}</h2><small>${esc(T('nk_level', 'المستوى {n}', { n: li + 1 }))} · ${esc(L.age)}</small></span>
-          <span class="lv-p">${got}/${ks.length * 3} ★</span>
+          <span class="lv-p">${got}/${ks.length * 3} ${STAR(true)}</span>
           <svg class="lv-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="lv-body"><p class="lv-goal">${esc(L.goal)}</p><div class="lv-bar"><i style="width:${pct}%"></i></div>
           ${L.lessons.map((S, si) => { const n = P.stars[key(L, S)] || 0; return `<a class="ls${n ? ' done' : ''}" href="#${L.id}/${S.id}"><span class="ls-n">${si + 1}</span><span class="ls-t">${esc(S.title)}</span>${starsHtml(n)}</a>`; }).join('')}
-          <a class="ls test" href="#${L.id}/test"><span class="ls-n">✓</span><span class="ls-t">${esc(T('nk_test', 'اختبار المستوى'))}</span>${best != null ? `<span class="ls-best">${esc(T('nk_best', 'أفضل نتيجة {p}٪', { p: best }))}</span>` : ''}</a>
+          <a class="ls test" href="#${L.id}/test"><span class="ls-n">${TICK}</span><span class="ls-t">${esc(T('nk_test', 'اختبار المستوى'))}</span>${best != null ? `<span class="ls-best">${esc(T('nk_best', 'أفضل نتيجة {p}٪', { p: best }))}</span>` : ''}</a>
         </div></section>`;
     });
     h += `<a class="nk-matn" href="nahw.html"><span>${esc(T('nk_matn', 'بعد الدروس: متن الآجرومية مع شرحٍ مبسّط'))}</span> ‹</a>
@@ -208,7 +211,7 @@
       }
       save();
       const msg = n === 3 ? T('nk_great', 'ممتاز! أتقنت هذا الدرس.') : n >= 1 ? T('nk_good', 'جيد! راجع الأمثلة وحاول مرة أخرى لتنال ثلاث نجوم.') : T('nk_try', 'لا بأس، اقرأ القاعدة والأمثلة ثم حاول مرة أخرى.');
-      main.innerHTML = `<div class="rs" id="nkResult"><div class="rs-stars">${[0, 1, 2].map(x => x < n ? '<b>★</b>' : '★').join('')}</div>
+      main.innerHTML = `<div class="rs" id="nkResult"><div class="rs-stars" role="img" aria-label="${n}/3">${[0, 1, 2].map(x => STAR(x < n)).join('')}</div>
         <h2>${esc(T('nk_score', '{s} من {n}', { s: score, n: qs.length }))}</h2><p>${esc(msg)}</p>
         <a class="nk-btn primary" href="${nextHref}">${esc(nextLabel)}</a>
         <button class="nk-btn" id="nkRetry">${esc(T('nk_retry', 'أعد المحاولة'))}</button>
