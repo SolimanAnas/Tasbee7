@@ -547,7 +547,7 @@
       if (!imgReady(img)) return;
       c.save();
       c.globalAlpha = alpha;
-      drawCover(c, img, img.naturalWidth, img.naturalHeight, w, h, cameraAt(local(j), slideMoves[j % slideMoves.length]), true);
+      drawCover(c, img, img.naturalWidth, img.naturalHeight, w, h, cameraAt(local(j), slideMoves[j % slideMoves.length]));
       c.restore();
     };
     c.fillStyle = '#000';
@@ -564,21 +564,16 @@
     } else {
       draw(i, 1);
     }
-    c.fillStyle = 'rgba(0,0,0,0.38)';
-    c.fillRect(0, 0, w, h);
   }
 
-  // Cover-fits an image or video frame at the camera position, then darkens
-  // it so the text stays readable.
-  function drawCover(c, src, sw, sh, w, h, cam, noShade) {
+  // Cover-fits an image or video frame at the camera position. No full-frame
+  // dimming: the text panel and the bottom vignette keep the text readable.
+  function drawCover(c, src, sw, sh, w, h, cam) {
     const scale = Math.max(w / sw, h / sh) * cam.zoom;
     const dw = sw * scale, dh = sh * scale;
     const roomX = Math.min((dw - w) / 2, w * PAN_MAX);
     const roomY = Math.min((dh - h) / 2, h * PAN_MAX);
     c.drawImage(src, (w - dw) / 2 + cam.panX * roomX, (h - dh) / 2 + cam.panY * roomY, dw, dh);
-    if (noShade) return;
-    c.fillStyle = 'rgba(0,0,0,0.38)';
-    c.fillRect(0, 0, w, h);
   }
 
   function drawBackground(c, w, h, progress, t, tl) {
@@ -676,7 +671,7 @@
       const ph = L.lines.length * L.lh + L.size * 0.5;
       c.save();
       c.shadowColor = 'transparent';
-      c.fillStyle = 'rgba(0,0,0,0.38)';
+      c.fillStyle = 'rgba(0,0,0,0.5)';
       c.beginPath();
       const px = (w - pw) / 2, py = cy - ph / 2 + rise, r = L.size * 0.55;
       if (c.roundRect) c.roundRect(px, py, pw, ph, r);
