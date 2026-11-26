@@ -74,8 +74,8 @@ window.TV_TEMPLATES = window.TV_PAINTED.concat([
       { src: 'crown-01', cx: 50, cy: 8.5, w: 54 },
     ],
     ayah: { x: 5, y: 20, w: 90, h: 57, maxLines: 4 },
-    surah: { plate: 'plate-02', cx: 64, cy: 89.5, w: 44, inset: [0.21, 0.2, 0.08, 0.16], color: '#f8e7b5' },
-    reciter: { plate: 'plate-04', cx: 22, cy: 89.5, w: 34, inset: [0.13, 0.22, 0.13, 0.2], color: '#ffffff' },
+    surah: { plate: 'plate-02', cx: 64, cy: 87, w: 44, inset: [0.21, 0.2, 0.08, 0.16], color: '#f8e7b5' },
+    reciter: { plate: 'plate-04', cx: 22, cy: 87, w: 34, inset: [0.13, 0.22, 0.13, 0.2], color: '#ffffff' },
   },
   {
     id: 'parchment',

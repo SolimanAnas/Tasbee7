@@ -173,29 +173,30 @@
       c.restore();
     }
 
+    // App icon + name in the lower right corner: the name, then the icon at the edge.
     function drawBranding(c, w, h) {
       const base = h;
       const size = base * 0.026, icon = base * 0.046, gap = base * 0.012;
-      const x0 = w * 0.022, y = h * 0.055;
+      const right = w * 0.978, y = h * 0.952;
       const hasIcon = ready(api.appIcon);
       c.save();
       c.globalAlpha = 0.85;
       c.font = size + 'px VMTajawal';
       c.direction = 'ltr';
-      c.textAlign = 'left';
+      c.textAlign = 'right';
       c.textBaseline = 'middle';
       c.shadowColor = 'rgba(0,0,0,0.5)';
       c.shadowBlur = 8;
-      let x = x0;
+      let x = right;
       if (hasIcon) {
         c.save();
         c.beginPath();
-        if (c.roundRect) c.roundRect(x, y - icon / 2, icon, icon, icon * 0.22);
-        else c.rect(x, y - icon / 2, icon, icon);
+        if (c.roundRect) c.roundRect(x - icon, y - icon / 2, icon, icon, icon * 0.22);
+        else c.rect(x - icon, y - icon / 2, icon, icon);
         c.clip();
-        c.drawImage(api.appIcon, x, y - icon / 2, icon, icon);
+        c.drawImage(api.appIcon, x - icon, y - icon / 2, icon, icon);
         c.restore();
-        x += icon + gap;
+        x -= icon + gap;
       }
       c.fillStyle = '#fff';
       c.fillText(api.BRAND, x, y);
