@@ -173,23 +173,35 @@
       c.restore();
     }
 
-    // App icon + name in the lower right corner: the name, then the icon at the edge.
-    function drawBranding(c, w, h) {
+    // App icon + name in the lower right corner: the name, then the icon at the edge,
+    // both with an outer glow in the template's own colour.
+    function drawBranding(c, w, h, tpl) {
+      const glow = tpl.glow || '#ffffff';
       const base = h;
       const size = base * 0.026, icon = base * 0.046, gap = base * 0.012;
       const right = w * 0.978, y = h * 0.952;
       const hasIcon = ready(api.appIcon);
       c.save();
-      c.globalAlpha = 0.85;
+      c.globalAlpha = 0.92;
       c.font = size + 'px VMTajawal';
       c.direction = 'ltr';
       c.textAlign = 'right';
       c.textBaseline = 'middle';
-      c.shadowColor = 'rgba(0,0,0,0.5)';
-      c.shadowBlur = 8;
+      c.shadowColor = glow;
+      c.shadowBlur = icon * 0.6;
       let x = right;
       if (hasIcon) {
+        // The glow comes from a rounded square drawn under the icon.
         c.save();
+        c.fillStyle = glow;
+        c.beginPath();
+        if (c.roundRect) c.roundRect(x - icon, y - icon / 2, icon, icon, icon * 0.22);
+        else c.rect(x - icon, y - icon / 2, icon, icon);
+        c.fill();
+        c.fill();
+        c.restore();
+        c.save();
+        c.shadowColor = 'transparent';
         c.beginPath();
         if (c.roundRect) c.roundRect(x - icon, y - icon / 2, icon, icon, icon * 0.22);
         else c.rect(x - icon, y - icon / 2, icon, icon);
@@ -199,6 +211,14 @@
         x -= icon + gap;
       }
       c.fillStyle = '#fff';
+      c.fillText(api.BRAND, x, y);
+      c.fillText(api.BRAND, x, y);   // twice: a stronger glow
+      // A thin dark edge keeps the white name readable on bright floors.
+      c.shadowColor = 'transparent';
+      c.lineJoin = 'round';
+      c.lineWidth = size * 0.12;
+      c.strokeStyle = 'rgba(0,0,0,0.45)';
+      c.strokeText(api.BRAND, x, y);
       c.fillText(api.BRAND, x, y);
       c.restore();
     }
@@ -216,7 +236,7 @@
       // Plates are part of the design, so they stay even with the names turned off.
       drawLabel(c, tpl.surah, S.caption && s ? (ar ? s.name : 'Surah ' + api.surahLatin(s)) : '', ar ? api.qfont() : 'VMTajawal', w, h);
       drawLabel(c, tpl.reciter, S.caption && r ? api.reciterName(r) : '', 'VMTajawal', w, h);
-      if (S.branding) drawBranding(c, w, h);
+      if (S.branding) drawBranding(c, w, h, tpl);
     }
 
     let base = null, baseKey = '';
