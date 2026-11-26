@@ -993,6 +993,8 @@ export default {
   'vm_fx_glow': "درەوشانەوە",
   'vm_fx_shadow': "سێبەر",
   'vm_fx_none': "هیچ",
+  'vm_halo_color': "ڕەنگی درەوشانەوە و سێبەر",
+  'vm_halo_auto': "خۆکار",
   'vm_mode_short': "کورتە / ڕیلز",
   'vm_mode_long': "ڤیدیۆی درێژ",
   'vm_template': "قاڵب",

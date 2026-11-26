@@ -965,6 +965,8 @@ export default {
   'vm_fx_glow': "Parlama",
   'vm_fx_shadow': "Gölge",
   'vm_fx_none': "Yok",
+  'vm_halo_color': "Parlama ve gölge rengi",
+  'vm_halo_auto': "Otomatik",
   'vm_mode_short': "Kısa / Reels",
   'vm_mode_long': "Uzun video",
   'vm_template': "Şablon",

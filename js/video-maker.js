@@ -69,9 +69,10 @@
     branding: true,     // app icon + name at the top
     textPanel: true,    // translucent rounded panel behind the ayah text
     textFx: 'strokeglow', // ayah text effect: strokeglow | glow | shadow | none
+    halo: 'auto',       // colour of that glow / shadow / outline: 'auto' or '#rrggbb'
     basmala: true,
     mode: 'short',      // 'short' = shorts / reels (default), 'long' = 16:9 long video
-    tvTemplate: 'royal', // long mode: template id (js/tv-templates.js)
+    tvTemplate: 'dawn', // long mode: template id (js/tv-templates.js)
     tvBg: 'g1',         // long mode: its own background ('g<i>' or 'i:<file>')
   };
   const isLong = () => state.mode === 'long' && !!long;
@@ -114,6 +115,7 @@
       vm_bg_bad: 'تعذّر فتح هذا الملف — اختر صورة أو فيديو', vm_bg_too_big: 'الفيديو كبير جداً — الحد {n} ميغابايت',
       vm_duration: 'مدة الفيديو', vm_duration_fail: 'تعذّر حساب المدة — تحقق من الاتصال',
       vm_bg_max: 'لديك {n} خلفيات خاصة — احذف واحدة أولاً', vm_bg_no_space: 'لا توجد مساحة كافية على الجهاز',
+      vm_halo_color: 'لون التوهج والظل', vm_halo_auto: 'تلقائي',
       vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
       vm_long_hint: 'كلما زادت الآيات طال وقت الإنشاء وكبر حجم الملف',
       vm_long_progress: 'جارٍ الإنشاء {p}% — الآية {i} من {n}',
@@ -134,6 +136,7 @@
       vm_bg_bad: "Couldn't open this file — choose a picture or a video", vm_bg_too_big: 'The video is too large — up to {n} MB',
       vm_duration: 'Video length', vm_duration_fail: "Couldn't work out the length — check your connection",
       vm_bg_max: 'You have {n} backgrounds of your own — delete one first', vm_bg_no_space: 'Not enough storage on this device',
+      vm_halo_color: 'Glow & shadow color', vm_halo_auto: 'Automatic',
       vm_mode_short: 'Shorts / Reels', vm_mode_long: 'Long video', vm_template: 'Template',
       vm_long_hint: 'More ayat take longer to create and make a bigger file',
       vm_long_progress: 'Creating {p}% — ayah {i} of {n}',
@@ -187,8 +190,9 @@
     state.bgs = state.bgs.filter(id => typeof id === 'string' && id.startsWith('i:')).slice(0, MAX_SLIDES);
     state.multiBg = !!state.multiBg;
     if (!TEXT_FX.includes(state.textFx)) state.textFx = 'strokeglow';
+    if (state.halo !== 'auto' && !/^#[0-9a-f]{6}$/i.test(String(state.halo))) state.halo = 'auto';
     if (state.mode !== 'long') state.mode = 'short';
-    if (!(window.TV_TEMPLATES || []).some(t => t.id === state.tvTemplate)) state.tvTemplate = 'royal';
+    if (!(window.TV_TEMPLATES || []).some(t => t.id === state.tvTemplate)) state.tvTemplate = 'dawn';
     if (typeof state.tvBg !== 'string' || !/^(g\d+|i:.+)$/.test(state.tvBg)) state.tvBg = 'g1';
   }
 
@@ -701,19 +705,28 @@
   }
 
   // One line of ayah text with the chosen effect that keeps it readable on any photo.
-  function fillAyahLine(c, ln, x, y, size) {
+  // Colour of the glow / shadow / outline. 'auto' = black, or white when `light`
+  // (dark text on a pale picture, long mode); otherwise the colour the user picked.
+  function haloRgb(light) {
+    if (state.halo === 'auto') return light ? '255,255,255' : '0,0,0';
+    const n = parseInt(state.halo.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
+  }
+  function fillAyahLine(c, ln, x, y, size, light) {
     const fx = state.textFx;
+    const rgb = haloRgb(light);
+    const halo = a => 'rgba(' + rgb + ',' + a + ')';
     if (fx === 'none') { c.shadowColor = 'transparent'; c.fillText(ln, x, y); return; }
     if (fx === 'shadow') {
-      c.shadowColor = 'rgba(0,0,0,0.65)'; c.shadowBlur = size * 0.3; c.shadowOffsetY = size * 0.04;
+      c.shadowColor = halo(0.65); c.shadowBlur = size * 0.3; c.shadowOffsetY = size * 0.04;
       c.fillText(ln, x, y);
       return;
     }
-    c.shadowColor = fx === 'glow' ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.8)';
+    c.shadowColor = halo(fx === 'glow' ? 0.9 : 0.8);
     c.shadowBlur = size * (fx === 'glow' ? 0.5 : 0.4);
     c.shadowOffsetY = 0;
     if (fx === 'strokeglow') {
-      c.lineJoin = 'round'; c.lineWidth = size * 0.05; c.strokeStyle = 'rgba(0,0,0,0.6)';
+      c.lineJoin = 'round'; c.lineWidth = size * 0.05; c.strokeStyle = halo(0.6);
       c.strokeText(ln, x, y);
       c.fillText(ln, x, y);
     } else {
@@ -1666,8 +1679,8 @@
       b.classList.toggle('active', on);
       b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
-    $('vmStyleNum').textContent = isLong() ? '5' : '4';
     if (isLong()) { long.setBackground(state.tvBg); fillTemplates(); }
+    updateSteps();
     clampRange('from');
     markBackgrounds();
     if (!isLong()) selectBackground(state.bg);
@@ -1687,12 +1700,19 @@
         cv.width = 320; cv.height = 180;
         const label = document.createElement('span');
         b.append(cv, label);
-        b.onclick = () => { state.tvTemplate = t.id; markTemplates(); onChange(); };
+        b.onclick = () => { state.tvTemplate = t.id; markTemplates(); updateSteps(); onChange(); };
         box.appendChild(b);
       });
     }
     markTemplates();
     refreshTemplateThumbs();
+  }
+  // A painted template brings its own picture, so the background step goes away.
+  function updateSteps() {
+    const ownBg = isLong() && !!long.template().background;
+    $('vmBgCard').hidden = ownBg;
+    $('vmBgNum').textContent = isLong() ? '4' : '3';
+    $('vmStyleNum').textContent = !isLong() ? '4' : ownBg ? '4' : '5';
   }
   function markTemplates() {
     document.querySelectorAll('#vmTemplates .tpl-thumb').forEach(b => {
@@ -1732,6 +1752,7 @@
       b.onclick = () => {
         state.textFx = b.dataset.fx;
         document.querySelectorAll('#vmTextFx button').forEach(x => x.classList.toggle('active', x === b));
+        markHalo();
         onChange();
       };
     });
@@ -1761,6 +1782,13 @@
     };
     document.querySelectorAll('#vmColors .swatch').forEach(s => { s.onclick = () => setColor(s.dataset.color); });
     $('vmColor').oninput = () => setColor($('vmColor').value);
+    const setHalo = col => {
+      state.halo = col;
+      markHalo();
+      onChange();
+    };
+    document.querySelectorAll('#vmHalos .swatch').forEach(s => { s.onclick = () => setHalo(s.dataset.halo); });
+    $('vmHalo').oninput = () => setHalo($('vmHalo').value);
     $('vmPreview').onclick = togglePreview;
     // Tapping the video itself plays/stops the preview.
     $('vmStage').onclick = () => { if (!busy) togglePreview(); };
@@ -1788,6 +1816,13 @@
     });
   }
 
+  function markHalo() {
+    document.querySelectorAll('#vmHalos .swatch').forEach(s => s.classList.toggle('active', s.dataset.halo === state.halo));
+    if (state.halo !== 'auto') $('vmHalo').value = state.halo;
+    // No effect, nothing to colour.
+    $('vmHaloField').hidden = state.textFx === 'none';
+  }
+
   function applyStateToControls() {
     $('vmFont').value = state.fontMul;
     $('vmCaption').checked = state.caption;
@@ -1796,6 +1831,7 @@
     document.querySelectorAll('#vmTextFx button').forEach(b => b.classList.toggle('active', b.dataset.fx === state.textFx));
     $('vmBasmala').checked = state.basmala;
     $('vmColor').value = state.color;
+    markHalo();
     document.querySelectorAll('#vmColors .swatch').forEach(s => s.classList.toggle('active', s.dataset.color === state.color));
     document.querySelectorAll('#vmFormat button').forEach(b => b.classList.toggle('active', b.dataset.fmt === state.format));
     $('vmMotion').checked = state.motion;

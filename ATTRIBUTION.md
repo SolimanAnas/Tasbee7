@@ -110,5 +110,5 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 
 - `js/vendor/mp4-muxer.js` — mp4-muxer 5.2.2 by Vanilagy (https://github.com/Vanilagy/mp4-muxer),
   MIT License, unmodified build. Writes the MP4 file from the WebCodecs encoder output.
-- `images/tv-maker/` — ornaments and name plates supplied for the app; the original sheets are kept in
-  `images/tv-maker/source/` and the cut pieces are listed in `images/tv-maker/README.md`.
+- `images/tv-maker/` — painted backgrounds, ornaments and name plates supplied for the app; the original
+  ornament sheets are kept in `images/tv-maker/source/`, and every file is listed in `images/tv-maker/README.md`.

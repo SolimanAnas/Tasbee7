@@ -52,8 +52,12 @@ test('shorts is the default; the long tab is 16:9 with templates and whole-surah
 
   await longTab.click();
   await expect(longTab).toHaveClass(/active/);
-  await expect(page.locator('#vmTemplates .tpl-thumb')).toHaveCount(4);
-  await expect(page.locator('#vmTemplates .tpl-thumb.active')).toHaveAttribute('data-tpl', 'royal');
+  await expect(page.locator('#vmTemplates .tpl-thumb')).toHaveCount(14);
+  await expect(page.locator('#vmTemplates .tpl-thumb.active')).toHaveAttribute('data-tpl', 'dawn');
+  // A painted template brings its own picture: no background step.
+  await expect(page.locator('#vmBgCard')).toBeHidden();
+  await page.locator('#vmTemplates [data-tpl="royal"]').click();
+  await expect(page.locator('#vmBgCard')).toBeVisible();
   await expect(page.locator('#vmFormat')).toBeHidden();
   await expect(page.locator('#vmMotion')).toBeHidden();
   await expect(page.locator('.long-hint')).toBeVisible();
@@ -72,6 +76,7 @@ test('shorts is the default; the long tab is 16:9 with templates and whole-surah
   await page.reload({ waitUntil: 'load' });
   await expect(longTab).toHaveClass(/active/);
   await expect(page.locator('#vmTemplates .tpl-thumb.active')).toHaveAttribute('data-tpl', 'mosque');
+  await expect(page.locator('#vmBgCard')).toBeVisible();
 
   // Back to shorts: the 20-ayah limit applies again, from the same first ayah.
   await shortTab.click();

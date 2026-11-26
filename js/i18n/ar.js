@@ -993,6 +993,8 @@ export default {
   'vm_fx_glow': "توهج",
   'vm_fx_shadow': "ظل",
   'vm_fx_none': "بدون",
+  'vm_halo_color': "لون التوهج والظل",
+  'vm_halo_auto': "تلقائي",
   'vm_mode_short': "مقاطع قصيرة / ريلز",
   'vm_mode_long': "فيديو طويل",
   'vm_template': "القالب",

@@ -449,7 +449,8 @@ body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
 .mode-tabs button:disabled { cursor:default; opacity:.6; }
 .long-hint { display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-secondary); line-height:1.6; margin-top:2px; }
 .long-hint svg { width:16px; height:16px; flex-shrink:0; margin-top:2px; }
-.tpl-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+.tpl-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; max-height:520px; overflow-y:auto; padding:2px; }
+@media (min-width: 880px) { .tpl-grid { grid-template-columns:repeat(3, 1fr); } }
 .tpl-thumb {
   display:flex; flex-direction:column; gap:6px; padding:6px; border-radius:14px; cursor:pointer;
   border:1.5px solid var(--glass-border); background:var(--field-bg); color:var(--text-secondary);
@@ -474,6 +475,10 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
 .custom-color { position:relative; width:32px; height:32px; border-radius:50%; overflow:hidden;
   background:conic-gradient(red, yellow, lime, cyan, blue, magenta, red); border:2px solid rgba(0,0,0,.12); }
 .custom-color input { position:absolute; inset:-8px; width:48px; height:48px; opacity:0; cursor:pointer; }
+/* "Automatic" glow/shadow colour: half dark, half light. */
+.swatch.auto { background:linear-gradient(135deg, #111 0 50%, #fff 50% 100%); position:relative; }
+.swatch.auto::after { content:'A'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font:800 12px/1 system-ui, sans-serif; color:#888; }
 
 /* Fixed action bar */
 .action-bar {
@@ -617,8 +622,13 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
         </div>
       </section>
 
-      <section class="card">
-        <div class="step-head"><span class="step-num">3</span><span class="step-title" data-i18n="vm_background">الخلفية</span></div>
+      <section class="card only-long">
+        <div class="step-head"><span class="step-num">3</span><span class="step-title" data-i18n="vm_template">القالب</span></div>
+        <div class="tpl-grid" id="vmTemplates"></div>
+      </section>
+
+      <section class="card" id="vmBgCard">
+        <div class="step-head"><span class="step-num" id="vmBgNum">3</span><span class="step-title" data-i18n="vm_background">الخلفية</span></div>
         <div class="bg-strip" id="vmBgs"></div>
         <input type="file" id="vmBgFile" accept="image/*,video/*" multiple hidden>
         <div class="bg-private" data-i18n="vm_bg_private">صورك وفيديوهاتك تبقى على جهازك ولا تُرفع إلى أي مكان.</div>
@@ -636,11 +646,6 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
           </span>
           <input type="checkbox" class="switch" id="vmMotion" checked>
         </label>
-      </section>
-
-      <section class="card only-long">
-        <div class="step-head"><span class="step-num">4</span><span class="step-title" data-i18n="vm_template">القالب</span></div>
-        <div class="tpl-grid" id="vmTemplates"></div>
       </section>
 
       <section class="card">
@@ -682,6 +687,20 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
             <button type="button" data-fx="glow" data-i18n="vm_fx_glow">توهج</button>
             <button type="button" data-fx="shadow" data-i18n="vm_fx_shadow">ظل</button>
             <button type="button" data-fx="none" data-i18n="vm_fx_none">بدون</button>
+          </div>
+        </div>
+
+        <div class="field" id="vmHaloField">
+          <div class="label" data-i18n="vm_halo_color">لون التوهج والظل</div>
+          <div class="color-row" id="vmHalos">
+            <button type="button" class="swatch auto active" data-halo="auto" data-i18n-title="vm_halo_auto" title="تلقائي" data-i18n-aria="vm_halo_auto" aria-label="تلقائي"></button>
+            <button type="button" class="swatch" data-halo="#000000" style="background:#000000" aria-label="#000000"></button>
+            <button type="button" class="swatch" data-halo="#ffffff" style="background:#ffffff" aria-label="#ffffff"></button>
+            <button type="button" class="swatch" data-halo="#e6c068" style="background:#e6c068" aria-label="#e6c068"></button>
+            <button type="button" class="swatch" data-halo="#0b2a5b" style="background:#0b2a5b" aria-label="#0b2a5b"></button>
+            <button type="button" class="swatch" data-halo="#0b4d3a" style="background:#0b4d3a" aria-label="#0b4d3a"></button>
+            <button type="button" class="swatch" data-halo="#4a1d5c" style="background:#4a1d5c" aria-label="#4a1d5c"></button>
+            <span class="custom-color" title="Custom"><input type="color" id="vmHalo" value="#000000" aria-label="Custom glow and shadow color"></span>
           </div>
         </div>
 

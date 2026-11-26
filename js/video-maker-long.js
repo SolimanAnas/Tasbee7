@@ -21,6 +21,7 @@
 
   const W = 1920, H = 1080;
   const ORN_DIR = '../images/tv-maker/ornaments/';
+  const BG_DIR = '../images/tv-maker/backgrounds/';
   const FPS = 30;
   const FADE = 0.3;       // text fade out / in at each page change (s)
   const LEAD = 0.6;       // background-only lead-in (s)
@@ -51,13 +52,28 @@
       return img;
     }
     const ready = img => !!img && img.complete && img.naturalWidth > 0;
+    // A painted template's own picture: full size for the preview and the export,
+    // a small copy (thumbs/) for the picker.
+    const painted = new Map();
+    function paintedBg(tpl, small) {
+      const url = BG_DIR + (small ? 'thumbs/' + tpl.background.replace(/\.\w+$/, '.webp') : tpl.background);
+      let img = painted.get(url);
+      if (!img) {
+        img = new Image();
+        img.onload = () => { assetVer++; api.onAsset(); };
+        img.src = url;
+        painted.set(url, img);
+      }
+      return img;
+    }
     // Waits (max 8 s) for the pictures the current template + background need,
     // so an export never opens on a frame without its ornaments.
     function ensureAssets() {
       const tpl = template();
       const names = tpl.overlays.map(o => o.src)
         .concat([tpl.surah.plate, tpl.reciter.plate].filter(Boolean));
-      const imgs = names.map(ornament).concat(bgImg ? [bgImg] : []).filter(img => !ready(img));
+      const own = tpl.background ? [paintedBg(tpl)] : (bgImg ? [bgImg] : []);
+      const imgs = names.map(ornament).concat(own).filter(img => !ready(img));
       if (!imgs.length) return Promise.resolve();
       return Promise.race([
         Promise.all(imgs.map(img => new Promise(res => {
@@ -83,13 +99,20 @@
     }
 
     // ---------- base layer: everything that holds still ----------
-    function drawBg(c, w, h) {
-      if (bgId.startsWith('i:') && ready(bgImg)) {
-        const sw = bgImg.naturalWidth, sh = bgImg.naturalHeight;
-        const k = Math.max(w / sw, h / sh);
-        c.drawImage(bgImg, (w - sw * k) / 2, (h - sh * k) / 2, sw * k, sh * k);
+    function cover(c, img, w, h) {
+      const sw = img.naturalWidth, sh = img.naturalHeight;
+      const k = Math.max(w / sw, h / sh);
+      c.drawImage(img, (w - sw * k) / 2, (h - sh * k) / 2, sw * k, sh * k);
+    }
+    function drawBg(c, w, h, tpl, small) {
+      if (tpl.background) {
+        const img = paintedBg(tpl, small);
+        if (ready(img)) { cover(c, img, w, h); return; }
+        c.fillStyle = '#0b1830';
+        c.fillRect(0, 0, w, h);
         return;
       }
+      if (bgId.startsWith('i:') && ready(bgImg)) { cover(c, bgImg, w, h); return; }
       const g = api.GRADIENTS[parseInt(bgId.slice(1), 10)] || api.GRADIENTS[1];
       const lin = c.createLinearGradient(0, 0, w * 0.3, h);
       g.stops.forEach((col, i) => lin.addColorStop(i / (g.stops.length - 1), col));
@@ -138,7 +161,7 @@
       if (spec.fx !== 'none') {
         c.shadowColor = 'rgba(0,0,0,0.7)';
         c.shadowBlur = size * 0.3;
-        if (!spec.plate) {
+        if (!spec.plate && !spec.baked) {
           // Straight on the background: same thin outline as the ayah text.
           c.lineJoin = 'round';
           c.lineWidth = size * 0.06;
@@ -179,8 +202,8 @@
       c.restore();
     }
 
-    function drawBase(c, w, h, tpl) {
-      drawBg(c, w, h);
+    function drawBase(c, w, h, tpl, small) {
+      drawBg(c, w, h, tpl, small);
       tpl.overlays.forEach(o => {
         const img = ornament(o.src);
         if (!ready(img)) return;
@@ -257,7 +280,10 @@
     function textLayer(seg, pageIdx) {
       const tpl = template();
       const L = pagesFor(seg);
-      const key = [seg.surah, seg.ayah, pageIdx, tpl.id, S.fontMul, S.color, S.textFx, api.qfont()].join('|');
+      const key = [seg.surah, seg.ayah, pageIdx, tpl.id, S.fontMul, S.color, S.textFx, S.halo, api.qfont()].join('|');
+      // Pale painted pictures: white (the default colour) becomes the template's
+      // dark ink with a light halo; any other colour the user picked is kept.
+      const light = !!tpl.ink && S.color.toLowerCase() === '#ffffff';
       let cv = layerCache.get(key);
       if (cv) return cv;
       const a = tpl.ayah;
@@ -271,11 +297,25 @@
       c.direction = 'rtl';
       c.textAlign = 'center';
       c.textBaseline = 'middle';
-      c.fillStyle = S.color;
+      c.fillStyle = light ? tpl.ink : S.color;
       const lines = L.pages[pageIdx];
       const lh = L.size * LH;
       const top = pad + rh / 2 - (lines.length - 1) * lh / 2;
-      lines.forEach((ln, i) => api.fillAyahLine(c, ln, cv.width / 2, top + i * lh, L.size));
+      if (tpl.panel) {
+        // Busy pictures: a soft panel behind just this block of text.
+        const widest = Math.max(...lines.map(ln => c.measureText(ln).width));
+        const pw = Math.min(widest + L.size * 1.2, cv.width - 4);
+        const ph = lines.length * lh + L.size * 0.3;
+        const px = (cv.width - pw) / 2, py = top - lh / 2 - L.size * 0.15;
+        c.save();
+        c.fillStyle = 'rgba(6,24,40,0.5)';
+        c.beginPath();
+        if (c.roundRect) c.roundRect(px, py, pw, ph, L.size * 0.5);
+        else c.rect(px, py, pw, ph);
+        c.fill();
+        c.restore();
+      }
+      lines.forEach((ln, i) => api.fillAyahLine(c, ln, cv.width / 2, top + i * lh, L.size, light));
       cv.pad = pad;
       layerCache.set(key, cv);
       // Only the current and next pages are ever needed.
@@ -336,7 +376,7 @@
       const tpl = templates.find(t => t.id === tplId) || templates[0];
       const w = c.canvas.width, h = c.canvas.height;
       c.clearRect(0, 0, w, h);
-      drawBase(c, w, h, tpl);
+      drawBase(c, w, h, tpl, true);
       const a = tpl.ayah;
       c.fillStyle = 'rgba(255,255,255,0.85)';
       const lh = h * 0.035;

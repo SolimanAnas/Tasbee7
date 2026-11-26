@@ -965,6 +965,8 @@ export default {
   'vm_fx_glow': "چمک",
   'vm_fx_shadow': "سایہ",
   'vm_fx_none': "کوئی نہیں",
+  'vm_halo_color': "چمک اور سائے کا رنگ",
+  'vm_halo_auto': "خودکار",
   'vm_mode_short': "شارٹس / ریلز",
   'vm_mode_long': "لمبی ویڈیو",
   'vm_template': "سانچہ",

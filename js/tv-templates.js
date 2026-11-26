@@ -1,9 +1,11 @@
 // Templates for the long (16:9 TV-style) video mode of pages/video-maker.html.
 //
-// A template is the frame around the recitation: ornaments, the plates that carry
-// the surah and reciter names, and the box the ayah text is fitted into. The
-// background (gradient, picture or the user's own picture) is chosen separately,
-// so every template works over every background.
+// Two kinds:
+//   - Painted templates: a complete 16:9 picture (scenery, arch, lanterns and the two
+//     name plates already painted in). Only the text is drawn: the surah name in the
+//     top plate, the reciter in the bottom plate, the ayah in between.
+//   - Ornament templates: ornaments and plates drawn over a background the user picks
+//     separately (gradient, picture or their own picture).
 //
 // All positions are percentages of the 16:9 frame, so the same template draws the
 // 1920×1080 export, the preview and the small picker thumbnails.
@@ -14,9 +16,47 @@
 //   - Plain labels (no plate): { cx, cy, w, h }.
 //   - ayah: { x, y, w, h } box; `maxLines` caps the lines on screen at once — longer
 //     ayat are split into pages (see js/video-maker.js, long mode).
-// Pictures live in images/tv-maker/ornaments/ (cut from the supplied sheets in
-// images/tv-maker/source/ — see images/tv-maker/README.md).
-window.TV_TEMPLATES = [
+// Pictures live in images/tv-maker/ (see images/tv-maker/README.md): painted
+// backgrounds in backgrounds/, ornaments in ornaments/ (cut from source/).
+(function () {
+  // A painted template from the inside of its two plates, measured on the picture
+  // (left, top, right, bottom in % — found from the plates' gold borders).
+  // The names get the middle of each plate; the ayah gets the open sky between them,
+  // clear of the lanterns and the mushaf stand at the sides.
+  function painted(id, ar, en, file, top, bottom, opts) {
+    const o = opts || {};
+    const label = ([l, t, r, b], color) => ({
+      cx: (l + r) / 2, cy: (t + b) / 2, w: (r - l) * 0.86, h: (b - t) * 0.72,
+      color, baked: true, fx: o.dark ? 'none' : undefined,
+    });
+    const y = top[3] + 3.5, y2 = bottom[1] - 3.5;
+    return {
+      id,
+      name: { ar, en },
+      background: file,
+      overlays: [],
+      ayah: { x: 12, y, w: 76, h: y2 - y, maxLines: 4 },
+      ink: o.ink,           // pale sky: ayah drawn in this dark colour with a light halo
+      panel: !!o.panel,     // busy scenery: soft panel behind the ayah
+      surah: label(top, o.dark ? '#13294b' : '#f8e7b5'),
+      reciter: label(bottom, o.dark ? '#13294b' : '#ffffff'),
+    };
+  }
+  window.TV_PAINTED = [
+    painted('dawn', 'فجر فيروزي', 'Teal dawn', 'bg-01.webp', [36.8, 12.2, 62.8, 21.8], [28.8, 75.1, 71.1, 85.7], { ink: '#0e2442' }),
+    painted('moonlit', 'ليلة مقمرة', 'Moonlit night', 'bg-02.webp', [37.1, 12.3, 62.6, 21.8], [29.5, 75.8, 70.4, 86.0]),
+    painted('ivory', 'عاجي', 'Ivory', 'bg-03.webp', [37.9, 15.1, 61.8, 24.4], [29.8, 75.2, 70.2, 84.0], { dark: true, ink: '#0e2442' }),
+    painted('sunset', 'غروب', 'Sunset', 'bg-04.webp', [36.9, 12.3, 62.8, 21.9], [29.1, 77.4, 71.0, 88.0], { ink: '#0e2442' }),
+    painted('violet', 'ليل بنفسجي', 'Violet night', 'bg-05.jpg', [37.8, 12.5, 62.2, 23.2], [29.2, 75.1, 70.8, 85.2]),
+    painted('greenmist', 'ضباب أخضر', 'Green mist', 'bg-06.webp', [37.6, 12.3, 61.9, 21.7], [29.1, 77.4, 70.6, 87.7], { ink: '#0e2442' }),
+    painted('mistfalls', 'شلال الضباب', 'Misty falls', 'bg-07.webp', [37.6, 12.2, 61.9, 21.7], [29.1, 77.4, 70.7, 87.6], { ink: '#0e2442' }),
+    painted('falls', 'الشلال', 'Waterfall', 'bg-08.webp', [37.7, 12.4, 62.0, 21.8], [29.2, 77.4, 70.7, 87.5], { panel: true }),
+    painted('dayfalls', 'شلال النهار', 'Daylight falls', 'bg-09.webp', [37.7, 12.5, 62.0, 21.9], [29.2, 77.5, 70.7, 87.6], { panel: true }),
+    painted('crescent', 'هلال', 'Crescent', 'bg-10.webp', [37.6, 13.2, 62.4, 23.5], [29.2, 74.7, 70.7, 84.7]),
+  ];
+})();
+
+window.TV_TEMPLATES = window.TV_PAINTED.concat([
   {
     id: 'royal',
     name: { ar: 'أزرق ملكي', en: 'Royal blue' },
@@ -59,4 +99,4 @@ window.TV_TEMPLATES = [
     surah: { cx: 50, cy: 6.5, w: 50, h: 7, color: '#f8e7b5' },
     reciter: { cx: 50, cy: 91.5, w: 50, h: 6, color: '#ffffff' },
   },
-];
+]);

@@ -993,6 +993,8 @@ export default {
   'vm_fx_glow': "Glow",
   'vm_fx_shadow': "Shadow",
   'vm_fx_none': "None",
+  'vm_halo_color': "Glow & shadow color",
+  'vm_halo_auto': "Automatic",
   'vm_mode_short': "Shorts / Reels",
   'vm_mode_long': "Long video",
   'vm_template': "Template",
