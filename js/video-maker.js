@@ -66,6 +66,7 @@
     caption: true,
     branding: true,     // app icon + name at the top
     textPanel: true,    // translucent rounded panel behind the ayah text
+    textFx: 'strokeglow', // ayah text effect: strokeglow | glow | shadow | none
     basmala: true,
   };
 
@@ -155,6 +156,8 @@
     b.classList.toggle('rec', !!rec);
   }
 
+  const TEXT_FX = ['strokeglow', 'glow', 'shadow', 'none'];
+
   function saveSettings() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
   }
@@ -166,6 +169,7 @@
     if (!Array.isArray(state.bgs)) state.bgs = [];
     state.bgs = state.bgs.filter(id => typeof id === 'string' && id.startsWith('i:')).slice(0, MAX_SLIDES);
     state.multiBg = !!state.multiBg;
+    if (!TEXT_FX.includes(state.textFx)) state.textFx = 'strokeglow';
   }
 
   function reciterObj() {
@@ -648,6 +652,29 @@
     return out;
   }
 
+  // One line of ayah text with the chosen effect that keeps it readable on any photo.
+  function fillAyahLine(c, ln, x, y, size) {
+    const fx = state.textFx;
+    if (fx === 'none') { c.shadowColor = 'transparent'; c.fillText(ln, x, y); return; }
+    if (fx === 'shadow') {
+      c.shadowColor = 'rgba(0,0,0,0.65)'; c.shadowBlur = size * 0.3; c.shadowOffsetY = size * 0.04;
+      c.fillText(ln, x, y);
+      return;
+    }
+    c.shadowColor = fx === 'glow' ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.8)';
+    c.shadowBlur = size * (fx === 'glow' ? 0.5 : 0.4);
+    c.shadowOffsetY = 0;
+    if (fx === 'strokeglow') {
+      c.lineJoin = 'round'; c.lineWidth = size * 0.05; c.strokeStyle = 'rgba(0,0,0,0.6)';
+      c.strokeText(ln, x, y);
+      c.fillText(ln, x, y);
+    } else {
+      c.fillText(ln, x, y);
+      c.fillText(ln, x, y);
+    }
+    c.fillText(ln, x, y);
+  }
+
   function drawAyah(c, seg, w, h, alpha) {
     if (alpha <= 0) return;
     const L = layoutText(c, seg, w, h);
@@ -658,9 +685,6 @@
     c.textAlign = 'center';
     c.textBaseline = 'middle';
     c.fillStyle = state.color;
-    c.shadowColor = 'rgba(0,0,0,0.65)';
-    c.shadowBlur = L.size * 0.3;
-    c.shadowOffsetY = L.size * 0.04;
     const cy = h * (state.caption ? 0.46 : 0.5);
     const top = cy - (L.lines.length - 1) * L.lh / 2;
     // Gentle rise as the ayah fades in.
@@ -682,7 +706,7 @@
       c.stroke();
       c.restore();
     }
-    L.lines.forEach((ln, i) => c.fillText(ln, w / 2, top + i * L.lh + rise));
+    L.lines.forEach((ln, i) => fillAyahLine(c, ln, w / 2, top + i * L.lh + rise, L.size));
     c.restore();
   }
 
@@ -1501,6 +1525,13 @@
     $('vmCaption').onchange = () => { state.caption = $('vmCaption').checked; onChange(); };
     $('vmBranding').onchange = () => { state.branding = $('vmBranding').checked; onChange(); };
     $('vmPanel').onchange = () => { state.textPanel = $('vmPanel').checked; onChange(); };
+    document.querySelectorAll('#vmTextFx button').forEach(b => {
+      b.onclick = () => {
+        state.textFx = b.dataset.fx;
+        document.querySelectorAll('#vmTextFx button').forEach(x => x.classList.toggle('active', x === b));
+        onChange();
+      };
+    });
     $('vmMotion').onchange = () => { state.motion = $('vmMotion').checked; onChange(); };
     $('vmBgFile').onchange = e => { addUserFiles(e.target.files); e.target.value = ''; };
     $('vmMultiBg').onchange = () => setMultiBg($('vmMultiBg').checked);
@@ -1555,6 +1586,7 @@
     $('vmCaption').checked = state.caption;
     $('vmBranding').checked = state.branding;
     $('vmPanel').checked = state.textPanel;
+    document.querySelectorAll('#vmTextFx button').forEach(b => b.classList.toggle('active', b.dataset.fx === state.textFx));
     $('vmBasmala').checked = state.basmala;
     $('vmColor').value = state.color;
     document.querySelectorAll('#vmColors .swatch').forEach(s => s.classList.toggle('active', s.dataset.color === state.color));
