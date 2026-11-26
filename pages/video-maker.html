@@ -430,6 +430,34 @@ body.vm-pseudo-fs .action-bar { display:none; }
 .formats.fx { grid-template-columns:repeat(2, 1fr); }
 .formats.fx button { flex-direction:row; justify-content:center; padding:11px 6px; }
 
+/* Shorts / long video tabs (upper toggle). Long mode hides the shorts-only
+   controls and shows its own (template picker, length hint). */
+body.mode-long .only-short, body:not(.mode-long) .only-long { display:none !important; }
+body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
+.mode-tabs {
+  display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:16px;
+  background:var(--glass); border:1px solid var(--glass-border); box-shadow:var(--glass-shadow);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+}
+.mode-tabs button {
+  display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:8px 10px;
+  border:none; border-radius:12px; background:transparent; color:var(--text-secondary);
+  font:inherit; font-size:14px; font-weight:800; cursor:pointer; transition:background .2s, color .2s;
+}
+.mode-tabs button svg { width:18px; height:18px; flex-shrink:0; }
+.mode-tabs button.active { background:var(--accent-main); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.18); }
+.mode-tabs button:disabled { cursor:default; opacity:.6; }
+.long-hint { display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-secondary); line-height:1.6; margin-top:2px; }
+.long-hint svg { width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+.tpl-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+.tpl-thumb {
+  display:flex; flex-direction:column; gap:6px; padding:6px; border-radius:14px; cursor:pointer;
+  border:1.5px solid var(--glass-border); background:var(--field-bg); color:var(--text-secondary);
+  font:inherit; font-size:12.5px; font-weight:700; transition:border-color .2s, color .2s;
+}
+.tpl-thumb canvas { width:100%; aspect-ratio:16 / 9; height:auto; border-radius:9px; display:block; background:#000; }
+.tpl-thumb.active { border-color:var(--accent-main); color:var(--accent-main); background:var(--accent-muted); }
+
 /* Font size slider with small/large glyph hints */
 .range-row { display:flex; align-items:center; gap:10px; }
 .range-row .a-sm { font-size:13px; font-weight:800; color:var(--text-secondary); }
@@ -498,6 +526,17 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
     </button>
   </div>
 
+  <div class="mode-tabs" id="vmModeTabs" role="tablist">
+    <button type="button" role="tab" data-mode="short" class="active" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+      <span data-i18n="vm_mode_short">مقاطع قصيرة / ريلز</span>
+    </button>
+    <button type="button" role="tab" data-mode="long" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8"/></svg>
+      <span data-i18n="vm_mode_long">فيديو طويل</span>
+    </button>
+  </div>
+
   <div class="layout">
     <div class="preview-col">
       <div class="card">
@@ -559,6 +598,10 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
           <span class="sw-text"><span class="sw-title" data-i18n="vm_basmala">البدء بالبسملة</span></span>
           <input type="checkbox" class="switch" id="vmBasmala" checked>
         </label>
+        <div class="long-hint only-long">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span data-i18n="vm_long_hint">كلما زادت الآيات طال وقت الإنشاء وكبر حجم الملف</span>
+        </div>
       </section>
 
       <section class="card">
@@ -579,14 +622,14 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
         <div class="bg-strip" id="vmBgs"></div>
         <input type="file" id="vmBgFile" accept="image/*,video/*" multiple hidden>
         <div class="bg-private" data-i18n="vm_bg_private">صورك وفيديوهاتك تبقى على جهازك ولا تُرفع إلى أي مكان.</div>
-        <label class="switch-row">
+        <label class="switch-row only-short">
           <span class="sw-text">
             <span class="sw-title" data-i18n="vm_multi_bg">عدة صور</span>
             <span class="sw-desc" data-i18n="vm_multi_bg_desc">اختر أكثر من صورة لتتبدّل خلال الفيديو</span>
           </span>
           <input type="checkbox" class="switch" id="vmMultiBg">
         </label>
-        <label class="switch-row">
+        <label class="switch-row only-short">
           <span class="sw-text">
             <span class="sw-title" data-i18n="vm_motion">حركة الخلفية</span>
             <span class="sw-desc" data-i18n="vm_motion_desc">تقريب وتحريك عشوائي للخلفية في كل فيديو</span>
@@ -595,9 +638,14 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
         </label>
       </section>
 
+      <section class="card only-long">
+        <div class="step-head"><span class="step-num">4</span><span class="step-title" data-i18n="vm_template">القالب</span></div>
+        <div class="tpl-grid" id="vmTemplates"></div>
+      </section>
+
       <section class="card">
-        <div class="step-head"><span class="step-num">4</span><span class="step-title" data-i18n="vm_step_style">التنسيق</span></div>
-        <div class="field">
+        <div class="step-head"><span class="step-num" id="vmStyleNum">4</span><span class="step-title" data-i18n="vm_step_style">التنسيق</span></div>
+        <div class="field only-short">
           <div class="label" data-i18n="vm_format">المقاس</div>
           <div class="formats" id="vmFormat">
             <button type="button" data-fmt="story" class="active"><span class="shape"></span><span data-i18n="vm_format_story">حالة / ستوري</span><small>9:16</small></button>
@@ -637,7 +685,7 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
           </div>
         </div>
 
-        <label class="switch-row">
+        <label class="switch-row only-short">
           <span class="sw-text"><span class="sw-title" data-i18n="vm_text_panel">لوحة شفافة خلف الآيات</span></span>
           <input type="checkbox" class="switch" id="vmPanel" checked>
         </label>
@@ -744,6 +792,9 @@ input[type="range"] { width:100%; accent-color:var(--accent-main); }
 <script src="../js/quran-text-source.js"></script>
 <script src="../js/popular-ayat.js"></script>
 <script src="../js/mp4-faststart.js"></script>
+<script src="../js/vendor/mp4-muxer.js"></script>
+<script src="../js/tv-templates.js"></script>
+<script src="../js/video-maker-long.js"></script>
 <script src="../js/video-maker.js"></script>
 <script>
 function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
@@ -753,7 +804,7 @@ function openLanguage() { if (window.I18n) I18n.openLangSheet(); }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 5;
+  var NEED = 6;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab

@@ -1,6 +1,8 @@
 // Quran ayah video maker — draws ayat over a background on a <canvas>, times
 // each ayah to its per-ayah everyayah.com recitation, and records canvas +
 // audio with MediaRecorder into a clip for status / stories / reels.
+// The "long video" tab (16:9, TV-style templates, whole surahs, fast export) lives
+// in js/video-maker-long.js and reuses this file's data, pickers and text drawing.
 (function () {
   'use strict';
 
@@ -68,7 +70,12 @@
     textPanel: true,    // translucent rounded panel behind the ayah text
     textFx: 'strokeglow', // ayah text effect: strokeglow | glow | shadow | none
     basmala: true,
+    mode: 'short',      // 'short' = shorts / reels (default), 'long' = 16:9 long video
+    tvTemplate: 'royal', // long mode: template id (js/tv-templates.js)
+    tvBg: 'g1',         // long mode: its own background ('g<i>' or 'i:<file>')
   };
+  const isLong = () => state.mode === 'long' && !!long;
+  let long = null;        // long-mode engine (js/video-maker-long.js)
 
   let surahs = [];        // [{ n, name, nameEn, ayat: [text...] }]
   let basmalaText = '';
@@ -107,6 +114,11 @@
       vm_bg_bad: 'تعذّر فتح هذا الملف — اختر صورة أو فيديو', vm_bg_too_big: 'الفيديو كبير جداً — الحد {n} ميغابايت',
       vm_duration: 'مدة الفيديو', vm_duration_fail: 'تعذّر حساب المدة — تحقق من الاتصال',
       vm_bg_max: 'لديك {n} خلفيات خاصة — احذف واحدة أولاً', vm_bg_no_space: 'لا توجد مساحة كافية على الجهاز',
+      vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
+      vm_long_hint: 'كلما زادت الآيات طال وقت الإنشاء وكبر حجم الملف',
+      vm_long_progress: 'جارٍ الإنشاء {p}% — الآية {i} من {n}',
+      vm_long_slow: 'متصفحك لا يدعم الإنشاء السريع — سيستغرق الإنشاء مدة الفيديو نفسها، أبقِ الشاشة مفتوحة',
+      vm_err_encode: 'تعذّر إنشاء الفيديو — حاول مرة أخرى',
     },
     en: {
       vm_title: 'Ayah Video Maker', vm_preview: 'Preview', vm_stop: 'Stop', vm_done: 'Video ready',
@@ -122,6 +134,11 @@
       vm_bg_bad: "Couldn't open this file — choose a picture or a video", vm_bg_too_big: 'The video is too large — up to {n} MB',
       vm_duration: 'Video length', vm_duration_fail: "Couldn't work out the length — check your connection",
       vm_bg_max: 'You have {n} backgrounds of your own — delete one first', vm_bg_no_space: 'Not enough storage on this device',
+      vm_mode_short: 'Shorts / Reels', vm_mode_long: 'Long video', vm_template: 'Template',
+      vm_long_hint: 'More ayat take longer to create and make a bigger file',
+      vm_long_progress: 'Creating {p}% — ayah {i} of {n}',
+      vm_long_slow: "Your browser can't use fast export — creating takes as long as the video itself; keep this screen open",
+      vm_err_encode: "Couldn't create the video — please try again",
     },
   };
   function tr(k, p) {
@@ -170,6 +187,9 @@
     state.bgs = state.bgs.filter(id => typeof id === 'string' && id.startsWith('i:')).slice(0, MAX_SLIDES);
     state.multiBg = !!state.multiBg;
     if (!TEXT_FX.includes(state.textFx)) state.textFx = 'strokeglow';
+    if (state.mode !== 'long') state.mode = 'short';
+    if (!(window.TV_TEMPLATES || []).some(t => t.id === state.tvTemplate)) state.tvTemplate = 'royal';
+    if (typeof state.tvBg !== 'string' || !/^(g\d+|i:.+)$/.test(state.tvBg)) state.tvBg = 'g1';
   }
 
   function reciterObj() {
@@ -376,6 +396,7 @@
     const before = state.bgs.length;
     state.bgs = state.bgs.filter(id => !ids.includes(id));
     fillBackgrounds();
+    if (ids.includes(state.tvBg)) { state.tvBg = 'g1'; if (long) long.setBackground('g1'); renderIdle(); }
     if (ids.includes(state.bg)) selectBackground('g0');
     else markBackgrounds();
     if (state.bgs.length !== before) onChange(); else saveSettings();
@@ -448,18 +469,22 @@
   let durTimer = 0, durFor = '', durTotal = 0;
   function fmtDur(total) {
     const sec = Math.max(1, Math.round(total));
-    const s = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    const mm = Math.floor(sec / 60), ss = String(sec % 60).padStart(2, '0');
+    const s = mm >= 60 ? Math.floor(mm / 60) + ':' + String(mm % 60).padStart(2, '0') + ':' + ss : mm + ':' + ss;
     return arabicNames() ? arDigits(s) : s;
   }
   function paintDuration(mode) {          // 'wait' | 'ok' | 'fail'
     const el = $('vmDurValue');
     el.classList.toggle('wait', mode === 'wait');
     el.classList.toggle('fail', mode === 'fail');
-    el.textContent = mode === 'ok' ? fmtDur(durTotal) : mode === 'fail' ? tr('vm_duration_fail') : '…';
+    el.textContent = mode === 'ok' ? (durApprox ? '≈ ' : '') + fmtDur(durTotal) : mode === 'fail' ? tr('vm_duration_fail') : '…';
     updateSummary();
   }
+  let durApprox = false;   // long mode shows an estimate (file sizes), not decoded lengths
   function updateDuration() {
     clearTimeout(durTimer);
+    if (isLong()) { updateLongDuration(); return; }
+    durApprox = false;
     const key = timelineKey();
     if (timeline && timeline.key === key) { durFor = key; durTotal = timeline.total; paintDuration('ok'); return; }
     durFor = '';
@@ -470,6 +495,23 @@
         if (timelineKey() === key) { durFor = key; durTotal = tl.total; paintDuration('ok'); }
       } catch {
         if (timelineKey() === key) paintDuration('fail');
+      }
+    }, 400);
+  }
+
+  function updateLongDuration() {
+    const key = 'L|' + timelineKey();
+    durFor = '';
+    durApprox = true;
+    paintDuration('wait');
+    durTimer = setTimeout(async () => {
+      try {
+        const total = await long.estimate(() => 'L|' + timelineKey() !== key || !isLong());
+        if ('L|' + timelineKey() !== key || !isLong()) return;
+        if (total == null) { $('vmDurValue').textContent = '—'; return; }
+        durFor = key; durTotal = total; paintDuration('ok');
+      } catch {
+        if ('L|' + timelineKey() === key && isLong()) paintDuration('fail');
       }
     }, 400);
   }
@@ -626,15 +668,21 @@
     return lines;
   }
 
-  // Wraps + auto-shrinks the ayah so the whole block fits the safe area.
-  function layoutText(c, seg, w, h) {
-    const key = [seg.surah, seg.ayah, w, h, state.fontMul, state.caption].join('|');
-    if (layoutCache.has(key)) return layoutCache.get(key);
+  // The ayah's words, the last one carrying the ayah-number medallion.
+  function ayahWords(seg) {
     const words = seg.text.split(/\s+/).filter(Boolean);
     // Ayah medallion: the mushaf font draws Arabic-Indic digits as one (as in
     // quran-text.html); Scheherazade needs U+06DD before them. The NBSP keeps the
     // marker from wrapping onto its own line.
     if (seg.num != null && words.length) words[words.length - 1] += '\u00A0' + (QFONT === 'QuranFont' ? '' : '\u06DD') + arDigits(seg.num);
+    return words;
+  }
+
+  // Wraps + auto-shrinks the ayah so the whole block fits the safe area.
+  function layoutText(c, seg, w, h) {
+    const key = [seg.surah, seg.ayah, w, h, state.fontMul, state.caption].join('|');
+    if (layoutCache.has(key)) return layoutCache.get(key);
+    const words = ayahWords(seg);
     const maxW = w * 0.84;
     const maxH = h * (state.caption ? 0.6 : 0.7);
     let size = Math.min(w, h) * 0.085 * state.fontMul;
@@ -802,7 +850,7 @@
   }
 
   function sizeCanvas() {
-    const [w, h] = FORMATS[state.format];
+    const [w, h] = isLong() ? [long.W, long.H] : FORMATS[state.format];
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     layoutStage();
   }
@@ -870,6 +918,7 @@
   function renderIdle() {
     if (playing || !surahs.length) return;
     sizeCanvas();
+    if (isLong()) { long.drawStill(ctx); return; }
     renderFrame(ctx, canvas.width, canvas.height, 0, null);
   }
 
@@ -906,6 +955,7 @@
     stopBgVideo();
     if (!playing) return;
     cancelAnimationFrame(playing.raf);
+    if (playing.ctl) playing.ctl.stop();
     playing.sources.forEach(s => { try { s.stop(); } catch (e) { /* not started */ } });
     playing = null;
     setBadge('');
@@ -929,8 +979,10 @@
     const num = n => (arabicNames() ? arDigits(n) : String(n));
     const range = state.from === state.to ? num(state.from) : num(state.from) + '–' + num(state.to);
     const name = arabicNames() ? surahPlain(s) : surahLatin(s);
-    $('vmSummary').textContent = name + ' · ' + range + ' · ' + { story: '9:16', square: '1:1', wide: '16:9' }[state.format] +
-      (durFor && durFor === timelineKey() ? ' · ' + fmtDur(durTotal) : '');
+    const fmt = isLong() ? '16:9 · 1080p' : { story: '9:16', square: '1:1', wide: '16:9' }[state.format];
+    const durKey = (isLong() ? 'L|' : '') + timelineKey();
+    $('vmSummary').textContent = name + ' · ' + range + ' · ' + fmt +
+      (durFor && durFor === durKey ? ' · ' + (durApprox ? '≈ ' : '') + fmtDur(durTotal) : '');
   }
 
   // Locks every control while exporting — a mid-recording change would alter the clip.
@@ -939,7 +991,7 @@
     busy = on;
     $('vmExport').disabled = on;
     $('vmPreview').hidden = on;
-    document.querySelectorAll('.controls-col input, .controls-col select, .controls-col button').forEach(el => { el.disabled = on; });
+    document.querySelectorAll('.controls-col input, .controls-col select, .controls-col button, #vmModeTabs button').forEach(el => { el.disabled = on; });
     if (!on) $('vmCancel').hidden = true;
   }
 
@@ -963,6 +1015,7 @@
     if (playing) { stopPlayback(); return; }
     const ac = audioCtx();
     ac.resume();   // must happen inside the tap, before any await (iOS)
+    if (isLong()) { previewLong(); return; }
     const tl = await loadTimelineWithUi();
     if (!tl || playing) return;
     sizeCanvas();
@@ -984,6 +1037,23 @@
     tick();
   }
 
+  // Long mode streams the recitation ayah by ayah instead of loading it all first.
+  async function previewLong() {
+    sizeCanvas();
+    await long.ensureAssets();
+    if (playing) return;
+    setStatus('');
+    const ctl = long.play({
+      c: ctx,
+      outputs: [audioCtx().destination],
+      onTick: (t, total) => { if (total) setStageProgress(clamp01(t / total)); },
+      onEnd: () => stopPlayback(),
+      onError: e => { console.warn('[video-maker] audio load failed', e); stopPlayback(); setStatus(tr('vm_err_audio'), true); },
+    });
+    playing = { sources: [], ctl, raf: 0, export: false };
+    updatePreviewBtn();
+  }
+
   function pickMime() {
     if (!window.MediaRecorder) return null;
     const list = [
@@ -999,7 +1069,72 @@
 
   let cancelExport = null;
 
+  async function exportLong() {
+    stopPlayback();
+    const ac = audioCtx();
+    ac.resume();
+    closeResult();
+    const cfgs = await long.fastConfigs();
+    const mime = cfgs ? null : pickMime();
+    if (!cfgs && (!mime || !canvas.captureStream)) { setStatus(tr('vm_err_unsupported'), true); return; }
+    setBusy(true);
+    $('vmCancel').hidden = false;
+    let cancelled = false;
+    cancelExport = () => { cancelled = true; };
+    let wakeLock = null;
+    try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { /* optional */ }
+    sizeCanvas();
+    setBadge(' ', true);
+    setProgress(0);
+    setStatus(cfgs ? '' : tr('vm_long_slow'));
+    const num = n => (arabicNames() ? arDigits(n) : String(n));
+    const onProgress = (p, i, n) => {
+      setProgress(p);
+      setStageProgress(p);
+      $('vmBadge').textContent = Math.round(p * 100) + '%';
+      if (cfgs) setStatus(tr('vm_long_progress', { p: num(Math.round(p * 100)), i: num(i), n: num(n) }));
+    };
+    let out = null;
+    try {
+      await long.ensureAssets();
+      if (cfgs) {
+        out = await long.exportFast(cfgs, {
+          onProgress,
+          isCancelled: () => cancelled,
+          // Shows how far the export has got without slowing it down.
+          onPreview: cv => ctx.drawImage(cv, 0, 0, canvas.width, canvas.height),
+        });
+      } else {
+        playing = { sources: [], raf: 0, export: true };
+        out = await long.exportRealtime({ canvas, mime, onProgress, isCancelled: () => cancelled });
+      }
+    } catch (e) {
+      console.warn('[video-maker] long export failed', e);
+      out = null;
+      if (!cancelled) setStatus(/HTTP|fetch|network|decode/i.test(String(e && e.message)) ? tr('vm_err_audio') : tr('vm_err_encode'), true);
+      cancelled = true;
+    }
+    if (wakeLock) wakeLock.release().catch(() => {});
+    cancelExport = null;
+    playing = null;
+    setBusy(false);
+    setBadge('');
+    setProgress(null);
+    setStageProgress(0);
+    renderIdle();
+    if (!out) { if (!$('vmStatus').classList.contains('error')) setStatus(''); return; }
+    let blob = out.blob;
+    if (!out.fast && out.type.includes('mp4') && window.Mp4FastStart) {
+      try {
+        const fixed = Mp4FastStart.defragment(await blob.arrayBuffer());
+        if (fixed) blob = new Blob([fixed], { type: 'video/mp4' });
+      } catch (e) { console.warn('[video-maker] MP4 remux failed, keeping original', e); }
+    }
+    showResult(blob, out.type);
+  }
+
   async function exportVideo() {
+    if (isLong()) { exportLong(); return; }
     const mime = pickMime();
     if (!mime || !canvas.captureStream) { setStatus(tr('vm_err_unsupported'), true); return; }
     stopPlayback();
@@ -1080,7 +1215,7 @@
   let resultUrl = null;
   function showResult(blob, type) {
     const ext = type.includes('mp4') ? 'mp4' : 'webm';
-    const name = `quran-${pad3(state.surah)}-${state.from}-${state.to}.${ext}`;
+    const name = `quran-${isLong() ? 'long-' : ''}${pad3(state.surah)}-${state.from}-${state.to}.${ext}`;
     if (resultUrl) URL.revokeObjectURL(resultUrl);
     resultUrl = URL.createObjectURL(blob);
     $('vmVideo').src = resultUrl;
@@ -1402,12 +1537,14 @@
 
   // Order numbers / ✓ on the thumbnails; videos and gradients are dimmed in multi mode.
   function markBackgrounds() {
-    const order = state.multiBg ? slideIds() : [];
+    const multi = state.multiBg && !isLong();
+    const order = multi ? slideIds() : [];
     document.querySelectorAll('#vmBgs .bg-thumb[data-bg]').forEach(b => {
       const n = order.indexOf(b.dataset.bg);
-      b.classList.toggle('active', state.multiBg ? n >= 0 : b.dataset.bg === state.bg);
+      b.classList.toggle('active', multi ? n >= 0 : b.dataset.bg === (isLong() ? state.tvBg : state.bg));
       if (n >= 0) b.dataset.order = n + 1; else delete b.dataset.order;
-      b.classList.toggle('off-in-multi', state.multiBg && !b.dataset.bg.startsWith('i:'));
+      // Long mode takes pictures and gradients (a looping clip would undo the fast export).
+      b.classList.toggle('off-in-multi', multi ? !b.dataset.bg.startsWith('i:') : isLong() && b.dataset.bg.startsWith('v:'));
     });
   }
   function toggleSlide(id) {
@@ -1439,6 +1576,14 @@
   // Thumbnail taps: toggle pictures in multi mode, otherwise pick the single background.
   // (selectBackground itself never toggles — init re-applies the saved single choice.)
   function tapBackground(id) {
+    if (isLong()) {
+      if (id.startsWith('v:')) return;
+      state.tvBg = id;
+      long.setBackground(id);
+      markBackgrounds();
+      onChange();
+      return;
+    }
     if (state.multiBg) { if (id.startsWith('i:')) toggleSlide(id); return; }
     selectBackground(id);
   }
@@ -1488,7 +1633,8 @@
     let to = Math.max(1, Math.min(count, parseInt($('vmTo').value, 10) || from));
     if (to < from) { if (changed === 'from') to = from; else from = to; }
     let msg = '';
-    if (to - from + 1 > MAX_AYAT) {
+    // Long mode: the whole surah (its hint says longer = slower and bigger).
+    if (!isLong() && to - from + 1 > MAX_AYAT) {
       if (changed === 'from') to = from + MAX_AYAT - 1; else from = to - MAX_AYAT + 1;
       msg = tr('vm_max_ayat', { n: MAX_AYAT });
     }
@@ -1502,11 +1648,68 @@
 
   function onChange() {
     layoutCache.clear();
+    if (long) long.invalidate();
     stopPlayback();
     saveSettings();
     updateSummary();
     updateDuration();
     renderIdle();
+    if (isLong()) refreshTemplateThumbs();
+  }
+
+  // ---------- shorts / long video tabs ----------
+  function setMode(mode) {
+    state.mode = mode === 'long' && long ? 'long' : 'short';
+    document.body.classList.toggle('mode-long', isLong());
+    document.querySelectorAll('#vmModeTabs button').forEach(b => {
+      const on = b.dataset.mode === state.mode;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    $('vmStyleNum').textContent = isLong() ? '5' : '4';
+    if (isLong()) { long.setBackground(state.tvBg); fillTemplates(); }
+    clampRange('from');
+    markBackgrounds();
+    if (!isLong()) selectBackground(state.bg);
+    onChange();
+  }
+
+  function fillTemplates() {
+    const box = $('vmTemplates');
+    if (box.childElementCount !== long.templates.length) {
+      box.innerHTML = '';
+      long.templates.forEach(t => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tpl-thumb';
+        b.dataset.tpl = t.id;
+        const cv = document.createElement('canvas');
+        cv.width = 320; cv.height = 180;
+        const label = document.createElement('span');
+        b.append(cv, label);
+        b.onclick = () => { state.tvTemplate = t.id; markTemplates(); onChange(); };
+        box.appendChild(b);
+      });
+    }
+    markTemplates();
+    refreshTemplateThumbs();
+  }
+  function markTemplates() {
+    document.querySelectorAll('#vmTemplates .tpl-thumb').forEach(b => {
+      const t = long.templates.find(x => x.id === b.dataset.tpl);
+      b.classList.toggle('active', b.dataset.tpl === state.tvTemplate);
+      b.setAttribute('aria-pressed', b.dataset.tpl === state.tvTemplate ? 'true' : 'false');
+      b.lastElementChild.textContent = arabicNames() ? t.name.ar : t.name.en;
+    });
+  }
+  let thumbTimer = 0;
+  function refreshTemplateThumbs() {
+    clearTimeout(thumbTimer);
+    thumbTimer = setTimeout(() => {
+      document.querySelectorAll('#vmTemplates .tpl-thumb canvas').forEach(cv => {
+        long.drawThumb(cv.getContext('2d'), cv.parentElement.dataset.tpl);
+      });
+    }, 60);
   }
 
   function bindControls() {
@@ -1570,11 +1773,15 @@
     $('vmSheetOverlay').onclick = () => closeResult();
     $('vmExport').onclick = exportVideo;
     $('vmCancel').onclick = () => { if (cancelExport) cancelExport(); };
+    document.querySelectorAll('#vmModeTabs button').forEach(b => {
+      b.onclick = () => { if (!busy && b.dataset.mode !== state.mode) setMode(b.dataset.mode); };
+    });
     bindPickers();
     if (window.ResizeObserver) new ResizeObserver(layoutStage).observe($('vmStage'));
     else window.addEventListener('resize', layoutStage);
     window.addEventListener('langchange', () => {
       fillSurahs(); fillReciters(); updatePreviewBtn(); updateSummary(); updateDuration(); renderIdle();
+      if (isLong()) { markTemplates(); refreshTemplateThumbs(); }
       if (pickSheet === 'Surah') renderSurahList();
       else if (pickSheet === 'Reciter') renderReciterList();
       else if (pickSheet === 'Popular') renderPopularList();
@@ -1602,6 +1809,16 @@
     const i18nReady = window.I18n ? I18n.init() : Promise.resolve();
     loadSettings();
     reciters = (window.EVERYAYAH_RECITERS || []).filter(r => STYLES.includes(r.style));
+    if (window.VMLong && window.TV_TEMPLATES) {
+      long = VMLong({
+        state, GRADIENTS, BRAND, appIcon, AUDIO_BASE,
+        tr, lang, arabicNames, arDigits, surahObj, reciterObj, reciterName, surahLatin,
+        qfont: () => QFONT, segments, ayahWords, wrapWords, fillAyahLine, audioCtx, bgSrc,
+        onAsset: () => { renderIdle(); if (isLong()) refreshTemplateThumbs(); },
+      });
+    }
+    if (!long) state.mode = 'short';
+    document.body.classList.toggle('mode-long', isLong());
     sizeCanvas();
     try {
       await Promise.all([loadQuran(), loadBackgrounds(), i18nReady]);
@@ -1630,7 +1847,8 @@
     // Canvas text silently falls back to a system font if drawn before the
     // webfont is ready, so wait for both faces before the first frame.
     try { await Promise.all([document.fonts.load('40px ' + QFONT), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
-    selectBackground(state.bg);
+    if (isLong()) setMode('long');
+    else selectBackground(state.bg);
     updateDuration();          // the length of the saved reciter + ayat, as soon as the page opens
   }
 
@@ -1638,7 +1856,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 5;   // 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  const BUILD = 6;   // 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
   window.VM = { build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo };
   init();
 })();
