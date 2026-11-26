@@ -43,6 +43,7 @@ test.beforeEach(async ({ page }) => {
 
 test('shorts is the default; the long tab is 16:9 with templates and whole-surah ranges', async ({ page }) => {
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
   const shortTab = page.locator('#vmModeTabs [data-mode="short"]');
   const longTab = page.locator('#vmModeTabs [data-mode="long"]');
   await expect(shortTab).toHaveClass(/active/);
@@ -87,6 +88,8 @@ test('shorts is the default; the long tab is 16:9 with templates and whole-surah
 
 test('the long video length is estimated, then the fast export makes an MP4 that long', async ({ page }) => {
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+  // The tab only works once the page's scripts have started (the surah picker is filled then).
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
   await page.locator('#vmModeTabs [data-mode="long"]').click();
   // Al-Fatihah: 7 ayat × 1 s + 0.6 s lead-in + 1.2 s tail = 8.8 s.
   await expect(page.locator('#vmDurValue')).toHaveText('≈ ٠:٠٩', { timeout: 20000 });

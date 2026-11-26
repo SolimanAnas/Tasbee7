@@ -496,9 +496,10 @@
     durTimer = setTimeout(async () => {
       try {
         const tl = await buildTimeline();
-        if (timelineKey() === key) { durFor = key; durTotal = tl.total; paintDuration('ok'); }
+        // Switched to the long tab meanwhile: its own estimate owns the display now.
+        if (timelineKey() === key && !isLong()) { durFor = key; durTotal = tl.total; paintDuration('ok'); }
       } catch {
-        if (timelineKey() === key) paintDuration('fail');
+        if (timelineKey() === key && !isLong()) paintDuration('fail');
       }
     }, 400);
   }
