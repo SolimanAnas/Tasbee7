@@ -1,6 +1,12 @@
 // Video maker: the user's own pictures and videos as backgrounds. They stay
 // on the device (IndexedDB), survive a reload, and can be deleted.
 const { test, expect } = require('@playwright/test');
+// the settings are in tabs (الآيات / الصوت / المظهر / النص): open the one a control is on
+const sec = (page, name) => expect(async () => {
+  const tab = page.locator('#vmTab-' + name);
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click({ timeout: 2000 });
+  await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
+}).toPass({ timeout: 15000 });
 const path = require('path');
 
 const BASE_URL = 'http://localhost:8080';
@@ -11,6 +17,7 @@ test.use({ serviceWorkers: 'block' });
 async function open(page) {
   await page.route(url => !url.href.startsWith(BASE_URL), route => route.abort());
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+  await sec(page, 'look');
   await expect(page.locator('#vmBgs .bg-add')).toBeVisible({ timeout: 20000 });
 }
 const own = page => page.locator('#vmBgs .bg-thumb.is-user');
@@ -44,6 +51,7 @@ test('other files are refused, and a deleted background is gone for good', async
   await expect(own(page)).toHaveCount(0);
   expect(await page.evaluate(() => VM.state.bg)).toBe('g0');
   await page.reload();
+  await sec(page, 'look');
   await expect(page.locator('#vmBgs .bg-add')).toBeVisible();
   await expect(own(page)).toHaveCount(0);
 });

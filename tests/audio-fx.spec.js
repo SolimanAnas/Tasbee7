@@ -1,6 +1,12 @@
 // Audio effects for the own recording: the panel, the listen button, the effects
 // themselves (rendered offline and measured), and a long video exported through them.
 const { test, expect } = require('@playwright/test');
+// the settings are in tabs (الآيات / الصوت / المظهر / النص): open the one a control is on
+const sec = (page, name) => expect(async () => {
+  const tab = page.locator('#vmTab-' + name);
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click({ timeout: 2000 });
+  await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
+}).toPass({ timeout: 15000 });
 
 const BASE_URL = 'http://localhost:8080';
 test.use({ serviceWorkers: 'block', viewport: { width: 412, height: 915 } });
@@ -88,21 +94,30 @@ test('the panel: presets, sliders, listen, and a long video exported through the
   test.setTimeout(120000);
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxBox')).toBeHidden();           // only for an own recording
   await page.setInputFiles('#vmOwnFile', { name: 'mine.wav', mimeType: 'audio/wav', buffer: wav([1.4, 2.0, 1.6]) });
   await expect(page.locator('#vmSyncList .sync-row')).toHaveCount(4, { timeout: 30000 });
   await page.locator('#vmSyncDone').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxBox')).toBeVisible();
 
   // A room preset sets its own length and amount; the sliders show and change them.
+  await sec(page, 'audio');
   await page.locator('#vmFxRooms [data-room="mosque"]').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxRevDecayVal')).toHaveText('٢.٦ s');
   let fx = await page.evaluate(() => VM.state.fx);
   expect(fx.reverb).toMatchObject({ preset: 'mosque', decay: 2.6, mix: 0.26 });
+  await sec(page, 'audio');
   await page.locator('#vmFxEchoMix').fill('0.3');
+  await sec(page, 'audio');
   await page.locator('#vmFxEchoMix').dispatchEvent('change');
+  await sec(page, 'audio');
   await page.locator('#vmFxPolish').check();
+  await sec(page, 'audio');
   await page.locator('#vmFxComp').fill('70');
+  await sec(page, 'audio');
   await page.locator('#vmFxComp').dispatchEvent('change');
   fx = await page.evaluate(() => VM.state.fx);
   expect(fx.echo.mix).toBeCloseTo(0.3);
@@ -110,19 +125,25 @@ test('the panel: presets, sliders, listen, and a long video exported through the
   expect(fx.touched).toBe(true);
 
   // Listen, and stop.
+  await sec(page, 'audio');
   await page.locator('#vmFxListen').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxListenLabel')).toHaveText('إيقاف', { timeout: 10000 });
+  await sec(page, 'audio');
   await page.locator('#vmFxListen').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxListenLabel')).toHaveText('استمع إلى المؤثرات');
 
   // Kept across a reload.
   await page.reload({ waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxRooms [data-room="mosque"]')).toHaveClass(/active/);
 
   // The long video is made through the effects, at the expected length.
   const fast = await page.evaluate(() => !!(window.VideoEncoder && window.AudioEncoder));
   test.skip(!fast, 'no WebCodecs in this browser');
+  await sec(page, 'audio');
   await expect(page.locator('#vmDurValue')).not.toHaveText('…', { timeout: 20000 });
   await page.locator('#vmExport').click();
   await expect(page.locator('#vmResult')).toBeVisible({ timeout: 90000 });

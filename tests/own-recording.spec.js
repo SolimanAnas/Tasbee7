@@ -3,6 +3,12 @@
 // pauses, the user fixes a boundary in the sync sheet, and both the Shorts length and the
 // long video export follow it. Nothing is downloaded: the audio server is never called.
 const { test, expect } = require('@playwright/test');
+// the settings are in tabs (الآيات / الصوت / المظهر / النص): open the one a control is on
+const sec = (page, name) => expect(async () => {
+  const tab = page.locator('#vmTab-' + name);
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click({ timeout: 2000 });
+  await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
+}).toPass({ timeout: 15000 });
 
 const BASE_URL = 'http://localhost:8080';
 test.use({ serviceWorkers: 'block', viewport: { width: 412, height: 915 } });
@@ -65,13 +71,20 @@ const upload = page => page.setInputFiles('#vmOwnFile', { name: 'تلاوتي.wa
 test('upload: the pauses give the split, the sheet fixes it, the length follows', async ({ page }) => {
   await open(page);
   // The toggle shows the upload panel; the reciter stays until a file is in.
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="own"]').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnBox')).toBeVisible();
+  await sec(page, 'audio');
   await expect(page.locator('#vmReciterBox')).toBeHidden();
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnPick')).toBeVisible();
   expect(await page.evaluate(() => VM.state.recSource)).toBe('reciter');
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="reciter"]').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmReciterBox')).toBeVisible();
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="own"]').click();
   await upload(page);
   // The sheet opens on its own to check the split.
@@ -89,11 +102,13 @@ test('upload: the pauses give the split, the sheet fixes it, the length follows'
   await expect(page.locator('#vmSyncList .sync-row[data-i="2"] input')).toHaveValue('5.0');
   await page.locator('#vmSyncDone').click();
   await expect(page.locator('#vmSyncSheet')).not.toHaveClass(/active/);
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnStatus')).toHaveClass(/ok/);
 
   // Shorts: the length is the recording from the first ayah to the end + lead-in + tail.
   const first = times[0], end = times[7];
   const expected = 0.5 + (end - first) + 1;
+  await sec(page, 'audio');
   await expect(page.locator('#vmDurValue')).not.toHaveText('…', { timeout: 20000 });
   const shown = (await page.textContent('#vmDurValue')).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).split(':');
   expect(Math.abs((+shown[0] * 60 + +shown[1]) - expected)).toBeLessThan(1.1);
@@ -101,31 +116,44 @@ test('upload: the pauses give the split, the sheet fixes it, the length follows'
   // It is remembered: after a reload the recording and its synced state are still there.
   await page.reload({ waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnBox')).toBeVisible();
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnName')).toHaveText('تلاوتي.wav');
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnStatus')).toHaveClass(/ok/);
 
   // A different range has no sync yet: it is split again, and marked for review.
+  await sec(page, 'ayat');
   await page.fill('#vmTo', '5');
+  await sec(page, 'ayat');
   await page.locator('#vmTo').dispatchEvent('change');
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnStatus')).toHaveClass(/warn/, { timeout: 30000 });
 
   // Delete: back to the reciter list.
+  await sec(page, 'audio');
   await page.locator('#vmOwnDel').click();
+  await sec(page, 'audio');
   await expect(page.locator('#vmReciterBox')).toBeVisible();
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnBox')).toBeHidden();
   expect(await page.evaluate(() => VM.state.recSource)).toBe('reciter');
 });
 
 test('the reciter name can be edited and is used instead of the reciter', async ({ page }) => {
   await open(page);
+  await sec(page, 'audio');
   await expect(page.locator('#vmSheikh')).toHaveAttribute('placeholder', /العفاسي/);
+  await sec(page, 'audio');
   await page.fill('#vmSheikh', 'الشيخ أحمد');
   expect(await page.evaluate(() => VM.state.sheikh)).toBe('الشيخ أحمد');
   // the caption on the Shorts video is drawn from it
   await page.reload({ waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'audio');
   await expect(page.locator('#vmSheikh')).toHaveValue('الشيخ أحمد');
+  await sec(page, 'audio');
   await page.fill('#vmSheikh', '');
   expect(await page.evaluate(() => VM.state.sheikh)).toBe('');
 });
@@ -134,12 +162,14 @@ test('a long video is made from the uploaded recording', async ({ page }) => {
   await open(page, { mode: 'long', surah: 1, from: 1, to: 7, tvTemplate: 'moonlit' });
   const fast = await page.evaluate(() => !!(window.VideoEncoder && window.AudioEncoder));
   test.skip(!fast, 'no WebCodecs in this browser');
+  await sec(page, 'audio');
   await upload(page);
   await expect(page.locator('#vmSyncList .sync-row')).toHaveCount(8, { timeout: 30000 });
   await page.fill('#vmSheikh', 'تلاوتي بصوتي');     // while the sheet is open the page behind keeps its state
   await page.locator('#vmSyncDone').click();
   await expect(page.locator('#vmSyncSheet')).not.toHaveClass(/active/);
   // exact length, no «≈»: an own recording needs no estimate
+  await sec(page, 'audio');
   await expect(page.locator('#vmDurValue')).toHaveText(/^٠:٢[٢-٤]$/, { timeout: 20000 });
   await page.locator('#vmExport').click();
   await expect(page.locator('#vmResult')).toBeVisible({ timeout: 90000 });
@@ -160,6 +190,7 @@ test('Shorts: the preview and the recorded video use the uploaded recording', as
   await page.locator('#vmSyncDone').click();
   await expect(page.locator('#vmSyncSheet')).not.toHaveClass(/active/);
   // 1.2 + 0.8 + 1.5 + a little around them, plus the lead-in and tail
+  await sec(page, 'audio');
   await expect(page.locator('#vmDurValue')).toHaveText(/^٠:٠[٥-٧]$/, { timeout: 20000 });
 
   // The preview plays and stops by itself at the end.
@@ -182,6 +213,7 @@ test('Shorts: the preview and the recorded video use the uploaded recording', as
 test('the timing sheet goes ayah by ayah to the end of the track', async ({ page }) => {
   test.setTimeout(90000);
   await open(page);
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="own"]').click();
   await upload(page);
   await expect(page.locator('#vmSyncList .sync-row')).toHaveCount(8, { timeout: 30000 });   // 7 ayat + the end
@@ -234,6 +266,7 @@ test('the timing sheet goes ayah by ayah to the end of the track', async ({ page
   await expect(page.locator('#vmSyncNextLabel')).toHaveText('تم');
   await page.locator('#vmSyncNext').click();
   await expect(page.locator('#vmSyncSheet')).not.toHaveClass(/active/);
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnStatus')).toHaveClass(/ok/);
 });
 
@@ -245,6 +278,7 @@ const TRUE_STARTS = [0, 1, 2, 3, 4, 6, 7].map(i => MISSED.starts[i]);     // MIS
 test('fixing one ayah syncs the ones after it; ayat placed by hand stay', async ({ page }) => {
   test.setTimeout(90000);
   await open(page);
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="own"]').click();
   await page.setInputFiles('#vmOwnFile', { name: 'تلاوتي.wav', mimeType: 'audio/wav', buffer: MISSED.buf });
   await expect(page.locator('#vmSyncList .sync-row')).toHaveCount(8, { timeout: 30000 });

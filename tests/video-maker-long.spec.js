@@ -3,6 +3,12 @@
 // The audio server is never called: HEAD requests answer with a size that is 1 s of
 // 128 kbps audio, and every recording is a generated 1 s WAV.
 const { test, expect } = require('@playwright/test');
+// the settings are in tabs (الآيات / الصوت / المظهر / النص): open the one a control is on
+const sec = (page, name) => expect(async () => {
+  const tab = page.locator('#vmTab-' + name);
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click({ timeout: 2000 });
+  await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
+}).toPass({ timeout: 15000 });
 
 const BASE_URL = 'http://localhost:8080';
 test.use({ serviceWorkers: 'block', viewport: { width: 390, height: 844 } });
@@ -47,41 +53,60 @@ test('shorts is the default; the long tab is 16:9 with templates and whole-surah
   const shortTab = page.locator('#vmModeTabs [data-mode="short"]');
   const longTab = page.locator('#vmModeTabs [data-mode="long"]');
   await expect(shortTab).toHaveClass(/active/);
+  await sec(page, 'look');
   await expect(page.locator('#vmTemplates')).toBeHidden();
+  await sec(page, 'text');
   await expect(page.locator('#vmFormat')).toBeVisible();
   expect(await page.evaluate(() => [vmCanvas.width, vmCanvas.height])).toEqual([1080, 1920]);
 
   await longTab.click();
   await expect(longTab).toHaveClass(/active/);
+  await sec(page, 'look');
   await expect(page.locator('#vmTemplates .tpl-thumb')).toHaveCount(14);
+  await sec(page, 'look');
   await expect(page.locator('#vmTemplates .tpl-thumb.active')).toHaveAttribute('data-tpl', 'dawn');
   // A painted template brings its own picture: no background step.
+  await sec(page, 'look');
+  await sec(page, 'look');
   await expect(page.locator('#vmBgCard')).toBeHidden();
   await page.locator('#vmTemplates [data-tpl="royal"]').click();
+  await sec(page, 'look');
   await expect(page.locator('#vmBgCard')).toBeVisible();
+  await sec(page, 'text');
   await expect(page.locator('#vmFormat')).toBeHidden();
+  await sec(page, 'look');
   await expect(page.locator('#vmMotion')).toBeHidden();
+  await sec(page, 'ayat');
   await expect(page.locator('.long-hint')).toBeVisible();
   expect(await page.evaluate(() => [vmCanvas.width, vmCanvas.height])).toEqual([1920, 1080]);
   await expect(page.locator('#vmSummary')).toContainText('16:9 · 1080p');
 
   // The whole of Al-Baqarah is allowed here …
   await page.evaluate(() => { const s = document.getElementById('vmSurah'); s.value = 2; s.dispatchEvent(new Event('change')); });
+  await sec(page, 'ayat');
   await page.fill('#vmTo', '286');
+  await sec(page, 'ayat');
   await page.locator('#vmTo').dispatchEvent('change');
+  await sec(page, 'ayat');
   await expect(page.locator('#vmTo')).toHaveValue('286');
+  await sec(page, 'ayat');
   await expect(page.locator('#vmFrom')).toHaveValue('1');
 
   // … and the choice of template is kept across a reload.
+  await sec(page, 'look');
   await page.locator('#vmTemplates [data-tpl="mosque"]').click();
   await page.reload({ waitUntil: 'load' });
   await expect(longTab).toHaveClass(/active/);
+  await sec(page, 'look');
   await expect(page.locator('#vmTemplates .tpl-thumb.active')).toHaveAttribute('data-tpl', 'mosque');
+  await sec(page, 'look');
   await expect(page.locator('#vmBgCard')).toBeVisible();
 
   // Back to shorts: the 20-ayah limit applies again, from the same first ayah.
   await shortTab.click();
+  await sec(page, 'ayat');
   await expect(page.locator('#vmFrom')).toHaveValue('1');
+  await sec(page, 'ayat');
   await expect(page.locator('#vmTo')).toHaveValue('20');
   expect(await page.evaluate(() => [vmCanvas.width, vmCanvas.height])).toEqual([1080, 1920]);
 });
@@ -92,6 +117,7 @@ test('the long video length is estimated, then the fast export makes an MP4 that
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
   await page.locator('#vmModeTabs [data-mode="long"]').click();
   // Al-Fatihah: 7 ayat × 1 s + 0.6 s lead-in + 1.2 s tail = 8.8 s.
+  await sec(page, 'audio');
   await expect(page.locator('#vmDurValue')).toHaveText('≈ ٠:٠٩', { timeout: 20000 });
 
   const fast = await page.evaluate(() => !!(window.VideoEncoder && window.AudioEncoder));

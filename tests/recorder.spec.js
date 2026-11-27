@@ -2,6 +2,12 @@
 // of tone with pauses); the test reads along in the teleprompter, taps «التالي» (and
 // «رجوع» once), finishes, and checks the take became the recitation, synced from the taps.
 const { test, expect } = require('@playwright/test');
+// the settings are in tabs (الآيات / الصوت / المظهر / النص): open the one a control is on
+const sec = (page, name) => expect(async () => {
+  const tab = page.locator('#vmTab-' + name);
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click({ timeout: 2000 });
+  await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
+}).toPass({ timeout: 15000 });
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -55,7 +61,9 @@ test('record with the teleprompter: the taps become the sync, polish switches on
   test.setTimeout(90000);
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="own"]').click();
+  await sec(page, 'audio');
   await page.locator('#vmOwnRec').click();
   await expect(page.locator('#vmRecSheet')).toHaveClass(/active/);
   await expect(page.locator('#vmRecCount')).toHaveText('الآية ١ من ٤');
@@ -95,9 +103,13 @@ test('record with the teleprompter: the taps become the sync, polish switches on
 
   const st = await page.evaluate(() => ({ src: VM.state.recSource, polish: VM.state.fx.polish.on }));
   expect(st).toEqual({ src: 'own', polish: true });
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnStatus')).toHaveClass(/ok/);
+  await sec(page, 'audio');
   await expect(page.locator('#vmOwnName')).toHaveText(/^recording-.*\.(webm|m4a|ogg)$/);
+  await sec(page, 'audio');
   await expect(page.locator('#vmFxBox')).toBeVisible();
+  await sec(page, 'audio');
   await expect(page.locator('#vmDurValue')).not.toHaveText('…', { timeout: 20000 });
 });
 
@@ -105,7 +117,9 @@ test('closing the sheet while recording keeps the take', async ({ page }) => {
   test.setTimeout(60000);
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'audio');
   await page.locator('#vmSource [data-src="own"]').click();
+  await sec(page, 'audio');
   await page.locator('#vmOwnRec').click();
   await page.locator('#vmRecMain').click();
   await expect(page.locator('#vmRecMainLabel')).toHaveText('إنهاء', { timeout: 10000 });

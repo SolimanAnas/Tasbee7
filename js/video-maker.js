@@ -166,6 +166,7 @@
       vm_sync_next_here: 'الآية التالية تبدأ هنا',
       vm_sync_follow: 'زامن الآيات التالية تلقائياً',
       vm_settings_video: 'الفيديو',
+      vm_sections: 'أقسام الإعدادات', vm_sec_audio: 'الصوت', vm_sec_look: 'المظهر', vm_sec_text: 'النص',
       vm_close: 'إغلاق',
       vm_step_up: 'زيادة واحد',
       vm_step_down: 'إنقاص واحد',
@@ -278,6 +279,7 @@
       vm_sync_next_here: 'Next ayah starts here',
       vm_sync_follow: 'Sync the following ayat automatically',
       vm_settings_video: 'Video',
+      vm_sections: 'Settings sections', vm_sec_audio: 'Audio', vm_sec_look: 'Look', vm_sec_text: 'Text',
       vm_close: 'Close',
       vm_step_up: 'One more',
       vm_step_down: 'One less',
@@ -1322,7 +1324,7 @@
     busy = on;
     $('vmExport').disabled = on;
     $('vmPreview').hidden = on;
-    document.querySelectorAll('.controls-col input, .controls-col select, .controls-col button, #vmModeTabs button').forEach(el => { el.disabled = on; });
+    document.querySelectorAll('.controls-col input, .controls-col select, .controls-col button:not([role="tab"]), #vmModeTabs button').forEach(el => { el.disabled = on; });
     if (!on) $('vmCancel').hidden = true;
   }
 
@@ -1749,6 +1751,45 @@
     const inside = sheet.contains(document.activeElement);
     if (e.shiftKey && (!inside || document.activeElement === first || document.activeElement === sheet.querySelector('[tabindex="-1"]'))) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && (!inside || document.activeElement === last)) { e.preventDefault(); first.focus(); }
+  }
+
+  // ---------- section tabs ----------
+  // The settings come in four parts (ayat, audio, look, text), one shown at a time and picked
+  // in any order. The create bar stays in place whichever is open.
+  const SECS = ['ayat', 'audio', 'look', 'text'];
+  let secNow = 'ayat';
+  function showSection(name, opts) {
+    if (!SECS.includes(name)) return;
+    secNow = name;
+    document.querySelectorAll('#vmSecTabs [role="tab"]').forEach(t => {
+      const on = t.dataset.sec === name;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    document.querySelectorAll('.controls-col > section[data-sec]').forEach(sec => sec.classList.toggle('sec-off', sec.dataset.sec !== name));
+    // If the bar is stuck at the top, start the new part right under it (not halfway down).
+    const bar = $('vmSecTabs');
+    if (opts && opts.scroll && bar.getBoundingClientRect().top <= parseFloat(getComputedStyle(bar).top) + 1) {
+      const top = bar.parentElement.getBoundingClientRect().top + scrollY - 6;
+      scrollTo({ top, behavior: 'auto' });
+    }
+    if (opts && opts.focus) $('vmTab-' + name).focus();
+  }
+  function bindSections() {
+    document.querySelectorAll('#vmSecTabs [role="tab"]').forEach(t => { t.onclick = () => showSection(t.dataset.sec, { scroll: true }); });
+    $('vmSecTabs').addEventListener('keydown', e => {
+      const i = SECS.indexOf(secNow);
+      const rtl = document.documentElement.dir === 'rtl';
+      let j = -1;
+      if (e.key === 'ArrowLeft') j = rtl ? i + 1 : i - 1;
+      else if (e.key === 'ArrowRight') j = rtl ? i - 1 : i + 1;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = SECS.length - 1;
+      if (j < 0 && e.key !== 'Home') return;
+      e.preventDefault();
+      showSection(SECS[(j + SECS.length) % SECS.length], { scroll: true, focus: true });
+    });
+    showSection('ayat');
   }
 
   // ---------- settings sheet + theme button (header) ----------
@@ -2210,6 +2251,7 @@
       };
     });
     $('vmMotion').onchange = () => { state.motion = $('vmMotion').checked; onChange(); };
+    bindSections();
     $('vmSettingsBtn').onclick = () => openPick('Settings');
     $('vmLangRow').onclick = () => {
       closePick();
@@ -2389,6 +2431,6 @@
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
   const BUILD = 8;   // 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
-  window.VM = { build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
+  window.VM = { showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
   init();
 })();
