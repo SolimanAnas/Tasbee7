@@ -68,11 +68,63 @@ test('pauses of similar length everywhere: low confidence', () => {
   assert.strictEqual(r.confidence, 'low');
 });
 
-test('fewer pauses than ayat: no split proposed, caller falls back', () => {
-  const { ch } = build([['v', 2], ['s', 0.8], ['v', 2], ['s', 0.8], ['v', 2]]);
+test('fewer pauses than ayat: the pauses found are kept, the rest placed by text and marked unsure', () => {
+  const { ch, starts } = build([['v', 2], ['s', 0.8], ['v', 2], ['s', 0.8], ['v', 2]]);
   const r = R.autoSplit(env(ch), R.HOP, 6);
-  assert.strictEqual(r.markers, null);
+  assert.strictEqual(r.markers.length, 6);
   assert.strictEqual(r.found, 2);
+  assert.ok(r.markers.some(m => Math.abs(m - (starts[1] - 0.15)) < 0.3), 'the first real pause is a boundary');
+  assert.ok(r.markers.some(m => Math.abs(m - (starts[2] - 0.15)) < 0.3), 'the second real pause is a boundary');
+  assert.strictEqual(r.unsure.length, 3, 'the three placed by text are unsure: ' + r.unsure);
+  assert.strictEqual(r.confidence, 'low');
+  for (let i = 1; i < 6; i++) assert.ok(r.markers[i] > r.markers[i - 1], 'ascending');
+});
+
+test('text lengths decide between a long breath and a shorter pause between ayat', () => {
+  // ayah 1 is long (with a 0.6 s breath in its middle), ayah 2 is short; the pause between
+  // them is only 0.5 s. By pause length alone the breath would win.
+  const parts = [['s', 0.4], ['v', 2.4], ['s', 0.6], ['v', 2.4], ['s', 0.5], ['v', 1.2], ['s', 0.6]];
+  const { ch, starts } = build(parts);
+  const lengthOnly = R.autoSplit(env(ch), R.HOP, 2);
+  near(lengthOnly.markers[1], starts[1] - 0.15, 0.3, 'without text: the breath');
+  const r = R.autoSplit(env(ch), R.HOP, 2, [60, 12]);
+  near(r.markers[1], starts[2] - 0.15, 0.3, 'with text lengths: the real boundary');
+});
+
+test('each boundary says whether it is sure', () => {
+  // clean 0.8 s pauses: all sure; equal pauses where only some are boundaries: unsure
+  const clean = [['s', 0.4]];
+  [1.5, 2, 1.5].forEach((v, i, a) => { clean.push(['v', v]); if (i < a.length - 1) clean.push(['s', 0.8]); });
+  clean.push(['s', 0.5]);
+  assert.deepStrictEqual(R.autoSplit(env(build(clean).ch), R.HOP, 3).unsure, []);
+  const same = [];
+  for (let i = 0; i < 6; i++) { same.push(['v', 1.2]); if (i < 5) same.push(['s', 0.5]); }
+  assert.deepStrictEqual(R.autoSplit(env(build(same).ch), R.HOP, 3).unsure, [1, 2]);
+});
+
+test('pace check: a pause too short to hear is found from the ayah that runs too long', () => {
+  // Al-Fatihah-like text lengths; ayah 4 follows ayah 3 after only 0.1 s (no pause found), and
+  // ayah 5 has a breath. Every pause is used, the breath fills the missing boundary: by pause
+  // length alone nothing looks wrong, but the merged ayah takes ~4x its text's time.
+  const W = [19, 18, 12, 11, 19, 19, 43];
+  const parts = [['s', 0.5], ['v', 1.4], ['s', 0.8], ['v', 2.2], ['s', 0.8], ['v', 1.8], ['s', 0.1], ['v', 1.5],
+    ['s', 0.8], ['v', 1.0], ['s', 0.35], ['v', 1.4], ['s', 0.8], ['v', 1.6], ['s', 0.8], ['v', 4.0], ['s', 1.0]];
+  const { ch } = build(parts);
+  const r = R.autoSplit(env(ch), R.HOP, 7, W);
+  assert.ok(r.unsure.includes(3), 'the boundary after the merged ayah is to check: ' + r.unsure);
+  // a recitation at an even pace raises nothing
+  const even = [['s', 0.4]];
+  W.forEach((w, i) => { even.push(['v', w * 0.09]); if (i < W.length - 1) even.push(['s', 0.8]); });
+  even.push(['s', 0.6]);
+  assert.deepStrictEqual(R.autoSplit(env(build(even).ch), R.HOP, 7, W).unsure, []);
+});
+
+test('snap points: one per pause, just before the next voice', () => {
+  const { ch, starts } = build([['s', 0.4], ['v', 1.5], ['s', 0.9], ['v', 2.0], ['s', 0.7], ['v', 1.2], ['s', 0.5]]);
+  const pts = R.snapPoints(env(ch), R.HOP);
+  assert.strictEqual(pts.length, 2);
+  near(pts[0].m, starts[1] - 0.15, 0.1, 'first');
+  near(pts[1].m, starts[2] - 0.15, 0.1, 'second');
 });
 
 test('one ayah: starts a little before the voice, ends a little after it', () => {
