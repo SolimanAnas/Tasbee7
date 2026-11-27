@@ -22,6 +22,25 @@
 .settings-chevron { width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; opacity:.5; }
 [dir="ltr"] .settings-chevron { transform:scaleX(-1); }
 .settings-sheet .switch-row { border:1px solid var(--glass-border); border-radius:14px; padding:10px 14px; background:var(--list-hover); }
+
+/* Section tabs: one part of the settings at a time, chosen in any order. A glass bar like
+   the rest of the page; it sticks to the top so the other parts stay one tap away. */
+.sec-tabs {
+  position:sticky; top:calc(env(safe-area-inset-top, 0px) + 6px); z-index:20;
+  display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:4px; padding:5px;
+  border-radius:18px; background:var(--bar-bg); border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+}
+.sec-tabs button {
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0;
+  min-height:52px; padding:5px 2px; border:none; border-radius:13px; background:none; cursor:pointer;
+  color:var(--text-secondary); font-family:inherit; font-size:13px; font-weight:700; transition:background .2s, color .2s;
+}
+.sec-tabs button span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sec-tabs svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.sec-tabs button[aria-selected="true"] { background:var(--accent-muted); color:var(--accent-main); }
+.sec-tabs button:focus-visible { outline:2px solid var(--accent-main); outline-offset:-2px; }
+.controls-col > section.sec-off { display:none !important; }
 </style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#F8FAFC">
 <title>صانع فيديو الآيات — زاد المسلم | Quran Ayah Video Maker</title>
@@ -739,7 +758,26 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
     </div>
 
     <div class="controls-col">
-      <section class="card">
+      <!-- Sections as tabs: one at a time, in any order, the create bar always there. -->
+      <div class="sec-tabs" id="vmSecTabs" role="tablist" aria-label="أقسام الإعدادات" data-i18n-aria="vm_sections">
+        <button type="button" role="tab" id="vmTab-ayat" data-sec="ayat" aria-selected="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5c2.6-1.4 5.4-1.4 8 0V19c-2.6-1.4-5.4-1.4-8 0zM21 5.5c-2.6-1.4-5.4-1.4-8 0V19c2.6-1.4 5.4-1.4 8 0z"/></svg>
+          <span data-i18n="vm_step_ayat">الآيات</span>
+        </button>
+        <button type="button" role="tab" id="vmTab-audio" data-sec="audio" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          <span data-i18n="vm_sec_audio">الصوت</span>
+        </button>
+        <button type="button" role="tab" id="vmTab-look" data-sec="look" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/></svg>
+          <span data-i18n="vm_sec_look">المظهر</span>
+        </button>
+        <button type="button" role="tab" id="vmTab-text" data-sec="text" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4.5h14V6M12 4.5v15M9 19.5h6"/></svg>
+          <span data-i18n="vm_sec_text">النص</span>
+        </button>
+      </div>
+      <section data-sec="ayat" role="tabpanel" aria-labelledby="vmTab-ayat" class="card">
         <div class="step-head">
           <span class="step-num">1</span><span class="step-title" data-i18n="vm_step_ayat">الآيات</span>
           <button type="button" class="search-btn" id="vmSearchBtn" aria-haspopup="dialog" data-i18n-title="vm_search" data-i18n-aria="vm_search" title="بحث في القرآن" aria-label="بحث في القرآن"><img src="../img/SVG/search.svg" alt="" style="width:18px;height:18px;"></button>
@@ -782,7 +820,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
         </div>
       </section>
 
-      <section class="card">
+      <section data-sec="audio" role="tabpanel" aria-labelledby="vmTab-audio" class="card">
         <div class="step-head"><span class="step-num">2</span><span class="step-title" data-i18n="vm_reciter">القارئ</span></div>
         <div class="formats fx" id="vmSource">
           <button type="button" data-src="reciter" class="active" data-i18n="vm_src_reciter">قارئ من القائمة</button>
@@ -872,12 +910,12 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
         </div>
       </section>
 
-      <section class="card only-long">
+      <section data-sec="look" role="tabpanel" aria-labelledby="vmTab-look" class="card only-long">
         <div class="step-head"><span class="step-num">3</span><span class="step-title" data-i18n="vm_template">القالب</span></div>
         <div class="tpl-grid" id="vmTemplates"></div>
       </section>
 
-      <section class="card" id="vmBgCard">
+      <section data-sec="look" role="tabpanel" aria-labelledby="vmTab-look" class="card" id="vmBgCard">
         <div class="step-head"><span class="step-num" id="vmBgNum">3</span><span class="step-title" data-i18n="vm_background">الخلفية</span></div>
         <div class="bg-strip" id="vmBgs"></div>
         <input type="file" id="vmBgFile" accept="image/*,video/*" multiple hidden>
@@ -898,7 +936,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
         </label>
       </section>
 
-      <section class="card">
+      <section data-sec="text" role="tabpanel" aria-labelledby="vmTab-text" class="card">
         <div class="step-head"><span class="step-num" id="vmStyleNum">4</span><span class="step-title" data-i18n="vm_step_style">التنسيق</span></div>
         <div class="field only-short">
           <div class="label" data-i18n="vm_format">المقاس</div>
