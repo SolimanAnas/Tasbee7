@@ -16,7 +16,7 @@ const MANIFEST = path.join(DIR, 'manifest.json');
 const numeric = (a, b) => a.localeCompare(b, undefined, { numeric: true });
 
 const onDisk = fs.readdirSync(DIR)
-  .filter(f => /\.(png|jpe?g|webp|avif|mp4|webm)$/i.test(f) && !f.endsWith('.thumb.webp'))
+  .filter(f => /\.(png|jpe?g|webp|avif|mp4|webm)$/i.test(f) && !f.endsWith('.thumb.webp') && !/\.pp\.mp4$/i.test(f))
   .sort(numeric);
 
 let previous = [];

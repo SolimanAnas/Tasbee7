@@ -35,11 +35,25 @@ const server = http.createServer((req, res) => {
       res.end('<h1>404 Not Found</h1>');
       return;
     }
-    res.writeHead(200, {
+    const headers = {
       'Content-Type': MIME[ext] || 'application/octet-stream',
       'Access-Control-Allow-Origin': '*',
       'Service-Worker-Allowed': '/',
-    });
+      'Accept-Ranges': 'bytes',
+    };
+    // Real hosts answer byte ranges, and a browser can only seek in a video that way.
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (range && (range[1] || range[2])) {
+      const size = data.length;
+      let start = range[1] ? parseInt(range[1], 10) : size - parseInt(range[2], 10);
+      let end = range[1] && range[2] ? parseInt(range[2], 10) : size - 1;
+      start = Math.max(0, start); end = Math.min(size - 1, end);
+      if (start > end) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); res.end(); return; }
+      res.writeHead(206, { ...headers, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
+      res.end(data.subarray(start, end + 1));
+      return;
+    }
+    res.writeHead(200, { ...headers, 'Content-Length': data.length });
     res.end(data);
   });
 });

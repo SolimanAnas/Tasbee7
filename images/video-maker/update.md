@@ -78,6 +78,10 @@ For each video that needs processing:
 5. If the video is longer than 30 s, keep it but list it as a warning in the report (long
    backgrounds only cost bandwidth; clips loop anyway).
 
+6. Its forward-and-back copy for the seamless loop setting: run `npm run bgs:pingpong`. It writes
+   `v<N>.pp.mp4` next to `v<N>.mp4` (forward, then the same frames backward) and skips the ones
+   that already exist. The page plays it when «تكرار الفيديو ذهاباً وإياباً» is on.
+
 ## 4. Regenerate the manifest
 Run `npm run bgs:video`. It must print no "has no thumbnail" warnings.
 The manifest order is the picker order and is curated by theme. The script keeps the existing
@@ -90,8 +94,8 @@ grayscale pixels); report duplicates instead of adding them twice.
 
 ## 5. Verify
 - `images/video-maker/manifest.json` lists every processed image/video and no `.thumb.webp`,
-  `.md` or original-format files.
-- Every `v*.mp4` has a matching `v*.thumb.webp`, and `ffprobe` shows no audio stream in it.
+  `.md`, `.pp.mp4` or original-format files.
+- Every `v*.mp4` has a matching `v*.thumb.webp` and `v*.pp.mp4`, and `ffprobe` shows no audio stream in it.
 - Every original that was converted now exists in `images/video-maker-originals/`.
 - `npm run verify` passes.
 
