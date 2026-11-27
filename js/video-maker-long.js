@@ -235,14 +235,14 @@
       const ar = api.arabicNames();
       // Plates are part of the design, so they stay even with the names turned off.
       drawLabel(c, tpl.surah, S.caption && s ? (ar ? s.name : 'Surah ' + api.surahLatin(s)) : '', ar ? api.qfont() : 'VMTajawal', w, h);
-      drawLabel(c, tpl.reciter, S.caption && r ? api.reciterName(r) : '', 'VMTajawal', w, h);
+      drawLabel(c, tpl.reciter, S.caption && r ? api.displayName() : '', 'VMTajawal', w, h);
       if (S.branding) drawBranding(c, w, h, tpl);
     }
 
     let base = null, baseKey = '';
     function baseLayer() {
       const tpl = template();
-      const key = [tpl.id, bgId, assetVer, S.surah, S.reciter, S.caption, S.branding, api.lang(), api.qfont()].join('|');
+      const key = [tpl.id, bgId, assetVer, S.surah, S.reciter, api.displayName(), S.caption, S.branding, api.lang(), api.qfont()].join('|');
       if (base && baseKey === key) return base;
       if (!base) { base = document.createElement('canvas'); base.width = W; base.height = H; }
       const c = base.getContext('2d');
@@ -442,6 +442,10 @@
     // size, and everyayah folder names carry the bitrate (Alafasy_128kbps).
     const sizeCache = new Map();
     async function estimate(isStale) {
+      if (api.own.active()) {
+        const p = await api.own.prepare();
+        return isStale() ? null : LEAD + api.own.span(p.entry) + TAIL;
+      }
       const segs = api.segments();
       const m = /(\d+)kbps/i.exec(api.reciterObj().folder);
       if (!m) return null;
@@ -470,6 +474,7 @@
     // Streams the recitation: decodes an ayah or two ahead of what is playing and
     // lets go of each one once it has been heard.
     function play({ c, outputs, onTick, onEnd, onError }) {
+      if (api.own.active()) return playOwn({ c, outputs, onTick, onEnd, onError });
       const ac = api.audioCtx();
       const segs = api.segments();
       const pre = prefetcher(segs, 3);
@@ -524,6 +529,59 @@
       return ctl;
     }
 
+    // The user's own recording: the ayat are slices of one decoded buffer, all scheduled
+    // at once (nothing to download or decode while playing).
+    function playOwn({ c, outputs, onTick, onEnd, onError }) {
+      const ac = api.audioCtx();
+      const segs = api.segments();
+      let wins = [], total = null, t0 = null, stopped = false, raf = 0, route = null;
+      const sources = new Set();
+      const ctl = {
+        stop() {
+          if (stopped) return;
+          stopped = true;
+          cancelAnimationFrame(raf);
+          sources.forEach(s => { try { s.stop(); } catch (e) { /* not started */ } });
+          sources.clear();
+          if (route) setTimeout(route.dispose, 50);
+        },
+      };
+      (async () => {
+        let p;
+        try { p = await api.own.prepare(); } catch (e) { if (!stopped) onError(e); return; }
+        if (stopped) return;
+        route = await api.fxRoute(outputs);      // the effects, when there are any
+        if (stopped) { route.dispose(); return; }
+        const items = [];
+        let t = LEAD;
+        const at = ac.currentTime + 0.3;
+        api.own.slices(p.entry).forEach((s, i) => {
+          const src = ac.createBufferSource();
+          src.buffer = p.audio.buffer;
+          route.outs.forEach(n => src.connect(n));
+          src.onended = () => { sources.delete(src); try { src.disconnect(); } catch (e) { /* gone */ } };
+          src.start(at + t, s.off, s.dur);
+          sources.add(src);
+          items.push({ seg: segs[i], start: t, end: t + s.dur });
+          t += s.dur;
+        });
+        wins = windowsOf(items);
+        total = t + TAIL;
+        t0 = at;
+      })();
+      const tick = () => {
+        if (stopped) return;
+        const t = t0 == null ? 0 : Math.max(0, ac.currentTime - t0);
+        drawFrame(c, t, wins, total);
+        onTick(t, total, total ? segs.length : 0, segs.length);
+        if (total != null && t >= total) { ctl.stop(); onEnd(); return; }
+        raf = requestAnimationFrame(tick);
+      };
+      drawFrame(c, 0, wins, total);
+      raf = requestAnimationFrame(tick);
+      return ctl;
+    }
+
     // ---------- fast export (WebCodecs) ----------
     async function pickVideoConfig() {
       if (!window.VideoEncoder) return null;
@@ -567,8 +625,12 @@
 
     async function exportFast(cfgs, { onProgress, isCancelled, onPreview }) {
       const segs = api.segments();
-      const pre = prefetcher(segs, 4);
-      const decoder = new OfflineAudioContext(2, SR, SR);   // decodes straight to 48 kHz
+      const ownMode = api.own.active();
+      const ownP = ownMode ? await api.own.prepare() : null;
+      const ownSlices = ownMode ? api.own.slices(ownP.entry) : null;
+      const fxOn = ownMode && api.fxActive();
+      const pre = ownMode ? null : prefetcher(segs, 4);
+      const decoder = ownMode ? null : new OfflineAudioContext(2, SR, SR);   // decodes straight to 48 kHz
       const target = new Mp4Muxer.ArrayBufferTarget();
       const muxer = new Mp4Muxer.Muxer({
         target,
@@ -653,11 +715,28 @@
         await pushAudio(null, null, 0, Math.round(LEAD * SR));      // silent lead-in
         for (let i = 0; i < segs.length; i++) {
           if (isCancelled()) break;
-          const buf = await decode(decoder, await pre.get(i));
-          const ch0 = buf.getChannelData(0);
-          const ch1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : ch0;
+          let ch0, ch1, n0 = 0, n1;
+          if (ownMode && fxOn) {
+            // the slice through the effects, rendered offline exactly as the preview plays
+            // it (with the audio before it run through first, so tails carry over)
+            const sl = ownSlices[i];
+            const last = i === segs.length - 1;
+            const r = await AudioFx.renderRange(ownP.audio.buffer, sl.off, sl.dur, S.fx, api.own.levels(), SR, last ? AudioFx.tailOf(S.fx) : 0);
+            ch0 = r.ch0; ch1 = r.ch1; n1 = r.ch0.length;
+          } else if (ownMode) {
+            // a slice of the one decoded recording
+            const sl = ownSlices[i];
+            ch0 = ownP.audio.ch0; ch1 = ownP.audio.ch1;
+            n0 = Math.min(ch0.length, Math.round(sl.off * SR));
+            n1 = Math.min(ch0.length, Math.round((sl.off + sl.dur) * SR));
+          } else {
+            const buf = await decode(decoder, await pre.get(i));
+            ch0 = buf.getChannelData(0);
+            ch1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : ch0;
+            n1 = buf.length;
+          }
           const start = samples / SR;
-          await pushAudio(ch0, ch1, 0, buf.length);
+          await pushAudio(ch0, ch1, n0, n1);
           items.push({ seg: segs[i], start, end: samples / SR });
           wins = windowsOf(items);
           // Everything before this ayah's end is final now (the last ayah instead
