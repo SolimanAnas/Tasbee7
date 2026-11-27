@@ -97,6 +97,30 @@
         if (p && p.catch) p.catch(reject);
       });
     }
+    // The loudness of the speech band only (~140 Hz – 3.4 kHz): mains hum, mic rumble and hiss
+    // don't fill the pauses, so they are found in a noisy room too. Filtered natively at 8 kHz
+    // (an OfflineAudioContext, a moment even for 30 minutes); without it, the full signal.
+    async function speechEnvelope(buffer, ch0, ch1) {
+      try {
+        const rate = 8000;
+        const ctx = new OfflineAudioContext(1, Math.max(1, Math.ceil(buffer.duration * rate)), rate);
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        let node = src;
+        for (const [type, f] of [['highpass', 140], ['highpass', 140], ['lowpass', 3400]]) {
+          const b = ctx.createBiquadFilter();
+          b.type = type; b.frequency.value = f; b.Q.value = 0.707;
+          node.connect(b);
+          node = b;
+        }
+        node.connect(ctx.destination);
+        src.start();
+        const out = await ctx.startRendering();
+        return R.envelopeDb(out.getChannelData(0), null, rate);
+      } catch (e) {
+        return R.envelopeDb(ch0, ch1, buffer.sampleRate);
+      }
+    }
     function decode() {
       if (!rec) return Promise.reject(new Error('no recording'));
       if (audio && audio.id === rec.id) return Promise.resolve(audio);
@@ -109,7 +133,7 @@
         if (buffer.duration > MAX_SECONDS + 5) throw Object.assign(new Error('long'), { code: 'long' });
         const ch0 = buffer.getChannelData(0);
         const ch1 = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : ch0;
-        const env = R.envelopeDb(ch0, ch1, buffer.sampleRate);
+        const env = await speechEnvelope(buffer, ch0, ch1);
         audio = { id, buffer, ch0, ch1, env, blob };
         return audio;
       })();
@@ -121,15 +145,16 @@
     // ---------- the split ----------
     function autoEntry(a, segs) {
       const n = segs.length;
-      const r = R.autoSplit(a.env, R.HOP, n);
+      const r = R.autoSplit(a.env, R.HOP, n, segs.map(s => letters(s.text)));
       let entry;
       if (r.markers) {
-        entry = { m: r.markers, end: r.end, reviewed: false, confidence: r.confidence, method: 'silence' };
+        entry = { m: r.markers, end: r.end, reviewed: false, confidence: r.confidence, method: 'silence', unsure: r.unsure };
       } else {
         const one = R.autoSplit(a.env, R.HOP, 1);
         const start = one.markers ? one.markers[0] : 0;
         const end = one.markers ? one.end : a.buffer.duration;
-        entry = { m: R.proportional(start, end, segs.map(s => letters(s.text))), end, reviewed: false, confidence: 'low', method: 'text' };
+        entry = { m: R.proportional(start, end, segs.map(s => letters(s.text))), end, reviewed: false, confidence: 'low', method: 'text',
+          unsure: segs.slice(1).map((_, i) => i + 1) };
       }
       entry.m = R.normalizeMarkers(entry.m, entry.end, MIN_STEP);
       return entry;
@@ -183,6 +208,7 @@
       const e = entryNow();
       if (!e) { el.textContent = tr('vm_own_unsynced'); el.classList.add('warn'); }
       else if (!e.reviewed) { el.textContent = tr('vm_own_unreviewed'); el.classList.add('warn'); }
+      else if (e.unsure && e.unsure.length) { el.textContent = unsureText(e.unsure.length); el.classList.add('warn'); }
       else { el.textContent = tr('vm_own_synced'); el.classList.add('ok'); }
     }
 
@@ -257,13 +283,18 @@
         const r = R.snapTaps(a.env, R.HOP, taps, n);
         let m = r.markers;
         const end = Math.max(r.end, m[m.length - 1] + MIN_STEP * 2);
-        if (m.length < n) {
+        const tapped = m.length;
+        let unsure = [];
+        if (m.length < n) {          // the ayat after the last tap: from the pauses, like an upload
           const restFrom = m.length - 1;
-          m = m.slice(0, restFrom).concat(R.proportional(m[restFrom], end, segs.slice(restFrom).map(sg => letters(sg.text))));
+          const r2 = R.resplitInfo(a.env, R.HOP, m[restFrom], end, segs.slice(restFrom).map(sg => letters(sg.text)));
+          m = m.slice(0, restFrom).concat(r2.markers);
+          unsure = r2.unsure.map(i => i + restFrom);
         }
         rec.sync[keyOf()] = {
           m: R.normalizeMarkers(m, end, MIN_STEP), end,
           reviewed: taps.length >= n - 1, confidence: 'high', method: 'live',
+          fixed: m.slice(0, tapped).map((_, i) => i), unsure,
         };
       });
     }
@@ -303,6 +334,7 @@
     let url = '';
     let raf = 0;
     let outlineCache = null;
+    let pauseCache = null;        // where the pauses are: shaded on the waveform, markers snap to them
     const WINS = [10, 30, 120, 0];     // seconds shown; 0 = all
 
     const dur = () => (audio ? audio.buffer.duration : rec ? rec.duration : 0);
@@ -328,12 +360,15 @@
       const segs = api.segments();
       const weights = [];
       for (let q = i; q < j; q++) weights.push(letters(segs[q] && segs[q].text));
-      const next = R.resplit(audio.env, R.HOP, work.m[i], b, weights);
+      const r = R.resplitInfo(audio.env, R.HOP, work.m[i], b, weights);
+      const next = r.markers;
       let moved = 0;
       for (let q = i + 1; q < j; q++) {
         if (Math.abs(next[q - i] - work.m[q]) > 0.05) moved++;
         work.m[q] = next[q - i];
+        work.unsure.delete(q);
       }
+      r.unsure.forEach(x => work.unsure.add(x + i));
       if (moved) showFollowNote(i + 1, j);
       return moved;
     }
@@ -355,12 +390,16 @@
       try {
         const p = await prepare();
         const e = p.entry;
-        work = { m: e.m.slice(), end: e.end, sel: 0, playing: -1, dirty: false, win: 30, follow: true, info: e, fixed: fixedOf(e) };
+        const fixed = fixedOf(e);
+        work = { m: e.m.slice(), end: e.end, sel: 0, playing: -1, dirty: false, win: 30, follow: true, info: e, fixed,
+          unsure: new Set((e.unsure || []).filter(i => !fixed.has(i))), hist: [], fut: [], stopAt: 0, rate: 1, dragging: false };
+        if (!pauseCache || pauseCache.id !== audio.id) pauseCache = { id: audio.id, pts: R.snapPoints(audio.env, R.HOP) };
         if (!outlineCache || outlineCache.id !== audio.id) outlineCache = { id: audio.id, bars: R.outline(audio.env, 1200) };
         const b = await audio.blob;
         url = URL.createObjectURL(b);
         el = new Audio(url);
         el.preload = 'auto';
+        el.preservesPitch = true;
         el.onended = () => { updateTransport(); };
         renderSync();
       } catch (err) {
@@ -374,7 +413,8 @@
       if (el) { el.pause(); el.removeAttribute('src'); el.load(); el = null; }
       if (url) { URL.revokeObjectURL(url); url = ''; }
       if (work && work.dirty && rec) {
-        const e = { m: R.normalizeMarkers(work.m, work.end, MIN_STEP), end: work.end, reviewed: true, confidence: 'high', method: 'manual', fixed: [...work.fixed].sort((a, b) => a - b) };
+        const e = { m: R.normalizeMarkers(work.m, work.end, MIN_STEP), end: work.end, reviewed: true, confidence: 'high', method: 'manual',
+          fixed: [...work.fixed].sort((a, b) => a - b), unsure: [...work.unsure].sort((a, b) => a - b) };
         store(e);
         work = null;
         renderSyncStatus();
@@ -428,6 +468,8 @@
         row(segs.length, '■', api.esc(tr('vm_sync_end')), work.end, true);
       document.querySelectorAll('#vmSyncZoom button').forEach(b => b.classList.toggle('active', +b.dataset.win === work.win));
       renderFocus();
+      markUnsure();
+      markHistory();
       drawWave();
       updateTransport();
     }
@@ -453,6 +495,10 @@
       const mark = $('vmSyncMarkNext');
       mark.hidden = isEnd;
       $('vmSyncFollow').hidden = k >= n - 1;
+      const unsure = !isEnd && work.unsure.has(k);
+      $('vmSyncUnsure').hidden = !unsure;
+      $('vmSyncConfirm').hidden = !unsure;
+      $('vmSyncJoin').hidden = isEnd;
       $('vmSyncMarkNextLabel').textContent = k < n - 1 ? tr('vm_sync_next_here') : tr('vm_sync_end_here');
       $('vmSyncPrev').disabled = k === 0;
       $('vmSyncNextLabel').textContent = isEnd ? tr('vm_sync_done') : tr('vm_sync_next');
@@ -506,7 +552,18 @@
       const tok = (name, fallback) => (css.getPropertyValue(name) || '').trim() || fallback;
       const accent = tok('--accent-main', '#F2B33D'), text = tok('--text-secondary', '#A1A1AA');
       const endColor = tok('--danger', '#F87171'), headColor = tok('--text-primary', '#F4F4F5');
+      const warn = (getComputedStyle(cv).getPropertyValue('--sync-warn') || '').trim() || '#b45309';
       const x = t => (t - v.a) / (v.b - v.a) * w;
+      // the pauses: where a boundary can go
+      if (pauseCache && pauseCache.id === audio.id) {
+        c.fillStyle = accent;
+        c.globalAlpha = 0.12;
+        for (const g of pauseCache.pts) {
+          if (g.b < v.a || g.a > v.b) continue;
+          c.fillRect(x(g.a), 14, Math.max(1, x(g.b) - x(g.a)), h - 14);
+        }
+        c.globalAlpha = 1;
+      }
       // bars
       c.fillStyle = text;            // neutral: the gold is kept for the selected marker
       c.globalAlpha = 0.55;
@@ -525,7 +582,7 @@
       all.forEach((t, i) => {
         if (t < v.a - 0.01 || t > v.b + 0.01) return;
         const px = x(t), sel = i === work.sel;
-        c.strokeStyle = i === work.m.length ? endColor : (sel ? accent : text);
+        c.strokeStyle = i === work.m.length ? endColor : sel ? accent : work.unsure.has(i) ? warn : text;
         c.lineWidth = sel ? 3 : 1.5;
         c.setLineDash(i < work.m.length && !work.fixed.has(i) ? [4, 3] : []);     // dashed = a guess
         c.beginPath(); c.moveTo(px, 14); c.lineTo(px, h); c.stroke();
@@ -557,13 +614,16 @@
         const k = Math.min(currentIndex(el.currentTime), work.m.length - 1);
         if (k !== work.playing) { work.playing = k; markPlaying(); }
         if (el.currentTime >= work.end) el.pause();
+        if (work.stopAt && el.currentTime >= work.stopAt) { work.stopAt = 0; el.pause(); }
       }
       drawWave();
       updateTransport();
       raf = requestAnimationFrame(tick);
     }
-    function playFrom(t) {
+    function playFrom(t, keepStop) {
       if (!el) return;
+      if (!keepStop) work.stopAt = 0;
+      el.playbackRate = work.rate;
       el.currentTime = Math.max(0, t);
       work.follow = true;
       el.play().catch(() => {});
@@ -576,7 +636,8 @@
     // are pushed along if it passes them, so going through the ayat in order never gets stuck.
     function setMarker(i, t) {
       const n = work.m.length;
-      if (i < n) work.fixed.add(i);
+      if (!work.dragging) remember();
+      if (i < n) { work.fixed.add(i); work.unsure.delete(i); }
       const all = work.m.concat([work.end]);
       const lo = i === 0 ? 0 : all[i - 1] + MIN_STEP;
       const hi = dur() - MIN_STEP * (n - i);          // room left for the ones after it
@@ -590,7 +651,60 @@
       refreshInputs();
       syncStatusLine();
       renderFocus();
+      markUnsure();
       drawWave();
+    }
+
+    // ---- undo / redo ----
+    // Each edit (a nudge, a drag, a tap, a re-split) can be taken back and redone.
+    const snap = () => ({ m: work.m.slice(), end: work.end, fixed: [...work.fixed], unsure: [...work.unsure], dirty: work.dirty });
+    function remember() {
+      work.hist.push(snap());
+      if (work.hist.length > 200) work.hist.shift();
+      work.fut = [];
+      markHistory();
+    }
+    function restore(st) {
+      work.m = st.m.slice(); work.end = st.end; work.fixed = new Set(st.fixed); work.unsure = new Set(st.unsure); work.dirty = st.dirty;
+      refreshInputs(); syncStatusLine(); renderFocus(); markUnsure(); drawWave(); markHistory();
+    }
+    function undo() { if (!work || !work.hist.length) return; work.fut.push(snap()); restore(work.hist.pop()); }
+    function redo() { if (!work || !work.fut.length) return; work.hist.push(snap()); restore(work.fut.pop()); }
+    function markHistory() {
+      if (!work) return;
+      $('vmSyncUndo').disabled = !work.hist.length;
+      $('vmSyncRedo').disabled = !work.fut.length;
+    }
+
+    // ---- boundaries to check ----
+    // The guesses that could be wrong (placed by text length, in a very short pause, or next to
+    // another pause as long): counted at the top, marked in the list, the waveform and the focus.
+    function unsureText(n) {
+      const v = num(n);
+      return tr(n === 1 ? 'vm_unsure_1' : n === 2 ? 'vm_unsure_2' : n % 100 >= 3 && n % 100 <= 10 ? 'vm_unsure_few' : 'vm_unsure_many', { n: v });
+    }
+    function markUnsure() {
+      if (!work) return;
+      document.querySelectorAll('#vmSyncList .sync-row').forEach(r => r.classList.toggle('unsure', work.unsure.has(+r.dataset.i)));
+      const n = work.unsure.size;
+      $('vmSyncReview').hidden = !n;
+      if (n) $('vmSyncReviewText').textContent = unsureText(n);
+    }
+    // The next unsure boundary after the one being checked (round to the first): go there and
+    // play across it.
+    function reviewNext() {
+      if (!work || !work.unsure.size) return;
+      const list = [...work.unsure].sort((a, b) => a - b);
+      const k = list.find(x => x > work.sel) || list[0];
+      goTo(k, false);
+      playJoin();
+    }
+    // «Listen across the boundary»: from a little before the ayah starts to a little after.
+    function playJoin() {
+      if (!work || !el) return;
+      const t = timeOf(work.sel);
+      work.stopAt = Math.min(dur(), t + 1.6);
+      playFrom(Math.max(0, t - 1.6), true);
     }
     function refreshInputs() {
       const all = work.m.concat([work.end]);
@@ -633,8 +747,10 @@
       });
       $('vmSyncAuto').onclick = () => {
         if (!work || !audio) return;
+        remember();
         const e = autoEntry(audio, api.segments());
         work.m = e.m; work.end = e.end; work.info = e; work.dirty = e.method !== 'silence' ? true : false; work.sel = 0; work.fixed = new Set();
+        work.unsure = new Set(e.unsure || []);
         renderSync();
       };
       $('vmSyncText').onclick = () => {
@@ -642,8 +758,10 @@
         const segs = api.segments();
         const one = R.autoSplit(audio.env, R.HOP, 1);
         const start = one.markers ? one.markers[0] : 0, end = one.markers ? one.end : audio.buffer.duration;
+        remember();
         work.m = R.normalizeMarkers(R.proportional(start, end, segs.map(s => letters(s.text))), end, MIN_STEP);
         work.end = end; work.dirty = true; work.info = { method: 'text', confidence: 'low' }; work.sel = 0; work.fixed = new Set();
+        work.unsure = new Set(segs.slice(1).map((_, i) => i + 1));
         renderSync();
       };
       $('vmSyncDone').onclick = () => api.closeSync();
@@ -660,11 +778,36 @@
       // also the ones placed by hand before
       $('vmSyncFollow').onclick = () => {
         if (!work || work.sel >= work.m.length - 1) return;
+        remember();
         for (let q = work.sel + 1; q < work.m.length; q++) work.fixed.delete(q);
         work.fixed.add(work.sel);
+        work.unsure.delete(work.sel);
         followFrom(work.sel);
         work.dirty = true;
-        refreshInputs(); syncStatusLine(); renderFocus(); drawWave();
+        refreshInputs(); syncStatusLine(); renderFocus(); markUnsure(); drawWave();
+      };
+      // the pro tools: undo / redo, a slower playback for exact marking, the boundaries to check
+      $('vmSyncUndo').onclick = undo;
+      $('vmSyncRedo').onclick = redo;
+      $('vmSyncSpeed').onclick = () => {
+        if (!work) return;
+        const RATES = [1, 0.75, 0.5];
+        work.rate = RATES[(RATES.indexOf(work.rate) + 1) % RATES.length];
+        if (el) el.playbackRate = work.rate;
+        const b = $('vmSyncSpeed');
+        b.textContent = String(work.rate).replace(/^0/, '') + '×';
+        b.classList.toggle('slow', work.rate < 1);
+      };
+      $('vmSyncReviewBtn').onclick = reviewNext;
+      $('vmSyncJoin').onclick = playJoin;
+      $('vmSyncConfirm').onclick = () => {        // the guess is right: keep it as it is
+        if (!work || !work.unsure.has(work.sel)) return;
+        remember();
+        work.unsure.delete(work.sel);
+        work.fixed.add(work.sel);
+        work.dirty = true;
+        renderFocus(); markUnsure(); syncStatusLine(); drawWave();
+        if (work.unsure.size) reviewNext();
       };
       $('vmSyncFMinus').onclick = () => { if (work) setMarker(work.sel, timeOf(work.sel) - 0.1); };
       $('vmSyncFPlus').onclick = () => { if (work) setMarker(work.sel, timeOf(work.sel) + 0.1); };
@@ -679,7 +822,15 @@
       document.addEventListener('keydown', e => {
         if (!work || !$('vmSyncSheet').classList.contains('active')) return;
         const tag = e.target && e.target.tagName;
+        // Ctrl/⌘+Z undo, Ctrl/⌘+Shift+Z or Ctrl+Y redo (not inside a text field: it has its own)
+        if ((e.ctrlKey || e.metaKey) && tag !== 'INPUT') {
+          const k = e.key.toLowerCase();
+          if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+          if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); redo(); return; }
+        }
         if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SUMMARY') return;
+        // , and . move the chosen boundary 50 ms earlier / later
+        if (e.key === ',' || e.key === '.') { e.preventDefault(); setMarker(work.sel, timeOf(work.sel) + (e.key === ',' ? -0.05 : 0.05)); return; }
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); markNext(); }
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
           e.preventDefault();
@@ -701,12 +852,28 @@
       cv.addEventListener('pointerdown', ev => {
         if (!work) return;
         drag = nearest(ev);
-        if (drag >= 0) { work.sel = drag; markRows(); renderFocus(); cv.setPointerCapture(ev.pointerId); work.follow = false; }
+        if (drag >= 0) { work.sel = drag; markRows(); renderFocus(); cv.setPointerCapture(ev.pointerId); work.follow = false; remember(); work.dragging = true; }
         else if (el) { el.currentTime = Math.min(dur(), Math.max(0, timeAt(ev))); work.follow = false; updateTransport(); }
         drawWave();
       });
-      cv.addEventListener('pointermove', ev => { if (drag >= 0 && work) setMarker(drag, timeAt(ev)); });
-      const end = () => { if (drag >= 0 && work) { const r = document.querySelector('#vmSyncList .sync-row.sel'); if (r) r.scrollIntoView({ block: 'nearest' }); } drag = -1; };
+      // a dragged marker snaps to a pause within ~12 px (hold Alt or Shift to place it freely)
+      const snapped = (ev, t) => {
+        if (ev.altKey || ev.shiftKey || !pauseCache || drag >= work.m.length) return t;
+        const r = cv.getBoundingClientRect(), v = view(), px = sec => (sec - v.a) / (v.b - v.a) * r.width;
+        let best = t, bd = 12;
+        for (const g of pauseCache.pts) { const d = Math.abs(px(g.m) - px(t)); if (d < bd) { bd = d; best = g.m; } }
+        return best;
+      };
+      cv.addEventListener('pointermove', ev => { if (drag >= 0 && work) setMarker(drag, snapped(ev, timeAt(ev))); });
+      const end = () => {
+        if (drag >= 0 && work) {
+          work.dragging = false;
+          const last = work.hist[work.hist.length - 1];
+          if (last && last.m[drag] === work.m[drag] && last.end === work.end) { work.hist.pop(); markHistory(); }   // a tap, not a move
+          const r = document.querySelector('#vmSyncList .sync-row.sel'); if (r) r.scrollIntoView({ block: 'nearest' });
+        }
+        drag = -1;
+      };
       cv.addEventListener('pointerup', end);
       cv.addEventListener('pointercancel', end);
       window.addEventListener('resize', () => { if (work) drawWave(); });
@@ -732,6 +899,7 @@
     return {
       init, bindUi, renderBox, has, active, displayName, prepare, slices, span, sig, entryNow, addRecorded, levels,
       openSync, closeSync, renderSync, decode,
+      get sync() { return work ? { m: work.m.slice(), end: work.end, sel: work.sel, unsure: [...work.unsure].sort((a, b) => a - b), fixed: [...work.fixed].sort((a, b) => a - b), rate: work.rate, playbackRate: el ? el.playbackRate : null, snaps: pauseCache ? pauseCache.pts.map(p => p.m) : [] } : null; },
       get rec() { return rec; },
       get buffer() { return audio ? audio.buffer : null; },
     };

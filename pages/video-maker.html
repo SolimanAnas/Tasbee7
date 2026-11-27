@@ -615,7 +615,34 @@ body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
 .sync-sheet { max-width:560px; }
 .sync-hint { font-size:12.5px; color:var(--text-secondary); line-height:1.6; }
 .sync-status { font-size:13px; font-weight:800; color:var(--accent-main); }
-.sync-status.warn { color:#b45309; }
+.sync-status.warn { color:var(--sync-warn); }
+/* Uncertain boundaries: one amber for them everywhere in the sheet (list, waveform, focus) */
+.sync-sheet { --sync-warn:#b45309; }
+[data-theme="dark"] .sync-sheet { --sync-warn:#f59e0b; }
+[data-theme="sepia"] .sync-sheet { --sync-warn:#9a4a0b; }
+.sync-review { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 8px 8px 12px; border-radius:12px;
+  background:color-mix(in srgb, var(--sync-warn) 12%, transparent); color:var(--sync-warn); font-size:13.5px; font-weight:700; }
+[dir="rtl"] .sync-review { padding:8px 12px 8px 8px; }
+.sync-review[hidden] { display:none; }
+.sync-review-btn { flex:none; min-height:40px; padding:0 14px; border:none; border-radius:10px; background:var(--sync-warn); color:#fff; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+.sync-tools { display:flex; gap:4px; }
+.sync-tool { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:1px solid var(--glass-border); border-radius:10px;
+  background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:13px; font-weight:800; cursor:pointer; padding:0; }
+.sync-tool svg { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.sync-tool:disabled { opacity:.35; cursor:default; }
+.sync-speed { width:auto; min-width:44px; padding:0 8px; font-variant-numeric:tabular-nums; }
+.sync-speed.slow { background:var(--accent-muted); border-color:var(--accent-main); color:var(--accent-main); }
+.sf-unsure { display:inline-flex; align-items:center; gap:4px; color:var(--sync-warn); font-size:12.5px; font-weight:800; }
+.sf-unsure[hidden] { display:none; }
+.sf-unsure svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.sf-check { display:flex; gap:8px; }
+.sf-check button { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:0 10px; border-radius:12px; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+.sf-check button[hidden] { display:none; }
+.sf-check svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.sf-join { border:1px solid var(--glass-border); background:transparent; color:var(--text-primary); }
+.sf-confirm { border:1px solid var(--sync-warn); background:color-mix(in srgb, var(--sync-warn) 12%, transparent); color:var(--sync-warn); }
+.sync-row.unsure .sr-num { color:var(--sync-warn); }
+.sync-row.unsure .sr-num::before { content:'⚠'; margin-inline-end:3px; font-size:11px; }
 .sync-wave { width:100%; height:96px; border-radius:14px; background:var(--field-bg); border:1px solid var(--glass-border); touch-action:none; cursor:pointer; flex-shrink:0; }
 .sync-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .sync-play { width:44px; height:44px; border-radius:50%; border:none; background:var(--accent-main); color:#fff; font-size:16px; cursor:pointer; flex:none; }
@@ -1081,10 +1108,19 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
   <div class="sheet-header"><h2 id="vmSyncSheetTitle" data-i18n="vm_sync_title">ضبط توقيت الآيات</h2><button class="icon-btn" type="button" data-close-pick aria-label="إغلاق" data-i18n-aria="vm_close" data-i18n-title="vm_close" title="إغلاق"><img src="../img/SVG/close.svg" class="close-icon" style="width:1em;height:1em;" alt=""></button></div>
   <div class="sheet-content">
     <div class="sync-status" id="vmSyncStatus" aria-live="polite"></div>
+    <div class="sync-review" id="vmSyncReview" hidden>
+      <span class="sync-review-text" id="vmSyncReviewText"></span>
+      <button type="button" class="sync-review-btn" id="vmSyncReviewBtn" data-i18n="vm_sync_review">راجع التالي</button>
+    </div>
     <canvas id="vmSyncWave" class="sync-wave" aria-hidden="true"></canvas>
     <div class="sync-bar">
       <button type="button" class="sync-play" id="vmSyncPlay" aria-label="Play">▶</button>
       <span class="sync-time" id="vmSyncTime" dir="ltr">0:00.0 / 0:00</span>
+      <span class="sync-tools">
+        <button type="button" class="sync-tool" id="vmSyncUndo" disabled aria-label="تراجع" title="تراجع" data-i18n-aria="vm_sync_undo" data-i18n-title="vm_sync_undo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+        <button type="button" class="sync-tool" id="vmSyncRedo" disabled aria-label="إعادة" title="إعادة" data-i18n-aria="vm_sync_redo" data-i18n-title="vm_sync_redo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+        <button type="button" class="sync-tool sync-speed" id="vmSyncSpeed" aria-label="سرعة التشغيل" title="سرعة التشغيل" data-i18n-aria="vm_sync_speed" data-i18n-title="vm_sync_speed" dir="ltr">1×</button>
+      </span>
       <span class="sync-zoom" id="vmSyncZoom" role="group">
         <button type="button" data-win="10">10s</button>
         <button type="button" data-win="30" class="active">30s</button>
@@ -1093,7 +1129,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       </span>
     </div>
     <div class="sync-focus" id="vmSyncFocus">
-      <div class="sf-top"><span class="sf-count" id="vmSyncFocusCount"></span></div>
+      <div class="sf-top"><span class="sf-count" id="vmSyncFocusCount"></span><span class="sf-unsure" id="vmSyncUnsure" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></svg><span data-i18n="vm_sync_unsure_chip">غير مؤكد</span></span></div>
       <div class="sf-ayah" id="vmSyncFocusText" dir="rtl"></div>
       <div class="sf-start">
         <span class="sf-start-label" id="vmSyncFocusLabel"></span>
@@ -1103,6 +1139,10 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           <button type="button" id="vmSyncFPlus" aria-label="+0.1">+</button>
           <button type="button" id="vmSyncFHere" data-i18n-title="vm_sync_set_here" title="ضع العلامة عند موضع التشغيل" data-i18n-aria="vm_sync_set_here" aria-label="ضع العلامة عند موضع التشغيل">⌖</button>
         </span>
+      </div>
+      <div class="sf-check">
+        <button type="button" class="sf-join" id="vmSyncJoin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg><span data-i18n="vm_sync_listen_join">استمع للفاصل</span></button>
+        <button type="button" class="sf-confirm" id="vmSyncConfirm" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="vm_sync_confirm">الفاصل صحيح</span></button>
       </div>
       <button type="button" class="sf-mark" id="vmSyncMarkNext"><span id="vmSyncMarkNextLabel" data-i18n="vm_sync_next_here">الآية التالية تبدأ هنا</span></button>
       <button type="button" class="sf-follow" id="vmSyncFollow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></svg><span data-i18n="vm_sync_follow">زامن الآيات التالية تلقائياً</span></button>

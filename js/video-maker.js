@@ -165,6 +165,7 @@
       vm_sync_from_start: 'استمع من البداية',
       vm_sync_next_here: 'الآية التالية تبدأ هنا',
       vm_sync_follow: 'زامن الآيات التالية تلقائياً',
+      vm_sync_review: 'راجع التالي', vm_sync_undo: 'تراجع', vm_sync_redo: 'إعادة', vm_sync_speed: 'سرعة التشغيل', vm_sync_unsure_chip: 'غير مؤكد', vm_sync_listen_join: 'استمع للفاصل', vm_sync_confirm: 'الفاصل صحيح', vm_unsure_1: 'فاصل واحد غير مؤكد', vm_unsure_2: 'فاصلان غير مؤكدين', vm_unsure_few: '{n} فواصل غير مؤكدة', vm_unsure_many: '{n} فاصلاً غير مؤكد',
       vm_settings_video: 'الفيديو',
       vm_sections: 'أقسام الإعدادات', vm_sec_audio: 'الصوت', vm_sec_look: 'المظهر', vm_sec_text: 'النص',
       vm_close: 'إغلاق',
@@ -278,6 +279,7 @@
       vm_sync_from_start: 'Listen from the start',
       vm_sync_next_here: 'Next ayah starts here',
       vm_sync_follow: 'Sync the following ayat automatically',
+      vm_sync_review: 'Check the next', vm_sync_undo: 'Undo', vm_sync_redo: 'Redo', vm_sync_speed: 'Playback speed', vm_sync_unsure_chip: 'Unsure', vm_sync_listen_join: 'Listen across it', vm_sync_confirm: 'It is right', vm_unsure_1: '1 boundary to check', vm_unsure_2: '2 boundaries to check', vm_unsure_few: '{n} boundaries to check', vm_unsure_many: '{n} boundaries to check',
       vm_settings_video: 'Video',
       vm_sections: 'Settings sections', vm_sec_audio: 'Audio', vm_sec_look: 'Look', vm_sec_text: 'Text',
       vm_close: 'Close',
@@ -2431,6 +2433,6 @@
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
   const BUILD = 8;   // 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
-  window.VM = { showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
+  window.VM = { get own() { return own; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
   init();
 })();
