@@ -5,7 +5,8 @@ const problems = [];
 for (const pg of pages) {
   const dir = path.dirname(pg);
   const html = fs.readFileSync(pg, 'utf8');
-  const refs = [...html.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
+  // Only the src / href attributes themselves, not ones that end the same way (data-src="own").
+  const refs = [...html.matchAll(/(?<![\w-])(?:src|href)\s*=\s*["']([^"']+)["']/g)].map(m => m[1]);
   for (const r of refs) {
     if (/^(https?:|data:|mailto:|tel:|#|javascript:|blob:)/i.test(r)) continue;
     // Skip template-literal placeholders (e.g. src="${thumb}") — these are
