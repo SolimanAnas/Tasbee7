@@ -861,14 +861,31 @@
     c.drawImage(src, (w - dw) / 2 + cam.panX * roomX, (h - dh) / 2 + cam.panY * roomY, dw, dh);
   }
 
+  // The last frame the background video showed, for the moments it has none.
+  const held = { cv: null, src: '', t: -1 };
+  function keepVideoFrame(v) {
+    if (held.src === v.currentSrc && held.t === v.currentTime) return;     // nothing new to keep
+    if (!held.cv) held.cv = document.createElement('canvas');
+    if (held.cv.width !== v.videoWidth || held.cv.height !== v.videoHeight) { held.cv.width = v.videoWidth; held.cv.height = v.videoHeight; }
+    held.cv.getContext('2d').drawImage(v, 0, 0);
+    held.src = v.currentSrc;
+    held.t = v.currentTime;
+  }
+  const heldFrameFor = v => !!(v && held.cv && held.src && held.src === v.currentSrc);
+
   function drawBackground(c, w, h, progress, t, tl) {
     const cam = cameraAt(progress);
     const zoom = cam.zoom;
     const ids = slideIds();
     if (ids.length) {
       drawSlideshow(c, w, h, tl ? t : 0, tl, ids);
-    } else if (state.bg.startsWith('v:') && bgVideo && bgVideo.readyState >= 2) {
+    } else if (state.bg.startsWith('v:') && bgVideo && bgVideo.readyState >= 2 && !bgVideo.seeking) {
       drawCover(c, bgVideo, bgVideo.videoWidth, bgVideo.videoHeight, w, h, cam);
+      keepVideoFrame(bgVideo);
+    } else if (state.bg.startsWith('v:') && heldFrameFor(bgVideo)) {
+      // The video has no frame for a moment (it jumps back to the start at its loop point,
+      // ~50 ms): hold the last one it showed rather than flash the poster.
+      drawCover(c, held.cv, held.cv.width, held.cv.height, w, h, cam);
     } else if (state.bg.startsWith('v:') && bgPoster && bgPoster.complete && bgPoster.naturalWidth) {
       drawCover(c, bgPoster, bgPoster.naturalWidth, bgPoster.naturalHeight, w, h, cam);
     } else if (state.bg.startsWith('i:') && bgImg && bgImg.complete && bgImg.naturalWidth) {

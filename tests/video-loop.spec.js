@@ -176,3 +176,43 @@ test('creating a video waits for the loop to be ready, then records it', async (
   expect(await page.evaluate(() => VM.loopJob.done)).toBe(true);
   expect(await page.evaluate(() => VM.bgVideo.src.startsWith('blob:') && VM.bgVideo.duration > 19.5)).toBe(true);
 });
+
+// When the background video jumps back to its start (its loop point, every ~10 s), it has no
+// frame for a moment. The picture must hold its last frame, never flash the poster: here the
+// poster is solid magenta, and no frame may show it.
+test('no flash at the loop point: the last frame is held while the video jumps back', async ({ page }) => {
+  test.setTimeout(60000);
+  await page.route(/v4\.thumb\.webp$/, route => route.fulfill({ status: 200, headers: { 'Content-Type': 'image/svg+xml' },
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"><rect width="16" height="9" fill="#ff00ff"/></svg>' }));
+  await page.addInitScript(() => { localStorage.setItem('vm_settings', JSON.stringify({ bg: 'v:v4.mp4', motion: false, pingPong: false })); });
+  await page.route(/everyayah\.com\/data\/.+\.mp3$/, route => route.fulfill({ status: 200, headers: { 'Content-Type': 'audio/wav', 'Access-Control-Allow-Origin': '*' }, body: wav(3) }));
+  await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await page.waitForFunction(() => VM.bgVideo && VM.bgVideo.readyState >= 2, null, { timeout: 20000 });
+  await page.locator('#vmPreview').click();
+  await expect.poll(() => page.evaluate(() => !!VM.bgVideo && !VM.bgVideo.paused && VM.bgVideo.currentTime > 0.5), { timeout: 15000 }).toBe(true);
+  const flashes = await page.evaluate(async () => {
+    const c = document.getElementById('vmCanvas');
+    const sm = document.createElement('canvas'); sm.width = 27; sm.height = 48;
+    const x = sm.getContext('2d', { willReadFrequently: true });
+    let bad = 0, frames = 0, stop = false;
+    const look = () => {
+      if (stop) return;
+      requestAnimationFrame(look);
+      x.drawImage(c, 0, 0, 27, 48);
+      const d = x.getImageData(0, 0, 27, 48).data;
+      let m = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i] > 200 && d[i + 1] < 80 && d[i + 2] > 200) m++;
+      frames++;
+      if (m > 50) bad++;
+    };
+    look();
+    // the jumps a loop makes, several times
+    for (let k = 0; k < 6; k++) { await new Promise(r => setTimeout(r, 350)); VM.bgVideo.currentTime = 0; }
+    await new Promise(r => setTimeout(r, 500));
+    stop = true;
+    return { bad, frames };
+  });
+  expect(flashes.frames).toBeGreaterThan(20);
+  expect(flashes.bad).toBe(0);
+});
