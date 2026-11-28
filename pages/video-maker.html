@@ -507,6 +507,24 @@ body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
 @media (max-width:420px) { .mode-tabs button { flex-direction:column; gap:3px; padding:6px 4px; font-size:12.5px; } }
 /* «خاطرة»: the word-by-word tab (Shorts controls, plus its own font picker and notes) */
 body.mode-khatira .not-khatira, body:not(.mode-khatira) .only-khatira { display:none !important; }
+/* «خاطرة» with your own words: the Quran controls step aside for the text fields */
+body.kh-text .not-ktext, body:not(.kh-text) .only-ktext { display:none !important; }
+body.kh-text.kh-own .kt-silent { display:none !important; }
+.kt-box { display:flex; flex-direction:column; gap:10px; }
+.kt-list { display:flex; flex-direction:column; gap:10px; }
+.kt-row { display:flex; flex-direction:column; gap:4px; position:relative; }
+.kt-row .kt-label { font-size:12.5px; font-weight:800; color:var(--text-secondary); }
+.kt-row textarea { width:100%; min-height:64px; resize:vertical; padding:10px 40px 10px 12px; border-radius:12px; border:1px solid var(--glass-border);
+  background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:16px; line-height:1.6; }
+[dir="rtl"] .kt-row textarea { padding:10px 12px 10px 40px; }
+.kt-row textarea:focus { outline:none; border-color:var(--accent-main); box-shadow:0 0 0 2px var(--accent-muted); }
+.kt-row .kt-del { position:absolute; top:26px; inset-inline-end:4px; width:36px; height:36px; border:none; border-radius:10px; background:transparent;
+  color:var(--text-secondary); font-size:20px; cursor:pointer; }
+.kt-row .kt-del:hover { background:var(--accent-muted); color:var(--danger); }
+.kt-add { display:flex; align-items:center; justify-content:center; gap:8px; min-height:48px; border:2px dashed var(--accent-main); border-radius:12px;
+  background:var(--accent-muted); color:var(--accent-main); font:inherit; font-size:14.5px; font-weight:800; cursor:pointer; }
+.kt-add svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; }
+.kt-add:disabled { opacity:.45; cursor:default; }
 .kh-note { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--text-secondary); line-height:1.6; margin-top:8px; }
 .kh-note svg { width:16px; height:16px; flex-shrink:0; margin-top:3px; }
 .kfonts { display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
@@ -796,7 +814,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       <div class="sec-tabs" id="vmSecTabs" role="tablist" aria-label="أقسام الإعدادات" data-i18n-aria="vm_sections">
         <button type="button" role="tab" id="vmTab-ayat" data-sec="ayat" aria-selected="true">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5c2.6-1.4 5.4-1.4 8 0V19c-2.6-1.4-5.4-1.4-8 0zM21 5.5c-2.6-1.4-5.4-1.4-8 0V19c2.6-1.4 5.4-1.4 8 0z"/></svg>
-          <span data-i18n="vm_step_ayat">الآيات</span>
+          <span class="not-khatira" data-i18n="vm_step_ayat">الآيات</span><span class="only-khatira" data-i18n="vm_sec_content">المحتوى</span>
         </button>
         <button type="button" role="tab" id="vmTab-audio" data-sec="audio" aria-selected="false" tabindex="-1">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
@@ -813,20 +831,30 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       </div>
       <section data-sec="ayat" role="tabpanel" aria-labelledby="vmTab-ayat" class="card">
         <div class="step-head">
-          <span class="step-num">1</span><span class="step-title" data-i18n="vm_step_ayat">الآيات</span>
-          <button type="button" class="search-btn" id="vmSearchBtn" aria-haspopup="dialog" data-i18n-title="vm_search" data-i18n-aria="vm_search" title="بحث في القرآن" aria-label="بحث في القرآن"><img src="../img/SVG/search.svg" alt="" style="width:18px;height:18px;"></button>
-          <button type="button" class="popular-btn" id="vmPopularBtn" aria-haspopup="dialog">
+          <span class="step-num">1</span><span class="step-title not-khatira" data-i18n="vm_step_ayat">الآيات</span><span class="step-title only-khatira" data-i18n="vm_sec_content">المحتوى</span>
+          <button type="button" class="search-btn not-ktext" id="vmSearchBtn" aria-haspopup="dialog" data-i18n-title="vm_search" data-i18n-aria="vm_search" title="بحث في القرآن" aria-label="بحث في القرآن"><img src="../img/SVG/search.svg" alt="" style="width:18px;height:18px;"></button>
+          <button type="button" class="popular-btn not-ktext" id="vmPopularBtn" aria-haspopup="dialog">
             <svg class="spark" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.6 6.6 5.4 11.4 12 12-6.6.6-11.4 5.4-12 12-.6-6.6-5.4-11.4-12-12C6.6 11.4 11.4 6.6 12 0z"/></svg><span data-i18n="vm_popular">الأكثر استخداماً</span>
           </button>
         </div>
-        <div class="field">
+        <!-- «خاطرة»: your own words, or ayat -->
+        <div class="formats fx only-khatira" id="vmKContent" role="group">
+          <button type="button" data-kc="text" class="active" aria-pressed="true" data-i18n="vm_kc_text">نص من كتابتك</button>
+          <button type="button" data-kc="quran" aria-pressed="false" data-i18n="vm_kc_quran">آيات من القرآن</button>
+        </div>
+        <div class="kt-box only-ktext">
+          <div class="kt-list" id="vmKTexts"></div>
+          <button type="button" class="kt-add" id="vmKTextAdd"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="vm_kt_add">أضف نصاً</span></button>
+          <div class="kh-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg><span data-i18n="vm_kt_note">كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.</span></div>
+        </div>
+        <div class="field not-ktext">
           <span class="label" data-i18n="vm_surah">السورة</span>
           <button type="button" class="picker-btn" id="vmSurahBtn" aria-haspopup="dialog">
             <span class="picker-main"><span class="picker-name" id="vmSurahLabel"></span></span>
           </button>
           <select id="vmSurah" hidden aria-hidden="true" tabindex="-1"></select>
         </div>
-        <div class="row">
+        <div class="row not-ktext">
           <div class="field">
             <label class="label" for="vmFrom" data-i18n="vm_from">من آية</label>
             <div class="stepper">
@@ -844,7 +872,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
             </div>
           </div>
         </div>
-        <label class="switch-row" id="vmBasmalaRow">
+        <label class="switch-row not-ktext" id="vmBasmalaRow">
           <span class="sw-text"><span class="sw-title" data-i18n="vm_basmala">البدء بالبسملة</span></span>
           <input type="checkbox" class="switch" id="vmBasmala" checked>
         </label>
@@ -855,12 +883,13 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       </section>
 
       <section data-sec="audio" role="tabpanel" aria-labelledby="vmTab-audio" class="card">
-        <div class="step-head"><span class="step-num">2</span><span class="step-title" data-i18n="vm_reciter">القارئ</span></div>
+        <div class="step-head"><span class="step-num">2</span><span class="step-title not-ktext" data-i18n="vm_reciter">القارئ</span><span class="step-title only-ktext" data-i18n="vm_sec_audio">الصوت</span></div>
         <div class="formats fx" id="vmSource">
-          <button type="button" data-src="reciter" class="active" data-i18n="vm_src_reciter">قارئ من القائمة</button>
+          <button type="button" data-src="reciter" class="active"><span class="not-ktext" data-i18n="vm_src_reciter">قارئ من القائمة</span><span class="only-ktext" data-i18n="vm_src_none">بدون صوت</span></button>
           <button type="button" data-src="own" data-i18n="vm_src_own">تسجيلي الخاص</button>
         </div>
-        <div id="vmReciterBox">
+        <div class="kh-note only-ktext kt-silent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-i18n="vm_kt_silent">بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.</span></div>
+        <div id="vmReciterBox" class="not-ktext">
           <button type="button" class="picker-btn" id="vmReciterBtn" aria-haspopup="dialog">
             <span class="picker-main" id="vmReciterLabel"></span>
           </button>
@@ -936,7 +965,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           <div class="kh-note only-khatira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg><span data-i18n="vm_kh_own_note">في تسجيلك تُوزَّع الكلمات على زمن كل آية بحسب طولها، فتوقيتها تقريبي.</span></div>
         </div>
         <div class="field">
-          <label class="label" for="vmSheikh" data-i18n="vm_sheikh_name">اسم القارئ المعروض</label>
+          <label class="label" for="vmSheikh"><span class="not-ktext" data-i18n="vm_sheikh_name">اسم القارئ المعروض</span><span class="only-ktext" data-i18n="vm_kt_name">الاسم المعروض</span></label>
           <input type="text" id="vmSheikh" class="text-input" maxlength="60" autocomplete="off" dir="auto">
         </div>
         <div class="dur-row" id="vmDuration" aria-live="polite">

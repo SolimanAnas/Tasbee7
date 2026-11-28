@@ -42,7 +42,7 @@ test.beforeEach(async ({ page }) => {
       if (sessionStorage.getItem('vmTestStarted')) return;
       sessionStorage.setItem('vmTestStarted', '1');
       localStorage.setItem('zad_lang', 'ar');
-      localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', surah: 1, from: 3, to: 5, kReciter: 7, bg: 'g0' }));
+      localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'quran', surah: 1, from: 3, to: 5, kReciter: 7, bg: 'g0' }));
     } catch { /* storage blocked */ }
   });
   await page.route(url => !url.href.startsWith(BASE_URL) && !/qurancdn|quranicaudio/.test(url.href), route => route.abort());
@@ -125,7 +125,7 @@ test('the tab: its reciters, its faces, and the Shorts controls it shares', asyn
   await open(page);
   await expect(page.locator('#vmBasmalaRow')).toBeHidden();               // no timings for it
   await sec(page, 'audio');
-  await expect(page.locator('.kh-note').first()).toBeVisible();
+  await expect(page.locator('#vmReciterBox .kh-note')).toBeVisible();
   await page.locator('#vmReciterBtn').click();
   await expect(page.locator('#vmReciterList [data-kreciter]')).toHaveCount(await page.evaluate(() => Khatira.RECITERS.length));
   await page.locator('#vmReciterList [data-kreciter="9"]').click();
@@ -202,7 +202,7 @@ test('a font from the device: added, used, remembered, deleted; a wrong file is 
 
 test('a khatira video is made', async ({ page }) => {
   test.setTimeout(90000);
-  await page.addInitScript(() => { if (!sessionStorage.getItem('k2')) { sessionStorage.setItem('k2', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', surah: 1, from: 3, to: 4, kReciter: 7, bg: 'g0' })); } });
+  await page.addInitScript(() => { if (!sessionStorage.getItem('k2')) { sessionStorage.setItem('k2', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'quran', surah: 1, from: 3, to: 4, kReciter: 7, bg: 'g0' })); } });
   await mockQuranCom(page, 'cbr.mp3');
   await open(page);
   const canRecord = await page.evaluate(() => !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream));
