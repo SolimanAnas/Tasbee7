@@ -241,8 +241,8 @@
       vm_fx_listen: 'استمع إلى المؤثرات',
       vm_fx_stop: 'إيقاف',
       vm_fx_auto_polish: 'فُعّل تحسين الصوت تلقائياً لتسجيلك — غيّره من «مؤثرات صوتية»',
-      vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
-      vm_sec_content: "المحتوى", vm_kc_text: "نص من كتابتك", vm_kc_quran: "آيات من القرآن", vm_kt_add: "أضف نصاً", vm_kt_note: "كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.", vm_src_none: "بدون صوت", vm_kt_silent: "بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.", vm_kt_name: "الاسم المعروض", vm_kt_label: "النص {i}", vm_kt_ph: "اكتب خاطرتك هنا…", vm_kt_delete: "حذف النص {i}", vm_kt_empty: "خاطرتك", vm_kt_count_1: "نص واحد", vm_kt_count: "{n} نصوص", vm_kt_n: "النص {i} من {n}", vm_kt_name_ph: 'اسمك، إن أردت أن يظهر في الفيديو',
+      vm_mode_short: 'قصير / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
+      vm_sec_content: "المحتوى", vm_kc_text: "نص من كتابتك", vm_kc_quran: "آيات من القرآن", vm_kt_add: "أضف نصاً", vm_kt_note: "كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.", vm_src_none: "بدون صوت", vm_kt_silent: "بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.", vm_kt_name: "الاسم المعروض", vm_kt_label: "النص {i}", vm_kt_ph: "اكتب خاطرتك هنا…", vm_kt_delete: "حذف النص {i}", vm_kt_empty: "خاطرتك", vm_kt_count_1: "نص واحد", vm_kt_count: "{n} نصوص", vm_kt_count_2: "نصّان", vm_kt_count_many: "{n} نصاً", vm_kt_n: "النص {i} من {n}", vm_kt_name_ph: 'اسمك، إن أردت أن يظهر في الفيديو',
       vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً", vm_src_quran: "آيات", vm_kq_note: "تُتلى الآيات التي تختارها تحت نصوصك، وتتوزع النصوص على مدة التلاوة ما لم يحدد السيناريو توقيتها.", vm_sc_w_quran: "آيات غير صحيحة في ‎@quran‎: {v}", vm_st_slot: "ملصق {n}", vm_st_slot_pick: "اختر صورة «ملصق {n}» من القائمة", vm_st_slot_left: "بقي {n} بلا صورة: اضغط رقماً ثم اختر صورته", vm_st_slot_done: "اختيرت كل الصور. اضغط رقماً لتغيير صورته.", vm_st_slots: "ملصقات السيناريو", vm_st_with_time: "وقت محدد", vm_st_with_line: "مع النص {n}", vm_st_pack: "تحميل حزمة الملصقات", vm_st_pack_busy: "تجهيز الحزمة… {n} / {of}", vm_st_pack_done: "حُمّلت الحزمة ({n} ملصقاً)", vm_st_pack_err: "تعذر تجهيز الحزمة، تحقق من الاتصال", vm_sc_title: "سيناريو الفيديو", vm_sc_hint: "الفيديو كاملاً في ملف نصي: السطور وتوقيتها وخطوطها وأحجامها وملصقاتها. نزّل القالب وأعطه لمساعد ذكاء اصطناعي مع موضوعك، ثم ارفع ما يكتبه.", vm_sc_upload: "رفع سيناريو", vm_sc_paste: "لصق سيناريو", vm_sc_template: "تحميل القالب", vm_sc_copy: "نسخ القالب للذكاء الاصطناعي", vm_sc_export: "تنزيل سيناريو الفيديو الحالي", vm_sc_paste_ph: "[0:00 - 0:04] نص السطر الأول <sticker 1>", vm_sc_apply: "استيراد", vm_sc_cancel: "إلغاء", vm_sc_empty: "لا نص في السيناريو", vm_sc_replace: "سيحل السيناريو محل نصوصك الحالية. متابعة؟", vm_sc_done: "استُورد {lines} سطراً و{stickers} ملصقاً.", vm_sc_pick: "اختر صورة لكل ملصق من بطاقة الملصقات.", vm_sc_big: "الملف أكبر من أن يكون سيناريو", vm_sc_bad: "تعذرت قراءة الملف", vm_sc_template_done: "حُمّل القالب. أعطه لمساعد ذكاء اصطناعي مع موضوع الفيديو.", vm_sc_copied: "نُسخ القالب. الصقه في مساعد الذكاء الاصطناعي واكتب موضوعك.", vm_sc_copy_err: "تعذر النسخ، استخدم «تحميل القالب»", vm_sc_nothing: "لا نصوص بعد لتنزيلها", vm_sc_opts_clear: "إزالة توقيت النص {i} وخطه وحجمه", vm_sc_w_font: "خط غير معروف: {v}", vm_sc_w_size: "حجم خارج المدى ٠٫٧ – ١٫٤، عُدّل: {v}", vm_sc_w_time: "السطر {n}: النهاية قبل البداية، فتُركت بلا نهاية", vm_sc_w_tag: "وسم ملصق غير مفهوم: {v}", vm_sc_w_lines: "تُرك {n} سطراً بعد الحد (٣٠)", vm_sc_w_stickers: "تُرك {n} ملصقاً بعد الحد (٣٠)", vm_sc_w_long: "السطر {n} طويل فقُصّ", vm_sc_w_other: "إعداد غير مفهوم: {v}", vm_mini_back: "العودة إلى المعاينة", vm_mini_close: "إخفاء المعاينة المصغرة", vm_st_when: "الظهور", vm_st_from: "من", vm_st_to: "إلى", vm_st_end: "النهاية", vm_st_now: "الآن", vm_st_now_aria: "وقت المعاينة الحالي", vm_st_fx: "التأثير", vm_st_fx_pop: "قفزة", vm_st_fx_fade: "تلاشٍ", vm_st_fx_slide: "انزلاق", vm_st_fx_zoom: "تكبير", vm_st_fx_float: "طفو", vm_st_fx_none: "بدون", vm_tpos: "موضع النص", vm_tpos_hint: "اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.", vm_tpos_reset: "إلى الوسط", vm_tpos_moving: "اسحب لتحريك النص",
       vm_ks_label: 'طريقة ظهور النص', vm_ks_line: 'السطر كاملاً', vm_ks_build: 'تظهر الكلمات مع التلاوة', vm_ks_word: 'كلمة كلمة',
       vm_mode_khatira: 'خاطرة', vm_kh_font: 'خط الكلمات', vm_kf_amiri: 'أميري', vm_kf_scheherazade: 'شهرزاد', vm_kf_naskh: 'نسخ', vm_kf_hafs: 'خط المصحف',
@@ -365,7 +365,7 @@
       vm_fx_stop: 'Stop',
       vm_fx_auto_polish: 'Voice polish was switched on for your recording — change it under «Pro audio effects»',
       vm_mode_short: 'Shorts / Reels', vm_mode_long: 'Long video', vm_template: 'Template',
-      vm_sec_content: "Content", vm_kc_text: "Your own words", vm_kc_quran: "Ayat of the Quran", vm_kt_add: "Add a text", vm_kt_note: "Each text shows word by word. With your recording each is timed to its part of the audio; with no audio it shows for as long as it takes to read.", vm_src_none: "No audio", vm_kt_silent: "No audio: each text shows for as long as it takes to read. To time it to your voice, choose «My recording» and upload a file or record.", vm_kt_name: "Name shown", vm_kt_label: "Text {i}", vm_kt_ph: "Write your thought here…", vm_kt_delete: "Delete text {i}", vm_kt_empty: "Your words", vm_kt_count_1: "1 text", vm_kt_count: "{n} texts", vm_kt_n: "Text {i} of {n}", vm_kt_name_ph: 'Your name, if you want it in the video',
+      vm_sec_content: "Content", vm_kc_text: "Your own words", vm_kc_quran: "Ayat of the Quran", vm_kt_add: "Add a text", vm_kt_note: "Each text shows word by word. With your recording each is timed to its part of the audio; with no audio it shows for as long as it takes to read.", vm_src_none: "No audio", vm_kt_silent: "No audio: each text shows for as long as it takes to read. To time it to your voice, choose «My recording» and upload a file or record.", vm_kt_name: "Name shown", vm_kt_label: "Text {i}", vm_kt_ph: "Write your thought here…", vm_kt_delete: "Delete text {i}", vm_kt_empty: "Your words", vm_kt_count_1: "1 text", vm_kt_count: "{n} texts", vm_kt_count_2: "2 texts", vm_kt_count_many: "{n} texts", vm_kt_n: "Text {i} of {n}", vm_kt_name_ph: 'Your name, if you want it in the video',
       vm_mode_khatira: 'Thoughts', vm_kh_font: 'Typeface', vm_kf_amiri: 'Amiri', vm_kf_scheherazade: 'Scheherazade', vm_kf_naskh: 'Naskh', vm_kf_hafs: 'Mushaf',
       vm_kf_ruqaa: 'Ruqaa', vm_kf_changa: 'Changa', vm_kf_cairo: 'Cairo', vm_kf_jomhuria: 'Jomhuria', vm_kf_gulzar: 'Gulzar',
       vm_kf_add: 'A font from your device', vm_kf_delete: 'Delete the font', vm_kf_bad: "Couldn't open the font file — choose a TTF, OTF or WOFF file", vm_kf_private: 'The fonts you add stay on your device and are never uploaded.',
@@ -2087,7 +2087,7 @@
       const fmt = { story: '9:16', square: '1:1', wide: '16:9' }[state.format];
       const num = x => (arabicNames() ? arDigits(x) : String(x));
       const durKey = durationKey();
-      $('vmSummary').textContent = tr('vm_mode_khatira') + ' · ' + tr(n === 1 ? 'vm_kt_count_1' : 'vm_kt_count', { n: num(n) }) + ' · ' + fmt +
+      $('vmSummary').textContent = tr('vm_mode_khatira') + ' · ' + tr(n === 1 ? 'vm_kt_count_1' : n === 2 ? 'vm_kt_count_2' : n >= 11 ? 'vm_kt_count_many' : 'vm_kt_count', { n: num(n) }) + ' · ' + fmt +
         (durFor && durFor === durKey ? ' · ' + fmtDur(durTotal) : '');
       return;
     }
@@ -2968,6 +2968,16 @@
     updateSummary();
   }
 
+  // A face that loads after a layout was measured (with the fallback's wider or narrower words)
+  // would leave wrong gaps between the words: measure again once any font finishes loading.
+  function fontsLoaded() {
+    layoutCache.clear();
+    kSizeCache.clear();
+    kLayoutCache.clear();
+    if (long && long.invalidate) long.invalidate();
+    renderIdle();
+  }
+
   function onChange() {
     layoutCache.clear();
     kSizeCache.clear();
@@ -3387,6 +3397,7 @@
     $('vmStage').onclick = () => { if (stickers && stickers.clickAfterDrag()) return; if (Date.now() - textDragEnd < 400) return; if (!busy) togglePreview(); };
     bindTextDrag();
     bindScript();
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fontsLoaded);
     bindMiniPreview();
     $('vmFullscreen').onclick = e => { e.stopPropagation(); toggleFullscreen(); };
     document.addEventListener('fullscreenchange', syncFullscreenUi);
@@ -3539,7 +3550,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 12;   // 12: video scripts (js/video-script.js: upload, paste, template for an AI, export), sticker numbers to fill and stickers with a line, the sticker pack as a ZIP (js/zip-store.js), «آيات» (a recitation) under own words, the floating mini preview; 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  const BUILD = 13;   // 13: UI/UX audit (contrast of filled and green text, 44 px targets, text from 12 px, layouts measured again when a face loads); 12: video scripts (js/video-script.js: upload, paste, template for an AI, export), sticker numbers to fill and stickers with a line, the sticker pack as a ZIP (js/zip-store.js), «آيات» (a recitation) under own words, the floating mini preview; 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
   window.VM = { khatiraLayout: (si, w, h) => { const tl = timeline, c = document.createElement('canvas').getContext('2d'); const L = kLayout(c, tl, si, w, h); return { size: L.size, rtl: L.rtl, pages: L.pages.map(pg => pg.map(ln => ln.length)) }; }, get own() { return own; }, khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; }, importScript, currentScript, scriptTemplate, get stickers() { return stickers; } };
   init();
 })();

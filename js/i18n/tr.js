@@ -1090,6 +1090,8 @@ export default {
   'vm_kt_empty': "Sözleriniz",
   'vm_kt_count_1': "1 metin",
   'vm_kt_count': "{n} metin",
+  'vm_kt_count_2': "2 metin",
+  'vm_kt_count_many': "{n} metin",
   'vm_kt_n': "Metin {i} / {n}",
   'vm_ks_label': "Metnin görünüşü",
   'vm_ks_line': "Satırın tamamı",
