@@ -42,6 +42,18 @@ originally developed by Yazin Insai (https://github.com/yazinsai/offline-tarteel
 Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 ```
 
+## «خاطرة» (video maker): word timings, audio and faces
+
+- Word timings and the surah recordings for the word-by-word tab come from the
+  [Quran.com](https://quran.com) API (`api.qurancdn.com`, audio from `download.quranicaudio.com`),
+  fetched in the browser when the tab is used; only the seconds of the chosen ayat are downloaded.
+  The recitations remain the work of their reciters.
+- `fonts/Amiri-Bold.ttf` ([Amiri](https://github.com/aliftype/amiri), © The Amiri Project Authors),
+  `fonts/ScheherazadeNew-Bold.ttf` ([Scheherazade New](https://software.sil.org/scheherazade/), © SIL
+  International) and `fonts/NotoNaskhArabic-Variable.ttf` ([Noto Naskh Arabic](https://github.com/notofonts/arabic),
+  © The Noto Project Authors), from the Google Fonts repository; all under the SIL Open Font License 1.1
+  (`fonts/extra/OFL-amiri.txt`, `OFL-scheherazadenew.txt`, `OFL-noto-naskh-arabic.txt`).
+
 ## Reciter photos
 
 - `images/reciters/*.webp` — reciter photos used as album art in the Quran audio player,

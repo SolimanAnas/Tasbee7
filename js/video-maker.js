@@ -75,11 +75,22 @@
     recSource: 'reciter', // 'reciter' = a reciter from the list, 'own' = the user's own recording
     sheikh: '',         // name shown for the reciter ('' = the reciter's own name / «تلاوتي»)
     fx: null,           // audio effects for the own recording (js/audio-fx.js; set in loadSettings)
-    mode: 'short',      // 'short' = shorts / reels (default), 'long' = 16:9 long video
+    mode: 'short',      // 'short' = shorts / reels (default), 'long' = 16:9 long video, 'khatira' = word by word
+    kReciter: 7,        // «خاطرة»: a reciter with word timings (js/khatira.js RECITERS, quran.com id)
+    kFont: 'amiri',     // «خاطرة»: the face of the words (KFONTS)
     tvTemplate: 'dawn', // long mode: template id (js/tv-templates.js)
     tvBg: 'g1',         // long mode: its own background ('g<i>' or 'i:<file>')
   };
   const isLong = () => state.mode === 'long' && !!long;
+  // «خاطرة»: the Shorts video (same backgrounds, sizes and export) with the recitation shown
+  // word by word, each word as it is recited, large, in a bold face.
+  const isKhatira = () => state.mode === 'khatira' && !!window.Khatira;
+  const KFONTS = {
+    amiri: { family: 'KhAmiri', weight: '' },
+    scheherazade: { family: 'KhScheherazade', weight: '' },
+    naskh: { family: 'KhNaskh', weight: '700 ' },
+    hafs: { family: null, weight: '' },             // the mushaf face (QFONT)
+  };
   let long = null;        // long-mode engine (js/video-maker-long.js)
   // The user's own recording (js/video-maker-own.js); without it every check is false.
   let own = { active: () => false, has: () => false };
@@ -221,6 +232,8 @@
       vm_fx_stop: 'إيقاف',
       vm_fx_auto_polish: 'فُعّل تحسين الصوت تلقائياً لتسجيلك — غيّره من «مؤثرات صوتية»',
       vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
+      vm_mode_khatira: 'خاطرة', vm_kh_font: 'خط الكلمات', vm_kf_amiri: 'أميري', vm_kf_scheherazade: 'شهرزاد', vm_kf_naskh: 'نسخ', vm_kf_hafs: 'خط المصحف',
+      vm_kh_reciters: 'قرّاء معهم توقيت لكل كلمة، فتظهر الكلمة حين تُتلى.', vm_kh_own_note: 'في تسجيلك تُوزَّع الكلمات على زمن كل آية بحسب طولها، فتوقيتها تقريبي.',
       vm_long_hint: 'كلما زادت الآيات طال وقت الإنشاء وكبر حجم الملف',
       vm_long_progress: 'جارٍ الإنشاء {p}% — الآية {i} من {n}',
       vm_long_slow: 'متصفحك لا يدعم الإنشاء السريع — سيستغرق الإنشاء مدة الفيديو نفسها، أبقِ الشاشة مفتوحة',
@@ -334,6 +347,8 @@
       vm_fx_stop: 'Stop',
       vm_fx_auto_polish: 'Voice polish was switched on for your recording — change it under «Pro audio effects»',
       vm_mode_short: 'Shorts / Reels', vm_mode_long: 'Long video', vm_template: 'Template',
+      vm_mode_khatira: 'Word by word', vm_kh_font: 'Typeface', vm_kf_amiri: 'Amiri', vm_kf_scheherazade: 'Scheherazade', vm_kf_naskh: 'Naskh', vm_kf_hafs: 'Mushaf',
+      vm_kh_reciters: 'Reciters with a timing for every word, so each word shows as it is recited.', vm_kh_own_note: 'In your recording the words share each ayah\'s time by their length, so their timing is approximate.',
       vm_long_hint: 'More ayat take longer to create and make a bigger file',
       vm_long_progress: 'Creating {p}% — ayah {i} of {n}',
       vm_long_slow: "Your browser can't use fast export — creating takes as long as the video itself; keep this screen open",
@@ -388,7 +403,9 @@
     state.pingPong = state.pingPong === true;
     if (!TEXT_FX.includes(state.textFx)) state.textFx = 'strokeglow';
     if (state.halo !== 'auto' && !/^#[0-9a-f]{6}$/i.test(String(state.halo))) state.halo = 'auto';
-    if (state.mode !== 'long') state.mode = 'short';
+    if (state.mode !== 'long' && state.mode !== 'khatira') state.mode = 'short';
+    if (!window.Khatira || !Khatira.RECITERS.some(r => r.id === state.kReciter)) state.kReciter = 7;
+    if (!KFONTS[state.kFont]) state.kFont = 'amiri';
     if (state.recSource !== 'own') state.recSource = 'reciter';
     state.sheikh = typeof state.sheikh === 'string' ? state.sheikh.slice(0, 60) : '';
     if (window.AudioFx) {
@@ -400,7 +417,12 @@
   }
 
   function reciterObj() {
+    if (isKhatira()) return kReciterObj();
     return reciters.find(r => r.id === state.reciter) || reciters[0];
+  }
+  function kReciterObj() {
+    const r = Khatira.RECITERS.find(x => x.id === state.kReciter) || Khatira.RECITERS[0];
+    return Object.assign({ kid: r.id, folder: 'qdc-' + r.id }, r);
   }
   function reciterName(r) { return arabicNames() ? r.name : r.en; }
   // The name shown on the video: what the user typed, else «تلاوتي» (own recording),
@@ -416,6 +438,7 @@
   }
   function surahLatin(s) { return window.I18n ? I18n.name('surahs', s.n, s.nameEn) : s.nameEn; }
   function basmalaApplies() {
+    if (isKhatira()) return false;           // the word timings start at the first ayah
     return state.from === 1 && state.surah !== 1 && state.surah !== 9;
   }
 
@@ -645,7 +668,8 @@
   }
 
   function timelineKey() {
-    if (own.active()) return ['own', own.rec.id, rangeKey(), own.sig(own.entryNow())].join('|');
+    if (own.active()) return [isKhatira() ? 'k-own' : 'own', own.rec.id, rangeKey(), own.sig(own.entryNow())].join('|');
+    if (isKhatira()) return ['k', state.kReciter, state.surah, state.from, state.to].join('|');
     return [reciterObj().folder, state.surah, state.from, state.to, state.basmala && basmalaApplies()].join('|');
   }
 
@@ -659,6 +683,12 @@
     const items = segs.map((sg, i) => {
       const s = own.slices(p.entry)[i];
       const it = Object.assign({}, sg, { buffer: p.audio.buffer, offset: s.off, dur: s.dur, start: t, end: t + s.dur });
+      if (isKhatira()) {
+        // no word timings in a recording: the ayah's time shared by the length of each word
+        const ws = Khatira.wordsOf(sg.text);
+        const a = it.start + Math.min(0.15, s.dur * 0.1), b = Math.max(a + 0.1, it.end - Math.min(0.25, s.dur * 0.15));
+        it.words = Khatira.share(ws, a, b).map((x, k) => ({ text: ws[k], a: x.a, b: x.b }));
+      }
       t = it.end;
       return it;
     });
@@ -666,8 +696,122 @@
     return timeline;
   }
 
+  // ---------- «خاطرة»: a reciter with word timings ----------
+  // The timings (quran.com) come per surah, with the surah's recording as one MP3. Only the
+  // seconds of the chosen ayat are fetched: a byte range of a constant-bitrate file, its first
+  // frame telling the second it starts at (js/khatira.js). Variable-bitrate files come whole.
+  const kMetaCache = new Map(), kHeadCache = new Map(), kClipCache = new Map();
+  function kMeta(id, surah) {
+    const key = id + ':' + surah;
+    if (!kMetaCache.has(key)) {
+      const p = fetch(Khatira.metaUrl(id, surah))
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(Khatira.parseMeta);
+      p.catch(() => kMetaCache.delete(key));
+      kMetaCache.set(key, p);
+    }
+    return kMetaCache.get(key);
+  }
+  // The bytes a..b of a file (both null = all of it), with progress for a whole file.
+  async function kBytes(url, a, b, onProgress) {
+    const r = await fetch(url, a == null ? {} : { headers: { Range: 'bytes=' + a + '-' + b } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const whole = r.status !== 206;
+    const len = +r.headers.get('content-length') || 0;
+    if (!onProgress || !len || !r.body || !r.body.getReader) return { buf: await r.arrayBuffer(), whole };
+    const reader = r.body.getReader(), parts = [];
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      parts.push(value); got += value.length;
+      onProgress(Math.min(0.95, got / len));
+    }
+    const out = new Uint8Array(got);
+    let o = 0;
+    for (const p of parts) { out.set(p, o); o += p.length; }
+    return { buf: out.buffer, whole };
+  }
+  const kDecode = buf => new Promise((res, rej) => {
+    const p = audioCtx().decodeAudioData(buf, res, rej);
+    if (p && p.catch) p.catch(rej);
+  });
+  // Seconds t0..t1 of a surah's recording, decoded: { buffer, base } — base is the second of
+  // the surah at which the buffer starts.
+  function kClip(meta, t0, t1, onProgress) {
+    const key = meta.url + '|' + t0.toFixed(3) + '|' + t1.toFixed(3);
+    if (!kClipCache.has(key)) {
+      const p = (async () => {
+        if (!kHeadCache.has(meta.url)) {
+          // the first 16 KB, or past the ID3 tag when it is bigger (cover art)
+          const h = kBytes(meta.url, 0, 16383).then(async r => {
+            if (r.whole) return { info: null, whole: r.buf };
+            let b = new Uint8Array(r.buf);
+            const tag = Khatira.id3Size(b);
+            if (tag + 8192 > b.length) {
+              const more = await kBytes(meta.url, 0, tag + 16383);
+              if (more.whole) return { info: null, whole: more.buf };
+              b = new Uint8Array(more.buf);
+            }
+            return { info: Khatira.mp3Info(b), whole: null };
+          });
+          h.catch(() => kHeadCache.delete(meta.url));
+          kHeadCache.set(meta.url, h);
+        }
+        const head = await kHeadCache.get(meta.url);
+        const info = head.info;
+        if (info && info.cbr) {
+          const a = Math.floor(Khatira.byteAt(info, Math.max(0, t0 - 1.5)));
+          const b = Math.ceil(Khatira.byteAt(info, t1 + 1.0));
+          const r = await kBytes(meta.url, a, b);
+          if (!r.whole) {
+            const bytes = new Uint8Array(r.buf);
+            const ff = Khatira.firstFrame(bytes, a, info);
+            if (ff) return { buffer: await kDecode(r.buf.slice(ff.pos)), base: ff.sec };
+          } else {
+            return { buffer: await kDecode(r.buf), base: 0 };
+          }
+        }
+        // variable bitrate (or a server without ranges): the whole recording
+        const r = head.whole ? { buf: head.whole.slice(0) } : await kBytes(meta.url, null, null, onProgress);
+        return { buffer: await kDecode(r.buf), base: 0 };
+      })();
+      p.catch(() => kClipCache.delete(key));
+      kClipCache.set(key, p);
+      if (kClipCache.size > 6) kClipCache.delete(kClipCache.keys().next().value);
+    }
+    return kClipCache.get(key);
+  }
+  async function buildKhatiraTimeline(onProgress) {
+    const key = timelineKey();
+    if (timeline && timeline.key === key) return timeline;
+    const segs = segments();
+    const meta = await kMeta(state.kReciter, state.surah);
+    const vs = segs.map(sg => meta.verses[sg.ayah]);
+    if (vs.some(v => !v)) throw new Error('no timings');
+    const first = vs[0], last = vs[vs.length - 1];
+    // a word may start a little before its ayah's own timestamp
+    const t0 = Math.min(first.from, ...first.segs.map(x => x[1])) / 1000;
+    const t1 = last.to / 1000;
+    const clip = await kClip(meta, t0, t1, onProgress);
+    const shift = LEAD - t0;                      // video time = surah time + shift
+    const items = segs.map((sg, i) => {
+      const v = vs[i];
+      const a = i === 0 ? t0 : v.from / 1000, b = v.to / 1000;
+      const ws = Khatira.wordsOf(sg.text);
+      const wt = Khatira.wordTimes(ws, v);
+      return Object.assign({}, sg, {
+        buffer: clip.buffer, offset: Math.max(0, a - clip.base), dur: Math.max(0.05, b - a), start: a + shift, end: b + shift,
+        words: ws.map((w, k) => ({ text: w, a: wt[k].a / 1000 + shift, b: wt[k].b / 1000 + shift })),
+      });
+    });
+    timeline = { key, items, total: t1 + shift + TAIL };
+    return timeline;
+  }
+
   async function buildTimeline(onProgress) {
     if (own.active()) return buildOwnTimeline();
+    if (isKhatira()) return buildKhatiraTimeline(onProgress);
     const key = timelineKey();
     if (timeline && timeline.key === key) return timeline;
     const folder = reciterObj().folder;
@@ -1094,11 +1238,73 @@
     c.restore();
   }
 
+  // ---------- «خاطرة»: the words ----------
+  // One word at a time, centred and large, in the chosen bold face; it eases in (a fade and a
+  // slight grow) as it is recited, while the one before fades out.
+  function kFont(size) {
+    const f = KFONTS[state.kFont] || KFONTS.amiri;
+    return f.weight + size + 'px ' + (f.family || QFONT);
+  }
+  function kFontReady() {
+    const f = KFONTS[state.kFont] || KFONTS.amiri;
+    if (!f.family || !document.fonts || !document.fonts.load) return Promise.resolve();
+    return document.fonts.load(f.weight + '64px ' + f.family, 'أبجد').catch(() => {});
+  }
+  const kSizeCache = new Map();
+  function drawKWord(c, word, w, h, alpha, p) {
+    if (alpha <= 0.002 || !word) return;
+    const key = [word, w, h, state.kFont, state.fontMul].join('|');
+    let size = kSizeCache.get(key);
+    if (!size) {
+      size = Math.min(w, h) * (w > h ? 0.2 : 0.19) * state.fontMul;
+      c.font = kFont(size);
+      const width = c.measureText(word).width;
+      if (width > w * 0.86) size *= w * 0.86 / width;
+      kSizeCache.set(key, size);
+      if (kSizeCache.size > 400) kSizeCache.delete(kSizeCache.keys().next().value);
+    }
+    const e = 1 - Math.pow(1 - clamp01(p), 3);            // ease out
+    c.save();
+    c.globalAlpha = alpha * e;
+    c.translate(w / 2, h * (state.caption ? 0.46 : 0.5));
+    const k = 0.9 + 0.1 * e;
+    c.scale(k, k);
+    c.font = kFont(size);
+    c.direction = 'rtl';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillStyle = state.color;
+    fillAyahLine(c, word, 0, 0, size);
+    c.restore();
+  }
+  function drawWords(c, w, h, t, tl) {
+    const words = tl.words || (tl.words = tl.items.flatMap(it => it.words || []));
+    let k = -1;
+    for (let i = 0; i < words.length && words[i].a <= t; i++) k = i;
+    if (k < 0) return;
+    const out = clamp01((tl.total - t) / FADE);          // the last word fades with the end
+    const p = clamp01((t - words[k].a) / 0.22);
+    if (p < 1 && k > 0) drawKWord(c, words[k - 1].text, w, h, (1 - p) * out, 1);
+    drawKWord(c, words[k].text, w, h, out, p);
+  }
+  // Which word shows at video time t (for the tests and the summary).
+  function khatiraWordAt(t) {
+    const tl = timeline;
+    if (!tl || !tl.items[0] || !tl.items[0].words) return null;
+    const words = tl.words || (tl.words = tl.items.flatMap(it => it.words || []));
+    let k = -1;
+    for (let i = 0; i < words.length && words[i].a <= t; i++) k = i;
+    return k < 0 ? null : Object.assign({ index: k }, words[k]);
+  }
+
   // t = seconds into the clip. With no timeline, draws a still of the first segment.
   function renderFrame(c, w, h, t, tl) {
     const total = tl ? tl.total : 1;
     drawBackground(c, w, h, tl ? clamp01(t / total) : 0, t, tl);
-    if (!tl) {
+    if (isKhatira()) {
+      if (tl && tl.items[0] && tl.items[0].words) drawWords(c, w, h, t, tl);
+      else { const segs = segments(); if (segs.length) drawKWord(c, Khatira.wordsOf(segs[0].text)[0], w, h, 1, 1); }
+    } else if (!tl) {
       const segs = segments();
       if (segs.length) drawAyah(c, segs[0], w, h, 1);
     } else {
@@ -1606,7 +1812,7 @@
   let resultUrl = null;
   function showResult(blob, type) {
     const ext = type.includes('mp4') ? 'mp4' : 'webm';
-    const name = `quran-${isLong() ? 'long-' : ''}${pad3(state.surah)}-${state.from}-${state.to}.${ext}`;
+    const name = `quran-${isLong() ? 'long-' : isKhatira() ? 'khatira-' : ''}${pad3(state.surah)}-${state.from}-${state.to}.${ext}`;
     if (resultUrl) URL.revokeObjectURL(resultUrl);
     resultUrl = URL.createObjectURL(blob);
     $('vmVideo').src = resultUrl;
@@ -1713,6 +1919,15 @@
   function renderReciterList() {
     const q = normalize($('vmReciterSearch').value.trim());
     document.querySelectorAll('#vmReciterFilter .filter-chip').forEach(b => b.classList.toggle('active', b.dataset.style === reciterFilter));
+    if (isKhatira()) {            // only the reciters with word timings
+      const rows = Khatira.RECITERS.filter(r => (reciterFilter === 'all' || r.style === reciterFilter) &&
+        (!q || normalize(r.name).includes(q) || r.en.toLowerCase().includes(q)));
+      $('vmReciterList').innerHTML = rows.map(r =>
+        '<button type="button" class="sheet-item' + (r.id === state.kReciter ? ' selected' : '') + '" data-kreciter="' + r.id + '">' +
+        reciterHtml(r) + '</button>'
+      ).join('') || '<div class="sheet-empty">' + esc(tr('takrar_no_results')) + '</div>';
+      return;
+    }
     const rows = reciters.filter(r => (reciterFilter === 'all' || r.style === reciterFilter) &&
       (!q || normalize(r.name).includes(q) || (r.en + ' ' + r.folder).toLowerCase().includes(q)));
     $('vmReciterList').innerHTML = rows.map(r =>
@@ -1955,7 +2170,16 @@
     $('vmSurahSearch').oninput = renderSurahList;
     $('vmReciterSearch').oninput = renderReciterList;
     $('vmSurahList').onclick = e => { const b = e.target.closest('[data-surah]'); if (b) choose('vmSurah', b.dataset.surah); };
-    $('vmReciterList').onclick = e => { const b = e.target.closest('[data-reciter]'); if (b) choose('vmReciter', b.dataset.reciter); };
+    $('vmReciterList').onclick = e => {
+      const k = e.target.closest('[data-kreciter]');
+      if (k) { state.kReciter = +k.dataset.kreciter; closePick(); renderPickerButtons(); onChange(); return; }
+      const b = e.target.closest('[data-reciter]');
+      if (b) choose('vmReciter', b.dataset.reciter);
+    };
+    // «خاطرة»: the face of the words
+    document.querySelectorAll('#vmKFonts [data-kfont]').forEach(b => {
+      b.onclick = () => { state.kFont = b.dataset.kfont; markKFonts(); kFontReady().then(() => onChange()); };
+    });
     document.querySelectorAll('#vmReciterFilter .filter-chip').forEach(b => {
       b.onclick = () => { reciterFilter = b.dataset.style; renderReciterList(); };
     });
@@ -2153,6 +2377,7 @@
 
   function onChange() {
     layoutCache.clear();
+    kSizeCache.clear();
     if (long) long.invalidate();
     stopPlayback();
     saveSettings();
@@ -2165,9 +2390,19 @@
   }
 
   // ---------- shorts / long video tabs ----------
+  function markKFonts() {
+    document.querySelectorAll('#vmKFonts [data-kfont]').forEach(b => {
+      const on = b.dataset.kfont === state.kFont;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
   function setMode(mode) {
-    state.mode = mode === 'long' && long ? 'long' : 'short';
+    state.mode = mode === 'long' && long ? 'long' : mode === 'khatira' && window.Khatira ? 'khatira' : 'short';
     document.body.classList.toggle('mode-long', isLong());
+    document.body.classList.toggle('mode-khatira', isKhatira());
+    renderPickerButtons();
+    if (isKhatira()) kFontReady().then(() => renderIdle());
     document.querySelectorAll('#vmModeTabs button').forEach(b => {
       const on = b.dataset.mode === state.mode;
       b.classList.toggle('active', on);
@@ -2342,6 +2577,7 @@
 
   function applyStateToControls() {
     $('vmFont').value = state.fontMul;
+    markKFonts();
     $('vmCaption').checked = state.caption;
     $('vmBranding').checked = state.branding;
     $('vmPanel').checked = state.textPanel;
@@ -2387,8 +2623,9 @@
         onAsset: () => { renderIdle(); if (isLong()) refreshTemplateThumbs(); },
       });
     }
-    if (!long) state.mode = 'short';
+    if (!long && state.mode === 'long') state.mode = 'short';
     document.body.classList.toggle('mode-long', isLong());
+    document.body.classList.toggle('mode-khatira', isKhatira());
     sizeCanvas();
     try {
       await Promise.all([loadQuran(), loadBackgrounds(), i18nReady]);
@@ -2422,6 +2659,7 @@
     // webfont is ready, so wait for both faces before the first frame.
     try { await Promise.all([document.fonts.load('40px ' + QFONT), document.fonts.load('40px VMTajawal')]); } catch (e) { /* fall through */ }
     if (isLong()) setMode('long');
+    else if (isKhatira()) { setMode('khatira'); await kFontReady(); renderIdle(); }
     else selectBackground(state.bg);
     updateDuration();          // the length of the saved reciter + ayat, as soon as the page opens
   }
@@ -2430,7 +2668,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 8;   // 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
-  window.VM = { showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
+  const BUILD = 9;   // 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  window.VM = { khatiraWordAt, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
   init();
 })();

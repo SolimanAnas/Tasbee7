@@ -78,6 +78,11 @@
   src: url('../fonts/Scheherazade.ttf') format('truetype');
   font-display: block;
 }
+/* «خاطرة»: bold faces for the word-by-word text, loaded only when that tab draws them. All
+   three cover every mark of the Uthmani text (OFL; fonts/extra/OFL-*.txt). */
+@font-face { font-family:'KhAmiri'; src:url('../fonts/Amiri-Bold.ttf') format('truetype'); font-display:block; }
+@font-face { font-family:'KhScheherazade'; src:url('../fonts/ScheherazadeNew-Bold.ttf') format('truetype'); font-display:block; }
+@font-face { font-family:'KhNaskh'; src:url('../fonts/NotoNaskhArabic-Variable.ttf') format('truetype'); font-weight:400 700; font-display:block; }
 @font-face {
   font-family: 'VMTajawal';
   src: url('../fonts/Tajawal-Bold.ttf') format('truetype');
@@ -483,7 +488,7 @@ body.vm-pseudo-fs .action-bar { display:none; }
 body.mode-long .only-short, body:not(.mode-long) .only-long { display:none !important; }
 body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
 .mode-tabs {
-  display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:16px;
+  display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:4px; padding:4px; border-radius:16px;
   background:var(--glass); border:1px solid var(--glass-border); box-shadow:var(--glass-shadow);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
 }
@@ -493,6 +498,19 @@ body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
   font:inherit; font-size:14px; font-weight:800; cursor:pointer; transition:background .2s, color .2s;
 }
 .mode-tabs button svg { width:18px; height:18px; flex-shrink:0; }
+.mode-tabs button span { min-width:0; text-align:center; line-height:1.25; }
+@media (max-width:420px) { .mode-tabs button { flex-direction:column; gap:3px; padding:6px 4px; font-size:12.5px; } }
+/* «خاطرة»: the word-by-word tab (Shorts controls, plus its own font picker and notes) */
+body.mode-khatira .not-khatira, body:not(.mode-khatira) .only-khatira { display:none !important; }
+.kh-note { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--text-secondary); line-height:1.6; margin-top:8px; }
+.kh-note svg { width:16px; height:16px; flex-shrink:0; margin-top:3px; }
+.kfonts { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+.kfonts button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:76px; padding:6px 6px 8px;
+  border:1.5px solid var(--glass-border); border-radius:14px; background:var(--field-bg); color:var(--text-primary); font:inherit; cursor:pointer; }
+.kfonts button.active { border-color:var(--accent-main); background:var(--accent-muted); }
+.kfonts .kf-sample { font-size:30px; line-height:1.5; direction:rtl; white-space:nowrap; }
+.kfonts .kf-name { font-size:12px; font-weight:700; color:var(--text-secondary); }
+.kfonts button.active .kf-name { color:var(--accent-main); }
 .mode-tabs button.active { background:var(--accent-main); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.18); }
 .mode-tabs button:disabled { cursor:default; opacity:.6; }
 .long-hint { display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-secondary); line-height:1.6; margin-top:2px; }
@@ -732,6 +750,10 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8"/></svg>
       <span data-i18n="vm_mode_long">فيديو طويل</span>
     </button>
+    <button type="button" role="tab" data-mode="khatira" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h6"/><path d="M17 15l2 2 3-4"/></svg>
+      <span data-i18n="vm_mode_khatira">خاطرة</span>
+    </button>
   </div>
 
   <div class="layout">
@@ -831,6 +853,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
             <span class="picker-main" id="vmReciterLabel"></span>
           </button>
           <select id="vmReciter" hidden aria-hidden="true" tabindex="-1"></select>
+          <div class="kh-note only-khatira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-i18n="vm_kh_reciters">قرّاء معهم توقيت لكل كلمة، فتظهر الكلمة حين تُتلى.</span></div>
         </div>
         <div id="vmOwnBox" hidden>
           <input type="file" id="vmOwnFile" accept="audio/*,video/mp4,video/webm,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac,.weba" hidden>
@@ -898,6 +921,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
             </div>
           </div>
           <div class="own-private" data-i18n="vm_own_private">تسجيلك يبقى على جهازك ولا يُرفع إلى أي مكان.</div>
+          <div class="kh-note only-khatira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg><span data-i18n="vm_kh_own_note">في تسجيلك تُوزَّع الكلمات على زمن كل آية بحسب طولها، فتوقيتها تقريبي.</span></div>
         </div>
         <div class="field">
           <label class="label" for="vmSheikh" data-i18n="vm_sheikh_name">اسم القارئ المعروض</label>
@@ -968,6 +992,16 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           </div>
         </div>
 
+        <div class="field only-khatira">
+          <div class="label" data-i18n="vm_kh_font">خط الكلمات</div>
+          <div class="kfonts" id="vmKFonts" role="group">
+            <button type="button" data-kfont="amiri" class="active" aria-pressed="true"><span class="kf-sample" style="font-family:KhAmiri">أبجد</span><span class="kf-name" data-i18n="vm_kf_amiri">أميري</span></button>
+            <button type="button" data-kfont="scheherazade" aria-pressed="false"><span class="kf-sample" style="font-family:KhScheherazade">أبجد</span><span class="kf-name" data-i18n="vm_kf_scheherazade">شهرزاد</span></button>
+            <button type="button" data-kfont="naskh" aria-pressed="false"><span class="kf-sample" style="font-family:KhNaskh;font-weight:700">أبجد</span><span class="kf-name" data-i18n="vm_kf_naskh">نسخ</span></button>
+            <button type="button" data-kfont="hafs" aria-pressed="false"><span class="kf-sample" style="font-family:QuranFont,QuranFallback">أبجد</span><span class="kf-name" data-i18n="vm_kf_hafs">خط المصحف</span></button>
+          </div>
+        </div>
+
         <div class="field">
           <div class="label" data-i18n="vm_text_fx">تأثير النص</div>
           <div class="formats fx" id="vmTextFx">
@@ -992,7 +1026,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           </div>
         </div>
 
-        <label class="switch-row only-short">
+        <label class="switch-row only-short not-khatira">
           <span class="sw-text"><span class="sw-title" data-i18n="vm_text_panel">لوحة شفافة خلف الآيات</span></span>
           <input type="checkbox" class="switch" id="vmPanel" checked>
         </label>
@@ -1199,6 +1233,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
 <script src="../js/audio-fx.js"></script>
 <script src="../js/video-maker-fx.js"></script>
 <script src="../js/video-maker-rec.js"></script>
+<script src="../js/khatira.js"></script>
 <script src="../js/video-maker.js"></script>
 <script>
 
@@ -1207,7 +1242,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 8;
+  var NEED = 9;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
