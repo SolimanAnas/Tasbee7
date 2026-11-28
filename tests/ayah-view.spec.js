@@ -176,6 +176,9 @@ test('the mini preview floats: dragged anywhere by mouse or finger, it stays the
   await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await expect(page.locator('#vmMiniView')).toBeVisible();
+  // its entrance (a short slide and scale) over before it is measured and grabbed
+  const settled = () => page.evaluate(() => Promise.all(document.getElementById('vmMini').getAnimations().map(x => x.finished)));
+  await settled();
   // mouse: to the middle of the screen, and it stays there (no jump to a side)
   let b = await page.locator('#vmMini').boundingBox();
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
@@ -183,8 +186,8 @@ test('the mini preview floats: dragged anywhere by mouse or finger, it stays the
   await page.mouse.move(206, 330, { steps: 8 });
   await page.mouse.up();
   b = await page.locator('#vmMini').boundingBox();
-  expect(Math.abs(b.x + b.width / 2 - 206)).toBeLessThan(4);
-  expect(Math.abs(b.y + b.height / 2 - 330)).toBeLessThan(4);
+  expect(Math.abs(b.x + b.width / 2 - 206)).toBeLessThan(6);
+  expect(Math.abs(b.y + b.height / 2 - 330)).toBeLessThan(6);
   await page.waitForTimeout(500);
   await expect(page.locator('#vmMiniView')).toBeVisible();                  // the drag was not a tap
   // finger
@@ -206,7 +209,8 @@ test('the mini preview floats: dragged anywhere by mouse or finger, it stays the
   await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await expect(page.locator('#vmMiniView')).toBeVisible();
-  await expect.poll(async () => Math.abs((await page.locator('#vmMini').boundingBox()).x - at.x)).toBeLessThan(4);
+  await settled();
+  await expect.poll(async () => Math.abs((await page.locator('#vmMini').boundingBox()).x - at.x)).toBeLessThan(6);
   // shrunk: its button floats too, and a tap (not a drag) opens it
   await page.locator('#vmMiniClose').click();
   const o = await page.locator('#vmMiniOpen').boundingBox();

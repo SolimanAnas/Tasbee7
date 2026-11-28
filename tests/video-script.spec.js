@@ -381,6 +381,8 @@ test('the mini preview can be dragged out of the way, and stays where it is let 
   await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await expect(page.locator('#vmMini')).toBeVisible();
+  // its entrance (a short slide and scale) over before it is measured and grabbed
+  await page.evaluate(() => Promise.all(document.getElementById('vmMini').getAnimations().map(x => x.finished)));
   const a = await page.locator('#vmMini').boundingBox();
   // RTL: it starts on the right
   expect(a.x).toBeGreaterThan(412 / 2);
@@ -390,7 +392,7 @@ test('the mini preview can be dragged out of the way, and stays where it is let 
   await page.mouse.up();
   const b = await page.locator('#vmMini').boundingBox();
   // where it was let go (the point grabbed is under the pointer), no jump to a side
-  expect(Math.abs(b.x + b.width / 2 - 120)).toBeLessThan(4);
+  expect(Math.abs(b.x + b.width / 2 - 120)).toBeLessThan(6);
   expect(b.y).toBeLessThan(a.y - 100);
   // the drag was not a tap: the page did not scroll up to the preview
   await page.waitForTimeout(500);

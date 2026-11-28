@@ -35,7 +35,7 @@ test('header: the theme button cycles the app themes; language is in the setting
   await expect(page.locator('#vmLangSub')).toHaveText('العربية');
   await page.locator('#vmLangRow').click();
   await expect(page.locator('#vmSettingsSheet')).not.toHaveClass(/active/);
-  await expect(page.getByText('English').first()).toBeVisible({ timeout: 5000 });   // the app's language sheet
+  await expect(page.locator('.lang-btn .lang-name', { hasText: 'English' })).toBeVisible({ timeout: 5000 });   // the app's language sheet (not the translation choice)
 });
 
 // Sheets are real dialogs for the keyboard and screen readers: named by their title, focus

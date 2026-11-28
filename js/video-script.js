@@ -17,6 +17,8 @@
   const STYLES = ['line', 'build', 'word'];
   const FORMATS = ['story', 'square', 'wide'];
   const FX = ['pop', 'fade', 'slide', 'zoom', 'float', 'none'];
+  // the background's colour looks (js/video-maker.js LOOKS)
+  const LOOKS = ['none', 'warm', 'cool', 'vivid', 'cinematic', 'golden', 'matte', 'dreamy', 'night', 'vintage', 'bw', 'noir'];
   // The faces a script can name (js/khatira.js FONTS; the mushaf face is for ayat only), and what
   // they look like, for the AI choosing one.
   const FONTS = [
@@ -119,6 +121,8 @@
       if (!isFinite(n)) { warn('size', raw); return; }
       out.size = round(clamp(n, LIMITS.size[0], LIMITS.size[1]), 100);
       if (out.size !== n) warn('size', raw);
+    } else if (key === 'look') {
+      if (LOOKS.includes(v)) out.look = v; else warn('look', raw);
     } else if (key === 'position') {
       const p = { top: 'top', middle: 'middle', center: 'middle', centre: 'middle', bottom: 'bottom', 'أعلى': 'top', 'وسط': 'middle', 'الوسط': 'middle', 'أسفل': 'bottom' }[v];
       // or a height: 0 (top) … 1 (bottom), or 0% … 100%
@@ -249,7 +253,7 @@
   function serialize(v) {
     const out = ['# Zad Al-Muslim video script', ''];
     const s = v.settings || {};
-    for (const k of ['font', 'size', 'spacing', 'position', 'style', 'color', 'format', 'name']) if (s[k] != null && s[k] !== '') out.push('@' + k + ': ' + s[k]);
+    for (const k of ['font', 'size', 'spacing', 'position', 'style', 'color', 'look', 'format', 'name']) if (s[k] != null && s[k] !== '') out.push('@' + k + ': ' + s[k]);
     if (s.quran) out.push('@quran: ' + s.quran.surah + ':' + s.quran.from + (s.quran.to !== s.quran.from ? '-' + s.quran.to : ''));
     if (out.length > 2) out.push('');
     // a place and size as the nearest words (the format has no numbers for them)
@@ -318,6 +322,9 @@
     L.push('#            build = the words appear one by one in place');
     L.push('#            word  = one big word at a time (good for short, strong lines)');
     L.push('#    @color: #rrggbb         text colour, e.g. #ffffff (white), #f5e6b8 (cream), #e6c068 (gold)');
+    L.push('#    @look: ' + LOOKS.join(' | '));
+    L.push('#            the colours of the background picture / video (a mood: warm = hope, night = worry,');
+    L.push('#            cinematic = a story, golden = gratitude, bw / noir = grief or warning). Default none.');
     L.push('#    @format: story | square | wide     9:16 (default), 1:1, 16:9');
     L.push('#    @name: <text>           a small name shown at the bottom (author / channel), optional');
     L.push('#    @quran: <surah>:<from>-<to>   a recitation of these ayat as the sound under the text');
@@ -381,7 +388,7 @@
     return L.join('\n') + '\n';
   }
 
-  const api = { parse, serialize, template, clock, LIMITS, FONTS: FONT_IDS, STYLES, FORMATS, FX };
+  const api = { parse, serialize, template, clock, LIMITS, FONTS: FONT_IDS, STYLES, FORMATS, FX, LOOKS };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.VMScript = api;
 })(typeof window !== 'undefined' ? window : this);
