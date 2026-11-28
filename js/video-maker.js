@@ -79,7 +79,8 @@
     kReciter: 7,        // «خاطرة»: a reciter with word timings (js/khatira.js RECITERS, quran.com id)
     kContent: 'text',   // «خاطرة»: 'text' = the user's own words (kTexts), 'quran' = ayat
     kTexts: [''],       // «خاطرة»: the user's texts, one field each, shown one after the other
-    stickers: [],       // character stickers on the video (js/video-stickers.js): [{ id, x, y, s, flip }]
+    stickers: [],       // character stickers on the video (js/video-stickers.js): [{ id, x, y, s, flip, from, to, fx }]
+    textPos: null,      // where the text sits (its centre, shares of the frame), moved by holding and dragging on the preview; null = the middle
     kStyle: 'line',     // «خاطرة»: how the text shows: 'line' (the whole line, the word recited lit), 'build' (words appear in place as recited), 'word' (one word at a time)
     kFont: 'amiri',     // «خاطرة»: the face of the words (Khatira.FONTS id, or 'u:<id>' for a font from the device)
     tvTemplate: 'dawn', // long mode: template id (js/tv-templates.js)
@@ -95,6 +96,7 @@
   const kTextWords = t => String(t || '').split(/\s+/).filter(Boolean);
   let long = null;        // long-mode engine (js/video-maker-long.js)
   let stickers = null;    // the character stickers (js/video-stickers.js)
+  let previewT = 0;       // the second the preview last played to (a sticker's "now" button)
   // The user's own recording (js/video-maker-own.js); without it every check is false.
   let own = { active: () => false, has: () => false };
   let recorder = null;    // the in-app recorder (js/video-maker-rec.js)
@@ -237,7 +239,7 @@
       vm_fx_auto_polish: 'فُعّل تحسين الصوت تلقائياً لتسجيلك — غيّره من «مؤثرات صوتية»',
       vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
       vm_sec_content: "المحتوى", vm_kc_text: "نص من كتابتك", vm_kc_quran: "آيات من القرآن", vm_kt_add: "أضف نصاً", vm_kt_note: "كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.", vm_src_none: "بدون صوت", vm_kt_silent: "بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.", vm_kt_name: "الاسم المعروض", vm_kt_label: "النص {i}", vm_kt_ph: "اكتب خاطرتك هنا…", vm_kt_delete: "حذف النص {i}", vm_kt_empty: "خاطرتك", vm_kt_count_1: "نص واحد", vm_kt_count: "{n} نصوص", vm_kt_n: "النص {i} من {n}", vm_kt_name_ph: 'اسمك، إن أردت أن يظهر في الفيديو',
-      vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً",
+      vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً", vm_st_when: "الظهور", vm_st_from: "من", vm_st_to: "إلى", vm_st_end: "النهاية", vm_st_now: "الآن", vm_st_now_aria: "وقت المعاينة الحالي", vm_st_fx: "التأثير", vm_st_fx_pop: "قفزة", vm_st_fx_fade: "تلاشٍ", vm_st_fx_slide: "انزلاق", vm_st_fx_zoom: "تكبير", vm_st_fx_float: "طفو", vm_st_fx_none: "بدون", vm_tpos: "موضع النص", vm_tpos_hint: "اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.", vm_tpos_reset: "إلى الوسط", vm_tpos_moving: "اسحب لتحريك النص",
       vm_ks_label: 'طريقة ظهور النص', vm_ks_line: 'السطر كاملاً', vm_ks_build: 'تظهر الكلمات مع التلاوة', vm_ks_word: 'كلمة كلمة',
       vm_mode_khatira: 'خاطرة', vm_kh_font: 'خط الكلمات', vm_kf_amiri: 'أميري', vm_kf_scheherazade: 'شهرزاد', vm_kf_naskh: 'نسخ', vm_kf_hafs: 'خط المصحف',
       vm_kf_ruqaa: 'رقعة', vm_kf_changa: 'تشانغا', vm_kf_cairo: 'كايرو', vm_kf_jomhuria: 'جمهورية', vm_kf_gulzar: 'گلزار',
@@ -279,7 +281,7 @@
       vm_own_long: 'The recording is too long — up to {n} minutes',
       vm_own_decoding: 'Analysing the recording…',
       vm_sync_title: 'Set the audio timing',
-      vm_st_title: "Stickers", vm_st_hint: "Tap a sticker to add it to the video, then move it on the preview or with the sliders.", vm_st_add_one: "Add: {name}", vm_st_added: "Added", vm_st_empty: "No stickers yet", vm_st_size: "Size", vm_st_x: "Across", vm_st_y: "Up and down", vm_st_flip: "Flip", vm_st_front: "To the front", vm_st_delete: "Delete", vm_st_done: "Done", vm_st_max: "At most {n} stickers",
+      vm_st_title: "Stickers", vm_st_hint: "Tap a sticker to add it to the video, then move it on the preview or with the sliders.", vm_st_add_one: "Add: {name}", vm_st_added: "Added", vm_st_empty: "No stickers yet", vm_st_size: "Size", vm_st_x: "Across", vm_st_y: "Up and down", vm_st_flip: "Flip", vm_st_front: "To the front", vm_st_delete: "Delete", vm_st_done: "Done", vm_st_max: "At most {n} stickers", vm_st_when: "Shows", vm_st_from: "From", vm_st_to: "To", vm_st_end: "the end", vm_st_now: "Now", vm_st_now_aria: "The preview's current time", vm_st_fx: "Effect", vm_st_fx_pop: "Pop", vm_st_fx_fade: "Fade", vm_st_fx_slide: "Slide up", vm_st_fx_zoom: "Zoom", vm_st_fx_float: "Float", vm_st_fx_none: "None", vm_tpos: "Text position", vm_tpos_hint: "Hold on the preview, then drag to move the text.", vm_tpos_reset: "Back to the centre", vm_tpos_moving: "Drag to move the text",
       vm_ks_label: 'How the text shows', vm_ks_line: 'The whole line', vm_ks_build: 'Words appear as recited', vm_ks_word: 'One word at a time',
       vm_sync_hint: 'Listen and move the markers so each ayah starts at its marker. Tap ▶ next to an ayah to hear it, or ⌖ to put the marker at the playhead.',
       vm_sync_all: 'All',
@@ -422,6 +424,7 @@
     if (!window.Khatira || !Khatira.RECITERS.some(r => r.id === state.kReciter)) state.kReciter = 7;
     if (state.kContent !== 'quran') state.kContent = 'text';
     if (!['line', 'build', 'word'].includes(state.kStyle)) state.kStyle = 'line';
+    state.textPos = cleanTextPos(state.textPos);
     state.kTexts = (Array.isArray(state.kTexts) ? state.kTexts : []).filter(t => typeof t === 'string').slice(0, MAX_KTEXTS).map(t => t.slice(0, MAX_KTEXT));
     if (!state.kTexts.length) state.kTexts = [''];
     if (typeof state.kFont !== 'string' || !(state.kFont.startsWith('u:') || (window.Khatira && Khatira.FONTS.some(f => f.id === state.kFont)))) state.kFont = 'amiri';
@@ -1189,6 +1192,20 @@
     c.fillText(ln, x, y);
   }
 
+  // ---------- where the text sits ----------
+  // Its centre on a w x h frame: the middle (a little higher above the caption), or where the
+  // user dragged it.
+  const TEXT_EDGE = 0.06;
+  function cleanTextPos(p) {
+    if (!p || typeof p !== 'object' || !isFinite(+p.x) || !isFinite(+p.y)) return null;
+    const c = v => Math.min(1 - TEXT_EDGE, Math.max(TEXT_EDGE, +v));
+    return { x: c(p.x), y: c(p.y) };
+  }
+  function textCentre(w, h) {
+    const p = state.textPos;
+    return p ? [p.x * w, p.y * h] : [w / 2, h * (state.caption ? 0.46 : 0.5)];
+  }
+
   function drawAyah(c, seg, w, h, alpha) {
     if (alpha <= 0) return;
     const L = layoutText(c, seg, w, h);
@@ -1199,7 +1216,7 @@
     c.textAlign = 'center';
     c.textBaseline = 'middle';
     c.fillStyle = state.color;
-    const cy = h * (state.caption ? 0.46 : 0.5);
+    const [cx, cy] = textCentre(w, h);
     const top = cy - (L.lines.length - 1) * L.lh / 2;
     // Gentle rise as the ayah fades in.
     const rise = (1 - alpha) * L.size * 0.3;
@@ -1211,7 +1228,7 @@
       c.shadowColor = 'transparent';
       c.fillStyle = 'rgba(0,0,0,0.5)';
       c.beginPath();
-      const px = (w - pw) / 2, py = cy - ph / 2 + rise, r = L.size * 0.55;
+      const px = cx - pw / 2, py = cy - ph / 2 + rise, r = L.size * 0.55;
       if (c.roundRect) c.roundRect(px, py, pw, ph, r);
       else c.rect(px, py, pw, ph);
       c.fill();
@@ -1220,7 +1237,7 @@
       c.stroke();
       c.restore();
     }
-    L.lines.forEach((ln, i) => fillAyahLine(c, ln, w / 2, top + i * L.lh + rise, L.size));
+    L.lines.forEach((ln, i) => fillAyahLine(c, ln, cx, top + i * L.lh + rise, L.size));
     c.restore();
   }
 
@@ -1464,7 +1481,7 @@
     const e = 1 - Math.pow(1 - clamp01(p), 3);            // ease out
     c.save();
     c.globalAlpha = alpha * e;
-    c.translate(w / 2, h * (state.caption ? 0.46 : 0.5));
+    c.translate(...textCentre(w, h));
     const k = 0.9 + 0.1 * e;
     c.scale(k, k);
     c.font = kFont(size);
@@ -1542,7 +1559,7 @@
     let cur = words.length - 1;
     if (t != null) { cur = -1; for (let i = 0; i < words.length && words[i].a <= t; i++) cur = i; }
     const page = cur >= 0 ? L.pageOf[cur] : 0;
-    const cx = w / 2, cy = h * (state.caption ? 0.46 : 0.5), style = state.kStyle;
+    const [cx, cy] = textCentre(w, h), style = state.kStyle;
     c.save();
     c.direction = L.rtl ? 'rtl' : 'ltr';
     c.textAlign = L.rtl ? 'right' : 'left';
@@ -1626,7 +1643,7 @@
         drawAyah(c, it, w, h, a);
       });
     }
-    if (stickers) stickers.draw(c, w, h);
+    if (stickers) stickers.draw(c, w, h, tl ? t : null, total);
     drawCaption(c, w, h);
     drawBranding(c, w, h);
   }
@@ -1696,6 +1713,64 @@
     if (fsElement()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
     else if ($('vmStage').classList.contains('pseudo-fs')) exitPseudoFullscreen();
     else enterFullscreen();
+  }
+
+  // ---------- moving the text: hold on the preview, then drag ----------
+  // A tap still plays the preview, and a finger that moves at once still scrolls the page: only a
+  // press held still for a moment (or a mouse drag) picks the text up. Stickers keep their own drag.
+  let textDrag = null;
+  let textDragEnd = 0;     // when a hold ended: the click that follows must not start the preview
+  function bindTextDrag() {
+    const cv = canvas, stage = $('vmStage'), HOLD = 380, SLOP = 10;
+    const frac = ev => { const r = cv.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width, y: (ev.clientY - r.top) / r.height }; };
+    const finish = () => {
+      if (!textDrag) return;
+      clearTimeout(textDrag.timer);
+      if (textDrag.armed) { textDragEnd = Date.now(); saveSettings(); setStatus(''); renderTextPos(); }
+      textDrag = null;
+      stage.classList.remove('text-drag');
+    };
+    const arm = () => {
+      if (!textDrag || textDrag.armed || playing || busy) return;
+      textDrag.armed = true;
+      stage.classList.add('text-drag');
+      try { cv.setPointerCapture(textDrag.id); } catch (e) { /* not supported */ }
+      if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) { /* not allowed */ }
+      setStatus(tr('vm_tpos_moving'));
+    };
+    cv.addEventListener('pointerdown', ev => {
+      if (busy || playing || isLong() || ev.button > 0 || textDrag) return;
+      if (stickers) {
+        const r = cv.getBoundingClientRect();
+        if (stickers.hit({ x: (ev.clientX - r.left) / r.width * cv.width, y: (ev.clientY - r.top) / r.height * cv.height }) >= 0) return;
+      }
+      const [x0, y0] = textCentre(1, 1);
+      textDrag = { id: ev.pointerId, mouse: ev.pointerType === 'mouse', cx: ev.clientX, cy: ev.clientY, p0: frac(ev), x0, y0, armed: false };
+      textDrag.timer = setTimeout(arm, HOLD);
+    });
+    cv.addEventListener('pointermove', ev => {
+      if (!textDrag || ev.pointerId !== textDrag.id) return;
+      if (!textDrag.armed) {
+        const d = Math.hypot(ev.clientX - textDrag.cx, ev.clientY - textDrag.cy);
+        if (textDrag.mouse && d > 6) arm();
+        else if (d > SLOP) { finish(); return; }    // a swipe: the page scrolls
+        if (!textDrag || !textDrag.armed) return;
+      }
+      const p = frac(ev);
+      state.textPos = cleanTextPos({ x: textDrag.x0 + p.x - textDrag.p0.x, y: textDrag.y0 + p.y - textDrag.p0.y });
+      renderIdle();
+    });
+    cv.addEventListener('pointerup', finish);
+    cv.addEventListener('pointercancel', finish);
+    // once the text is held, the finger moves it rather than the page
+    cv.addEventListener('touchmove', e => { if (textDrag && textDrag.armed) e.preventDefault(); }, { passive: false });
+    cv.addEventListener('contextmenu', e => { if (!isLong()) e.preventDefault(); });
+    $('vmTextPosReset').onclick = () => { state.textPos = null; saveSettings(); renderIdle(); renderTextPos(); };
+    renderTextPos();
+  }
+  function renderTextPos() {
+    const b = $('vmTextPosReset');
+    if (b) b.disabled = !state.textPos;
   }
 
   function renderIdle() {
@@ -1892,6 +1967,7 @@
       if (!playing) return;
       const t = ac.currentTime - playing.t0;
       renderFrame(ctx, canvas.width, canvas.height, Math.max(0, t), tl);
+      previewT = Math.min(tl.total, Math.max(0, t));
       setStageProgress(clamp01(t / tl.total));
       if (t >= tl.total) { stopPlayback(); return; }
       playing.raf = requestAnimationFrame(tick);
@@ -2945,7 +3021,8 @@
     $('vmHalo').oninput = () => setHalo($('vmHalo').value);
     $('vmPreview').onclick = togglePreview;
     // Tapping the video itself plays/stops the preview.
-    $('vmStage').onclick = () => { if (stickers && stickers.clickAfterDrag()) return; if (!busy) togglePreview(); };
+    $('vmStage').onclick = () => { if (stickers && stickers.clickAfterDrag()) return; if (Date.now() - textDragEnd < 400) return; if (!busy) togglePreview(); };
+    bindTextDrag();
     $('vmFullscreen').onclick = e => { e.stopPropagation(); toggleFullscreen(); };
     document.addEventListener('fullscreenchange', syncFullscreenUi);
     document.addEventListener('webkitfullscreenchange', syncFullscreenUi);
@@ -3014,7 +3091,7 @@
     if (window.VMStickers) {
       stickers = VMStickers({
         state, $, tr, lang, canvas, num: n => (arabicNames() ? arDigits(n) : String(n)),
-        playing: () => !!playing, busy: () => busy, redraw: () => renderIdle(), save: saveSettings,
+        playing: () => !!playing, busy: () => busy, redraw: () => renderIdle(), save: saveSettings, now: () => previewT,
         say: (m, err) => setStatus(m, err),
       });
       stickers.sanitize();
@@ -3094,7 +3171,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 10;   // 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  const BUILD = 11;   // 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
   window.VM = { khatiraLayout: (si, w, h) => { const tl = timeline, c = document.createElement('canvas').getContext('2d'); const L = kLayout(c, tl, si, w, h); return { size: L.size, rtl: L.rtl, pages: L.pages.map(pg => pg.map(ln => ln.length)) }; }, get own() { return own; }, khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
   init();
 })();

@@ -1,8 +1,10 @@
-// Character stickers for the video maker (pages/video-maker.html): 39 pictures of the character
-// (images/stickers/s01..s39.webp, cut from the supplied sheets) the user can put on a video:
-// tap one in the picker to add it, then move it on the preview (drag, or the sliders), resize,
-// flip, bring to the front or delete it. They are drawn by renderFrame, so the preview, the
-// mini preview and the exported video all show them.
+// Character stickers for the video maker (pages/video-maker.html): 49 pictures of the character
+// (images/stickers/h01..h10.webp, the high-resolution pack, shown first, then s01..s39, cut from
+// the supplied sheets) the user can put on a video: tap one in the picker to add it, then move it
+// on the preview (drag, or the sliders), resize, flip, bring to the front or delete it. Each one
+// shows from / to a second of the video (the whole video by default) and comes in and goes out
+// with an effect. They are drawn by renderFrame, so the preview, the mini preview and the
+// exported video all show them.
 //
 // Created by js/video-maker.js, which passes in what it shares (the settings, the canvas, the
 // stage, translations and how to redraw).
@@ -12,6 +14,17 @@
   const DIR = '../images/stickers/';
   const MAX = 12;                       // stickers on one video
   const SIZE = { min: 0.08, max: 1.3 }; // width as a share of the shorter side of the video
+  const FX = ['pop', 'fade', 'slide', 'zoom', 'float', 'none'];   // how a sticker comes in and goes out
+  const FX_DUR = 0.5;                   // seconds the effect takes
+  const MAX_T = 3600;                   // a time beyond any video
+
+  // The high-resolution pack, first in the picker: [Arabic, English].
+  const HD = [
+    ['يتأمل السماء', 'Looking up, thinking'], ['فكرة على اللابتوب', 'An idea at the laptop'], ['يتساءل', 'Wondering why'],
+    ['يكتب بين الكتب', 'Writing among books'], ['يدعو', 'Making dua'], ['يقرأ المصحف', 'Reading the mushaf'],
+    ['يدعو بيده على صدره', 'Inviting, hand on heart'], ['يفكر', 'Thinking'], ['يده على قلبه', 'Hand on heart, open hand'],
+    ['مهموم', 'Worried, head in hand'],
+  ];
 
   // What each picture shows: [Arabic, English] (the other languages read the English).
   const LABELS = [
@@ -26,7 +39,9 @@
     ['فكرة ولابتوب', 'Idea at the laptop'], ['يستمع إلى القرآن', 'Listening to the Quran'], ['يكتب', 'Writing'], ['انتبه', 'Attention'],
     ['تساؤل', 'A question'], ['يفتح يديه', 'Open hands'], ['دعاء هادئ', 'Quiet dua'], ['يقرأ', 'Reading'], ['يستمع', 'Listening'],
   ];
-  const ids = LABELS.map((_, i) => 's' + String(i + 1).padStart(2, '0'));
+  const pad = i => String(i + 1).padStart(2, '0');
+  const ALL = HD.concat(LABELS);
+  const ids = HD.map((_, i) => 'h' + pad(i)).concat(LABELS.map((_, i) => 's' + pad(i)));
 
   window.VMStickers = function (api) {
     const S = api.state;
@@ -40,7 +55,7 @@
     const label = id => {
       const i = ids.indexOf(id);
       if (i < 0) return id;
-      return (api.lang() === 'ar' ? LABELS[i][0] : LABELS[i][1]);
+      return (api.lang() === 'ar' ? ALL[i][0] : ALL[i][1]);
     };
     const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
     const list = () => S.stickers;
@@ -64,7 +79,12 @@
         y: clamp(+s.y || 0.5, 0, 1),
         s: clamp(+s.s || 0.45, SIZE.min, SIZE.max),
         flip: !!s.flip,
+        from: clamp(+s.from || 0, 0, MAX_T),
+        // null = to the end of the video
+        to: s.to == null || s.to === '' || !isFinite(+s.to) ? null : clamp(+s.to, 0, MAX_T),
+        fx: FX.includes(s.fx) ? s.fx : 'pop',
       }));
+      S.stickers.forEach(s => { if (s.to != null && s.to <= s.from) s.to = null; });
       if (sel >= S.stickers.length) sel = -1;
     }
 
@@ -76,13 +96,43 @@
       const bw = s.s * Math.min(w, h);
       return { cx: s.x * w, cy: s.y * h, w: bw, h: bw * ratio };
     }
-    function draw(c, w, h) {
+    // How far in a sticker is at video time t: { a: opacity, k: scale, dy: offset (share of its
+    // height) }, or null while it is off. `t` null = a still (the editor): every sticker, as placed.
+    const easeOut = x => 1 - Math.pow(1 - x, 3);
+    const easeBack = x => { const k = 1.70158; return 1 + (k + 1) * Math.pow(x - 1, 3) + k * Math.pow(x - 1, 2); };
+    function look(s, t, total) {
+      if (t == null) return { a: 1, k: 1, dy: 0 };
+      const end = s.to == null ? (total || MAX_T) : Math.min(s.to, total || MAX_T);
+      if (t < s.from || t > end) return null;
+      const d = Math.min(FX_DUR, (end - s.from) / 2);
+      // in: 0 -> 1 over the first d seconds; out: 1 -> 0 over the last d (only when it leaves
+      // before the end: at the end the whole video fades)
+      const pin = d > 0 && s.from > 0 ? Math.min(1, (t - s.from) / d) : 1;
+      const pout = d > 0 && s.to != null && s.to < (total || MAX_T) ? Math.min(1, (end - t) / d) : 1;
+      const p = Math.max(0, Math.min(pin, pout));
+      const e = easeOut(p);
+      const r = { a: 1, k: 1, dy: 0 };
+      switch (s.fx) {
+        case 'fade': r.a = e; break;
+        case 'pop': r.a = Math.min(1, p * 3); r.k = Math.max(0.01, easeBack(p)); break;
+        case 'slide': r.a = e; r.dy = (1 - e) * 0.6; break;
+        case 'zoom': r.a = e; r.k = 0.25 + 0.75 * e; break;
+        case 'float': r.a = e; r.dy = (1 - e) * 0.15 + Math.sin((t - s.from) * 2.2) * 0.025; break;
+        default: break;
+      }
+      return r.a > 0.003 ? r : null;
+    }
+    function draw(c, w, h, t, total) {
       for (const s of list()) {
         const im = image(s.id);
         if (!im.complete || !im.naturalWidth) continue;
+        const v = look(s, t == null ? null : t, total);
+        if (!v) continue;
         const b = box(s, w, h);
         c.save();
-        c.translate(b.cx, b.cy);
+        c.globalAlpha *= v.a;
+        c.translate(b.cx, b.cy + v.dy * b.h);
+        if (v.k !== 1) c.scale(v.k, v.k);
         if (s.flip) c.scale(-1, 1);
         c.shadowColor = 'rgba(0,0,0,0.35)';
         c.shadowBlur = b.w * 0.04;
@@ -168,6 +218,13 @@
       $('vmStName').textContent = label(s.id);
       const set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = v; };
       set('vmStSize', s.s); set('vmStX', s.x); set('vmStY', s.y);
+      set('vmStFrom', s.from ? +s.from.toFixed(1) : '');
+      set('vmStTo', s.to == null ? '' : +s.to.toFixed(1));
+      document.querySelectorAll('#vmStFx [data-fx]').forEach(b => {
+        const on = b.dataset.fx === s.fx;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
     }
     function select(i) {
       sel = i;
@@ -178,7 +235,7 @@
       if (list().length >= MAX) { api.say(tr('vm_st_max', { n: api.num(MAX) }), true); return; }
       const n = list().length;
       // new ones start low on the video (clear of the text) and a little apart
-      S.stickers.push({ id, x: clamp(0.5 + ((n % 3) - 1) * 0.12, 0.1, 0.9), y: clamp(0.76 - (n % 4) * 0.03, 0.1, 0.9), s: 0.46, flip: false });
+      S.stickers.push({ id, x: clamp(0.5 + ((n % 3) - 1) * 0.12, 0.1, 0.9), y: clamp(0.76 - (n % 4) * 0.03, 0.1, 0.9), s: 0.46, flip: false, from: 0, to: null, fx: 'pop' });
       api.say('', false);
       sel = S.stickers.length - 1;
       changed();
@@ -270,6 +327,22 @@
       $('vmStFlip').onclick = () => { const s = list()[sel]; if (s) { s.flip = !s.flip; changed(); } };
       $('vmStFront').onclick = () => { if (sel >= 0) { S.stickers.push(S.stickers.splice(sel, 1)[0]); sel = S.stickers.length - 1; changed(); } };
       $('vmStDel').onclick = remove;
+      // when it shows: seconds from the start; an empty "to" = until the end
+      const time = () => {
+        const s = list()[sel];
+        if (!s) return;
+        const f = parseFloat($('vmStFrom').value), e = parseFloat($('vmStTo').value);
+        s.from = isFinite(f) ? clamp(f, 0, MAX_T) : 0;
+        s.to = isFinite(e) && e > s.from ? clamp(e, 0, MAX_T) : null;
+        api.save(); api.redraw();
+      };
+      $('vmStFrom').onchange = time;
+      $('vmStTo').onchange = time;
+      $('vmStFromNow').onclick = () => { const s = list()[sel]; if (!s) return; $('vmStFrom').value = +api.now().toFixed(1); time(); renderControls(); };
+      $('vmStToNow').onclick = () => { const s = list()[sel]; if (!s) return; $('vmStTo').value = +api.now().toFixed(1); time(); renderControls(); };
+      document.querySelectorAll('#vmStFx [data-fx]').forEach(b => {
+        b.onclick = () => { const s = list()[sel]; if (!s) return; s.fx = b.dataset.fx; changed(); };
+      });
       $('vmStDone').onclick = () => select(-1);
     }
     function render() {
@@ -281,7 +354,7 @@
     }
 
     return {
-      bindUi, render, draw, placeBox, clickAfterDrag, sanitize,
+      bindUi, render, draw, placeBox, clickAfterDrag, sanitize, look, hit: p => hit(p),
       get selected() { return sel; },
       get ids() { return ids.slice(); },
     };

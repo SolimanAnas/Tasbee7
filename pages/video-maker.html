@@ -63,6 +63,19 @@
 .st-act { min-height:44px; padding:0 4px; border:1px solid var(--glass-border); border-radius:12px; background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
 .st-act.st-del { color:var(--danger); }
 .st-act.st-ok { background:var(--accent-main); border-color:var(--accent-main); color:var(--on-accent); }
+.st-times { display:flex; flex-wrap:wrap; gap:6px; }
+.st-time { display:flex; align-items:center; gap:5px; flex:1 1 130px; }
+.st-time input { width:100%; min-width:0; min-height:40px; padding:0 8px; border:1px solid var(--glass-border); border-radius:10px; background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:14px; font-variant-numeric:tabular-nums; }
+.st-now { flex:none; min-height:40px; padding:0 9px; border:1px solid var(--glass-border); border-radius:10px; background:var(--field-bg); color:var(--accent-main); font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; }
+.st-fx { display:flex; flex-wrap:wrap; gap:6px; }
+.st-fx button { min-height:36px; padding:0 11px; border:1px solid var(--glass-border); border-radius:999px; background:var(--field-bg); color:var(--text-secondary); font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; }
+.st-fx button.active { border-color:var(--accent-main); background:var(--accent-muted); color:var(--accent-main); }
+.tpos-row { display:flex; align-items:center; gap:10px; }
+.tpos-row .st-hint { margin:0; flex:1; }
+.tpos-row .st-act { flex:none; padding:0 14px; }
+.tpos-row .st-act:disabled { opacity:.45; cursor:default; }
+#vmStage canvas { -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+#vmStage.text-drag canvas { cursor:grabbing; outline:2px dashed var(--accent-main); outline-offset:-2px; }
 .st-box { position:absolute; border:2px dashed var(--accent-main); border-radius:10px; pointer-events:none; z-index:3; box-shadow:0 0 0 1px rgba(0,0,0,.35); }
 .st-box[hidden] { display:none; }
 .st-handle { position:absolute; inset-inline-end:-13px; bottom:-13px; width:26px; height:26px; border-radius:50%; background:var(--accent-main); border:2px solid #fff;
@@ -1070,6 +1083,22 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           <label class="st-row"><span data-i18n="vm_st_size">الحجم</span><input type="range" id="vmStSize" min="0.08" max="1.3" step="0.01"></label>
           <label class="st-row"><span data-i18n="vm_st_x">أفقياً</span><input type="range" id="vmStX" min="0" max="1" step="0.005" dir="ltr"></label>
           <label class="st-row"><span data-i18n="vm_st_y">رأسياً</span><input type="range" id="vmStY" min="0" max="1" step="0.005"></label>
+          <div class="st-row"><span data-i18n="vm_st_when">الظهور</span>
+            <div class="st-times">
+              <label class="st-time"><span data-i18n="vm_st_from">من</span><input type="number" id="vmStFrom" min="0" step="0.1" inputmode="decimal" placeholder="0" dir="ltr"><button type="button" class="st-now" id="vmStFromNow" data-i18n="vm_st_now" data-i18n-title="vm_st_now_aria" title="وقت المعاينة الحالي">الآن</button></label>
+              <label class="st-time"><span data-i18n="vm_st_to">إلى</span><input type="number" id="vmStTo" min="0" step="0.1" inputmode="decimal" data-i18n-placeholder="vm_st_end" placeholder="النهاية" dir="ltr"><button type="button" class="st-now" id="vmStToNow" data-i18n="vm_st_now" data-i18n-title="vm_st_now_aria" title="وقت المعاينة الحالي">الآن</button></label>
+            </div>
+          </div>
+          <div class="st-row"><span data-i18n="vm_st_fx">التأثير</span>
+            <div class="st-fx" id="vmStFx" role="group" data-i18n-aria="vm_st_fx" aria-label="التأثير">
+              <button type="button" data-fx="pop" aria-pressed="true" class="active" data-i18n="vm_st_fx_pop">قفزة</button>
+              <button type="button" data-fx="fade" aria-pressed="false" data-i18n="vm_st_fx_fade">تلاشٍ</button>
+              <button type="button" data-fx="slide" aria-pressed="false" data-i18n="vm_st_fx_slide">انزلاق</button>
+              <button type="button" data-fx="zoom" aria-pressed="false" data-i18n="vm_st_fx_zoom">تكبير</button>
+              <button type="button" data-fx="float" aria-pressed="false" data-i18n="vm_st_fx_float">طفو</button>
+              <button type="button" data-fx="none" aria-pressed="false" data-i18n="vm_st_fx_none">بدون</button>
+            </div>
+          </div>
           <div class="st-actions">
             <button type="button" id="vmStFlip" class="st-act" data-i18n="vm_st_flip">قلب</button>
             <button type="button" id="vmStFront" class="st-act" data-i18n="vm_st_front">للأمام</button>
@@ -1087,6 +1116,14 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
             <button type="button" data-fmt="story" class="active"><span class="shape"></span><span data-i18n="vm_format_story">حالة / ستوري</span><small>9:16</small></button>
             <button type="button" data-fmt="square"><span class="shape"></span><span data-i18n="vm_format_square">مربع</span><small>1:1</small></button>
             <button type="button" data-fmt="wide"><span class="shape"></span><span data-i18n="vm_format_wide">عريض</span><small>16:9</small></button>
+          </div>
+        </div>
+
+        <div class="field only-short">
+          <div class="label" data-i18n="vm_tpos">موضع النص</div>
+          <div class="tpos-row">
+            <span class="st-hint" data-i18n="vm_tpos_hint">اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.</span>
+            <button type="button" class="st-act" id="vmTextPosReset" data-i18n="vm_tpos_reset" disabled>إلى الوسط</button>
           </div>
         </div>
 
@@ -1381,7 +1418,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 10;
+  var NEED = 11;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
