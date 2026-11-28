@@ -174,7 +174,7 @@ test.describe('the audit: touch targets, text size, contrast, and word gaps afte
       if (sessionStorage.getItem('g')) return;
       sessionStorage.setItem('g', '1');
       localStorage.setItem('zad_lang', 'ar');
-      localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', kTexts: ['الصبر مفتاح الفرج'], kFont: 'amiri', bg: 'g0', motion: false }));
+      localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', kTexts: ['الصبر مفتاح الفرج'], kFont: 'amiri', textAlign: 'middle', bg: 'g0', motion: false }));
     });
     await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
     await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });

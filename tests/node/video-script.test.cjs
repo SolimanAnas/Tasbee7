@@ -94,6 +94,29 @@ test('@quran: a recitation under the text', () => {
   assert.ok(S.serialize({ settings: { quran: { surah: 94, from: 5, to: 6 } }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@quran: 94:5-6'));
 });
 
+test('@spacing: the space between lines, kept in range', () => {
+  assert.strictEqual(S.parse('@spacing: 1.3\nأ').settings.spacing, 1.3);
+  const r = S.parse('@spacing: 5\nأ');
+  assert.strictEqual(r.settings.spacing, 2.4);
+  assert.deepStrictEqual(r.warnings.map(w => w.code), ['spacing']);
+  assert.ok(S.serialize({ settings: { spacing: 1.3 }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@spacing: 1.3'));
+  assert.ok(S.template({}).includes('@spacing: <number>'));
+});
+
+test('sticker tags: until the next sticker, or to the end', () => {
+  const r = S.parse('أ <sticker 1 next>\nب <sticker 2 end>\nج <sticker 3>');
+  assert.deepStrictEqual(r.stickers.map(s => s.until), ['next', 'end', 'line']);
+  const back = S.parse(S.serialize(r));
+  assert.deepStrictEqual(back.stickers.map(s => s.until), ['next', 'end', 'line']);
+});
+
+test('@position: where the text sits', () => {
+  assert.strictEqual(S.parse('@position: bottom\nأ').settings.position, 'bottom');
+  assert.strictEqual(S.parse('@position: أعلى\nأ').settings.position, 'top');
+  assert.deepStrictEqual(S.parse('@position: left\nأ').warnings.map(w => w.code), ['position']);
+  assert.ok(S.serialize({ settings: { position: 'top' }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@position: top'));
+});
+
 test('limits: lines, length, stickers', () => {
   const many = Array.from({ length: 40 }, (_, i) => `سطر ${i + 1} <sticker 1>`).join('\n');
   const r = S.parse(many + '\n' + 'ك'.repeat(500));

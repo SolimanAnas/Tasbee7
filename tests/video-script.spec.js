@@ -13,6 +13,11 @@ const sec = (page, name) => expect(async () => {
   await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
 }).toPass({ timeout: 15000 });
 
+// the picker folds away once a sticker is added: open it, then tap the picture
+async function pick(page, id) {
+  if ((await page.locator('#vmStPickToggle').getAttribute('aria-expanded')) !== 'true') await page.locator('#vmStPickToggle').click();
+  await page.locator(`#vmStGrid [data-sticker="${id}"]`).click();
+}
 const BASE_URL = 'http://localhost:8080';
 test.use({ serviceWorkers: 'block', viewport: { width: 412, height: 915 } });
 
@@ -93,16 +98,16 @@ test('an uploaded script makes the video: texts with their times, fonts and size
   // before a picture is chosen a number draws nothing
   const none = await lowWhite(page, 2.5);
   // choose: number 1 -> f… the grid's tile; then number 2 is next
-  await page.locator('#vmStGrid [data-sticker="h08"]').click();
+  await pick(page, 'h08');
   await expect(page.locator('#vmStSlotList .st-slot.active')).toHaveAttribute('data-slot', '2');
-  await page.locator('#vmStGrid [data-sticker="h05"]').click();
+  await pick(page, 'h05');
   await expect(page.locator('#vmStSlotList .st-slot.active')).toHaveCount(0);
   await expect(page.locator('#vmStSlotHint')).toContainText('اختيرت كل الصور');
   sts = await page.evaluate(() => VM.state.stickers.map(s => [s.slot, s.id]));
   expect(sts).toEqual([[1, 'h08'], [2, 'h05'], [1, 'h08'], [null, 'h05'], [2, 'h05']]);
   // a number can be changed later: tap it, then another picture
   await page.locator('#vmStSlotList [data-slot="2"]').click();
-  await page.locator('#vmStGrid [data-sticker="h06"]').click();
+  await pick(page, 'h06');
   expect(await page.evaluate(() => VM.state.stickers.filter(s => s.slot === 2).map(s => s.id))).toEqual(['h06', 'h06']);
   // each shows with its line: during line 1 more of the picture than before choosing it
   await expect.poll(() => lowWhite(page, 2.5)).toBeGreaterThan(none + 1500);
@@ -183,7 +188,8 @@ test('pasting a script (and subtitles), the warnings, replacing texts asks first
   const back = S.parse(text, { ids: ['h05'] });
   expect(back.lines).toEqual(S.parse(SCRIPT, { ids: ['h05'] }).lines);
   expect(back.settings).toMatchObject({ font: 'cairo', size: 1.1, style: 'build', color: '#f5e6b8', name: 'قناة الأثر' });
-  expect(back.stickers.map(s => [s.line, s.slot, s.x, s.y, s.s])).toEqual(S.parse(SCRIPT, { ids: ['h05'] }).stickers.map(s => [s.line, s.slot, s.x, s.y, s.s]));
+  // the stickers come back on their lines, numbers and sides (one alone stands large on the bottom edge)
+  expect(back.stickers.map(s => [s.line, s.slot, s.x])).toEqual(S.parse(SCRIPT, { ids: ['h05'] }).stickers.map(s => [s.line, s.slot, s.x]));
 });
 
 test('the template for an AI: downloaded and copied, with the fonts, the size range and the stickers', async ({ page, context }) => {
@@ -213,12 +219,12 @@ test('a sticker shown with a chosen text (or set times), and the sticker pack as
   await page.addInitScript(() => { if (!sessionStorage.getItem('w1')) { sessionStorage.setItem('w1', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, caption: false, kTexts: ['الأول هنا', 'والثاني هنا', 'والثالث'] })); } });
   await open(page);
   await sec(page, 'look');
-  await page.locator('#vmStGrid [data-sticker="h03"]').click();
-  const pick = page.locator('#vmStWith');
-  await expect(pick.locator('option')).toHaveCount(4);
-  await expect(pick).toHaveValue('time');
+  await pick(page, 'h03');
+  const withSel = page.locator('#vmStWith');
+  await expect(withSel.locator('option')).toHaveCount(4);
+  await expect(withSel).toHaveValue('time');
   await expect(page.locator('#vmStTimes')).toBeVisible();
-  await pick.selectOption('1');
+  await withSel.selectOption('1');
   expect(await page.evaluate(() => VM.state.stickers[0].line)).toBe(1);
   await expect(page.locator('#vmStTimes')).toBeHidden();
   // shown while the second text is, not with the first or the third
@@ -229,7 +235,7 @@ test('a sticker shown with a chosen text (or set times), and the sticker pack as
   expect(off1).toBeLessThan(on * 0.05);
   expect(off3).toBeLessThan(on * 0.05);
   // back to set times: the line's own seconds, kept
-  await pick.selectOption('time');
+  await withSel.selectOption('time');
   const s = await page.evaluate(() => VM.state.stickers[0]);
   expect(s.line).toBe(null);
   expect(s.from).toBeCloseTo(span[1][0], 0);

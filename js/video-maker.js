@@ -65,6 +65,8 @@
     multiBg: false,     // slideshow: several pictures change during the clip
     bgs: [],            // picked pictures in order ('i:<file>'), used when multiBg is on
     fontMul: 1,
+    lineGap: null,      // space from line to line, as a share of the text size (null = the mode's own: 1.8 for ayat, 1.45 for «خاطرة»)
+    miniPreview: true,  // the floating mini preview while the preview is out of view
     color: '#ffffff',
     caption: true,
     branding: true,     // app icon + name at the top
@@ -82,7 +84,8 @@
     ktAudio: 'none',    // «خاطرة» own words: 'none' (each text for its length) or 'quran' (a recitation of surah / from / to under them, by kReciter)
     kOpts: [],          // «خاطرة»: per text (same index), from a video script: { a, b } its seconds, { font, size } its face and size; null = none
     stickers: [],       // character stickers on the video (js/video-stickers.js): [{ id, x, y, s, flip, from, to, fx }]
-    textPos: null,      // where the text sits (its centre, shares of the frame), moved by holding and dragging on the preview; null = the middle
+    textPos: null,
+    textAlign: null,    // 'top' | 'middle' | 'bottom' (null = the mode's own); textPos (a drag) wins over it      // where the text sits (its centre, shares of the frame), moved by holding and dragging on the preview; null = the middle
     kStyle: 'line',     // «خاطرة»: how the text shows: 'line' (the whole line, the word recited lit), 'build' (words appear in place as recited), 'word' (one word at a time)
     kFont: 'amiri',     // «خاطرة»: the face of the words (Khatira.FONTS id, or 'u:<id>' for a font from the device)
     tvTemplate: 'dawn', // long mode: template id (js/tv-templates.js)
@@ -243,7 +246,7 @@
       vm_fx_auto_polish: 'فُعّل تحسين الصوت تلقائياً لتسجيلك — غيّره من «مؤثرات صوتية»',
       vm_mode_short: 'قصير / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
       vm_sec_content: "المحتوى", vm_kc_text: "نص من كتابتك", vm_kc_quran: "آيات من القرآن", vm_kt_add: "أضف نصاً", vm_kt_note: "كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.", vm_src_none: "بدون صوت", vm_kt_silent: "بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.", vm_kt_name: "الاسم المعروض", vm_kt_label: "النص {i}", vm_kt_ph: "اكتب خاطرتك هنا…", vm_kt_delete: "حذف النص {i}", vm_kt_empty: "خاطرتك", vm_kt_count_1: "نص واحد", vm_kt_count: "{n} نصوص", vm_kt_count_2: "نصّان", vm_kt_count_many: "{n} نصاً", vm_kt_n: "النص {i} من {n}", vm_kt_name_ph: 'اسمك، إن أردت أن يظهر في الفيديو',
-      vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً", vm_src_quran: "آيات", vm_kq_note: "تُتلى الآيات التي تختارها تحت نصوصك، وتتوزع النصوص على مدة التلاوة ما لم يحدد السيناريو توقيتها.", vm_sc_w_quran: "آيات غير صحيحة في ‎@quran‎: {v}", vm_st_slot: "ملصق {n}", vm_st_slot_pick: "اختر صورة «ملصق {n}» من القائمة", vm_st_slot_left: "بقي {n} بلا صورة: اضغط رقماً ثم اختر صورته", vm_st_slot_done: "اختيرت كل الصور. اضغط رقماً لتغيير صورته.", vm_st_slots: "ملصقات السيناريو", vm_st_with_time: "وقت محدد", vm_st_with_line: "مع النص {n}", vm_st_pack: "تحميل حزمة الملصقات", vm_st_pack_busy: "تجهيز الحزمة… {n} / {of}", vm_st_pack_done: "حُمّلت الحزمة ({n} ملصقاً)", vm_st_pack_err: "تعذر تجهيز الحزمة، تحقق من الاتصال", vm_sc_title: "سيناريو الفيديو", vm_sc_hint: "الفيديو كاملاً في ملف نصي: السطور وتوقيتها وخطوطها وأحجامها وملصقاتها. نزّل القالب وأعطه لمساعد ذكاء اصطناعي مع موضوعك، ثم ارفع ما يكتبه.", vm_sc_upload: "رفع سيناريو", vm_sc_paste: "لصق سيناريو", vm_sc_template: "تحميل القالب", vm_sc_copy: "نسخ القالب للذكاء الاصطناعي", vm_sc_export: "تنزيل سيناريو الفيديو الحالي", vm_sc_paste_ph: "[0:00 - 0:04] نص السطر الأول <sticker 1>", vm_sc_apply: "استيراد", vm_sc_cancel: "إلغاء", vm_sc_empty: "لا نص في السيناريو", vm_sc_replace: "سيحل السيناريو محل نصوصك الحالية. متابعة؟", vm_sc_done: "استُورد {lines} سطراً و{stickers} ملصقاً.", vm_sc_pick: "اختر صورة لكل ملصق من بطاقة الملصقات.", vm_sc_big: "الملف أكبر من أن يكون سيناريو", vm_sc_bad: "تعذرت قراءة الملف", vm_sc_template_done: "حُمّل القالب. أعطه لمساعد ذكاء اصطناعي مع موضوع الفيديو.", vm_sc_copied: "نُسخ القالب. الصقه في مساعد الذكاء الاصطناعي واكتب موضوعك.", vm_sc_copy_err: "تعذر النسخ، استخدم «تحميل القالب»", vm_sc_nothing: "لا نصوص بعد لتنزيلها", vm_sc_opts_clear: "إزالة توقيت النص {i} وخطه وحجمه", vm_sc_w_font: "خط غير معروف: {v}", vm_sc_w_size: "حجم خارج المدى ٠٫٧ – ١٫٤، عُدّل: {v}", vm_sc_w_time: "السطر {n}: النهاية قبل البداية، فتُركت بلا نهاية", vm_sc_w_tag: "وسم ملصق غير مفهوم: {v}", vm_sc_w_lines: "تُرك {n} سطراً بعد الحد (٣٠)", vm_sc_w_stickers: "تُرك {n} ملصقاً بعد الحد (٣٠)", vm_sc_w_long: "السطر {n} طويل فقُصّ", vm_sc_w_other: "إعداد غير مفهوم: {v}", vm_mini_back: "العودة إلى المعاينة", vm_mini_close: "إخفاء المعاينة المصغرة", vm_st_when: "الظهور", vm_st_from: "من", vm_st_to: "إلى", vm_st_end: "النهاية", vm_st_now: "الآن", vm_st_now_aria: "وقت المعاينة الحالي", vm_st_fx: "التأثير", vm_st_fx_pop: "قفزة", vm_st_fx_fade: "تلاشٍ", vm_st_fx_slide: "انزلاق", vm_st_fx_zoom: "تكبير", vm_st_fx_float: "طفو", vm_st_fx_none: "بدون", vm_tpos: "موضع النص", vm_tpos_hint: "اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.", vm_tpos_reset: "إلى الوسط", vm_tpos_moving: "اسحب لتحريك النص",
+      vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً", vm_ta_top: "أعلى", vm_ta_middle: "الوسط", vm_ta_bottom: "أسفل", vm_sc_w_position: "موضع نص غير مفهوم (top / middle / bottom): {v}", vm_mini_setting: "معاينة مصغّرة عائمة", vm_mini_setting_desc: "نسخة صغيرة من الفيديو تظهر حين تنزل إلى الإعدادات، لترى كل تغيير مباشرة", vm_mini_off: "أُخفيت المعاينة المصغّرة. تعيدها من الإعدادات ⚙", vm_line_gap: "تباعد الأسطر", vm_sc_w_spacing: "تباعد أسطر خارج المدى ١٫١ – ٢٫٤، عُدّل: {v}", vm_st_until: "حتى", vm_st_until_line: "نهاية هذا النص", vm_st_until_next: "ظهور الملصق التالي", vm_st_until_end: "نهاية الفيديو", vm_st_until_time: "ثانية محددة", vm_st_pick: "اختر ملصقاً", vm_seek: "موضع المعاينة", vm_undo: "تراجع", vm_redo: "إعادة", vm_src_quran: "آيات", vm_kq_note: "تُتلى الآيات التي تختارها تحت نصوصك، وتتوزع النصوص على مدة التلاوة ما لم يحدد السيناريو توقيتها.", vm_sc_w_quran: "آيات غير صحيحة في ‎@quran‎: {v}", vm_st_slot: "ملصق {n}", vm_st_slot_pick: "اختر صورة «ملصق {n}» من القائمة", vm_st_slot_left: "بقي {n} بلا صورة: اضغط رقماً ثم اختر صورته", vm_st_slot_done: "اختيرت كل الصور. اضغط رقماً لتغيير صورته.", vm_st_slots: "ملصقات السيناريو", vm_st_with_time: "وقت محدد", vm_st_with_line: "مع النص {n}", vm_st_pack: "تحميل حزمة الملصقات", vm_st_pack_busy: "تجهيز الحزمة… {n} / {of}", vm_st_pack_done: "حُمّلت الحزمة ({n} ملصقاً)", vm_st_pack_err: "تعذر تجهيز الحزمة، تحقق من الاتصال", vm_sc_title: "سيناريو الفيديو", vm_sc_hint: "الفيديو كاملاً في ملف نصي: السطور وتوقيتها وخطوطها وأحجامها وملصقاتها. نزّل القالب وأعطه لمساعد ذكاء اصطناعي مع موضوعك، ثم ارفع ما يكتبه.", vm_sc_upload: "رفع سيناريو", vm_sc_paste: "لصق سيناريو", vm_sc_template: "تحميل القالب", vm_sc_copy: "نسخ القالب للذكاء الاصطناعي", vm_sc_export: "تنزيل سيناريو الفيديو الحالي", vm_sc_paste_ph: "[0:00 - 0:04] نص السطر الأول <sticker 1>", vm_sc_apply: "استيراد", vm_sc_cancel: "إلغاء", vm_sc_empty: "لا نص في السيناريو", vm_sc_replace: "سيحل السيناريو محل نصوصك الحالية. متابعة؟", vm_sc_done: "استُورد {lines} سطراً و{stickers} ملصقاً.", vm_sc_pick: "اختر صورة لكل ملصق من بطاقة الملصقات.", vm_sc_big: "الملف أكبر من أن يكون سيناريو", vm_sc_bad: "تعذرت قراءة الملف", vm_sc_template_done: "حُمّل القالب. أعطه لمساعد ذكاء اصطناعي مع موضوع الفيديو.", vm_sc_copied: "نُسخ القالب. الصقه في مساعد الذكاء الاصطناعي واكتب موضوعك.", vm_sc_copy_err: "تعذر النسخ، استخدم «تحميل القالب»", vm_sc_nothing: "لا نصوص بعد لتنزيلها", vm_sc_opts_clear: "إزالة توقيت النص {i} وخطه وحجمه", vm_sc_w_font: "خط غير معروف: {v}", vm_sc_w_size: "حجم خارج المدى ٠٫٧ – ١٫٤، عُدّل: {v}", vm_sc_w_time: "السطر {n}: النهاية قبل البداية، فتُركت بلا نهاية", vm_sc_w_tag: "وسم ملصق غير مفهوم: {v}", vm_sc_w_lines: "تُرك {n} سطراً بعد الحد (٣٠)", vm_sc_w_stickers: "تُرك {n} ملصقاً بعد الحد (٣٠)", vm_sc_w_long: "السطر {n} طويل فقُصّ", vm_sc_w_other: "إعداد غير مفهوم: {v}", vm_mini_back: "العودة إلى المعاينة", vm_mini_close: "إخفاء المعاينة المصغرة", vm_st_when: "الظهور", vm_st_from: "من", vm_st_to: "إلى", vm_st_end: "النهاية", vm_st_now: "الآن", vm_st_now_aria: "وقت المعاينة الحالي", vm_st_fx: "التأثير", vm_st_fx_pop: "قفزة", vm_st_fx_fade: "تلاشٍ", vm_st_fx_slide: "انزلاق", vm_st_fx_zoom: "تكبير", vm_st_fx_float: "طفو", vm_st_fx_none: "بدون", vm_tpos: "موضع النص", vm_tpos_hint: "اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.", vm_tpos_reset: "إلى الوسط", vm_tpos_moving: "اسحب لتحريك النص",
       vm_ks_label: 'طريقة ظهور النص', vm_ks_line: 'السطر كاملاً', vm_ks_build: 'تظهر الكلمات مع التلاوة', vm_ks_word: 'كلمة كلمة',
       vm_mode_khatira: 'خاطرة', vm_kh_font: 'خط الكلمات', vm_kf_amiri: 'أميري', vm_kf_scheherazade: 'شهرزاد', vm_kf_naskh: 'نسخ', vm_kf_hafs: 'خط المصحف',
       vm_kf_ruqaa: 'رقعة', vm_kf_changa: 'تشانغا', vm_kf_cairo: 'كايرو', vm_kf_jomhuria: 'جمهورية', vm_kf_gulzar: 'گلزار',
@@ -285,7 +288,7 @@
       vm_own_long: 'The recording is too long — up to {n} minutes',
       vm_own_decoding: 'Analysing the recording…',
       vm_sync_title: 'Set the audio timing',
-      vm_st_title: "Stickers", vm_st_hint: "Tap a sticker to add it to the video, then move it on the preview or with the sliders.", vm_st_add_one: "Add: {name}", vm_st_added: "Added", vm_st_empty: "No stickers yet", vm_st_size: "Size", vm_st_x: "Across", vm_st_y: "Up and down", vm_st_flip: "Flip", vm_st_front: "To the front", vm_st_delete: "Delete", vm_st_done: "Done", vm_st_max: "At most {n} stickers", vm_src_quran: "Ayat", vm_kq_note: "The ayat you choose are recited under your texts; the texts spread over the recitation unless the script times them.", vm_sc_w_quran: "Ayat not understood in @quran: {v}", vm_st_slot: "Sticker {n}", vm_st_slot_pick: "Choose the picture for “Sticker {n}” from the list", vm_st_slot_left: "{n} still without a picture: tap a number, then its picture", vm_st_slot_done: "All pictures chosen. Tap a number to change its picture.", vm_st_slots: "Script stickers", vm_st_with_time: "Set times", vm_st_with_line: "With text {n}", vm_st_pack: "Download the sticker pack", vm_st_pack_busy: "Preparing the pack… {n} / {of}", vm_st_pack_done: "Pack downloaded ({n} stickers)", vm_st_pack_err: "Couldn't prepare the pack. Check your connection", vm_sc_title: "Video script", vm_sc_hint: "The whole video in one text file: its lines, their timing, fonts, sizes and stickers. Download the template, give it to an AI assistant with your topic, then upload what it writes.", vm_sc_upload: "Upload a script", vm_sc_paste: "Paste a script", vm_sc_template: "Download the template", vm_sc_copy: "Copy the template for an AI", vm_sc_export: "Download this video's script", vm_sc_paste_ph: "[0:00 - 0:04] The first line <sticker 1>", vm_sc_apply: "Import", vm_sc_cancel: "Cancel", vm_sc_empty: "There's no text in the script", vm_sc_replace: "The script will replace your current texts. Continue?", vm_sc_done: "Imported {lines} lines and {stickers} stickers.", vm_sc_pick: "Choose a picture for each sticker in the stickers card.", vm_sc_big: "The file is too large to be a script", vm_sc_bad: "Couldn't read the file", vm_sc_template_done: "Template downloaded. Give it to an AI assistant with the video's topic.", vm_sc_copied: "Template copied. Paste it into an AI assistant and add your topic.", vm_sc_copy_err: "Couldn't copy. Use “Download the template”", vm_sc_nothing: "No texts to download yet", vm_sc_opts_clear: "Remove the time, font and size of text {i}", vm_sc_w_font: "Unknown font: {v}", vm_sc_w_size: "Size out of the 0.7 – 1.4 range, adjusted: {v}", vm_sc_w_time: "Line {n}: the end is before the start, so it has no end", vm_sc_w_tag: "Sticker tag not understood: {v}", vm_sc_w_lines: "{n} lines past the limit (30) left out", vm_sc_w_stickers: "{n} stickers past the limit (30) left out", vm_sc_w_long: "Line {n} was too long and was cut", vm_sc_w_other: "Setting not understood: {v}", vm_mini_back: "Back to the preview", vm_mini_close: "Hide the mini preview", vm_st_when: "Shows", vm_st_from: "From", vm_st_to: "To", vm_st_end: "the end", vm_st_now: "Now", vm_st_now_aria: "The preview's current time", vm_st_fx: "Effect", vm_st_fx_pop: "Pop", vm_st_fx_fade: "Fade", vm_st_fx_slide: "Slide up", vm_st_fx_zoom: "Zoom", vm_st_fx_float: "Float", vm_st_fx_none: "None", vm_tpos: "Text position", vm_tpos_hint: "Hold on the preview, then drag to move the text.", vm_tpos_reset: "Back to the centre", vm_tpos_moving: "Drag to move the text",
+      vm_st_title: "Stickers", vm_st_hint: "Tap a sticker to add it to the video, then move it on the preview or with the sliders.", vm_st_add_one: "Add: {name}", vm_st_added: "Added", vm_st_empty: "No stickers yet", vm_st_size: "Size", vm_st_x: "Across", vm_st_y: "Up and down", vm_st_flip: "Flip", vm_st_front: "To the front", vm_st_delete: "Delete", vm_st_done: "Done", vm_st_max: "At most {n} stickers", vm_ta_top: "Top", vm_ta_middle: "Middle", vm_ta_bottom: "Bottom", vm_sc_w_position: "Text position not understood (top / middle / bottom): {v}", vm_mini_setting: "Floating mini preview", vm_mini_setting_desc: "A small copy of the video that shows while you scroll to the settings, so you see every change as you make it", vm_mini_off: "Mini preview hidden. Turn it back on in Settings ⚙", vm_line_gap: "Line spacing", vm_sc_w_spacing: "Line spacing outside 1.1 – 2.4, adjusted: {v}", vm_st_until: "Until", vm_st_until_line: "This text ends", vm_st_until_next: "The next sticker shows", vm_st_until_end: "The video ends", vm_st_until_time: "A set second", vm_st_pick: "Choose a sticker", vm_seek: "Preview position", vm_undo: "Undo", vm_redo: "Redo", vm_src_quran: "Ayat", vm_kq_note: "The ayat you choose are recited under your texts; the texts spread over the recitation unless the script times them.", vm_sc_w_quran: "Ayat not understood in @quran: {v}", vm_st_slot: "Sticker {n}", vm_st_slot_pick: "Choose the picture for “Sticker {n}” from the list", vm_st_slot_left: "{n} still without a picture: tap a number, then its picture", vm_st_slot_done: "All pictures chosen. Tap a number to change its picture.", vm_st_slots: "Script stickers", vm_st_with_time: "Set times", vm_st_with_line: "With text {n}", vm_st_pack: "Download the sticker pack", vm_st_pack_busy: "Preparing the pack… {n} / {of}", vm_st_pack_done: "Pack downloaded ({n} stickers)", vm_st_pack_err: "Couldn't prepare the pack. Check your connection", vm_sc_title: "Video script", vm_sc_hint: "The whole video in one text file: its lines, their timing, fonts, sizes and stickers. Download the template, give it to an AI assistant with your topic, then upload what it writes.", vm_sc_upload: "Upload a script", vm_sc_paste: "Paste a script", vm_sc_template: "Download the template", vm_sc_copy: "Copy the template for an AI", vm_sc_export: "Download this video's script", vm_sc_paste_ph: "[0:00 - 0:04] The first line <sticker 1>", vm_sc_apply: "Import", vm_sc_cancel: "Cancel", vm_sc_empty: "There's no text in the script", vm_sc_replace: "The script will replace your current texts. Continue?", vm_sc_done: "Imported {lines} lines and {stickers} stickers.", vm_sc_pick: "Choose a picture for each sticker in the stickers card.", vm_sc_big: "The file is too large to be a script", vm_sc_bad: "Couldn't read the file", vm_sc_template_done: "Template downloaded. Give it to an AI assistant with the video's topic.", vm_sc_copied: "Template copied. Paste it into an AI assistant and add your topic.", vm_sc_copy_err: "Couldn't copy. Use “Download the template”", vm_sc_nothing: "No texts to download yet", vm_sc_opts_clear: "Remove the time, font and size of text {i}", vm_sc_w_font: "Unknown font: {v}", vm_sc_w_size: "Size out of the 0.7 – 1.4 range, adjusted: {v}", vm_sc_w_time: "Line {n}: the end is before the start, so it has no end", vm_sc_w_tag: "Sticker tag not understood: {v}", vm_sc_w_lines: "{n} lines past the limit (30) left out", vm_sc_w_stickers: "{n} stickers past the limit (30) left out", vm_sc_w_long: "Line {n} was too long and was cut", vm_sc_w_other: "Setting not understood: {v}", vm_mini_back: "Back to the preview", vm_mini_close: "Hide the mini preview", vm_st_when: "Shows", vm_st_from: "From", vm_st_to: "To", vm_st_end: "the end", vm_st_now: "Now", vm_st_now_aria: "The preview's current time", vm_st_fx: "Effect", vm_st_fx_pop: "Pop", vm_st_fx_fade: "Fade", vm_st_fx_slide: "Slide up", vm_st_fx_zoom: "Zoom", vm_st_fx_float: "Float", vm_st_fx_none: "None", vm_tpos: "Text position", vm_tpos_hint: "Hold on the preview, then drag to move the text.", vm_tpos_reset: "Back to the centre", vm_tpos_moving: "Drag to move the text",
       vm_ks_label: 'How the text shows', vm_ks_line: 'The whole line', vm_ks_build: 'Words appear as recited', vm_ks_word: 'One word at a time',
       vm_sync_hint: 'Listen and move the markers so each ayah starts at its marker. Tap ▶ next to an ayah to hear it, or ⌖ to put the marker at the playhead.',
       vm_sync_all: 'All',
@@ -412,6 +415,80 @@
 
   function saveSettings() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+    histNote();
+  }
+
+  // ---------- undo / redo ----------
+  // Every saved change is a step (changes within a moment are one: a drag, a slider, a word typed).
+  const HIST_MAX = 80;
+  let hist = [], fut = [], histTimer = 0, histLast = null, restoring = false;
+  function histNote() {
+    if (restoring || histLast == null) return;
+    clearTimeout(histTimer);
+    histTimer = setTimeout(histCommit, 350);
+  }
+  function histCommit() {
+    clearTimeout(histTimer);
+    histTimer = 0;
+    if (histLast == null) return;
+    const now = JSON.stringify(state);
+    if (now === histLast) return;
+    hist.push(histLast);
+    if (hist.length > HIST_MAX) hist.shift();
+    fut = [];
+    histLast = now;
+    renderUndo();
+  }
+  function histStart() { histLast = JSON.stringify(state); hist = []; fut = []; renderUndo(); }
+  function undo() { histCommit(); if (!hist.length) return; fut.push(histLast); histApply(hist.pop()); }
+  function redo() { histCommit(); if (!fut.length) return; hist.push(histLast); histApply(fut.pop()); }
+  // Put a saved step back: every control, the texts, the stickers and the preview follow it.
+  function histApply(json) {
+    restoring = true;
+    try {
+      if (playing && !playing.export) stopPlayback();
+      const old = state.mode;
+      for (const k of Object.keys(state)) delete state[k];
+      Object.assign(state, JSON.parse(json));
+      histLast = json;
+      if (stickers) stickers.sanitize();
+      applyStateToControls();
+      renderKTexts();
+      markKContent();
+      renderKFonts();
+      renderTextPos();
+      if (own.renderBox) own.renderBox();
+      if (fxUi) fxUi.render();
+      if (stickers) stickers.render();
+      if (state.mode !== old || isLong()) setMode(state.mode);
+      else { clampRange('from'); renderPickerButtons(); markBackgrounds(); selectBackground(state.bg); onChange(); }
+      saveSettings();
+    } finally { restoring = false; }
+    // the step as the page now holds it (tidied on the way in), so it is not taken for a new change
+    clearTimeout(histTimer);
+    histTimer = 0;
+    histLast = JSON.stringify(state);
+    renderUndo();
+  }
+  function renderUndo() {
+    const u = $('vmUndo'), r = $('vmRedo');
+    if (!u) return;
+    u.disabled = !hist.length;
+    r.disabled = !fut.length;
+  }
+  function bindUndo() {
+    $('vmUndo').onclick = undo;
+    $('vmRedo').onclick = redo;
+    // Ctrl/⌘+Z, Ctrl/⌘+Shift+Z or Ctrl+Y (a text field keeps its own)
+    document.addEventListener('keydown', e => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k !== 'z' && k !== 'y') return;
+      const el = document.activeElement;
+      if (el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|number|search)$/.test(el.type)))) return;
+      e.preventDefault();
+      if (k === 'y' || e.shiftKey) redo(); else undo();
+    });
   }
   function loadSettings() {
     try { Object.assign(state, JSON.parse(localStorage.getItem(STORE_KEY)) || {}); } catch (e) { /* ignore */ }
@@ -429,9 +506,12 @@
     if (state.kContent !== 'quran') state.kContent = 'text';
     if (!['line', 'build', 'word'].includes(state.kStyle)) state.kStyle = 'line';
     state.textPos = cleanTextPos(state.textPos);
+    if (!TEXT_ALIGNS.includes(state.textAlign)) state.textAlign = null;
     state.kTexts = (Array.isArray(state.kTexts) ? state.kTexts : []).filter(t => typeof t === 'string').slice(0, MAX_KTEXTS).map(t => t.slice(0, MAX_KTEXT));
     if (!state.kTexts.length) state.kTexts = [''];
     if (state.ktAudio !== 'quran') state.ktAudio = 'none';
+    state.lineGap = state.lineGap == null || !isFinite(+state.lineGap) ? null : Math.min(2.4, Math.max(1.1, +state.lineGap));
+    state.miniPreview = state.miniPreview !== false;
     state.kOpts = state.kTexts.map((_, i) => cleanKOpt((Array.isArray(state.kOpts) ? state.kOpts : [])[i]));
     if (typeof state.kFont !== 'string' || !(state.kFont.startsWith('u:') || (window.Khatira && Khatira.FONTS.some(f => f.id === state.kFont)))) state.kFont = 'amiri';
     if (state.recSource !== 'own') state.recSource = 'reciter';
@@ -1202,7 +1282,7 @@
 
   // Wraps + auto-shrinks the ayah so the whole block fits the safe area.
   function layoutText(c, seg, w, h) {
-    const key = [seg.surah, seg.ayah, w, h, state.fontMul, state.caption].join('|');
+    const key = [seg.surah, seg.ayah, w, h, state.fontMul, state.caption, lineGap()].join('|');
     if (layoutCache.has(key)) return layoutCache.get(key);
     const words = ayahWords(seg);
     const maxW = w * 0.84;
@@ -1212,11 +1292,11 @@
     for (;;) {
       c.font = size + 'px ' + QFONT;
       lines = wrapWords(c, words, maxW);
-      if (lines.length * size * 1.8 <= maxH || size <= 22) break;
+      if (lines.length * size * lineGap() <= maxH || size <= 22) break;
       size *= 0.94;
     }
     const widest = Math.max(...lines.map(ln => c.measureText(ln).width));
-    const out = { size, lines, lh: size * 1.8, widest };
+    const out = { size, lines, lh: size * lineGap(), widest };
     layoutCache.set(key, out);
     if (layoutCache.size > 200) layoutCache.delete(layoutCache.keys().next().value);
     return out;
@@ -1254,6 +1334,9 @@
     c.fillText(ln, x, y);
   }
 
+  // The space from line to line (a share of the text size): the user's, or the mode's own.
+  const lineGap = () => state.lineGap || (isKhatira() ? 1.45 : 1.8);
+
   // ---------- where the text sits ----------
   // Its centre on a w x h frame: the middle (a little higher above the caption), or where the
   // user dragged it.
@@ -1263,9 +1346,26 @@
     const c = v => Math.min(1 - TEXT_EDGE, Math.max(TEXT_EDGE, +v));
     return { x: c(p.x), y: c(p.y) };
   }
-  function textCentre(w, h) {
+  // Where the text block goes: 'top', 'middle' or 'bottom' (null = the mode's own: «خاطرة» at the
+  // top, ayat in the middle), always clear of the app name above and the caption below.
+  const TEXT_ALIGNS = ['top', 'middle', 'bottom'];
+  const textAlign = () => state.textAlign || (isKhatira() ? 'top' : 'middle');
+  let lastTextAt = null;       // the centre last drawn (shares), where a drag picks the text up
+  // bh: the height of the block of text being drawn (its lines)
+  function textCentre(w, h, bh) {
     const p = state.textPos;
-    return p ? [p.x * w, p.y * h] : [w / 2, h * (state.caption ? 0.46 : 0.5)];
+    let out;
+    if (p) out = [p.x * w, p.y * h];
+    else {
+      const base = Math.min(w, h), half = (bh || 0) / 2, a = textAlign();
+      const top = state.branding ? base * 0.15 : base * 0.08;                    // under the app name
+      const bottom = h - (state.caption ? base * 0.3 : base * 0.12);              // over the caption (and the descenders)
+      if (a === 'top') out = [w / 2, Math.min(h / 2, top + half)];
+      else if (a === 'bottom') out = [w / 2, Math.max(h / 2, bottom - half)];
+      else out = [w / 2, h * (state.caption ? 0.46 : 0.5)];
+    }
+    if (bh != null) lastTextAt = { x: out[0] / w, y: out[1] / h };
+    return out;
   }
 
   function drawAyah(c, seg, w, h, alpha) {
@@ -1278,7 +1378,7 @@
     c.textAlign = 'center';
     c.textBaseline = 'middle';
     c.fillStyle = state.color;
-    const [cx, cy] = textCentre(w, h);
+    const [cx, cy] = textCentre(w, h, (L.lines.length - 1) * L.lh + L.size * (state.textPanel ? 1.6 : 1.3));
     const top = cy - (L.lines.length - 1) * L.lh / 2;
     // Gentle rise as the ayah fades in.
     const rise = (1 - alpha) * L.size * 0.3;
@@ -1550,7 +1650,7 @@
     const e = 1 - Math.pow(1 - clamp01(p), 3);            // ease out
     c.save();
     c.globalAlpha = alpha * e;
-    c.translate(...textCentre(w, h));
+    c.translate(...textCentre(w, h, size * 1.3));
     const k = 0.9 + 0.1 * e;
     c.scale(k, k);
     c.font = kFont(size, face);
@@ -1567,7 +1667,7 @@
   // edge for right-to-left text), so words can light up or appear without anything moving.
   const kLayoutCache = new Map();
   function kLayout(c, tl, si, w, h) {
-    const key = [tl.key, si, w, h, state.kFont, state.fontMul, state.caption, userFonts.length].join('|');
+    const key = [tl.key, si, w, h, state.kFont, state.fontMul, state.caption, userFonts.length, lineGap()].join('|');
     if (kLayoutCache.has(key)) return kLayoutCache.get(key);
     const it = tl.items[si];
     const texts = it.words.map(x => (x.kt ? x.text : kText(x.text)));
@@ -1589,10 +1689,10 @@
         if (cur.length && cw + add > maxW) { lines.push(cur); cur = [i]; cw = wd; } else { cur.push(i); cw += add; }
       });
       if (cur.length) lines.push(cur);
-      if (lines.length * size * 1.8 <= maxH || size <= minSize) break;
+      if (lines.length * size * lineGap() <= maxH || size <= minSize) break;
       size = Math.max(minSize, size * 0.94);
     }
-    const lh = size * 1.8, perPage = Math.max(1, Math.floor(maxH / lh));
+    const lh = size * lineGap(), perPage = Math.max(1, Math.floor(maxH / lh));
     const pages = [];
     for (let i = 0; i < lines.length; i += perPage) pages.push(lines.slice(i, i + perPage));
     const xs = [], ys = [], pageOf = [];
@@ -1628,7 +1728,7 @@
     let cur = words.length - 1;
     if (t != null) { cur = -1; for (let i = 0; i < words.length && words[i].a <= t; i++) cur = i; }
     const page = cur >= 0 ? L.pageOf[cur] : 0;
-    const [cx, cy] = textCentre(w, h), style = state.kStyle;
+    const [cx, cy] = textCentre(w, h, (L.pages[page].length - 1) * L.lh + L.size * 1.3), style = state.kStyle;
     c.save();
     c.direction = L.rtl ? 'rtl' : 'ltr';
     c.textAlign = L.rtl ? 'right' : 'left';
@@ -1722,7 +1822,7 @@
         drawAyah(c, it, w, h, a);
       });
     }
-    if (stickers) stickers.draw(c, w, h, tl ? t : null, total, tl ? lineSpanIn(tl) : undefined);
+    if (stickers) stickers.draw(c, w, h, tl ? t : null, total, tl ? lineSpanIn(tl) : undefined, c === ctx && !playing);
     drawCaption(c, w, h);
     drawBranding(c, w, h);
   }
@@ -1804,7 +1904,7 @@
     try { miniClosed = sessionStorage.getItem('vmMiniClosed') === '1'; } catch (e) { /* storage blocked */ }
     let stageSeen = true;
     const update = () => {
-      const show = !stageSeen && !miniClosed && !isFullscreen() && $('vmResult').hidden;
+      const show = !stageSeen && !miniClosed && state.miniPreview && !isFullscreen() && $('vmResult').hidden;
       if (show === miniOn) return;
       miniOn = show;
       box.hidden = !show;
@@ -1859,9 +1959,12 @@
       if (pos) miniPos = pos;
     } catch (e) { /* storage blocked */ }
     $('vmMiniPlay').onclick = () => { if (!busy) togglePreview(); };
+    // ×: off until it is turned on again in the settings (⚙)
     $('vmMiniClose').onclick = () => {
-      miniClosed = true;
-      try { sessionStorage.setItem('vmMiniClosed', '1'); } catch (e) { /* storage blocked */ }
+      state.miniPreview = false;
+      $('vmMiniToggle').checked = false;
+      saveSettings();
+      setStatus(tr('vm_mini_off'));
       update();
     };
     miniUpdate = update;
@@ -1924,7 +2027,9 @@
         const r = cv.getBoundingClientRect();
         if (stickers.hit({ x: (ev.clientX - r.left) / r.width * cv.width, y: (ev.clientY - r.top) / r.height * cv.height }) >= 0) return;
       }
-      const [x0, y0] = textCentre(1, 1);
+      // from where the text is now (its block's centre as last drawn)
+      const at = lastTextAt || { x: 0.5, y: 0.46 };
+      const x0 = at.x, y0 = at.y;
       textDrag = { id: ev.pointerId, mouse: ev.pointerType === 'mouse', cx: ev.clientX, cy: ev.clientY, p0: frac(ev), x0, y0, armed: false };
       textDrag.timer = setTimeout(arm, HOLD);
     });
@@ -1945,33 +2050,52 @@
     // once the text is held, the finger moves it rather than the page
     cv.addEventListener('touchmove', e => { if (textDrag && textDrag.armed) e.preventDefault(); }, { passive: false });
     cv.addEventListener('contextmenu', e => { if (!isLong()) e.preventDefault(); });
-    $('vmTextPosReset').onclick = () => { state.textPos = null; saveSettings(); renderIdle(); renderTextPos(); };
+    document.querySelectorAll('#vmTextAlign [data-ta]').forEach(b => {
+      b.onclick = () => { state.textAlign = b.dataset.ta; state.textPos = null; saveSettings(); renderIdle(); renderTextPos(); };
+    });
     renderTextPos();
   }
+  // the button of where the text is (none while it sits where it was dragged)
   function renderTextPos() {
-    const b = $('vmTextPosReset');
-    if (b) b.disabled = !state.textPos;
+    document.querySelectorAll('#vmTextAlign [data-ta]').forEach(b => {
+      const on = !state.textPos && b.dataset.ta === textAlign();
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
   }
 
   function renderIdle() {
     if (playing || !surahs.length) return;
     sizeCanvas();
-    if (isLong()) { long.drawStill(ctx); return; }
-    renderFrame(ctx, canvas.width, canvas.height, 0, null);
+    if (isLong()) { long.drawStill(ctx); showSeek(null); return; }
+    const tl = idleTimeline();
+    if (tl && tl.items.length) {
+      const t = idleT(tl);
+      previewT = t;
+      renderFrame(ctx, canvas.width, canvas.height, t, tl);
+    } else renderFrame(ctx, canvas.width, canvas.height, 0, null);
+    showSeek(tl && tl.items.length ? tl : null);
   }
 
   // ---------- playback / export ----------
-  function startSources(tl, out, t0) {
+  // from: the second of the video to start at (the seek bar); what ends before it is not played,
+  // what is under way starts part-way through.
+  function startSources(tl, out, t0, from) {
+    const at = from || 0, now = audioCtx().currentTime;
     // the segments' own audio, and a sound of the whole video (a recitation under own words)
     return tl.items.concat(tl.audio || []).filter(it => it.buffer).map(it => {
+      const off = it.offset != null ? it.offset : 0;
+      const dur = it.offset != null ? it.dur : it.buffer.duration;
+      if (it.start + dur <= at) return null;
       const src = audioCtx().createBufferSource();
       src.buffer = it.buffer;
       out.forEach(node => src.connect(node));
+      const into = Math.max(0, at - it.start);
       // The user's own recording: play just this ayah's slice of it.
-      if (it.offset != null) src.start(t0 + it.start, it.offset, it.dur);
+      if (it.offset != null || into > 0) src.start(Math.max(now, t0 + it.start + into), off + into, dur - into);
       else src.start(t0 + it.start);
       return src;
-    });
+    }).filter(Boolean);
   }
 
   // ---------- forward-then-backward looping of the background video ----------
@@ -2141,19 +2265,82 @@
     if (playing) return;
     const route = await fxRoute([ac.destination]);
     if (playing) { route.dispose(); return; }
-    const t0 = ac.currentTime + 0.1;
-    playing = { sources: startSources(tl, route.outs, t0), t0, raf: 0, export: false, dispose: route.dispose };
+    // from where the seek bar is (from the start once it has reached the end)
+    const from = seekT != null && seekT < tl.total - 0.25 ? seekT : 0;
+    const t0 = ac.currentTime + 0.1 - from;
+    playing = { sources: startSources(tl, route.outs, t0, from), t0, raf: 0, export: false, dispose: route.dispose };
     updatePreviewBtn();
     const tick = () => {
       if (!playing) return;
       const t = ac.currentTime - playing.t0;
       renderFrame(ctx, canvas.width, canvas.height, Math.max(0, t), tl);
       previewT = Math.min(tl.total, Math.max(0, t));
+      seekT = previewT;
       setStageProgress(clamp01(t / tl.total));
-      if (t >= tl.total) { stopPlayback(); return; }
+      showSeek(tl);
+      if (t >= tl.total) { seekT = null; stopPlayback(); return; }
       playing.raf = requestAnimationFrame(tick);
     };
     tick();
+  }
+
+  // ---------- the seek bar: any moment of the video, in the preview ----------
+  // Stopping the preview leaves it at that moment; the next play goes on from there. Standing
+  // still, the preview shows the frame at the seek bar (each sticker only in its own time); before
+  // any seeking, a moment when the first text is all on screen.
+  let seekT = null;
+  // A timeline the preview can stand on without loading anything (own words with no audio are
+  // timed at once; the others once they have been loaded for a preview).
+  function idleTimeline() {
+    if (isLong() || own.active() && !timeline) return null;
+    const key = timelineKey();
+    if (timeline && timeline.key === key) return timeline;
+    if (isKText() && !own.active() && !isKQuran()) return buildPacedTimeline();
+    return null;
+  }
+  function idleT(tl) {
+    if (seekT != null) return Math.min(seekT, tl.total);
+    const it = tl.items[0];
+    if (!it) return 0;
+    const ws = it.words;
+    // the first text all said (its last word lit), or the middle of the first ayah
+    return ws && ws.length ? Math.min(it.end - 0.05, ws[ws.length - 1].a + 0.25) : (it.start + it.end) / 2;
+  }
+  const clock = sec => { const m = Math.floor(sec / 60), r = Math.floor(sec % 60); const t = m + ':' + String(r).padStart(2, '0'); return arabicNames() ? arDigits(t) : t; };
+  function showSeek(tl) {
+    const bar = $('vmSeek');
+    if (!bar) return;
+    $('vmSeekRow').hidden = isLong();
+    if (!tl) { $('vmSeekNow').textContent = clock(0); $('vmSeekTotal').textContent = '–:––'; if (document.activeElement !== bar) bar.value = 0; return; }
+    const t = playing ? previewT : idleT(tl);
+    if (document.activeElement !== bar || playing) bar.value = Math.round(t / tl.total * 1000);
+    bar.setAttribute('aria-valuetext', clock(t) + ' / ' + clock(tl.total));
+    $('vmSeekNow').textContent = clock(t);
+    $('vmSeekTotal').textContent = clock(tl.total);
+  }
+  function bindSeek() {
+    const bar = $('vmSeek');
+    let loading = false;
+    const go = async () => {
+      let tl = idleTimeline();
+      if (!tl) {                                  // load it once (the audio has the times)
+        if (loading) return;
+        loading = true;
+        try { tl = await loadTimelineWithUi(); } finally { loading = false; }
+        if (!tl) return;
+      }
+      seekT = +bar.value / 1000 * tl.total;
+      previewT = seekT;
+      if (playing && !playing.export) {            // playing: go on from there
+        stopPlayback();
+        togglePreview();
+        return;
+      }
+      renderIdle();
+    };
+    bar.addEventListener('input', go);
+    // the page does not scroll under a finger sliding along it
+    bar.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
   }
 
   // Long mode streams the recitation ayah by ayah instead of loading it all first.
@@ -3106,17 +3293,19 @@
       settings: {
         font: /^[a-z]+$/.test(state.kFont) ? state.kFont : null,
         size: state.fontMul !== 1 ? state.fontMul : null,
+        spacing: state.lineGap,
+        position: state.textPos ? null : state.textAlign,
         style: state.kStyle, color: state.color, format: state.format, name: state.sheikh || null,
         quran: isKQuran() ? { surah: state.surah, from: state.from, to: state.to } : null,
       },
       lines: rows.map(r => ({ text: r.text, a: r.o.a != null ? r.o.a : null, b: r.o.b != null ? r.o.b : null, font: r.o.font, size: r.o.size })),
       stickers: state.stickers.filter(st => st.line == null || at.has(st.line)).map(st => ({
-        line: st.line == null ? null : at.get(st.line), slot: st.id ? null : st.slot, id: st.id, fx: st.fx, flip: st.flip, x: st.x, y: st.y, s: st.s,
+        line: st.line == null ? null : at.get(st.line), slot: st.id ? null : st.slot, id: st.id, fx: st.fx, flip: st.flip, x: st.x, y: st.y, s: st.s, until: st.until,
       })),
     });
   }
   function scriptWarning(w) {
-    const k = { quran: 'vm_sc_w_quran', font: 'vm_sc_w_font', size: 'vm_sc_w_size', time: 'vm_sc_w_time', tag: 'vm_sc_w_tag', lines: 'vm_sc_w_lines', stickers: 'vm_sc_w_stickers', long: 'vm_sc_w_long' }[w.code] || 'vm_sc_w_other';
+    const k = { position: 'vm_sc_w_position', spacing: 'vm_sc_w_spacing', quran: 'vm_sc_w_quran', font: 'vm_sc_w_font', size: 'vm_sc_w_size', time: 'vm_sc_w_time', tag: 'vm_sc_w_tag', lines: 'vm_sc_w_lines', stickers: 'vm_sc_w_stickers', long: 'vm_sc_w_long' }[w.code] || 'vm_sc_w_other';
     return tr(k, { v: w.detail, n: /^\d+$/.test(w.detail) ? (arabicNames() ? arDigits(+w.detail) : w.detail) : w.detail });
   }
   // Read a script into the video: «خاطرة» with own words, its texts (with their seconds, faces
@@ -3134,6 +3323,8 @@
     const st = r.settings;
     if (st.font) state.kFont = st.font;
     if (st.size) state.fontMul = st.size;
+    if (st.spacing) state.lineGap = st.spacing;
+    if (st.position) { state.textAlign = st.position; state.textPos = null; }
     if (st.style) state.kStyle = st.style;
     if (st.color) state.color = st.color;
     if (st.format) state.format = st.format;
@@ -3153,6 +3344,7 @@
     applyStateToControls();
     if (st.quran) { clampRange('from'); renderPickerButtons(); }
     renderKTexts();
+    renderTextPos();
     if (own.renderBox) own.renderBox();
     saveSettings();
     onChange();
@@ -3269,6 +3461,9 @@
       b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     if (isLong()) { long.setBackground(state.tvBg); fillTemplates(); }
+    $('vmLineGap').value = lineGap();
+    renderTextPos();
+    seekT = null;                                  // another kind of video: from its start
     updateSteps();
     clampRange('from');
     markBackgrounds();
@@ -3334,6 +3529,8 @@
     $('vmBasmala').onchange = () => { state.basmala = $('vmBasmala').checked; onChange(); };
     $('vmReciter').onchange = () => { state.reciter = $('vmReciter').value; renderPickerButtons(); onChange(); };
     $('vmFont').oninput = () => { state.fontMul = parseFloat($('vmFont').value); onChange(); };
+    $('vmLineGap').oninput = () => { state.lineGap = parseFloat($('vmLineGap').value); onChange(); };
+    $('vmMiniToggle').onchange = () => { state.miniPreview = $('vmMiniToggle').checked; saveSettings(); miniUpdate(); };
     $('vmCaption').onchange = () => { state.caption = $('vmCaption').checked; onChange(); };
     $('vmBranding').onchange = () => { state.branding = $('vmBranding').checked; onChange(); };
     $('vmPanel').onchange = () => { state.textPanel = $('vmPanel').checked; onChange(); };
@@ -3397,6 +3594,7 @@
     $('vmStage').onclick = () => { if (stickers && stickers.clickAfterDrag()) return; if (Date.now() - textDragEnd < 400) return; if (!busy) togglePreview(); };
     bindTextDrag();
     bindScript();
+    bindSeek();
     if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fontsLoaded);
     bindMiniPreview();
     $('vmFullscreen').onclick = e => { e.stopPropagation(); toggleFullscreen(); };
@@ -3441,6 +3639,8 @@
 
   function applyStateToControls() {
     $('vmFont').value = state.fontMul;
+    $('vmLineGap').value = lineGap();
+    $('vmMiniToggle').checked = state.miniPreview;
     markKFonts();
     markKStyle();
     $('vmCaption').checked = state.caption;
@@ -3468,6 +3668,7 @@
       stickers = VMStickers({
         state, $, tr, lang, canvas, num: n => (arabicNames() ? arDigits(n) : String(n)),
         playing: () => !!playing, busy: () => busy, redraw: () => renderIdle(), save: saveSettings, now: () => previewT,
+        frame: () => { const tl = playing ? null : idleTimeline(); return tl && tl.items.length ? { t: idleT(tl), total: tl.total, span: lineSpanIn(tl) } : null; },
         lines: () => (isKText() ? segments().map(sg => ({ i: sg.ki, n: sg.ki + 1, text: sg.text })) : []),
         lineSpan: k => { const f = timeline && lineSpanIn(timeline); return f ? f(k) : null; }, download: saveBlob,
         say: (m, err) => setStatus(m, err),
@@ -3544,13 +3745,15 @@
     else if (isKhatira()) { setMode('khatira'); await kFontReady(); renderIdle(); }
     else selectBackground(state.bg);
     updateDuration();          // the length of the saved reciter + ayat, as soon as the page opens
+    bindUndo();
+    setTimeout(histStart, 400);   // history starts from the page as it opened
   }
 
   appIcon.onload = () => renderIdle();
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 13;   // 13: UI/UX audit (contrast of filled and green text, 44 px targets, text from 12 px, layouts measured again when a face loads); 12: video scripts (js/video-script.js: upload, paste, template for an AI, export), sticker numbers to fill and stickers with a line, the sticker pack as a ZIP (js/zip-store.js), «آيات» (a recitation) under own words, the floating mini preview; 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
-  window.VM = { khatiraLayout: (si, w, h) => { const tl = timeline, c = document.createElement('canvas').getContext('2d'); const L = kLayout(c, tl, si, w, h); return { size: L.size, rtl: L.rtl, pages: L.pages.map(pg => pg.map(ln => ln.length)) }; }, get own() { return own; }, khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; }, importScript, currentScript, scriptTemplate, get stickers() { return stickers; } };
+  const BUILD = 14;   // 14: seek bar (the preview stands at a moment; play goes on from it), undo / redo, line spacing, sticker corners / × / «حتى», folding picker, mini preview setting; 13: UI/UX audit (contrast of filled and green text, 44 px targets, text from 12 px, layouts measured again when a face loads); 12: video scripts (js/video-script.js: upload, paste, template for an AI, export), sticker numbers to fill and stickers with a line, the sticker pack as a ZIP (js/zip-store.js), «آيات» (a recitation) under own words, the floating mini preview; 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  window.VM = { khatiraLayout: (si, w, h) => { const tl = timeline, c = document.createElement('canvas').getContext('2d'); const L = kLayout(c, tl, si, w, h); return { size: L.size, rtl: L.rtl, pages: L.pages.map(pg => pg.map(ln => ln.length)) }; }, get own() { return own; }, khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; }, importScript, currentScript, scriptTemplate, get stickers() { return stickers; }, undo, redo, get history() { histCommit(); return { started: histLast != null, undo: hist.length, redo: fut.length }; } };
   init();
 })();

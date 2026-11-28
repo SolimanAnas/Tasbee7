@@ -163,7 +163,8 @@ test('a long text is laid out in lines at a readable size, and paged when it wou
   await page.locator('#vmKTextAdd').click();
   await field(page, 1).fill(long);
   await expect(page.locator('#vmSummary')).toContainText('نصان', { timeout: 5000 }).catch(() => {});
-  const L = await page.evaluate(async () => { await VM.buildTimeline(); return [VM.khatiraLayout(0, 540, 960), VM.khatiraLayout(1, 540, 960)]; });
+  // large text with airy lines (the 400 characters of a field fit one page at the default spacing)
+  const L = await page.evaluate(async () => { VM.state.fontMul = 1.4; VM.state.lineGap = 2.2; await VM.buildTimeline(); return [VM.khatiraLayout(0, 540, 960), VM.khatiraLayout(1, 540, 960)]; });
   expect(L[0].pages.length).toBe(1);
   expect(L[0].size).toBeGreaterThan(540 * 0.09);                               // a short text is large
   expect(L[1].pages.length).toBeGreaterThan(1);                                // a long one is paged
