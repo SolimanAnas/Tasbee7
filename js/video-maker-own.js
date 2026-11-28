@@ -185,7 +185,8 @@
     // ---------- the panel in step 2 ----------
     function renderBox() {
       const showOwn = (S.recSource === 'own' && has()) || pendingOwn;
-      document.querySelectorAll('#vmSource button').forEach(b => b.classList.toggle('active', b.dataset.src === (showOwn ? 'own' : 'reciter')));
+      const cur = showOwn ? 'own' : api.ktQuran && api.ktQuran() ? 'quran' : 'reciter';
+      document.querySelectorAll('#vmSource button').forEach(b => b.classList.toggle('active', b.dataset.src === cur));
       $('vmReciterBox').hidden = showOwn;
       $('vmOwnBox').hidden = !showOwn;
       $('vmSheikh').placeholder = api.isKText && api.isKText() ? tr('vm_kt_name_ph') : showOwn ? tr('vm_my_recitation') : api.reciterName(api.reciterObj());
@@ -322,9 +323,13 @@
     // With nothing uploaded yet, «تسجيلي» only shows the upload panel; the recitation
     // stays the reciter's until a recording is in.
     function setSource(src) {
+      // own words: «آيات» (a recitation under them) and «بدون صوت» are the two kinds of 'reciter'
+      if (api.setKtAudio && api.isKText && api.isKText() && src !== 'own') api.setKtAudio(src === 'quran' ? 'quran' : 'none');
+      if (src === 'quran') src = 'reciter';
       if (src === 'own' && !has()) { pendingOwn = true; renderBox(); return; }
       pendingOwn = false;
       S.recSource = src;
+      if (api.setKtAudio && api.isKText && api.isKText()) api.setKtAudio(S.ktAudio);   // the body class follows the source
       renderBox();
       api.onChange();
     }

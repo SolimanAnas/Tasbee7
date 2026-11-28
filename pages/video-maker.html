@@ -76,6 +76,40 @@
 .tpos-row .st-act:disabled { opacity:.45; cursor:default; }
 #vmStage canvas { -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
 #vmStage.text-drag canvas { cursor:grabbing; outline:2px dashed var(--accent-main); outline-offset:-2px; }
+.st-with { width:100%; min-height:40px; padding:0 8px; border:1px solid var(--glass-border); border-radius:10px; background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:13.5px; }
+.st-pack { display:inline-flex; align-items:center; gap:6px; align-self:flex-start; min-height:40px; padding:0 14px; border:1px solid var(--glass-border); border-radius:999px; background:var(--field-bg); color:var(--accent-main); font:inherit; font-size:13px; font-weight:800; cursor:pointer; }
+.st-pack svg { width:18px; height:18px; }
+.st-pack:disabled { opacity:.55; cursor:progress; }
+.st-slots { display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:16px; border:1.5px dashed var(--accent-main); background:var(--accent-muted); }
+.st-slots[hidden] { display:none; }
+.st-slots-title { font-size:14px; font-weight:800; color:var(--accent-main); }
+.st-slot-list { display:flex; flex-wrap:wrap; gap:8px; }
+.st-slot { position:relative; width:60px; height:60px; padding:4px; border:1.5px solid var(--glass-border); border-radius:14px; background:var(--field-bg); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.st-slot img { max-width:100%; max-height:100%; object-fit:contain; pointer-events:none; }
+.st-slot.empty { border-style:dashed; }
+.st-slot.active { border-color:var(--accent-main); box-shadow:0 0 0 3px var(--accent-muted); }
+.st-slot-n { position:absolute; top:-7px; inset-inline-start:-7px; min-width:22px; height:22px; padding:0 5px; border-radius:11px; background:var(--accent-main); color:var(--on-accent); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.st-slot.empty .st-slot-n { position:static; width:30px; height:30px; border-radius:50%; font-size:15px; }
+.st-slot-hint { font-size:12.5px; font-weight:700; color:var(--text-secondary); }
+.st-grid.picking .st-tile { border-color:var(--accent-main); }
+.st-chip-empty { font-weight:800; color:var(--accent-main); border-style:dashed; }
+.sc-box { display:flex; flex-direction:column; gap:8px; padding:12px; margin-bottom:10px; border-radius:16px; background:var(--list-hover); border:1px solid var(--glass-border); }
+.sc-box[hidden] { display:none; }
+.sc-head { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:800; color:var(--accent-main); }
+.sc-head svg { width:20px; height:20px; }
+.sc-hint { font-size:12.5px; line-height:1.6; color:var(--text-secondary); }
+.sc-actions { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; }
+.sc-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:4px 8px; border:1px solid var(--glass-border); border-radius:12px; background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:13px; font-weight:700; cursor:pointer; text-align:center; }
+.sc-btn svg { width:18px; height:18px; flex:none; }
+.sc-btn.sc-main { background:var(--accent-main); border-color:var(--accent-main); color:var(--on-accent); }
+.sc-wide { grid-column:1 / -1; }
+.sc-paste { display:flex; flex-direction:column; gap:6px; }
+.sc-paste[hidden] { display:none; }
+.sc-paste textarea { width:100%; min-height:140px; padding:10px; border:1px solid var(--glass-border); border-radius:12px; background:var(--field-bg); color:var(--text-primary); font:13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; resize:vertical; }
+.sc-warn { margin:0; padding-inline-start:18px; font-size:12.5px; line-height:1.6; color:var(--danger); }
+.sc-warn[hidden] { display:none; }
+.kt-opts { display:inline-flex; align-items:center; gap:4px; align-self:flex-start; padding:2px 4px 2px 10px; border-radius:999px; background:var(--accent-muted); color:var(--accent-main); font-size:12px; font-weight:800; font-variant-numeric:tabular-nums; }
+.kt-opts-x { width:28px; height:28px; border:none; border-radius:50%; background:transparent; color:inherit; font-size:16px; cursor:pointer; }
 .st-box { position:absolute; border:2px dashed var(--accent-main); border-radius:10px; pointer-events:none; z-index:3; box-shadow:0 0 0 1px rgba(0,0,0,.35); }
 .st-box[hidden] { display:none; }
 .st-handle { position:absolute; inset-inline-end:-13px; bottom:-13px; width:26px; height:26px; border-radius:50%; background:var(--accent-main); border:2px solid #fff;
@@ -548,8 +582,11 @@ body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
 /* «خاطرة»: the word-by-word tab (Shorts controls, plus its own font picker and notes) */
 body.mode-khatira .not-khatira, body:not(.mode-khatira) .only-khatira { display:none !important; }
 /* «خاطرة» with your own words: the Quran controls step aside for the text fields */
-body.kh-text .not-ktext, body:not(.kh-text) .only-ktext { display:none !important; }
+body.kh-text .not-ktext:not(.kq-show), body.kh-text:not(.kt-quran) .not-ktext.kq-show, body:not(.kh-text) .only-ktext { display:none !important; }
 body.kh-text.kh-own .kt-silent { display:none !important; }
+/* own words over a recitation («آيات»): the surah, range and reciter show (in «الصوت») */
+body:not(.kt-quran) .only-kq, body.kt-quran .kt-silent, body.kt-quran #vmReciterBox .kh-note { display:none !important; }
+.kq-box { display:flex; flex-direction:column; gap:12px; margin-top:12px; }
 .kt-box { display:flex; flex-direction:column; gap:10px; }
 .kt-list { display:flex; flex-direction:column; gap:10px; }
 .kt-row { display:flex; flex-direction:column; gap:4px; position:relative; }
@@ -781,6 +818,20 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
   font:800 12px/1 system-ui, sans-serif; color:#888; }
 
 /* Fixed action bar */
+.mini-prev { position:fixed; z-index:19; inset-inline-start:12px; bottom:calc(env(safe-area-inset-bottom) + 92px); border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 1px var(--glass-border); background:#000; animation:miniIn .22s ease-out; }
+.mini-prev[hidden] { display:none; }
+@keyframes miniIn { from { opacity:0; transform:translateY(12px) scale(.94); } }
+.mini-view { display:block; padding:0; border:none; background:none; cursor:pointer; border-radius:14px; overflow:hidden; }
+.mini-view canvas { display:block; width:100%; height:100%; }
+.mini-btn { position:absolute; width:34px; height:34px; border:none; border-radius:50%; background:rgba(0,0,0,.6); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; line-height:1; }
+.mini-btn::after { content:''; position:absolute; inset:-5px; }
+.mini-btn svg { width:16px; height:16px; }
+.mini-play { bottom:6px; inset-inline-start:6px; }
+.mini-play .i-stop, .mini-prev.playing .mini-play .i-play { display:none; }
+.mini-prev.playing .mini-play .i-stop { display:block; }
+.mini-close { top:-10px; inset-inline-end:-10px; width:28px; height:28px; background:var(--field-bg); color:var(--text-primary); box-shadow:0 2px 8px rgba(0,0,0,.35); border:1px solid var(--glass-border); }
+body.vm-pseudo-fs .mini-prev { display:none; }
+@media (prefers-reduced-motion: reduce) { .mini-prev { animation:none; } }
 .action-bar {
   position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; justify-content:center;
   padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);
@@ -911,18 +962,38 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           <button type="button" data-kc="quran" aria-pressed="false" data-i18n="vm_kc_quran">آيات من القرآن</button>
         </div>
         <div class="kt-box only-ktext">
+          <div class="sc-box" id="vmScBox">
+            <div class="sc-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span data-i18n="vm_sc_title">سيناريو الفيديو</span></div>
+            <div class="sc-hint" data-i18n="vm_sc_hint">الفيديو كاملاً في ملف نصي: السطور وتوقيتها وخطوطها وأحجامها وملصقاتها. نزّل القالب وأعطه لمساعد ذكاء اصطناعي مع موضوعك، ثم ارفع ما يكتبه.</div>
+            <div class="sc-actions">
+              <button type="button" class="sc-btn sc-main" id="vmScUpload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg><span data-i18n="vm_sc_upload">رفع سيناريو</span></button>
+              <button type="button" class="sc-btn" id="vmScPasteBtn" aria-expanded="false" aria-controls="vmScPaste"><span data-i18n="vm_sc_paste">لصق سيناريو</span></button>
+              <button type="button" class="sc-btn" id="vmScTemplate"><span data-i18n="vm_sc_template">تحميل القالب</span></button>
+              <button type="button" class="sc-btn" id="vmScCopy"><span data-i18n="vm_sc_copy">نسخ القالب للذكاء الاصطناعي</span></button>
+              <button type="button" class="sc-btn sc-wide" id="vmScExport"><span data-i18n="vm_sc_export">تنزيل سيناريو الفيديو الحالي</span></button>
+            </div>
+            <input type="file" id="vmScFile" accept=".txt,.srt,.vtt,text/plain" hidden>
+            <div class="sc-paste" id="vmScPaste" hidden>
+              <textarea id="vmScText" rows="7" dir="auto" data-i18n-placeholder="vm_sc_paste_ph" placeholder="[0:00 - 0:04] نص السطر الأول &lt;sticker 1&gt;" data-i18n-aria="vm_sc_paste" aria-label="لصق سيناريو"></textarea>
+              <div class="sc-actions">
+                <button type="button" class="sc-btn sc-main" id="vmScApply" data-i18n="vm_sc_apply">استيراد</button>
+                <button type="button" class="sc-btn" id="vmScCancel" data-i18n="vm_sc_cancel">إلغاء</button>
+              </div>
+            </div>
+            <ul class="sc-warn" id="vmScWarn" hidden></ul>
+          </div>
           <div class="kt-list" id="vmKTexts"></div>
           <button type="button" class="kt-add" id="vmKTextAdd"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="vm_kt_add">أضف نصاً</span></button>
           <div class="kh-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg><span data-i18n="vm_kt_note">كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.</span></div>
         </div>
-        <div class="field not-ktext">
+        <div class="field not-ktext kq-show" id="vmSurahField">
           <span class="label" data-i18n="vm_surah">السورة</span>
           <button type="button" class="picker-btn" id="vmSurahBtn" aria-haspopup="dialog">
             <span class="picker-main"><span class="picker-name" id="vmSurahLabel"></span></span>
           </button>
           <select id="vmSurah" hidden aria-hidden="true" tabindex="-1"></select>
         </div>
-        <div class="row not-ktext">
+        <div class="row not-ktext kq-show" id="vmRangeRow">
           <div class="field">
             <label class="label" for="vmFrom" data-i18n="vm_from">من آية</label>
             <div class="stepper">
@@ -954,10 +1025,15 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
         <div class="step-head"><span class="step-num">2</span><span class="step-title not-ktext" data-i18n="vm_reciter">القارئ</span><span class="step-title only-ktext" data-i18n="vm_sec_audio">الصوت</span></div>
         <div class="formats fx" id="vmSource">
           <button type="button" data-src="reciter" class="active"><span class="not-ktext" data-i18n="vm_src_reciter">قارئ من القائمة</span><span class="only-ktext" data-i18n="vm_src_none">بدون صوت</span></button>
+          <button type="button" data-src="quran" class="only-ktext" data-i18n="vm_src_quran">آيات</button>
           <button type="button" data-src="own" data-i18n="vm_src_own">تسجيلي الخاص</button>
         </div>
+        <!-- own words over a recitation: the surah and ayat (moved here from «المحتوى») and the reciter -->
+        <div class="kq-box only-kq" id="vmKqBox">
+          <div class="kh-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span data-i18n="vm_kq_note">تُتلى الآيات التي تختارها تحت نصوصك، وتتوزع النصوص على مدة التلاوة ما لم يحدد السيناريو توقيتها.</span></div>
+        </div>
         <div class="kh-note only-ktext kt-silent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-i18n="vm_kt_silent">بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.</span></div>
-        <div id="vmReciterBox" class="not-ktext">
+        <div id="vmReciterBox" class="not-ktext kq-show">
           <button type="button" class="picker-btn" id="vmReciterBtn" aria-haspopup="dialog">
             <span class="picker-main" id="vmReciterLabel"></span>
           </button>
@@ -1072,6 +1148,12 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       <section data-sec="look" role="tabpanel" aria-labelledby="vmTab-look" class="card only-short" id="vmStickerCard">
         <div class="step-head"><span class="step-num">4</span><span class="step-title" data-i18n="vm_st_title">ملصقات</span><span class="st-count" id="vmStCount" dir="ltr"></span></div>
         <div class="st-hint" data-i18n="vm_st_hint">اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.</div>
+        <button type="button" class="st-pack" id="vmStPack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span data-i18n="vm_st_pack">تحميل حزمة الملصقات</span></button>
+        <div class="st-slots" id="vmStSlots" hidden>
+          <div class="st-slots-title" data-i18n="vm_st_slots">ملصقات السيناريو</div>
+          <div class="st-slot-list" id="vmStSlotList" role="group" data-i18n-aria="vm_st_slots" aria-label="ملصقات السيناريو"></div>
+          <div class="st-slot-hint" id="vmStSlotHint" aria-live="polite"></div>
+        </div>
         <div class="st-grid" id="vmStGrid" role="group" data-i18n-aria="vm_st_title" aria-label="ملصقات"></div>
         <div class="field">
           <div class="label" data-i18n="vm_st_added">المضافة</div>
@@ -1083,7 +1165,10 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
           <label class="st-row"><span data-i18n="vm_st_size">الحجم</span><input type="range" id="vmStSize" min="0.08" max="1.3" step="0.01"></label>
           <label class="st-row"><span data-i18n="vm_st_x">أفقياً</span><input type="range" id="vmStX" min="0" max="1" step="0.005" dir="ltr"></label>
           <label class="st-row"><span data-i18n="vm_st_y">رأسياً</span><input type="range" id="vmStY" min="0" max="1" step="0.005"></label>
-          <div class="st-row"><span data-i18n="vm_st_when">الظهور</span>
+          <label class="st-row" id="vmStWithRow"><span data-i18n="vm_st_when">الظهور</span>
+            <select id="vmStWith" class="st-with"></select>
+          </label>
+          <div class="st-row" id="vmStTimes"><span></span>
             <div class="st-times">
               <label class="st-time"><span data-i18n="vm_st_from">من</span><input type="number" id="vmStFrom" min="0" step="0.1" inputmode="decimal" placeholder="0" dir="ltr"><button type="button" class="st-now" id="vmStFromNow" data-i18n="vm_st_now" data-i18n-title="vm_st_now_aria" title="وقت المعاينة الحالي">الآن</button></label>
               <label class="st-time"><span data-i18n="vm_st_to">إلى</span><input type="number" id="vmStTo" min="0" step="0.1" inputmode="decimal" data-i18n-placeholder="vm_st_end" placeholder="النهاية" dir="ltr"><button type="button" class="st-now" id="vmStToNow" data-i18n="vm_st_now" data-i18n-title="vm_st_now_aria" title="وقت المعاينة الحالي">الآن</button></label>
@@ -1203,6 +1288,13 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
       </section>
     </div>
   </div>
+</div>
+
+<!-- a small live copy of the preview, while the preview itself is scrolled out of view -->
+<div class="mini-prev" id="vmMini" hidden>
+  <button type="button" class="mini-view" id="vmMiniView" data-i18n-aria="vm_mini_back" aria-label="العودة إلى المعاينة"><canvas id="vmMiniCanvas" aria-hidden="true"></canvas></button>
+  <button type="button" class="mini-btn mini-play" id="vmMiniPlay" data-i18n-aria="vm_preview" aria-label="معاينة"><svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="i-stop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+  <button type="button" class="mini-btn mini-close" id="vmMiniClose" data-i18n-aria="vm_mini_close" aria-label="إخفاء المعاينة المصغرة">×</button>
 </div>
 
 <div class="action-bar">
@@ -1410,6 +1502,8 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
 <script src="../js/video-maker-rec.js"></script>
 <script src="../js/khatira.js"></script>
 <script src="../js/video-stickers.js"></script>
+<script src="../js/video-script.js"></script>
+<script src="../js/zip-store.js"></script>
 <script src="../js/video-maker.js"></script>
 <script>
 
@@ -1418,7 +1512,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 11;
+  var NEED = 12;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab

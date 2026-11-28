@@ -19,6 +19,8 @@ test.beforeEach(async ({ page }) => {
     try {
       if (sessionStorage.getItem('vmTestStarted')) return;
       sessionStorage.setItem('vmTestStarted', '1');
+      // the floating mini preview (tested on its own in tests/video-script.spec.js) would sit over the controls
+      sessionStorage.setItem('vmMiniClosed', '1');
       localStorage.setItem('zad_lang', 'ar');
       localStorage.setItem('vm_settings', JSON.stringify({ mode: 'short', bg: 'g0', motion: false }));
     } catch { /* storage blocked */ }
@@ -97,7 +99,9 @@ test('a tap adds a sticker to the video; the sliders move and size it; flip, fro
   await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(1);
   await expect(page.locator('#vmStControls')).toBeVisible();
   await expect(page.locator('#vmStName')).toHaveText('يدعو وتألق');
-  await expect(page.locator('#vmStCount')).toHaveText('١ / ١٢');
+  await expect(page.locator('#vmStCount')).toHaveText('١ / ٣٠');
+  // a new one: centred in the lower half of the video
+  expect((await stickers(page))[0]).toMatchObject({ x: 0.5, y: 0.75 });
   await expect.poll(async () => (await ink(page)).n).toBeGreaterThan(before.n + 1500);       // it is in the frame
   const a = await ink(page);
   // across: the slider moves it (its white follows)
@@ -169,14 +173,14 @@ test('dragging on the preview moves it, the corner handle sizes it, and a drag d
   await expect(page.locator('#vmStagePlay')).toBeVisible({ timeout: 10000 });
 });
 
-test('remembered, at most twelve, Escape and «تم» let go, and not on the long video', async ({ page }) => {
+test('remembered, at most thirty, Escape and «تم» let go, and not on the long video', async ({ page }) => {
   await open(page);
-  for (let i = 1; i <= 12; i++) await page.locator(`#vmStGrid [data-sticker="s${String(i).padStart(2, '0')}"]`).click();
-  expect((await stickers(page)).length).toBe(12);
-  await page.locator('#vmStGrid [data-sticker="s20"]').click();
-  expect((await stickers(page)).length).toBe(12);
-  await expect(page.locator('#vmStatus')).toContainText('١٢');
-  await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(12);
+  for (let i = 1; i <= 30; i++) await page.locator(`#vmStGrid [data-sticker="s${String(i).padStart(2, '0')}"]`).click();
+  expect((await stickers(page)).length).toBe(30);
+  await page.locator('#vmStGrid [data-sticker="s35"]').click();
+  expect((await stickers(page)).length).toBe(30);
+  await expect(page.locator('#vmStatus')).toContainText('٣٠');
+  await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(30);
   await page.keyboard.press('Escape');
   await expect(page.locator('#vmStControls')).toBeHidden();
   await expect(page.locator('#vmStickerBox')).toBeHidden();
@@ -186,9 +190,9 @@ test('remembered, at most twelve, Escape and «تم» let go, and not on the lon
   await expect(page.locator('#vmStControls')).toBeHidden();
   await page.reload({ waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
-  expect((await stickers(page)).map(s => s.id)).toEqual(Array.from({ length: 12 }, (_, i) => 's' + String(i + 1).padStart(2, '0')));
+  expect((await stickers(page)).map(s => s.id)).toEqual(Array.from({ length: 30 }, (_, i) => 's' + String(i + 1).padStart(2, '0')));
   await sec(page, 'look');
-  await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(12);
+  await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(30);
   // the long video has its own engine: no stickers there
   await page.locator('#vmModeTabs [data-mode="long"]').click();
   await sec(page, 'look');
