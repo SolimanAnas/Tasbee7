@@ -121,6 +121,13 @@ test('@position: where the text sits', () => {
   assert.ok(S.serialize({ settings: { position: 'top' }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@position: top'));
 });
 
+test('@look: the background colours', () => {
+  assert.strictEqual(S.parse('@look: cinematic\nأ').settings.look, 'cinematic');
+  assert.deepStrictEqual(S.parse('@look: sepia-ish\nأ').warnings.map(w => w.code), ['look']);
+  assert.ok(S.serialize({ settings: { look: 'golden' }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@look: golden'));
+  assert.ok(S.template({}).includes('@look: none | warm'));
+});
+
 test('limits: lines, length, stickers', () => {
   const many = Array.from({ length: 40 }, (_, i) => `سطر ${i + 1} <sticker 1>`).join('\n');
   const r = S.parse(many + '\n' + 'ك'.repeat(500));

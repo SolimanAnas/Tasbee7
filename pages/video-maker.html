@@ -128,6 +128,26 @@
   background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); font:inherit; font-size:13px; font-weight:800; cursor:pointer; text-align:center; }
 .st-all svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2; }
 .st-all:disabled { opacity:.45; cursor:default; }
+.gr-card { padding:6px 16px; }
+.gr-head { display:flex; align-items:center; gap:10px; width:100%; min-height:52px; padding:0; border:none; background:none; color:var(--text-primary); font:inherit; cursor:pointer; text-align:start; }
+.gr-ic { width:22px; height:22px; flex:none; fill:none; stroke:var(--accent-ink, var(--accent-main)); stroke-width:2; }
+.gr-ic path { stroke:none; fill:var(--accent-ink, var(--accent-main)); }
+.gr-title { font-size:16px; font-weight:800; }
+.gr-now { margin-inline-start:auto; padding:3px 10px; border-radius:999px; background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); font-size:12.5px; font-weight:800; }
+.gr-now:empty { display:none; }
+.gr-chev { width:20px; height:20px; flex:none; fill:none; stroke:var(--text-secondary); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; transition:transform .2s; }
+.gr-now:empty + .gr-chev { margin-inline-start:auto; }
+.gr-head[aria-expanded="true"] .gr-chev { transform:rotate(180deg); }
+.gr-body { display:flex; flex-direction:column; gap:12px; padding:4px 0 12px; }
+.gr-body[hidden] { display:none; }
+.gr-looks { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 6px; scroll-snap-type:x proximity; }
+.gr-look { flex:0 0 72px; display:flex; flex-direction:column; align-items:center; gap:4px; padding:4px; border:2px solid transparent; border-radius:14px;
+  background:none; color:var(--text-secondary); font:inherit; font-size:12px; font-weight:800; cursor:pointer; scroll-snap-align:start; }
+.gr-look canvas { width:62px; height:96px; border-radius:10px; display:block; background:#111; }
+.gr-look.active { border-color:var(--accent-main); color:var(--accent-ink, var(--accent-main)); background:var(--accent-muted); }
+.gr-sliders { display:flex; flex-direction:column; gap:2px; }
+.gr-row { display:grid; grid-template-columns:96px 1fr; align-items:center; gap:10px; font-size:13px; font-weight:700; color:var(--text-secondary); }
+.gr-reset { align-self:flex-start; padding:0 14px; }
 .st-box { position:absolute; border:2px dashed var(--accent-main); border-radius:10px; pointer-events:none; z-index:3; box-shadow:0 0 0 1px rgba(0,0,0,.35); }
 .st-box[hidden] { display:none; }
 .st-handle { position:absolute; inset-inline-end:-13px; bottom:-13px; width:26px; height:26px; border-radius:50%; background:var(--accent-fill, var(--accent-main)); border:2px solid #fff;
@@ -872,7 +892,7 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
   font:800 12px/1 system-ui, sans-serif; color:#888; }
 
 /* Fixed action bar */
-.mini-prev { position:fixed; z-index:19; inset-inline-start:12px; bottom:calc(env(safe-area-inset-bottom) + 92px); border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 1px var(--glass-border); background:#000; animation:miniIn .22s ease-out; }
+.mini-prev { position:fixed; z-index:30;   /* over the sticky tab bar and the bottom bar (20), under sheets (40) */  inset-inline-start:12px; bottom:calc(env(safe-area-inset-bottom) + 92px); border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 1px var(--glass-border); background:#000; animation:miniIn .22s ease-out; }
 .mini-prev[hidden] { display:none; }
 @keyframes miniIn { from { opacity:0; transform:translateY(12px) scale(.94); } }
 .mini-view { display:block; padding:0; border:none; background:none; cursor:pointer; border-radius:14px; overflow:hidden; }
@@ -1204,8 +1224,8 @@ body.vm-pseudo-fs .mini-prev { display:none; }
         <div class="bg-private" data-i18n="vm_bg_private">صورك وفيديوهاتك تبقى على جهازك ولا تُرفع إلى أي مكان.</div>
         <label class="switch-row only-short">
           <span class="sw-text">
-            <span class="sw-title" data-i18n="vm_multi_bg">عدة صور</span>
-            <span class="sw-desc" data-i18n="vm_multi_bg_desc">اختر أكثر من صورة لتتبدّل خلال الفيديو</span>
+            <span class="sw-title" data-i18n="vm_multi_bg">عدة صور ومقاطع</span>
+            <span class="sw-desc" data-i18n="vm_multi_bg_desc">اختر أكثر من صورة أو فيديو لتتبدّل خلال الفيديو</span>
           </span>
           <input type="checkbox" class="switch" id="vmMultiBg">
         </label>
@@ -1216,6 +1236,28 @@ body.vm-pseudo-fs .mini-prev { display:none; }
           </span>
           <input type="checkbox" class="switch" id="vmMotion" checked>
         </label>
+      </section>
+
+      <!-- the background's colours: a look and fine adjustments (folds away; under the background it changes) -->
+      <section data-sec="look" role="tabpanel" aria-labelledby="vmTab-look" class="card only-short gr-card" id="vmGradeCard">
+        <button type="button" class="gr-head" id="vmGradeToggle" aria-expanded="false" aria-controls="vmGradeBody">
+          <svg class="gr-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+          <span class="gr-title" data-i18n="vm_grade">ألوان الفيديو</span>
+          <span class="gr-now" id="vmGradeNow"></span>
+          <svg class="gr-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="gr-body" id="vmGradeBody" hidden>
+          <div class="gr-looks" id="vmGradeLooks" role="group" data-i18n-aria="vm_grade" aria-label="ألوان الفيديو"></div>
+          <div class="gr-sliders">
+            <label class="gr-row"><span data-i18n="vm_gr_bright">السطوع</span><input type="range" data-g="bright" min="-1" max="1" step="0.01" value="0"></label>
+            <label class="gr-row"><span data-i18n="vm_gr_contrast">التباين</span><input type="range" data-g="contrast" min="-1" max="1" step="0.01" value="0"></label>
+            <label class="gr-row"><span data-i18n="vm_gr_sat">التشبع</span><input type="range" data-g="sat" min="-1" max="1" step="0.01" value="0"></label>
+            <label class="gr-row"><span data-i18n="vm_gr_warm">الحرارة</span><input type="range" data-g="warm" min="-1" max="1" step="0.01" value="0"></label>
+            <label class="gr-row"><span data-i18n="vm_gr_fade">التلاشي</span><input type="range" data-g="fade" min="0" max="1" step="0.01" value="0"></label>
+            <label class="gr-row"><span data-i18n="vm_gr_vignette">الإطار المظلم</span><input type="range" data-g="vignette" min="0" max="1" step="0.01" value="0"></label>
+          </div>
+          <button type="button" class="st-act gr-reset" id="vmGradeReset" data-i18n="vm_gr_reset">إعادة الألوان الأصلية</button>
+        </div>
       </section>
 
       <section data-sec="look" role="tabpanel" aria-labelledby="vmTab-look" class="card only-short" id="vmStickerCard">
@@ -1648,7 +1690,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 16;
+  var NEED = 17;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
