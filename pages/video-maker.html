@@ -82,6 +82,10 @@
 .formats.ta button { flex-direction:row; gap:6px; }
 .formats.ta svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
 .tpos-slider { margin-top:4px; }
+.trans-row { display:flex; flex-wrap:wrap; gap:6px; }
+.trans-row button { min-height:44px; padding:0 14px; border:1.5px solid var(--glass-border); border-radius:999px; background:var(--field-bg); color:var(--text-secondary);
+  font:inherit; font-size:13.5px; font-weight:800; cursor:pointer; }
+.trans-row button.active { border-color:var(--accent-main); background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); }
 .rc-exact { align-self:flex-start; font-size:12px; font-weight:800; padding:1px 8px; border-radius:8px; background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); }
 .mini-prev.dragging { box-shadow:0 18px 40px rgba(0,0,0,.55), 0 0 0 2px var(--accent-main); cursor:grabbing; }
 .mini-prev.dragging.min { box-shadow:none; }
@@ -1334,6 +1338,19 @@ body.vm-pseudo-fs .mini-prev { display:none; }
           </div>
           <div class="kh-note" id="vmAvNote" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="vmAvNoteText"></span></div>
         </div>
+        <!-- a translation under the ayat (the Quran reader's, from Tanzil) -->
+        <div class="field only-short not-ktext">
+          <div class="label" data-i18n="vm_tr">ترجمة الآيات</div>
+          <div class="trans-row" id="vmTrans" role="group" data-i18n-aria="vm_tr" aria-label="ترجمة الآيات">
+            <button type="button" data-trans="" aria-pressed="true" class="active" data-i18n="vm_tr_none">بدون</button>
+            <button type="button" data-trans="en.sahih" aria-pressed="false" lang="en">English</button>
+            <button type="button" data-trans="tr.diyanet" aria-pressed="false" lang="tr">Türkçe</button>
+            <button type="button" data-trans="ur.junagarhi" aria-pressed="false" lang="ur">اردو</button>
+            <button type="button" data-trans="ku.asan" aria-pressed="false" lang="ckb">کوردی</button>
+            <button type="button" data-trans="ar.muyassar" aria-pressed="false" data-i18n="vm_tr_muyassar">التفسير الميسر</button>
+          </div>
+          <div class="bg-private" data-i18n="vm_tr_note">من مشروع Tanzil، كما في قارئ القرآن. تُحمَّل مرة وتعمل بلا اتصال بعدها.</div>
+        </div>
         <div class="field only-short">
           <div class="label" data-i18n="vm_format">المقاس</div>
           <div class="formats" id="vmFormat">
@@ -1690,7 +1707,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 17;
+  var NEED = 18;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab
