@@ -375,7 +375,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
   await expect(page.locator('#vmFrom')).toHaveValue('4');
 });
 
-test('the mini preview can be dragged out of the way, and settles at the nearer side', async ({ page }) => {
+test('the mini preview can be dragged out of the way, and stays where it is let go', async ({ page }) => {
   await page.addInitScript(() => { if (!sessionStorage.getItem('d2')) { sessionStorage.setItem('d2', '1'); localStorage.setItem('vmMiniMin', '0'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['نص'] })); } });
   await open(page);
   await sec(page, 'text');
@@ -389,7 +389,8 @@ test('the mini preview can be dragged out of the way, and settles at the nearer 
   await page.mouse.move(120, 200, { steps: 8 });
   await page.mouse.up();
   const b = await page.locator('#vmMini').boundingBox();
-  expect(b.x).toBeCloseTo(12, 0);                       // settled on the left
+  // where it was let go (the point grabbed is under the pointer), no jump to a side
+  expect(Math.abs(b.x + b.width / 2 - 120)).toBeLessThan(4);
   expect(b.y).toBeLessThan(a.y - 100);
   // the drag was not a tap: the page did not scroll up to the preview
   await page.waitForTimeout(500);

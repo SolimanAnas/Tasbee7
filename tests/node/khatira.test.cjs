@@ -132,4 +132,33 @@ test('a word for a face without the Uthmani marks reads as in common print', () 
   assert.strictEqual(K.adaptWord('هُدٗى', null), 'هُدًى');
 });
 
+test('an ayah in phrases at its stopping marks (an-Nur 35), timed from where each phrase starts', () => {
+  const qpc = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'quran-qpc.json'), 'utf8')).surahs;
+  const ws = K.wordsOf(qpc[23][34]);
+  const ph = K.phrasesOf(ws);
+  assert.deepStrictEqual(ph, [[0, 3], [4, 8], [9, 11], [12, 21], [22, 31], [32, 34], [35, 39], [40, 43], [44, 47]]);
+  // every phrase but the last ends on a stopping mark, or is a long run cut in two
+  ph.slice(0, -1).forEach(([x, y]) => assert.ok(/[\u06D6-\u06DB]/.test(ws[y]) || y - x + 1 >= 6, 'ends at a stop: ' + ws[y]));
+  // a short ayah with no mark is one phrase
+  assert.deepStrictEqual(K.phrasesOf(K.wordsOf('ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ')), [[0, 3]]);
+  // a long one with no mark is cut near its middle
+  assert.deepStrictEqual(K.phrasesOf(Array.from({ length: 14 }, () => 'كلمة')), [[0, 6], [7, 13]]);
+  // the words of each phrase share its time by their length, phrase after phrase
+  const starts = ph.map((_, k) => 1 + k * 2), wt = K.phraseWordTimes(ws, ph, starts, 19);
+  assert.strictEqual(wt.length, ws.length);
+  ph.forEach(([x, y], k) => {
+    assert.ok(Math.abs(wt[x].a - starts[k]) < 1e-9, 'a phrase starts where it was found');
+    assert.ok(Math.abs(wt[y].b - (k + 1 < ph.length ? starts[k + 1] : 19)) < 1e-9, 'and ends where the next starts');
+  });
+  for (let i = 1; i < wt.length; i++) assert.ok(wt[i].a >= wt[i - 1].a - 1e-9, 'in order');
+});
+
+test('the Shorts reciters with word timings on quran.com', () => {
+  const ids = Object.values(K.QDC_OF);
+  assert.strictEqual(ids.length, 12);
+  for (const id of ids) assert.ok(K.RECITERS.some(r => r.id === id), 'a quran.com reciter: ' + id);
+  assert.strictEqual(K.QDC_OF.dosary, 97);
+  assert.strictEqual(K.QDC_OF.afasy, 7);
+});
+
 console.log(`\n${passed} tests passed`);

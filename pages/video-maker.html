@@ -81,6 +81,10 @@
 .formats.ta { grid-template-columns:repeat(3, 1fr); }
 .formats.ta button { flex-direction:row; gap:6px; }
 .formats.ta svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
+.tpos-slider { margin-top:4px; }
+.rc-exact { align-self:flex-start; font-size:12px; font-weight:800; padding:1px 8px; border-radius:8px; background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); }
+.mini-prev.dragging { box-shadow:0 18px 40px rgba(0,0,0,.55), 0 0 0 2px var(--accent-main); cursor:grabbing; }
+.mini-prev.dragging.min { box-shadow:none; }
 .tpos-row .st-hint { margin:0; flex:1; }
 .tpos-row .st-act { flex:none; padding:0 14px; }
 .tpos-row .st-act:disabled { opacity:.45; cursor:default; }
@@ -1278,6 +1282,16 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 
       <section data-sec="text" role="tabpanel" aria-labelledby="vmTab-text" class="card">
         <div class="step-head"><span class="step-num" id="vmStyleNum">4</span><span class="step-title" data-i18n="vm_step_style">التنسيق</span></div>
+        <!-- Shorts: the ayah all at once, line by line or word by word, as it is recited -->
+        <div class="field only-short not-khatira">
+          <div class="label" data-i18n="vm_av">عرض الآية</div>
+          <div class="formats ta" id="vmAyahView" role="group" data-i18n-aria="vm_av" aria-label="عرض الآية">
+            <button type="button" data-av="full" aria-pressed="true" class="active"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 11h14M5 15h14"/></svg><span data-i18n="vm_av_full">كاملة</span></button>
+            <button type="button" data-av="line" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14" opacity=".45"/><path d="M5 13h9"/><path d="M15.5 13h3.5" stroke-width="3.2"/></svg><span data-i18n="vm_av_line">سطراً سطراً</span></button>
+            <button type="button" data-av="word" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12h8" stroke-width="3.2"/></svg><span data-i18n="vm_av_word">كلمة كلمة</span></button>
+          </div>
+          <div class="kh-note" id="vmAvNote" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="vmAvNoteText"></span></div>
+        </div>
         <div class="field only-short">
           <div class="label" data-i18n="vm_format">المقاس</div>
           <div class="formats" id="vmFormat">
@@ -1293,6 +1307,11 @@ body.vm-pseudo-fs .mini-prev { display:none; }
             <button type="button" data-ta="top" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14M8 9h8M8 13h8"/></svg><span data-i18n="vm_ta_top">أعلى</span></button>
             <button type="button" data-ta="middle" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h8M8 14h8"/><path d="M5 4h14M5 20h14" opacity=".45"/></svg><span data-i18n="vm_ta_middle">الوسط</span></button>
             <button type="button" data-ta="bottom" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11h8M8 15h8M5 20h14"/></svg><span data-i18n="vm_ta_bottom">أسفل</span></button>
+          </div>
+          <div class="range-row tpos-slider">
+            <svg class="gap-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14M8 8h8"/></svg>
+            <input type="range" id="vmTextY" min="0" max="1" step="0.01" value="0" data-i18n-aria="vm_tpos_slider" aria-label="موضع النص رأسياً">
+            <svg class="gap-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16h8M5 20h14"/></svg>
           </div>
           <span class="st-hint" data-i18n="vm_tpos_hint">اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.</span>
         </div>
@@ -1629,7 +1648,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 15;
+  var NEED = 16;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab

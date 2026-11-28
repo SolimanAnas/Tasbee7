@@ -121,7 +121,11 @@
       if (out.size !== n) warn('size', raw);
     } else if (key === 'position') {
       const p = { top: 'top', middle: 'middle', center: 'middle', centre: 'middle', bottom: 'bottom', 'أعلى': 'top', 'وسط': 'middle', 'الوسط': 'middle', 'أسفل': 'bottom' }[v];
-      if (p) out.position = p; else warn('position', raw);
+      // or a height: 0 (top) … 1 (bottom), or 0% … 100%
+      const n = /^(\d+(?:\.\d+)?)\s*%$/.test(v) ? parseFloat(v) / 100 : /^\d*\.?\d+$/.test(v) ? parseFloat(v) : NaN;
+      if (p) out.position = p;
+      else if (isFinite(n) && n >= 0 && n <= 1) out.position = round(n, 100);
+      else warn('position', raw);
     } else if (key === 'spacing') {
       const n = parseFloat(v);
       if (!isFinite(n)) { warn('spacing', raw); return; }
@@ -307,7 +311,8 @@
     L.push('#    @font: <font id>        the font of the whole video (list below)');
     L.push(`#    @size: <number>         text size, from ${LIMITS.size[0]} (small) to ${LIMITS.size[1]} (large); 1 = normal`);
     L.push(`#    @spacing: <number>      space between lines, from ${LIMITS.spacing[0]} (tight) to ${LIMITS.spacing[1]} (airy); 1.45 = normal`);
-    L.push('#    @position: top | middle | bottom   where the text sits (default top, with a sticker below it)');
+    L.push('#    @position: top | middle | bottom, or a height 0 … 1 (0.3 = a little above the middle)');
+    L.push('#            where the text sits (default top, with a sticker below it)');
     L.push('#    @style: line | build | word');
     L.push('#            line  = the whole line shows, the word being read is lit (default)');
     L.push('#            build = the words appear one by one in place');
