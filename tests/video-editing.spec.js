@@ -209,30 +209,42 @@ test('a sticker: either corner resizes, × on it deletes, the picker folds after
   await expect(page.locator('#vmStagePlay')).toBeVisible();
 });
 
-test('the mini preview: × turns it off; the setting brings it back', async ({ page }) => {
+test('the mini preview: × shrinks it (never lost); the setting turns it off and on', async ({ page }) => {
   await open(page, { kTexts: ['الصبر مفتاح الفرج'], miniPreview: true });
   await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-  await expect(page.locator('#vmMini')).toBeVisible();
+  await expect(page.locator('#vmMiniView')).toBeVisible();
   await page.locator('#vmMiniClose').click();
-  await expect(page.locator('#vmMini')).toBeHidden();
-  await expect(page.locator('#vmStatus')).toContainText('الإعدادات');
-  expect(await page.evaluate(() => VM.state.miniPreview)).toBe(false);
-  // off for later visits too
-  await page.reload({ waitUntil: 'load' });
-  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
-  await sec(page, 'text');
+  await expect(page.locator('#vmMiniView')).toBeHidden();
+  await expect(page.locator('#vmMiniOpen')).toBeVisible();
+  await expect(page.locator('#vmStatus')).toContainText('اضغطه لإظهارها');
+  expect(await page.evaluate(() => VM.state.miniPreview)).toBe(true);
+  // the setting off: nothing at all
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.locator('#vmSettingsBtn').click();
+  await expect(page.locator('#vmMiniToggle')).toBeChecked();
+  await page.locator('#vmMiniToggle').uncheck();
+  await page.keyboard.press('Escape');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(400);
   await expect(page.locator('#vmMini')).toBeHidden();
-  // ⚙ → «معاينة مصغّرة عائمة»
-  await page.evaluate(() => scrollTo(0, 0));
+  // on again (also after a reload): the full preview, not the shrunk button
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
   await page.locator('#vmSettingsBtn').click();
   await expect(page.locator('#vmMiniToggle')).not.toBeChecked();
   await page.locator('#vmMiniToggle').check();
   await page.keyboard.press('Escape');
+  await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-  await expect(page.locator('#vmMini')).toBeVisible();
+  await expect(page.locator('#vmMiniView')).toBeVisible();
+  // an early version's "hidden for this visit" flag no longer hides it
+  await page.evaluate(() => sessionStorage.setItem('vmMiniClosed', '1'));
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'text');
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  await expect(page.locator('#vmMiniView')).toBeVisible();
 });
 
 test('«موضع النص»: top, middle or bottom, clear of the app name and the caption; «خاطرة» starts at the top', async ({ page }) => {

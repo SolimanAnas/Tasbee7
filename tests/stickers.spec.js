@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
       if (sessionStorage.getItem('vmTestStarted')) return;
       sessionStorage.setItem('vmTestStarted', '1');
       // the floating mini preview (tested on its own in tests/video-script.spec.js) would sit over the controls
-      sessionStorage.setItem('vmMiniClosed', '1');
+      localStorage.setItem('vmMiniMin', '1');
       localStorage.setItem('zad_lang', 'ar');
       localStorage.setItem('vm_settings', JSON.stringify({ mode: 'short', bg: 'g0', motion: false }));
     } catch { /* storage blocked */ }
@@ -54,16 +54,16 @@ const ink = page => page.evaluate(() => {
 
 test('the 49 pictures: the high-resolution pack first, all named, cut clean and sized for a video', async ({ page }) => {
   await open(page);
-  await expect(page.locator('#vmStGrid .st-tile')).toHaveCount(49);
-  const order = await page.locator('#vmStGrid .st-tile').evaluateAll(els => els.map(e => e.dataset.sticker));
+  await expect(page.locator('#vmStGrid .st-tile[data-sticker]')).toHaveCount(49);
+  const order = await page.locator('#vmStGrid .st-tile[data-sticker]').evaluateAll(els => els.map(e => e.dataset.sticker));
   expect(order.slice(0, 10)).toEqual(Array.from({ length: 10 }, (_, i) => 'h' + String(i + 1).padStart(2, '0')));
   expect(order[10]).toBe('s01');
-  const names = await page.locator('#vmStGrid .st-tile').evaluateAll(els => els.map(e => e.getAttribute('aria-label')));
+  const names = await page.locator('#vmStGrid .st-tile[data-sticker]').evaluateAll(els => els.map(e => e.getAttribute('aria-label')));
   expect(names.every(n => n && n.startsWith('أضف: '))).toBe(true);
   expect(new Set(names).size).toBe(49);
   const report = await page.evaluate(async () => {
     const out = [];
-    for (const t of document.querySelectorAll('#vmStGrid .st-tile')) {
+    for (const t of document.querySelectorAll('#vmStGrid .st-tile[data-sticker]')) {
       const id = t.dataset.sticker;
       const im = new Image();
       im.src = '../images/stickers/' + id + '.webp';
@@ -402,4 +402,59 @@ test.describe('on a touch screen', () => {
     await expect(page.locator('#vmStagePlay')).toBeVisible();
     expect(await page.evaluate(() => VM.state.textPos)).toEqual(pos);
   });
+});
+
+// A transparent PNG with a white block (what a sticker cut from a photo looks like), made here.
+function pngOf(w, h) {
+  const zlib = require('zlib');
+  const raw = Buffer.alloc((w * 4 + 1) * h);
+  for (let y = 0; y < h; y++) {
+    raw[y * (w * 4 + 1)] = 0;
+    for (let x = 0; x < w; x++) {
+      const i = y * (w * 4 + 1) + 1 + x * 4, on = x > w * 0.2 && x < w * 0.8 && y > h * 0.1 && y < h * 0.95;
+      raw[i] = raw[i + 1] = raw[i + 2] = 255; raw[i + 3] = on ? 255 : 0;
+    }
+  }
+  const crcT = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; crcT[n] = c >>> 0; }
+  const crc = b => { let c = 0xFFFFFFFF; for (const x of b) c = crcT[(c ^ x) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const chunk = (type, data) => { const l = Buffer.alloc(4); l.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([l, td, c]); };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+
+test('your own stickers: added from the device first in the picker, in the video, kept at full size, remembered, and deleted', async ({ page }) => {
+  await page.addInitScript(() => { if (!sessionStorage.getItem('o1')) { sessionStorage.setItem('o1', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['نص'] })); } });
+  await open(page);
+  await expect(page.locator('#vmStGrid .st-add')).toBeVisible();
+  // «ملصقك» is the first tile
+  expect(await page.locator('#vmStGrid > *').first().getAttribute('id')).toBe('vmStOwnAdd');
+  const png = pngOf(900, 1200);
+  await page.locator('#vmStOwnFile').setInputFiles([{ name: 'my-character.png', mimeType: 'image/png', buffer: png }, { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }]);
+  await expect.poll(() => page.evaluate(() => VM.stickers.ownCount)).toBe(1);
+  await expect(page.locator('#vmStatus')).toContainText('تعذّر فتح بعض الملفات');      // the text file is refused
+  // it went into the video, standing on the bottom edge
+  const st = await page.evaluate(() => VM.state.stickers[0]);
+  expect(st.id).toMatch(/^u:[a-z0-9]+$/);
+  expect(st.x).toBe(0.5);
+  await expect(page.locator('#vmStName')).toHaveText('my-character');
+  // drawn, from the picture as it was (full size, not re-encoded)
+  const full = await page.evaluate(async id => { const t = document.querySelector('#vmStGrid [data-sticker="' + id + '"] img'); await t.decode(); return [t.naturalWidth, t.naturalHeight]; }, st.id);
+  expect(full).toEqual([900, 1200]);
+  const white = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 270; c.height = 480; const x = c.getContext('2d', { willReadFrequently: true }); VM.renderFrame(x, 270, 480, 0, null); const d = x.getImageData(0, 300, 270, 180).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 245 && d[i + 1] > 245 && d[i + 2] > 245) n++; return n; });
+  expect(white).toBeGreaterThan(5000);
+  // its tile is first, after «ملصقك»; remembered after a reload, in the picker and the video
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await expect.poll(() => page.evaluate(() => VM.stickers.ownCount)).toBe(1);
+  await sec(page, 'look');
+  await page.locator('#vmStPickToggle').click();
+  const firstTwo = await page.locator('#vmStGrid .st-tile').evaluateAll(els => els.slice(0, 2).map(e => e.dataset.sticker || e.id));
+  expect(firstTwo).toEqual(['vmStOwnAdd', st.id]);
+  expect(await page.evaluate(() => VM.state.stickers[0].id)).toBe(st.id);
+  // delete it: asks, and as it is in the video, it leaves the video too
+  page.once('dialog', d => d.accept());
+  await page.locator('#vmStGrid .st-own-del').first().click();
+  await expect.poll(() => page.evaluate(() => VM.stickers.ownCount)).toBe(0);
+  expect(await page.evaluate(() => VM.state.stickers.length)).toBe(0);
+  await expect(page.locator('#vmStGrid .st-own')).toHaveCount(0);
 });

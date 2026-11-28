@@ -126,7 +126,7 @@ test.describe('the audit: touch targets, text size, contrast, and word gaps afte
       await page.addInitScript(([mode, theme]) => {
         if (sessionStorage.getItem('a')) return;
         sessionStorage.setItem('a', '1');
-        sessionStorage.setItem('vmMiniClosed', '1');
+        localStorage.setItem('vmMiniMin', '1');
         localStorage.setItem('zad_lang', 'ar');
         localStorage.setItem('themeMode', theme);
         localStorage.setItem('vm_settings', JSON.stringify({ mode, kContent: 'text', kTexts: ['الصبر مفتاح الفرج', 'ومن يتق الله'], bg: 'g0', motion: false }));

@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
       if (sessionStorage.getItem('vmTestStarted')) return;
       sessionStorage.setItem('vmTestStarted', '1');
       // the floating mini preview (tested on its own in tests/video-script.spec.js) would sit over the controls
-      sessionStorage.setItem('vmMiniClosed', '1');
+      localStorage.setItem('vmMiniMin', '1');
       localStorage.setItem('zad_lang', 'ar');
       localStorage.setItem('vm_settings', JSON.stringify({ mode: 'short', bg: 'g0', motion: false }));
     } catch { /* storage blocked */ }
@@ -258,8 +258,8 @@ test('a sticker shown with a chosen text (or set times), and the sticker pack as
   await expect(page.locator('#vmStatus')).toContainText('٤٩');
 });
 
-test('the floating mini preview: while the preview is out of view it shows the video live; a tap goes back; × hides it', async ({ page }) => {
-  await page.addInitScript(() => { if (!sessionStorage.getItem('p1')) { sessionStorage.setItem('p1', '1'); sessionStorage.removeItem('vmMiniClosed'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح الفرج'] })); } });
+test('the floating mini preview: while the preview is out of view it shows the video live; a tap goes back; × shrinks it, a tap opens it again', async ({ page }) => {
+  await page.addInitScript(() => { if (!sessionStorage.getItem('p1')) { sessionStorage.setItem('p1', '1'); localStorage.setItem('vmMiniMin', '0'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح الفرج'] })); } });
   await open(page);
   await page.evaluate(() => scrollTo(0, 0));
   await expect(page.locator('#vmMini')).toBeHidden();
@@ -288,16 +288,21 @@ test('the floating mini preview: while the preview is out of view it shows the v
   await page.locator('#vmMiniView').click();
   await expect(page.locator('#vmMini')).toBeHidden({ timeout: 5000 });
   await expect(page.locator('#vmStage')).toBeInViewport({ ratio: 0.5 });
-  // ×: hidden for the rest of the visit
+  // ×: shrinks to a round button (remembered); a tap on it brings the preview back
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await expect(page.locator('#vmMini')).toBeVisible();
   await page.locator('#vmMiniClose').click();
-  await expect(page.locator('#vmMini')).toBeHidden();
-  await page.evaluate(() => scrollTo(0, 0));
-  await page.waitForTimeout(300);
+  await expect(page.locator('#vmMiniView')).toBeHidden();
+  await expect(page.locator('#vmMiniOpen')).toBeVisible();
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(300);
-  await expect(page.locator('#vmMini')).toBeHidden();
+  await expect(page.locator('#vmMiniOpen')).toBeVisible();
+  await expect(page.locator('#vmMiniView')).toBeHidden();
+  await page.locator('#vmMiniOpen').click();
+  await expect(page.locator('#vmMiniView')).toBeVisible();
+  await expect.poll(async () => (await sample()).lit).toBeGreaterThan(1000);     // live again
 });
 
 // quran.com, as in tests/khatira.spec.js: the timings (surah 1) and the MP3 with byte ranges
@@ -371,7 +376,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
 });
 
 test('the mini preview can be dragged out of the way, and settles at the nearer side', async ({ page }) => {
-  await page.addInitScript(() => { if (!sessionStorage.getItem('d2')) { sessionStorage.setItem('d2', '1'); sessionStorage.removeItem('vmMiniClosed'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['نص'] })); } });
+  await page.addInitScript(() => { if (!sessionStorage.getItem('d2')) { sessionStorage.setItem('d2', '1'); localStorage.setItem('vmMiniMin', '0'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['نص'] })); } });
   await open(page);
   await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
