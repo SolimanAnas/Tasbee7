@@ -94,7 +94,7 @@ test('section tabs: one part at a time, in any order, by touch or keyboard', asy
   await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
   const shown = () => page.evaluate(() => [...document.querySelectorAll('.controls-col > section[data-sec]')]
-    .filter(s => s.getClientRects().length).map(s => s.dataset.sec));
+    .filter(s => s.getClientRects().length).map(s => s.dataset.sec).filter((v, i, a) => a.indexOf(v) === i));
   expect(await shown()).toEqual(['ayat']);
   await page.locator('#vmTab-text').click();
   expect(await shown()).toEqual(['text']);
