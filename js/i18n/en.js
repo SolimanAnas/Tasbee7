@@ -1118,6 +1118,8 @@ export default {
   'vm_kt_empty': "Your words",
   'vm_kt_count_1': "1 text",
   'vm_kt_count': "{n} texts",
+  'vm_kt_count_2': "2 texts",
+  'vm_kt_count_many': "{n} texts",
   'vm_kt_n': "Text {i} of {n}",
   'vm_ks_label': "How the text shows",
   'vm_ks_line': "The whole line",

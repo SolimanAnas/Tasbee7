@@ -1090,6 +1090,8 @@ export default {
   'vm_kt_empty': "آپ کے الفاظ",
   'vm_kt_count_1': "1 متن",
   'vm_kt_count': "{n} متون",
+  'vm_kt_count_2': "2 متون",
+  'vm_kt_count_many': "{n} متون",
   'vm_kt_n': "متن {i} از {n}",
   'vm_ks_label': "متن کیسے دکھے",
   'vm_ks_line': "پوری سطر",

@@ -26,6 +26,7 @@ test('header: the theme button cycles the app themes; language is in the setting
   const second = await theme();
   expect(second).not.toBe(first);
   await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });   // started: its buttons work
   expect(await theme()).toBe(second);                                         // remembered, app-wide
   // no language button in the header any more: it is a row in the settings sheet
   await expect(page.locator('.header [onclick*="openLanguage"]')).toHaveCount(0);
@@ -116,4 +117,85 @@ test('section tabs: one part at a time, in any order, by touch or keyboard', asy
   const gap = await page.evaluate(() => document.querySelector('section[data-sec="audio"]').getBoundingClientRect().top - document.getElementById('vmSecTabs').getBoundingClientRect().bottom);
   expect(gap).toBeGreaterThanOrEqual(0);
   expect(gap).toBeLessThan(30);
+});
+
+// The audit: what a thumb, a tired eye and a slow font load need.
+test.describe('the audit: touch targets, text size, contrast, and word gaps after a font loads', () => {
+  for (const [mode, theme] of [['short', 'light'], ['khatira', 'dark'], ['long', 'sepia']]) {
+    test(`${mode} / ${theme}: every control at least 40 px, no text under 12 px, text at 4.5:1`, async ({ page }) => {
+      await page.addInitScript(([mode, theme]) => {
+        if (sessionStorage.getItem('a')) return;
+        sessionStorage.setItem('a', '1');
+        sessionStorage.setItem('vmMiniClosed', '1');
+        localStorage.setItem('zad_lang', 'ar');
+        localStorage.setItem('themeMode', theme);
+        localStorage.setItem('vm_settings', JSON.stringify({ mode, kContent: 'text', kTexts: ['الصبر مفتاح الفرج', 'ومن يتق الله'], bg: 'g0', motion: false }));
+      }, [mode, theme]);
+      await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+      await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+      for (const tab of ['ayat', 'audio', 'look', 'text']) {
+        await sec(page, tab);
+        const r = await page.evaluate(() => {
+          const vis = el => { const s = getComputedStyle(el); const b = el.getBoundingClientRect(); return s.visibility !== 'hidden' && s.display !== 'none' && b.width > 0 && b.height > 0 && !el.closest('.bottom-sheet:not(.active), [hidden], canvas'); };
+          const name = el => (el.id ? '#' + el.id : el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0]) + ' «' + (el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 20) + '»';
+          const small = [], tiny = [], low = [];
+          document.querySelectorAll('button, a[href], select, textarea, input:not([type=hidden]):not([type=file]):not([type=range]):not([type=checkbox])').forEach(el => {
+            if (!vis(el)) return;
+            const b = el.getBoundingClientRect();
+            if (b.width < 40 || b.height < 40) small.push(name(el) + ' ' + Math.round(b.width) + 'x' + Math.round(b.height));
+          });
+          const lum = c => { const m = c.match(/[\d.]+/g); if (!m) return null; const v = m.slice(0, 3).map(x => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return { L: 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2], a: m[3] == null ? 1 : +m[3] }; };
+          const bgOf = el => { for (let e = el; e; e = e.parentElement) { const s = getComputedStyle(e); const l = lum(s.backgroundColor); if (l && l.a > 0.85) return l.L; if (s.backgroundImage !== 'none' && e !== document.body && e !== document.documentElement) return null; } return null; };
+          const seen = new Set(), w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          for (let n; (n = w.nextNode());) {
+            const el = n.parentElement;
+            if (!el || seen.has(el) || !n.textContent.trim() || !vis(el) || el.closest('svg, button:disabled')) continue;
+            seen.add(el);
+            const s = getComputedStyle(el), fs = parseFloat(s.fontSize);
+            if (fs < 12) tiny.push(name(el) + ' ' + fs + 'px');
+            const fg = lum(s.color), bg = bgOf(el);
+            if (fg && bg != null) {
+              const cr = (Math.max(fg.L, bg) + 0.05) / (Math.min(fg.L, bg) + 0.05);
+              const large = fs >= 18.5 || (fs >= 14 && +s.fontWeight >= 700);
+              if (cr < (large ? 3 : 4.5)) low.push(name(el) + ' ' + cr.toFixed(2));
+            }
+          }
+          return { small, tiny, low };
+        });
+        expect(r.small, tab + ': small targets').toEqual([]);
+        expect(r.tiny, tab + ': tiny text').toEqual([]);
+        expect(r.low, tab + ': low contrast').toEqual([]);
+      }
+    });
+  }
+
+  test('«خاطرة»: the gaps between words are spaces, even when the face loaded after the first layout', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (sessionStorage.getItem('g')) return;
+      sessionStorage.setItem('g', '1');
+      localStorage.setItem('zad_lang', 'ar');
+      localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', kTexts: ['الصبر مفتاح الفرج'], kFont: 'amiri', bg: 'g0', motion: false }));
+    });
+    await page.goto(`${BASE_URL}/pages/video-maker.html`, { waitUntil: 'load' });
+    await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(300);
+    // the widest empty run between the words of the first line, against the face's own space
+    const r = await page.evaluate(() => {
+      const cv = document.getElementById('vmCanvas'), x = cv.getContext('2d', { willReadFrequently: true });
+      const y0 = Math.round(cv.height * 0.38), y1 = Math.round(cv.height * 0.5);
+      const d = x.getImageData(0, y0, cv.width, y1 - y0).data;
+      const ink = [];
+      for (let i = 0; i < cv.width; i++) { let on = 0; for (let j = 0; j < y1 - y0; j += 2) { const k = (j * cv.width + i) * 4; if (d[k] > 220 && d[k + 1] > 220 && d[k + 2] > 220) on++; } ink.push(on > 0); }
+      const first = ink.indexOf(true), last = ink.lastIndexOf(true);
+      let gap = 0, run = 0;
+      for (let i = first; i <= last; i++) { if (ink[i]) run = 0; else gap = Math.max(gap, ++run); }
+      const c = document.createElement('canvas').getContext('2d');
+      c.font = '100px KhAmiri';
+      return { gap, space100: c.measureText(' ').width, words: VM.khatiraLayout ? null : null };
+    });
+    // the line is about 0.14 of the width tall (151 px on 1080): a space is ~44 px; the bug left ~150
+    expect(r.gap).toBeGreaterThan(20);
+    expect(r.gap).toBeLessThan(95);
+  });
 });

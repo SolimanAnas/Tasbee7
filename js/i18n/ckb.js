@@ -1118,6 +1118,8 @@ export default {
   'vm_kt_empty': "وشەکانت",
   'vm_kt_count_1': "1 دەق",
   'vm_kt_count': "{n} دەق",
+  'vm_kt_count_2': "2 دەق",
+  'vm_kt_count_many': "{n} دەق",
   'vm_kt_n': "دەقی {i} لە {n}",
   'vm_ks_label': "شێوازی پیشاندانی دەق",
   'vm_ks_line': "هەموو دێڕەکە",
