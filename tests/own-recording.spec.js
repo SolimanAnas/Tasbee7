@@ -264,10 +264,15 @@ test('the timing sheet goes ayah by ayah to the end of the track', async ({ page
   await expect(focus).toHaveText('نهاية التلاوة');
   await expect(page.locator('#vmSyncMarkNext')).toBeHidden();
   await expect(page.locator('#vmSyncNextLabel')).toHaveText('تم');
+  // ayat 3–7 were re-split after ayah 2 was moved into the middle of a voice: the ones that
+  // could only be placed by text length are left marked to check, in the sheet and the panel
+  const left = await page.evaluate(() => VM.own.sync.unsure);
+  expect(left.length).toBeGreaterThan(0);
   await page.locator('#vmSyncNext').click();
   await expect(page.locator('#vmSyncSheet')).not.toHaveClass(/active/);
   await sec(page, 'audio');
-  await expect(page.locator('#vmOwnStatus')).toHaveClass(/ok/);
+  await expect(page.locator('#vmOwnStatus')).toHaveClass(/warn/);
+  await expect(page.locator('#vmOwnStatus')).toContainText('غير مؤكد');
 });
 
 // One pause the auto split can't see (ayah 4 follows ayah 3 after 0.1 s) and a breath inside

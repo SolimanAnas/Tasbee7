@@ -1,12 +1,14 @@
 // Helpers for the user's own recording (pages/video-maker.html, «تسجيلي»):
-// the loudness envelope of a decoded recording and a first guess at where each
-// ayah starts, from the pauses between them. Pure functions (no DOM, no audio
-// objects) so they can be tested in Node: tests/node/own-recitation.test.cjs.
+// the loudness envelope of a decoded recording and where each ayah starts in it.
+// Pure functions (no DOM, no audio objects) so they can be tested in Node:
+// tests/node/own-recitation.test.cjs.
 //
-// A recording has no ayah timestamps, so the split is a proposal the user checks
-// and fixes by ear in the sync sheet. The pauses between ayat are usually longer
-// than the breaths inside an ayah, so the N-1 longest pauses are taken as the
-// boundaries between N ayat; how clearly they stand out sets the confidence.
+// A recording has no ayah timestamps, so the split is a proposal the user checks by ear in
+// the sync sheet. The boundaries are chosen among the pauses (longer pauses first), helped by
+// where the length of each ayah's text says it should end, so a long breath inside an ayah
+// doesn't win over a shorter pause between two. Where no pause fits, a boundary is placed by
+// text length. Each boundary says whether it is sure, so the sheet can point the user at the
+// ones worth a listen.
 (function (root) {
   'use strict';
 
@@ -42,66 +44,119 @@
 
   // Where the ayat start, as seconds into the recording.
   //   env: envelopeDb(...)   hop: its resolution   n: number of ayat expected
-  // Returns { markers, end, confidence, method } — markers has n entries (the start of
-  // each ayah, ascending), end is where the last one stops. When the pauses cannot
-  // be told apart, { markers: null, confidence: 'none' } and the caller falls back to
-  // splitting by text length.
-  function autoSplit(env, hop, n) {
+  //   weights: (optional) the length of each ayah's text, to judge where boundaries belong
+  // Returns { markers, end, confidence, method, unsure } — markers has n entries (the start of
+  // each ayah, ascending), end is where the last one stops, unsure lists the markers (1..n-1)
+  // worth checking. With no voice to find, { markers: null, confidence: 'none' } and the caller
+  // falls back to splitting by text length.
+  function autoSplit(env, hop, n, weights) {
     const h = hop || HOP;
-    if (!(n >= 1) || !env.length) return { markers: null, end: 0, confidence: 'none', method: 'none' };
+    if (!(n >= 1) || !env.length) return { markers: null, end: 0, confidence: 'none', method: 'none', unsure: [] };
     const duration = env.length * h;
-    const floor = percentile(env, 0.1), speech = percentile(env, 0.9);
-    const contrast = speech - floor;
-    if (contrast < 6) return { markers: null, end: duration, confidence: 'none', method: 'none' };
-    const thr = floor + contrast * 0.3;
-
-    const active = new Uint8Array(env.length);
-    for (let i = 0; i < env.length; i++) active[i] = env[i] > thr ? 1 : 0;
-    // Clicks: a burst shorter than 50 ms with silence on both sides is not speech.
-    const blip = Math.max(1, Math.round(0.05 / h));
-    for (let i = 0; i < active.length;) {
-      if (!active[i]) { i++; continue; }
-      let j = i;
-      while (j < active.length && active[j]) j++;
-      if (j - i < blip) for (let k = i; k < j; k++) active[k] = 0;
-      i = j;
-    }
+    const { active, contrast } = activity(env);
+    if (contrast < 6) return { markers: null, end: duration, confidence: 'none', method: 'none', unsure: [] };
     let first = -1, last = -1;
     for (let i = 0; i < active.length; i++) if (active[i]) { if (first < 0) first = i; last = i; }
-    if (first < 0) return { markers: null, end: duration, confidence: 'none', method: 'none' };
+    if (first < 0) return { markers: null, end: duration, confidence: 'none', method: 'none', unsure: [] };
 
     const start = Math.max(0, first * h - LEAD_IN);
     const end = Math.min(duration, (last + 1) * h + TAIL_OUT);
-    if (n === 1) return { markers: [start], end, confidence: 'high', method: 'silence' };
+    if (n === 1) return { markers: [start], end, confidence: 'high', method: 'silence', unsure: [] };
 
-    // Silent stretches between the first and the last sound.
-    const minLen = Math.ceil(MIN_GAP / h);
-    const gaps = [];
-    for (let i = first; i <= last;) {
+    const w = weights && weights.length === n ? weights : new Array(n).fill(1);
+    const cands = candidates(active, h, first, last + 1, start, end);
+    const r = choose(cands, start, end, w, !!(weights && weights.length === n));
+    const real = r.picks.filter(p => !p.virtual).length;
+    const share = r.unsure.length / (n - 1);
+    const confidence = r.unsure.length === 0 ? 'high' : share <= 1 / 3 && real === n - 1 ? 'medium' : 'low';
+    return { markers: r.markers, end, confidence, method: 'silence', unsure: r.unsure, found: real };
+  }
+
+  // The pauses that could separate two ayat, between frames i0 and i1 of the activity, each
+  // with where its marker would go (just before the next voice) and how long it is.
+  // Only pauses whose marker falls inside (a, b) count.
+  function candidates(active, h, i0, i1, a, b) {
+    const minLen = Math.ceil(0.12 / h);
+    const out = [];
+    for (let i = Math.max(0, i0); i < i1 && i < active.length;) {
       if (active[i]) { i++; continue; }
       let j = i;
-      while (j <= last && !active[j]) j++;
-      if (j - i >= minLen) gaps.push({ s: i, e: j - 1, len: j - i });
+      while (j < active.length && !active[j]) j++;
+      if (j - i >= minLen && j <= i1) {
+        const ga = i * h, gb = j * h;
+        const m = Math.max(ga + (gb - ga) * 0.5, gb - LEAD_IN);
+        if (m > a + MIN_GAP && m < b - MIN_GAP) out.push({ m, len: gb - ga });
+      }
       i = j;
     }
-    if (gaps.length < n - 1) return { markers: null, end, confidence: 'none', method: 'silence', found: gaps.length };
+    return out;
+  }
 
-    const byLen = gaps.slice().sort((a, b) => b.len - a.len || a.s - b.s);
-    const chosen = byLen.slice(0, n - 1).sort((a, b) => a.s - b.s);
-    const rejected = byLen[n - 1];
-    const shortest = byLen[n - 2].len;
-    let confidence;
-    if (!rejected) confidence = shortest * h >= 0.3 ? 'high' : 'medium';
-    else {
-      const ratio = shortest / rejected.len;
-      confidence = ratio >= 1.5 ? 'high' : ratio >= 1.15 ? 'medium' : 'low';
+  // Chooses the count-1 boundaries between a and b (count = weights.length) among the
+  // candidate pauses: a dynamic programme over them, in order, that prefers long pauses near
+  // where the text lengths say each ayah should change. Where no pause fits, a «virtual» one at
+  // that expected place is used instead (placed by text length, and marked unsure).
+  // Returns { markers (count entries, the first = a), picks, unsure (marker indices 1..) }.
+  const VIRTUAL = -0.6;        // a pause, however short, is preferred to no pause
+  function choose(cands, a, b, weights, pace) {
+    const count = weights.length, k = count - 1;
+    if (k <= 0) return { markers: [a], picks: [], unsure: [] };
+    const total = weights.reduce((x, y) => x + y, 0) || 1;
+    const expect = [];
+    let acc = 0;
+    for (let q = 0; q < k; q++) { acc += weights[q]; expect.push(a + (b - a) * acc / total); }
+    const all = cands.concat(expect.map(m => ({ m, len: 0, virtual: true }))).sort((x, y) => x.m - y.m || (x.virtual ? 1 : -1));
+    const avg = (b - a) / count;
+    const score = (q, g) => (all[g].virtual ? VIRTUAL : Math.min(all[g].len, 1.2) / 1.2) - 0.15 * Math.abs(all[g].m - expect[q]) / avg;
+    const G = all.length;
+    let prev = new Float64Array(G), from = [];
+    for (let g = 0; g < G; g++) prev[g] = score(0, g);
+    for (let q = 1; q < k; q++) {
+      const cur = new Float64Array(G).fill(-Infinity), back = new Int32Array(G).fill(-1);
+      let best = -Infinity, bestAt = -1;
+      for (let g = q; g < G; g++) {
+        if (prev[g - 1] > best) { best = prev[g - 1]; bestAt = g - 1; }
+        if (bestAt >= 0) { cur[g] = best + score(q, g); back[g] = bestAt; }
+      }
+      from.push(back);
+      prev = cur;
     }
-    const markers = [start];
-    for (const g of chosen) {
-      const a = g.s * h, b = (g.e + 1) * h;
-      markers.push(Math.max(a + (b - a) * 0.5, b - LEAD_IN));   // just before the next voice starts
-    }
-    return { markers, end, confidence, method: 'silence' };
+    let g = -1, best = -Infinity;
+    for (let x = 0; x < G; x++) if (prev[x] > best) { best = prev[x]; g = x; }
+    const pickIdx = [g];
+    for (let q = k - 1; q >= 1; q--) { g = from[q - 1][g]; pickIdx.unshift(g); }
+    const picks = pickIdx.map(x => all[x]);
+    const markers = normalizeMarkers([a].concat(picks.map(p => p.m)), b, MIN_GAP);
+    // A boundary is unsure when it is placed by text length, sits in a very short pause, or
+    // another pause between its neighbours is nearly as long (it could be either).
+    const chosen = new Set(pickIdx);
+    const unsure = [];
+    picks.forEach((p, q) => {
+      let rival = 0;
+      const lo = q === 0 ? a : picks[q - 1].m, hi = q === k - 1 ? b : picks[q + 1].m;
+      all.forEach((c, x) => { if (!c.virtual && !chosen.has(x) && c.m > lo + MIN_GAP && c.m < hi - MIN_GAP && c.len > rival) rival = c.len; });
+      if (p.virtual || p.len < 0.25 || rival >= p.len * 0.75) unsure.push(q + 1);
+    });
+    if (pace) paceCheck(markers, b, weights).forEach(i => { if (!unsure.includes(i)) unsure.push(i); });
+    unsure.sort((x, y) => x - y);
+    return { markers, picks, unsure };
+  }
+
+  // The pace check: an ayah that takes far longer (or shorter) than its text would at the
+  // reciter's own pace is two ayat run together (a pause too short to hear) or half of one.
+  // Its boundaries are marked unsure. Loose limits, so a slow, melodic recitation passes.
+  //   markers: ayah starts   end: where the last ends   weights: text lengths
+  // Returns marker indices (1..n-1).
+  function paceCheck(markers, end, weights) {
+    const n = markers.length;
+    if (n < 3 || !weights || weights.length !== n) return [];
+    const rate = markers.map((m, q) => ((q < n - 1 ? markers[q + 1] : end) - m) / (weights[q] || 1));
+    const med = rate.slice().sort((x, y) => x - y)[Math.floor(n / 2)];
+    const out = new Set();
+    rate.forEach((r, q) => {
+      if (r > med * 2.5 || r < med * 0.4) { if (q >= 1) out.add(q); if (q + 1 <= n - 1) out.add(q + 1); }
+    });
+    return [...out];
   }
 
   // The fallback: the time shared between the ayat by the length of their text.
@@ -152,7 +207,18 @@
     const contrast = speech - floor;
     const thr = floor + contrast * 0.3;
     const active = new Uint8Array(env.length);
-    if (contrast >= 6) for (let i = 0; i < env.length; i++) active[i] = env[i] > thr ? 1 : 0;
+    if (contrast >= 6) {
+      for (let i = 0; i < env.length; i++) active[i] = env[i] > thr ? 1 : 0;
+      // Clicks: a burst shorter than 50 ms with silence on both sides is not speech.
+      const blip = Math.max(1, Math.round(0.05 / HOP));
+      for (let i = 0; i < active.length;) {
+        if (!active[i]) { i++; continue; }
+        let j = i;
+        while (j < active.length && active[j]) j++;
+        if (j - i < blip) for (let k = i; k < j; k++) active[k] = 0;
+        i = j;
+      }
+    }
     return { active, contrast };
   }
 
@@ -221,61 +287,27 @@
   // The ayat after one the user has fixed by hand, split again from it.
   //   a: where the fixed ayah starts   b: where the next fixed marker (or the end) is
   //   weights: the length of the text of each ayah from the fixed one up to b (count = weights.length)
-  // Returns count markers, the first one = a. The pauses between a and b are the candidates;
-  // the ones chosen are the longest that also fall near where the text lengths say the ayat
-  // should change (a dynamic programme over the pauses, in order). Too few pauses: the time
-  // is shared by text length.
-  function resplit(env, hop, a, b, weights) {
+  // Returns { markers (count entries, the first = a), unsure (indices into markers) }, chosen
+  // the same way as autoSplit.
+  function resplitInfo(env, hop, a, b, weights) {
     const h = hop || HOP;
-    const count = weights.length;
-    if (count <= 1) return [a];
+    if (weights.length <= 1) return { markers: [a], unsure: [] };
     const { active } = activity(env);
     // the voice of the fixed ayah starts after a: a pause before it belongs to the fixed marker
     let onset = Math.ceil(a / h);
     while (onset < active.length && onset * h < b && !active[onset]) onset++;
-    const minLen = Math.ceil(0.12 / h);
-    const cands = [];
-    for (let i = onset; i * h < b && i < active.length;) {
-      if (active[i]) { i++; continue; }
-      let j = i;
-      while (j < active.length && !active[j]) j++;
-      if (j - i >= minLen) {
-        const ga = i * h, gb = j * h;
-        const m = Math.max(ga + (gb - ga) * 0.5, gb - LEAD_IN);
-        if (m > a + MIN_GAP && m < b - MIN_GAP && gb < b) cands.push({ m, len: gb - ga });
-      }
-      i = j;
-    }
-    const k = count - 1;                                   // boundaries to place
-    const total = weights.reduce((x, y) => x + y, 0) || 1;
-    const expect = [];
-    let acc = 0;
-    for (let q = 0; q < k; q++) { acc += weights[q]; expect.push(a + (b - a) * acc / total); }
-    if (cands.length < k) return normalizeMarkers(proportional(a, b, weights), b, MIN_GAP);
-    // dp[q][g]: best score with boundary q at candidate g
-    const avg = (b - a) / count;
-    const score = (q, g) => Math.min(cands[g].len, 1.2) / 1.2 - 0.15 * Math.abs(cands[g].m - expect[q]) / avg;
-    const G = cands.length;
-    let prev = new Float64Array(G), from = [];
-    for (let g = 0; g < G; g++) prev[g] = score(0, g);
-    for (let q = 1; q < k; q++) {
-      const cur = new Float64Array(G).fill(-Infinity), back = new Int32Array(G).fill(-1);
-      let best = -Infinity, bestAt = -1;
-      for (let g = q; g < G; g++) {
-        if (prev[g - 1] > best) { best = prev[g - 1]; bestAt = g - 1; }
-        if (bestAt >= 0) { cur[g] = best + score(q, g); back[g] = bestAt; }
-      }
-      from.push(back);
-      prev = cur;
-    }
-    let g = -1, best = -Infinity;
-    for (let x = 0; x < G; x++) if (prev[x] > best) { best = prev[x]; g = x; }
-    const picks = [g];
-    for (let q = k - 1; q >= 1; q--) { g = from[q - 1][g]; picks.unshift(g); }
-    return normalizeMarkers([a].concat(picks.map(x => cands[x].m)), b, MIN_GAP);
+    const r = choose(candidates(active, h, onset, Math.floor(b / h), a, b), a, b, weights, true);
+    return { markers: r.markers, unsure: r.unsure.filter(i => i >= 1) };
+  }
+  const resplit = (env, hop, a, b, weights) => resplitInfo(env, hop, a, b, weights).markers;
+
+  // Where markers can snap to while one is dragged: the marker position of every pause.
+  function snapPoints(env, hop) {
+    const { gaps } = pauses(env, hop || HOP);
+    return gaps.map(g => ({ a: g.a, b: g.b, m: Math.max(g.a + (g.b - g.a) * 0.5, g.b - LEAD_IN) }));
   }
 
-  const api = { HOP, MIN_GAP, resplit, envelopeDb, autoSplit, proportional, normalizeMarkers, outline, percentile, snapTaps, snapOne };
+  const api = { HOP, MIN_GAP, LEAD_IN, resplit, resplitInfo, snapPoints, paceCheck, envelopeDb, autoSplit, proportional, normalizeMarkers, outline, percentile, snapTaps, snapOne };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OwnRecitation = api;
 })(typeof window !== 'undefined' ? window : globalThis);
