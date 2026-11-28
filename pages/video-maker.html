@@ -113,6 +113,10 @@
 .sc-warn[hidden] { display:none; }
 .kt-opts { display:inline-flex; align-items:center; gap:4px; align-self:flex-start; padding:2px 4px 2px 10px; border-radius:999px; background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); font-size:12px; font-weight:800; font-variant-numeric:tabular-nums; }
 .kt-opts-x { width:28px; height:28px; border:none; border-radius:50%; background:transparent; color:inherit; font-size:16px; cursor:pointer; }
+.st-all { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; margin-top:4px; padding:6px 12px; border:1.5px dashed var(--accent-main); border-radius:12px;
+  background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); font:inherit; font-size:13px; font-weight:800; cursor:pointer; text-align:center; }
+.st-all svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2; }
+.st-all:disabled { opacity:.45; cursor:default; }
 .st-box { position:absolute; border:2px dashed var(--accent-main); border-radius:10px; pointer-events:none; z-index:3; box-shadow:0 0 0 1px rgba(0,0,0,.35); }
 .st-box[hidden] { display:none; }
 .st-handle { position:absolute; inset-inline-end:-13px; bottom:-13px; width:26px; height:26px; border-radius:50%; background:var(--accent-fill, var(--accent-main)); border:2px solid #fff;
@@ -267,12 +271,15 @@ button { font-family: inherit; }
 
 /* Header */
 .header {
-  position:relative; display:flex; align-items:center; justify-content:space-between;
+  position:relative; display:grid; grid-template-columns:auto minmax(0, 1fr) auto; align-items:center; gap:4px;
   background:var(--glass); border:1px solid var(--glass-border);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-  box-shadow:var(--glass-shadow); border-radius:18px; padding:12px 16px;
+  box-shadow:var(--glass-shadow); border-radius:18px; padding:8px 10px;
 }
-.header-title { font-weight:800; font-size:18px; position:absolute; left:50%; transform:translateX(-50%); white-space:nowrap; }
+/* the title has only the room between the buttons: it shrinks, then wraps (never runs under them) */
+.header-title { min-width:0; text-align:center; font-weight:800; font-size:clamp(14px, 4.4vw, 18px);
+  margin:0; line-height:1.2; padding:0 2px; overflow:hidden;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow-wrap:anywhere; }
 .icon-btn {
   background:none; border:none; color:var(--text-primary); cursor:pointer;
   width:44px; height:44px; border-radius:12px;
@@ -913,7 +920,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 <div class="app">
   <div class="header">
     <a href="../index.html" class="icon-btn" title="الرئيسية" style="text-decoration:none;" data-i18n-title="home"><img src="../img/SVG/home.svg" class="action-icon" style="width:1em;height:1em;" alt=""></a>
-    <div class="header-title" data-i18n="vm_title">صانع فيديو الآيات</div>
+    <h1 class="header-title" data-i18n="vm_title_short">فيديو الآيات</h1>
     <div class="header-actions">
       <button class="icon-btn theme-btn" id="vmThemeBtn" type="button" data-t="light" aria-label="تغيير المظهر" title="تغيير المظهر" data-i18n-aria="radio_toggle_theme" data-i18n-title="radio_toggle_theme">
         <svg class="ti ti-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"/></svg>
@@ -944,11 +951,11 @@ body.vm-pseudo-fs .mini-prev { display:none; }
   <div class="layout">
     <div class="preview-col">
       <div class="card">
-        <div class="stage" id="vmStage" role="button" tabindex="0" data-i18n-aria="vm_preview" aria-label="معاينة">
+        <div class="stage" id="vmStage">
           <canvas id="vmCanvas" width="1080" height="1920"></canvas>
-          <div class="stage-play" id="vmStagePlay" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
-          </div>
+          <button type="button" class="stage-play" id="vmStagePlay" data-i18n-aria="vm_preview" aria-label="معاينة" data-i18n-title="vm_preview" title="معاينة">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+          </button>
           <button type="button" class="stage-fs" id="vmFullscreen" data-i18n-title="vm_fullscreen" title="ملء الشاشة" data-i18n-aria="vm_fullscreen" aria-label="ملء الشاشة">
             <svg class="fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
             <svg class="fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
@@ -1244,6 +1251,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
               <button type="button" data-fx="none" aria-pressed="false" data-i18n="vm_st_fx_none">بدون</button>
             </div>
           </div>
+          <button type="button" class="st-all" id="vmStAll"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="vm_st_all">تطبيق المكان والحجم والتأثير على كل الملصقات</span></button>
           <div class="st-actions">
             <button type="button" id="vmStFlip" class="st-act" data-i18n="vm_st_flip">قلب</button>
             <button type="button" id="vmStFront" class="st-act" data-i18n="vm_st_front">للأمام</button>
@@ -1507,10 +1515,25 @@ body.vm-pseudo-fs .mini-prev { display:none; }
       <span class="settings-text"><span class="settings-title" dir="auto">اللغة (Language)</span><span class="settings-sub" id="vmLangSub">العربية</span></span>
       <svg class="settings-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
     </button>
+    <div class="settings-label" data-i18n="vm_project">المشروع</div>
+    <button type="button" class="settings-row" id="vmFileNew">
+      <svg class="settings-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></svg>
+      <span class="settings-text"><span class="settings-title" data-i18n="vm_file_new">جديد</span><span class="settings-sub" data-i18n="vm_file_new_sub">بداية جديدة: النصوص والملصقات والتنسيق من أوله (يمكن التراجع)</span></span>
+    </button>
+    <button type="button" class="settings-row" id="vmFileOpen">
+      <svg class="settings-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-8l-2-3H4a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1z"/><path d="M12 17v-6M9 14l3-3 3 3"/></svg>
+      <span class="settings-text"><span class="settings-title" data-i18n="vm_file_open">فتح مشروع</span><span class="settings-sub" data-i18n="vm_file_open_sub">من ملف حفظته من قبل، على هذا الجهاز أو غيره</span></span>
+    </button>
+    <button type="button" class="settings-row" id="vmFileSave">
+      <svg class="settings-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg>
+      <span class="settings-text"><span class="settings-title" data-i18n="vm_file_save">حفظ المشروع</span><span class="settings-sub" data-i18n="vm_file_save_sub">ملف صغير فيه الفيديو كله لتكمله لاحقاً أو على جهاز آخر</span></span>
+    </button>
+    <input type="file" id="vmFileInput" accept=".zadvideo,.json,application/json" hidden>
+    <div class="bg-private" data-i18n="vm_file_note">ما أضفته من جهازك (خلفيات، تسجيلات، خطوط) يبقى عليه ولا يدخل في الملف.</div>
     <div class="settings-label" data-i18n="vm_settings_video">الفيديو</div>
       <label class="switch-row">
         <span class="sw-text">
-          <span class="sw-title" data-i18n="vm_pingpong">تكرار الفيديو ذهاباً وإياباً</span>
+          <span class="sw-title" data-i18n="vm_pingpong">التكرار العكسي للفيديو</span>
           <span class="sw-desc" data-i18n="vm_pingpong_desc">يعمل الفيديو للأمام ثم للخلف فلا يظهر قطع عند إعادته</span>
         </span>
         <input type="checkbox" class="switch" id="vmPingPong">
@@ -1590,7 +1613,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 14;
+  var NEED = 15;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab

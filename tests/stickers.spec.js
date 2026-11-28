@@ -174,9 +174,12 @@ test('dragging on the preview moves it, the corner handle sizes it, and a drag d
   await page.mouse.up();
   expect((await stickers(page))[0].s).toBeGreaterThan(s1.s * 1.08);
   await expect(page.locator('#vmStagePlay')).toBeVisible();
-  // a tap on empty video (no sticker there) still plays / stops the preview as before
+  // a tap on empty video does not start playing (it is for editing); ▶ plays, a tap stops
   await page.waitForTimeout(600);
   await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.06);
+  await page.waitForTimeout(800);
+  await expect(page.locator('#vmStagePlay')).toBeVisible();
+  await page.locator('#vmStagePlay').click();
   await expect(page.locator('#vmStagePlay')).toBeHidden({ timeout: 10000 });
   await page.locator('#vmStage').click({ position: { x: 10, y: 10 } });
   await expect(page.locator('#vmStagePlay')).toBeVisible({ timeout: 10000 });

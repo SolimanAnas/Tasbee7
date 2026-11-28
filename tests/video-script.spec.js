@@ -73,7 +73,7 @@ test('an uploaded script makes the video: texts with their times, fonts and size
   await toTexts(page);
   await upload(page, SCRIPT);
   // the texts and what each one was given
-  await expect(page.locator('#vmStatus')).toContainText('٣ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('٣ أسطر');
   // numbered stickers wait for pictures: the stickers card is opened to choose them
   await expect(page.locator('#vmTab-look')).toHaveAttribute('aria-selected', 'true');
   const st = await page.evaluate(() => ({ texts: VM.state.kTexts, opts: VM.state.kOpts, kFont: VM.state.kFont, fontMul: VM.state.fontMul, kStyle: VM.state.kStyle, color: VM.state.color, sheikh: VM.state.sheikh, mode: VM.state.mode, kContent: VM.state.kContent }));
@@ -125,7 +125,7 @@ test('a line\'s own font and size draw it differently; the × drops them', async
   await open(page);
   await toTexts(page);
   await upload(page, '[0:00 - 0:03] أ\n[0:03 - 0:06] الصبر مفتاح {font: jomhuria, size: 1.4}\n');
-  await expect(page.locator('#vmStatus')).toContainText('٢ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('سطران');
   const frame = () => page.evaluate(async () => {
     const tl = await VM.buildTimeline();
     const c = document.createElement('canvas'); c.width = 270; c.height = 480;
@@ -179,7 +179,7 @@ test('pasting a script (and subtitles), the warnings, replacing texts asks first
   await page.locator('#vmScCancel').click();
   page.once('dialog', d => d.accept());
   await upload(page, SCRIPT);
-  await expect(page.locator('#vmStatus')).toContainText('٣ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('٣ أسطر');
   await expect(page.locator('#vmTab-look')).toHaveAttribute('aria-selected', 'true');
   await sec(page, 'ayat');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('#vmScExport').click()]);
@@ -202,11 +202,15 @@ test('the template for an AI: downloaded and copied, with the fonts, the size ra
   expect(t).toContain('INSTRUCTIONS FOR THE AI');
   for (const f of ['amiri', 'scheherazade', 'naskh', 'ruqaa', 'changa', 'cairo', 'jomhuria', 'gulzar']) expect(t).toMatch(new RegExp('#\\s+' + f + '\\s'));
   expect(t).toContain('from 0.7 (small) to 1.4 (large)');
-  expect(t).toContain('h01  Looking up, thinking  ·  يتأمل السماء');
-  expect(t).toContain('s39  Listening');
+  // every sticker described for the AI to pick from: what it shows, what it fits, its Arabic name
+  expect(t).toContain('PICK THEM YOURSELF');
+  expect(t).toContain('h01  Sitting on the floor against a cushion, hugging his knees, looking up. Fits: hope, waiting, quiet reflection, contentment.  ·  يتأمل السماء');
+  expect(t).toContain('s22  In sujood on a prayer mat. Fits:');
+  expect(t).toContain('s39  Headphones on. Fits:');
+  expect((t.match(/^#\s{6}[hs]\d\d {2}.+ Fits: /gm) || []).length).toBe(49);
   // its example uploads as it is
   await upload(page, t);
-  await expect(page.locator('#vmStatus')).toContainText('٥ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('٥ أسطر');
   await expect(page.locator('#vmScWarn')).toBeHidden();
   // copied for pasting into an assistant
   await sec(page, 'ayat');
@@ -344,7 +348,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
   expect(tl.total).toBeGreaterThan(start + dur);
   // the preview plays it
   await page.evaluate(() => scrollTo(0, 0));
-  await page.locator('#vmStage').click({ position: { x: 20, y: 20 } });
+  await page.locator('#vmStagePlay').click();
   await expect(page.locator('#vmStagePlay')).toBeHidden({ timeout: 10000 });
   await page.locator('#vmStage').click({ position: { x: 20, y: 20 } });
   await expect(page.locator('#vmStagePlay')).toBeVisible({ timeout: 10000 });
@@ -358,7 +362,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
   await sec(page, 'ayat');
   page.once('dialog', d => d.accept());
   await upload(page, '@quran: 1:4-5\n[0:00 - 0:03] مالك يوم الدين\nإياك نعبد');
-  await expect(page.locator('#vmStatus')).toContainText('٢ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('سطران');
   expect(await page.evaluate(() => [VM.state.ktAudio, VM.state.surah, VM.state.from, VM.state.to])).toEqual(['quran', 1, 4, 5]);
   expect(await page.evaluate(() => VM.currentScript())).toContain('@quran: 1:4-5');
   await sec(page, 'audio');

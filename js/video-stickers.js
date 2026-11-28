@@ -43,6 +43,58 @@
     ['فكرة ولابتوب', 'Idea at the laptop'], ['يستمع إلى القرآن', 'Listening to the Quran'], ['يكتب', 'Writing'], ['انتبه', 'Attention'],
     ['تساؤل', 'A question'], ['يفتح يديه', 'Open hands'], ['دعاء هادئ', 'Quiet dua'], ['يقرأ', 'Reading'], ['يستمع', 'Listening'],
   ];
+  // What each picture shows and what it suits, for an AI choosing them (the script template).
+  const ABOUT = {
+    h01: 'Sitting on the floor against a cushion, hugging his knees, looking up. Fits: hope, waiting, quiet reflection, contentment.',
+    h02: 'At a laptop, a finger on his temple, a lightbulb above. Fits: an idea, insight, learning, work.',
+    h03: 'Hand on his chin, a big blue question mark. Fits: a question to the viewer, wondering, "have you ever...?".',
+    h04: 'Writing in an open notebook beside a stack of books. Fits: study, writing, knowledge, planning.',
+    h05: 'Standing, both hands raised in dua. Fits: supplication, asking Allah, hope.',
+    h06: 'Standing, reading an open mushaf. Fits: reading the Quran, guidance, a verse.',
+    h07: 'One hand on his heart, the other held out to the viewer. Fits: sincere advice, an invitation, "my brother...".',
+    h08: 'Thinking, chin in hand, arm folded. Fits: contemplation, weighing something, calm thought.',
+    h09: 'Hand on his heart, the other hand open. Fits: speaking from the heart, gratitude, sincerity.',
+    h10: 'Sitting, head in his hand, eyes down. Fits: grief, worry, exhaustion, a heavy burden.',
+    s01: 'Hand on chin, a question mark in a thought bubble. Fits: wondering, puzzled.',
+    s02: 'Both fists raised in excitement. Fits: joy, motivation, good news.',
+    s03: 'Sitting, covering his face, a tear. Fits: sadness, crying, regret.',
+    s04: 'Two thumbs up with sparkles. Fits: approval, well done, good deeds.',
+    s05: 'Yawning, "zzz" above. Fits: tiredness, sleepiness, laziness, late nights.',
+    s06: 'Hands on his cheeks, shocked, red exclamation marks. Fits: shock, surprise, alarm.',
+    s07: 'Hands raised in dua with sparkles. Fits: hopeful dua, blessings.',
+    s08: 'Hugging the mushaf, a red heart. Fits: love of the Quran.',
+    s09: 'Leaning back, hands behind his head, a sunset. Fits: rest, peace, calm after effort.',
+    s10: 'Both hands on his chest, eyes closed. Fits: gratitude, peace of heart, humility.',
+    s11: 'Sitting, head in his hand, a storm cloud above. Fits: worry, distress, hard times.',
+    s12: 'Making dua, the sun coming out from a cloud. Fits: hope after hardship, relief coming.',
+    s13: 'Thinking, a lightbulb above. Fits: an idea, a realization.',
+    s14: 'Both hands open, a heart. Fits: love, kindness, generosity, welcome.',
+    s15: 'Hands on his temples, red stress waves. Fits: headache, pressure, stress.',
+    s16: 'Hand on his chest, eyes closed, breathing out. Fits: relief, calm, tranquility.',
+    s17: 'Chin in hand, dreaming of a road at sunset. Fits: the path ahead, the future, the journey of life.',
+    s18: 'Making dua, a mosque and a lantern at night. Fits: night prayer, Ramadan, the mosque.',
+    s19: 'Sitting, head in his hand, a tangled scribble above. Fits: overthinking, confusion, anxiety.',
+    s20: 'Clenched fists, an angry red mark. Fits: anger, frustration.',
+    s21: 'Holding his head with both hands, red jagged lines. Fits: overwhelmed, pain, panic.',
+    s22: 'In sujood on a prayer mat. Fits: prayer, prostration, humility, closeness to Allah.',
+    s23: 'Standing, hands raised in dua, looking up. Fits: supplication, asking.',
+    s24: 'Holding prayer beads. Fits: dhikr, remembrance, tasbeeh.',
+    s25: 'Sitting cross-legged, reading the mushaf. Fits: reading the Quran, study.',
+    s26: 'Sitting at a mushaf on a stand, a finger raised. Fits: a reminder, a lesson from the Quran.',
+    s27: 'Sitting against a cushion, hugging his knees, looking up. Fits: quiet waiting, reflection.',
+    s28: 'Holding a mushaf, a finger raised. Fits: "Allah says...", pointing to a verse.',
+    s29: 'A mushaf on a stand beside a lantern. Fits: Ramadan nights, recitation, tranquility.',
+    s30: 'Reading a book among books, against a cushion. Fits: reading, knowledge.',
+    s31: 'At a laptop, a lightbulb above. Fits: an idea, learning online.',
+    s32: 'Headphones on, reading the mushaf, sound waves. Fits: listening to the Quran.',
+    s33: 'Writing in a notebook beside books. Fits: writing, taking notes, planning.',
+    s34: 'A finger raised, attention lines. Fits: attention, an important point, "note this".',
+    s35: 'Chin in hand, a question mark. Fits: a question, asking the viewer.',
+    s36: 'Both hands open, held forward. Fits: explaining, presenting, offering.',
+    s37: 'Quiet dua, hands together, head bowed. Fits: humble supplication.',
+    s38: 'Reading an open mushaf. Fits: reading the Quran.',
+    s39: 'Headphones on. Fits: listening to the Quran, a lecture or a talk.',
+  };
   const pad = i => String(i + 1).padStart(2, '0');
   const ALL = HD.concat(LABELS);
   const ids = HD.map((_, i) => 'h' + pad(i)).concat(LABELS.map((_, i) => 's' + pad(i)));
@@ -270,6 +322,7 @@
       $('vmStControls').hidden = !s;
       api.canvas.style.touchAction = s ? 'none' : '';
       if (!s) return;
+      $('vmStAll').disabled = list().length < 2;
       $('vmStName').textContent = label(s.id, s.slot) + (s.id && s.slot ? ' · ' + slotName(s.slot) : '');
       // when it shows: with one of the texts (while that line is on screen), or from / to
       const texts = api.lines ? api.lines() : [];
@@ -356,7 +409,7 @@
       api.save(); api.redraw(); renderControls(); placeBox();
       return { added: Math.min(items.length, room), dropped: Math.max(0, items.length - room) };
     }
-    const catalog = () => ids.map((id, i) => ({ id, ar: ALL[i][0], en: ALL[i][1] }));
+    const catalog = () => ids.map((id, i) => ({ id, ar: ALL[i][0], en: ALL[i][1], about: ABOUT[id] || '' }));
 
     // ---- the whole pack as one ZIP (with a list of what each picture is) ----
     async function downloadPack() {
@@ -506,6 +559,14 @@
       $('vmStFlip').onclick = () => { const s = list()[sel]; if (s) { s.flip = !s.flip; changed(); } };
       $('vmStFront').onclick = () => { if (sel >= 0) { S.stickers.push(S.stickers.splice(sel, 1)[0]); sel = S.stickers.length - 1; changed(); } };
       $('vmStDel').onclick = remove;
+      // the chosen one's place, size and effect for every sticker (each keeps its own timing and picture)
+      $('vmStAll').onclick = () => {
+        const s = list()[sel];
+        if (!s || list().length < 2) return;
+        list().forEach(o => { if (o !== s) { o.x = s.x; o.y = s.y; o.s = s.s; o.fx = s.fx; } });
+        changed();
+        api.say(tr('vm_st_all_done', { n: api.num(list().length - 1) }), false);
+      };
       // when it shows: seconds from the start; an empty "to" = until the end
       const time = () => {
         const s = list()[sel];

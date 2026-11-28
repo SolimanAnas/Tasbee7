@@ -136,22 +136,29 @@ test('a script written out reads back the same', () => {
   assert.strictEqual(S.clock(67.5), '1:07.5');
 });
 
-test('the template: instructions, every font, the size range, the stickers, and an example that reads', () => {
-  const stickers = [{ id: 'h01', ar: 'يتأمل', en: 'Looking up' }, { id: 'h05', ar: 'يدعو', en: 'Making dua' }];
+test('the template: instructions, every font, the size range, every sticker with what it shows, and an example that reads', () => {
+  const stickers = [
+    { id: 'h05', ar: 'يدعو', en: 'Making dua', about: 'Standing, both hands raised in dua. Fits: supplication.' },
+    { id: 'h06', ar: 'يقرأ المصحف', en: 'Reading', about: 'Standing, reading an open mushaf. Fits: the Quran.' },
+    { id: 'h10', ar: 'مهموم', en: 'Worried', about: 'Sitting, head in his hand. Fits: grief, worry.' },
+  ];
   for (const lang of ['ar', 'en']) {
     const t = S.template({ lang, stickers });
     assert.ok(t.includes('INSTRUCTIONS FOR THE AI'));
+    assert.ok(t.includes('PICK THEM YOURSELF'), 'the AI picks the stickers');
     for (const f of S.FONTS) assert.ok(new RegExp('#\\s+' + f + '\\s').test(t), lang + ': font ' + f);
     assert.ok(!/#\s+hafs\s/.test(t), 'not the mushaf face');
     assert.ok(t.includes('from 0.7 (small) to 1.4 (large)'));
-    assert.ok(t.includes('h05  Making dua  ·  يدعو'));
+    assert.ok(t.includes('h05  Standing, both hands raised in dua. Fits: supplication.  ·  يدعو'));
     for (const fx of S.FX) assert.ok(t.includes(fx));
-    const r = S.parse(t, { ids: ['h01', 'h05'] });
+    const r = S.parse(t, { ids: stickers.map(x => x.id) });
     assert.strictEqual(r.lines.length, 5, lang + ': the example reads');
     assert.deepStrictEqual(r.warnings, []);
     assert.ok(r.lines[2].font && r.lines[2].size === 1.3);
-    assert.deepStrictEqual([...new Set(r.stickers.map(s => s.slot))].sort(), [1, 2, 3]);
+    assert.deepStrictEqual(r.stickers.map(x => x.id), ['h10', 'h06', 'h05'], lang + ': the example picks by id');
     assert.ok(r.lines.every((l, i) => l.a === [0, 4, 9, 14, 19][i]));
+    // without the list, numbers for the user to fill
+    assert.deepStrictEqual([...new Set(S.parse(S.template({ lang }), {}).stickers.map(x => x.slot))].sort(), [1, 2, 3]);
   }
 });
 
