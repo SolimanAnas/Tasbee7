@@ -114,6 +114,10 @@ test('@position: where the text sits', () => {
   assert.strictEqual(S.parse('@position: bottom\nأ').settings.position, 'bottom');
   assert.strictEqual(S.parse('@position: أعلى\nأ').settings.position, 'top');
   assert.deepStrictEqual(S.parse('@position: left\nأ').warnings.map(w => w.code), ['position']);
+  assert.strictEqual(S.parse('@position: 0.3\nأ').settings.position, 0.3);
+  assert.strictEqual(S.parse('@position: 75%\nأ').settings.position, 0.75);
+  assert.deepStrictEqual(S.parse('@position: 1.5\nأ').warnings.map(w => w.code), ['position']);
+  assert.ok(S.serialize({ settings: { position: 0.3 }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@position: 0.3'));
   assert.ok(S.serialize({ settings: { position: 'top' }, lines: [{ text: 'أ', a: null, b: null }] }).includes('@position: top'));
 });
 

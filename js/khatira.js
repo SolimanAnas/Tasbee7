@@ -259,7 +259,42 @@
     return out;
   }
 
-  const api = { API, RECITERS, FONTS, hasIn, metaUrl, parseMeta, wordsOf, wordTimes, share, id3Size, mp3Info, byteAt, firstFrame, frameAt, cmapOf, adaptWord };
+  // The Shorts reciters (js/reciters.js ids, everyayah.com) whose recitation quran.com also has with
+  // word timings: their ayat can be shown word by word exactly (quran.com's recording of them).
+  const QDC_OF = {
+    afasy: 7, minshawi: 9, husary: 6, arabassy: 2, basit_mujawwad: 1, sudais: 3, shuraym: 10,
+    dosary: 97, shatiri: 4, rifai: 5, tunaiji: 161, husary_muallim: 12,
+  };
+
+  // An ayah's words in phrases, ended by its stopping marks (where a reciter may pause):
+  // [[first, last], ...] word indices. A long run with no mark is split in two near its middle.
+  const STOPS = /[\u06D6-\u06DB]/;          // ۖ ۗ ۘ ۙ ۚ ۛ
+  function phrasesOf(words, maxRun) {
+    const out = [];
+    const max = maxRun || 12;
+    let a = 0;
+    const push = (x, y) => {
+      if (y - x + 1 > max) { const m = x + Math.ceil((y - x + 1) / 2) - 1; push(x, m); push(m + 1, y); return; }
+      out.push([x, y]);
+    };
+    words.forEach((w, i) => { if (STOPS.test(w) && i < words.length - 1) { push(a, i); a = i + 1; } });
+    if (a < words.length) push(a, words.length - 1);
+    return out;
+  }
+  // [{ a, b }] (s) for each word, from where each phrase starts (starts: seconds, ascending) and
+  // where the last ends; inside a phrase the time is shared by the length of the words.
+  function phraseWordTimes(words, phrases, starts, end) {
+    const out = new Array(words.length);
+    phrases.forEach(([x, y], k) => {
+      const a = starts[k], b = k + 1 < phrases.length ? starts[k + 1] : end;
+      const span = words.slice(x, y + 1).map(letters), total = span.reduce((p, q) => p + q, 0) || 1;
+      let t = a;
+      for (let i = x; i <= y; i++) { const d = (b - a) * letters(words[i]) / total; out[i] = { a: t, b: t + d }; t += d; }
+    });
+    return out;
+  }
+
+  const api = { API, RECITERS, FONTS, QDC_OF, phrasesOf, phraseWordTimes, letters, hasIn, metaUrl, parseMeta, wordsOf, wordTimes, share, id3Size, mp3Info, byteAt, firstFrame, frameAt, cmapOf, adaptWord };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.Khatira = api;
 })(typeof window !== 'undefined' ? window : globalThis);
