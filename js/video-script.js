@@ -330,22 +330,23 @@
     L.push('#      Use it for emphasis (a key line larger, or in a calligraphic font), not on every line.');
     L.push('#    - Rows starting with # are comments and are ignored. Do not put quotes around the text.');
     L.push('#');
-    L.push('# 3) STICKERS: pictures of a character (a man in a white thobe) shown with a line.');
-    L.push('#    Put <sticker N> at the end of the line it goes with. N is a number: 1, 2, 3 ... Each number is');
-    L.push('#    one picture that the USER chooses after uploading, so describe the mood you mean in a');
-    L.push('#    comment at the top, e.g.  # sticker 1: thinking   # sticker 2: making dua');
-    L.push('#    Reuse a number for the same picture. At most 6 numbers and ' + LIMITS.stickers + ' stickers in all.');
+    L.push('# 3) STICKERS: pictures of one character (a bearded man in a white thobe, his face left blank)');
+    L.push('#    shown with a line of text. PICK THEM YOURSELF from the list below: put <sticker ID> at the end');
+    L.push('#    of the line it goes with, choosing the picture whose pose and mood fit that line');
+    L.push('#    (a question → a thinking one, a dua → hands raised, a verse → the mushaf ...).');
+    L.push('#    Use a sticker on about half the lines, not every one; repeat one when the mood repeats.');
+    L.push('#    At most ' + LIMITS.stickers + ' in all. (<sticker 1>, <sticker 2> ... are placeholders the user fills in later.)');
     L.push('#    Options inside the tag, any order:');
-    L.push('#      where:  left | center | right    and    top | middle | bottom   (default: bottom, centered)');
+    L.push('#      where:  left | center | right    and    top | middle | bottom   (default: centred, standing on the bottom edge, large)');
     L.push('#      size:   small | medium | large');
     L.push('#      effect: ' + FX.join(' | ') + '   (how it comes in and goes out; default pop)');
     L.push('#      flip    (mirror it)        all    (show it for the whole video, not just that line)');
     L.push('#      next    (stays until the next sticker shows)    end    (stays from its line to the end)');
-    L.push('#    e.g.  <sticker 1 left fade>   <sticker 2 right small>   <sticker 3 all top float>');
-    L.push('#    The text is in the middle of the video: keep stickers at the bottom (or top), and at most two per line.');
+    L.push('#    e.g.  <sticker h05 fade>   <sticker s13 right small>   <sticker h01 all top float>');
+    L.push('#    The text sits at the top: one sticker per line, at the bottom, is the clearest.');
     if (st.length) {
-      L.push('#    To choose a picture yourself, write its id instead of the number, e.g. <sticker ' + st[0].id + '>:');
-      st.forEach(s => L.push('#      ' + s.id + '  ' + s.en + (s.ar ? '  ·  ' + s.ar : '')));
+      L.push('#    THE STICKERS (id · what it shows · what it fits · its Arabic name):');
+      st.forEach(s => L.push('#      ' + s.id + '  ' + (s.about || s.en) + (s.ar ? '  ·  ' + s.ar : '')));
     }
     L.push('#');
     L.push('# FONTS (ids for @font and {font: ...}):');
@@ -354,20 +355,22 @@
     L.push('# ---------------------------------------------------------');
     L.push('');
     L.push('# Example (replace it with the new script):');
-    L.push('# sticker 1: thinking   sticker 2: making dua   sticker 3: reading the Quran');
+    // the example names pictures by id when the list is there, else by placeholder number
+    const has = id => st.some(x => x.id === id);
+    const pickId = (id, n) => (has(id) ? id : String(n));
     if (ar) {
       L.push('@font: amiri', '@size: 1', '@style: line', '');
-      L.push('[0:00 - 0:04] هل ضاقت بك الدنيا يوماً؟ <sticker 1 fade>');
+      L.push('[0:00 - 0:04] هل ضاقت بك الدنيا يوماً؟ <sticker ' + pickId('h10', 1) + ' fade>');
       L.push('[0:04 - 0:09] تذكّر أن بعد العسر يسراً');
-      L.push('[0:09 - 0:14] فإن مع العسر يسراً {font: ruqaa, size: 1.3} <sticker 3 left>');
-      L.push('[0:14 - 0:19] ارفع يديك وقل: يا رب <sticker 2 float>');
+      L.push('[0:09 - 0:14] فإن مع العسر يسراً {font: ruqaa, size: 1.3} <sticker ' + pickId('h06', 3) + '>');
+      L.push('[0:14 - 0:19] ارفع يديك وقل: يا رب <sticker ' + pickId('h05', 2) + ' float>');
       L.push('[0:19 - 0:23] فإنه قريب يجيب دعوة الداعي');
     } else {
       L.push('@font: cairo', '@size: 1', '@style: build', '');
-      L.push('[0:00 - 0:04] Has the world ever felt too narrow? <sticker 1 fade>');
+      L.push('[0:00 - 0:04] Has the world ever felt too narrow? <sticker ' + pickId('h10', 1) + ' fade>');
       L.push('[0:04 - 0:09] Remember: after hardship comes ease');
-      L.push('[0:09 - 0:14] Indeed, with hardship comes ease {font: changa, size: 1.3} <sticker 3 left>');
-      L.push('[0:14 - 0:19] Raise your hands and say: O my Lord <sticker 2 float>');
+      L.push('[0:09 - 0:14] Indeed, with hardship comes ease {font: changa, size: 1.3} <sticker ' + pickId('h06', 3) + '>');
+      L.push('[0:14 - 0:19] Raise your hands and say: O my Lord <sticker ' + pickId('h05', 2) + ' float>');
       L.push('[0:19 - 0:23] He is near, He answers the one who calls');
     }
     return L.join('\n') + '\n';

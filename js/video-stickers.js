@@ -10,6 +10,9 @@
 // (`line`, the index of the text) and may be a numbered placeholder (`slot`, no picture yet)
 // until the user picks a picture for that number. The whole pack downloads as one ZIP.
 //
+// The user's own stickers (pictures from the device, ids 'u:<id>') are kept as they are (no
+// re-encoding) in the device's storage (IndexedDB 'vm-user-stickers') and listed first.
+//
 // Created by js/video-maker.js, which passes in what it shares (the settings, the canvas, the
 // stage, translations and how to redraw).
 (function () {
@@ -43,6 +46,58 @@
     ['فكرة ولابتوب', 'Idea at the laptop'], ['يستمع إلى القرآن', 'Listening to the Quran'], ['يكتب', 'Writing'], ['انتبه', 'Attention'],
     ['تساؤل', 'A question'], ['يفتح يديه', 'Open hands'], ['دعاء هادئ', 'Quiet dua'], ['يقرأ', 'Reading'], ['يستمع', 'Listening'],
   ];
+  // What each picture shows and what it suits, for an AI choosing them (the script template).
+  const ABOUT = {
+    h01: 'Sitting on the floor against a cushion, hugging his knees, looking up. Fits: hope, waiting, quiet reflection, contentment.',
+    h02: 'At a laptop, a finger on his temple, a lightbulb above. Fits: an idea, insight, learning, work.',
+    h03: 'Hand on his chin, a big blue question mark. Fits: a question to the viewer, wondering, "have you ever...?".',
+    h04: 'Writing in an open notebook beside a stack of books. Fits: study, writing, knowledge, planning.',
+    h05: 'Standing, both hands raised in dua. Fits: supplication, asking Allah, hope.',
+    h06: 'Standing, reading an open mushaf. Fits: reading the Quran, guidance, a verse.',
+    h07: 'One hand on his heart, the other held out to the viewer. Fits: sincere advice, an invitation, "my brother...".',
+    h08: 'Thinking, chin in hand, arm folded. Fits: contemplation, weighing something, calm thought.',
+    h09: 'Hand on his heart, the other hand open. Fits: speaking from the heart, gratitude, sincerity.',
+    h10: 'Sitting, head in his hand, eyes down. Fits: grief, worry, exhaustion, a heavy burden.',
+    s01: 'Hand on chin, a question mark in a thought bubble. Fits: wondering, puzzled.',
+    s02: 'Both fists raised in excitement. Fits: joy, motivation, good news.',
+    s03: 'Sitting, covering his face, a tear. Fits: sadness, crying, regret.',
+    s04: 'Two thumbs up with sparkles. Fits: approval, well done, good deeds.',
+    s05: 'Yawning, "zzz" above. Fits: tiredness, sleepiness, laziness, late nights.',
+    s06: 'Hands on his cheeks, shocked, red exclamation marks. Fits: shock, surprise, alarm.',
+    s07: 'Hands raised in dua with sparkles. Fits: hopeful dua, blessings.',
+    s08: 'Hugging the mushaf, a red heart. Fits: love of the Quran.',
+    s09: 'Leaning back, hands behind his head, a sunset. Fits: rest, peace, calm after effort.',
+    s10: 'Both hands on his chest, eyes closed. Fits: gratitude, peace of heart, humility.',
+    s11: 'Sitting, head in his hand, a storm cloud above. Fits: worry, distress, hard times.',
+    s12: 'Making dua, the sun coming out from a cloud. Fits: hope after hardship, relief coming.',
+    s13: 'Thinking, a lightbulb above. Fits: an idea, a realization.',
+    s14: 'Both hands open, a heart. Fits: love, kindness, generosity, welcome.',
+    s15: 'Hands on his temples, red stress waves. Fits: headache, pressure, stress.',
+    s16: 'Hand on his chest, eyes closed, breathing out. Fits: relief, calm, tranquility.',
+    s17: 'Chin in hand, dreaming of a road at sunset. Fits: the path ahead, the future, the journey of life.',
+    s18: 'Making dua, a mosque and a lantern at night. Fits: night prayer, Ramadan, the mosque.',
+    s19: 'Sitting, head in his hand, a tangled scribble above. Fits: overthinking, confusion, anxiety.',
+    s20: 'Clenched fists, an angry red mark. Fits: anger, frustration.',
+    s21: 'Holding his head with both hands, red jagged lines. Fits: overwhelmed, pain, panic.',
+    s22: 'In sujood on a prayer mat. Fits: prayer, prostration, humility, closeness to Allah.',
+    s23: 'Standing, hands raised in dua, looking up. Fits: supplication, asking.',
+    s24: 'Holding prayer beads. Fits: dhikr, remembrance, tasbeeh.',
+    s25: 'Sitting cross-legged, reading the mushaf. Fits: reading the Quran, study.',
+    s26: 'Sitting at a mushaf on a stand, a finger raised. Fits: a reminder, a lesson from the Quran.',
+    s27: 'Sitting against a cushion, hugging his knees, looking up. Fits: quiet waiting, reflection.',
+    s28: 'Holding a mushaf, a finger raised. Fits: "Allah says...", pointing to a verse.',
+    s29: 'A mushaf on a stand beside a lantern. Fits: Ramadan nights, recitation, tranquility.',
+    s30: 'Reading a book among books, against a cushion. Fits: reading, knowledge.',
+    s31: 'At a laptop, a lightbulb above. Fits: an idea, learning online.',
+    s32: 'Headphones on, reading the mushaf, sound waves. Fits: listening to the Quran.',
+    s33: 'Writing in a notebook beside books. Fits: writing, taking notes, planning.',
+    s34: 'A finger raised, attention lines. Fits: attention, an important point, "note this".',
+    s35: 'Chin in hand, a question mark. Fits: a question, asking the viewer.',
+    s36: 'Both hands open, held forward. Fits: explaining, presenting, offering.',
+    s37: 'Quiet dua, hands together, head bowed. Fits: humble supplication.',
+    s38: 'Reading an open mushaf. Fits: reading the Quran.',
+    s39: 'Headphones on. Fits: listening to the Quran, a lecture or a talk.',
+  };
   const pad = i => String(i + 1).padStart(2, '0');
   const ALL = HD.concat(LABELS);
   const ids = HD.map((_, i) => 'h' + pad(i)).concat(LABELS.map((_, i) => 's' + pad(i)));
@@ -57,9 +112,16 @@
     let swallowClick = 0;              // the click that ends a drag must not start the preview
     let slotSel = null;                // the script's sticker number a picture is being chosen for
 
+    // the user's own stickers: id -> { name, url, blob }
+    const own = new Map();
+    const OWN_MAX = 60, OWN_BYTES = 15 * 1024 * 1024;
+    const isOwn = id => typeof id === 'string' && /^u:[a-z0-9]+$/.test(id);
+    const srcOf = id => (isOwn(id) ? (own.get(id) || {}).url || '' : DIR + id + '.webp');
+    const known = id => ids.includes(id) || isOwn(id);
     const slotName = n => tr('vm_st_slot', { n: api.num(n) });
     const label = (id, slot) => {
       if (!id) return slot ? slotName(slot) : '';
+      if (isOwn(id)) return own.has(id) ? own.get(id).name : tr('vm_st_own_missing');
       const i = ids.indexOf(id);
       if (i < 0) return id;
       return (api.lang() === 'ar' ? ALL[i][0] : ALL[i][1]);
@@ -71,7 +133,9 @@
       if (!im) {
         im = new Image();
         im.onload = () => api.redraw();
-        im.src = DIR + id + '.webp';
+        const src = srcOf(id);
+        if (!src) return im;                 // one of the user's, not read from storage yet
+        im.src = src;
         imgs.set(id, im);
       }
       return im;
@@ -81,8 +145,8 @@
     function sanitize() {
       const src = Array.isArray(S.stickers) ? S.stickers : [];
       const slotOf = s => (Number.isInteger(+s.slot) && +s.slot >= 1 && +s.slot <= 99 ? +s.slot : null);
-      S.stickers = src.filter(s => s && (ids.includes(s.id) || (s.id == null && slotOf(s)))).slice(0, MAX).map(s => ({
-        id: ids.includes(s.id) ? s.id : null,
+      S.stickers = src.filter(s => s && (known(s.id) || (s.id == null && slotOf(s)))).slice(0, MAX).map(s => ({
+        id: known(s.id) ? s.id : null,
         slot: slotOf(s),
         // shown with a line of the script (index of the text), or null: from / to
         line: Number.isInteger(+s.line) && s.line !== null && +s.line >= 0 && +s.line < 100 ? +s.line : null,
@@ -228,10 +292,128 @@
         b.onclick = () => (slotSel != null ? assign(slotSel, id) : add(id));
         grid.appendChild(b);
       });
+      renderOwn();
       relabel();
     }
+
+    // ---- the user's own stickers: «+ ملصقك» first, then theirs (each with ×), then the pack ----
+    function ownDb() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) { reject(new Error('no IndexedDB')); return; }
+        const rq = indexedDB.open('vm-user-stickers', 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore('items', { keyPath: 'id' });
+        rq.onsuccess = () => resolve(rq.result);
+        rq.onerror = () => reject(rq.error);
+      });
+    }
+    async function ownTx(mode, fn) {
+      const db = await ownDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('items', mode), st = tx.objectStore('items');
+        const out = fn(st);
+        tx.oncomplete = () => { db.close(); resolve(out && out.result !== undefined ? out.result : undefined); };
+        tx.onerror = () => { db.close(); reject(tx.error); };
+      });
+    }
+    async function loadOwn() {
+      let rows = [];
+      try { rows = (await ownTx('readonly', st => st.getAll())) || []; } catch (e) { rows = []; }
+      rows.sort((a, b) => b.added - a.added).forEach(r => {
+        if (!own.has(r.id)) own.set(r.id, { name: r.name, blob: r.blob, url: URL.createObjectURL(r.blob) });
+      });
+      renderOwn();
+      relabel();
+      renderControls();
+      api.redraw();
+    }
+    function renderOwn() {
+      const grid = $('vmStGrid');
+      if (!grid) return;
+      grid.querySelectorAll('.st-add, .st-own').forEach(el => el.remove());
+      const first = grid.firstChild;
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'st-tile st-add';
+      addBtn.id = 'vmStOwnAdd';
+      addBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span></span>';
+      addBtn.querySelector('span').textContent = tr('vm_st_own_add');
+      addBtn.title = tr('vm_st_own_add_long');
+      addBtn.setAttribute('aria-label', tr('vm_st_own_add_long'));
+      addBtn.onclick = () => $('vmStOwnFile').click();
+      grid.insertBefore(addBtn, first);
+      for (const [id, o] of own) {
+        const wrap = document.createElement('div');
+        wrap.className = 'st-own';
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'st-tile';
+        b.dataset.sticker = id;
+        const im = document.createElement('img');
+        im.src = o.url;
+        im.alt = '';
+        b.appendChild(im);
+        b.onclick = () => (slotSel != null ? assign(slotSel, id) : add(id));
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'st-own-del';
+        del.textContent = '×';
+        del.setAttribute('aria-label', tr('vm_st_own_delete', { name: o.name }));
+        del.title = del.getAttribute('aria-label');
+        del.onclick = () => removeOwn(id);
+        wrap.append(b, del);
+        grid.insertBefore(wrap, first);
+      }
+    }
+    // the pictures as they are (no re-encoding: no loss); each must open as a picture
+    async function addOwn(files) {
+      let added = null, bad = 0;
+      for (const f of files) {
+        if (own.size >= OWN_MAX) { api.say(tr('vm_st_own_max', { n: api.num(OWN_MAX) }), true); break; }
+        if (!/^image\//.test(f.type) || f.size > OWN_BYTES || !(await opens(f))) { bad++; continue; }
+        const id = 'u:' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        const name = String(f.name || '').replace(/\.[^.]+$/, '').slice(0, 40) || tr('vm_st_own');
+        try {
+          await ownTx('readwrite', st => st.put({ id, name, blob: f, added: Date.now() }));
+        } catch (e) { bad++; continue; }
+        own.set(id, { name, blob: f, url: URL.createObjectURL(f) });
+        // newest first: move it to the front
+        const o = own.get(id); own.delete(id);
+        const rest = [...own]; own.clear(); own.set(id, o); rest.forEach(([k, v]) => own.set(k, v));
+        added = added || id;
+      }
+      renderOwn();
+      relabel();
+      // the first one goes into the video (or fills the script's number being chosen)
+      if (added) {
+        if (slotSel != null) assign(slotSel, added);
+        else add(added);
+      }
+      if (bad) api.say(tr('vm_st_own_bad'), true);
+      else if (added) api.say(tr('vm_st_own_added'), false);
+    }
+    function opens(f) {
+      return new Promise(resolve => {
+        const u = URL.createObjectURL(f), im = new Image();
+        im.onload = () => { URL.revokeObjectURL(u); resolve(im.naturalWidth > 0); };
+        im.onerror = () => { URL.revokeObjectURL(u); resolve(false); };
+        im.src = u;
+      });
+    }
+    async function removeOwn(id) {
+      const used = list().filter(s => s.id === id).length;
+      if (!confirm(used ? tr('vm_st_own_delete_used', { n: api.num(used) }) : tr('vm_st_own_delete_ask'))) return;
+      try { await ownTx('readwrite', st => st.delete(id)); } catch (e) { /* gone from the list anyway */ }
+      const o = own.get(id);
+      if (o) URL.revokeObjectURL(o.url);
+      own.delete(id);
+      imgs.delete(id);
+      if (used) { S.stickers = list().filter(s => s.id !== id); sel = -1; }
+      renderOwn();
+      relabel();
+      changed();
+    }
     function relabel() {
-      document.querySelectorAll('#vmStGrid .st-tile').forEach(b => {
+      document.querySelectorAll('#vmStGrid .st-tile[data-sticker]').forEach(b => {
         const t = tr('vm_st_add_one', { name: label(b.dataset.sticker) });
         b.setAttribute('aria-label', t);
         b.title = t;
@@ -250,7 +432,7 @@
         b.title = label(s.id, s.slot);
         if (s.id) {
           const im = document.createElement('img');
-          im.src = DIR + s.id + '.webp';
+          im.src = srcOf(s.id);
           im.alt = '';
           b.appendChild(im);
         } else {
@@ -270,6 +452,7 @@
       $('vmStControls').hidden = !s;
       api.canvas.style.touchAction = s ? 'none' : '';
       if (!s) return;
+      $('vmStAll').disabled = list().length < 2;
       $('vmStName').textContent = label(s.id, s.slot) + (s.id && s.slot ? ' · ' + slotName(s.slot) : '');
       // when it shows: with one of the texts (while that line is on screen), or from / to
       const texts = api.lines ? api.lines() : [];
@@ -315,7 +498,7 @@
         const count = list().filter(s => s.slot === n).length;
         b.title = slotName(n) + (id ? ': ' + label(id) : '') + ' (×' + api.num(count) + ')';
         b.setAttribute('aria-label', b.title);
-        if (id) { const im = document.createElement('img'); im.src = DIR + id + '.webp'; im.alt = ''; b.appendChild(im); }
+        if (id) { const im = document.createElement('img'); im.src = srcOf(id); im.alt = ''; b.appendChild(im); }
         const tag = document.createElement('span');
         tag.className = 'st-slot-n';
         tag.textContent = api.num(n);
@@ -356,7 +539,7 @@
       api.save(); api.redraw(); renderControls(); placeBox();
       return { added: Math.min(items.length, room), dropped: Math.max(0, items.length - room) };
     }
-    const catalog = () => ids.map((id, i) => ({ id, ar: ALL[i][0], en: ALL[i][1] }));
+    const catalog = () => ids.map((id, i) => ({ id, ar: ALL[i][0], en: ALL[i][1], about: ABOUT[id] || '' }));
 
     // ---- the whole pack as one ZIP (with a list of what each picture is) ----
     async function downloadPack() {
@@ -397,7 +580,7 @@
     // centred, and as low as it goes with its whole picture in the frame
     function standing(id) {
       const cv = api.canvas, w = cv.width || 1080, h = cv.height || 1920, base = Math.min(w, h);
-      const tile = document.querySelector('#vmStGrid [data-sticker="' + id + '"] img'), im = imgs.get(id);
+      const tile = document.querySelector('#vmStGrid [data-sticker="' + id + '"] img'), im = image(id);
       const src = im && im.naturalWidth ? im : tile && tile.naturalWidth ? tile : null;
       const ratio = src ? src.naturalHeight / src.naturalWidth : 1.3;
       const sz = w < h ? 0.62 : 0.5;                              // a portrait video: about two thirds of its width
@@ -407,7 +590,16 @@
     function add(id) {
       if (list().length >= MAX) { api.say(tr('vm_st_max', { n: api.num(MAX) }), true); return; }
       // new ones start centred and large, standing on the bottom edge of the video (the text is above)
-      S.stickers.push(Object.assign({ id, flip: false, from: 0, to: null, fx: 'pop', line: null, slot: null, until: 'line' }, standing(id)));
+      const at = standing(id);
+      const st = Object.assign({ id, flip: false, from: 0, to: null, fx: 'pop', line: null, slot: null, until: 'line' }, at);
+      S.stickers.push(st);
+      // its picture's shape not known yet (not loaded): place it again once it is, unless it was moved
+      const im = image(id);
+      if (!im.naturalWidth) {
+        im.addEventListener('load', () => {
+          if (st.x === at.x && st.y === at.y && st.s === at.s) { Object.assign(st, standing(id)); changed(); }
+        }, { once: true });
+      }
       api.say('', false);
       sel = S.stickers.length - 1;
       setPicker(false);                 // its controls come next; the picker opens again with a tap
@@ -506,6 +698,14 @@
       $('vmStFlip').onclick = () => { const s = list()[sel]; if (s) { s.flip = !s.flip; changed(); } };
       $('vmStFront').onclick = () => { if (sel >= 0) { S.stickers.push(S.stickers.splice(sel, 1)[0]); sel = S.stickers.length - 1; changed(); } };
       $('vmStDel').onclick = remove;
+      // the chosen one's place, size and effect for every sticker (each keeps its own timing and picture)
+      $('vmStAll').onclick = () => {
+        const s = list()[sel];
+        if (!s || list().length < 2) return;
+        list().forEach(o => { if (o !== s) { o.x = s.x; o.y = s.y; o.s = s.s; o.fx = s.fx; } });
+        changed();
+        api.say(tr('vm_st_all_done', { n: api.num(list().length - 1) }), false);
+      };
       // when it shows: seconds from the start; an empty "to" = until the end
       const time = () => {
         const s = list()[sel];
@@ -531,6 +731,9 @@
         changed();
       };
       $('vmStPack').onclick = downloadPack;
+      const file = $('vmStOwnFile');
+      file.onchange = () => { const fs = [...(file.files || [])]; file.value = ''; if (fs.length) addOwn(fs); };
+      loadOwn();
       $('vmStUntil').onchange = () => {
         const s = list()[sel];
         if (!s) return;
@@ -576,7 +779,8 @@
       get slotSel() { return slotSel; },
       get max() { return MAX; },
       get selected() { return sel; },
-      get ids() { return ids.slice(); },
+      get ids() { return ids.concat([...own.keys()]); },
+      get ownCount() { return own.size; },
     };
   };
 })();

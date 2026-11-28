@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
       if (sessionStorage.getItem('vmTestStarted')) return;
       sessionStorage.setItem('vmTestStarted', '1');
       // the floating mini preview (tested on its own in tests/video-script.spec.js) would sit over the controls
-      sessionStorage.setItem('vmMiniClosed', '1');
+      localStorage.setItem('vmMiniMin', '1');
       localStorage.setItem('zad_lang', 'ar');
       localStorage.setItem('vm_settings', JSON.stringify({ mode: 'short', bg: 'g0', motion: false }));
     } catch { /* storage blocked */ }
@@ -73,7 +73,7 @@ test('an uploaded script makes the video: texts with their times, fonts and size
   await toTexts(page);
   await upload(page, SCRIPT);
   // the texts and what each one was given
-  await expect(page.locator('#vmStatus')).toContainText('٣ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('٣ أسطر');
   // numbered stickers wait for pictures: the stickers card is opened to choose them
   await expect(page.locator('#vmTab-look')).toHaveAttribute('aria-selected', 'true');
   const st = await page.evaluate(() => ({ texts: VM.state.kTexts, opts: VM.state.kOpts, kFont: VM.state.kFont, fontMul: VM.state.fontMul, kStyle: VM.state.kStyle, color: VM.state.color, sheikh: VM.state.sheikh, mode: VM.state.mode, kContent: VM.state.kContent }));
@@ -125,7 +125,7 @@ test('a line\'s own font and size draw it differently; the × drops them', async
   await open(page);
   await toTexts(page);
   await upload(page, '[0:00 - 0:03] أ\n[0:03 - 0:06] الصبر مفتاح {font: jomhuria, size: 1.4}\n');
-  await expect(page.locator('#vmStatus')).toContainText('٢ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('سطران');
   const frame = () => page.evaluate(async () => {
     const tl = await VM.buildTimeline();
     const c = document.createElement('canvas'); c.width = 270; c.height = 480;
@@ -179,7 +179,7 @@ test('pasting a script (and subtitles), the warnings, replacing texts asks first
   await page.locator('#vmScCancel').click();
   page.once('dialog', d => d.accept());
   await upload(page, SCRIPT);
-  await expect(page.locator('#vmStatus')).toContainText('٣ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('٣ أسطر');
   await expect(page.locator('#vmTab-look')).toHaveAttribute('aria-selected', 'true');
   await sec(page, 'ayat');
   const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('#vmScExport').click()]);
@@ -202,11 +202,15 @@ test('the template for an AI: downloaded and copied, with the fonts, the size ra
   expect(t).toContain('INSTRUCTIONS FOR THE AI');
   for (const f of ['amiri', 'scheherazade', 'naskh', 'ruqaa', 'changa', 'cairo', 'jomhuria', 'gulzar']) expect(t).toMatch(new RegExp('#\\s+' + f + '\\s'));
   expect(t).toContain('from 0.7 (small) to 1.4 (large)');
-  expect(t).toContain('h01  Looking up, thinking  ·  يتأمل السماء');
-  expect(t).toContain('s39  Listening');
+  // every sticker described for the AI to pick from: what it shows, what it fits, its Arabic name
+  expect(t).toContain('PICK THEM YOURSELF');
+  expect(t).toContain('h01  Sitting on the floor against a cushion, hugging his knees, looking up. Fits: hope, waiting, quiet reflection, contentment.  ·  يتأمل السماء');
+  expect(t).toContain('s22  In sujood on a prayer mat. Fits:');
+  expect(t).toContain('s39  Headphones on. Fits:');
+  expect((t.match(/^#\s{6}[hs]\d\d {2}.+ Fits: /gm) || []).length).toBe(49);
   // its example uploads as it is
   await upload(page, t);
-  await expect(page.locator('#vmStatus')).toContainText('٥ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('٥ أسطر');
   await expect(page.locator('#vmScWarn')).toBeHidden();
   // copied for pasting into an assistant
   await sec(page, 'ayat');
@@ -254,8 +258,8 @@ test('a sticker shown with a chosen text (or set times), and the sticker pack as
   await expect(page.locator('#vmStatus')).toContainText('٤٩');
 });
 
-test('the floating mini preview: while the preview is out of view it shows the video live; a tap goes back; × hides it', async ({ page }) => {
-  await page.addInitScript(() => { if (!sessionStorage.getItem('p1')) { sessionStorage.setItem('p1', '1'); sessionStorage.removeItem('vmMiniClosed'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح الفرج'] })); } });
+test('the floating mini preview: while the preview is out of view it shows the video live; a tap goes back; × shrinks it, a tap opens it again', async ({ page }) => {
+  await page.addInitScript(() => { if (!sessionStorage.getItem('p1')) { sessionStorage.setItem('p1', '1'); localStorage.setItem('vmMiniMin', '0'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح الفرج'] })); } });
   await open(page);
   await page.evaluate(() => scrollTo(0, 0));
   await expect(page.locator('#vmMini')).toBeHidden();
@@ -284,16 +288,21 @@ test('the floating mini preview: while the preview is out of view it shows the v
   await page.locator('#vmMiniView').click();
   await expect(page.locator('#vmMini')).toBeHidden({ timeout: 5000 });
   await expect(page.locator('#vmStage')).toBeInViewport({ ratio: 0.5 });
-  // ×: hidden for the rest of the visit
+  // ×: shrinks to a round button (remembered); a tap on it brings the preview back
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   await expect(page.locator('#vmMini')).toBeVisible();
   await page.locator('#vmMiniClose').click();
-  await expect(page.locator('#vmMini')).toBeHidden();
-  await page.evaluate(() => scrollTo(0, 0));
-  await page.waitForTimeout(300);
+  await expect(page.locator('#vmMiniView')).toBeHidden();
+  await expect(page.locator('#vmMiniOpen')).toBeVisible();
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(300);
-  await expect(page.locator('#vmMini')).toBeHidden();
+  await expect(page.locator('#vmMiniOpen')).toBeVisible();
+  await expect(page.locator('#vmMiniView')).toBeHidden();
+  await page.locator('#vmMiniOpen').click();
+  await expect(page.locator('#vmMiniView')).toBeVisible();
+  await expect.poll(async () => (await sample()).lit).toBeGreaterThan(1000);     // live again
 });
 
 // quran.com, as in tests/khatira.spec.js: the timings (surah 1) and the MP3 with byte ranges
@@ -344,7 +353,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
   expect(tl.total).toBeGreaterThan(start + dur);
   // the preview plays it
   await page.evaluate(() => scrollTo(0, 0));
-  await page.locator('#vmStage').click({ position: { x: 20, y: 20 } });
+  await page.locator('#vmStagePlay').click();
   await expect(page.locator('#vmStagePlay')).toBeHidden({ timeout: 10000 });
   await page.locator('#vmStage').click({ position: { x: 20, y: 20 } });
   await expect(page.locator('#vmStagePlay')).toBeVisible({ timeout: 10000 });
@@ -358,7 +367,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
   await sec(page, 'ayat');
   page.once('dialog', d => d.accept());
   await upload(page, '@quran: 1:4-5\n[0:00 - 0:03] مالك يوم الدين\nإياك نعبد');
-  await expect(page.locator('#vmStatus')).toContainText('٢ سطراً');
+  await expect(page.locator('#vmStatus')).toContainText('سطران');
   expect(await page.evaluate(() => [VM.state.ktAudio, VM.state.surah, VM.state.from, VM.state.to])).toEqual(['quran', 1, 4, 5]);
   expect(await page.evaluate(() => VM.currentScript())).toContain('@quran: 1:4-5');
   await sec(page, 'audio');
@@ -367,7 +376,7 @@ test('«آيات» in «الصوت»: a recitation under your own texts, the tex
 });
 
 test('the mini preview can be dragged out of the way, and settles at the nearer side', async ({ page }) => {
-  await page.addInitScript(() => { if (!sessionStorage.getItem('d2')) { sessionStorage.setItem('d2', '1'); sessionStorage.removeItem('vmMiniClosed'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['نص'] })); } });
+  await page.addInitScript(() => { if (!sessionStorage.getItem('d2')) { sessionStorage.setItem('d2', '1'); localStorage.setItem('vmMiniMin', '0'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', kContent: 'text', bg: 'g0', motion: false, kTexts: ['نص'] })); } });
   await open(page);
   await sec(page, 'text');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
