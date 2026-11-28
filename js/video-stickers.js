@@ -6,13 +6,17 @@
 // with an effect. They are drawn by renderFrame, so the preview, the mini preview and the
 // exported video all show them.
 //
+// A video script (js/video-script.js) adds stickers too: each shows with its line of text
+// (`line`, the index of the text) and may be a numbered placeholder (`slot`, no picture yet)
+// until the user picks a picture for that number. The whole pack downloads as one ZIP.
+//
 // Created by js/video-maker.js, which passes in what it shares (the settings, the canvas, the
 // stage, translations and how to redraw).
 (function () {
   'use strict';
 
   const DIR = '../images/stickers/';
-  const MAX = 12;                       // stickers on one video
+  const MAX = 30;                       // stickers on one video
   const SIZE = { min: 0.08, max: 1.3 }; // width as a share of the shorter side of the video
   const FX = ['pop', 'fade', 'slide', 'zoom', 'float', 'none'];   // how a sticker comes in and goes out
   const FX_DUR = 0.5;                   // seconds the effect takes
@@ -51,8 +55,11 @@
     let sel = -1;                      // the chosen sticker (index in S.stickers), or -1
     let gesture = null;                // a drag in progress
     let swallowClick = 0;              // the click that ends a drag must not start the preview
+    let slotSel = null;                // the script's sticker number a picture is being chosen for
 
-    const label = id => {
+    const slotName = n => tr('vm_st_slot', { n: api.num(n) });
+    const label = (id, slot) => {
+      if (!id) return slot ? slotName(slot) : '';
       const i = ids.indexOf(id);
       if (i < 0) return id;
       return (api.lang() === 'ar' ? ALL[i][0] : ALL[i][1]);
@@ -73,8 +80,12 @@
     // ---- settings ----
     function sanitize() {
       const src = Array.isArray(S.stickers) ? S.stickers : [];
-      S.stickers = src.filter(s => s && ids.includes(s.id)).slice(0, MAX).map(s => ({
-        id: s.id,
+      const slotOf = s => (Number.isInteger(+s.slot) && +s.slot >= 1 && +s.slot <= 99 ? +s.slot : null);
+      S.stickers = src.filter(s => s && (ids.includes(s.id) || (s.id == null && slotOf(s)))).slice(0, MAX).map(s => ({
+        id: ids.includes(s.id) ? s.id : null,
+        slot: slotOf(s),
+        // shown with a line of the script (index of the text), or null: from / to
+        line: Number.isInteger(+s.line) && s.line !== null && +s.line >= 0 && +s.line < 100 ? +s.line : null,
         x: clamp(+s.x || 0.5, 0, 1),
         y: clamp(+s.y || 0.5, 0, 1),
         s: clamp(+s.s || 0.45, SIZE.min, SIZE.max),
@@ -86,13 +97,17 @@
       }));
       S.stickers.forEach(s => { if (s.to != null && s.to <= s.from) s.to = null; });
       if (sel >= S.stickers.length) sel = -1;
+      if (slotSel != null && !slots().includes(slotSel)) slotSel = null;
     }
+    // the placeholder numbers of the script, in order, and the picture chosen for each (or null)
+    const slots = () => [...new Set(list().filter(s => s.slot != null).map(s => s.slot))].sort((a, b) => a - b);
+    const slotId = n => { const s = list().find(x => x.slot === n && x.id); return s ? s.id : null; };
 
     // ---- drawing ----
     // Where a sticker sits on a w x h video: its centre and size in pixels.
     function box(s, w, h) {
-      const im = image(s.id);
-      const ratio = im.naturalWidth ? im.naturalHeight / im.naturalWidth : 1;
+      const im = s.id ? image(s.id) : null;
+      const ratio = im && im.naturalWidth ? im.naturalHeight / im.naturalWidth : 1;
       const bw = s.s * Math.min(w, h);
       return { cx: s.x * w, cy: s.y * h, w: bw, h: bw * ratio };
     }
@@ -100,15 +115,24 @@
     // height) }, or null while it is off. `t` null = a still (the editor): every sticker, as placed.
     const easeOut = x => 1 - Math.pow(1 - x, 3);
     const easeBack = x => { const k = 1.70158; return 1 + (k + 1) * Math.pow(x - 1, 3) + k * Math.pow(x - 1, 2); };
-    function look(s, t, total) {
+    // span(line) -> [start, end] of a script line in the timeline, null when that line is not in
+    // it (an emptied text), undefined when there are no lines (not own words): then from / to.
+    function look(s, t, total, span) {
       if (t == null) return { a: 1, k: 1, dy: 0 };
-      const end = s.to == null ? (total || MAX_T) : Math.min(s.to, total || MAX_T);
-      if (t < s.from || t > end) return null;
-      const d = Math.min(FX_DUR, (end - s.from) / 2);
+      const all = total || MAX_T;
+      let from = s.from, to = s.to;
+      if (s.line != null && span) {
+        const sp = span(s.line);
+        if (sp === null) return null;
+        if (sp) { from = sp[0]; to = sp[1]; }
+      }
+      const end = to == null ? all : Math.min(to, all);
+      if (t < from || t > end) return null;
+      const d = Math.min(FX_DUR, (end - from) / 2);
       // in: 0 -> 1 over the first d seconds; out: 1 -> 0 over the last d (only when it leaves
       // before the end: at the end the whole video fades)
-      const pin = d > 0 && s.from > 0 ? Math.min(1, (t - s.from) / d) : 1;
-      const pout = d > 0 && s.to != null && s.to < (total || MAX_T) ? Math.min(1, (end - t) / d) : 1;
+      const pin = d > 0 && from > 0 ? Math.min(1, (t - from) / d) : 1;
+      const pout = d > 0 && to != null && to < all - 0.05 ? Math.min(1, (end - t) / d) : 1;
       const p = Math.max(0, Math.min(pin, pout));
       const e = easeOut(p);
       const r = { a: 1, k: 1, dy: 0 };
@@ -117,16 +141,17 @@
         case 'pop': r.a = Math.min(1, p * 3); r.k = Math.max(0.01, easeBack(p)); break;
         case 'slide': r.a = e; r.dy = (1 - e) * 0.6; break;
         case 'zoom': r.a = e; r.k = 0.25 + 0.75 * e; break;
-        case 'float': r.a = e; r.dy = (1 - e) * 0.15 + Math.sin((t - s.from) * 2.2) * 0.025; break;
+        case 'float': r.a = e; r.dy = (1 - e) * 0.15 + Math.sin((t - from) * 2.2) * 0.025; break;
         default: break;
       }
       return r.a > 0.003 ? r : null;
     }
-    function draw(c, w, h, t, total) {
+    function draw(c, w, h, t, total, span) {
       for (const s of list()) {
+        if (!s.id) continue;               // a script's number with no picture chosen yet
         const im = image(s.id);
         if (!im.complete || !im.naturalWidth) continue;
-        const v = look(s, t == null ? null : t, total);
+        const v = look(s, t == null ? null : t, total, span);
         if (!v) continue;
         const b = box(s, w, h);
         c.save();
@@ -148,7 +173,7 @@
       if (!frame) return;
       const cv = api.canvas, stage = $('vmStage');
       const s = list()[sel];
-      if (!s || api.playing() || stage.classList.contains('is-fs')) { frame.hidden = true; return; }
+      if (!s || !s.id || api.playing() || stage.classList.contains('is-fs')) { frame.hidden = true; return; }
       const cr = cv.getBoundingClientRect(), sr = stage.getBoundingClientRect();
       if (!cr.width) { frame.hidden = true; return; }
       const k = cr.width / cv.width;
@@ -176,7 +201,7 @@
         im.loading = 'lazy';
         im.decoding = 'async';
         b.appendChild(im);
-        b.onclick = () => add(id);
+        b.onclick = () => (slotSel != null ? assign(slotSel, id) : add(id));
         grid.appendChild(b);
       });
       relabel();
@@ -197,16 +222,22 @@
         b.type = 'button';
         b.className = 'st-chip' + (i === sel ? ' active' : '');
         b.setAttribute('aria-pressed', i === sel ? 'true' : 'false');
-        b.setAttribute('aria-label', label(s.id));
-        b.title = label(s.id);
-        const im = document.createElement('img');
-        im.src = DIR + s.id + '.webp';
-        im.alt = '';
-        b.appendChild(im);
+        b.setAttribute('aria-label', label(s.id, s.slot));
+        b.title = label(s.id, s.slot);
+        if (s.id) {
+          const im = document.createElement('img');
+          im.src = DIR + s.id + '.webp';
+          im.alt = '';
+          b.appendChild(im);
+        } else {
+          b.classList.add('st-chip-empty');
+          b.textContent = api.num(s.slot);
+        }
         b.onclick = () => select(i === sel ? -1 : i);
         box.appendChild(b);
       });
       $('vmStEmpty').hidden = list().length > 0;
+      renderSlots();
       $('vmStCount').textContent = list().length ? api.num(list().length) + ' / ' + api.num(MAX) : '';
     }
     function renderControls() {
@@ -215,7 +246,18 @@
       $('vmStControls').hidden = !s;
       api.canvas.style.touchAction = s ? 'none' : '';
       if (!s) return;
-      $('vmStName').textContent = label(s.id);
+      $('vmStName').textContent = label(s.id, s.slot) + (s.id && s.slot ? ' · ' + slotName(s.slot) : '');
+      // when it shows: with one of the texts (while that line is on screen), or from / to
+      const texts = api.lines ? api.lines() : [];
+      const pick = $('vmStWith');
+      pick.innerHTML = '';
+      const opt = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; pick.appendChild(o); };
+      opt('time', tr('vm_st_with_time'));
+      texts.forEach(x => opt(String(x.i), tr('vm_st_with_line', { n: api.num(x.n) }) + ': ' + (x.text.length > 28 ? x.text.slice(0, 27) + '…' : x.text)));
+      if (s.line != null && !texts.some(x => x.i === s.line)) opt(String(s.line), tr('vm_st_with_line', { n: api.num(s.line + 1) }));
+      pick.value = s.line == null ? 'time' : String(s.line);
+      $('vmStWithRow').hidden = !texts.length && s.line == null;
+      $('vmStTimes').hidden = s.line != null;
       const set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = v; };
       set('vmStSize', s.s); set('vmStX', s.x); set('vmStY', s.y);
       set('vmStFrom', s.from ? +s.from.toFixed(1) : '');
@@ -226,16 +268,102 @@
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
     }
+    // ---- the script's numbered stickers: a picture for each number ----
+    function renderSlots() {
+      const box = $('vmStSlots');
+      if (!box) return;
+      const ns = slots();
+      box.hidden = !ns.length;
+      const row = $('vmStSlotList');
+      row.innerHTML = '';
+      ns.forEach(n => {
+        const id = slotId(n);
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'st-slot' + (n === slotSel ? ' active' : '') + (id ? '' : ' empty');
+        b.dataset.slot = n;
+        b.setAttribute('aria-pressed', n === slotSel ? 'true' : 'false');
+        const count = list().filter(s => s.slot === n).length;
+        b.title = slotName(n) + (id ? ': ' + label(id) : '') + ' (×' + api.num(count) + ')';
+        b.setAttribute('aria-label', b.title);
+        if (id) { const im = document.createElement('img'); im.src = DIR + id + '.webp'; im.alt = ''; b.appendChild(im); }
+        const tag = document.createElement('span');
+        tag.className = 'st-slot-n';
+        tag.textContent = api.num(n);
+        b.appendChild(tag);
+        b.onclick = () => pickFor(n === slotSel ? null : n);
+        row.appendChild(b);
+      });
+      const left = ns.filter(n => !slotId(n)).length;
+      $('vmStSlotHint').textContent = slotSel != null ? tr('vm_st_slot_pick', { n: api.num(slotSel) }) : left ? tr('vm_st_slot_left', { n: api.num(left) }) : tr('vm_st_slot_done');
+      $('vmStGrid').classList.toggle('picking', slotSel != null);
+    }
+    function pickFor(n) {
+      slotSel = n;
+      if (n != null) { sel = -1; placeBox(); }
+      renderControls();
+      if (n != null) { const g = $('vmStGrid'); if (g.scrollIntoView) g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    }
+    // the picture for every sticker of number n; then on to the next number without one
+    function assign(n, id) {
+      list().forEach(s => { if (s.slot === n) s.id = id; });
+      const next = slots().find(k => !slotId(k));
+      slotSel = next == null ? null : next;
+      api.save(); api.redraw(); renderControls();
+    }
+    // a script's stickers replace the ones the last script added (the user's own stay)
+    function fromScript(items) {
+      const own = list().filter(s => s.line == null && s.slot == null);
+      const room = Math.max(0, MAX - own.length);
+      S.stickers = own.concat(items.slice(0, room).map(s => ({
+        id: s.id || null, slot: s.slot || null, line: s.line == null ? null : s.line,
+        x: s.x, y: s.y, s: s.s, flip: !!s.flip, from: 0, to: null, fx: s.fx || 'pop',
+      })));
+      sanitize();
+      sel = -1;
+      const first = slots().find(k => !slotId(k));
+      slotSel = first == null ? null : first;
+      api.save(); api.redraw(); renderControls(); placeBox();
+      return { added: Math.min(items.length, room), dropped: Math.max(0, items.length - room) };
+    }
+    const catalog = () => ids.map((id, i) => ({ id, ar: ALL[i][0], en: ALL[i][1] }));
+
+    // ---- the whole pack as one ZIP (with a list of what each picture is) ----
+    async function downloadPack() {
+      const btn = $('vmStPack');
+      if (!window.ZipStore || btn.disabled) return;
+      btn.disabled = true;
+      try {
+        const files = [];
+        for (let i = 0; i < ids.length; i++) {
+          api.say(tr('vm_st_pack_busy', { n: api.num(i + 1), of: api.num(ids.length) }), false);
+          const r = await fetch(DIR + ids[i] + '.webp');
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          files.push({ name: 'zad-stickers/' + ids[i] + '.webp', data: new Uint8Array(await r.arrayBuffer()) });
+        }
+        const list = catalog().map(c => c.id + '\t' + c.ar + '\t' + c.en).join('\n');
+        files.push({ name: 'zad-stickers/stickers.txt', data: new TextEncoder().encode('id\tالعربية\tEnglish\n' + list + '\n') });
+        const blob = new Blob([ZipStore.make(files)], { type: 'application/zip' });
+        api.download(blob, 'zad-stickers.zip');
+        api.say(tr('vm_st_pack_done', { n: api.num(ids.length) }), false);
+      } catch (e) {
+        console.warn('[stickers] pack', e);
+        api.say(tr('vm_st_pack_err'), true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
     function select(i) {
       sel = i;
+      if (i >= 0) slotSel = null;
       placeBox();
       renderControls();
     }
     function add(id) {
       if (list().length >= MAX) { api.say(tr('vm_st_max', { n: api.num(MAX) }), true); return; }
-      const n = list().length;
-      // new ones start low on the video (clear of the text) and a little apart
-      S.stickers.push({ id, x: clamp(0.5 + ((n % 3) - 1) * 0.12, 0.1, 0.9), y: clamp(0.76 - (n % 4) * 0.03, 0.1, 0.9), s: 0.46, flip: false, from: 0, to: null, fx: 'pop' });
+      // new ones start centred in the lower half of the video (clear of the text)
+      S.stickers.push({ id, x: 0.5, y: 0.75, s: 0.46, flip: false, from: 0, to: null, fx: 'pop', line: null, slot: null });
       api.say('', false);
       sel = S.stickers.length - 1;
       changed();
@@ -255,6 +383,7 @@
     function hit(p) {
       const cv = api.canvas;
       for (let i = list().length - 1; i >= 0; i--) {
+        if (!list()[i].id) continue;
         const b = box(list()[i], cv.width, cv.height);
         if (Math.abs(p.x - b.cx) <= b.w / 2 && Math.abs(p.y - b.cy) <= b.h / 2) return i;
       }
@@ -310,6 +439,7 @@
       handle.addEventListener('pointercancel', endH);
       handle.addEventListener('click', e => e.stopPropagation());
       document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && slotSel != null && !document.querySelector('.bottom-sheet.active')) { pickFor(null); return; }
         if (e.key === 'Escape' && sel >= 0 && !document.querySelector('.bottom-sheet.active') && $('vmResult').hidden) select(-1);
       });
       addEventListener('resize', placeBox);
@@ -336,6 +466,22 @@
         s.to = isFinite(e) && e > s.from ? clamp(e, 0, MAX_T) : null;
         api.save(); api.redraw();
       };
+      $('vmStWith').onchange = () => {
+        const s = list()[sel];
+        if (!s) return;
+        const v = $('vmStWith').value;
+        if (v === 'time') {
+          // from a line to set times: where that line was, as a start
+          if (s.line != null) {
+            const sp = api.lineSpan ? api.lineSpan(s.line) : null;
+            s.from = sp ? Math.round(sp[0] * 10) / 10 : 0;
+            s.to = sp ? Math.round(sp[1] * 10) / 10 : null;
+          }
+          s.line = null;
+        } else s.line = +v;
+        changed();
+      };
+      $('vmStPack').onclick = downloadPack;
       $('vmStFrom').onchange = time;
       $('vmStTo').onchange = time;
       $('vmStFromNow').onclick = () => { const s = list()[sel]; if (!s) return; $('vmStFrom').value = +api.now().toFixed(1); time(); renderControls(); };
@@ -354,7 +500,9 @@
     }
 
     return {
-      bindUi, render, draw, placeBox, clickAfterDrag, sanitize, look, hit: p => hit(p),
+      bindUi, render, draw, placeBox, clickAfterDrag, sanitize, look, hit: p => hit(p), fromScript, catalog, assign, pickFor, downloadPack,
+      get slotSel() { return slotSel; },
+      get max() { return MAX; },
       get selected() { return sel; },
       get ids() { return ids.slice(); },
     };

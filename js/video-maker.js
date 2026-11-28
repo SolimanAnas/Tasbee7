@@ -79,6 +79,8 @@
     kReciter: 7,        // «خاطرة»: a reciter with word timings (js/khatira.js RECITERS, quran.com id)
     kContent: 'text',   // «خاطرة»: 'text' = the user's own words (kTexts), 'quran' = ayat
     kTexts: [''],       // «خاطرة»: the user's texts, one field each, shown one after the other
+    ktAudio: 'none',    // «خاطرة» own words: 'none' (each text for its length) or 'quran' (a recitation of surah / from / to under them, by kReciter)
+    kOpts: [],          // «خاطرة»: per text (same index), from a video script: { a, b } its seconds, { font, size } its face and size; null = none
     stickers: [],       // character stickers on the video (js/video-stickers.js): [{ id, x, y, s, flip, from, to, fx }]
     textPos: null,      // where the text sits (its centre, shares of the frame), moved by holding and dragging on the preview; null = the middle
     kStyle: 'line',     // «خاطرة»: how the text shows: 'line' (the whole line, the word recited lit), 'build' (words appear in place as recited), 'word' (one word at a time)
@@ -92,6 +94,8 @@
   const isKhatira = () => state.mode === 'khatira' && !!window.Khatira;
   // «خاطرة» with the user's own words (text fields) rather than ayat.
   const isKText = () => isKhatira() && state.kContent === 'text';
+  // ...over a recitation of ayat (not the user's own recording, which takes the place of any other sound)
+  const isKQuran = () => isKText() && state.ktAudio === 'quran' && state.recSource !== 'own';
   const MAX_KTEXTS = 30, MAX_KTEXT = 400;
   const kTextWords = t => String(t || '').split(/\s+/).filter(Boolean);
   let long = null;        // long-mode engine (js/video-maker-long.js)
@@ -239,7 +243,7 @@
       vm_fx_auto_polish: 'فُعّل تحسين الصوت تلقائياً لتسجيلك — غيّره من «مؤثرات صوتية»',
       vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
       vm_sec_content: "المحتوى", vm_kc_text: "نص من كتابتك", vm_kc_quran: "آيات من القرآن", vm_kt_add: "أضف نصاً", vm_kt_note: "كل نص يظهر كلمة كلمة. مع تسجيلك يُضبط كل نص على مقطعه من الصوت، وبدون صوت يظهر بقدر طوله.", vm_src_none: "بدون صوت", vm_kt_silent: "بدون صوت: يظهر كل نص بقدر طوله. لتضبطه على صوتك اختر «تسجيلي الخاص» وارفع ملفاً أو سجّل.", vm_kt_name: "الاسم المعروض", vm_kt_label: "النص {i}", vm_kt_ph: "اكتب خاطرتك هنا…", vm_kt_delete: "حذف النص {i}", vm_kt_empty: "خاطرتك", vm_kt_count_1: "نص واحد", vm_kt_count: "{n} نصوص", vm_kt_n: "النص {i} من {n}", vm_kt_name_ph: 'اسمك، إن أردت أن يظهر في الفيديو',
-      vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً", vm_st_when: "الظهور", vm_st_from: "من", vm_st_to: "إلى", vm_st_end: "النهاية", vm_st_now: "الآن", vm_st_now_aria: "وقت المعاينة الحالي", vm_st_fx: "التأثير", vm_st_fx_pop: "قفزة", vm_st_fx_fade: "تلاشٍ", vm_st_fx_slide: "انزلاق", vm_st_fx_zoom: "تكبير", vm_st_fx_float: "طفو", vm_st_fx_none: "بدون", vm_tpos: "موضع النص", vm_tpos_hint: "اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.", vm_tpos_reset: "إلى الوسط", vm_tpos_moving: "اسحب لتحريك النص",
+      vm_st_title: "ملصقات", vm_st_hint: "اضغط ملصقاً ليُضاف إلى الفيديو، ثم حرّكه على المعاينة أو بالمنزلقات.", vm_st_add_one: "أضف: {name}", vm_st_added: "المضافة", vm_st_empty: "لم تُضف ملصقات بعد", vm_st_size: "الحجم", vm_st_x: "أفقياً", vm_st_y: "رأسياً", vm_st_flip: "قلب", vm_st_front: "للأمام", vm_st_delete: "حذف", vm_st_done: "تم", vm_st_max: "الحد الأقصى {n} ملصقاً", vm_src_quran: "آيات", vm_kq_note: "تُتلى الآيات التي تختارها تحت نصوصك، وتتوزع النصوص على مدة التلاوة ما لم يحدد السيناريو توقيتها.", vm_sc_w_quran: "آيات غير صحيحة في ‎@quran‎: {v}", vm_st_slot: "ملصق {n}", vm_st_slot_pick: "اختر صورة «ملصق {n}» من القائمة", vm_st_slot_left: "بقي {n} بلا صورة: اضغط رقماً ثم اختر صورته", vm_st_slot_done: "اختيرت كل الصور. اضغط رقماً لتغيير صورته.", vm_st_slots: "ملصقات السيناريو", vm_st_with_time: "وقت محدد", vm_st_with_line: "مع النص {n}", vm_st_pack: "تحميل حزمة الملصقات", vm_st_pack_busy: "تجهيز الحزمة… {n} / {of}", vm_st_pack_done: "حُمّلت الحزمة ({n} ملصقاً)", vm_st_pack_err: "تعذر تجهيز الحزمة، تحقق من الاتصال", vm_sc_title: "سيناريو الفيديو", vm_sc_hint: "الفيديو كاملاً في ملف نصي: السطور وتوقيتها وخطوطها وأحجامها وملصقاتها. نزّل القالب وأعطه لمساعد ذكاء اصطناعي مع موضوعك، ثم ارفع ما يكتبه.", vm_sc_upload: "رفع سيناريو", vm_sc_paste: "لصق سيناريو", vm_sc_template: "تحميل القالب", vm_sc_copy: "نسخ القالب للذكاء الاصطناعي", vm_sc_export: "تنزيل سيناريو الفيديو الحالي", vm_sc_paste_ph: "[0:00 - 0:04] نص السطر الأول <sticker 1>", vm_sc_apply: "استيراد", vm_sc_cancel: "إلغاء", vm_sc_empty: "لا نص في السيناريو", vm_sc_replace: "سيحل السيناريو محل نصوصك الحالية. متابعة؟", vm_sc_done: "استُورد {lines} سطراً و{stickers} ملصقاً.", vm_sc_pick: "اختر صورة لكل ملصق من بطاقة الملصقات.", vm_sc_big: "الملف أكبر من أن يكون سيناريو", vm_sc_bad: "تعذرت قراءة الملف", vm_sc_template_done: "حُمّل القالب. أعطه لمساعد ذكاء اصطناعي مع موضوع الفيديو.", vm_sc_copied: "نُسخ القالب. الصقه في مساعد الذكاء الاصطناعي واكتب موضوعك.", vm_sc_copy_err: "تعذر النسخ، استخدم «تحميل القالب»", vm_sc_nothing: "لا نصوص بعد لتنزيلها", vm_sc_opts_clear: "إزالة توقيت النص {i} وخطه وحجمه", vm_sc_w_font: "خط غير معروف: {v}", vm_sc_w_size: "حجم خارج المدى ٠٫٧ – ١٫٤، عُدّل: {v}", vm_sc_w_time: "السطر {n}: النهاية قبل البداية، فتُركت بلا نهاية", vm_sc_w_tag: "وسم ملصق غير مفهوم: {v}", vm_sc_w_lines: "تُرك {n} سطراً بعد الحد (٣٠)", vm_sc_w_stickers: "تُرك {n} ملصقاً بعد الحد (٣٠)", vm_sc_w_long: "السطر {n} طويل فقُصّ", vm_sc_w_other: "إعداد غير مفهوم: {v}", vm_mini_back: "العودة إلى المعاينة", vm_mini_close: "إخفاء المعاينة المصغرة", vm_st_when: "الظهور", vm_st_from: "من", vm_st_to: "إلى", vm_st_end: "النهاية", vm_st_now: "الآن", vm_st_now_aria: "وقت المعاينة الحالي", vm_st_fx: "التأثير", vm_st_fx_pop: "قفزة", vm_st_fx_fade: "تلاشٍ", vm_st_fx_slide: "انزلاق", vm_st_fx_zoom: "تكبير", vm_st_fx_float: "طفو", vm_st_fx_none: "بدون", vm_tpos: "موضع النص", vm_tpos_hint: "اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.", vm_tpos_reset: "إلى الوسط", vm_tpos_moving: "اسحب لتحريك النص",
       vm_ks_label: 'طريقة ظهور النص', vm_ks_line: 'السطر كاملاً', vm_ks_build: 'تظهر الكلمات مع التلاوة', vm_ks_word: 'كلمة كلمة',
       vm_mode_khatira: 'خاطرة', vm_kh_font: 'خط الكلمات', vm_kf_amiri: 'أميري', vm_kf_scheherazade: 'شهرزاد', vm_kf_naskh: 'نسخ', vm_kf_hafs: 'خط المصحف',
       vm_kf_ruqaa: 'رقعة', vm_kf_changa: 'تشانغا', vm_kf_cairo: 'كايرو', vm_kf_jomhuria: 'جمهورية', vm_kf_gulzar: 'گلزار',
@@ -281,7 +285,7 @@
       vm_own_long: 'The recording is too long — up to {n} minutes',
       vm_own_decoding: 'Analysing the recording…',
       vm_sync_title: 'Set the audio timing',
-      vm_st_title: "Stickers", vm_st_hint: "Tap a sticker to add it to the video, then move it on the preview or with the sliders.", vm_st_add_one: "Add: {name}", vm_st_added: "Added", vm_st_empty: "No stickers yet", vm_st_size: "Size", vm_st_x: "Across", vm_st_y: "Up and down", vm_st_flip: "Flip", vm_st_front: "To the front", vm_st_delete: "Delete", vm_st_done: "Done", vm_st_max: "At most {n} stickers", vm_st_when: "Shows", vm_st_from: "From", vm_st_to: "To", vm_st_end: "the end", vm_st_now: "Now", vm_st_now_aria: "The preview's current time", vm_st_fx: "Effect", vm_st_fx_pop: "Pop", vm_st_fx_fade: "Fade", vm_st_fx_slide: "Slide up", vm_st_fx_zoom: "Zoom", vm_st_fx_float: "Float", vm_st_fx_none: "None", vm_tpos: "Text position", vm_tpos_hint: "Hold on the preview, then drag to move the text.", vm_tpos_reset: "Back to the centre", vm_tpos_moving: "Drag to move the text",
+      vm_st_title: "Stickers", vm_st_hint: "Tap a sticker to add it to the video, then move it on the preview or with the sliders.", vm_st_add_one: "Add: {name}", vm_st_added: "Added", vm_st_empty: "No stickers yet", vm_st_size: "Size", vm_st_x: "Across", vm_st_y: "Up and down", vm_st_flip: "Flip", vm_st_front: "To the front", vm_st_delete: "Delete", vm_st_done: "Done", vm_st_max: "At most {n} stickers", vm_src_quran: "Ayat", vm_kq_note: "The ayat you choose are recited under your texts; the texts spread over the recitation unless the script times them.", vm_sc_w_quran: "Ayat not understood in @quran: {v}", vm_st_slot: "Sticker {n}", vm_st_slot_pick: "Choose the picture for “Sticker {n}” from the list", vm_st_slot_left: "{n} still without a picture: tap a number, then its picture", vm_st_slot_done: "All pictures chosen. Tap a number to change its picture.", vm_st_slots: "Script stickers", vm_st_with_time: "Set times", vm_st_with_line: "With text {n}", vm_st_pack: "Download the sticker pack", vm_st_pack_busy: "Preparing the pack… {n} / {of}", vm_st_pack_done: "Pack downloaded ({n} stickers)", vm_st_pack_err: "Couldn't prepare the pack. Check your connection", vm_sc_title: "Video script", vm_sc_hint: "The whole video in one text file: its lines, their timing, fonts, sizes and stickers. Download the template, give it to an AI assistant with your topic, then upload what it writes.", vm_sc_upload: "Upload a script", vm_sc_paste: "Paste a script", vm_sc_template: "Download the template", vm_sc_copy: "Copy the template for an AI", vm_sc_export: "Download this video's script", vm_sc_paste_ph: "[0:00 - 0:04] The first line <sticker 1>", vm_sc_apply: "Import", vm_sc_cancel: "Cancel", vm_sc_empty: "There's no text in the script", vm_sc_replace: "The script will replace your current texts. Continue?", vm_sc_done: "Imported {lines} lines and {stickers} stickers.", vm_sc_pick: "Choose a picture for each sticker in the stickers card.", vm_sc_big: "The file is too large to be a script", vm_sc_bad: "Couldn't read the file", vm_sc_template_done: "Template downloaded. Give it to an AI assistant with the video's topic.", vm_sc_copied: "Template copied. Paste it into an AI assistant and add your topic.", vm_sc_copy_err: "Couldn't copy. Use “Download the template”", vm_sc_nothing: "No texts to download yet", vm_sc_opts_clear: "Remove the time, font and size of text {i}", vm_sc_w_font: "Unknown font: {v}", vm_sc_w_size: "Size out of the 0.7 – 1.4 range, adjusted: {v}", vm_sc_w_time: "Line {n}: the end is before the start, so it has no end", vm_sc_w_tag: "Sticker tag not understood: {v}", vm_sc_w_lines: "{n} lines past the limit (30) left out", vm_sc_w_stickers: "{n} stickers past the limit (30) left out", vm_sc_w_long: "Line {n} was too long and was cut", vm_sc_w_other: "Setting not understood: {v}", vm_mini_back: "Back to the preview", vm_mini_close: "Hide the mini preview", vm_st_when: "Shows", vm_st_from: "From", vm_st_to: "To", vm_st_end: "the end", vm_st_now: "Now", vm_st_now_aria: "The preview's current time", vm_st_fx: "Effect", vm_st_fx_pop: "Pop", vm_st_fx_fade: "Fade", vm_st_fx_slide: "Slide up", vm_st_fx_zoom: "Zoom", vm_st_fx_float: "Float", vm_st_fx_none: "None", vm_tpos: "Text position", vm_tpos_hint: "Hold on the preview, then drag to move the text.", vm_tpos_reset: "Back to the centre", vm_tpos_moving: "Drag to move the text",
       vm_ks_label: 'How the text shows', vm_ks_line: 'The whole line', vm_ks_build: 'Words appear as recited', vm_ks_word: 'One word at a time',
       vm_sync_hint: 'Listen and move the markers so each ayah starts at its marker. Tap ▶ next to an ayah to hear it, or ⌖ to put the marker at the playhead.',
       vm_sync_all: 'All',
@@ -427,6 +431,8 @@
     state.textPos = cleanTextPos(state.textPos);
     state.kTexts = (Array.isArray(state.kTexts) ? state.kTexts : []).filter(t => typeof t === 'string').slice(0, MAX_KTEXTS).map(t => t.slice(0, MAX_KTEXT));
     if (!state.kTexts.length) state.kTexts = [''];
+    if (state.ktAudio !== 'quran') state.ktAudio = 'none';
+    state.kOpts = state.kTexts.map((_, i) => cleanKOpt((Array.isArray(state.kOpts) ? state.kOpts : [])[i]));
     if (typeof state.kFont !== 'string' || !(state.kFont.startsWith('u:') || (window.Khatira && Khatira.FONTS.some(f => f.id === state.kFont)))) state.kFont = 'amiri';
     if (state.recSource !== 'own') state.recSource = 'reciter';
     state.sheikh = typeof state.sheikh === 'string' ? state.sheikh.slice(0, 60) : '';
@@ -457,7 +463,7 @@
     if (isKText()) return 'kt|' + segments().length;
     return [state.surah, state.from, state.to, state.basmala && basmalaApplies()].join('|');
   }
-  const kTextsSig = () => segments().map(s => s.text).join('\u2029');
+  const kTextsSig = () => segments().map(s => s.text + (s.at != null || s.until != null || s.font || s.size ? '\u2028' + [s.at, s.until, s.font, s.size].join(',') : '')).join('\u2029');
   function surahObj() { return surahs[state.surah - 1]; }
   // Undecorated name ("البقرة") from js/surah-map.js — the same list takrar.html shows.
   function surahPlain(s) {
@@ -685,11 +691,31 @@
     return p;
   }
 
+  // A text's own settings from a script: its seconds, its face and size (any of them), or null.
+  function cleanKOpt(o) {
+    if (!o || typeof o !== 'object') return null;
+    const out = {};
+    const sec = v => (v != null && v !== '' && isFinite(+v) ? Math.min(3600, Math.max(0, +v)) : null);
+    const a = sec(o.a), b = sec(o.b);
+    if (a != null) out.a = a;
+    if (b != null && (a == null || b > a)) out.b = b;
+    if (typeof o.font === 'string' && /^[a-z]+$/.test(o.font) && window.Khatira && Khatira.FONTS.some(f => f.id === o.font)) out.font = o.font;
+    if (isFinite(+o.size) && o.size !== null && o.size !== '') out.size = Math.min(1.4, Math.max(0.7, +o.size));
+    return Object.keys(out).length ? out : null;
+  }
+
   // Segments to show, in order (no audio yet).
   function segments() {
     if (isKText()) {
-      // the user's texts that have something in them, each a segment of its own
-      return state.kTexts.map(t => t.trim()).filter(Boolean).map((text, i) => ({ surah: 0, ayah: i + 1, text, num: i + 1, kt: true }));
+      // the user's texts that have something in them, each a segment of its own (ki: which text)
+      const out = [];
+      state.kTexts.forEach((t, ki) => {
+        const text = t.trim();
+        if (!text) return;
+        const o = state.kOpts[ki] || {};
+        out.push({ surah: 0, ayah: out.length + 1, text, num: out.length + 1, kt: true, ki, at: o.a != null ? o.a : null, until: o.b != null ? o.b : null, font: o.font || null, size: o.size || null });
+      });
+      return out;
     }
     const s = surahObj();
     const out = [];
@@ -699,7 +725,7 @@
   }
 
   function timelineKey() {
-    if (isKText()) return ['kt', own.active() ? own.rec.id + '|' + own.sig(own.entryNow()) : 'paced', kTextsSig()].join('|');
+    if (isKText()) return ['kt', own.active() ? own.rec.id + '|' + own.sig(own.entryNow()) : isKQuran() ? ['q', state.kReciter, state.surah, state.from, state.to].join(':') : 'paced', kTextsSig()].join('|');
     if (own.active()) return [isKhatira() ? 'k-own' : 'own', own.rec.id, rangeKey(), own.sig(own.entryNow())].join('|');
     if (isKhatira()) return ['k', state.kReciter, state.surah, state.from, state.to].join('|');
     return [reciterObj().folder, state.surah, state.from, state.to, state.basmala && basmalaApplies()].join('|');
@@ -851,22 +877,58 @@
   function buildPacedTimeline() {
     const key = timelineKey();
     if (timeline && timeline.key === key) return timeline;
+    const items = pacedItems(segments(), 0);
+    timeline = { key, items, total: (items.length ? items[items.length - 1].end : LEAD) + TAIL };
+    return timeline;
+  }
+  // The texts' times: a script's seconds where it gives them, else each for as long as it takes to
+  // read; `fit` > 0 (a recitation's length) spreads texts with no times over it instead.
+  function pacedItems(segs, fit) {
     let t = LEAD;
-    const items = segments().map(sg => {
+    const reading = segs.map(sg => {
       const ws = kTextWords(sg.text);
-      const chars = ws.join('').length;
-      const dur = Math.min(15, Math.max(1.6, 0.5 + ws.length * 0.3 + chars * 0.045));
-      const it = Object.assign({}, sg, { buffer: null, start: t, end: t + dur });
-      it.words = kShare(ws, t + 0.15, t + dur - 0.35).map((x, k) => ({ text: ws[k], a: x.a, b: x.b, kt: true }));
+      return Math.min(15, Math.max(1.6, 0.5 + ws.length * 0.3 + ws.join('').length * 0.045));
+    });
+    const timed = segs.some(sg => sg.at != null || sg.until != null);
+    const sum = reading.reduce((a, b) => a + b, 0);
+    const k = fit > 0 && !timed && sum > 0 ? fit / sum : 1;
+    return segs.map((sg, i) => {
+      const ws = kTextWords(sg.text);
+      const auto = Math.max(1.2, reading[i] * k);
+      // a script's seconds: where it starts (never before the line before ends) and ends (its
+      // own end, else where the next line starts, else by its length)
+      const start = sg.at != null ? Math.max(t, sg.at) : t;
+      const next = segs[i + 1];
+      let end = sg.until != null ? sg.until : next && next.at != null && next.at > start ? next.at : start + auto;
+      end = Math.min(start + 120, Math.max(start + 0.8, end));
+      const it = Object.assign({}, sg, { buffer: null, start, end });
+      it.words = kShare(ws, start + 0.15, Math.max(start + 0.3, end - 0.35)).map((x, k) => ({ text: ws[k], a: x.a, b: x.b, kt: true }));
       t = it.end;
       return it;
     });
-    timeline = { key, items, total: t + TAIL };
+  }
+  // Own words over a recitation: the ayat's audio (one clip, the «خاطرة» reciter's) from the start,
+  // the texts over it; the video lasts as long as the longer of the two.
+  async function buildKtQuranTimeline(onProgress) {
+    const key = timelineKey();
+    if (timeline && timeline.key === key) return timeline;
+    const meta = await kMeta(state.kReciter, state.surah);
+    const vs = [];
+    for (let a = state.from; a <= state.to; a++) vs.push(meta.verses[a]);
+    if (!vs.length || vs.some(v => !v)) throw new Error('no timings');
+    const t0 = Math.min(vs[0].from, ...vs[0].segs.map(x => x[1])) / 1000;
+    const t1 = vs[vs.length - 1].to / 1000;
+    const clip = await kClip(meta, t0, t1, onProgress);
+    const dur = Math.max(0.1, t1 - t0);
+    const items = pacedItems(segments(), dur);
+    const audio = [{ buffer: clip.buffer, offset: Math.max(0, t0 - clip.base), dur, start: LEAD, end: LEAD + dur }];
+    const end = Math.max(LEAD + dur, items.length ? items[items.length - 1].end : 0);
+    timeline = { key, items, audio, total: end + TAIL };
     return timeline;
   }
 
   async function buildTimeline(onProgress) {
-    if (isKText() && !own.active()) return buildPacedTimeline();
+    if (isKText() && !own.active()) return isKQuran() ? buildKtQuranTimeline(onProgress) : buildPacedTimeline();
     if (own.active()) return buildOwnTimeline();
     if (isKhatira()) return buildKhatiraTimeline(onProgress);
     const key = timelineKey();
@@ -1337,12 +1399,13 @@
     const bundled = window.Khatira ? Khatira.FONTS.map(f => Object.assign({ has: f.qpc ? null : Khatira.hasIn(f) }, f)) : [];
     return bundled.concat(userFonts.map(u => ({ id: 'u:' + u.id, family: u.family, weight: '', has: u.has, user: u })));
   }
-  function kFace() {
+  // The face of the video, or of one line that names its own (a script's {font: ...}).
+  function kFace(id) {
     const all = kFaces();
-    return all.find(f => f.id === state.kFont) || all[0] || { family: null, weight: '', qpc: true };
+    return (id && all.find(f => f.id === id)) || all.find(f => f.id === state.kFont) || all[0] || { family: null, weight: '', qpc: true };
   }
-  function kFont(size) {
-    const f = kFace();
+  function kFont(size, face) {
+    const f = face || kFace();
     return f.weight + size + 'px ' + (f.family || QFONT);
   }
   // The word as the chosen face draws it.
@@ -1350,10 +1413,15 @@
     const f = kFace();
     return f.qpc ? word : Khatira.adaptWord(word, f.user ? f.has : f.has || (() => true));
   }
+  // The video's face and any a line names, loaded (a face draws nothing until it is).
   function kFontReady() {
-    const f = kFace();
-    if (!f.family || !document.fonts || !document.fonts.load) return Promise.resolve();
-    return document.fonts.load(f.weight + '64px ' + f.family, 'أبجد').catch(() => {});
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    const ids = new Set([state.kFont]);
+    if (isKText()) state.kOpts.forEach(o => { if (o && o.font) ids.add(o.font); });
+    return Promise.all([...ids].map(id => {
+      const f = kFace(id);
+      return f.family ? document.fonts.load(f.weight + '64px ' + f.family, 'أبجد').catch(() => {}) : null;
+    }));
   }
   function fontDb() {
     return new Promise((resolve, reject) => {
@@ -1465,14 +1533,15 @@
   // One word at a time, centred and large, in the chosen bold face; it eases in (a fade and a
   // slight grow) as it is recited, while the one before fades out.
   const kSizeCache = new Map();
-  function drawKWord(c, word, w, h, alpha, p, own) {
+  function drawKWord(c, word, w, h, alpha, p, own, seg) {
     if (alpha <= 0.002 || !word) return;
     if (!own) word = kText(word);            // the user's own words are drawn as typed
-    const key = [word, w, h, state.kFont, state.fontMul].join('|');
+    const face = kFace(seg && seg.font), mul = (seg && seg.size) || state.fontMul;
+    const key = [word, w, h, face.id, mul].join('|');
     let size = kSizeCache.get(key);
     if (!size) {
-      size = Math.min(w, h) * (w > h ? 0.2 : 0.19) * state.fontMul * (kFace().size || 1);
-      c.font = kFont(size);
+      size = Math.min(w, h) * (w > h ? 0.2 : 0.19) * mul * (face.size || 1);
+      c.font = kFont(size, face);
       const width = c.measureText(word).width;
       if (width > w * 0.86) size *= w * 0.86 / width;
       kSizeCache.set(key, size);
@@ -1484,7 +1553,7 @@
     c.translate(...textCentre(w, h));
     const k = 0.9 + 0.1 * e;
     c.scale(k, k);
-    c.font = kFont(size);
+    c.font = kFont(size, face);
     c.direction = /[\u0590-\u08FF\uFB1D-\uFEFC]/.test(word) ? 'rtl' : 'ltr';
     c.textAlign = 'center';
     c.textBaseline = 'middle';
@@ -1498,19 +1567,19 @@
   // edge for right-to-left text), so words can light up or appear without anything moving.
   const kLayoutCache = new Map();
   function kLayout(c, tl, si, w, h) {
-    const key = [tl.key, si, w, h, state.kFont, state.fontMul, state.caption].join('|');
+    const key = [tl.key, si, w, h, state.kFont, state.fontMul, state.caption, userFonts.length].join('|');
     if (kLayoutCache.has(key)) return kLayoutCache.get(key);
     const it = tl.items[si];
     const texts = it.words.map(x => (x.kt ? x.text : kText(x.text)));
     const arabic = (it.text || texts.join(' ')).replace(/[^\u0600-\u06FF]/g, '').length * 2 >= (it.text || texts.join(' ')).replace(/[\s\d\p{P}]/gu, '').length;
     const rtl = it.kt ? arabic : true;
-    const face = kFace(), mul = state.fontMul * (face.size || 1);
+    const face = kFace(it.font), mul = (it.size || state.fontMul) * (face.size || 1);
     const base = Math.min(w, h);
     const maxW = w * 0.86, maxH = h * (state.caption ? 0.5 : 0.62);
     const minSize = base * 0.055 * mul;
     let size = base * (w > h ? 0.15 : 0.14) * mul, lines, space, widths;
     for (;;) {
-      c.font = kFont(size);
+      c.font = kFont(size, face);
       widths = texts.map(x => c.measureText(x).width);
       space = c.measureText('\u00A0').width;
       lines = [];
@@ -1535,7 +1604,7 @@
         x += rtl ? -(widths[i] + space) : widths[i] + space;
       });
     }));
-    const out = { texts, rtl, size, lh, pages, xs, ys, pageOf, space };
+    const out = { texts, rtl, size, lh, pages, xs, ys, pageOf, space, face };
     kLayoutCache.set(key, out);
     if (kLayoutCache.size > 200) kLayoutCache.delete(kLayoutCache.keys().next().value);
     return out;
@@ -1564,7 +1633,7 @@
     c.direction = L.rtl ? 'rtl' : 'ltr';
     c.textAlign = L.rtl ? 'right' : 'left';
     c.textBaseline = 'middle';
-    c.font = kFont(L.size);
+    c.font = kFont(L.size, L.face);
     words.forEach((wd, i) => {
       if (L.pageOf[i] !== page) return;
       let a = alpha, hl = 0;
@@ -1591,8 +1660,8 @@
     if (state.kStyle === 'word') {
       if (k < 0) return;
       const p = clamp01((t - words[k].a) / 0.22);
-      if (p < 1 && k > 0) drawKWord(c, words[k - 1].text, w, h, (1 - p) * out, 1, words[k - 1].kt);
-      drawKWord(c, words[k].text, w, h, out, p, words[k].kt);
+      if (p < 1 && k > 0) drawKWord(c, words[k - 1].text, w, h, (1 - p) * out, 1, words[k - 1].kt, tl.items[words[k - 1].seg]);
+      drawKWord(c, words[k].text, w, h, out, p, words[k].kt, tl.items[words[k].seg]);
       return;
     }
     // the line of the word being recited; the next line shows from 0.35 s before its first word
@@ -1613,6 +1682,16 @@
     return k < 0 ? null : Object.assign({ index: k }, words[k]);
   }
 
+  // When each script line shows in a timeline (stickers that go with a line): line -> [start,
+  // end], null when the line is not in it; undefined (not own words) = stickers use from / to.
+  function lineSpanIn(tl) {
+    if (!isKText() || !tl.items.length || tl.items[0].ki == null) return undefined;
+    return line => {
+      const it = tl.items.find(x => x.ki === line);
+      return it ? [it.words && it.words[0] ? Math.min(it.start, it.words[0].a - 0.35) : it.start, it.end] : null;
+    };
+  }
+
   // t = seconds into the clip. With no timeline, draws a still of the first segment.
   function renderFrame(c, w, h, t, tl) {
     const total = tl ? tl.total : 1;
@@ -1626,7 +1705,7 @@
           const sg = segs[0], ws = sg.kt ? kTextWords(sg.text) : Khatira.wordsOf(sg.text);
           const still = { key: 'still|' + sg.text, items: [Object.assign({}, sg, { words: ws.map(x => ({ text: x, a: 0, kt: !!sg.kt })) })] };
           drawKSegment(c, w, h, still, 0, null, 1);
-        } else if (segs.length) drawKWord(c, segs[0].kt ? kTextWords(segs[0].text)[0] : Khatira.wordsOf(segs[0].text)[0], w, h, 1, 1, segs[0].kt);
+        } else if (segs.length) drawKWord(c, segs[0].kt ? kTextWords(segs[0].text)[0] : Khatira.wordsOf(segs[0].text)[0], w, h, 1, 1, segs[0].kt, segs[0]);
         else if (isKText()) drawKWord(c, tr('vm_kt_empty'), w, h, 0.55, 1, true);    // nothing written yet
       }
     } else if (!tl) {
@@ -1643,7 +1722,7 @@
         drawAyah(c, it, w, h, a);
       });
     }
-    if (stickers) stickers.draw(c, w, h, tl ? t : null, total);
+    if (stickers) stickers.draw(c, w, h, tl ? t : null, total, tl ? lineSpanIn(tl) : undefined);
     drawCaption(c, w, h);
     drawBranding(c, w, h);
   }
@@ -1682,6 +1761,7 @@
   function syncFullscreenUi() {
     $('vmStage').classList.toggle('is-fs', isFullscreen());
     layoutStage();
+    miniUpdate();
   }
   function enterFullscreen() {
     const stage = $('vmStage');
@@ -1714,6 +1794,106 @@
     else if ($('vmStage').classList.contains('pseudo-fs')) exitPseudoFullscreen();
     else enterFullscreen();
   }
+
+  // ---------- the floating mini preview ----------
+  // While the preview is scrolled out of view (on a phone, under the settings), a small copy of
+  // it floats in a corner so every change shows as it is made: tap it to go back up, ▶ to play.
+  let miniOn = false, miniRaf = 0, miniLast = 0, miniClosed = false, miniAr = 0, miniPos = null;
+  function bindMiniPreview() {
+    const box = $('vmMini'), mc = $('vmMiniCanvas'), stage = $('vmStage');
+    try { miniClosed = sessionStorage.getItem('vmMiniClosed') === '1'; } catch (e) { /* storage blocked */ }
+    let stageSeen = true;
+    const update = () => {
+      const show = !stageSeen && !miniClosed && !isFullscreen() && $('vmResult').hidden;
+      if (show === miniOn) return;
+      miniOn = show;
+      box.hidden = !show;
+      if (show) {
+        miniSize();
+        miniLoop();
+        if (miniPos) { const p = miniPos; miniPos = null; requestAnimationFrame(() => placeAt(p.left, p.top)); }
+      } else cancelAnimationFrame(miniRaf);
+    };
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(es => { stageSeen = es[es.length - 1].intersectionRatio > 0.25; update(); }, { threshold: [0, 0.25, 0.5] }).observe(stage);
+    }
+    $('vmMiniView').onclick = () => {
+      if (Date.now() - miniDragEnd < 400) return;           // the end of a drag, not a tap
+      stage.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    // drag it anywhere out of the way; it settles at the nearer side, where it was let go
+    let drag = null, miniDragEnd = 0;
+    const view = $('vmMiniView');
+    const placeAt = (x, y) => {
+      const r = box.getBoundingClientRect(), W = innerWidth, H = innerHeight;
+      box.style.left = Math.min(W - r.width - 8, Math.max(8, x)) + 'px';
+      box.style.top = Math.min(H - r.height - 8, Math.max(8, y)) + 'px';
+      box.style.right = 'auto'; box.style.bottom = 'auto'; box.style.insetInlineStart = 'auto';
+    };
+    view.addEventListener('pointerdown', ev => {
+      const r = box.getBoundingClientRect();
+      drag = { x: ev.clientX, y: ev.clientY, dx: ev.clientX - r.left, dy: ev.clientY - r.top, moved: false, id: ev.pointerId };
+    });
+    view.addEventListener('pointermove', ev => {
+      if (!drag || ev.pointerId !== drag.id) return;
+      if (!drag.moved && Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) < 8) return;
+      if (!drag.moved) { drag.moved = true; try { view.setPointerCapture(ev.pointerId); } catch (e) { /* not supported */ } }
+      ev.preventDefault();
+      placeAt(ev.clientX - drag.dx, ev.clientY - drag.dy);
+    });
+    const endDrag = () => {
+      if (drag && drag.moved) {
+        miniDragEnd = Date.now();
+        const r = box.getBoundingClientRect();
+        placeAt(r.left + r.width / 2 < innerWidth / 2 ? 12 : innerWidth - r.width - 12, r.top);
+        try { sessionStorage.setItem('vmMiniPos', JSON.stringify({ left: parseFloat(box.style.left), top: parseFloat(box.style.top) })); } catch (e) { /* storage blocked */ }
+      }
+      drag = null;
+    };
+    view.addEventListener('pointerup', endDrag);
+    view.addEventListener('pointercancel', endDrag);
+    view.addEventListener('touchmove', e => { if (drag && drag.moved) e.preventDefault(); }, { passive: false });
+    view.style.touchAction = 'none';
+    try {
+      const pos = JSON.parse(sessionStorage.getItem('vmMiniPos') || 'null');
+      if (pos) miniPos = pos;
+    } catch (e) { /* storage blocked */ }
+    $('vmMiniPlay').onclick = () => { if (!busy) togglePreview(); };
+    $('vmMiniClose').onclick = () => {
+      miniClosed = true;
+      try { sessionStorage.setItem('vmMiniClosed', '1'); } catch (e) { /* storage blocked */ }
+      update();
+    };
+    miniUpdate = update;
+    // the picture: copied from the preview a few times a second (every frame while it plays)
+    function miniLoop() {
+      cancelAnimationFrame(miniRaf);
+      const step = now => {
+        if (!miniOn) return;
+        if (playing || now - miniLast > 120) {
+          miniLast = now;
+          if (miniAr !== canvas.width / canvas.height) miniSize();     // the size (format) changed
+          const x = mc.getContext('2d');
+          x.drawImage(canvas, 0, 0, mc.width, mc.height);
+        }
+        box.classList.toggle('playing', !!playing);
+        miniRaf = requestAnimationFrame(step);
+      };
+      miniRaf = requestAnimationFrame(step);
+    }
+    function miniSize() {
+      // the video's own shape, about as large as a thumb's reach allows
+      const ar = canvas.width / canvas.height;
+      miniAr = ar;
+      const w = Math.round(ar < 1 ? 112 : ar === 1 ? 140 : 184), h = Math.round(w / ar);
+      const view = $('vmMiniView');
+      view.style.width = w + 'px';
+      view.style.height = h + 'px';
+      mc.width = w * 2;
+      mc.height = h * 2;
+    }
+  }
+  let miniUpdate = () => {};
 
   // ---------- moving the text: hold on the preview, then drag ----------
   // A tap still plays the preview, and a finger that moves at once still scrolls the page: only a
@@ -1782,7 +1962,8 @@
 
   // ---------- playback / export ----------
   function startSources(tl, out, t0) {
-    return tl.items.filter(it => it.buffer).map(it => {
+    // the segments' own audio, and a sound of the whole video (a recitation under own words)
+    return tl.items.concat(tl.audio || []).filter(it => it.buffer).map(it => {
       const src = audioCtx().createBufferSource();
       src.buffer = it.buffer;
       out.forEach(node => src.connect(node));
@@ -2239,6 +2420,7 @@
   function openResult() {
     $('vmSheetOverlay').hidden = false;
     $('vmResult').hidden = false;
+    miniUpdate();
     focusDialog($('vmResult'));
     if (window.BackClose) BackClose.opened(closeResult);
   }
@@ -2248,6 +2430,7 @@
     if (window.BackClose) BackClose.closed();
     $('vmVideo').pause();
     $('vmResult').hidden = true;
+    miniUpdate();
     $('vmSheetOverlay').hidden = true;
     restoreFocus();
   }
@@ -2582,6 +2765,7 @@
     $('vmKTextAdd').onclick = () => {
       if (state.kTexts.length >= MAX_KTEXTS) return;
       state.kTexts.push('');
+      state.kOpts.push(null);
       renderKTexts();
       saveSettings();
       const last = $('vmKText' + (state.kTexts.length - 1));
@@ -2838,6 +3022,27 @@
         kTextTimer = setTimeout(() => { kTextTimer = 0; onChange(); }, 350);   // the preview follows as you type
       };
       row.append(label, ta);
+      const o = state.kOpts[i];
+      if (o) {
+        // what a script set for this text: its time, face and size, with a × to drop them
+        const tag = document.createElement('div');
+        tag.className = 'kt-opts';
+        const txt = document.createElement('span');
+        // each part in its own run, so times and numbers read right in Arabic too
+        const bit = (t, dir) => { if (txt.childNodes.length) txt.append(' · '); const b = document.createElement('bdi'); if (dir) b.dir = dir; b.textContent = t; txt.appendChild(b); };
+        if (o.a != null || o.b != null) bit((o.a != null ? VMScript.clock(o.a) : '…') + ' – ' + (o.b != null ? VMScript.clock(o.b) : '…'), 'ltr');
+        if (o.font) bit(tr('vm_kf_' + o.font));
+        if (o.size) bit('×' + o.size, 'ltr');
+        const x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'kt-opts-x';
+        x.textContent = '×';
+        x.setAttribute('aria-label', tr('vm_sc_opts_clear', { i: num(i + 1) }));
+        x.title = x.getAttribute('aria-label');
+        x.onclick = () => { state.kOpts[i] = null; saveSettings(); renderKTexts(); onChange(); };
+        tag.append(txt, x);
+        row.appendChild(tag);
+      }
       if (state.kTexts.length > 1) {
         const del = document.createElement('button');
         del.type = 'button';
@@ -2845,13 +3050,169 @@
         del.textContent = '×';
         del.setAttribute('aria-label', tr('vm_kt_delete', { i: num(i + 1) }));
         del.title = del.getAttribute('aria-label');
-        del.onclick = () => { state.kTexts.splice(i, 1); renderKTexts(); onChange(); };
+        del.onclick = () => {
+          state.kTexts.splice(i, 1);
+          state.kOpts.splice(i, 1);
+          // stickers that went with a later line move up with it; this line's own go
+          if (stickers) {
+            state.stickers = state.stickers.filter(st => st.line !== i);
+            state.stickers.forEach(st => { if (st.line != null && st.line > i) st.line--; });
+            stickers.render();
+          }
+          renderKTexts(); onChange();
+        };
         row.appendChild(del);
       }
       list.appendChild(row);
     });
     $('vmKTextAdd').disabled = state.kTexts.length >= MAX_KTEXTS;
   }
+  // ---------- a video script (js/video-script.js): the whole video in one text file ----------
+  function saveBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+  // The template, with the faces and stickers this version has: for the user to give to an AI.
+  function scriptTemplate() {
+    return VMScript.template({
+      lang: lang(),
+      stickers: stickers ? stickers.catalog() : [],
+      fonts: Khatira.FONTS.filter(f => !f.qpc).map(f => f.id),
+    });
+  }
+  // The video as it is, written as a script (to edit, or keep).
+  function currentScript() {
+    const rows = [];
+    state.kTexts.forEach((t, i) => { if (t.trim()) rows.push({ i, text: t.trim(), o: state.kOpts[i] || {} }); });
+    const at = new Map(rows.map((r, n) => [r.i, n]));
+    return VMScript.serialize({
+      settings: {
+        font: /^[a-z]+$/.test(state.kFont) ? state.kFont : null,
+        size: state.fontMul !== 1 ? state.fontMul : null,
+        style: state.kStyle, color: state.color, format: state.format, name: state.sheikh || null,
+        quran: isKQuran() ? { surah: state.surah, from: state.from, to: state.to } : null,
+      },
+      lines: rows.map(r => ({ text: r.text, a: r.o.a != null ? r.o.a : null, b: r.o.b != null ? r.o.b : null, font: r.o.font, size: r.o.size })),
+      stickers: state.stickers.filter(st => st.line == null || at.has(st.line)).map(st => ({
+        line: st.line == null ? null : at.get(st.line), slot: st.id ? null : st.slot, id: st.id, fx: st.fx, flip: st.flip, x: st.x, y: st.y, s: st.s,
+      })),
+    });
+  }
+  function scriptWarning(w) {
+    const k = { quran: 'vm_sc_w_quran', font: 'vm_sc_w_font', size: 'vm_sc_w_size', time: 'vm_sc_w_time', tag: 'vm_sc_w_tag', lines: 'vm_sc_w_lines', stickers: 'vm_sc_w_stickers', long: 'vm_sc_w_long' }[w.code] || 'vm_sc_w_other';
+    return tr(k, { v: w.detail, n: /^\d+$/.test(w.detail) ? (arabicNames() ? arDigits(+w.detail) : w.detail) : w.detail });
+  }
+  // Read a script into the video: «خاطرة» with own words, its texts (with their seconds, faces
+  // and sizes), its settings and its stickers. Returns whether it was read.
+  function importScript(text) {
+    const r = VMScript.parse(text, { ids: stickers ? stickers.ids : [] });
+    const warn = $('vmScWarn');
+    if (!r.lines.length) { setStatus(tr('vm_sc_empty'), true); warn.hidden = true; return false; }
+    if (state.kTexts.some(t => t.trim()) && !confirm(tr('vm_sc_replace'))) return false;
+    if (playing) stopPlayback();
+    clearTimeout(kTextTimer);
+    kTextTimer = 0;
+    state.kTexts = r.lines.map(l => l.text);
+    state.kOpts = r.lines.map(l => cleanKOpt({ a: l.a, b: l.b, font: l.font, size: l.size }));
+    const st = r.settings;
+    if (st.font) state.kFont = st.font;
+    if (st.size) state.fontMul = st.size;
+    if (st.style) state.kStyle = st.style;
+    if (st.color) state.color = st.color;
+    if (st.format) state.format = st.format;
+    if (st.name != null) { state.sheikh = st.name; if (st.name) state.caption = true; }
+    state.kContent = 'text';
+    if (st.quran && surahs.some(x => x.n === st.quran.surah)) {
+      // the recitation it names, under the texts
+      state.surah = st.quran.surah; state.from = st.quran.from; state.to = st.quran.to;
+      state.ktAudio = 'quran';
+      if (state.recSource === 'own') state.recSource = 'reciter';
+    }
+    let placed = { added: 0, dropped: 0 };
+    if (stickers) placed = stickers.fromScript(r.stickers);
+    const warnings = r.warnings.slice();
+    if (placed.dropped) warnings.push({ code: 'stickers', detail: String(placed.dropped) });
+    if (isKhatira()) { markKContent(); renderPickerButtons(); } else setMode('khatira');
+    applyStateToControls();
+    if (st.quran) { clampRange('from'); renderPickerButtons(); }
+    renderKTexts();
+    if (own.renderBox) own.renderBox();
+    saveSettings();
+    onChange();
+    kFontReady().then(() => renderIdle());
+    // what was read, and what was not
+    const n = x => (arabicNames() ? arDigits(x) : String(x));
+    const waiting = stickers && stickers.slotSel != null;
+    setStatus(tr('vm_sc_done', { lines: n(r.lines.length), stickers: n(placed.added) }) + (waiting ? ' ' + tr('vm_sc_pick') : ''), false);
+    warn.innerHTML = '';
+    warnings.forEach(w => { const li = document.createElement('li'); li.textContent = scriptWarning(w); warn.appendChild(li); });
+    warn.hidden = !warnings.length;
+    // pictures to choose for the script's sticker numbers: the stickers card, ready to pick
+    if (waiting) {
+      showSection('look');
+      const card = $('vmStickerCard');
+      if (card && card.scrollIntoView) setTimeout(() => card.scrollIntoView({ block: 'start', behavior: 'smooth' }), 60);
+    }
+    return true;
+  }
+  function bindScript() {
+    if (!window.VMScript) { $('vmScBox').hidden = true; return; }
+    const file = $('vmScFile');
+    $('vmScUpload').onclick = () => file.click();
+    file.onchange = async () => {
+      const f = file.files && file.files[0];
+      file.value = '';
+      if (!f) return;
+      if (f.size > 512 * 1024) { setStatus(tr('vm_sc_big'), true); return; }
+      try { importScript(await f.text()); } catch (e) { console.warn('[video-maker] script', e); setStatus(tr('vm_sc_bad'), true); }
+    };
+    const paste = $('vmScPaste');
+    $('vmScPasteBtn').onclick = () => {
+      paste.hidden = !paste.hidden;
+      $('vmScPasteBtn').setAttribute('aria-expanded', paste.hidden ? 'false' : 'true');
+      if (!paste.hidden) $('vmScText').focus();
+    };
+    $('vmScApply').onclick = () => {
+      if (importScript($('vmScText').value)) { $('vmScText').value = ''; paste.hidden = true; $('vmScPasteBtn').setAttribute('aria-expanded', 'false'); }
+    };
+    $('vmScCancel').onclick = () => { paste.hidden = true; $('vmScPasteBtn').setAttribute('aria-expanded', 'false'); };
+    $('vmScTemplate').onclick = () => {
+      saveBlob(new Blob([scriptTemplate()], { type: 'text/plain;charset=utf-8' }), 'zad-video-script-template.txt');
+      setStatus(tr('vm_sc_template_done'));
+    };
+    $('vmScCopy').onclick = async () => {
+      try { await navigator.clipboard.writeText(scriptTemplate()); setStatus(tr('vm_sc_copied')); } catch (e) { setStatus(tr('vm_sc_copy_err'), true); }
+    };
+    $('vmScExport').onclick = () => {
+      flushKTexts();
+      if (!state.kTexts.some(t => t.trim())) { setStatus(tr('vm_sc_nothing'), true); return; }
+      saveBlob(new Blob([currentScript()], { type: 'text/plain;charset=utf-8' }), 'zad-video-script.txt');
+    };
+  }
+
+  // Own words over a recitation: the surah and ayat fields move to «الصوت», under the choice of
+  // sound (they are what is heard there); back to «المحتوى» otherwise.
+  let kqHome = null;
+  function placeKq() {
+    const box = $('vmKqBox'), f = $('vmSurahField'), r = $('vmRangeRow');
+    if (!box || !f || !r) return;
+    if (!kqHome) { kqHome = document.createComment('surah fields'); f.parentNode.insertBefore(kqHome, f); }
+    if (isKQuran()) { if (f.parentNode !== box) box.append(f, r); } else if (f.parentNode === box) kqHome.after(f, r);
+  }
+  function setKtAudio(v) {
+    state.ktAudio = v === 'quran' ? 'quran' : 'none';
+    markKContent();
+    renderPickerButtons();
+    if (isKQuran()) clampRange('from');
+  }
+
   function markKContent() {
     document.querySelectorAll('#vmKContent [data-kc]').forEach(b => {
       const on = b.dataset.kc === state.kContent;
@@ -2860,6 +3221,8 @@
     });
     document.body.classList.toggle('kh-text', isKText());
     document.body.classList.toggle('kh-own', isKText() && state.recSource === 'own');
+    document.body.classList.toggle('kt-quran', isKQuran());
+    placeKq();
   }
   function setKContent(kc) {
     state.kContent = kc === 'quran' ? 'quran' : 'text';
@@ -3023,6 +3386,8 @@
     // Tapping the video itself plays/stops the preview.
     $('vmStage').onclick = () => { if (stickers && stickers.clickAfterDrag()) return; if (Date.now() - textDragEnd < 400) return; if (!busy) togglePreview(); };
     bindTextDrag();
+    bindScript();
+    bindMiniPreview();
     $('vmFullscreen').onclick = e => { e.stopPropagation(); toggleFullscreen(); };
     document.addEventListener('fullscreenchange', syncFullscreenUi);
     document.addEventListener('webkitfullscreenchange', syncFullscreenUi);
@@ -3092,6 +3457,8 @@
       stickers = VMStickers({
         state, $, tr, lang, canvas, num: n => (arabicNames() ? arDigits(n) : String(n)),
         playing: () => !!playing, busy: () => busy, redraw: () => renderIdle(), save: saveSettings, now: () => previewT,
+        lines: () => (isKText() ? segments().map(sg => ({ i: sg.ki, n: sg.ki + 1, text: sg.text })) : []),
+        lineSpan: k => { const f = timeline && lineSpanIn(timeline); return f ? f(k) : null; }, download: saveBlob,
         say: (m, err) => setStatus(m, err),
       });
       stickers.sanitize();
@@ -3101,6 +3468,7 @@
         state, $, tr, esc, arabicNames, arDigits, segments, ayahWords, rangeKey, reciterObj, reciterName,
         setStatus, onChange: () => onChange(), renderFx: () => { if (fxUi) fxUi.render(); },
         openSync: () => openPick('Sync'), closeSync: () => closePick(), isKText: () => isKText(),
+        ktQuran: () => isKText() && state.ktAudio === 'quran', setKtAudio: v => setKtAudio(v),
       });
     }
     if (window.VMRec && own.addRecorded) {
@@ -3171,7 +3539,7 @@
 
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
-  const BUILD = 11;   // 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
-  window.VM = { khatiraLayout: (si, w, h) => { const tl = timeline, c = document.createElement('canvas').getContext('2d'); const L = kLayout(c, tl, si, w, h); return { size: L.size, rtl: L.rtl, pages: L.pages.map(pg => pg.map(ln => ln.length)) }; }, get own() { return own; }, khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
+  const BUILD = 12;   // 12: video scripts (js/video-script.js: upload, paste, template for an AI, export), sticker numbers to fill and stickers with a line, the sticker pack as a ZIP (js/zip-store.js), «آيات» (a recitation) under own words, the floating mini preview; 11: sticker timing and effects, the high-resolution sticker pack, text moved by holding and dragging; 10: character stickers (js/video-stickers.js), 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
+  window.VM = { khatiraLayout: (si, w, h) => { const tl = timeline, c = document.createElement('canvas').getContext('2d'); const L = kLayout(c, tl, si, w, h); return { size: L.size, rtl: L.rtl, pages: L.pages.map(pg => pg.map(ln => ln.length)) }; }, get own() { return own; }, khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; }, importScript, currentScript, scriptTemplate, get stickers() { return stickers; } };
   init();
 })();
