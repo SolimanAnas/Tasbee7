@@ -97,6 +97,7 @@ test('the word on screen is the one being recited', async ({ page }) => {
   await mockQuranCom(page, 'cbr.mp3');
   await open(page);
   const r = await page.evaluate(async () => {
+    VM.state.kStyle = 'word';                                   // one word at a time: each frame is the word itself
     const tl = await VM.buildTimeline();
     const all = tl.items.flatMap(it => it.words);
     const c = document.createElement('canvas'); c.width = 270; c.height = 480;

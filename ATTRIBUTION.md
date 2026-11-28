@@ -61,6 +61,12 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 - Fonts a user adds from their device in that tab are kept on the device only (IndexedDB); none are
   bundled whose licence does not allow it.
 
+## Video maker character stickers
+
+- `images/stickers/s01.webp` … `s39.webp` — the character stickers (js/video-stickers.js): illustrations
+  supplied for the project, cut from the supplied sheets (13 sheets of 3), cleaned of the stray
+  semi-transparent specks around the outlines and saved as WebP at up to 640 px.
+
 ## Reciter photos
 
 - `images/reciters/*.webp` — reciter photos used as album art in the Quran audio player,
