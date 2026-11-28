@@ -11,6 +11,11 @@ const sec = (page, name) => expect(async () => {
   await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 500 });
 }).toPass({ timeout: 15000 });
 
+// the picker folds away once a sticker is added: open it, then tap the picture
+async function pick(page, id) {
+  if ((await page.locator('#vmStPickToggle').getAttribute('aria-expanded')) !== 'true') await page.locator('#vmStPickToggle').click();
+  await page.locator(`#vmStGrid [data-sticker="${id}"]`).click();
+}
 const BASE_URL = 'http://localhost:8080';
 test.use({ serviceWorkers: 'block', viewport: { width: 412, height: 915 } });
 
@@ -93,15 +98,19 @@ test('a tap adds a sticker to the video; the sliders move and size it; flip, fro
   await expect(page.locator('#vmStEmpty')).toBeVisible();
   await expect(page.locator('#vmStControls')).toBeHidden();
   const before = await ink(page);
-  await page.locator('#vmStGrid [data-sticker="s07"]').click();
+  await pick(page, 's07');
   expect((await stickers(page)).map(s => s.id)).toEqual(['s07']);
   await expect(page.locator('#vmStEmpty')).toBeHidden();
   await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(1);
   await expect(page.locator('#vmStControls')).toBeVisible();
   await expect(page.locator('#vmStName')).toHaveText('يدعو وتألق');
   await expect(page.locator('#vmStCount')).toHaveText('١ / ٣٠');
-  // a new one: centred in the lower half of the video
-  expect((await stickers(page))[0]).toMatchObject({ x: 0.5, y: 0.75 });
+  // a new one: centred, large, standing on the bottom edge (its picture all in the frame)
+  const n0 = (await stickers(page))[0];
+  expect(n0.x).toBe(0.5);
+  expect(n0.s).toBe(0.62);
+  const bottom = await page.evaluate(() => { const s = VM.state.stickers[0], im = document.querySelector('#vmStGrid [data-sticker="' + s.id + '"] img'); return s.y + s.s * 1080 * (im.naturalHeight / im.naturalWidth) / 2 / 1920; });
+  expect(bottom).toBeCloseTo(1, 2);
   await expect.poll(async () => (await ink(page)).n).toBeGreaterThan(before.n + 1500);       // it is in the frame
   const a = await ink(page);
   // across: the slider moves it (its white follows)
@@ -115,11 +124,11 @@ test('a tap adds a sticker to the video; the sliders move and size it; flip, fro
   // size
   const small = await ink(page);
   await page.locator('#vmStSize').fill('0.9');
-  await expect.poll(async () => (await ink(page)).n).toBeGreaterThan(small.n * 2);
+  await expect.poll(async () => (await ink(page)).n).toBeGreaterThan(small.n * 1.4);
   // flip, a second one, front
   await page.locator('#vmStFlip').click();
   expect((await stickers(page))[0].flip).toBe(true);
-  await page.locator('#vmStGrid [data-sticker="s22"]').click();
+  await pick(page, 's22');
   expect((await stickers(page)).map(s => s.id)).toEqual(['s07', 's22']);
   await page.locator('#vmStAdded .st-chip').first().click();
   await expect(page.locator('#vmStName')).toHaveText('يدعو وتألق');
@@ -138,7 +147,7 @@ test('dragging on the preview moves it, the corner handle sizes it, and a drag d
   // «خاطرة» with a typed text: a preview that needs no network
   await page.addInitScript(() => { if (!sessionStorage.getItem('d1')) { sessionStorage.setItem('d1', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح الفرج'] })); } });
   await open(page);
-  await page.locator('#vmStGrid [data-sticker="s08"]').click();
+  await pick(page, 's08');
   await page.evaluate(() => scrollTo(0, 0));
   await expect(page.locator('#vmStickerBox')).toBeVisible();
   const cv = () => page.locator('#vmCanvas').boundingBox();
@@ -163,7 +172,7 @@ test('dragging on the preview moves it, the corner handle sizes it, and a drag d
   await page.mouse.down();
   await page.mouse.move(h.x + h.width / 2 + 50, h.y + h.height / 2 + 50, { steps: 5 });
   await page.mouse.up();
-  expect((await stickers(page))[0].s).toBeGreaterThan(s1.s * 1.15);
+  expect((await stickers(page))[0].s).toBeGreaterThan(s1.s * 1.08);
   await expect(page.locator('#vmStagePlay')).toBeVisible();
   // a tap on empty video (no sticker there) still plays / stops the preview as before
   await page.waitForTimeout(600);
@@ -174,10 +183,11 @@ test('dragging on the preview moves it, the corner handle sizes it, and a drag d
 });
 
 test('remembered, at most thirty, Escape and «تم» let go, and not on the long video', async ({ page }) => {
+  test.setTimeout(120000);          // thirty stickers, each through the folding picker
   await open(page);
-  for (let i = 1; i <= 30; i++) await page.locator(`#vmStGrid [data-sticker="s${String(i).padStart(2, '0')}"]`).click();
+  for (let i = 1; i <= 30; i++) await pick(page, `s${String(i).padStart(2, '0')}`);
   expect((await stickers(page)).length).toBe(30);
-  await page.locator('#vmStGrid [data-sticker="s35"]').click();
+  await pick(page, 's35');
   expect((await stickers(page)).length).toBe(30);
   await expect(page.locator('#vmStatus')).toContainText('٣٠');
   await expect(page.locator('#vmStAdded .st-chip')).toHaveCount(30);
@@ -233,7 +243,7 @@ test('the stickers are in the exported video', async ({ page }) => {
 test('timing and effect: a sticker shows from / to the seconds set, coming in and going out with its effect', async ({ page }) => {
   await page.addInitScript(() => { if (!sessionStorage.getItem('t1')) { sessionStorage.setItem('t1', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', bg: 'g0', motion: false, caption: false, kTexts: ['الصبر مفتاح الفرج وبالصبر تنال المعالي'] })); } });
   await open(page);
-  await page.locator('#vmStGrid [data-sticker="h05"]').click();
+  await pick(page, 'h05');
   let s = (await stickers(page))[0];
   expect([s.from, s.to, s.fx]).toEqual([0, null, 'pop']);                         // the whole video, popping in
   await expect(page.locator('#vmStFx [data-fx="pop"]')).toHaveAttribute('aria-pressed', 'true');
@@ -312,10 +322,10 @@ const textAt = page => page.evaluate(() => {
 });
 
 test('the text: a mouse drag on the preview moves it, in the video too; it is remembered and «إلى الوسط» puts it back', async ({ page }) => {
-  await page.addInitScript(() => { if (!sessionStorage.getItem('m1')) { sessionStorage.setItem('m1', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح'] })); } });
+  await page.addInitScript(() => { if (!sessionStorage.getItem('m1')) { sessionStorage.setItem('m1', '1'); localStorage.setItem('vm_settings', JSON.stringify({ mode: 'khatira', bg: 'g0', motion: false, kTexts: ['الصبر مفتاح'], textAlign: 'middle' })); } });
   await open(page);
   await sec(page, 'text');
-  await expect(page.locator('#vmTextPosReset')).toBeDisabled();
+  await expect(page.locator('#vmTextAlign [data-ta="middle"]')).toHaveAttribute('aria-pressed', 'true');
   await page.evaluate(() => scrollTo(0, 0));
   const a = await textAt(page);
   expect(a.n).toBeGreaterThan(200);
@@ -332,7 +342,7 @@ test('the text: a mouse drag on the preview moves it, in the video too; it is re
   const b = await textAt(page);
   expect(b.y).toBeLessThan(a.y - 0.18);
   expect(b.x).toBeLessThan(a.x - 0.1);
-  await expect(page.locator('#vmTextPosReset')).toBeEnabled();
+  await expect(page.locator('#vmTextAlign [aria-pressed="true"]')).toHaveCount(0);   // dragged: none of the three
   // kept on the frame's edge however far it is pulled
   await page.mouse.move(box.x + box.width * 0.35, box.y + box.height * 0.21);
   await page.mouse.down();
@@ -343,9 +353,9 @@ test('the text: a mouse drag on the preview moves it, in the video too; it is re
   await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
   expect(await page.evaluate(() => VM.state.textPos)).toEqual({ x: 0.06, y: 0.06 });
   await sec(page, 'text');
-  await page.locator('#vmTextPosReset').click();
+  await page.locator('#vmTextAlign [data-ta="middle"]').click();
   expect(await page.evaluate(() => VM.state.textPos)).toBe(null);
-  await expect(page.locator('#vmTextPosReset')).toBeDisabled();
+  await expect(page.locator('#vmTextAlign [data-ta="middle"]')).toHaveAttribute('aria-pressed', 'true');
   const c = await textAt(page);
   expect(Math.abs(c.y - a.y)).toBeLessThan(0.01);
   // the Shorts ayah follows it too

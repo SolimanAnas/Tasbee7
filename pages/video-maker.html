@@ -71,6 +71,9 @@
 .st-fx button { min-height:44px; padding:0 11px; border:1px solid var(--glass-border); border-radius:999px; background:var(--field-bg); color:var(--text-secondary); font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; }
 .st-fx button.active { border-color:var(--accent-ink, var(--accent-main)); background:var(--accent-muted); color:var(--accent-ink, var(--accent-main)); }
 .tpos-row { display:flex; align-items:center; gap:10px; }
+.formats.ta { grid-template-columns:repeat(3, 1fr); }
+.formats.ta button { flex-direction:row; gap:6px; }
+.formats.ta svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
 .tpos-row .st-hint { margin:0; flex:1; }
 .tpos-row .st-act { flex:none; padding:0 14px; }
 .tpos-row .st-act:disabled { opacity:.45; cursor:default; }
@@ -115,6 +118,20 @@
 .st-handle { position:absolute; inset-inline-end:-13px; bottom:-13px; width:26px; height:26px; border-radius:50%; background:var(--accent-fill, var(--accent-main)); border:2px solid #fff;
   pointer-events:auto; cursor:nwse-resize; touch-action:none; }
 .st-handle::after { content:''; position:absolute; inset:-9px; }
+/* the opposite corner resizes too; × deletes the chosen sticker */
+.st-handle-top { inset-inline-end:auto; inset-inline-start:-13px; bottom:auto; top:-13px; cursor:nesw-resize; }
+.st-x { position:absolute; top:-15px; inset-inline-end:-15px; width:30px; height:30px; border-radius:50%; border:2px solid #fff; padding:0;
+  background:#dc2626; color:#fff; font-size:19px; line-height:24px; font-weight:800; cursor:pointer; pointer-events:auto; box-shadow:0 2px 8px rgba(0,0,0,.4); }
+.st-x::after { content:''; position:absolute; inset:-8px; }
+.st-pick-toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; min-height:44px; padding:0 14px; border:1px solid var(--glass-border);
+  border-radius:14px; background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
+.st-pick-toggle svg { width:20px; height:20px; flex:none; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; transition:transform .2s; }
+.st-pick-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
+.st-grid[hidden] { display:none; }
+.st-until { display:flex; gap:6px; align-items:center; }
+.st-until select { flex:1; min-width:0; }
+.st-until input { width:84px; min-height:44px; padding:0 8px; border:1px solid var(--glass-border); border-radius:10px; background:var(--field-bg); color:var(--text-primary); font:inherit; font-size:14px; }
+.st-until input[hidden] { display:none; }
 </style>  <!-- pinch-zoom on, double-tap zoom off -->
 <meta name="theme-color" content="#F8FAFC">
 <title>صانع فيديو الآيات — زاد المسلم | Quran Ayah Video Maker</title>
@@ -508,7 +525,17 @@ body.vm-pseudo-fs .action-bar { display:none; }
 .stage-progress { position:absolute; left:0; right:0; bottom:0; height:4px; background:rgba(255,255,255,.15); }
 .stage-progress > div { height:100%; width:0; background:var(--accent-fill, var(--accent-main)); transition:width .15s linear; }
 
-.meta-row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.seek { display:flex; align-items:center; gap:10px; direction:ltr; margin-top:-2px; }
+.seek input { flex:1; min-width:0; min-height:40px; accent-color:var(--accent-main); }
+.seek-t { flex:none; min-width:38px; font-size:12.5px; font-weight:800; color:var(--text-secondary); font-variant-numeric:tabular-nums; text-align:center; }
+.meta-row { display:flex; flex-wrap:nowrap; gap:8px; justify-content:center; align-items:center; }
+.meta-row .chip { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hist-btn { flex:none; width:44px; height:44px; border-radius:50%; border:1px solid var(--glass-border); background:var(--field-bg); color:var(--text-primary); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; padding:0; }
+.hist-btn svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+[dir="rtl"] .hist-btn svg { transform:scaleX(-1); }   /* back points to the right in Arabic */
+.hist-btn:disabled { opacity:.4; cursor:default; }
+.hist-btn:not(:disabled):active { transform:scale(.92); }
 .chip {
   font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:20px;
   background:var(--accent-muted); color:var(--text-primary);
@@ -806,6 +833,7 @@ body:not(.kt-quran) .only-kq, body.kt-quran .kt-silent, body.kt-quran #vmReciter
 
 /* Font size slider with small/large glyph hints */
 .range-row { display:flex; align-items:center; gap:10px; }
+.range-row .gap-ic { width:20px; height:20px; flex:none; fill:none; stroke:var(--text-secondary); stroke-width:2.2; stroke-linecap:round; }
 .range-row .a-sm { font-size:13px; font-weight:800; color:var(--text-secondary); }
 .range-row .a-lg { font-size:20px; font-weight:800; color:var(--text-secondary); }
 input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--accent-ink, var(--accent-main)); cursor:pointer; }
@@ -925,12 +953,23 @@ body.vm-pseudo-fs .mini-prev { display:none; }
             <svg class="fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
             <svg class="fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
           </button>
-          <div class="st-box" id="vmStickerBox" hidden><span class="st-handle" id="vmStHandle" aria-hidden="true"></span></div>
+          <div class="st-box" id="vmStickerBox" hidden>
+            <span class="st-handle" id="vmStHandle" aria-hidden="true"></span>
+            <span class="st-handle st-handle-top" id="vmStHandle2" aria-hidden="true"></span>
+            <button type="button" class="st-x" id="vmStBoxDel" data-i18n-aria="vm_st_delete" aria-label="حذف" data-i18n-title="vm_st_delete" title="حذف">×</button>
+          </div>
           <div class="stage-badge" id="vmBadge" hidden></div>
           <div class="stage-progress"><div id="vmStageBar"></div></div>
         </div>
+        <div class="seek" id="vmSeekRow">
+          <span class="seek-t" id="vmSeekNow" dir="ltr">0:00</span>
+          <input type="range" id="vmSeek" min="0" max="1000" step="1" value="0" dir="ltr" data-i18n-aria="vm_seek" aria-label="موضع المعاينة">
+          <span class="seek-t" id="vmSeekTotal" dir="ltr">–:––</span>
+        </div>
         <div class="meta-row">
+          <button type="button" class="hist-btn" id="vmUndo" disabled data-i18n-aria="vm_undo" aria-label="تراجع" data-i18n-title="vm_undo" title="تراجع"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
           <span class="chip" id="vmSummary"></span>
+          <button type="button" class="hist-btn" id="vmRedo" disabled data-i18n-aria="vm_redo" aria-label="إعادة" data-i18n-title="vm_redo" title="إعادة"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
         </div>
         <div class="progress" id="vmProgress" hidden><div id="vmProgressBar"></div></div>
         <div class="status" id="vmStatus" aria-live="polite"></div>
@@ -1163,6 +1202,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
           <div class="st-slot-list" id="vmStSlotList" role="group" data-i18n-aria="vm_st_slots" aria-label="ملصقات السيناريو"></div>
           <div class="st-slot-hint" id="vmStSlotHint" aria-live="polite"></div>
         </div>
+        <button type="button" class="st-pick-toggle" id="vmStPickToggle" aria-expanded="true" aria-controls="vmStGrid"><span data-i18n="vm_st_pick">اختر ملصقاً</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="st-grid" id="vmStGrid" role="group" data-i18n-aria="vm_st_title" aria-label="ملصقات"></div>
         <div class="field">
           <div class="label" data-i18n="vm_st_added">المضافة</div>
@@ -1177,6 +1217,17 @@ body.vm-pseudo-fs .mini-prev { display:none; }
           <label class="st-row" id="vmStWithRow"><span data-i18n="vm_st_when">الظهور</span>
             <select id="vmStWith" class="st-with"></select>
           </label>
+          <div class="st-row" id="vmStUntilRow" hidden><label for="vmStUntil" data-i18n="vm_st_until">حتى</label>
+            <div class="st-until">
+              <select id="vmStUntil" class="st-with">
+                <option value="line" data-i18n="vm_st_until_line">نهاية هذا النص</option>
+                <option value="next" data-i18n="vm_st_until_next">ظهور الملصق التالي</option>
+                <option value="end" data-i18n="vm_st_until_end">نهاية الفيديو</option>
+                <option value="time" data-i18n="vm_st_until_time">ثانية محددة</option>
+              </select>
+              <input type="number" id="vmStUntilAt" min="0" step="0.1" inputmode="decimal" dir="ltr" data-i18n-aria="vm_st_until_time" aria-label="ثانية محددة" hidden>
+            </div>
+          </div>
           <div class="st-row" id="vmStTimes"><span></span>
             <div class="st-times">
               <label class="st-time"><span data-i18n="vm_st_from">من</span><input type="number" id="vmStFrom" min="0" step="0.1" inputmode="decimal" placeholder="0" dir="ltr"><button type="button" class="st-now" id="vmStFromNow" data-i18n="vm_st_now" data-i18n-title="vm_st_now_aria" title="وقت المعاينة الحالي">الآن</button></label>
@@ -1215,10 +1266,12 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 
         <div class="field only-short">
           <div class="label" data-i18n="vm_tpos">موضع النص</div>
-          <div class="tpos-row">
-            <span class="st-hint" data-i18n="vm_tpos_hint">اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.</span>
-            <button type="button" class="st-act" id="vmTextPosReset" data-i18n="vm_tpos_reset" disabled>إلى الوسط</button>
+          <div class="formats ta" id="vmTextAlign" role="group" data-i18n-aria="vm_tpos" aria-label="موضع النص">
+            <button type="button" data-ta="top" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14M8 9h8M8 13h8"/></svg><span data-i18n="vm_ta_top">أعلى</span></button>
+            <button type="button" data-ta="middle" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h8M8 14h8"/><path d="M5 4h14M5 20h14" opacity=".45"/></svg><span data-i18n="vm_ta_middle">الوسط</span></button>
+            <button type="button" data-ta="bottom" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11h8M8 15h8M5 20h14"/></svg><span data-i18n="vm_ta_bottom">أسفل</span></button>
           </div>
+          <span class="st-hint" data-i18n="vm_tpos_hint">اضغط مطولاً على المعاينة ثم اسحب لتحريك النص.</span>
         </div>
 
         <div class="field">
@@ -1227,6 +1280,15 @@ body.vm-pseudo-fs .mini-prev { display:none; }
             <span class="a-sm">ع</span>
             <input type="range" id="vmFont" min="0.7" max="1.4" step="0.05" value="1">
             <span class="a-lg">ع</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="vmLineGap" data-i18n="vm_line_gap">تباعد الأسطر</label>
+          <div class="range-row">
+            <svg class="gap-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 12h14M5 15h14"/></svg>
+            <input type="range" id="vmLineGap" min="1.1" max="2.4" step="0.05" value="1.5">
+            <svg class="gap-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M5 12h14M5 19h14"/></svg>
           </div>
         </div>
 
@@ -1453,6 +1515,13 @@ body.vm-pseudo-fs .mini-prev { display:none; }
         </span>
         <input type="checkbox" class="switch" id="vmPingPong">
       </label>
+      <label class="switch-row">
+        <span class="sw-text">
+          <span class="sw-title" data-i18n="vm_mini_setting">معاينة مصغّرة عائمة</span>
+          <span class="sw-desc" data-i18n="vm_mini_setting_desc">نسخة صغيرة من الفيديو تظهر حين تنزل إلى الإعدادات، لترى كل تغيير مباشرة</span>
+        </span>
+        <input type="checkbox" class="switch" id="vmMiniToggle">
+      </label>
   </div>
 </div>
 <div class="bottom-sheet" id="vmReciterSheet" role="dialog" aria-modal="true" aria-labelledby="vmReciterSheetTitle">
@@ -1521,7 +1590,7 @@ body.vm-pseudo-fs .mini-prev { display:none; }
 // the "multiple pictures" switch shows but does nothing). Drop the stale copy from
 // every cache and reload once. Keep NEED in step with BUILD in js/video-maker.js.
 (function () {
-  var NEED = 13;
+  var NEED = 14;
   try {
     if (window.VM && VM.build >= NEED) { sessionStorage.removeItem('vmHealed'); return; }
     if (sessionStorage.getItem('vmHealed') || !window.caches) return;   // at most once per tab

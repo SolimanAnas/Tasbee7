@@ -13,7 +13,7 @@
 (function (root) {
   'use strict';
 
-  const LIMITS = { lines: 30, chars: 400, stickers: 30, slots: 30, size: [0.7, 1.4], seconds: 3600 };
+  const LIMITS = { lines: 30, chars: 400, stickers: 30, slots: 30, size: [0.7, 1.4], spacing: [1.1, 2.4], seconds: 3600 };
   const STYLES = ['line', 'build', 'word'];
   const FORMATS = ['story', 'square', 'wide'];
   const FX = ['pop', 'fade', 'slide', 'zoom', 'float', 'none'];
@@ -76,7 +76,7 @@
     let ref = m[1];
     if (!ref) ref = toks.shift() || '';
     ref = ref.replace(/^#/, '').toLowerCase();
-    const st = { slot: null, id: null, fx: null, flip: false, all: false };
+    const st = { slot: null, id: null, fx: null, flip: false, all: false, until: null };
     if (/^\d{1,3}$/.test(ref) && +ref >= 1) st.slot = +ref;
     else if (ids.includes(ref)) st.id = ref;
     else return { bad: ref || '?' };
@@ -85,6 +85,8 @@
       if (POS[k] || POS[raw]) { const [key, v] = POS[k] || POS[raw]; st[key] = v; } else if (FX.includes(k)) st.fx = k;
       else if (k === 'flip' || raw === 'معكوس') st.flip = true;
       else if (k === 'all' || k === 'whole' || raw === 'كامل') st.all = true;
+      else if (k === 'next') st.until = 'next';           // stays until the next sticker shows
+      else if (k === 'end') st.until = 'end';             // stays to the end of the video
     }
     return st;
   }
@@ -117,6 +119,14 @@
       if (!isFinite(n)) { warn('size', raw); return; }
       out.size = round(clamp(n, LIMITS.size[0], LIMITS.size[1]), 100);
       if (out.size !== n) warn('size', raw);
+    } else if (key === 'position') {
+      const p = { top: 'top', middle: 'middle', center: 'middle', centre: 'middle', bottom: 'bottom', 'أعلى': 'top', 'وسط': 'middle', 'الوسط': 'middle', 'أسفل': 'bottom' }[v];
+      if (p) out.position = p; else warn('position', raw);
+    } else if (key === 'spacing') {
+      const n = parseFloat(v);
+      if (!isFinite(n)) { warn('spacing', raw); return; }
+      out.spacing = round(clamp(n, LIMITS.spacing[0], LIMITS.spacing[1]), 100);
+      if (out.spacing !== n) warn('spacing', raw);
     } else if (key === 'style') { if (STYLES.includes(v)) out.style = v; else warn('style', raw); }
     else if (key === 'format') { if (FORMATS.includes(v)) out.format = v; else warn('format', raw); }
     else if (key === 'color' || key === 'colour') { if (/^#[0-9a-f]{6}$/.test(v)) out.color = v; else warn('color', raw); }
@@ -145,7 +155,7 @@
     const addSticker = (st, line) => {
       if (stickers.length >= LIMITS.stickers) { droppedSt++; return; }
       if (st.slot != null && st.slot > LIMITS.slots) { warn('tag', 'sticker ' + st.slot); return; }
-      stickers.push({ line: st.all ? null : line, slot: st.slot, id: st.id, x: st.x, y: st.y, s: st.s, fx: st.fx || 'pop', flip: st.flip });
+      stickers.push({ auto: st.y == null && st.s == null, line: st.all ? null : line, slot: st.slot, id: st.id, x: st.x, y: st.y, s: st.s, fx: st.fx || 'pop', flip: st.flip, until: st.until || 'line' });
     };
     for (let i = 0; i < src.length; i++) {
       const l = src[i].trim();
@@ -235,7 +245,7 @@
   function serialize(v) {
     const out = ['# Zad Al-Muslim video script', ''];
     const s = v.settings || {};
-    for (const k of ['font', 'size', 'style', 'color', 'format', 'name']) if (s[k] != null && s[k] !== '') out.push('@' + k + ': ' + s[k]);
+    for (const k of ['font', 'size', 'spacing', 'position', 'style', 'color', 'format', 'name']) if (s[k] != null && s[k] !== '') out.push('@' + k + ': ' + s[k]);
     if (s.quran) out.push('@quran: ' + s.quran.surah + ':' + s.quran.from + (s.quran.to !== s.quran.from ? '-' + s.quran.to : ''));
     if (out.length > 2) out.push('');
     // a place and size as the nearest words (the format has no numbers for them)
@@ -250,7 +260,7 @@
       if (s && st.s !== 0.38 && s[0] !== 'medium') w.push(s[0]);
       return w.length ? ' ' + w.join(' ') : '';
     };
-    const tag = st => '<sticker ' + (st.slot != null ? st.slot : st.id) + where(st) + (st.fx && st.fx !== 'pop' ? ' ' + st.fx : '') + (st.flip ? ' flip' : '') + (st.line == null ? ' all' : '') + '>';
+    const tag = st => '<sticker ' + (st.slot != null ? st.slot : st.id) + where(st) + (st.fx && st.fx !== 'pop' ? ' ' + st.fx : '') + (st.flip ? ' flip' : '') + (st.line == null ? ' all' : st.until === 'next' || st.until === 'end' ? ' ' + st.until : '') + '>';
     v.lines.forEach((ln, i) => {
       let row = '';
       if (ln.a != null) row += '[' + clock(ln.a) + (ln.b != null ? ' - ' + clock(ln.b) : '') + '] ';
@@ -296,6 +306,8 @@
     L.push('# 1) SETTINGS (optional), one per row, at the top:');
     L.push('#    @font: <font id>        the font of the whole video (list below)');
     L.push(`#    @size: <number>         text size, from ${LIMITS.size[0]} (small) to ${LIMITS.size[1]} (large); 1 = normal`);
+    L.push(`#    @spacing: <number>      space between lines, from ${LIMITS.spacing[0]} (tight) to ${LIMITS.spacing[1]} (airy); 1.45 = normal`);
+    L.push('#    @position: top | middle | bottom   where the text sits (default top, with a sticker below it)');
     L.push('#    @style: line | build | word');
     L.push('#            line  = the whole line shows, the word being read is lit (default)');
     L.push('#            build = the words appear one by one in place');
@@ -328,6 +340,7 @@
     L.push('#      size:   small | medium | large');
     L.push('#      effect: ' + FX.join(' | ') + '   (how it comes in and goes out; default pop)');
     L.push('#      flip    (mirror it)        all    (show it for the whole video, not just that line)');
+    L.push('#      next    (stays until the next sticker shows)    end    (stays from its line to the end)');
     L.push('#    e.g.  <sticker 1 left fade>   <sticker 2 right small>   <sticker 3 all top float>');
     L.push('#    The text is in the middle of the video: keep stickers at the bottom (or top), and at most two per line.');
     if (st.length) {

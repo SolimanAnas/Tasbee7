@@ -94,6 +94,8 @@
         // null = to the end of the video
         to: s.to == null || s.to === '' || !isFinite(+s.to) ? null : clamp(+s.to, 0, MAX_T),
         fx: FX.includes(s.fx) ? s.fx : 'pop',
+        // with a line: until the line ends ('line'), the next sticker shows ('next'), the video ends ('end'), or a second
+        until: ['line', 'next', 'end'].includes(s.until) ? s.until : isFinite(+s.until) && s.until !== null && s.until !== '' && +s.until >= 0 ? Math.min(MAX_T, +s.until) : 'line',
       }));
       S.stickers.forEach(s => { if (s.to != null && s.to <= s.from) s.to = null; });
       if (sel >= S.stickers.length) sel = -1;
@@ -117,15 +119,35 @@
     const easeBack = x => { const k = 1.70158; return 1 + (k + 1) * Math.pow(x - 1, 3) + k * Math.pow(x - 1, 2); };
     // span(line) -> [start, end] of a script line in the timeline, null when that line is not in
     // it (an emptied text), undefined when there are no lines (not own words): then from / to.
-    function look(s, t, total, span) {
-      if (t == null) return { a: 1, k: 1, dy: 0 };
-      const all = total || MAX_T;
-      let from = s.from, to = s.to;
+    // when a sticker shows: [from, to] (to null = the end), or null when its line is not there
+    function spanOf(s, span) {
       if (s.line != null && span) {
         const sp = span(s.line);
         if (sp === null) return null;
-        if (sp) { from = sp[0]; to = sp[1]; }
+        if (sp) {
+          const u = s.until;
+          return [sp[0], u === 'end' || u === 'next' ? null : typeof u === 'number' ? (u > sp[0] ? u : sp[1]) : sp[1]];
+        }
       }
+      return [s.from, s.to];
+    }
+    // 'next': until the first sticker after it begins (or the end)
+    function nextStart(s, from, span) {
+      let best = null;
+      for (const o of list()) {
+        if (o === s || !o.id) continue;
+        const sp = spanOf(o, span);
+        if (sp && sp[0] > from + 0.01 && (best == null || sp[0] < best)) best = sp[0];
+      }
+      return best;
+    }
+    function look(s, t, total, span) {
+      if (t == null) return { a: 1, k: 1, dy: 0 };
+      const all = total || MAX_T;
+      const sp = spanOf(s, span);
+      if (!sp) return null;
+      let [from, to] = sp;
+      if (s.line != null && span && s.until === 'next') to = nextStart(s, from, span);
       const end = to == null ? all : Math.min(to, all);
       if (t < from || t > end) return null;
       const d = Math.min(FX_DUR, (end - from) / 2);
@@ -146,12 +168,14 @@
       }
       return r.a > 0.003 ? r : null;
     }
-    function draw(c, w, h, t, total, span) {
+    // editing: the preview standing still (the chosen sticker shows whatever its time)
+    function draw(c, w, h, t, total, span, editing) {
       for (const s of list()) {
         if (!s.id) continue;               // a script's number with no picture chosen yet
         const im = image(s.id);
         if (!im.complete || !im.naturalWidth) continue;
-        const v = look(s, t == null ? null : t, total, span);
+        // the chosen one always shows while it is being edited (the preview stands still)
+        const v = editing && list()[sel] === s ? { a: 1, k: 1, dy: 0 } : look(s, t == null ? null : t, total, span);
         if (!v) continue;
         const b = box(s, w, h);
         c.save();
@@ -258,6 +282,11 @@
       pick.value = s.line == null ? 'time' : String(s.line);
       $('vmStWithRow').hidden = !texts.length && s.line == null;
       $('vmStTimes').hidden = s.line != null;
+      $('vmStUntilRow').hidden = s.line == null;
+      const u = typeof s.until === 'number' ? 'time' : s.until;
+      $('vmStUntil').value = u;
+      $('vmStUntilAt').hidden = u !== 'time';
+      if (u === 'time' && document.activeElement !== $('vmStUntilAt')) $('vmStUntilAt').value = +s.until.toFixed(1);
       const set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = v; };
       set('vmStSize', s.s); set('vmStX', s.x); set('vmStY', s.y);
       set('vmStFrom', s.from ? +s.from.toFixed(1) : '');
@@ -300,7 +329,7 @@
     }
     function pickFor(n) {
       slotSel = n;
-      if (n != null) { sel = -1; placeBox(); }
+      if (n != null) { sel = -1; placeBox(); setPicker(true); }
       renderControls();
       if (n != null) { const g = $('vmStGrid'); if (g.scrollIntoView) g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
     }
@@ -317,7 +346,8 @@
       const room = Math.max(0, MAX - own.length);
       S.stickers = own.concat(items.slice(0, room).map(s => ({
         id: s.id || null, slot: s.slot || null, line: s.line == null ? null : s.line,
-        x: s.x, y: s.y, s: s.s, flip: !!s.flip, from: 0, to: null, fx: s.fx || 'pop',
+        // no place given: one alone stands on the bottom edge, large, like a sticker added by hand
+        ...(s.auto && s.x === 0.5 ? standing(s.id) : { x: s.x, y: s.y, s: s.s }), flip: !!s.flip, from: 0, to: null, fx: s.fx || 'pop', until: s.until || 'line',
       })));
       sanitize();
       sel = -1;
@@ -354,18 +384,33 @@
       }
     }
 
+    function setPicker(open) {
+      $('vmStGrid').hidden = !open;
+      $('vmStPickToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
     function select(i) {
       sel = i;
       if (i >= 0) slotSel = null;
       placeBox();
       renderControls();
     }
+    // centred, and as low as it goes with its whole picture in the frame
+    function standing(id) {
+      const cv = api.canvas, w = cv.width || 1080, h = cv.height || 1920, base = Math.min(w, h);
+      const tile = document.querySelector('#vmStGrid [data-sticker="' + id + '"] img'), im = imgs.get(id);
+      const src = im && im.naturalWidth ? im : tile && tile.naturalWidth ? tile : null;
+      const ratio = src ? src.naturalHeight / src.naturalWidth : 1.3;
+      const sz = w < h ? 0.62 : 0.5;                              // a portrait video: about two thirds of its width
+      const bh = sz * base * ratio;
+      return { x: 0.5, y: Math.round(Math.max(0.5, 1 - bh / 2 / h) * 1000) / 1000, s: sz };
+    }
     function add(id) {
       if (list().length >= MAX) { api.say(tr('vm_st_max', { n: api.num(MAX) }), true); return; }
-      // new ones start centred in the lower half of the video (clear of the text)
-      S.stickers.push({ id, x: 0.5, y: 0.75, s: 0.46, flip: false, from: 0, to: null, fx: 'pop', line: null, slot: null });
+      // new ones start centred and large, standing on the bottom edge of the video (the text is above)
+      S.stickers.push(Object.assign({ id, flip: false, from: 0, to: null, fx: 'pop', line: null, slot: null, until: 'line' }, standing(id)));
       api.say('', false);
       sel = S.stickers.length - 1;
+      setPicker(false);                 // its controls come next; the picker opens again with a tap
       changed();
     }
     function remove() {
@@ -382,8 +427,11 @@
     }
     function hit(p) {
       const cv = api.canvas;
+      // only what the preview shows at its moment (the chosen one always)
+      const f = api.frame ? api.frame() : null;
       for (let i = list().length - 1; i >= 0; i--) {
         if (!list()[i].id) continue;
+        if (f && i !== sel && !look(list()[i], f.t, f.total, f.span)) continue;
         const b = box(list()[i], cv.width, cv.height);
         if (Math.abs(p.x - b.cx) <= b.w / 2 && Math.abs(p.y - b.cy) <= b.h / 2) return i;
       }
@@ -415,29 +463,30 @@
       const end = () => { if (gesture && gesture.moved) swallowClick = Date.now(); gesture = null; };
       cv.addEventListener('pointerup', end);
       cv.addEventListener('pointercancel', end);
-      // the corner handle resizes: the sticker's width follows its distance from the centre
-      const handle = $('vmStHandle');
-      handle.addEventListener('pointerdown', ev => {
-        const s = list()[sel];
-        if (!s) return;
-        ev.stopPropagation(); ev.preventDefault();
-        const p = toCanvas(ev), b = box(s, cv.width, cv.height);
-        gesture = { kind: 'size', s0: s.s, d0: Math.hypot(p.x - b.cx, p.y - b.cy) || 1, moved: false };
-        try { handle.setPointerCapture(ev.pointerId); } catch (e) { /* not supported */ }
-      });
-      handle.addEventListener('pointermove', ev => {
-        if (!gesture || gesture.kind !== 'size') return;
-        const s = list()[sel];
-        if (!s) return;
-        const p = toCanvas(ev), b = box(s, cv.width, cv.height);
-        s.s = clamp(gesture.s0 * Math.hypot(p.x - b.cx, p.y - b.cy) / gesture.d0, SIZE.min, SIZE.max);
-        gesture.moved = true;
-        changed();
-      });
-      const endH = () => { if (gesture && gesture.moved) swallowClick = Date.now(); gesture = null; };
-      handle.addEventListener('pointerup', endH);
-      handle.addEventListener('pointercancel', endH);
-      handle.addEventListener('click', e => e.stopPropagation());
+      // either corner handle resizes: the sticker's width follows the finger's distance from its centre
+      for (const handle of [$('vmStHandle'), $('vmStHandle2')]) {
+        handle.addEventListener('pointerdown', ev => {
+          const s = list()[sel];
+          if (!s) return;
+          ev.stopPropagation(); ev.preventDefault();
+          const p = toCanvas(ev), b = box(s, cv.width, cv.height);
+          gesture = { kind: 'size', s0: s.s, d0: Math.hypot(p.x - b.cx, p.y - b.cy) || 1, moved: false };
+          try { handle.setPointerCapture(ev.pointerId); } catch (e) { /* not supported */ }
+        });
+        handle.addEventListener('pointermove', ev => {
+          if (!gesture || gesture.kind !== 'size') return;
+          const s = list()[sel];
+          if (!s) return;
+          const p = toCanvas(ev), b = box(s, cv.width, cv.height);
+          s.s = clamp(gesture.s0 * Math.hypot(p.x - b.cx, p.y - b.cy) / gesture.d0, SIZE.min, SIZE.max);
+          gesture.moved = true;
+          changed();
+        });
+        const endH = () => { if (gesture && gesture.moved) swallowClick = Date.now(); gesture = null; };
+        handle.addEventListener('pointerup', endH);
+        handle.addEventListener('pointercancel', endH);
+        handle.addEventListener('click', e => e.stopPropagation());
+      }
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && slotSel != null && !document.querySelector('.bottom-sheet.active')) { pickFor(null); return; }
         if (e.key === 'Escape' && sel >= 0 && !document.querySelector('.bottom-sheet.active') && $('vmResult').hidden) select(-1);
@@ -482,6 +531,29 @@
         changed();
       };
       $('vmStPack').onclick = downloadPack;
+      $('vmStUntil').onchange = () => {
+        const s = list()[sel];
+        if (!s) return;
+        const v = $('vmStUntil').value;
+        if (v === 'time') {
+          const sp = api.lineSpan ? api.lineSpan(s.line) : null;
+          s.until = Math.round((sp ? sp[1] : 5) * 10) / 10;
+        } else s.until = v;
+        changed();
+      };
+      $('vmStUntilAt').onchange = () => {
+        const s = list()[sel];
+        const n = parseFloat($('vmStUntilAt').value);
+        if (!s || !isFinite(n)) return;
+        s.until = clamp(n, 0, MAX_T);
+        changed();
+      };
+      // the picker folds away once there are stickers (less to scroll past)
+      $('vmStPickToggle').onclick = () => setPicker($('vmStGrid').hidden);
+      setPicker(!list().length);
+      const del = $('vmStBoxDel');
+      del.addEventListener('pointerdown', e => e.stopPropagation());
+      del.onclick = e => { e.stopPropagation(); remove(); };
       $('vmStFrom').onchange = time;
       $('vmStTo').onchange = time;
       $('vmStFromNow').onclick = () => { const s = list()[sel]; if (!s) return; $('vmStFrom').value = +api.now().toFixed(1); time(); renderControls(); };
