@@ -75,7 +75,8 @@
       const txt = mb >= 1 ? mb.toFixed(mb >= 10 ? 0 : 1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
       return api.arabicNames() ? api.arDigits(txt) : txt;
     }
-    const letters = t => String(t || '').replace(/[^ء-ي]/g, '').length || 1;
+    // the length of a text, for sharing time: its Arabic letters, or for other scripts its characters
+    const letters = t => String(t || '').replace(/[^ء-ي]/g, '').length || String(t || '').replace(/[\s\p{P}]/gu, '').length || 1;
     const has = () => !!rec;
     const active = () => S.recSource === 'own' && has();
     const keyOf = () => api.rangeKey();
@@ -187,7 +188,7 @@
       document.querySelectorAll('#vmSource button').forEach(b => b.classList.toggle('active', b.dataset.src === (showOwn ? 'own' : 'reciter')));
       $('vmReciterBox').hidden = showOwn;
       $('vmOwnBox').hidden = !showOwn;
-      $('vmSheikh').placeholder = showOwn ? tr('vm_my_recitation') : api.reciterName(api.reciterObj());
+      $('vmSheikh').placeholder = api.isKText && api.isKText() ? tr('vm_kt_name_ph') : showOwn ? tr('vm_my_recitation') : api.reciterName(api.reciterObj());
       if ($('vmSheikh').value !== (S.sheikh || '')) $('vmSheikh').value = S.sheikh || '';
       const info = $('vmOwnInfo');
       info.hidden = !rec;
@@ -487,7 +488,7 @@
       const n = work.m.length, k = work.sel, segs = api.segments();
       const isEnd = k >= n;
       const seg = segs[Math.min(k, n - 1)];
-      $('vmSyncFocusCount').textContent = isEnd ? tr('vm_sync_end') : (seg && seg.num == null ? '﷽ ' : '') + tr('vm_sync_ayah', { i: num(k + 1), n: num(n) });
+      $('vmSyncFocusCount').textContent = isEnd ? tr('vm_sync_end') : (seg && seg.num == null ? '﷽ ' : '') + tr(seg && seg.kt ? 'vm_kt_n' : 'vm_sync_ayah', { i: num(k + 1), n: num(n) });
       $('vmSyncFocusText').textContent = isEnd || !seg ? '' : api.ayahWords({ text: seg.text, num: null }).join(' ');
       $('vmSyncFocusLabel').textContent = isEnd ? tr('vm_sync_end') : tr('vm_sync_this_start');
       const f = $('vmSyncFTime');

@@ -39,7 +39,7 @@
       const n = segs.length;
       const seg = segs[Math.min(idx, n - 1)];
       const next = segs[idx + 1];
-      $('vmRecCount').textContent = seg && seg.num == null ? tr('vm_rec_basmala') : tr('vm_rec_count', { i: num(Math.min(idx + 1, n)), n: num(n) });
+      $('vmRecCount').textContent = seg && seg.num == null ? tr('vm_rec_basmala') : tr(seg && seg.kt ? 'vm_kt_n' : 'vm_rec_count', { i: num(Math.min(idx + 1, n)), n: num(n) });
       const ayah = $('vmRecAyah');
       ayah.style.fontFamily = api.qfont() + ', QuranFallback, serif';
       ayah.textContent = seg ? api.ayahWords(seg).join(' ') : '';
