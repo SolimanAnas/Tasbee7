@@ -77,7 +77,7 @@
     fx: null,           // audio effects for the own recording (js/audio-fx.js; set in loadSettings)
     mode: 'short',      // 'short' = shorts / reels (default), 'long' = 16:9 long video, 'khatira' = word by word
     kReciter: 7,        // «خاطرة»: a reciter with word timings (js/khatira.js RECITERS, quran.com id)
-    kFont: 'amiri',     // «خاطرة»: the face of the words (KFONTS)
+    kFont: 'amiri',     // «خاطرة»: the face of the words (Khatira.FONTS id, or 'u:<id>' for a font from the device)
     tvTemplate: 'dawn', // long mode: template id (js/tv-templates.js)
     tvBg: 'g1',         // long mode: its own background ('g<i>' or 'i:<file>')
   };
@@ -85,12 +85,6 @@
   // «خاطرة»: the Shorts video (same backgrounds, sizes and export) with the recitation shown
   // word by word, each word as it is recited, large, in a bold face.
   const isKhatira = () => state.mode === 'khatira' && !!window.Khatira;
-  const KFONTS = {
-    amiri: { family: 'KhAmiri', weight: '' },
-    scheherazade: { family: 'KhScheherazade', weight: '' },
-    naskh: { family: 'KhNaskh', weight: '700 ' },
-    hafs: { family: null, weight: '' },             // the mushaf face (QFONT)
-  };
   let long = null;        // long-mode engine (js/video-maker-long.js)
   // The user's own recording (js/video-maker-own.js); without it every check is false.
   let own = { active: () => false, has: () => false };
@@ -233,6 +227,8 @@
       vm_fx_auto_polish: 'فُعّل تحسين الصوت تلقائياً لتسجيلك — غيّره من «مؤثرات صوتية»',
       vm_mode_short: 'مقاطع قصيرة / ريلز', vm_mode_long: 'فيديو طويل', vm_template: 'القالب',
       vm_mode_khatira: 'خاطرة', vm_kh_font: 'خط الكلمات', vm_kf_amiri: 'أميري', vm_kf_scheherazade: 'شهرزاد', vm_kf_naskh: 'نسخ', vm_kf_hafs: 'خط المصحف',
+      vm_kf_ruqaa: 'رقعة', vm_kf_changa: 'تشانغا', vm_kf_cairo: 'كايرو', vm_kf_jomhuria: 'جمهورية', vm_kf_gulzar: 'گلزار',
+      vm_kf_add: 'خط من جهازك', vm_kf_delete: 'حذف الخط', vm_kf_bad: 'تعذّر فتح ملف الخط — اختر ملف TTF أو OTF أو WOFF', vm_kf_private: 'الخطوط التي تضيفها تبقى على جهازك ولا تُرفع إلى أي مكان.',
       vm_kh_reciters: 'قرّاء معهم توقيت لكل كلمة، فتظهر الكلمة حين تُتلى.', vm_kh_own_note: 'في تسجيلك تُوزَّع الكلمات على زمن كل آية بحسب طولها، فتوقيتها تقريبي.',
       vm_long_hint: 'كلما زادت الآيات طال وقت الإنشاء وكبر حجم الملف',
       vm_long_progress: 'جارٍ الإنشاء {p}% — الآية {i} من {n}',
@@ -348,6 +344,8 @@
       vm_fx_auto_polish: 'Voice polish was switched on for your recording — change it under «Pro audio effects»',
       vm_mode_short: 'Shorts / Reels', vm_mode_long: 'Long video', vm_template: 'Template',
       vm_mode_khatira: 'Word by word', vm_kh_font: 'Typeface', vm_kf_amiri: 'Amiri', vm_kf_scheherazade: 'Scheherazade', vm_kf_naskh: 'Naskh', vm_kf_hafs: 'Mushaf',
+      vm_kf_ruqaa: 'Ruqaa', vm_kf_changa: 'Changa', vm_kf_cairo: 'Cairo', vm_kf_jomhuria: 'Jomhuria', vm_kf_gulzar: 'Gulzar',
+      vm_kf_add: 'A font from your device', vm_kf_delete: 'Delete the font', vm_kf_bad: "Couldn't open the font file — choose a TTF, OTF or WOFF file", vm_kf_private: 'The fonts you add stay on your device and are never uploaded.',
       vm_kh_reciters: 'Reciters with a timing for every word, so each word shows as it is recited.', vm_kh_own_note: 'In your recording the words share each ayah\'s time by their length, so their timing is approximate.',
       vm_long_hint: 'More ayat take longer to create and make a bigger file',
       vm_long_progress: 'Creating {p}% — ayah {i} of {n}',
@@ -405,7 +403,7 @@
     if (state.halo !== 'auto' && !/^#[0-9a-f]{6}$/i.test(String(state.halo))) state.halo = 'auto';
     if (state.mode !== 'long' && state.mode !== 'khatira') state.mode = 'short';
     if (!window.Khatira || !Khatira.RECITERS.some(r => r.id === state.kReciter)) state.kReciter = 7;
-    if (!KFONTS[state.kFont]) state.kFont = 'amiri';
+    if (typeof state.kFont !== 'string' || !(state.kFont.startsWith('u:') || (window.Khatira && Khatira.FONTS.some(f => f.id === state.kFont)))) state.kFont = 'amiri';
     if (state.recSource !== 'own') state.recSource = 'reciter';
     state.sheikh = typeof state.sheikh === 'string' ? state.sheikh.slice(0, 60) : '';
     if (window.AudioFx) {
@@ -1238,25 +1236,152 @@
     c.restore();
   }
 
-  // ---------- «خاطرة»: the words ----------
-  // One word at a time, centred and large, in the chosen bold face; it eases in (a fade and a
-  // slight grow) as it is recited, while the one before fades out.
+  // ---------- «خاطرة»: the faces ----------
+  // The bundled bold faces (js/khatira.js FONTS) and the ones the user adds from the device (kept
+  // there, in IndexedDB, like their backgrounds). A word is drawn as the face can draw it: the
+  // Uthmani marks a face lacks become their usual equivalents (Khatira.adaptWord).
+  let userFonts = [];             // [{ id, name, family, has }]
+  const FONT_DB = 'vm-user-fonts';
+  const MAX_FONTS = 12, MAX_FONT_BYTES = 20 * 1024 * 1024;
+  function kFaces() {
+    const bundled = window.Khatira ? Khatira.FONTS.map(f => Object.assign({ has: f.qpc ? null : Khatira.hasIn(f) }, f)) : [];
+    return bundled.concat(userFonts.map(u => ({ id: 'u:' + u.id, family: u.family, weight: '', has: u.has, user: u })));
+  }
+  function kFace() {
+    const all = kFaces();
+    return all.find(f => f.id === state.kFont) || all[0] || { family: null, weight: '', qpc: true };
+  }
   function kFont(size) {
-    const f = KFONTS[state.kFont] || KFONTS.amiri;
+    const f = kFace();
     return f.weight + size + 'px ' + (f.family || QFONT);
   }
+  // The word as the chosen face draws it.
+  function kText(word) {
+    const f = kFace();
+    return f.qpc ? word : Khatira.adaptWord(word, f.user ? f.has : f.has || (() => true));
+  }
   function kFontReady() {
-    const f = KFONTS[state.kFont] || KFONTS.amiri;
+    const f = kFace();
     if (!f.family || !document.fonts || !document.fonts.load) return Promise.resolve();
     return document.fonts.load(f.weight + '64px ' + f.family, 'أبجد').catch(() => {});
   }
+  function fontDb() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) { reject(new Error('no IndexedDB')); return; }
+      const req = indexedDB.open(FONT_DB, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('fonts', { keyPath: 'id' });
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  function fontTx(mode, fn) {
+    return fontDb().then(d => new Promise((resolve, reject) => {
+      const t = d.transaction('fonts', mode);
+      const out = fn(t.objectStore('fonts'));
+      t.oncomplete = () => { d.close(); resolve(out && 'result' in out ? out.result : undefined); };
+      t.onerror = () => { d.close(); reject(t.error); };
+    }));
+  }
+  // A font file as a face: loaded (so a bad file is refused), added to the page, and read for
+  // the characters it draws (TrueType / OpenType; unknown for WOFF).
+  async function faceOf(rec) {
+    const family = 'KhUser' + rec.id;
+    const ff = new FontFace(family, rec.data);
+    await ff.load();
+    document.fonts.add(ff);
+    const set = Khatira.cmapOf(rec.data);
+    return { id: rec.id, name: rec.name, family, ff, has: set ? (c => set.has(c.codePointAt(0))) : null };
+  }
+  async function loadUserFonts() {
+    let recs = [];
+    try { recs = (await fontTx('readonly', st => st.getAll())) || []; } catch (e) { recs = []; }
+    recs.sort((a, b) => (a.added || 0) - (b.added || 0));
+    userFonts = [];
+    for (const r of recs) { try { userFonts.push(await faceOf(r)); } catch (e) { /* a file the browser no longer reads */ } }
+    if (state.kFont.startsWith('u:') && !userFonts.some(u => 'u:' + u.id === state.kFont)) state.kFont = 'amiri';
+  }
+  async function addUserFont(file) {
+    if (!file) return;
+    if (!/\.(ttf|otf|woff2?)$/i.test(file.name) && !/font/.test(file.type)) { setStatus(tr('vm_kf_bad'), true); return; }
+    if (file.size > MAX_FONT_BYTES || userFonts.length >= MAX_FONTS) { setStatus(tr('vm_kf_bad'), true); return; }
+    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: file.name.replace(/\.[^.]+$/, '').slice(0, 40), data: await file.arrayBuffer(), added: Date.now() };
+    let face;
+    try { face = await faceOf(rec); } catch (e) { setStatus(tr('vm_kf_bad'), true); return; }
+    try { await fontTx('readwrite', st => st.put(rec)); } catch (e) { /* kept for this visit only */ }
+    userFonts.push(face);
+    state.kFont = 'u:' + rec.id;
+    setStatus('');
+    renderKFonts();
+    onChange();
+  }
+  async function deleteUserFont(id) {
+    const i = userFonts.findIndex(u => u.id === id);
+    if (i < 0) return;
+    try { document.fonts.delete(userFonts[i].ff); } catch (e) { /* gone */ }
+    userFonts.splice(i, 1);
+    try { await fontTx('readwrite', st => st.delete(id)); } catch (e) { /* not stored */ }
+    if (state.kFont === 'u:' + id) state.kFont = 'amiri';
+    renderKFonts();
+    kFontReady().then(() => onChange());
+  }
+  // The picker: a sample of «أبجد» in each face, the user's own after the bundled ones, then «+».
+  function renderKFonts() {
+    const box = $('vmKFonts');
+    if (!box || !window.Khatira) return;
+    box.innerHTML = '';
+    for (const f of kFaces()) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.kfont = f.id;
+      const sample = document.createElement('span');
+      sample.className = 'kf-sample';
+      sample.textContent = 'أبجد';
+      sample.style.fontFamily = f.family ? "'" + f.family + "'" : 'QuranFont, QuranFallback';
+      if (f.weight) sample.style.fontWeight = f.weight.trim();
+      if (f.size) sample.style.fontSize = Math.round(28 * f.size) + 'px';
+      const name = document.createElement('span');
+      name.className = 'kf-name';
+      name.textContent = f.user ? f.user.name : tr('vm_kf_' + f.id);
+      if (f.user) name.dir = 'auto';
+      b.append(sample, name);
+      b.onclick = () => { state.kFont = f.id; markKFonts(); kFontReady().then(() => onChange()); };
+      if (f.user) {
+        b.classList.add('is-user');
+        const del = document.createElement('span');
+        del.className = 'kf-del';
+        del.setAttribute('role', 'button');
+        del.tabIndex = 0;
+        del.setAttribute('aria-label', tr('vm_kf_delete'));
+        del.title = tr('vm_kf_delete');
+        del.textContent = '×';
+        const go = e => { e.stopPropagation(); e.preventDefault(); deleteUserFont(f.user.id); };
+        del.onclick = go;
+        del.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') go(e); };
+        b.appendChild(del);
+      }
+      box.appendChild(b);
+    }
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'kf-add';
+    add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span></span>';
+    add.querySelector('span').textContent = tr('vm_kf_add');
+    add.onclick = () => $('vmKFontFile').click();
+    box.appendChild(add);
+    markKFonts();
+  }
+
+  // ---------- «خاطرة»: the words ----------
+  // One word at a time, centred and large, in the chosen bold face; it eases in (a fade and a
+  // slight grow) as it is recited, while the one before fades out.
   const kSizeCache = new Map();
   function drawKWord(c, word, w, h, alpha, p) {
     if (alpha <= 0.002 || !word) return;
+    word = kText(word);
     const key = [word, w, h, state.kFont, state.fontMul].join('|');
     let size = kSizeCache.get(key);
     if (!size) {
-      size = Math.min(w, h) * (w > h ? 0.2 : 0.19) * state.fontMul;
+      size = Math.min(w, h) * (w > h ? 0.2 : 0.19) * state.fontMul * (kFace().size || 1);
       c.font = kFont(size);
       const width = c.measureText(word).width;
       if (width > w * 0.86) size *= w * 0.86 / width;
@@ -2176,10 +2301,8 @@
       const b = e.target.closest('[data-reciter]');
       if (b) choose('vmReciter', b.dataset.reciter);
     };
-    // «خاطرة»: the face of the words
-    document.querySelectorAll('#vmKFonts [data-kfont]').forEach(b => {
-      b.onclick = () => { state.kFont = b.dataset.kfont; markKFonts(); kFontReady().then(() => onChange()); };
-    });
+    // «خاطرة»: a font from the device (the picker's buttons are made by renderKFonts)
+    $('vmKFontFile').onchange = e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; addUserFont(f); };
     document.querySelectorAll('#vmReciterFilter .filter-chip').forEach(b => {
       b.onclick = () => { reciterFilter = b.dataset.style; renderReciterList(); };
     });
@@ -2630,6 +2753,7 @@
     try {
       await Promise.all([loadQuran(), loadBackgrounds(), i18nReady]);
       await loadUserBackgrounds();
+      await loadUserFonts();
       if (own.init) await own.init();
     } catch (e) {
       console.error('[video-maker] init failed', e);
@@ -2649,6 +2773,7 @@
     fillSurahs();
     fillReciters();
     fillBackgrounds();
+    renderKFonts();
     applyStateToControls();
     clampRange('from');
     bindControls();
@@ -2669,6 +2794,6 @@
   // Bump BUILD whenever pages/video-maker.html starts depending on new script
   // features; the page reloads once with a fresh copy if it gets an older one.
   const BUILD = 9;   // 9: «خاطرة» tab (js/khatira.js), 8: in-app recorder + audio effects, 7: own recording («تسجيلي») + editable reciter name, 6: long video tab (js/video-maker-long.js), 5: user's own backgrounds, 4: mushaf font + QPC Hafs text, 3: Quran search sheet (2: multi-picture slideshow)
-  window.VM = { khatiraWordAt, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
+  window.VM = { khatiraWordAt, kText, get userFonts() { return userFonts.map(u => ({ id: u.id, name: u.name, known: !!u.has })); }, get timeline() { return timeline; }, showSection, get section() { return secNow; }, build: BUILD, state, renderFrame, buildTimeline, loadAyahAudio, exportVideo, get bgVideo() { return bgVideo; }, get loopJob() { return loopJob; } };
   init();
 })();

@@ -97,4 +97,39 @@ test('the reciters all have names and a known style', () => {
   assert.ok(K.metaUrl(7, 2).includes('/7/audio_files?chapter=2&segments=true'));
 });
 
+test('each bundled face: its file reads, and its list of missing marks is exactly what the file lacks', () => {
+  const qpc = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'quran-qpc.json'), 'utf8')).surahs;
+  const used = [...new Set([...qpc.flat().join('')])].filter(c => c.codePointAt(0) >= 0x600);
+  for (const f of K.FONTS.filter(x => x.file)) {
+    const cm = K.cmapOf(fs.readFileSync(path.join(__dirname, '..', '..', 'fonts', f.file)));
+    assert.ok(cm && cm.size > 200, f.id + ': cmap read');
+    const lacks = used.filter(c => !cm.has(c.codePointAt(0))).sort().join('');
+    assert.strictEqual(lacks, [...f.missing].sort().join(''), f.id + ': missing marks');
+    assert.strictEqual(['\u08F0', '\u08F1', '\u08F2'].filter(c => cm.has(c.codePointAt(0))).join(''), f.open, f.id + ': open tanween');
+    // what it lacks has a stand-in it draws, or is a mark that can be left out
+    const has = K.hasIn(f);
+    for (const c of lacks) assert.ok(!K.adaptWord('ب' + c, has).includes(c), f.id + ': ' + c.codePointAt(0).toString(16));
+    // every character of the whole Quran, adapted, is one the face draws
+    for (const c of new Set(K.adaptWord(qpc.flat().join(' '), has))) if (c.codePointAt(0) >= 0x600) assert.ok(cm.has(c.codePointAt(0)), f.id + ': draws ' + c.codePointAt(0).toString(16));
+  }
+  assert.strictEqual(K.cmapOf(new Uint8Array([0x77, 0x4F, 0x46, 0x32, 0, 0, 0, 0]).buffer), null, 'WOFF2: not read');
+});
+
+test('a word for a face without the Uthmani marks reads as in common print', () => {
+  const cairo = K.hasIn(K.FONTS.find(f => f.id === 'cairo')), amiri = K.hasIn(K.FONTS.find(f => f.id === 'amiri'));
+  assert.strictEqual(K.adaptWord('نَسۡتَعِينُ', cairo), 'نَسْتَعِينُ');                 // ۡ -> ْ
+  assert.strictEqual(K.adaptWord('إِنَّهُۥ', cairo), 'إِنَّهُ');                          // the small waw left out
+  assert.strictEqual(K.adaptWord('ٱلرَّحۡمَٰنِ', cairo), 'ٱلرَّحْمَٰنِ');               // ٱ and ٰ it has
+  assert.strictEqual(K.adaptWord('رَّبِّهِمۡۖ', cairo), 'رَّبِّهِمْ');                    // the stop sign left out
+  // the staggered tanween of the QPC text: Unicode's open tanween, or the plain one
+  assert.strictEqual(K.adaptWord('غِشَٰوَةٞ', cairo), 'غِشَٰوَةٌ');
+  assert.strictEqual(K.adaptWord('هُدٗى', cairo), 'هُدًى');
+  assert.strictEqual(K.adaptWord('ظُلُمَٰتٖ', cairo), 'ظُلُمَٰتٍ');
+  assert.strictEqual(K.adaptWord('هُدٗى', amiri), 'هُد\u08F0ى');
+  assert.strictEqual(K.adaptWord('إِنَّهُۥ', amiri), 'إِنَّهُۥ', 'a face with every mark keeps it');
+  // unknown coverage (a WOFF font): only the tanween change, to the plain ones
+  assert.strictEqual(K.adaptWord('نَسۡتَعِينُ', null), 'نَسۡتَعِينُ');
+  assert.strictEqual(K.adaptWord('هُدٗى', null), 'هُدًى');
+});
+
 console.log(`\n${passed} tests passed`);

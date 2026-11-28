@@ -51,8 +51,15 @@ Licensed under CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/).
 - `fonts/Amiri-Bold.ttf` ([Amiri](https://github.com/aliftype/amiri), © The Amiri Project Authors),
   `fonts/ScheherazadeNew-Bold.ttf` ([Scheherazade New](https://software.sil.org/scheherazade/), © SIL
   International) and `fonts/NotoNaskhArabic-Variable.ttf` ([Noto Naskh Arabic](https://github.com/notofonts/arabic),
-  © The Noto Project Authors), from the Google Fonts repository; all under the SIL Open Font License 1.1
-  (`fonts/extra/OFL-amiri.txt`, `OFL-scheherazadenew.txt`, `OFL-noto-naskh-arabic.txt`).
+  © The Noto Project Authors), `fonts/ArefRuqaa-Bold.ttf` ([Aref Ruqaa](https://github.com/alif-type/aref-ruqaa)),
+  `fonts/Changa-Variable.ttf` ([Changa](https://github.com/googlefonts/changa-vf)),
+  `fonts/Cairo-Variable.ttf` ([Cairo](https://github.com/Gue3bara/Cairo)), `fonts/Jomhuria-Regular.ttf`
+  (Jomhuria, © KB-Studio, Lasse Fister, Sorkin Type, Khaled Hosny) and `fonts/Gulzar-Regular.ttf`
+  ([Gulzar](https://github.com/simoncozens/Gulzar)), from the Google Fonts repository; all under the SIL Open Font
+  License 1.1 (`fonts/extra/OFL-amiri.txt`, `OFL-scheherazadenew.txt`, `OFL-noto-naskh-arabic.txt`,
+  `OFL-arefruqaa.txt`, `OFL-changa.txt`, `OFL-cairo.txt`, `OFL-jomhuria.txt`, `OFL-gulzar.txt`).
+- Fonts a user adds from their device in that tab are kept on the device only (IndexedDB); none are
+  bundled whose licence does not allow it.
 
 ## Reciter photos
 

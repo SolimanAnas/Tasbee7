@@ -167,7 +167,99 @@
     return null;
   }
 
-  const api = { API, RECITERS, metaUrl, parseMeta, wordsOf, wordTimes, share, id3Size, mp3Info, byteAt, firstFrame, frameAt };
+  // ---- faces ----
+  // The bold faces bundled for the words (fonts/, OFL; fonts/extra/OFL-*.txt): the marks of the
+  // Uthmani text each cannot draw, and which open (staggered) tanween U+08F0–08F2 it has (both
+  // checked against the font files by tests/node/khatira.test.cjs). `size` evens out how large a
+  // face draws at the same pixel size.
+  const OPEN = '\u08F0\u08F1\u08F2';
+  const DISPLAY = '\u0657\u065E\u06D6\u06D7\u06D8\u06DA\u06DB\u06DC\u06DE\u06E0\u06E1\u06E2\u06E4\u06E5\u06E6\u06E7\u06E8\u06E9\u06EA\u06EC\u06ED';
+  const FONTS = [
+    { id: 'amiri', family: 'KhAmiri', file: 'Amiri-Bold.ttf', weight: '', missing: '', open: OPEN },
+    { id: 'scheherazade', family: 'KhScheherazade', file: 'ScheherazadeNew-Bold.ttf', weight: '', missing: '', open: OPEN },
+    { id: 'naskh', family: 'KhNaskh', file: 'NotoNaskhArabic-Variable.ttf', weight: '700 ', missing: '', open: OPEN },
+    { id: 'ruqaa', family: 'KhRuqaa', file: 'ArefRuqaa-Bold.ttf', weight: '', missing: DISPLAY.replace('\u0657', '').replace('\u06E1', ''), open: '\u08F1' },
+    { id: 'changa', family: 'KhChanga', file: 'Changa-Variable.ttf', weight: '800 ', missing: DISPLAY, open: '' },
+    { id: 'cairo', family: 'KhCairo', file: 'Cairo-Variable.ttf', weight: '900 ', missing: DISPLAY, open: '' },
+    { id: 'jomhuria', family: 'KhJomhuria', file: 'Jomhuria-Regular.ttf', weight: '', missing: '', open: OPEN, size: 1.45 },
+    { id: 'gulzar', family: 'KhGulzar', file: 'Gulzar-Regular.ttf', weight: '', missing: '\u0640' + DISPLAY.replace('\u0657', ''), open: '' },
+    { id: 'hafs', family: null, file: null, weight: '', missing: '', open: '', qpc: true },   // the mushaf face: its own encoding
+  ];
+  // Whether a bundled face draws character c.
+  const hasIn = f => c => !f.missing.includes(c) && (c < '\u08F0' || c > '\u08F2' || f.open.includes(c));
+
+  // The characters a TrueType / OpenType font maps (its cmap table: format 4 or 12), or null when
+  // the file cannot be read (WOFF, WOFF2, a collection): then the word is drawn as it is.
+  function cmapOf(buf) {
+    try {
+      const v = new DataView(buf instanceof ArrayBuffer ? buf : buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
+      const tag = v.getUint32(0);
+      if (tag !== 0x00010000 && tag !== 0x4F54544F && tag !== 0x74727565) return null;   // TrueType, 'OTTO', 'true'
+      const n = v.getUint16(4);
+      let cmap = -1;
+      for (let i = 0; i < n; i++) if (v.getUint32(12 + i * 16) === 0x636D6170) cmap = v.getUint32(12 + i * 16 + 8);
+      if (cmap < 0) return null;
+      const subs = v.getUint16(cmap + 2);
+      let best = -1, bestRank = 0;
+      for (let i = 0; i < subs; i++) {
+        const pid = v.getUint16(cmap + 4 + i * 8), eid = v.getUint16(cmap + 6 + i * 8), off = cmap + v.getUint32(cmap + 8 + i * 8);
+        const fmt = v.getUint16(off);
+        const rank = fmt === 12 && ((pid === 3 && eid === 10) || pid === 0) ? 3 : fmt === 4 && ((pid === 3 && eid === 1) || pid === 0) ? 2 : 0;
+        if (rank > bestRank) { bestRank = rank; best = off; }
+      }
+      if (best < 0) return null;
+      const set = new Set();
+      if (v.getUint16(best) === 4) {
+        const segX2 = v.getUint16(best + 6), ends = best + 14, starts = ends + segX2 + 2, deltas = starts + segX2, ranges = deltas + segX2;
+        for (let s = 0; s < segX2 / 2; s++) {
+          const end = v.getUint16(ends + s * 2), start = v.getUint16(starts + s * 2);
+          const delta = v.getInt16(deltas + s * 2), ro = v.getUint16(ranges + s * 2);
+          for (let c = start; c <= end && c !== 0xFFFF; c++) {
+            let g;
+            if (!ro) g = (c + delta) & 0xFFFF;
+            else { g = v.getUint16(ranges + s * 2 + ro + (c - start) * 2); if (g) g = (g + delta) & 0xFFFF; }
+            if (g) set.add(c);
+          }
+        }
+      } else {
+        const groups = v.getUint32(best + 12);
+        for (let i = 0; i < groups; i++) {
+          const o = best + 16 + i * 12, start = v.getUint32(o), end = v.getUint32(o + 4);
+          if (end - start > 0x30000) continue;
+          for (let c = start; c <= end; c++) set.add(c);
+        }
+      }
+      return set;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // A word of the King Fahd «QPC Hafs» text for a face other than the mushaf face it is encoded
+  // for. That text writes the staggered (open) tanween with three spare marks (U+0657, U+065E,
+  // U+0656), which any other face draws as what Unicode means by them (an inverted damma, a fatha
+  // with two dots, a subscript alef): they always become Unicode's open tanween U+08F0–08F2, or
+  // the plain tanween where the face has no open one. Any other mark the face lacks is drawn as
+  // its usual equivalent (the sukun «ۡ» as «ْ», alif wasla «ٱ» as «ا», the small high madda as
+  // «ٓ»), else left out (the small waw and ya, the stop signs, the small meem…), so the word reads
+  // as in common print and nothing is drawn from another font.
+  //   has(c): whether the face draws c; null when unknown (a user's WOFF font): only the tanween
+  //   are changed, to the plain ones every Arabic face has.
+  const QPC = { '\u0657': ['\u08F0', '\u064B'], '\u065E': ['\u08F1', '\u064C'], '\u0656': ['\u08F2', '\u064D'] };
+  const SWAP = { '\u06E1': '\u0652', '\u0671': '\u0627', '\u06E4': '\u0653' };
+  const MARK = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DE-\u06E8\u06EA-\u06ED\u08F0-\u08F2]/;
+  function adaptWord(word, has) {
+    let out = '';
+    for (const c of word) {
+      if (QPC[c]) { out += has ? (QPC[c].find(has) || '') : QPC[c][1]; continue; }
+      if (!has || has(c)) { out += c; continue; }
+      if (SWAP[c] && has(SWAP[c])) out += SWAP[c];
+      else if (!MARK.test(c) && c !== '\u06E9' && c !== '\u0640') out += c;   // a letter: keep
+    }
+    return out;
+  }
+
+  const api = { API, RECITERS, FONTS, hasIn, metaUrl, parseMeta, wordsOf, wordTimes, share, id3Size, mp3Info, byteAt, firstFrame, frameAt, cmapOf, adaptWord };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.Khatira = api;
 })(typeof window !== 'undefined' ? window : globalThis);

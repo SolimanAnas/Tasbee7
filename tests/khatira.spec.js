@@ -133,7 +133,8 @@ test('the tab: its reciters, its faces, and the Shorts controls it shares', asyn
   expect(await page.evaluate(() => VM.state.kReciter)).toBe(9);
   // the faces: one per button, the chosen one drawn
   await sec(page, 'text');
-  await expect(page.locator('#vmKFonts [data-kfont]')).toHaveCount(4);
+  await expect(page.locator('#vmKFonts [data-kfont]')).toHaveCount(await page.evaluate(() => Khatira.FONTS.length));
+  await expect(page.locator('#vmKFonts .kf-add')).toBeVisible();
   const frame = () => page.evaluate(() => { const c = document.getElementById('vmCanvas'); return c.toDataURL('image/png').length; });
   const before = await frame();
   await page.locator('#vmKFonts [data-kfont="scheherazade"]').click();
@@ -151,6 +152,52 @@ test('the tab: its reciters, its faces, and the Shorts controls it shares', asyn
   await page.locator('#vmModeTabs [data-mode="short"]').click();
   await sec(page, 'audio');
   await expect(page.locator('#vmReciterLabel')).not.toContainText('المنشاوي');
+});
+
+test('a face without the Uthmani marks gets the word as in common print; the mushaf face keeps it', async ({ page }) => {
+  await mockQuranCom(page, 'cbr.mp3');
+  await open(page);
+  await sec(page, 'text');
+  const word = 'نَسۡتَعِينُ', tanween = 'هُدٗى';
+  await page.locator('#vmKFonts [data-kfont="cairo"]').click();
+  expect(await page.evaluate(([w, t]) => [VM.kText(w), VM.kText(t)], [word, tanween])).toEqual(['نَسْتَعِينُ', 'هُدًى']);
+  await page.locator('#vmKFonts [data-kfont="amiri"]').click();
+  expect(await page.evaluate(([w, t]) => [VM.kText(w), VM.kText(t)], [word, tanween])).toEqual([word, 'هُد\u08F0ى']);
+  await page.locator('#vmKFonts [data-kfont="hafs"]').click();
+  expect(await page.evaluate(([w, t]) => [VM.kText(w), VM.kText(t)], [word, tanween])).toEqual([word, tanween]);
+});
+
+test('a font from the device: added, used, remembered, deleted; a wrong file is refused', async ({ page }) => {
+  await page.addInitScript(() => { if (!sessionStorage.getItem('f1')) { sessionStorage.setItem('f1', '1'); indexedDB.deleteDatabase('vm-user-fonts'); } });
+  await mockQuranCom(page, 'cbr.mp3');
+  await open(page);
+  await sec(page, 'text');
+  const before = await page.locator('#vmKFonts [data-kfont]').count();
+  // a file that is not a font
+  await page.setInputFiles('#vmKFontFile', { name: 'notes.ttf', mimeType: 'font/ttf', buffer: Buffer.from('not a font at all') });
+  await expect(page.locator('#vmStatus')).toContainText('تعذّر فتح ملف الخط');
+  await expect(page.locator('#vmKFonts [data-kfont]')).toHaveCount(before);
+  // a real one (a TrueType face that lacks the Uthmani marks)
+  await page.setInputFiles('#vmKFontFile', { name: 'خطي الجميل.ttf', mimeType: 'font/ttf', buffer: fs.readFileSync(path.join(__dirname, '..', 'fonts', 'Changa-Variable.ttf')) });
+  await expect(page.locator('#vmKFonts [data-kfont]')).toHaveCount(before + 1);
+  const tile = page.locator('#vmKFonts .is-user');
+  await expect(tile).toContainText('خطي الجميل');
+  await expect(tile).toHaveAttribute('aria-pressed', 'true');                  // chosen at once
+  expect(await page.evaluate(() => VM.state.kFont)).toMatch(/^u:/);
+  expect(await page.evaluate(() => VM.kText('نَسۡتَعِينُ'))).toBe('نَسْتَعِينُ');   // read: it has no ۡ
+  // kept on the device
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  await sec(page, 'text');
+  await expect(page.locator('#vmKFonts .is-user')).toHaveAttribute('aria-pressed', 'true');
+  expect(await page.evaluate(() => VM.userFonts.map(u => [u.name, u.known]))).toEqual([['خطي الجميل', true]]);
+  // deleted: gone, and the words go back to the first face
+  await page.locator('#vmKFonts .is-user .kf-del').click();
+  await expect(page.locator('#vmKFonts .is-user')).toHaveCount(0);
+  expect(await page.evaluate(() => VM.state.kFont)).toBe('amiri');
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.locator('#vmSurahLabel')).not.toBeEmpty({ timeout: 20000 });
+  expect(await page.evaluate(() => VM.userFonts.length)).toBe(0);
 });
 
 test('a khatira video is made', async ({ page }) => {

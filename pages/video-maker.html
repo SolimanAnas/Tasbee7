@@ -78,11 +78,16 @@
   src: url('../fonts/Scheherazade.ttf') format('truetype');
   font-display: block;
 }
-/* «خاطرة»: bold faces for the word-by-word text, loaded only when that tab draws them. All
-   three cover every mark of the Uthmani text (OFL; fonts/extra/OFL-*.txt). */
+/* «خاطرة»: bold faces for the word-by-word text, loaded only when that tab draws them (OFL;
+   fonts/extra/OFL-*.txt). The marks a face lacks are drawn as their usual equivalents (js/khatira.js). */
 @font-face { font-family:'KhAmiri'; src:url('../fonts/Amiri-Bold.ttf') format('truetype'); font-display:block; }
 @font-face { font-family:'KhScheherazade'; src:url('../fonts/ScheherazadeNew-Bold.ttf') format('truetype'); font-display:block; }
 @font-face { font-family:'KhNaskh'; src:url('../fonts/NotoNaskhArabic-Variable.ttf') format('truetype'); font-weight:400 700; font-display:block; }
+@font-face { font-family:'KhRuqaa'; src:url('../fonts/ArefRuqaa-Bold.ttf') format('truetype'); font-display:block; }
+@font-face { font-family:'KhChanga'; src:url('../fonts/Changa-Variable.ttf') format('truetype'); font-weight:200 800; font-display:block; }
+@font-face { font-family:'KhCairo'; src:url('../fonts/Cairo-Variable.ttf') format('truetype'); font-weight:200 1000; font-display:block; }
+@font-face { font-family:'KhJomhuria'; src:url('../fonts/Jomhuria-Regular.ttf') format('truetype'); font-display:block; }
+@font-face { font-family:'KhGulzar'; src:url('../fonts/Gulzar-Regular.ttf') format('truetype'); font-display:block; }
 @font-face {
   font-family: 'VMTajawal';
   src: url('../fonts/Tajawal-Bold.ttf') format('truetype');
@@ -504,11 +509,18 @@ body.mode-long .stage:not(.is-fs) { height:auto; aspect-ratio:16 / 9; }
 body.mode-khatira .not-khatira, body:not(.mode-khatira) .only-khatira { display:none !important; }
 .kh-note { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--text-secondary); line-height:1.6; margin-top:8px; }
 .kh-note svg { width:16px; height:16px; flex-shrink:0; margin-top:3px; }
-.kfonts { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+.kfonts { display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
+.kfonts button { position:relative; }
+.kfonts .kf-del { position:absolute; top:4px; inset-inline-end:4px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,.55); color:#fff;
+  font-size:16px; line-height:23px; text-align:center; cursor:pointer; }
+.kfonts .kf-del::after { content:''; position:absolute; inset:-8px; }
+.kfonts .kf-add { border:2px dashed var(--accent-main); background:var(--accent-muted); color:var(--accent-main); }
+.kfonts .kf-add svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; }
+.kfonts .kf-add span { font-size:12px; font-weight:800; text-align:center; }
 .kfonts button { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:76px; padding:6px 6px 8px;
   border:1.5px solid var(--glass-border); border-radius:14px; background:var(--field-bg); color:var(--text-primary); font:inherit; cursor:pointer; }
 .kfonts button.active { border-color:var(--accent-main); background:var(--accent-muted); }
-.kfonts .kf-sample { font-size:30px; line-height:1.5; direction:rtl; white-space:nowrap; }
+.kfonts .kf-sample { font-size:28px; line-height:1.5; direction:rtl; white-space:nowrap; }
 .kfonts .kf-name { font-size:12px; font-weight:700; color:var(--text-secondary); }
 .kfonts button.active .kf-name { color:var(--accent-main); }
 .mode-tabs button.active { background:var(--accent-main); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.18); }
@@ -994,12 +1006,9 @@ input[type="range"] { width:100%; min-height:44px; margin:0; accent-color:var(--
 
         <div class="field only-khatira">
           <div class="label" data-i18n="vm_kh_font">خط الكلمات</div>
-          <div class="kfonts" id="vmKFonts" role="group">
-            <button type="button" data-kfont="amiri" class="active" aria-pressed="true"><span class="kf-sample" style="font-family:KhAmiri">أبجد</span><span class="kf-name" data-i18n="vm_kf_amiri">أميري</span></button>
-            <button type="button" data-kfont="scheherazade" aria-pressed="false"><span class="kf-sample" style="font-family:KhScheherazade">أبجد</span><span class="kf-name" data-i18n="vm_kf_scheherazade">شهرزاد</span></button>
-            <button type="button" data-kfont="naskh" aria-pressed="false"><span class="kf-sample" style="font-family:KhNaskh;font-weight:700">أبجد</span><span class="kf-name" data-i18n="vm_kf_naskh">نسخ</span></button>
-            <button type="button" data-kfont="hafs" aria-pressed="false"><span class="kf-sample" style="font-family:QuranFont,QuranFallback">أبجد</span><span class="kf-name" data-i18n="vm_kf_hafs">خط المصحف</span></button>
-          </div>
+          <div class="kfonts" id="vmKFonts" role="group"></div>
+          <input type="file" id="vmKFontFile" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" hidden>
+          <div class="bg-private" data-i18n="vm_kf_private">الخطوط التي تضيفها تبقى على جهازك ولا تُرفع إلى أي مكان.</div>
         </div>
 
         <div class="field">
